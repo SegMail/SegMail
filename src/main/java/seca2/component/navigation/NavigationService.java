@@ -18,7 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
-import seca2.component.data.HibernateDBServices;
+import seca2.component.data.HibernateEMServices;
 import seca2.component.user.UserService;
 import seca2.entity.navigation.MenuItem;
 import seca2.entity.navigation.MenuItemAccess;
@@ -39,7 +39,7 @@ import seca2.entity.user.UserType;
 @Stateless
 public class NavigationService {
     
-    @Inject private HibernateDBServices hibernateDB;
+    @Inject private HibernateEMServices hibernateDB;
     @EJB private UserService userService;
     
     EntityManager em;

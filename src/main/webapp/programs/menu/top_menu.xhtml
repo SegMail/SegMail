@@ -17,7 +17,7 @@
                 <ul class="nav navbar-nav">
                     <c:forEach items="#{TopMenu.programs}" var="program">
                         
-                        <li class="#{TopMenu.currentProgramIndex == program.PROGRAM_ID ? 'active' : ''}">
+                        <li class="#{TopMenu.currentProgramIndex == program.OBJECTID ? 'active' : ''}">
                             <a href="#{request.contextPath.concat(program.VIEW_DIRECTORY)}">#{program.PROGRAM_NAME}</a>
                         </li>
 

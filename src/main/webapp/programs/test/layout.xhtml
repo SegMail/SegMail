@@ -8,8 +8,47 @@
     <ui:composition template="#{bootstrap.elements['template-location']}">
 
         <ui:define name="main-program-panel">
-            <h2>This is the testing page</h2>
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                    <h2>This is the testing page</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-4">
 
+                    <h:panelGroup styleClass="panel panel-success" id="DBSetup">
+                        <div class="panel-heading">For setting up the DB schema</div>
+                        <div class="panel-body">
+                            <h:form id="setupDBForm">
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12">
+                                        <!--<h:outputLabel for="setupDBEM" styleClass="control-label col-md-6">Generate DB with EntityManager: </h:outputLabel>-->
+                                        <h:commandButton id="setupDBEM" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via EM"
+                                                         actionListener="#{ProgramTest.formTestDB.generateDBEM()}"></h:commandButton>
+                                    </div>
+                                </div><br />
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12">
+                                        <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
+                                        <h:commandButton id="setupDBSession" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via Session"
+                                                         actionListener="#{ProgramTest.formTestDB.generateDBSession()}"></h:commandButton>
+                                    </div>
+                                </div><br />
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12">
+                                        <c:forEach items="#{facesContext.messageList}" var="m">
+                                            <div class="alert alert-danger" >
+                                                <strong>#{m.summary}</strong><br />
+                                                #{m.detail}
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </div>
+                            </h:form>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
         </ui:define>
 
     </ui:composition>

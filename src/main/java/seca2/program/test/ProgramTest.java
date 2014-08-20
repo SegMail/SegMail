@@ -19,14 +19,24 @@ import seca2.entity.program.Program;
  *
  * @author vincent.a.lee
  */
-@Named("ProgramFile")
+@Named("ProgramTest")
 @SessionScoped
 public class ProgramTest extends Program {
     
+    @Inject private FormTestDB formTestDB;
     
     @PostConstruct
     public void init(){
         
     }
+
+    public FormTestDB getFormTestDB() {
+        return formTestDB;
+    }
+
+    public void setFormTestDB(FormTestDB formTestDB) {
+        this.formTestDB = formTestDB;
+    }
+    
     
 }

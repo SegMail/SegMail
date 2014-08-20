@@ -161,7 +161,7 @@ public class Bootstrap implements Serializable {
      * <p>
      * This is where you manage your menu items and which page they link to
      * 
-     */
+     
     @Inject private NavigationModule navigationModule;
     @URLActions(actions={
         @URLAction(mappingId="home", onPostback=false),
@@ -169,7 +169,7 @@ public class Bootstrap implements Serializable {
     })
     public void loadNavigation(){
         
-    }
+    }*/
     
     /**
      * Presentation Management!

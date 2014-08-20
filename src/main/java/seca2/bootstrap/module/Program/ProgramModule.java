@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.hibernate.Session;
 import seca2.bootstrap.module.User.UserModule;
-import seca2.component.data.HibernateDBServices;
+import seca2.component.data.HibernateEMServices;
 import seca2.component.data.HibernateUtil;
 import seca2.entity.program.Program;
 
@@ -32,15 +32,15 @@ public class ProgramModule implements Serializable {
     private int currentProgramIndex;
     public static final int DEFAULT_PROGRAM = 0;
 
-    private Session session;
-    @Inject private HibernateUtil hibernateUtil;
     @Inject private UserModule userModule;
+    
 
     @PostConstruct
     public void init() {
         //create a stub first, next time then we'll implement the actual thing
         programNames = new ArrayList<String>();
         if (userModule.checkSessionActive()) {
+            programNames.add("test");
             programNames.add("sendmail");
             programNames.add("signupforms");
             programNames.add("lists");
@@ -50,6 +50,7 @@ public class ProgramModule implements Serializable {
 
         }
         else{
+            programNames.add("test");
             programNames.add("sendmail");
             programNames.add("signupforms");
             programNames.add("lists");
@@ -66,6 +67,7 @@ public class ProgramModule implements Serializable {
             program.setPROGRAM_NAME(programNames.get(i));
 
             String dir = programNames.get(i).toLowerCase();
+            program.setOBJECTID(i);
             program.setBEAN_DIRECTORY("seca2.program." + dir);
             program.setVIEW_DIRECTORY("/program/" + dir + "/");
             program.setVIEW_ROOT("/programs/" + dir + "/layout.xhtml");
