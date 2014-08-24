@@ -24,6 +24,7 @@ import seca2.entity.program.Program;
 public class ProgramTest extends Program {
     
     @Inject private FormTestDB formTestDB;
+    @Inject private FormTestNavigation formTestNavigation;
     
     @PostConstruct
     public void init(){
@@ -36,6 +37,14 @@ public class ProgramTest extends Program {
 
     public void setFormTestDB(FormTestDB formTestDB) {
         this.formTestDB = formTestDB;
+    }
+
+    public FormTestNavigation getFormTestNavigation() {
+        return formTestNavigation;
+    }
+
+    public void setFormTestNavigation(FormTestNavigation formTestNavigation) {
+        this.formTestNavigation = formTestNavigation;
     }
     
     

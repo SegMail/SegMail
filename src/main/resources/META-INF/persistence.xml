@@ -11,9 +11,9 @@
         <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
         <!--<property name="hibernate.connection.url" value="jdbc:h2:mem:test"/>
         <property name="hibernate.connection.url" value="jdbc:h2:file:C:\Users\KH\Downloads\EDS"/>-->
-        <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/seca2?rewriteBatchedStatements=true"/>
-        <property name="hibernate.connection.username" value="seca2"/>
-        <property name="hibernate.connection.password" value="seca2"/>
+        <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/segmail?rewriteBatchedStatements=true"/>
+        <property name="hibernate.connection.username" value="segmail"/>
+        <property name="hibernate.connection.password" value="segmail"/>
         <property name="hibernate.hbm2ddl.auto" value="update"/>
         
         <property name="hibernate.current_session_context_class" value="thread"/>

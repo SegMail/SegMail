@@ -14,7 +14,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 col-md-4">
+                <div class="col-sm-12 col-md-4"><!--test DB generation-->
 
                     <h:panelGroup styleClass="panel panel-success" id="DBSetup">
                         <div class="panel-heading">For setting up the DB schema</div>
@@ -45,6 +45,104 @@
                                     </div>
                                 </div>
                             </h:form>
+                        </div>
+                    </h:panelGroup>
+                </div>
+                <div class="col-sm-12 col-md-4"><!--test menu creation-->
+
+                    <h:panelGroup styleClass="panel panel-success" id="navigationSetup">
+                        <div class="panel-heading">For testing navigation functions.</div>
+                        <div class="panel-body">
+                            <h:form id="setupNavigationForm">
+                                
+                                <div class="row">
+                                    <h:panelGroup styleClass="col-md-12 col-xs-12 collapse navbar-collapse">
+                                        <ul class="nav navbar-nav">
+                                        </ul>
+                                    </h:panelGroup>
+                                </div>
+                                <div class="row"><!--form to enter menu-->
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="allMenuItems" styleClass="control-label col-md-4">Parent MenuItem: </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:selectOneMenu id="allMenuItems" class="selectpicker" 
+                                                             value="#{ProgramTest.formTestNavigation.selectedParentMenuItemId}"
+                                                             >
+                                                <c:choose>
+                                                    <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
+                                                        <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <f:selectItems value="#{ProgramTest.formTestNavigation.allMenuItems}"
+                                                                       var="menuItem"
+                                                                       itemLabel="#{menuItem.MENU_ITEM_NAME}"
+                                                                       itemValue="#{menuItem.OBJECTID}"
+                                                                       >
+                                                        </f:selectItems>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </h:selectOneMenu>
+                                            <!--Impt! This script must be called here, if not the above select element won't be rendered as a 
+                                                button-->
+                                            <script>
+                                                loadNiceButtons();
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="menuItemName" styleClass="control-label col-md-4">MenuItem name: </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:inputText id="menuItemName" styleClass="form-control" 
+                                                         value="#{ProgramTest.formTestNavigation.menuItemName}" ></h:inputText>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="menuURL" styleClass="control-label col-md-4">MenuItem URL: </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:inputText id="menuURL" styleClass="form-control" 
+                                                         value="#{ProgramTest.formTestNavigation.menuItemURL}" ></h:inputText>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="menuXHTML" styleClass="control-label col-md-4">MenuItem XHTML:  </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:inputText id="menuXHTML" styleClass="form-control" 
+                                                         value="#{ProgramTest.formTestNavigation.menuItemXHTML}" ></h:inputText>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <p:commandButton id="createMenuItem" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new menu item"
+                                                         actionListener="#{ProgramTest.formTestNavigation.createNewMenuItem()}"
+                                                         update="@form">
+                                        </p:commandButton>
+                                        
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12">
+                                        <c:forEach items="#{facesContext.messageList}" var="m">
+                                            <div class="alert alert-danger" >
+                                                <strong>#{m.summary}</strong><br />
+                                                #{m.detail}
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                </div>
+                                <p:blockUI id="setupNavigationFormBlock" block="setupNavigationForm" trigger="setupNavigationForm:createMenuItem">
+                                    <p id="spinner">Please wait while we do what we do best.</p>
+                                </p:blockUI>
+                            </h:form>
+                            
                         </div>
                     </h:panelGroup>
                 </div>

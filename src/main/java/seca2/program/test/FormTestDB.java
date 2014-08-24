@@ -31,6 +31,7 @@ public class FormTestDB implements Serializable {
     public void generateDBEM(){
         try{
             EntityManager em = hibernateDBServices.getEM();
+            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_INFO, "Success!",null);
         } catch(Exception ex){
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
         }
@@ -39,7 +40,8 @@ public class FormTestDB implements Serializable {
     public void generateDBSession(){
         try {
             Session session = hibernateDBServices.getSession();
-            new SchemaExport(hibernateDBServices.createFullConfig()).execute(true, true, true, true);
+            new SchemaExport(hibernateDBServices.createFullConfig()).create(true,true);
+            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_INFO, "Success!",null);
         } catch (DBConnectionException dbcex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", dbcex.getMessage());
         } catch(Exception ex){
