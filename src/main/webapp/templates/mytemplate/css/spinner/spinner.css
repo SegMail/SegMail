@@ -9,13 +9,18 @@
     text-indent: 250px;
     white-space: nowrap;
     overflow: hidden;
-
-    -webkit-mask-image: url(spinner.png);
     
+    background-image: url(spinner.png);
+
     -webkit-animation-name: spinnerRotate;
     -webkit-animation-duration: 2s;
     -webkit-animation-iteration-count: infinite;
     -webkit-animation-timing-function: linear;
+    
+    -moz-animation-name: spinnerRotate;
+    -moz-animation-duration: 2s;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
 }
 
 @-webkit-keyframes spinnerRotate {
@@ -24,5 +29,14 @@
     }
     to {
         -webkit-transform:rotate(360deg);
+    }
+}
+
+@keyframes spinnerRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
     }
 }

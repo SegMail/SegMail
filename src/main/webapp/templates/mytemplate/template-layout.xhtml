@@ -59,7 +59,7 @@
         </h:outputScript>
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" /> 
-        <script>
+        <!--<script>
             $(document).ready(function() {
                 var cl = new CanvasLoader('canvasloader-container-fileupload');
                 cl.show(); // Hidden by default
@@ -67,7 +67,7 @@
                 c2.show(); // Hidden by default
             });
 
-        </script>
+        </script>-->
         <!--for select buttons-->
         
     </f:view>
