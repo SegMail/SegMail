@@ -37,8 +37,8 @@ public class NavigationService implements Serializable {
 
     @Inject
     private HibernateEMServices hibernateDB;
-    @EJB
-    private UserService userService;
+    //@EJB
+    //private UserService userService;
 
     EntityManager em;
 
@@ -76,9 +76,12 @@ public class NavigationService implements Serializable {
             MenuItem parentMenuItem = em.find(MenuItem.class, parentMenuItemId);
 
             //Assign root as default if no parent is inputted?
+            /**
+             * If no parent is found, create it as a root.
+             
             if (parentMenuItem == null) {
                 throw new CreateMenuItemException("Parent MenuItem Id " + parentMenuItemId + " does not exist.");
-            }
+            }*/
             
             MenuItem newMenuItem = new MenuItem();
             newMenuItem.setMENU_ITEM_NAME(name);
