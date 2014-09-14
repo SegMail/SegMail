@@ -35,12 +35,12 @@ import seca2.entity.user.UserType;
 @Stateless
 public class NavigationService implements Serializable {
 
-    @Inject
+    @EJB
     private HibernateEMServices hibernateDB;
     //@EJB
     //private UserService userService;
 
-    EntityManager em;
+    private EntityManager em;
 
     public TreeNode<MenuItem> buildMenuForUserType(UserType userType) {
         if (em == null || !em.isOpen()) {

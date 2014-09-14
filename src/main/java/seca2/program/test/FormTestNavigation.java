@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import seca2.component.data.DBConnectionException;
 import seca2.component.navigation.CreateMenuItemException;
@@ -23,6 +24,7 @@ import seca2.program.messenger.FacesMessenger;
  *
  * @author KH
  */
+@RequestScoped
 public class FormTestNavigation implements Serializable{
     
     @EJB private NavigationService navigationService;
@@ -37,7 +39,7 @@ public class FormTestNavigation implements Serializable{
     
     @PostConstruct
     public void init(){
-        initializeAllMenuItems();
+        //initializeAllMenuItems();
     }
     
     public void initializeAllMenuItems(){
@@ -58,7 +60,7 @@ public class FormTestNavigation implements Serializable{
     public void createNewMenuItem(){
         
         try{
-            Thread.sleep(5000);//for testing ajax loader
+            //Thread.sleep(5000);//for testing ajax loader
             navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
         }
         catch(CreateMenuItemException crmex){

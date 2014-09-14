@@ -24,11 +24,11 @@ import org.hibernate.service.ServiceRegistry;
 @Stateless
 public class HibernateEMServices implements Serializable {
 
-    @PersistenceUnit(unitName="HIBERNATE")
+    //@PersistenceUnit(unitName="HIBERNATE")
     private EntityManagerFactory emf;
     
     public EntityManager getEM() {
-        //EntityManagerFactory emf = Persistence.createEntityManagerFactory("HIBERNATE");//, this.createFullConfig().getProperties());
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("HIBERNATE");//, this.createFullConfig().getProperties());
         EntityManager em = emf.createEntityManager();
         
         return em;
