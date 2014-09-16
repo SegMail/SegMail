@@ -13,18 +13,17 @@
         <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/segmail?"/>
         <property name="hibernate.connection.username" value="segmail"/>
         <property name="hibernate.connection.password" value="segmail"/>-->
-        <property name="hibernate.connection.datasource">jdbc/__default</property>
+        <property name="hibernate.connection.datasource" value="jdbc/__default" />
         <property name="hibernate.current_session_context_class" value="thread"/>
         <property name="hibernate.c3p0.min_size" value="5"/>
         <property name="hibernate.c3p0.max_size" value="20"/>
         <property name="hibernate.c3p0.timeout" value="30"/>
         <property name="hibernate.c3p0.max_statements" value="100"/>
-        <!--<property name="hibernate.hbm2ddl.auto" value="update"/>-->
-        <property name="hibernate.archive.autodetection" value="class, hbm"/>
+        <!----><property name="hibernate.hbm2ddl.auto" value="update"/>
         <property name="hibernate.show_sql" value="true"/>
         <property name="hibernate.connection.autocommit" value="false"/>
         <!--<property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create" />-->
         
     </properties>
   </persistence-unit>
-</persistence>
+</persistence>  

@@ -6,7 +6,6 @@
 
 package seca2.program.test;
 
-import General.TreeNode;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.inject.Named;
 import seca2.component.data.DBConnectionException;
 import seca2.component.navigation.CreateMenuItemException;
 import seca2.component.navigation.NavigationService;
@@ -24,6 +24,7 @@ import seca2.program.messenger.FacesMessenger;
  *
  * @author KH
  */
+@Named("FormTestNavigation")
 @RequestScoped
 public class FormTestNavigation implements Serializable{
     
@@ -39,16 +40,16 @@ public class FormTestNavigation implements Serializable{
     
     @PostConstruct
     public void init(){
-        //initializeAllMenuItems();
+        initializeAllMenuItems();
     }
     
     public void initializeAllMenuItems(){
         try{
             allMenuItems = navigationService.getAllMenuItems();
         }
-        /*catch(DBConnectionException dbex){
+        catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }*/
+        }
         catch(CreateMenuItemException crex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, crex.getClass().getSimpleName(), crex.getMessage());
         }
@@ -62,6 +63,11 @@ public class FormTestNavigation implements Serializable{
         try{
             //Thread.sleep(5000);//for testing ajax loader
             navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
+            //if successful, reload the page
+            this.initializeAllMenuItems();
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         }
         catch(CreateMenuItemException crmex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
