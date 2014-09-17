@@ -5,7 +5,10 @@
 package seca2.component.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -26,6 +29,8 @@ public class HibernateEMServices implements Serializable {
 
     @PersistenceUnit(unitName="HIBERNATE")
     private EntityManagerFactory emf;
+    
+    @Inject private EntityExplorer entityExplorer;
     
     public EntityManager getEM() {
         //EntityManagerFactory emf = Persistence.createEntityManagerFactory("HIBERNATE");//, this.createFullConfig().getProperties());

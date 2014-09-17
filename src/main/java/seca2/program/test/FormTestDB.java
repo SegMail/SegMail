@@ -48,16 +48,15 @@ public class FormTestDB implements Serializable {
             Configuration cfg = hibernateDBServices.createFullConfig();
             
             //add all entity packages
-            List<Class> entities = new ArrayList<Class>();
-            entities.addAll(explorer.getClasses("seca2.entity.file"));
-            entities.addAll(explorer.getClasses("seca2.entity.navigation"));
-            entities.addAll(explorer.getClasses("seca2.entity.program"));
-            entities.addAll(explorer.getClasses("seca2.entity.user"));
-            
+            seca2.component.data.Package root = new seca2.component.data.Package();
+            root.push("seca2");
+            root.push("entity");
+
+            ClassLoader loader = explorer.getClassLoader();
+            List<Class> entities = explorer.collectEntities(root, loader);
             for(Class c : entities){
                 cfg.addAnnotatedClass(c);
             }
-            
             new SchemaExport(cfg)
                     //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
                     .execute(true, true, false, true);

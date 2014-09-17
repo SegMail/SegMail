@@ -122,7 +122,31 @@ public class EntityExplorer {
         if(leaf){
             found.add(currentTree.clone());
         }
-            
+    }
+    
+    public List<Class> collectClasses(Package root, ClassLoader loader) throws ClassNotFoundException, CloneNotSupportedException, Exception{
+        URL entityDirectory = getResource(root.toString(), loader);
+        List<Package> found = new ArrayList<Package>();
+        Package currentTree = new Package();
+        
+        collectPackages(new File(entityDirectory.getFile()), root, found);
+        List<Class> foundClasses = new ArrayList<Class>();
+        for(Package f:found){
+            foundClasses.addAll(getClasses(f.toString()));
+        }
+        
+        return foundClasses;
+    }
+    
+    public List<Class> collectEntities(Package root, ClassLoader loader) throws CloneNotSupportedException, Exception{
+        List<Class> found = collectClasses(root, loader);
+        List<Class> entities = new ArrayList<Class>();
+        for(Class f:found){
+            if(f.isAnnotationPresent(Entity.class))
+                entities.add(f);
+        }
+        
+        return entities;
     }
     
     public static void main(String[] args) throws ClassNotFoundException, IOException, Exception{
@@ -152,8 +176,9 @@ public class EntityExplorer {
                 System.out.println(c.getName());
         }*/
         
+        
         EntityExplorer explorer = new EntityExplorer();
-        ClassLoader loader = explorer.getClassLoader();
+        /*ClassLoader loader = explorer.getClassLoader();
         URL entityDirectory = explorer.getResource("seca2.entity", loader);
         System.out.println(entityDirectory);
         
@@ -169,9 +194,16 @@ public class EntityExplorer {
         for(Package f:found){
             System.out.println(f);
             foundClass.addAll(explorer.getClasses(f.toString()));
-        }
-        System.out.println("All classes found:");
-        for(Class c:foundClass){
+        }*/
+        Package root = new Package();
+        root.push("seca2");
+        root.push("entity");
+        
+        ClassLoader loader = explorer.getClassLoader();
+        
+        System.out.println("All entities found:");
+        List<Class> foundEntities = explorer.collectEntities(root, loader);
+        for(Class c:foundEntities){
             System.out.println(c.getName());
         }
         
