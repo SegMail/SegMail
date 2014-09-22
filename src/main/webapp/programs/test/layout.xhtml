@@ -14,8 +14,8 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 col-md-4"><!--test DB generation-->
-
+                <div class="col-sm-12 col-md-4">
+                    <!--test DB generation-->
                     <h:panelGroup styleClass="panel panel-success" id="DBSetup">
                         <div class="panel-heading">For setting up the DB schema</div>
                         <div class="panel-body">
@@ -53,14 +53,53 @@
                             </h:form>
                         </div>
                     </h:panelGroup>
-                </div>
-                <div class="col-sm-12 col-md-4"><!--test menu creation-->
+                    <!--test create usertype-->
+                    <h:panelGroup styleClass="panel panel-success" id="createUsertype">
+                        <div class="panel-heading">For testing creation of usertypes.</div>
+                        <div class="panel-body">
+                            <h:form id="createUsertypeForm">
+                                <div class="row">
+                                    <h:panelGroup styleClass="col-md-12 col-xs-12 collapse navbar-collapse">
+                                        <div class="row">
+                                            <div class="col-md-12 col-xs-12 form-group">
+                                                <h:outputLabel for="usertypeName" styleClass="control-label col-md-4">Usertype name: </h:outputLabel>
+                                                <div class="col-md-8">
+                                                    <h:inputText id="usertypeName" styleClass="form-control" 
+                                                                 value="" ></h:inputText>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-xs-12 form-group">
+                                                <h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>
+                                                <div class="col-md-8">
+                                                    <h:inputTextarea id="usertypeDesc" styleClass="form-control" 
+                                                                     value="" ></h:inputTextarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 col-xs-12 form-group">
+                                                <p:commandButton id="createUserTypeButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Usertype"
+                                                                 update="@form">
+                                                </p:commandButton>
 
-                    <h:panelGroup styleClass="panel panel-success" id="navigationSetup">
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+                                </div>
+                                <p:blockUI id="setupNavigationFormBlock" block="createUsertypeForm" trigger="createUsertypeForm:createUserTypeButton">
+                                    <p id="spinner">Please wait while we do what we do best.</p>
+                                </p:blockUI>
+                            </h:form>
+                        </div>
+                    </h:panelGroup>
+                </div>
+                <div class="col-sm-12 col-md-4">
+
+                    <h:panelGroup styleClass="panel panel-success" id="navigationSetup"><!--test menu creation-->
                         <div class="panel-heading">For testing navigation functions.</div>
                         <div class="panel-body">
                             <h:form id="setupNavigationForm">
-                                
+
                                 <div class="row">
                                     <h:panelGroup styleClass="col-md-12 col-xs-12 collapse navbar-collapse">
                                         <ul class="nav navbar-nav">
@@ -132,7 +171,7 @@
                                                          actionListener="#{ProgramTest.formTestNavigation.createNewMenuItem()}"
                                                          update="@form">
                                         </p:commandButton>
-                                        
+
                                     </div>
                                 </div>
                                 <div class="row">
@@ -150,7 +189,22 @@
                                     <p id="spinner">Please wait while we do what we do best.</p>
                                 </p:blockUI>
                             </h:form>
-                            
+
+                        </div>
+                    </h:panelGroup>
+                </div>
+                <div class="col-sm-12 col-md-4">
+
+                    <h:panelGroup styleClass="panel panel-success" id="menuAssign"><!--test menu assignment-->
+                        <div class="panel-heading">For testing assigning of menuitem access.</div>
+                        <div class="panel-body">
+                            <h:form id="assignMenuItemForm">
+                                <div class="row">
+                                    <h:panelGroup styleClass="col-md-12 col-xs-12 collapse navbar-collapse">
+                                        This is for assigning menu items to usertypes
+                                    </h:panelGroup>
+                                </div>
+                            </h:form>
                         </div>
                     </h:panelGroup>
                 </div>

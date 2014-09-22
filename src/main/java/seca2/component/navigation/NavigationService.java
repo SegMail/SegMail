@@ -56,8 +56,8 @@ public class NavigationService implements Serializable {
             em = hibernateDB.getEM();
         }
         
-        //1. Get all MenuItemAccess by userType ID.
         try{
+            //1. Get all MenuItemAccess by userType ID.
             CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class);
             Root<MenuItemAccess> sourceEntity = criteria.from(MenuItemAccess.class);
@@ -68,6 +68,10 @@ public class NavigationService implements Serializable {
                     .setFirstResult(0)
                     .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
                     .getResultList();
+            
+            //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
+            
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -77,7 +81,7 @@ public class NavigationService implements Serializable {
             throw ex;
         }
         
-        //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
+        
 
         return null;
     }
