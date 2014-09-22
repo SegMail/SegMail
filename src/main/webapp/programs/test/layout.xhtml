@@ -42,8 +42,7 @@
                                 </div><br />
                                 <div class="row">
                                     <div class="col-md-12 col-xs-12">
-                                        <p:messages for="setupDBForm" ></p:messages>
-                                        <c:forEach items="#{facesContext.messageList}" var="m"  >
+                                        <c:forEach items="#{facesContext.messageList}" var="m">
                                             <div class="alert alert-danger" >
                                                 <strong>#{m.summary}</strong><br />
                                                 #{m.detail}
@@ -80,6 +79,7 @@
                                                         <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
                                                     </c:when>
                                                     <c:otherwise>
+                                                        <f:selectItem itemLabel="No parent" itemValue="" />
                                                         <f:selectItems value="#{FormTestNavigation.allMenuItems}"
                                                                        var="menuItem"
                                                                        itemLabel="#{menuItem.MENU_ITEM_NAME}"
@@ -137,8 +137,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 col-xs-12">
-                                        
                                         <c:forEach items="#{facesContext.messageList}" var="m" >
+
                                             <div class="alert alert-danger" >
                                                 <strong>#{m.summary}</strong><br />
                                                 #{m.detail}

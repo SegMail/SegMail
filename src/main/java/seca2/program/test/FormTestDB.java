@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -25,6 +26,7 @@ import seca2.program.messenger.FacesMessenger;
  *
  * @author KH
  */
+@RequestScoped
 public class FormTestDB implements Serializable {
     
     @EJB private HibernateEMServices hibernateDBServices;
@@ -60,7 +62,7 @@ public class FormTestDB implements Serializable {
             new SchemaExport(cfg)
                     //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
                     .execute(true, true, false, true);
-            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_INFO, "Success!",null);
+            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!",null);
         } catch (DBConnectionException dbcex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", dbcex.getMessage());
         } catch(Exception ex){

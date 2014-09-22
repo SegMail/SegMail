@@ -26,6 +26,7 @@ public abstract class EnterpriseRelationship extends AuditedObject {
     protected EnterpriseObject TARGET;
     
     protected String REL_TYPE;
+    protected int REL_SEQUENCE;
 
     @Id @ManyToOne
     public EnterpriseObject getSOURCE() {
@@ -44,13 +45,23 @@ public abstract class EnterpriseRelationship extends AuditedObject {
     public void setTARGET(EnterpriseObject TARGET) {
         this.TARGET = TARGET;
     }
-
+    
+    @Id
     public String getREL_TYPE() {
         return REL_TYPE;
     }
 
     public void setREL_TYPE(String REL_TYPE) {
         this.REL_TYPE = REL_TYPE;
+    }
+    
+    @Id
+    public int getREL_SEQUENCE() {
+        return REL_SEQUENCE;
+    }
+
+    public void setREL_SEQUENCE(int REL_SEQUENCE) {
+        this.REL_SEQUENCE = REL_SEQUENCE;
     }
     
     

@@ -46,12 +46,10 @@ public class FormTestNavigation implements Serializable{
     public void initializeAllMenuItems(){
         try{
             allMenuItems = navigationService.getAllMenuItems();
+            //who knows whether there is empty list or not?
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(CreateMenuItemException crex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, crex.getClass().getSimpleName(), crex.getMessage());
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
