@@ -17,6 +17,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
+import seca2.bootstrap.GlobalValues;
 import seca2.component.data.DBConnectionException;
 import seca2.component.data.HibernateEMServices;
 import seca2.component.user.UserService;
@@ -42,23 +43,56 @@ public class NavigationService implements Serializable {
 
     private EntityManager em;
 
-    public TreeNode<MenuItem> buildMenuForUserType(UserType userType) {
+    /**
+     * 
+     * Transitivity: Given a tree a->b->c, if userType has access to only a and b
+     * but not b, then this function will not return c as part of the menu tree.
+     * 
+     * @param userType
+     * @return 
+     */
+    public TreeNode<MenuItem> buildMenuForUserType(UserType userType) throws DBConnectionException {
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
         }
+        
+        //1. Get all MenuItemAccess by userType ID.
+        try{
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class);
+            Root<MenuItemAccess> sourceEntity = criteria.from(MenuItemAccess.class);
+            criteria.select(sourceEntity);
+            criteria.where(builder.equal(sourceEntity.get(MenuItemAccess_.TARGET), userType));
 
-        long userTypeId = userType.getOBJECTID();
-
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class);
-        Root<MenuItemAccess> sourceEntity = criteria.from(MenuItemAccess.class);
-
-        criteria.where(builder.equal(sourceEntity.get(MenuItemAccess_.SOURCE), userType));
-        List<MenuItemAccess> menuItemAccess = em.createQuery(criteria).getResultList();
+            List<MenuItemAccess> results = em.createQuery(criteria)
+                    .setFirstResult(0)
+                    .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
+                    .getResultList();
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+        
+        //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
 
         return null;
     }
 
+    /**
+     * If parentMenunItemId is negative, not found, create the menu item as root.
+     * 
+     * @param name
+     * @param requestUrl
+     * @param xhtml
+     * @param parentMenuItemId
+     * @return
+     * @throws CreateMenuItemException
+     * @throws DBConnectionException 
+     */
     public long createMenuItem(String name, String requestUrl, String xhtml, long parentMenuItemId)
             throws CreateMenuItemException, DBConnectionException {
         if (em == null || !em.isOpen()) {
@@ -112,7 +146,7 @@ public class NavigationService implements Serializable {
 
     }
 
-    public List<MenuItem> getAllMenuItems() throws CreateMenuItemException, DBConnectionException {
+    public List<MenuItem> getAllMenuItems() throws DBConnectionException {
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
         }
@@ -124,16 +158,26 @@ public class NavigationService implements Serializable {
 
             List<MenuItem> results = em.createQuery(criteria)
                     .setFirstResult(0)
-                    .setMaxResults(9999)
+                    .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
                     .getResultList();
             return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
-            throw new CreateMenuItemException(pex.getMessage());
+            throw pex;
         } catch (Exception ex) {
-            throw new CreateMenuItemException(ex.getMessage());
+            throw ex;
         }
+    }
+    
+    public TreeNode<MenuItem> buildMenuTree(long rootMenuItemId) throws DBConnectionException{
+        //may not be necessary
+        if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
+        
+        List<MenuItem> allMenuItems = this.getAllMenuItems();
+        return null;
     }
 }

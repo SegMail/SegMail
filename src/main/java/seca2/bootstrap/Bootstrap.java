@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -154,6 +155,8 @@ public class Bootstrap implements Serializable {
         }
         this.elements.put("program", programModule.getCurrentProgram());
         this.elements.put("program-location", "/programs/"+program+"/layout.xhtml"); //I have to use this first...
+        
+        program = ""; //clear after setting, because a sessionscoped variable will only be injected once.
     }
     
     /**

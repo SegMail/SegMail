@@ -6,7 +6,10 @@
 
 package General;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  *
@@ -15,6 +18,8 @@ import java.util.List;
 public class TreeNode<T> {
     
     private T element;
+    private int BREADTH = 0;
+    private int DEPTH = 0;
     
     private TreeNode<T> parent;
     private List<TreeNode<T>> children;
@@ -43,6 +48,41 @@ public class TreeNode<T> {
         this.children = children;
     }
     
+    /**
+     * Returns a list of all elements in the tree in a Depth-First-Search order.
+     * 
+     * @return List of all elements under tree
+     */
+    public List<T> DFS(){
+        List<T> results = new ArrayList<T>();
+        results.add(element); //Adds its own element first
+        
+        for(TreeNode<T> child:children){
+            results.addAll(child.DFS());
+        }
+        
+        return results;
+    }
     
+    /**
+     * Returns a list of all elements in the tree in a Breadth-First-Search order.
+     * @return 
+     */
+    public List<T> BFS(){
+        List<T> results = new ArrayList<T>();
+        Queue<TreeNode<T>> nextQueue = new LinkedList<TreeNode<T>>();
+        
+        results.add(element); //Adds its own element first
+        
+        for(TreeNode<T> child:children){
+            nextQueue.add(child);
+        }
+        
+        for(TreeNode<T> next:nextQueue){
+            results.addAll(next.BFS());
+        }
+        
+        return results;
+    }
     
 }
