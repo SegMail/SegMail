@@ -22,7 +22,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.joda.time.DateTime;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.user.UserAccountLockedException;
-import seca2.component.user.UserService;
+import seca2.component.user.UserServiceHibernate;
 import seca2.entity.user.UserAccount;
 import seca2.program.messenger.FacesMessenger;
 
@@ -34,7 +34,7 @@ import seca2.program.messenger.FacesMessenger;
 @RequestScoped
 public class FormUserLogin {
     
-    @EJB private UserService userService;
+    @EJB private UserServiceHibernate userService;
     @Inject private UserModule userModule; //to check if there was a previous URL to be redirected and set the sessionID
     
     private String username;

@@ -59,32 +59,29 @@
                         <div class="panel-body">
                             <h:form id="createUsertypeForm">
                                 <div class="row">
-                                    <h:panelGroup styleClass="col-md-12 col-xs-12 collapse navbar-collapse">
-                                        <div class="row">
-                                            <div class="col-md-12 col-xs-12 form-group">
-                                                <h:outputLabel for="usertypeName" styleClass="control-label col-md-4">Usertype name: </h:outputLabel>
-                                                <div class="col-md-8">
-                                                    <h:inputText id="usertypeName" styleClass="form-control" 
-                                                                 value="" ></h:inputText>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 col-xs-12 form-group">
-                                                <h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>
-                                                <div class="col-md-8">
-                                                    <h:inputTextarea id="usertypeDesc" styleClass="form-control" 
-                                                                     value="" ></h:inputTextarea>
-                                                </div>
-                                            </div>
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="usertypeName" styleClass="control-label col-md-4">Usertype name: </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:inputText id="usertypeName" styleClass="form-control"
+                                                         value="#{ProgramTest.formTestUser.userTypeName}" ></h:inputText>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-12 col-xs-12 form-group">
-                                                <p:commandButton id="createUserTypeButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Usertype"
-                                                                 update="@form">
-                                                </p:commandButton>
+                                    </div>
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:inputTextarea id="usertypeDesc" styleClass="form-control" 
+                                                             value="#{ProgramTest.formTestUser.description}" ></h:inputTextarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <p:commandButton id="createUserTypeButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Usertype"
+                                                         actionListener="#{ProgramTest.formTestUser.createUserType()}"
+                                                         update="@form">
+                                        </p:commandButton>
 
-                                            </div>
-                                        </div>
-                                    </h:panelGroup>
+                                    </div>
                                 </div>
                                 <p:blockUI id="setupNavigationFormBlock" block="createUsertypeForm" trigger="createUsertypeForm:createUserTypeButton">
                                     <p id="spinner">Please wait while we do what we do best.</p>

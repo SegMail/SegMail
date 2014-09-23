@@ -60,7 +60,7 @@ public class FormTestNavigation implements Serializable{
         
         try{
             //Thread.sleep(5000);//for testing ajax loader
-            navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
+                navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
             //if successful, reload the page
             this.initializeAllMenuItems();
         }

@@ -6,257 +6,81 @@
 
 package seca2.component.user;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.joda.time.DateTime;
-import seca2.component.data.HibernateUtil;
-import seca2.entity.user.UserAccount;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import org.hibernate.exception.GenericJDBCException;
+import seca2.component.data.DBConnectionException;
+import seca2.component.data.HibernateEMServices;
+import seca2.entity.navigation.MenuItem;
 import seca2.entity.user.UserType;
+import seca2.entity.user.UserType_;
 
 /**
- * A Stateless service for User operations.
- * 20140502 - this is probably the only necessary case where an EJB should be used
- * because the user database could be somewhere else.
- * 
- * @author KH
+ *
+ * @author vincent.a.lee
  */
 @Stateless
-public class UserService {
-    
+public class UserService  {
     private static final String HASH_KEY = "33150291203315029120";
     private static final int MAX_UNSUCCESS_ATTEMPTS = 3;
     
-    @Inject private HibernateUtil hibernateUtil;
+    @EJB private HibernateEMServices hibernateDB;
+    private EntityManager em;
     
-    private Session session; //Singleton session object for the same EJB instance
-    
-    /**
-     * Returns the UserAccount object if authentication passes. If authentication
- passes but UserAccount is locked, throw a UserAccountLockedException. If 
- authentication fails, return null and let the client code handle.
- <p>
-     * 
-     * @param username
-     * @param password
-     * @return
-     * @throws UserAccountLockedException 
-     */
-    public UserAccount login(String username, String password) throws UserAccountLockedException{
+    public void createUserType(String userTypeName, String description)
+        throws UserTypeException, DBConnectionException{
         
-        String secureHash = this.getPasswordHash(username, password, HASH_KEY);
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        List results = session.createCriteria(UserAccount.class)
-                .add(Restrictions.eq("USERNAME", username))
-                .list();
-        if(results.size() < 1 ) return null;//no such user
+        if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
         
-        UserAccount result = (UserAccount) results.get(0);
-        if(secureHash.equals(result.getPASSWORD())){ //authentication passes
-            if(!result.isUSER_LOCKED()){
-                //reset unlock flag and counters
-                result.setUNSUCCESSFUL_ATTEMPTS(0);
-                session.update(result);
-                
-            }else{
-                throw new UserAccountLockedException(username);
+        try{
+            if(userTypeName == null || userTypeName.length() <= 0)
+                throw new UserTypeException("Usertype name cannot be empty!");
+            
+            List<UserType> existingUserTypes = this.getUserType(userTypeName);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
             }
-        }else{ //authentication fails
-            //increment unsuccessful counter and set lock flag
-            result.setLAST_UNSUCCESS_ATTEMPT((new DateTime()).toDate());
-            result.setUNSUCCESSFUL_ATTEMPTS(result.getUNSUCCESSFUL_ATTEMPTS()+1);
-            if(result.getUNSUCCESSFUL_ATTEMPTS()>=MAX_UNSUCCESS_ATTEMPTS){
-                result.setUSER_LOCKED(true);
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    public List<UserType> getUserType(String userTypeName) throws DBConnectionException{
+        if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
+        
+        try{
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<UserType> criteria = builder.createQuery(UserType.class);
+            Root<UserType> sourceEntity = criteria.from(UserType.class); //FROM UserType
+            
+            criteria.select(sourceEntity); // SELECT *
+            criteria.where(builder.equal(sourceEntity.get(UserType_.USERTYPENAME), userTypeName)); //WHERE USERTYPENAME = userTypeName
+            
+            List<UserType> results = em.createQuery(criteria)
+                    .getResultList();
+            
+            return results;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
             }
-            session.save(result);
-            result = null;
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
         }
-        return result;
-    }
-    
-    public UserAccount registerNewUser(String username, String password, String usertype) throws UserRegistrationException{
-        /**
-         * Validate existence of both username and passwords as you will also 
-         * need to validate at the frontend forms.
-         */
-        if(username == null || username.isEmpty()){
-            throw new UserRegistrationException("Username cannot be empty.");
-        }
-        if(password == null || password.isEmpty()){
-            throw new UserRegistrationException("Password cannot be empty.");
-        }
-        if(usertype == null || usertype.isEmpty()){
-            throw new UserRegistrationException("Usertype cannot be empty.");
-        }
-        
-        /**
-         * This is where container-managed transactions are useful! A method of 
-         * a class calling another method of the same class with the same injected
-         * instance of DAO.
-         */
-        if(this.checkIfUserExist(username)){ 
-            throw new UserRegistrationException("Username already exist. Please choose a different name.");
-        }
-        
-        UserType userType = this.getUserTypeByName(usertype); //if multiple results match, the first one will be returned
-        if(userType == null){
-            throw new UserRegistrationException("Usertype "+usertype+" does not exist. "
-                    + "Please create a usertype first.");
-        }
-        
-        UserAccount newUser = new UserAccount();
-        newUser.setUSERNAME(username);
-        newUser.setPASSWORD(this.getPasswordHash(username, password, HASH_KEY));
-        newUser.setUSERTYPE(userType);
-        
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        session.getTransaction().begin();
-        session.save(newUser);
-        session.getTransaction().commit();
-        
-        return newUser;
-    }
-    
-    public UserAccount changePassword(String username, String oldPassword, String newPassword) throws UserAccountLockedException{
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        UserAccount changeForUser = null;
-        //authenticate old password first
-        changeForUser = this.login(username, oldPassword);
-        
-        if(changeForUser == null){ //authentication failed
-            return null;
-        }
-        String newHashedPassword = this.getPasswordHash(username, newPassword, HASH_KEY);
-        changeForUser.setPASSWORD(newHashedPassword);
-        changeForUser = (UserAccount) session.save(changeForUser);
-        return changeForUser;
-    }
-    
-    private String getPasswordHash(String username, String password, String exraHash){
-        String secureHash = password.concat(username).concat(exraHash);
-        MessageDigest md;
-        byte[] hash;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-            hash = md.digest(secureHash.getBytes("UTF-8"));
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
-            throw new RuntimeException("Error encountered in login method.");
-        }
-        String hashedPassword = String.format("%032x", new BigInteger(hash));
-        
-        return hashedPassword;
-    }
-    
-    /**
-     * Returns true or false. Note: Do not return any UserAccount object without 
- a password! Use sparingly.
- <p>
-     * @param username
-     * @return 
-     */
-    public boolean checkIfUserExist(String username){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        List results = session.createCriteria(UserAccount.class)
-                .add(Restrictions.eq("USERNAME", username))
-                .list();
-        if(results.size() < 1 ) return false;//no such user
-        
-        return true;
-    }
-    
-    public boolean checkIfUserTypeExist(String usertype){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        List results = session.createCriteria(UserType.class)
-                .add(Restrictions.eq("USERTYPENAME", usertype))
-                .list();
-        if(results.size() < 1 ) return false;//no such user type
-        
-        return true;
-    }
-    
-    public UserType getUserTypeByName(String usertype){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        List<UserType> results = session.createCriteria(UserType.class)
-                .add(Restrictions.eq("USERTYPENAME", usertype.toUpperCase()))
-                .list();
-        if(results.size() < 1 ) return null;
-        
-        return results.get(0);
-    }
-    
-    public UserType getUserTypeById(long usertypeid){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        List<UserType> results = session.createCriteria(UserType.class)
-                .add(Restrictions.eq("USERTYPEID", usertypeid))
-                .list();
-        if(results.size() < 1 ) return null;
-        
-        return results.get(0);
-    }
-    
-    public List<UserType> getUserTypes(int firstResult, int maxResult){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        Criteria selectAll = session.createCriteria(UserType.class).setFirstResult(firstResult)
-                .setMaxResults(maxResult);
-        List<UserType> result = selectAll.list();
-        
-        return result;
-    }
-    
-    public void createUserType(String usertype, String description) throws UserTypeException{
-        if(usertype == null || usertype.isEmpty()){
-            throw new UserTypeException("Usertype cannot be empty.");
-        }
-        if(this.checkIfUserTypeExist(usertype)){
-            throw new UserTypeException("Usertype already exists.");
-        }
-        UserType newType = new UserType();
-        newType.setUSERTYPENAME(usertype.toUpperCase()); //convert to uppercase
-        newType.setDESCRIPTION(description);
-        
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        session.getTransaction().begin();
-        session.save(newType);
-        session.getTransaction().commit();
-    }
-    
-    public void modifyUserType(UserType userType){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        session.getTransaction().begin();
-        session.update(userType);
-        session.getTransaction().commit();
-    }
-    
-    /**
-     * This is where my EDS creation EnterpriseObject.exportAsMap() comes handy.
-     * In certain scenarios, you don't want to expose certain fields like passwords
-     * to the caller of your web service. But a "SELECT userid, username
-     * FROM user..." statement can do the job equally well.
-     */
-    public List<UserAccount> searchUserByName(String usernamePattern){
-        if(session == null || !session.isOpen()) 
-            session = hibernateUtil.getSession();
-        Criteria selectUserAndType = session.createCriteria(UserAccount.class)
-                .add(Restrictions.ilike("USERNAME", "%"+usernamePattern+"%"));
-        List<UserAccount> result = selectUserAndType.list();
-        
-        return result;
     }
 }

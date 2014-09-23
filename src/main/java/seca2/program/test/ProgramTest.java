@@ -25,6 +25,7 @@ public class ProgramTest extends Program {
     
     @Inject private FormTestDB formTestDB;
     @Inject private FormTestNavigation formTestNavigation;
+    @Inject private FormTestUser formTestUser;
     
     @PostConstruct
     public void init(){
@@ -45,6 +46,14 @@ public class ProgramTest extends Program {
 
     public void setFormTestNavigation(FormTestNavigation formTestNavigation) {
         this.formTestNavigation = formTestNavigation;
+    }
+
+    public FormTestUser getFormTestUser() {
+        return formTestUser;
+    }
+
+    public void setFormTestUser(FormTestUser formTestUser) {
+        this.formTestUser = formTestUser;
     }
     
     

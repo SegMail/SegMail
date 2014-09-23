@@ -20,7 +20,7 @@ import org.hibernate.exception.GenericJDBCException;
 import seca2.bootstrap.GlobalValues;
 import seca2.component.data.DBConnectionException;
 import seca2.component.data.HibernateEMServices;
-import seca2.component.user.UserService;
+import seca2.component.user.UserServiceHibernate;
 import seca2.entity.navigation.MenuItem;
 import seca2.entity.navigation.MenuItemAccess;
 import seca2.entity.navigation.MenuItemAccess_;
