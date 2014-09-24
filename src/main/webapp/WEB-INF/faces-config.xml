@@ -21,5 +21,7 @@
             <renderer-class>seca2.template.HeadRenderer</renderer-class>
         </renderer>
     </render-kit>
-    
+    <lifecycle>
+        <phase-listener>jsf.Seca2PhaseListener</phase-listener>
+    </lifecycle>
 </faces-config>
