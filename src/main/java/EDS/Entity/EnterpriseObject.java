@@ -15,8 +15,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -24,7 +26,7 @@ import javax.persistence.TableGenerator;
  */
 @Entity
 @Table(name="ENTERPRISEOBJECT")
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy=InheritanceType.JOINED)
 @DiscriminatorColumn(name="OBJECT_NAME")
 @TableGenerator(name="ENTERPRISEUNIT_SEQ",initialValue=1,allocationSize=10,table="SEQUENCE")
 public abstract class EnterpriseObject extends AuditedObject {
@@ -41,6 +43,7 @@ public abstract class EnterpriseObject extends AuditedObject {
     /*@Id*/ protected java.sql.Date END_DATE;
     
     protected String SEARCH_TERM;
+    protected java.sql.Date DATE_CHANGED;
 
     @Id @GeneratedValue(generator="ENTERPRISEUNIT_SEQ",strategy=GenerationType.TABLE) 
     public long getOBJECTID() {
@@ -83,5 +86,19 @@ public abstract class EnterpriseObject extends AuditedObject {
         this.SEARCH_TERM = SEARCH_TERM;
     }
 
-    
+    public Date getDATE_CHANGED() {
+        return DATE_CHANGED;
+    }
+
+    public void setDATE_CHANGED(Date DATE_CHANGED) {
+        this.DATE_CHANGED = DATE_CHANGED;
+    }
+
+    @PrePersist
+    public void recordDateChanged(){
+        DateTime today = new DateTime();
+        java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
+        
+        this.setDATE_CHANGED(todaySQL);
+    }
 }

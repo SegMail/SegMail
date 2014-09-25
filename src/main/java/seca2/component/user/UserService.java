@@ -46,6 +46,18 @@ public class UserService  {
             
             List<UserType> existingUserTypes = this.getUserType(userTypeName);
             
+            if(existingUserTypes != null && !existingUserTypes.isEmpty()){
+                throw new UserTypeException("Usertype name \""+userTypeName+"\" has been taken. Please choose a different name.");
+            }
+            
+            //Instantiate the UserType object
+            UserType userType = new UserType();
+            userType.setUSERTYPENAME(userTypeName);
+            
+            em.getTransaction().begin();
+            em.persist(userType);
+            em.getTransaction().commit();
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
