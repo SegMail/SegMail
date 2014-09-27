@@ -51,16 +51,18 @@ public class FormTestDB implements Serializable {
             
             //add all entity packages
             seca2.component.data.Package root = new seca2.component.data.Package();
-            root.push("seca2");
-            root.push("entity");
+            root.push("seca2").push("entity");
 
             ClassLoader loader = explorer.getClassLoader();
             List<Class> entities = explorer.collectEntities(root, loader);
             for(Class c : entities){
                 cfg.addAnnotatedClass(c);
             }
+            //Delete all tables first
             new SchemaExport(cfg)
                     //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
+                    .execute(true, true, true, false);
+            new SchemaExport(cfg)
                     .execute(true, true, false, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!",null);
         } catch (DBConnectionException dbcex) {

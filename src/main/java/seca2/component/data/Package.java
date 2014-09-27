@@ -16,8 +16,9 @@ import java.util.Stack;
 public class Package {
     private Stack<String> stack = new Stack<String>();
     
-    public void push(String childPackage){
+    public Package push(String childPackage){
         stack.push(childPackage);
+        return this;
     }
     
     public String pop(){

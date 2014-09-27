@@ -52,7 +52,9 @@ public class FormTestNavigation implements Serializable{
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         }
         catch(Exception ex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, 
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
         }
     }
     
@@ -71,7 +73,9 @@ public class FormTestNavigation implements Serializable{
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
         }
         catch(Exception ex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
         }
     }
     

@@ -6,6 +6,7 @@
 
 package EDS.Entity;
 
+import java.sql.Date;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
@@ -27,6 +28,9 @@ public abstract class EnterpriseRelationship extends AuditedObject {
     
     protected String REL_TYPE;
     protected int REL_SEQUENCE;
+    protected String CHANGED_BY;
+    protected Date DATE_CREATED;
+    protected String CREATED_BY;
 
     @Id @ManyToOne
     public EnterpriseObject getSOURCE() {
@@ -63,6 +67,19 @@ public abstract class EnterpriseRelationship extends AuditedObject {
     public void setREL_SEQUENCE(int REL_SEQUENCE) {
         this.REL_SEQUENCE = REL_SEQUENCE;
     }
+
+    /**
+     * Testing method for initializing random values for a table row
+     */
+    public abstract void randInit();
+
+    /**
+     * Generates an object that represents the identifier of the row object
+     *
+     *
+     * @return Object - Key of this table row
+     */
+    public abstract Object generateKey();
     
     
 }

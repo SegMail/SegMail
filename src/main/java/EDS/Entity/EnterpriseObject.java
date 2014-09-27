@@ -26,10 +26,10 @@ import org.joda.time.DateTime;
  */
 @Entity
 @Table(name="ENTERPRISEOBJECT")
-@Inheritance(strategy=InheritanceType.JOINED)
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @DiscriminatorColumn(name="OBJECT_NAME")
 @TableGenerator(name="ENTERPRISEUNIT_SEQ",initialValue=1,allocationSize=10,table="SEQUENCE")
-public abstract class EnterpriseObject extends AuditedObject {
+public abstract class EnterpriseObject implements Serializable {
     
     protected long OBJECTID;
     protected String OBJECT_NAME;
@@ -44,6 +44,9 @@ public abstract class EnterpriseObject extends AuditedObject {
     
     protected String SEARCH_TERM;
     protected java.sql.Date DATE_CHANGED;
+    protected String CHANGED_BY;
+    protected Date DATE_CREATED;
+    protected String CREATED_BY;
 
     @Id @GeneratedValue(generator="ENTERPRISEUNIT_SEQ",strategy=GenerationType.TABLE) 
     public long getOBJECTID() {
@@ -93,6 +96,34 @@ public abstract class EnterpriseObject extends AuditedObject {
     public void setDATE_CHANGED(Date DATE_CHANGED) {
         this.DATE_CHANGED = DATE_CHANGED;
     }
+
+    public String getCHANGED_BY() {
+        return CHANGED_BY;
+    }
+
+    public void setCHANGED_BY(String CHANGED_BY) {
+        this.CHANGED_BY = CHANGED_BY;
+    }
+
+    public Date getDATE_CREATED() {
+        return DATE_CREATED;
+    }
+
+    public void setDATE_CREATED(Date DATE_CREATED) {
+        this.DATE_CREATED = DATE_CREATED;
+    }
+
+    public String getCREATED_BY() {
+        return CREATED_BY;
+    }
+
+    public void setCREATED_BY(String CREATED_BY) {
+        this.CREATED_BY = CREATED_BY;
+    }
+    
+    public abstract void randInit();
+    
+    public abstract Object generateKey();
 
     @PrePersist
     public void recordDateChanged(){

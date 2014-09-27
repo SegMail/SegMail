@@ -27,6 +27,9 @@ public abstract class EnterpriseData extends AuditedObject{
     protected java.sql.Date START_DATE;
     protected java.sql.Date END_DATE;
     protected int SNO;
+    protected String CHANGED_BY;
+    protected Date DATE_CREATED;
+    protected String CREATED_BY;
 
     @Id @ManyToOne
     public EnterpriseObject getOWNER() {
@@ -63,6 +66,19 @@ public abstract class EnterpriseData extends AuditedObject{
     public void setSNO(int SNO) {
         this.SNO = SNO;
     }
+
+    /**
+     * Testing method for initializing random values for a table row
+     */
+    public abstract void randInit();
+
+    /**
+     * Generates an object that represents the identifier of the row object
+     *
+     *
+     * @return Object - Key of this table row
+     */
+    public abstract Object generateKey();
     
     
 }
