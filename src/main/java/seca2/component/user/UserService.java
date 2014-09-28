@@ -10,11 +10,13 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
+import seca2.bootstrap.GlobalValues;
 import seca2.component.data.DBConnectionException;
 import seca2.component.data.HibernateEMServices;
 import seca2.entity.navigation.MenuItem;
@@ -44,7 +46,7 @@ public class UserService  {
             if(userTypeName == null || userTypeName.length() <= 0)
                 throw new UserTypeException("Usertype name cannot be empty!");
             
-            List<UserType> existingUserTypes = this.getUserType(userTypeName);
+            List<UserType> existingUserTypes = this.getUserTypeByName(userTypeName);
             
             if(existingUserTypes != null && !existingUserTypes.isEmpty()){
                 throw new UserTypeException("Usertype name \""+userTypeName+"\" has been taken. Please choose a different name.");
@@ -68,7 +70,66 @@ public class UserService  {
         }
     }
     
-    public List<UserType> getUserType(String userTypeName) throws DBConnectionException{
+    public List<UserType> getAllUserTypes() throws DBConnectionException{
+        if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
+        
+        try{
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<UserType> criteria = builder.createQuery(UserType.class);
+            Root<UserType> sourceEntity = criteria.from(UserType.class); //FROM UserType
+            
+            criteria.select(sourceEntity); // SELECT *
+            
+            List<UserType> results = em.createQuery(criteria)
+                    .setFirstResult(0)
+                    .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
+                    .getResultList();
+            
+            return results;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    public UserType getUserTypeById(long userTypeId) throws DBConnectionException{
+         if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
+        
+        try{
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<UserType> criteria = builder.createQuery(UserType.class);
+            Root<UserType> sourceEntity = criteria.from(UserType.class); //FROM UserType
+            
+            criteria.select(sourceEntity); // SELECT *
+            criteria.where(builder.equal(sourceEntity.get(UserType_.OBJECTID), userTypeId)); //WHERE USERTYPENAME = userTypeName
+            
+            UserType result = em.createQuery(criteria)
+                    .getSingleResult();
+            
+            return result;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            if (pex instanceof NoResultException){
+                return null;
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    public List<UserType> getUserTypeByName(String userTypeName) throws DBConnectionException{
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
         }

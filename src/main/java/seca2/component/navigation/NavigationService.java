@@ -5,6 +5,8 @@
  */
 package seca2.component.navigation;
 
+import EDS.Entity.EnterpriseObject;
+import EDS.Entity.EnterpriseObject_;
 import General.TreeNode;
 import java.io.Serializable;
 import java.util.List;
@@ -12,18 +14,23 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.SetJoin;
 import org.hibernate.exception.GenericJDBCException;
 import seca2.bootstrap.GlobalValues;
 import seca2.component.data.DBConnectionException;
 import seca2.component.data.HibernateEMServices;
+import seca2.component.user.UserService;
 import seca2.component.user.UserServiceHibernate;
 import seca2.entity.navigation.MenuItem;
 import seca2.entity.navigation.MenuItemAccess;
 import seca2.entity.navigation.MenuItemAccess_;
+import seca2.entity.navigation.MenuItem_;
 import seca2.entity.user.UserType;
 
 /**
@@ -38,8 +45,8 @@ public class NavigationService implements Serializable {
 
     @EJB
     private HibernateEMServices hibernateDB;
-    //@EJB
-    //private UserService userService;
+    @EJB
+    private UserService userService;
 
     private EntityManager em;
 
@@ -146,8 +153,89 @@ public class NavigationService implements Serializable {
         
     }
 
-    public void assignMenuItemAccess(long userTypeId, long menuItemId) {
+    public void assignMenuItemAccess(long userTypeId, long menuItemId) throws AssignMenuItemAccessException, DBConnectionException {
+        if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
+        try{
+            //check if userType already has access to menuItem
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class); //AS criteria
+            Root<MenuItemAccess> menuItemAccess = criteria.from(MenuItemAccess.class); //FROM MenuItemAccess
+            
+            Join<MenuItemAccess,EnterpriseObject> menuItem = menuItemAccess.join(MenuItemAccess_.SOURCE); //FROM EnterpriseObject
+            criteria.where(builder.equal(menuItem.get(EnterpriseObject_.OBJECTID), menuItemId)); //WHERE MenuItemAccess.SOURCE.OBJECTID = menuItemId
+            Join<MenuItemAccess,EnterpriseObject> userType = menuItemAccess.join(MenuItemAccess_.TARGET); //FROM EnterpriseObject
+            criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)); //WHERE MenuItemAccess.TARGET.OBJECTID = userTypeId
+            
+            List<MenuItemAccess> results = em.createQuery(criteria)
+                    .getResultList();
+            
+            if(results != null && results.size() > 0){
+                MenuItemAccess first = results.get(0);
+                throw new AssignMenuItemAccessException("Menu Item "+first.getTARGET().getOBJECT_NAME()+" is already assigned "
+                        + "to UserType "+first.getSOURCE().getOBJECT_NAME());
+            }
+            
+            //get menuItem first
+            MenuItem assignMenuItem = this.getMenuItemById(menuItemId);
+            if(assignMenuItem == null)
+                throw new AssignMenuItemAccessException("MenuItem with ID "+menuItemId+" could not be found!");
+            
+            //get userType
+            UserType assignUserType = userService.getUserTypeById(userTypeId);
+            if(assignUserType == null)
+                throw new AssignMenuItemAccessException("UserType with ID "+userTypeId+" could not be found!");
+            
+            //Create the MenuItemAccess objects (bi-directional)
+            MenuItemAccess assignment1 = new MenuItemAccess();
+            assignment1.setSOURCE(assignUserType);
+            assignment1.setTARGET(assignMenuItem);
+            
+            MenuItemAccess assignment2 = new MenuItemAccess();
+            assignment2.setSOURCE(assignMenuItem);
+            assignment2.setTARGET(assignUserType);
+            
+            em.getTransaction().begin();
+            em.persist(assignment1);
+            em.persist(assignment2);
+            em.getTransaction().commit();
+            
+        }catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    public MenuItem getMenuItemById(long menuItemId) throws DBConnectionException{
+        if (em == null || !em.isOpen()) {
+            em = hibernateDB.getEM();
+        }
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
+            Root<MenuItem> sourceEntity = criteria.from(MenuItem.class);
+            criteria.select(sourceEntity);
+            criteria.where(builder.equal(sourceEntity.get(MenuItem_.OBJECTID), menuItemId));
 
+            MenuItem result = em.createQuery(criteria)
+                    .getSingleResult();
+            return result;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            } 
+            if (pex instanceof NoResultException){
+                return null;
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     public List<MenuItem> getAllMenuItems() throws DBConnectionException {

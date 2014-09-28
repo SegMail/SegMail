@@ -9,6 +9,8 @@ package seca2.entity.navigation;
 import EDS.Entity.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -69,4 +71,9 @@ public class MenuItem extends EnterpriseObject {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    @PrePersist
+    @PreUpdate
+    public void PrePersist(){
+        this.OBJECT_NAME = this.MENU_ITEM_NAME;
+    }
 }

@@ -15,9 +15,12 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
 import seca2.component.data.DBConnectionException;
+import seca2.component.navigation.AssignMenuItemAccessException;
 import seca2.component.navigation.CreateMenuItemException;
 import seca2.component.navigation.NavigationService;
+import seca2.component.user.UserService;
 import seca2.entity.navigation.MenuItem;
+import seca2.entity.user.UserType;
 import seca2.program.messenger.FacesMessenger;
 
 /**
@@ -29,23 +32,47 @@ import seca2.program.messenger.FacesMessenger;
 public class FormTestNavigation implements Serializable{
     
     @EJB private NavigationService navigationService;
+    @EJB private UserService userService;
     
     private List<MenuItem> allMenuItems = new ArrayList<MenuItem>();
+    private List<UserType> allUserTypes = new ArrayList<UserType>();
+    
+    //Create MenuItem
     private long selectedParentMenuItemId;
     private String menuItemName;
     private String menuItemURL;
     private String menuItemXHTML;
+    
+    //Assign MenuItemAccess
+    private long selectedAssignedMenuItemId;
+    private long selectedUserTypeId;
     
     private final String setupNavigationFormName = "setupNavigationForm";
     
     @PostConstruct
     public void init(){
         initializeAllMenuItems();
+        initializeAllUserTypes();
     }
     
     public void initializeAllMenuItems(){
         try{
             allMenuItems = navigationService.getAllMenuItems();
+            //who knows whether there is empty list or not?
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        }
+        catch(Exception ex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, 
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
+        }
+    }
+    
+    public void initializeAllUserTypes(){
+         try{
+            allUserTypes = userService.getAllUserTypes();
             //who knows whether there is empty list or not?
         }
         catch(DBConnectionException dbex){
@@ -70,6 +97,23 @@ public class FormTestNavigation implements Serializable{
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         }
         catch(CreateMenuItemException crmex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
+        }
+        catch(Exception ex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
+        }
+    }
+    
+    public void assignMenuAccess(){
+        try{
+            navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId);
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        }
+        catch(AssignMenuItemAccessException crmex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
         }
         catch(Exception ex){
@@ -121,6 +165,30 @@ public class FormTestNavigation implements Serializable{
 
     public void setMenuItemXHTML(String menuItemXHTML) {
         this.menuItemXHTML = menuItemXHTML;
+    }
+
+    public long getSelectedAssignedMenuItemId() {
+        return selectedAssignedMenuItemId;
+    }
+
+    public void setSelectedAssignedMenuItemId(long selectedAssignedMenuItemId) {
+        this.selectedAssignedMenuItemId = selectedAssignedMenuItemId;
+    }
+
+    public List<UserType> getAllUserTypes() {
+        return allUserTypes;
+    }
+
+    public void setAllUserTypes(List<UserType> allUserTypes) {
+        this.allUserTypes = allUserTypes;
+    }
+
+    public long getSelectedUserTypeId() {
+        return selectedUserTypeId;
+    }
+
+    public void setSelectedUserTypeId(long selectedUserTypeId) {
+        this.selectedUserTypeId = selectedUserTypeId;
     }
 
     

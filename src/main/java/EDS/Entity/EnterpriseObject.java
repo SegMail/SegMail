@@ -26,8 +26,8 @@ import org.joda.time.DateTime;
  */
 @Entity
 @Table(name="ENTERPRISEOBJECT")
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-@DiscriminatorColumn(name="OBJECT_NAME")
+@Inheritance(strategy=InheritanceType.JOINED)
+@DiscriminatorColumn(name="OBJECT_TYPE")
 @TableGenerator(name="ENTERPRISEUNIT_SEQ",initialValue=1,allocationSize=10,table="SEQUENCE")
 public abstract class EnterpriseObject implements Serializable {
     

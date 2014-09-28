@@ -21,7 +21,7 @@ import javax.persistence.Table;
 public class MenuItemAccess extends EnterpriseRelationship {
 
     //Any additional attributes to be maintained for this relationship?
-    protected String REL_TYPE = "MENU_ITEM_ACCESS";
+    //protected String REL_TYPE = "MENU_ITEM_ACCESS"; no need to redefine it here
     
     @PrePersist
     public void prePersist(){

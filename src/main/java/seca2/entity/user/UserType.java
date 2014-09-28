@@ -7,7 +7,10 @@
 package seca2.entity.user;
 
 import EDS.Entity.EnterpriseObject;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -16,6 +19,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="USERTYPE")
+@DiscriminatorValue("USERTYPE")
 public class UserType extends EnterpriseObject {
     
     private String USERTYPENAME;
@@ -69,5 +73,9 @@ public class UserType extends EnterpriseObject {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    
+    @PrePersist
+    @PreUpdate
+    public void PrePersist(){
+        this.OBJECT_NAME = this.USERTYPENAME;
+    }
 }
