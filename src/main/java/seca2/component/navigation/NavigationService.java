@@ -164,9 +164,11 @@ public class NavigationService implements Serializable {
             Root<MenuItemAccess> menuItemAccess = criteria.from(MenuItemAccess.class); //FROM MenuItemAccess
             
             Join<MenuItemAccess,EnterpriseObject> menuItem = menuItemAccess.join(MenuItemAccess_.SOURCE); //FROM EnterpriseObject
-            criteria.where(builder.equal(menuItem.get(EnterpriseObject_.OBJECTID), menuItemId)); //WHERE MenuItemAccess.SOURCE.OBJECTID = menuItemId
+            //criteria.where(builder.equal(menuItem.get(EnterpriseObject_.OBJECTID), menuItemId)); //WHERE MenuItemAccess.SOURCE.OBJECTID = menuItemId
             Join<MenuItemAccess,EnterpriseObject> userType = menuItemAccess.join(MenuItemAccess_.TARGET); //FROM EnterpriseObject
-            criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)); //WHERE MenuItemAccess.TARGET.OBJECTID = userTypeId
+            //criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)); //WHERE MenuItemAccess.TARGET.OBJECTID = userTypeId
+            criteria.where(builder.and(builder.equal(menuItem.get(EnterpriseObject_.OBJECTID), menuItemId),//WHERE MenuItemAccess.SOURCE.OBJECTID = menuItemId
+                           builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)));  // AND MenuItemAccess.TARGET.OBJECTID = userTypeId
             
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .getResultList();

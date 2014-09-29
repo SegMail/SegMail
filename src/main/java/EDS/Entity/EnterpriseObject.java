@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.sql.Date;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,6 +31,7 @@ import org.joda.time.DateTime;
 @Inheritance(strategy=InheritanceType.JOINED)
 @DiscriminatorColumn(name="OBJECT_TYPE")
 @TableGenerator(name="ENTERPRISEUNIT_SEQ",initialValue=1,allocationSize=10,table="SEQUENCE")
+@EntityListeners(AuditedObjectListener.class)
 public abstract class EnterpriseObject implements Serializable {
     
     protected long OBJECTID;
@@ -126,23 +128,5 @@ public abstract class EnterpriseObject implements Serializable {
     
     public abstract Object generateKey();
 
-    @PrePersist
-    @PreUpdate
-    public void recordDateChanged(){
-        DateTime today = new DateTime();
-        java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
-        
-        this.setDATE_CHANGED(todaySQL);
-    }
     
-    @PrePersist
-    @PreUpdate
-    public void recordCreated(){
-        if(this.DATE_CREATED != null) return;
-        
-        DateTime today = new DateTime();
-        java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
-        
-        this.setDATE_CREATED(todaySQL);
-    }
 }
