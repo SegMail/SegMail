@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import org.joda.time.DateTime;
@@ -126,10 +127,22 @@ public abstract class EnterpriseObject implements Serializable {
     public abstract Object generateKey();
 
     @PrePersist
+    @PreUpdate
     public void recordDateChanged(){
         DateTime today = new DateTime();
         java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
         
         this.setDATE_CHANGED(todaySQL);
+    }
+    
+    @PrePersist
+    @PreUpdate
+    public void recordCreated(){
+        if(this.DATE_CREATED != null) return;
+        
+        DateTime today = new DateTime();
+        java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
+        
+        this.setDATE_CREATED(todaySQL);
     }
 }
