@@ -47,6 +47,9 @@ public class FormTestNavigation implements Serializable{
     private long selectedAssignedMenuItemId;
     private long selectedUserTypeId;
     
+    //Build Menu
+    private long selectedUserTypeIdToBuildMenu;
+    
     private final String setupNavigationFormName = "setupNavigationForm";
     
     @PostConstruct
@@ -124,7 +127,17 @@ public class FormTestNavigation implements Serializable{
     }
     
     public void buildMenu(){
-        
+        try{
+            navigationService.buildMenuForUserType(selectedUserTypeIdToBuildMenu);
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        }
+        catch(Exception ex){
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
+        }
     }
 
     public List<MenuItem> getAllMenuItems() {
@@ -189,6 +202,14 @@ public class FormTestNavigation implements Serializable{
 
     public void setSelectedUserTypeId(long selectedUserTypeId) {
         this.selectedUserTypeId = selectedUserTypeId;
+    }
+
+    public long getSelectedUserTypeIdToBuildMenu() {
+        return selectedUserTypeIdToBuildMenu;
+    }
+
+    public void setSelectedUserTypeIdToBuildMenu(long selectedUserTypeIdToBuildMenu) {
+        this.selectedUserTypeIdToBuildMenu = selectedUserTypeIdToBuildMenu;
     }
 
     

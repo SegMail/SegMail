@@ -293,6 +293,57 @@
                         </div>
                     </h:panelGroup>
                 </div>
+                <div class="col-sm-12 col-md-4">
+
+                    <h:panelGroup styleClass="panel panel-success" id="buildMenu"><!--test build menu-->
+                        <div class="panel-heading">For testing building of entire menu for usertype.</div>
+                        <div class="panel-body">
+                            <h:form id="buildMenuForm">
+                                <div class="row"><!--form to assign menu items to usertypes-->
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <h:outputLabel for="allUserTypesForBuilding" styleClass="control-label col-md-4">Usertypes: </h:outputLabel>
+                                        <div class="col-md-8">
+                                            <h:selectOneMenu id="allUserTypesForBuilding" class="selectpicker" 
+                                                             value="#{ProgramTest.formTestNavigation.selectedUserTypeIdToBuildMenu}"
+                                                             >
+                                                <c:choose>
+                                                    <c:when test="#{(ProgramTest.formTestNavigation.allUserTypes.size() == 0)}">
+                                                        <f:selectItem itemLabel="No UserTypes exist yet"></f:selectItem>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <f:selectItem itemLabel="No UserTypes selected" itemValue="" />
+                                                        <f:selectItems value="#{FormTestNavigation.allUserTypes}"
+                                                                       var="userType"
+                                                                       itemLabel="#{userType.USERTYPENAME}"
+                                                                       itemValue="#{userType.OBJECTID}"
+                                                                       >
+                                                        </f:selectItems>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </h:selectOneMenu>
+                                            <!--Impt! This script must be called here, if not the above select element won't be rendered as a 
+                                                button-->
+                                            <script>
+                                                loadNiceButtons();
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <p:commandButton id="buildMenuButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Build menu for user type"
+                                                         actionListener="#{ProgramTest.formTestNavigation.buildMenu()}"
+                                                         update="@form">
+                                        </p:commandButton>
+                                    </div>
+                                </div>
+                                <p:blockUI id="setupNavigationFormBlock" block="buildMenuForm" trigger="buildMenuForm:buildMenuButton">
+                                    <p id="spinner">Please wait while we do what we do best.</p>
+                                </p:blockUI>
+                            </h:form>
+                        </div>
+                    </h:panelGroup>
+                </div>
             </div>
         </ui:define>
 

@@ -9,6 +9,8 @@ import EDS.Entity.EnterpriseObject;
 import EDS.Entity.EnterpriseObject_;
 import General.TreeNode;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -30,8 +32,10 @@ import seca2.component.user.UserServiceHibernate;
 import seca2.entity.navigation.MenuItem;
 import seca2.entity.navigation.MenuItemAccess;
 import seca2.entity.navigation.MenuItemAccess_;
+import seca2.entity.navigation.MenuItemComparator;
 import seca2.entity.navigation.MenuItem_;
 import seca2.entity.user.UserType;
+import seca2.entity.user.UserType_;
 
 /**
  * Handles the navigation of the application
@@ -58,18 +62,22 @@ public class NavigationService implements Serializable {
      * @param userType
      * @return 
      */
-    public TreeNode<MenuItem> buildMenuForUserType(UserType userType) throws DBConnectionException {
+    public TreeNode<MenuItem> buildMenuForUserType(long userTypeId) throws DBConnectionException {
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
         }
         
         try{
             //1. Get all MenuItemAccess by userType ID.
+            //This uses EnterpriseRelationship to pull both MenuItem and UserType objects instead of using MenuItem to pull
+            //both MenuItemAccess and UserType. This is because there is no mapping for EnterpriseObject->EnterpriseRelationship
             CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class);
-            Root<MenuItemAccess> sourceEntity = criteria.from(MenuItemAccess.class);
-            criteria.select(sourceEntity);
-            criteria.where(builder.equal(sourceEntity.get(MenuItemAccess_.TARGET), userType));
+            Root<MenuItemAccess> menuItem = criteria.from(MenuItemAccess.class);
+            criteria.select(menuItem);
+            Join<MenuItemAccess,EnterpriseObject> userType = menuItem.join(MenuItemAccess_.SOURCE);
+            
+            criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId));
 
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .setFirstResult(0)
@@ -77,7 +85,12 @@ public class NavigationService implements Serializable {
                     .getResultList();
             
             //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
-            
+            List<MenuItem> menuItems = new ArrayList<MenuItem>();
+            for(MenuItemAccess mia:results){
+                menuItems.add((MenuItem) mia.getTARGET());
+                System.out.println("MenuItem: "+mia.getTARGET().getOBJECT_NAME());
+            }
+            Collections.sort(menuItems,new MenuItemComparator());
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

@@ -76,4 +76,6 @@ public class MenuItem extends EnterpriseObject {
     public void PrePersist(){
         this.OBJECT_NAME = this.MENU_ITEM_NAME;
     }
+    
+    
 }

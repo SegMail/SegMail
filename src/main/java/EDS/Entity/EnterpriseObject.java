@@ -16,11 +16,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
-import org.joda.time.DateTime;
 
 /**
  *
@@ -32,7 +29,7 @@ import org.joda.time.DateTime;
 @DiscriminatorColumn(name="OBJECT_TYPE")
 @TableGenerator(name="ENTERPRISEUNIT_SEQ",initialValue=1,allocationSize=10,table="SEQUENCE")
 @EntityListeners(AuditedObjectListener.class)
-public abstract class EnterpriseObject implements Serializable {
+public abstract class EnterpriseObject implements Serializable, Comparable<EnterpriseObject> {
     
     protected long OBJECTID;
     protected String OBJECT_NAME;
@@ -127,6 +124,17 @@ public abstract class EnterpriseObject implements Serializable {
     public abstract void randInit();
     
     public abstract Object generateKey();
+
+    /**
+     * 
+     * @param o
+     * @return 
+     */
+    @Override
+    public int compareTo(EnterpriseObject o) {
+        if(this.OBJECTID == o.OBJECTID) return 0;
+        return (this.OBJECTID > o.OBJECTID ? 1 : -1);
+    }
 
     
 }
