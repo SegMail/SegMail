@@ -92,6 +92,8 @@ public class NavigationService implements Serializable {
             }
             Collections.sort(menuItems,new MenuItemComparator());
             
+            System.out.println();
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
