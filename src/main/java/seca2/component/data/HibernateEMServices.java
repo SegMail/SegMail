@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnit;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -30,11 +31,14 @@ public class HibernateEMServices implements Serializable {
     @PersistenceUnit(unitName="HIBERNATE")
     private EntityManagerFactory emf;
     
+    @PersistenceContext(name="HIBERNATE")
+    private EntityManager em;
+    
     @Inject private EntityExplorer entityExplorer;
     
     public EntityManager getEM() {
         //EntityManagerFactory emf = Persistence.createEntityManagerFactory("HIBERNATE");//, this.createFullConfig().getProperties());
-        EntityManager em = emf.createEntityManager();
+        //EntityManager em = emf.createEntityManager();
         
         return em;
     }

@@ -14,9 +14,12 @@ import java.util.Collections;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -51,6 +54,9 @@ public class NavigationService implements Serializable {
     private HibernateEMServices hibernateDB;
     @EJB
     private UserService userService;
+    
+    @PersistenceContext(name="HIBERNATE")
+    private EntityManager emReplace;
 
     private EntityManager em;
 
@@ -62,6 +68,7 @@ public class NavigationService implements Serializable {
      * @param userType
      * @return 
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public TreeNode<MenuItem> buildMenuForUserType(long userTypeId) throws DBConnectionException {
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
@@ -119,11 +126,13 @@ public class NavigationService implements Serializable {
      * @throws CreateMenuItemException
      * @throws DBConnectionException 
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public long createMenuItem(String name, String requestUrl, String xhtml, long parentMenuItemId)
             throws CreateMenuItemException, DBConnectionException {
-        if (em == null || !em.isOpen()) {
+        /*if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
-        }
+        }*/
+        
         
         try {
             if(name == null || name.length() <= 0)
@@ -133,7 +142,7 @@ public class NavigationService implements Serializable {
             if(xhtml == null || xhtml.length() <= 0)
                 throw new CreateMenuItemException("MenuItem XHTML cannot be empty!");
             //get parent MenuItem
-            MenuItem parentMenuItem = em.find(MenuItem.class, parentMenuItemId);
+            MenuItem parentMenuItem = emReplace.find(MenuItem.class, parentMenuItemId);
 
             //Assign root as default if no parent is inputted?
             /**
@@ -149,9 +158,9 @@ public class NavigationService implements Serializable {
             newMenuItem.setMENU_ITEM_URL(requestUrl);
             newMenuItem.setMENU_ITEM_XHTML(xhtml);
             
-            em.getTransaction().begin();
-            em.persist(newMenuItem);
-            em.getTransaction().commit();
+            //em.getTransaction().begin();
+            emReplace.persist(newMenuItem);
+            //em.getTransaction().commit();
             
             return newMenuItem.getOBJECTID();
             
@@ -168,13 +177,15 @@ public class NavigationService implements Serializable {
         
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void assignMenuItemAccess(long userTypeId, long menuItemId) throws AssignMenuItemAccessException, DBConnectionException {
-        if (em == null || !em.isOpen()) {
+        /*if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
-        }
+        }*/
+        
         try{
             //check if userType already has access to menuItem
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = emReplace.getCriteriaBuilder();
             CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class); //AS criteria
             Root<MenuItemAccess> menuItemAccess = criteria.from(MenuItemAccess.class); //FROM MenuItemAccess
             
@@ -228,6 +239,7 @@ public class NavigationService implements Serializable {
         }
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public MenuItem getMenuItemById(long menuItemId) throws DBConnectionException{
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
@@ -255,6 +267,7 @@ public class NavigationService implements Serializable {
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<MenuItem> getAllMenuItems() throws DBConnectionException {
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();
@@ -280,6 +293,7 @@ public class NavigationService implements Serializable {
         }
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public TreeNode<MenuItem> buildMenuTree(long rootMenuItemId) throws DBConnectionException{
         //may not be necessary
         if (em == null || !em.isOpen()) {

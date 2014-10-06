@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
-  <persistence-unit name="HIBERNATE" transaction-type="RESOURCE_LOCAL">
+  <persistence-unit name="HIBERNATE" transaction-type="JTA">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <jta-data-source>jdbc/__default</jta-data-source>
     <properties>
         <property name="hibernate.archive.autodetection" value="class"/>
         <!--<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
@@ -12,9 +13,9 @@
         <property name="hibernate.connection.url" value="jdbc:h2:file:C:\Users\KH\Downloads\EDS"/>
         <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/segmail?"/>
         <property name="hibernate.connection.username" value="segmail"/>
-        <property name="hibernate.connection.password" value="segmail"/>-->
-        <property name="hibernate.connection.datasource" value="jdbc/__default" />
-        <property name="hibernate.current_session_context_class" value="thread"/>
+        <property name="hibernate.connection.password" value="segmail"/>
+        <property name="hibernate.connection.datasource" value="jdbc/__default" />-->
+        <property name="hibernate.current_session_context_class" value="jta"/>
         <property name="hibernate.c3p0.min_size" value="5"/>
         <property name="hibernate.c3p0.max_size" value="20"/>
         <property name="hibernate.c3p0.timeout" value="30"/>
@@ -24,6 +25,12 @@
         <property name="hibernate.connection.autocommit" value="false"/>
         <!--<property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create" />-->
         
+        <property name="hibernate.transaction.factory_class" value="org.hibernate.transaction.JTATransactionFactory"/>
+        <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform" />
+        <property name="hibernate.transaction.manager_lookup_class" value="org.hibernate.transaction.CMTTransactionFactory"/>
+        
+        <!--<property name="hibernate.transaction.auto_close_session" value="false" />-->
+        <property name="hibernate.transaction.flush_before_completion" value="true" />
     </properties>
   </persistence-unit>
 </persistence>  

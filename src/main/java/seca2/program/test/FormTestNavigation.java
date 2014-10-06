@@ -94,6 +94,7 @@ public class FormTestNavigation implements Serializable{
             //Thread.sleep(5000);//for testing ajax loader
                 navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
             //if successful, reload the page
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem created successfully!", null);
             this.initializeAllMenuItems();
         }
         catch(DBConnectionException dbex){
