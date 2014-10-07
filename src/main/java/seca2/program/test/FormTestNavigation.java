@@ -20,6 +20,7 @@ import seca2.component.navigation.CreateMenuItemException;
 import seca2.component.navigation.NavigationService;
 import seca2.component.user.UserService;
 import seca2.entity.navigation.MenuItem;
+import seca2.entity.navigation.MenuItemAccess;
 import seca2.entity.user.UserType;
 import seca2.program.messenger.FacesMessenger;
 
@@ -92,9 +93,9 @@ public class FormTestNavigation implements Serializable{
         
         try{
             //Thread.sleep(5000);//for testing ajax loader
-                navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
+            MenuItem newMenuItem = navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
             //if successful, reload the page
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem created successfully!", null);
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+newMenuItem.getMENU_ITEM_NAME()+" created successfully!", null);
             this.initializeAllMenuItems();
         }
         catch(DBConnectionException dbex){
@@ -112,7 +113,12 @@ public class FormTestNavigation implements Serializable{
     
     public void assignMenuAccess(){
         try{
-            navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId);
+            List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId);
+            
+            if(biRel != null && biRel.size() >= 1){
+                MenuItemAccess 
+            }
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+newMenuItem.getMENU_ITEM_NAME()+" created successfully!", null);
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");

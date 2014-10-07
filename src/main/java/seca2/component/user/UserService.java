@@ -9,8 +9,11 @@ package seca2.component.user;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -33,15 +36,14 @@ public class UserService  {
     private static final int MAX_UNSUCCESS_ATTEMPTS = 3;
     
     @EJB private HibernateEMServices hibernateDB;
+    
+    @PersistenceContext(name="HIBERNATE")
     private EntityManager em;
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void createUserType(String userTypeName, String description)
         throws UserTypeException, DBConnectionException{
-        
-        if (em == null || !em.isOpen()) {
-            em = hibernateDB.getEM();
-        }
-        
+                
         try{
             if(userTypeName == null || userTypeName.length() <= 0)
                 throw new UserTypeException("Usertype name cannot be empty!");
@@ -56,9 +58,9 @@ public class UserService  {
             UserType userType = new UserType();
             userType.setUSERTYPENAME(userTypeName);
             
-            em.getTransaction().begin();
+            //em.getTransaction().begin();
             em.persist(userType);
-            em.getTransaction().commit();
+            //em.getTransaction().commit();
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -70,10 +72,8 @@ public class UserService  {
         }
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<UserType> getAllUserTypes() throws DBConnectionException{
-        if (em == null || !em.isOpen()) {
-            em = hibernateDB.getEM();
-        }
         
         try{
             CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -99,10 +99,8 @@ public class UserService  {
         }
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public UserType getUserTypeById(long userTypeId) throws DBConnectionException{
-         if (em == null || !em.isOpen()) {
-            em = hibernateDB.getEM();
-        }
         
         try{
             CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -129,10 +127,8 @@ public class UserService  {
         }
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<UserType> getUserTypeByName(String userTypeName) throws DBConnectionException{
-        if (em == null || !em.isOpen()) {
-            em = hibernateDB.getEM();
-        }
         
         try{
             CriteriaBuilder builder = em.getCriteriaBuilder();
