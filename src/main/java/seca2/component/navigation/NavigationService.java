@@ -7,7 +7,7 @@ package seca2.component.navigation;
 
 import EDS.Entity.EnterpriseObject;
 import EDS.Entity.EnterpriseObject_;
-import General.TreeNode;
+import TreeAPI.TreeBranch;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +65,7 @@ public class NavigationService implements Serializable {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public TreeNode<MenuItem> buildMenuForUserType(long userTypeId) throws DBConnectionException {
+    public TreeBranch<MenuItem> buildMenuForUserType(long userTypeId) throws DBConnectionException {
         
         try{
             //1. Get all MenuItemAccess by userType ID.
@@ -86,12 +86,22 @@ public class NavigationService implements Serializable {
             
             //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
             List<MenuItem> menuItems = new ArrayList<MenuItem>();
+            System.out.println("Before sort...");
             for(MenuItemAccess mia:results){
                 menuItems.add((MenuItem) mia.getTARGET());
-                System.out.println("MenuItem: "+mia.getTARGET().getOBJECT_NAME());
+                System.out.println("MenuItem: "+mia.getTARGET()+"    Parent: "+((MenuItem)mia.getTARGET()).getPARENT_MENU_ITEM());
             }
+            System.out.println("Sorting...");
             Collections.sort(menuItems,new MenuItemComparator());
             
+            System.out.println("After sort...");
+            for(MenuItem mi:menuItems){
+                System.out.println("MenuItem: "+mi+"    Parent: "+mi.getPARENT_MENU_ITEM());
+            }
+            
+            //2a. Decide which node to be the root...
+            // Ideally, each menu can only have 1 root.
+            // How about a menu object as the root?
             System.out.println();
             
         } catch (PersistenceException pex) {
@@ -294,7 +304,7 @@ public class NavigationService implements Serializable {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public TreeNode<MenuItem> buildMenuTree(long rootMenuItemId) throws DBConnectionException{
+    public TreeBranch<MenuItem> buildMenuTree(long rootMenuItemId) throws DBConnectionException{
         //may not be necessary
         if (em == null || !em.isOpen()) {
             em = hibernateDB.getEM();

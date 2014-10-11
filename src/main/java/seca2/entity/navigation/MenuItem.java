@@ -7,6 +7,8 @@
 package seca2.entity.navigation;
 
 import EDS.Entity.EnterpriseObject;
+import TreeAPI.TreeBranch;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -19,7 +21,8 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="MENUITEM")
-public class MenuItem extends EnterpriseObject {
+@DiscriminatorValue("MENUITEM")
+public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
 
     private String MENU_ITEM_NAME; //display name
     private String MENU_ITEM_URL; //request URL
@@ -75,6 +78,21 @@ public class MenuItem extends EnterpriseObject {
     @PreUpdate
     public void PrePersist(){
         this.OBJECT_NAME = this.MENU_ITEM_NAME;
+    }
+
+    @Override
+    public Iterable<MenuItem> getChildren() {
+        return null;
+    }
+
+    @Override
+    public MenuItem getParent() {
+        return this.PARENT_MENU_ITEM;
+    }
+
+    @Override
+    public TRAVERSAL_MODE getTraversalMode() {
+        return TRAVERSAL_MODE.PARENT_ONLY;
     }
     
     

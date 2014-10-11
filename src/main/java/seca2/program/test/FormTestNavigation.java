@@ -115,10 +115,7 @@ public class FormTestNavigation implements Serializable{
         try{
             List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId);
             
-            if(biRel != null && biRel.size() >= 1){
-                MenuItemAccess 
-            }
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+newMenuItem.getMENU_ITEM_NAME()+" created successfully!", null);
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+selectedAssignedMenuItemId+" is assigned to user type "+selectedUserTypeId+"!", null);
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");

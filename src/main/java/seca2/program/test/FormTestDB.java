@@ -59,9 +59,9 @@ public class FormTestDB implements Serializable {
                 cfg.addAnnotatedClass(c);
             }
             //Delete all tables first
-            new SchemaExport(cfg)
+            new SchemaExport(cfg).drop(true, true);
                     //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
-                    .execute(true, true, true, false);
+                    //.execute(true, true, true, false);
             new SchemaExport(cfg)
                     .execute(true, true, false, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!",null);

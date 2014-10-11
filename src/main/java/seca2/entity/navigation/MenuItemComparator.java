@@ -28,7 +28,11 @@ public class MenuItemComparator implements Comparator<MenuItem> {
         
         int compareParentIds = compare(o1.getPARENT_MENU_ITEM(),o2.getPARENT_MENU_ITEM());
         
-        if(compareParentIds != 0) return compareParentIds; //sort by parents first
+        if(compareParentIds != 0){ 
+            System.out.println("MenuItem: "+o1+" ==="+compareParentIds+"=== MenuItem: "+o2);
+            return compareParentIds;
+        } //sort by parents first
+        System.out.println("MenuItem: "+o1+" ==="+compareOwnIds+"=== MenuItem: "+o2);
         return compareOwnIds; //sort by its own objectId
     }
     

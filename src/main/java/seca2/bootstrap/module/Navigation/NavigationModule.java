@@ -6,7 +6,7 @@
 
 package seca2.bootstrap.module.Navigation;
 
-import General.TreeNode;
+import TreeAPI.TreeBranch;
 import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -27,21 +27,9 @@ public class NavigationModule implements Serializable {
     
     @EJB private NavigationService navigationService;
     
-    private TreeNode<MenuItem> menuTree; //
-    
     @PostConstruct
     public void init() {
         //Construct menuTree from DB
         
     }
-
-    public TreeNode<MenuItem> getMenuTree() {
-        return menuTree;
-    }
-
-    public void setMenuTree(TreeNode<MenuItem> menuTree) {
-        this.menuTree = menuTree;
-    }
-    
-    
 }

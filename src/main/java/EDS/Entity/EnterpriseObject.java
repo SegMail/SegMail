@@ -136,5 +136,11 @@ public abstract class EnterpriseObject implements Serializable, Comparable<Enter
         return (this.OBJECTID > o.OBJECTID ? 1 : -1);
     }
 
+    @Override
+    public String toString() {
+        return "EnterpriseObject{" + "OBJECTID=" + OBJECTID + ", OBJECT_NAME=" + OBJECT_NAME + ", START_DATE=" + START_DATE + ", END_DATE=" + END_DATE + '}';
+    }
+
+    
     
 }
