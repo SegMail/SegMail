@@ -6,6 +6,7 @@
 
 package TreeAPI;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
 public class TreeNode<T> {
     
     private T root;
-    private List<T> children;
+    private List<T> children = new ArrayList<T>();
 
     public T getRoot() {
         return root;
@@ -33,5 +34,8 @@ public class TreeNode<T> {
         this.children = children;
     }
     
+    public void addChild(T child){
+        this.children.add(child);
+    }
     
 }
