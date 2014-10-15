@@ -8,6 +8,8 @@ package seca2.component.navigation;
 import EDS.Entity.EnterpriseObject;
 import EDS.Entity.EnterpriseObject_;
 import TreeAPI.TreeBranch;
+import TreeAPI.TreeBuilder;
+import TreeAPI.TreeNode;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +67,7 @@ public class NavigationService implements Serializable {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public TreeBranch<MenuItem> buildMenuForUserType(long userTypeId) throws DBConnectionException {
+    public List<TreeNode> buildMenuForUserType(long userTypeId) throws DBConnectionException {
         
         try{
             //1. Get all MenuItemAccess by userType ID.
@@ -85,24 +87,26 @@ public class NavigationService implements Serializable {
                     .getResultList();
             
             //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
-            List<MenuItem> menuItems = new ArrayList<MenuItem>();
+            List<TreeBranch> menuItems = new ArrayList<>();
             System.out.println("Before sort...");
             for(MenuItemAccess mia:results){
                 menuItems.add((MenuItem) mia.getTARGET());
                 System.out.println("MenuItem: "+mia.getTARGET()+"    Parent: "+((MenuItem)mia.getTARGET()).getPARENT_MENU_ITEM());
             }
-            System.out.println("Sorting...");
+            /*System.out.println("Sorting...");
             Collections.sort(menuItems,new MenuItemComparator());
             
             System.out.println("After sort...");
             for(MenuItem mi:menuItems){
                 System.out.println("MenuItem: "+mi+"    Parent: "+mi.getPARENT_MENU_ITEM());
-            }
+            }*/
+            List<TreeNode> sortedRoots = TreeBuilder.buildTree(menuItems);
             
             //2a. Decide which node to be the root...
             // Ideally, each menu can only have 1 root.
             // How about a menu object as the root?
             System.out.println();
+            return sortedRoots;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -113,9 +117,6 @@ public class NavigationService implements Serializable {
             throw ex;
         }
         
-        
-
-        return null;
     }
 
     /**

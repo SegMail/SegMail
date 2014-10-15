@@ -10,7 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * A TreeNode is a atomic unit of a Tree. It can be its own root - any TreeNode
+ * is a root. 
+ * 
+ * - Do I need an Iterator?
  * @author vincent.a.lee
  */
 public class TreeNode<T> {

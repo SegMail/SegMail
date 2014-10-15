@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  *
@@ -80,16 +81,19 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         this.OBJECT_NAME = this.MENU_ITEM_NAME;
     }
 
+    @Transient
     @Override
     public Iterable<MenuItem> getChildren() {
         return null;
     }
 
+    @Transient
     @Override
     public MenuItem getParent() {
         return this.PARENT_MENU_ITEM;
     }
 
+    @Transient
     @Override
     public TRAVERSAL_MODE getTraversalMode() {
         return TRAVERSAL_MODE.PARENT_ONLY;
