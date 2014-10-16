@@ -70,7 +70,7 @@ public class TreeBuilder {
                 }
                 //how to add the inspected as a child of inspected parent?
                 if(inspectedChild != null){
-                    newParentNode.addChild(inspectedChild);
+                    //newParentNode.addChild(inspectedChild);
                 }
                 
                 //get next parent & change child pointer
@@ -82,5 +82,46 @@ public class TreeBuilder {
         }
         return allRoots;
         
+    }
+    
+    public static List<TreeNode> buildTreeByParentBruteForce(List<TreeBranch> allBranches){
+        /**
+         * 1. Loop through each TreeBranch in the list allBranches.
+         * 2. Construct the TreeNode for this TreeBranch first - inspectedTreeBranch and add them to a TreeNode list.
+         * 3. Loop through the list again to search for all TreeNode which parent is this TreeNode.
+         * 4. If inspectedTreeBranch is the parent of this TreeBranch, then add it as the child of inpectedTreeBranch
+         * 
+         */
+        List<TreeBranch> copyOfBranches = new ArrayList<TreeBranch>(allBranches); //To refrain from modifying the original instance
+        final List<TreeNode> inspectedNodes = new ArrayList<TreeNode>(); //Immutable list that will be used in comparing parents
+        List<TreeNode> finalNodes = new ArrayList<TreeNode>(); //Final list of nodes that will be returned
+        // 1. Loop through each TreeBranch in the list allBranches.
+        for(TreeBranch inspectedTreeBranch : copyOfBranches){
+            //2. Construct the TreeNode for this TreeBranch first - inspectedTreeBranch.
+            TreeNode treeNode = new TreeNode();
+            treeNode.setRoot(inspectedTreeBranch);
+            inspectedNodes.add(treeNode);
+            finalNodes.add(treeNode);
+        }
+        
+        //3. Loop through the list again to search for all TreeBranch which parent is this TreeBranch.
+        for(TreeNode parentTreeNode : inspectedNodes){
+            //4. If inspectedTreeBranch is the parent of this TreeBranch, then add it as the child of inpectedTreeBranch
+            for(TreeNode childTreeNode : finalNodes){
+                TreeBranch parent = parentTreeNode.getRoot();
+                TreeBranch child = childTreeNode.getRoot();
+                
+                if(child.getParent().equals(parent)){
+                    //link the child and parent
+                    parentTreeNode.addChild(childTreeNode);
+                    childTreeNode.setParent(parentTreeNode);
+                    //remove them from the finalNodes list
+                    finalNodes.remove(childTreeNode);
+                }
+            }
+            
+        }
+        
+        return finalNodes;
     }
 }

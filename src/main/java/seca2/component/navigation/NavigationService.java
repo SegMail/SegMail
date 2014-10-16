@@ -86,6 +86,10 @@ public class NavigationService implements Serializable {
                     .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
                     .getResultList();
             
+            /**
+             * Aborted as it is too complex to query all accessible MenuItems first then build the
+             * tree from there. Instead, why not just select
+             */
             //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
             List<TreeBranch> menuItems = new ArrayList<>();
             System.out.println("Before sort...");
@@ -93,14 +97,8 @@ public class NavigationService implements Serializable {
                 menuItems.add((MenuItem) mia.getTARGET());
                 System.out.println("MenuItem: "+mia.getTARGET()+"    Parent: "+((MenuItem)mia.getTARGET()).getPARENT_MENU_ITEM());
             }
-            /*System.out.println("Sorting...");
-            Collections.sort(menuItems,new MenuItemComparator());
             
-            System.out.println("After sort...");
-            for(MenuItem mi:menuItems){
-                System.out.println("MenuItem: "+mi+"    Parent: "+mi.getPARENT_MENU_ITEM());
-            }*/
-            List<TreeNode> sortedRoots = TreeBuilder.buildTree(menuItems);
+            List<TreeNode> sortedRoots = TreeBuilder.buildTreeByParentBruteForce(menuItems);
             
             //2a. Decide which node to be the root...
             // Ideally, each menu can only have 1 root.
