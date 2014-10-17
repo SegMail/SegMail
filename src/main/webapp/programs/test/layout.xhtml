@@ -337,6 +337,40 @@
                                         </p:commandButton>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-xs-12 form-group">
+                                        <nav class="navbar navbar-inverse" role="navigation">
+                                            <div class="navbar-header">
+                                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
+                                                    <span class="sr-only">Toggle navigation</span>
+                                                </button>
+                                                <a class="navbar-brand" href="#">SegMail Dev 1.0</a>
+                                            </div>
+                                            <div class="collapse navbar-collapse" id="navbar-collapse-02">
+                                                <ul class="nav navbar-nav">
+                                                    <c:forEach items="#{TopMenu.programs}" var="program">
+
+                                                        <li class="#{TopMenu.currentProgramIndex == program.OBJECTID ? 'active' : ''}">
+                                                            <a href="#{request.contextPath.concat(program.VIEW_DIRECTORY)}">#{program.PROGRAM_NAME}</a>
+                                                        </li>
+
+                                                    </c:forEach>
+                                                </ul>
+                                                <!--leave this here to look good...
+                                                <form class="navbar-form navbar-right" action="#" role="search" style="">
+                                                    <div class="form-group">
+                                                        <div class="input-group">
+                                                            <input class="form-control" id="navbarInput-01" type="search" placeholder="Search" />
+                                                            <span class="input-group-btn">
+                                                                <button type="submit" class="btn"><span class="fui-search"></span></button>
+                                                            </span>            
+                                                        </div>
+                                                    </div>               
+                                                </form> ...no more-->
+                                            </div><!-- /.navbar-collapse -->
+                                        </nav>
+                                    </div>
+                                </div>
                                 <p:blockUI id="setupNavigationFormBlock" block="buildMenuForm" trigger="buildMenuForm:buildMenuButton">
                                     <p id="spinner">Please wait while we do what we do best.</p>
                                 </p:blockUI>

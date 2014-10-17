@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Queue;
 import java.util.Stack;
 
@@ -106,17 +107,21 @@ public class TreeBuilder {
         
         //3. Loop through the list again to search for all TreeBranch which parent is this TreeBranch.
         for(TreeNode parentTreeNode : inspectedNodes){
+            TreeBranch checkParent = parentTreeNode.getRoot();
             //4. If inspectedTreeBranch is the parent of this TreeBranch, then add it as the child of inpectedTreeBranch
-            for(TreeNode childTreeNode : finalNodes){
-                TreeBranch parent = parentTreeNode.getRoot();
+            //Use an Iterator now, because we are going to modify the list while iterating through it to avoid ConcurrentModificationException
+            ListIterator<TreeNode> finalNodeIterator = finalNodes.listIterator();
+            while(finalNodeIterator.hasNext()){
+                TreeNode childTreeNode = finalNodeIterator.next();
                 TreeBranch child = childTreeNode.getRoot();
                 
-                if(child.getParent().equals(parent)){
+                if(child.getParent() != null
+                        && child.getParent().equals(checkParent)){
                     //link the child and parent
                     parentTreeNode.addChild(childTreeNode);
                     childTreeNode.setParent(parentTreeNode);
                     //remove them from the finalNodes list
-                    finalNodes.remove(childTreeNode);
+                    finalNodeIterator.remove();
                 }
             }
             
