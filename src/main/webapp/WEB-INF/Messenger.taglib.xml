@@ -24,6 +24,12 @@
             <type>java.lang.Boolean</type>
             <description>If messages can be dismissed</description>
         </attribute>
+        
+        <attribute>
+            <name>for</name>
+            <type>java.lang.String</type>
+            <description>The component ID which this messenger is for.</description>
+        </attribute>
             
     </tag>
 </facelet-taglib>

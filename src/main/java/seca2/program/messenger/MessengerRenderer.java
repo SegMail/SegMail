@@ -6,6 +6,9 @@
 package seca2.program.messenger;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
@@ -49,21 +52,49 @@ public class MessengerRenderer extends Renderer {
         
         //Get the client ID in order to retrieve all messages for the client
         String clientId = component.getClientId(context);
+        String _for = component.getFor();
         
+        //Retrieve all messages that were "for" this component using the client ID
+        List<FacesMessage> myMessages = context.getMessageList(_for);
         
         try{
+            //Start encoding the messages
             writer.startElement("div", component);
             writer.writeAttribute("id", component.getClientId(), "id");
            
             //start writing content
-            if(component.isClosable()){
-                
-                writer.write("This component is closable");
-            }
-            else{
+            for(FacesMessage message : myMessages){
                 writer.startElement("div", component);
-                writer.write("This component is NOT closable");
-                writer.endElement("div");
+                
+                /**StyleClass should be set at the end as various attributes of the FacesMessage 
+                 * will determine the styleClass
+                 */
+                String messageStyleClass = "alert";
+                
+                if(message.getSeverity().equals(FacesMessage.SEVERITY_INFO)){
+                    messageStyleClass.concat(" alert-info");
+                } else if (message.getSeverity().equals(FacesMessage.SEVERITY_WARN)){
+                    messageStyleClass.concat(" alert-warning");
+                } else if (message.getSeverity().equals(FacesMessage.SEVERITY_ERROR)){
+                    messageStyleClass.concat(" alert-danger");
+                } else if (message.getSeverity().equals(FacesMessage.SEVERITY_FATAL)){
+                    messageStyleClass.concat(" alert-success"); 
+                    //this is the only exceptional case that you will find unintuitive,
+                    //but the rest are ok...
+                }
+                
+                //Check if closable, put in the Bootstrap dismissible class
+                if(component.isClosable()){
+                    messageStyleClass.concat(" alert-dismissible");
+                }
+                
+                //Are we ready to set the style of the message?
+                
+                //How to style the links? Which attribute of FacesMessage to depend on?
+                //Solution 1: Custom message class extended from FacesMessage
+                //Solution 2: Scan through the FacesMessage summary and detail fields to 
+                //  find the <a> tag and append its class atttribute.
+                                
             }
             writer.write(component.testComponentMethod());
             writer.endElement("div");

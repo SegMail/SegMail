@@ -36,7 +36,6 @@ public class MessengerComponent extends UIMessages {
     }
     
     
-    
     public String testComponentMethod(){
         return "Test new component";
     }
