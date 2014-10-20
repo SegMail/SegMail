@@ -72,28 +72,30 @@ public class MessengerRenderer extends Renderer {
                 String messageStyleClass = "alert";
                 
                 if(message.getSeverity().equals(FacesMessage.SEVERITY_INFO)){
-                    messageStyleClass.concat(" alert-info");
+                    messageStyleClass = messageStyleClass.concat(" alert-info");
                 } else if (message.getSeverity().equals(FacesMessage.SEVERITY_WARN)){
-                    messageStyleClass.concat(" alert-warning");
+                    messageStyleClass = messageStyleClass.concat(" alert-warning");
                 } else if (message.getSeverity().equals(FacesMessage.SEVERITY_ERROR)){
-                    messageStyleClass.concat(" alert-danger");
+                    messageStyleClass = messageStyleClass.concat(" alert-danger");
                 } else if (message.getSeverity().equals(FacesMessage.SEVERITY_FATAL)){
-                    messageStyleClass.concat(" alert-success"); 
+                    messageStyleClass = messageStyleClass.concat(" alert-success"); 
                     //this is the only exceptional case that you will find unintuitive,
                     //but the rest are ok...
                 }
                 
                 //Check if closable, put in the Bootstrap dismissible class
                 if(component.isClosable()){
-                    messageStyleClass.concat(" alert-dismissible");
+                    messageStyleClass = messageStyleClass.concat(" alert-dismissible");
                 }
                 
                 //Are we ready to set the style of the message?
-                
+                writer.writeAttribute("class", messageStyleClass, "class");
                 //How to style the links? Which attribute of FacesMessage to depend on?
                 //Solution 1: Custom message class extended from FacesMessage
                 //Solution 2: Scan through the FacesMessage summary and detail fields to 
                 //  find the <a> tag and append its class atttribute.
+                //We choose both solution
+                
                                 
             }
             writer.write(component.testComponentMethod());

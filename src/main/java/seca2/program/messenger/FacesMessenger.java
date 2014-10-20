@@ -26,4 +26,11 @@ public class FacesMessenger {
         FacesMessage msg = new FacesMessage(level,headline,description);
         FacesContext.getCurrentInstance().addMessage(clientId, msg);
     }
+    
+    public static BootstrapMessage constructBootstrapMessage(String clientId){
+        BootstrapMessage newMessage = new BootstrapMessage();
+        FacesContext.getCurrentInstance().addMessage(clientId, newMessage);
+        
+        return newMessage;
+    }
 }

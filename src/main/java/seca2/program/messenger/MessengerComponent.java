@@ -27,6 +27,7 @@ public class MessengerComponent extends UIMessages {
         
     }
 
+    
     public boolean isClosable() {
         return (Boolean) this.getStateHelper().eval(CLOSABLE, CLOSABLE_DEFAULT);
     }

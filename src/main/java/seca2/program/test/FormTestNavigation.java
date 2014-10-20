@@ -144,6 +144,7 @@ public class FormTestNavigation implements Serializable{
         }
     }
 
+    
     public List<MenuItem> getAllMenuItems() {
         return allMenuItems;
     }
