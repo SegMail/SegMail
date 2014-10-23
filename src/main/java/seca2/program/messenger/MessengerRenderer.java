@@ -44,6 +44,14 @@ public class MessengerRenderer extends Renderer {
 
     public static final String RENDERER_TYPE = "seca2.program.messenger.MessengerRenderer";
 
+    protected final String SUMMARY_HTML_ELEMENT = "strong";
+    protected final String SUMMARY_HTML_STYLE_CLASS = "";
+    
+    protected final String DETAIL_HTML_ELEMENT = "";
+    protected final String DETAIL_HTML_STYLE_CLASS = "";
+    
+    
+    protected final String LINK_HTML_STYLES_CLASS = "alert-link";
     
     @Override
     public void encodeEnd(FacesContext context, UIComponent uicomponent) throws IOException {
@@ -89,12 +97,34 @@ public class MessengerRenderer extends Renderer {
                 }
                 
                 //Are we ready to set the style of the message?
-                writer.writeAttribute("class", messageStyleClass, "class");
+                writer.writeAttribute("class", messageStyleClass,null);
                 //How to style the links? Which attribute of FacesMessage to depend on?
                 //Solution 1: Custom message class extended from FacesMessage
                 //Solution 2: Scan through the FacesMessage summary and detail fields to 
                 //  find the <a> tag and append its class atttribute.
-                //We choose both solution
+                //We choose solution 1
+                
+                //If this is a MessengerMessage, call its encode method to generate the HTML
+                if(message.getClass().equals(MessengerMessage.class)){
+                    MessengerMessage messengerMessage = (MessengerMessage) message;
+                    messengerMessage.encodeMessage(context, uicomponent);
+                }
+                //If not, just get its summary and details to encode it here.
+                else{
+                    if(component.isShowSummary()){
+                        writer.startElement(SUMMARY_HTML_ELEMENT, component);
+                        writer.writeAttribute("class", SUMMARY_HTML_STYLE_CLASS, null);
+                        writer.write(message.getSummary());
+                        writer.endElement(SUMMARY_HTML_ELEMENT);
+                    }
+                    if(component.isShowDetail()){
+                        writer.startElement(DETAIL_HTML_ELEMENT, component);
+                        writer.writeAttribute("class", DETAIL_HTML_STYLE_CLASS, null);
+                        writer.write(message.getSummary());
+                        writer.endElement(DETAIL_HTML_ELEMENT);
+                    }
+                }
+                
                 
                                 
             }
@@ -110,5 +140,6 @@ public class MessengerRenderer extends Renderer {
     public void encodeBegin(FacesContext context, UIComponent component) throws IOException {
         super.encodeBegin(context, component); //To change body of generated methods, choose Tools | Templates.
     }
+    
     
 }
