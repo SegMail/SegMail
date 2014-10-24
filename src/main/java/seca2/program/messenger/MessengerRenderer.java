@@ -98,6 +98,7 @@ public class MessengerRenderer extends Renderer {
                 
                 //Are we ready to set the style of the message?
                 writer.writeAttribute("class", messageStyleClass,null);
+                writer.writeAttribute("role","alert",null);
                 //How to style the links? Which attribute of FacesMessage to depend on?
                 //Solution 1: Custom message class extended from FacesMessage
                 //Solution 2: Scan through the FacesMessage summary and detail fields to 
@@ -112,20 +113,38 @@ public class MessengerRenderer extends Renderer {
                 //If not, just get its summary and details to encode it here.
                 else{
                     if(component.isShowSummary()){
-                        writer.startElement(SUMMARY_HTML_ELEMENT, component);
-                        writer.writeAttribute("class", SUMMARY_HTML_STYLE_CLASS, null);
+                        if(SUMMARY_HTML_ELEMENT != null &&
+                                SUMMARY_HTML_ELEMENT.length() > 0)
+                            writer.startElement(SUMMARY_HTML_ELEMENT, component);
+                        
+                        if(SUMMARY_HTML_STYLE_CLASS != null &&
+                                SUMMARY_HTML_STYLE_CLASS.length() > 0)
+                            writer.writeAttribute("class", SUMMARY_HTML_STYLE_CLASS, null);
+                        
                         writer.write(message.getSummary());
-                        writer.endElement(SUMMARY_HTML_ELEMENT);
+                        
+                        if(SUMMARY_HTML_ELEMENT != null &&
+                                SUMMARY_HTML_ELEMENT.length() > 0)
+                            writer.endElement(SUMMARY_HTML_ELEMENT);
                     }
                     if(component.isShowDetail()){
-                        writer.startElement(DETAIL_HTML_ELEMENT, component);
-                        writer.writeAttribute("class", DETAIL_HTML_STYLE_CLASS, null);
-                        writer.write(message.getSummary());
-                        writer.endElement(DETAIL_HTML_ELEMENT);
+                        if(DETAIL_HTML_ELEMENT != null &&
+                                DETAIL_HTML_ELEMENT.length() > 0)
+                            writer.startElement(DETAIL_HTML_ELEMENT, component);
+                        
+                        if(DETAIL_HTML_STYLE_CLASS != null &&
+                                DETAIL_HTML_STYLE_CLASS.length() > 0)
+                            writer.writeAttribute("class", DETAIL_HTML_STYLE_CLASS, null);
+                        
+                        writer.write(message.getDetail());
+                        
+                        if(DETAIL_HTML_ELEMENT != null &&
+                                DETAIL_HTML_ELEMENT.length() > 0)
+                            writer.endElement(DETAIL_HTML_ELEMENT);
                     }
                 }
                 
-                
+                writer.endElement("div");
                                 
             }
             writer.write(component.testComponentMethod());

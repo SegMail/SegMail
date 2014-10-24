@@ -30,6 +30,20 @@
             <type>java.lang.String</type>
             <description>The component ID which this messenger is for.</description>
         </attribute>
+        
+        <attribute>
+            <name>showSummary</name>
+            <type>java.lang.Boolean</type>
+            <description>Whether to show the summary of the message.</description>
+        </attribute>
+        
+        <attribute>
+            <name>showDetail</name>
+            <type>java.lang.Boolean</type>
+            <description>Whether to show the details of the message.</description>
+        </attribute>
+        
+        
             
     </tag>
 </facelet-taglib>

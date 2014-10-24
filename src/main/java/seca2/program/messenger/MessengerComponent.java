@@ -22,6 +22,12 @@ public class MessengerComponent extends UIMessages {
     //Properties
     private static final String CLOSABLE = "closable";
     private static final Boolean CLOSABLE_DEFAULT = false;
+    
+    private static final String SHOW_SUMMARY = "showSummary";
+    private static final Boolean SHOW_SUMMARY_DEFAULT = true;
+    
+    private static final String SHOW_DETAILS = "showDetails";
+    private static final Boolean SHOW_DETAILS_DEFAULT = true;
 
     public MessengerComponent() {
         
@@ -45,5 +51,4 @@ public class MessengerComponent extends UIMessages {
     public String getFamily() {
         return MessengerComponent.COMPONENT_FAMILY;
     }
-    
 }

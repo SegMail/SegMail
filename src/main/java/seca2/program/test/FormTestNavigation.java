@@ -65,7 +65,7 @@ public class FormTestNavigation implements Serializable{
             //who knows whether there is empty list or not?
         }
         catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_INFO, "Could not connect to database!", "Please contact admin.");
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, 

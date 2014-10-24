@@ -184,13 +184,10 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 col-xs-12">
-                                        <c:forEach items="#{facesContext.messageList}" var="m" >
-
-                                            <div class="alert alert-danger" >
-                                                <strong>#{m.summary}</strong><br />
-                                                #{m.detail}
-                                            </div>
-                                        </c:forEach>
+                                        <msg:messenger for="setupNavigationForm" closable="true"
+                                                       showDetail="true"
+                                                       showSummary="true"
+                                                       ></msg:messenger>
                                     </div>
                                 </div>
                                 <p:blockUI id="setupNavigationFormBlock" block="setupNavigationForm" trigger="setupNavigationForm:createMenuItem">
@@ -285,12 +282,6 @@
                                                 #{m.detail}
                                             </div>
                                         </c:forEach>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 col-xs-12">
-                                        <msg:messenger for=""></msg:messenger>
-                                        
                                     </div>
                                 </div>
                                 <p:blockUI id="setupNavigationFormBlock" block="assignMenuItemForm" trigger="assignMenuItemForm:createMenuItemAccess">
