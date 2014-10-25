@@ -24,11 +24,17 @@ import javax.faces.context.ResponseWriter;
 public class MessengerMessage extends FacesMessage {
 
     private final String summaryTags = "strong";
+    private final String summaryTagStyleClass = "";
     private final String detailTags = "";
+    private final String detailTagStyleClass = "";
     private final String linkTags = "a";
     private final String linkStyleClass = "alert-link";
     private List<LinkMarker> linksSummary = new ArrayList<LinkMarker>();
     private List<LinkMarker> linksDetail = new ArrayList<LinkMarker>();
+    
+    public static enum LINK_TARGET{
+        
+    }
 
     private class LinkMarker {
 
@@ -49,34 +55,40 @@ public class MessengerMessage extends FacesMessage {
         }
     }
 
-    public void appendSummary(String message) {
-        this.setSummary(this.getSummary().concat(message));
+    public MessengerMessage appendSummary(String message) {
+        this.setSummary(this.getSummary()== null ? message : this.getSummary().concat(message));
+        return this;
     }
 
-    public void appendDetail(String message) {
-        this.setDetail(this.getDetail().concat(message));
+    public MessengerMessage appendDetail(String message) {
+        this.setDetail(this.getDetail()== null ? message : this.getDetail().concat(message));
+        return this;
     }
 
-    public void appendSummaryLink(String link, String href, String target) {
+    public MessengerMessage appendSummaryLink(String link, String href, String target) {
         //Capture position of link by capturing length of current Summary
         LinkMarker newMarker = new LinkMarker(this.getSummary(), link, target, href);
         this.linksSummary.add(newMarker);
         this.appendSummary(link);
+        return this;
     }
 
-    public void appendDetailLink(String link, String href, String target) {
+    public MessengerMessage appendDetailLink(String link, String href, String target) {
         //Capture position of link by capturing length of current Summary
         LinkMarker newMarker = new LinkMarker(this.getDetail(), link, href, target);
         this.linksDetail.add(newMarker);
         this.appendDetail(link);
+        return this;
     }
 
-    public void clearSummary() {
+    public MessengerMessage clearSummary() {
         this.setSummary("");
+        return this;
     }
 
-    public void clearDetail() {
+    public MessengerMessage clearDetail() {
         this.setDetail("");
+        return this;
     }
 
     public void encodeMessage(FacesContext context, UIComponent uicomponent) throws IOException {
@@ -85,68 +97,64 @@ public class MessengerMessage extends FacesMessage {
 
         //Encode summary first
         if (component.isShowSummary()) {
-            writer.startElement(this.summaryTags, component);
-            Iterator<LinkMarker> iSummary = linksSummary.iterator();
-            int startPositionSummary = 0;
-            while (iSummary.hasNext()) {
-                LinkMarker linkMarker = iSummary.next();
-
-                //write since start_position to the start of the next linkMarker
-                if (linkMarker.start_position > startPositionSummary) //only if marker start is at least 1 char away from startPosition
-                {
-                    writer.write(this.getDetail().substring(startPositionSummary,
-                            linkMarker.start_position - 1));
-                }
-                //write the link
-                writer.startElement(linkTags, component);
-                writer.writeAttribute("class", this.linkStyleClass, null);
-                writer.writeAttribute("href", linkMarker.href, null);
-                writer.writeAttribute("target", linkMarker.target, null);
-                writer.write(linkMarker.printLink(this.getDetail()));
-                writer.endElement(linkTags);
-
-                //move the cursor position
-                startPositionSummary = linkMarker.end_position + 1;
-            }
-            if (startPositionSummary < this.getDetail().length()) //if we are at least 1 char away from the end
-            {
-                writer.write(this.getDetail().substring(startPositionSummary));//finish off the last chunk
-            }
-            writer.endElement(this.summaryTags);
+            this.encodeMessageWithLink(context, component,
+                    this.getSummary(), linksSummary, 
+                    this.summaryTags, this.summaryTagStyleClass, 
+                    this.linkTags, this.linkStyleClass);
 
         }
 
         //Encode details
-        if (component.isShowDetail()) {
-            writer.startElement(this.detailTags, component);
-            Iterator<LinkMarker> iDetails = linksDetail.iterator();
-            int startPositionDetail = 0;
-            while (iDetails.hasNext()) {
-                LinkMarker linkMarker = iDetails.next();
-
-                //write since start_position to the start of the next linkMarker
-                if (linkMarker.start_position > startPositionDetail) //only if marker start is at least 1 char away from startPosition
-                {
-                    writer.write(this.getDetail().substring(startPositionDetail,
-                            linkMarker.start_position - 1));
-                }
-                //write the link
-                writer.startElement(linkTags, component);
-                writer.writeAttribute("class", this.linkStyleClass, null);
-                writer.writeAttribute("href", linkMarker.href, null);
-                writer.writeAttribute("target", linkMarker.target, null);
-                writer.write(linkMarker.printLink(this.getDetail()));
-                writer.endElement(linkTags);
-
-                //move the cursor position
-                startPositionDetail = linkMarker.end_position + 1;
-            }
-            if (startPositionDetail < this.getDetail().length()) //if we are at least 1 char away from the end
-            {
-                writer.write(this.getDetail().substring(startPositionDetail));//finish off the last chunk
-            }
-            writer.endElement(this.detailTags);
+        if (component.isShowDetail()) { //if there is no detail, this.getDetail() will return summary instead. WTF.
+            this.encodeMessageWithLink(context, component,
+                    this.getDetail(), this.linksDetail, 
+                    this.detailTags, this.detailTagStyleClass, 
+                    this.linkTags, this.linkStyleClass);
         }
 
+    }
+    
+    private void encodeMessageWithLink(FacesContext context, UIComponent component, 
+            String message, List<LinkMarker> linkMarkers,
+            String messageTag, String messageStyleClass, 
+            String linkTag, String linkStyleClass) throws IOException{
+        
+        ResponseWriter writer = context.getResponseWriter();
+        if(messageTag != null && !messageTag.isEmpty())
+            writer.startElement(messageTag, component);
+        
+        Iterator<LinkMarker> iLinks = linkMarkers.iterator();
+        int startPositionDetail = 0;
+        while (iLinks.hasNext()) {
+            LinkMarker linkMarker = iLinks.next();
+
+            //write since start_position to the start of the next linkMarker
+            if (linkMarker.start_position > startPositionDetail) //only if marker start is at least 1 char away from startPosition
+            {
+                writer.write(message.substring(startPositionDetail,
+                        linkMarker.start_position - 1));
+            }
+            //write the link
+            if(linkTag != null && !linkTag.isEmpty()){
+                writer.startElement(linkTag, component);
+                writer.writeAttribute("class", linkStyleClass, null);
+                writer.writeAttribute("href", linkMarker.href, null);
+                writer.writeAttribute("target", linkMarker.target, null);
+            }
+            
+            writer.write(linkMarker.printLink(message));
+            
+            if(linkTag != null && !linkTag.isEmpty()){
+                writer.endElement(linkTag);
+            }
+            //move the cursor position
+            startPositionDetail = linkMarker.end_position + 1;
+        }
+        if (startPositionDetail < message.length()) //if we are at least 1 char away from the end
+        {
+            writer.write(message.substring(startPositionDetail));//finish off the last chunk
+        }
+        if(messageTag != null && !messageTag.isEmpty())
+            writer.endElement(messageTag);
     }
 }

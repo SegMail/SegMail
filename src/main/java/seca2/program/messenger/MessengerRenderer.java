@@ -147,7 +147,6 @@ public class MessengerRenderer extends Renderer {
                 writer.endElement("div");
                                 
             }
-            writer.write(component.testComponentMethod());
             writer.endElement("div");
         } catch (IOException ex){
             System.out.println("Could not generate markup");
