@@ -22,7 +22,7 @@ import seca2.component.user.UserService;
 import seca2.entity.navigation.MenuItem;
 import seca2.entity.navigation.MenuItemAccess;
 import seca2.entity.user.UserType;
-import seca2.program.messenger.FacesMessenger;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *

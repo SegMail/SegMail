@@ -21,7 +21,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import seca2.component.data.HibernateUtil;
 import seca2.component.file.FileService;
 import seca2.entity.file.FileEntity;
-import seca2.program.messenger.FacesMessenger;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *

@@ -20,7 +20,7 @@ import org.hibernate.tool.hbm2ddl.SchemaExport;
 import seca2.component.data.DBConnectionException;
 import seca2.component.data.EntityExplorer;
 import seca2.component.data.HibernateEMServices;
-import seca2.program.messenger.FacesMessenger;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *

@@ -16,7 +16,7 @@ import javax.faces.application.FacesMessage;
 import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserService;
 import seca2.component.user.UserTypeException;
-import seca2.program.messenger.FacesMessenger;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *

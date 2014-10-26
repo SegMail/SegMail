@@ -38,7 +38,7 @@ import seca2.entity.file.FileEntity;
 import static seca2.entity.file.FileEntity.FILE_STATUS.COMPLETED;
 import static seca2.entity.file.FileEntity.FILE_STATUS.INCOMPLETE;
 import seca2.entity.file.FileSequence;
-import seca2.program.messenger.FacesMessenger;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  * Subprogram that processes file and sequence objects

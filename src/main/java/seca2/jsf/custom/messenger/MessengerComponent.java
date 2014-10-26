@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.messenger;
+package seca2.jsf.custom.messenger;
 
 import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponentBase;

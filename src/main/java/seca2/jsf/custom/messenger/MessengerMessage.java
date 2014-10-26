@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.messenger;
+package seca2.jsf.custom.messenger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ public class MessengerMessage extends FacesMessage {
     public static enum LINK_TARGET{
         
     }
+    
 
     private class LinkMarker {
 

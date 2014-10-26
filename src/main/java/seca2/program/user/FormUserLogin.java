@@ -24,7 +24,7 @@ import seca2.bootstrap.module.User.UserModule;
 import seca2.component.user.UserAccountLockedException;
 import seca2.component.user.UserServiceHibernate;
 import seca2.entity.user.UserAccount;
-import seca2.program.messenger.FacesMessenger;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *

@@ -4,13 +4,14 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd"
     version="2.0">
-    <namespace>http://seca2.program.messenger/Messenger</namespace>
+    <namespace></namespace>
+    <namespace>http://seca2.jsf/custom</namespace>
     <tag>
         <tag-name>messenger</tag-name>
         
         <component>
             <component-type>Messenger</component-type>
-            <renderer-type>seca2.program.messenger.MessengerRenderer</renderer-type>
+            <renderer-type>seca2.jsf.custom.messenger.MessengerRenderer</renderer-type>
         </component>
         
         <attribute>
@@ -43,7 +44,5 @@
             <description>Whether to show the details of the message.</description>
         </attribute>
         
-        
-            
     </tag>
 </facelet-taglib>

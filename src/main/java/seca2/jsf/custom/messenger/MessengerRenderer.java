@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.messenger;
+package seca2.jsf.custom.messenger;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -42,7 +42,7 @@ import javax.faces.render.Renderer;
         rendererType = MessengerRenderer.RENDERER_TYPE)
 public class MessengerRenderer extends Renderer {
 
-    public static final String RENDERER_TYPE = "seca2.program.messenger.MessengerRenderer";
+    public static final String RENDERER_TYPE = "seca2.jsf.custom.messenger.MessengerRenderer";
 
     protected final String SUMMARY_HTML_ELEMENT = "strong";
     protected final String SUMMARY_HTML_STYLE_CLASS = "";

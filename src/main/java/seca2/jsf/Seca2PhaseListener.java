@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package jsf;
+package seca2.jsf;
 
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package seca2.program.messenger;
+package seca2.jsf.custom.messenger;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
