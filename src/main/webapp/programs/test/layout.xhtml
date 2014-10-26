@@ -6,8 +6,10 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
-      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
-    <ui:composition template="#{bootstrap.elements['template-location']}">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:test="http://java.sun.com/jsf/composite/seca2">
+    <ui:composition template="#{bootstrap.elements['template-location']}"
+                    >
 
         <ui:define name="main-program-panel">
             <div class="row">
@@ -142,7 +144,7 @@
                                             <script>
                                                 loadNiceButtons();
                                             </script>
-                                            <
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -236,6 +238,7 @@
                                                 loadNiceButtons();
                                             </script>
                                             <!--potential custom component-->
+                                            
                                         </div>
                                     </div>
                                 </div>
