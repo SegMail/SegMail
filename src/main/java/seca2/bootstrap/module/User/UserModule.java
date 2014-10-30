@@ -10,8 +10,10 @@ import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import seca2.entity.user.User;
 
 /**
  *
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpSession;
 @SessionScoped
 public class UserModule implements Serializable{
     
+    @Inject private User user;
     private final LoginMode loginMode = LoginMode.BLOCK;
     
     private String sSessionId;

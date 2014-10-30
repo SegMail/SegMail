@@ -25,6 +25,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -40,7 +42,7 @@ import seca2.bootstrap.module.User.UserModule;
  */
 @URLMappings(mappings={
     @URLMapping(id="home", pattern="/",viewId="/program/index.xhtml"),
-    @URLMapping(id="program", pattern="/program/#{bootstrap.program}/",viewId="/program/index.xhtml"),
+    @URLMapping(id="program", pattern="/program/#{program}/",viewId="/program/index.xhtml"),
     @URLMapping(id="install", pattern="/install/",viewId="/program/programs/install/install.xhtml")
 })
 @URLBeanName("bootstrap")
@@ -53,6 +55,8 @@ public class Bootstrap implements Serializable {
      */
     private Map<String,Object> elements;
     
+    @Inject @Any
+    private Instance<BootstrapModule> modules;
     /**
      * Injected view parameters
      */
@@ -60,6 +64,10 @@ public class Bootstrap implements Serializable {
     
     @PostConstruct
     public void init(){
+        
+        for(BootstrapModule module:modules){
+            System.out.println("This is module "+module.getClass().getSimpleName());
+        }
         //Initialize all parameters
         elements = new HashMap<String,Object>();
         
@@ -124,7 +132,12 @@ public class Bootstrap implements Serializable {
     }
     
     /**
-     * Program Management!
+     * Program Management! 
+     * 
+     * [2014.10.26] This will be renamed to Navigation Management
+     * - Authorization access will be based on MenuItems, not programs.
+     * - MenuItems are in turn assigned to programs.
+     * 
      * <p>
      * This is the part where you manage what to show depending on what the user 
      * has inputted in the request URL.
@@ -139,6 +152,7 @@ public class Bootstrap implements Serializable {
     public void loadProgram(){
         //Let's just get the template up first
         //It's damn ugly coding but no choice....
+        System.out.println("Loading program from elements: "+this.elements.get("program"));
         if(this.program == null || this.program.isEmpty()){
             programModule.setCurrentProgramIndex(ProgramModule.DEFAULT_PROGRAM);
             program = programModule.getProgramNames().get(programModule.getCurrentProgramIndex());

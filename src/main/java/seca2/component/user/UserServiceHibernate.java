@@ -18,6 +18,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import seca2.component.data.HibernateUtil;
+import seca2.entity.user.User;
 import seca2.entity.user.UserAccount;
 import seca2.entity.user.UserType;
 
@@ -49,7 +50,7 @@ public class UserServiceHibernate {
      * @return
      * @throws UserAccountLockedException 
      */
-    public UserAccount login(String username, String password) throws UserAccountLockedException{
+    public User login(String username, String password) throws UserAccountLockedException{
         
         String secureHash = this.getPasswordHash(username, password, HASH_KEY);
         if(session == null || !session.isOpen()) 
@@ -79,7 +80,7 @@ public class UserServiceHibernate {
             session.save(result);
             result = null;
         }
-        return result;
+        return (User) (result == null ? null : result.getOWNER());
     }
     
     public UserAccount registerNewUser(String username, String password, String usertype) throws UserRegistrationException{
@@ -115,7 +116,7 @@ public class UserServiceHibernate {
         UserAccount newUser = new UserAccount();
         newUser.setUSERNAME(username);
         newUser.setPASSWORD(this.getPasswordHash(username, password, HASH_KEY));
-        newUser.setUSERTYPE(userType);
+        //newUser.setUSERTYPE(userType);
         
         if(session == null || !session.isOpen()) 
             session = hibernateUtil.getSession();
@@ -126,10 +127,10 @@ public class UserServiceHibernate {
         return newUser;
     }
     
-    public UserAccount changePassword(String username, String oldPassword, String newPassword) throws UserAccountLockedException{
+    public User changePassword(String username, String oldPassword, String newPassword) throws UserAccountLockedException{
         if(session == null || !session.isOpen()) 
             session = hibernateUtil.getSession();
-        UserAccount changeForUser = null;
+        User changeForUser = null;
         //authenticate old password first
         changeForUser = this.login(username, oldPassword);
         
@@ -137,8 +138,8 @@ public class UserServiceHibernate {
             return null;
         }
         String newHashedPassword = this.getPasswordHash(username, newPassword, HASH_KEY);
-        changeForUser.setPASSWORD(newHashedPassword);
-        changeForUser = (UserAccount) session.save(changeForUser);
+        //changeForUser.setPASSWORD(newHashedPassword);
+        //changeForUser = (UserAccount) session.save(changeForUser);
         return changeForUser;
     }
     

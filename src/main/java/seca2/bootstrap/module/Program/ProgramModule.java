@@ -8,12 +8,14 @@ package seca2.bootstrap.module.Program;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.hibernate.Session;
+import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.data.HibernateEMServices;
 import seca2.component.data.HibernateUtil;
@@ -25,7 +27,7 @@ import seca2.entity.program.Program;
  */
 @Named("ProgramModule")
 @SessionScoped
-public class ProgramModule implements Serializable {
+public class ProgramModule extends BootstrapModule implements Serializable {
 
     private List<String> programNames; //stud at this moment
     private List<Program> programs;
@@ -104,5 +106,12 @@ public class ProgramModule implements Serializable {
     public void setPrograms(List<Program> programs) {
         this.programs = programs;
     }
+
+    @Override
+    protected void doStuff(Map<String, Object> input, Map<String, Object> output) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 
 }

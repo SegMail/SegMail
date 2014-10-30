@@ -6,6 +6,7 @@
 
 package seca2.entity.user;
 
+import EDS.Entity.EnterpriseData;
 import EDS.Entity.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -24,15 +25,13 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name="USERENTITY")
 @TableGenerator(name="USERENTITY_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
-public class UserAccount extends EnterpriseObject {
+public class UserAccount extends EnterpriseData {
     
     private String USERNAME;
     private String PASSWORD;
     private boolean USER_LOCKED;
     private int UNSUCCESSFUL_ATTEMPTS;
     private java.util.Date LAST_UNSUCCESS_ATTEMPT; //Timestamp
-    
-    private UserType USERTYPE;
 
     public String getUSERNAME() {
         return USERNAME;
@@ -75,14 +74,6 @@ public class UserAccount extends EnterpriseObject {
         this.LAST_UNSUCCESS_ATTEMPT = LAST_UNSUCCESS_ATTEMPT;
     }
 
-    @ManyToOne
-    public UserType getUSERTYPE() {
-        return USERTYPE;
-    }
-
-    public void setUSERTYPE(UserType USERTYPE) {
-        this.USERTYPE = USERTYPE;
-    }
 
     @Override
     public void randInit() {

@@ -21,6 +21,5 @@ public class UserAccount_ extends EnterpriseObject_ {
     public static volatile SingularAttribute<UserAccount,Boolean> USER_LOCKED;
     public static volatile SingularAttribute<UserAccount,Integer> UNSUCCESSFUL_ATTEMPTS;
     public static volatile SingularAttribute<UserAccount,java.sql.Date> LAST_UNSUCCESS_ATTEMPT;
-    public static volatile SingularAttribute<UserAccount,UserType> USERTYPE;
     
 }

@@ -23,6 +23,7 @@ import org.joda.time.DateTime;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.user.UserAccountLockedException;
 import seca2.component.user.UserServiceHibernate;
+import seca2.entity.user.User;
 import seca2.entity.user.UserAccount;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -55,7 +56,7 @@ public class FormUserLogin {
                     "Please enter password", null);
             return;
         }
-        UserAccount user = null;
+        User user = null;
         try {
             //use UserService to login
             user = userService.login(username, password);
