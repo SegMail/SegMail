@@ -11,11 +11,14 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.hibernate.Session;
 import seca2.bootstrap.BootstrapModule;
+import seca2.bootstrap.BootstrapRequest;
+import seca2.bootstrap.BootstrapType;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.data.HibernateEMServices;
 import seca2.component.data.HibernateUtil;
@@ -26,7 +29,9 @@ import seca2.entity.program.Program;
  * @author vincent.a.lee
  */
 @Named("ProgramModule")
-@SessionScoped
+@RequestScoped
+@BootstrapRequest
+@BootstrapType(postback=false)
 public class ProgramModule extends BootstrapModule implements Serializable {
 
     private List<String> programNames; //stud at this moment
@@ -34,14 +39,15 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     private int currentProgramIndex;
     public static final int DEFAULT_PROGRAM = 0;
 
-    @Inject private UserModule userModule;
+    //@Inject 
+    private UserModule userModule;
     
 
     @PostConstruct
     public void init() {
         //create a stub first, next time then we'll implement the actual thing
         programNames = new ArrayList<String>();
-        if (userModule.checkSessionActive()) {
+        if (userModule != null && userModule.checkSessionActive()) {
             programNames.add("test");
             programNames.add("sendmail");
             programNames.add("signupforms");
@@ -108,8 +114,13 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void doStuff(Map<String, Object> input, Map<String, Object> output) {
+    protected void execute(Map<String, Object> input, Map<String, Object> output) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected int executionSequence() {
+        return 99;
     }
 
     

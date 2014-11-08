@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.BootstrapRequest;
 import seca2.bootstrap.module.Program.ProgramModule;
 import seca2.entity.program.Program;
 
@@ -22,7 +23,7 @@ import seca2.entity.program.Program;
 @Named("TopMenu")
 public class TopMenu {
     
-    @Inject private ProgramModule programModule;
+    @Inject @BootstrapRequest private ProgramModule programModule;
     
     @PostConstruct
     public void init(){
