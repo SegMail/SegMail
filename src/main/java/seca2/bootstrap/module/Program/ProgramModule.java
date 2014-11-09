@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapRequest;
 import seca2.bootstrap.BootstrapType;
+import seca2.bootstrap.BootstrappingChainFactory;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.data.HibernateEMServices;
 import seca2.component.data.HibernateUtil;
@@ -114,13 +115,13 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void execute(Map<String, Object> input, Map<String, Object> output) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected int executionSequence() {
+        return 99;
     }
 
     @Override
-    protected int executionSequence() {
-        return 99;
+    protected void execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     

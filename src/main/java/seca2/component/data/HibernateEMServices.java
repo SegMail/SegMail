@@ -4,6 +4,7 @@
  */
 package seca2.component.data;
 
+import seca2.utilities.EntityExplorer;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

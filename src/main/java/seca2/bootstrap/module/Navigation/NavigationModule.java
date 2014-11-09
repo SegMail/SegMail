@@ -16,6 +16,7 @@ import javax.inject.Named;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapSession;
 import seca2.bootstrap.BootstrapType;
+import seca2.bootstrap.BootstrappingChainFactory;
 import seca2.component.navigation.NavigationService;
 
 /**
@@ -37,13 +38,13 @@ public class NavigationModule extends BootstrapModule implements Serializable  {
     }
 
     @Override
-    protected void execute(Map<String, Object> input, Map<String, Object> output) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected int executionSequence() {
+        return 10;
     }
 
     @Override
-    protected int executionSequence() {
-        return 10;
+    protected void execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     

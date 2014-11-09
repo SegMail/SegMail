@@ -20,21 +20,39 @@ import java.util.Map;
  */
 public abstract class BootstrapModule {
     
-    //Bad design, do not use!!!
-    protected BootstrapModule next;
+    private BootstrapModule next;
+    
+    /**
+     * As with http://www.javaworld.com/article/2072857/java-web-development/the-chain-of-responsibility-pattern-s-pitfalls-and-improvements.html,
+     * this is a non-classic CoR implementation where the base class decides to 
+     * trigger the next responsibility in the chain.
+     * 
+     * @param inputContext
+     * @param outputContext 
+     */
+    public void start(Map<String,Object> inputContext, Map<String,Object> outputContext){
+        this.execute(inputContext, outputContext);
+        
+        if(next != null)
+            next.start(inputContext, outputContext);
+    }
+    
+    public void strapNext(BootstrapModule next){
+        this.next = next;
+    }
     
     /**
      * The method that is used for 
+     * @param inputContext
+     * @param outputContext
+     * @param chain
      * @param input
      * @param output 
      */
-    protected abstract void execute(Map<String,Object> inputContext,Map<String,Object> outputContext);
+    protected abstract void execute(
+            Map<String,Object> inputContext,
+            Map<String,Object> outputContext);
     
     protected abstract int executionSequence();
     
-    //Bad design, do not use this!!!
-    protected BootstrapModule strapNext(BootstrapModule next){
-        this.next = next;
-        return this;
-    }
 }

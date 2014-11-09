@@ -56,7 +56,7 @@ public class Bootstrap implements Serializable {
     /**
      * Chain of Responsibility object that will execute the modules in sequence.
      */
-    @Inject private BootstrappingChain bootstrappingChain;
+    @Inject private BootstrappingChainFactory bootstrappingChain;
     /**
      * Injected view parameters
      */
@@ -64,6 +64,8 @@ public class Bootstrap implements Serializable {
     
     @PostConstruct
     public void init(){
+        //Start the chain!
+        BootstrapModule head = this.bootstrappingChain.getHead();
         
         
     }

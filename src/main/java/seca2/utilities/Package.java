@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package seca2.component.data;
+package seca2.utilities;
 
 import java.util.Iterator;
 import java.util.Stack;

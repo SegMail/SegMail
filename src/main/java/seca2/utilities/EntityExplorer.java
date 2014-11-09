@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.component.data;
+package seca2.utilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import javax.persistence.Entity;
+import seca2.bootstrap.BootstrapModule;
 
 /**
  *
@@ -20,7 +21,7 @@ import javax.persistence.Entity;
  */
 public class EntityExplorer {
     
-    public List<Class> getClasses(String packageName) throws Exception {
+    public static List<Class> getClasses(String packageName) throws Exception {
         File directory = null;
         try {
             ClassLoader cld = getClassLoader();
@@ -33,7 +34,7 @@ public class EntityExplorer {
         return collectClasses(packageName, directory);
     }
 
-    public ClassLoader getClassLoader() throws ClassNotFoundException {
+    public static ClassLoader getClassLoader() throws ClassNotFoundException {
         ClassLoader cld = Thread.currentThread().getContextClassLoader();
         if (cld == null) {
             throw new ClassNotFoundException("Can't get class loader.");
@@ -41,7 +42,7 @@ public class EntityExplorer {
         return cld;
     }
 
-    public URL getResource(String packageName, ClassLoader cld) throws ClassNotFoundException {
+    public static URL getResource(String packageName, ClassLoader cld) throws ClassNotFoundException {
         String path = packageName.replace('.', '/');
         URL resource = cld.getResource(path);
         if (resource == null) {
@@ -50,7 +51,7 @@ public class EntityExplorer {
         return resource;
     }
 
-    public List<Class> collectClasses(String packageName, File directory) throws ClassNotFoundException {
+    public static List<Class> collectClasses(String packageName, File directory) throws ClassNotFoundException {
         List<Class> classes = new ArrayList<>();
         if (directory.exists()) {
             String[] files = directory.list(); // returns a list of files and directories.
@@ -71,7 +72,7 @@ public class EntityExplorer {
         return classes;
     }
     
-    public List<File> collectFiles(File directory, String extension){
+    public static List<File> collectFiles(File directory, String extension){
         List<File> found = new ArrayList<File>();
         List<File> childrenFiles = Arrays.asList(directory.listFiles());
         
@@ -88,7 +89,7 @@ public class EntityExplorer {
         return found;
     }
     
-    public List<Class> collectClasses(File directory, ClassLoader loader){
+    public static List<Class> collectClasses(File directory, ClassLoader loader){
         List<Class> found = new ArrayList<Class>();
         List<File> childrenFiles = Arrays.asList(directory.listFiles());
         
@@ -106,7 +107,7 @@ public class EntityExplorer {
         return found;
     }
     
-    public void collectPackages(File directory, Package currentTree, List<Package> found) throws CloneNotSupportedException{
+    public static void collectPackages(File directory, Package currentTree, List<Package> found) throws CloneNotSupportedException{
         List<File> childrenFiles = Arrays.asList(directory.listFiles());
         boolean leaf = true;
         
@@ -124,7 +125,7 @@ public class EntityExplorer {
         }
     }
     
-    public List<Class> collectClasses(Package root, ClassLoader loader) throws ClassNotFoundException, CloneNotSupportedException, Exception{
+    public static List<Class> collectClasses(Package root, ClassLoader loader) throws ClassNotFoundException, CloneNotSupportedException, Exception{
         URL entityDirectory = getResource(root.toString(), loader);
         List<Package> found = new ArrayList<Package>();
         Package currentTree = new Package();
@@ -138,11 +139,22 @@ public class EntityExplorer {
         return foundClasses;
     }
     
-    public List<Class> collectEntities(Package root, ClassLoader loader) throws CloneNotSupportedException, Exception{
+    public static List<Class> collectEntities(Package root, ClassLoader loader) throws CloneNotSupportedException, Exception{
         List<Class> found = collectClasses(root, loader);
         List<Class> entities = new ArrayList<Class>();
         for(Class f:found){
             if(f.isAnnotationPresent(Entity.class))
+                entities.add(f);
+        }
+        
+        return entities;
+    }
+    
+    public static List<Class> collectBootstrapModules(Package root, ClassLoader loader) throws CloneNotSupportedException, Exception{
+        List<Class> found = collectClasses(root, loader);
+        List<Class> entities = new ArrayList<Class>();
+        for(Class f:found){
+            if(f.isAssignableFrom(BootstrapModule.class))
                 entities.add(f);
         }
         

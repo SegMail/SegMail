@@ -18,7 +18,7 @@ import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import seca2.component.data.DBConnectionException;
-import seca2.component.data.EntityExplorer;
+import seca2.utilities.EntityExplorer;
 import seca2.component.data.HibernateEMServices;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -30,8 +30,6 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormTestDB implements Serializable {
     
     @EJB private HibernateEMServices hibernateDBServices;
-    
-    @Inject private EntityExplorer explorer;
     
     private final String TestGenerateDBFormName = "setupDBForm";
     
@@ -50,11 +48,11 @@ public class FormTestDB implements Serializable {
             Configuration cfg = hibernateDBServices.createFullConfig();
             
             //add all entity packages
-            seca2.component.data.Package root = new seca2.component.data.Package();
+            seca2.utilities.Package root = new seca2.utilities.Package();
             root.push("seca2").push("entity");
 
-            ClassLoader loader = explorer.getClassLoader();
-            List<Class> entities = explorer.collectEntities(root, loader);
+            ClassLoader loader = EntityExplorer.getClassLoader();
+            List<Class> entities = EntityExplorer.collectEntities(root, loader);
             for(Class c : entities){
                 cfg.addAnnotatedClass(c);
             }

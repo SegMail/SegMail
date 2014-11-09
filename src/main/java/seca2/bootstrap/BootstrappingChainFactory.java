@@ -5,24 +5,28 @@
  */
 package seca2.bootstrap;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import seca2.utilities.EntityExplorer;
 
 /**
  * This is a chain of responsibility for all bootstrap modules.
  * 
  * @author LeeKiatHaw
  */
-public class BootstrappingChain {
+public class BootstrappingChainFactory {
     
     /**
      * Currently we are experimenting with executing all modules for all requests.
@@ -34,21 +38,29 @@ public class BootstrappingChain {
     /**
      * 
      */
-    private List<BootstrapModule> bootstrapOrderedList;
+    private List<BootstrapModule> bootstrapModuleList;
+    private BootstrapModule head;
     
     @PostConstruct
     public void init(){
-        this.bootstrapOrderedList = this.generateBootstrapList(Modules);
+        //Depending on the environment (SE or EE), call different methods
+        if(Modules == null){
+            bootstrapModuleList = this.generateBootstrapList();
+        } else {
+            bootstrapModuleList = this.generateBootstrapList(Modules);
+        }
+        head = this.constructBoostrapChain(this.bootstrapModuleList);
+    }
+
+    public BootstrapModule getHead() {
+        return head;
+    }
+
+    public List<BootstrapModule> getBootstrapModuleList() {
+        return bootstrapModuleList;
     }
     
-    public void executeChain(Map<String,Object> inputContext, Map<String,Object> outputContext){
-        // 1.How to stop the execution?
-        // 2.How to allow modules in the chain to redirect/forward HTTP requests?
-        
-        for(BootstrapModule module : this.bootstrapOrderedList){
-            module.execute(inputContext, outputContext);
-        }
-    }
+    
     
     //Helper methods
     
@@ -58,7 +70,7 @@ public class BootstrappingChain {
      * @param modules
      * @return 
      */
-    private List<BootstrapModule> generateBootstrapList(Instance<BootstrapModule> modules){
+    public List<BootstrapModule> generateBootstrapList(Instance<BootstrapModule> modules){
         List<BootstrapModule> moduleList = new ArrayList<BootstrapModule>();
         Iterator<BootstrapModule> i = modules.iterator();
         
@@ -74,12 +86,11 @@ public class BootstrappingChain {
      * @param moduleList
      * @return 
      */
-    private BootstrapModule constructBoostrapChain(Instance<BootstrapModule> modules){
+    public BootstrapModule constructBoostrapChain(List<BootstrapModule> moduleList){
         /**
          * Impt! moduleList must be sorted here, if not the next step will return
          * a chain in the wrong order.
          */
-        List<BootstrapModule> moduleList = this.generateBootstrapList(modules);
         Collections.sort(moduleList, new BootstrapModuleComparator());
         
         /**
@@ -88,14 +99,42 @@ public class BootstrappingChain {
          * the next BootstrapModule and strap on to the previous one. 
          */
         Iterator<BootstrapModule> i = moduleList.iterator();
-        BootstrapModule head = null;
+        BootstrapModule tempHead = null;
         while(i.hasNext()){
             BootstrapModule nextHead = i.next();
-            nextHead.strapNext(head);
-            head = nextHead;
+            nextHead.strapNext(tempHead);
+            tempHead = nextHead;
             
         }
         
-        return head;
+        return tempHead;
+    }
+    
+    /**
+     * A non-Java EE method to get all instances of BoostrapModule class.
+     * 
+     * @return
+     * @throws ClassNotFoundException
+     * @throws Exception 
+     */
+    public List<BootstrapModule> generateBootstrapList() {
+        try{
+            seca2.utilities.Package root = new seca2.utilities.Package();
+            root.push("seca2").push("bootstrap");
+            List<BootstrapModule> result = new ArrayList<>();
+            List<Class> allBootstrapClasses = 
+                EntityExplorer.collectClasses(root, EntityExplorer.getClassLoader());
+
+            for(Class c : allBootstrapClasses){
+                if(c.isAssignableFrom(BootstrapModule.class)){
+                    BootstrapModule newInstance = (BootstrapModule) c.getConstructor((Class) null).newInstance((Object) null);
+                    result.add(newInstance);
+                }
+
+            }
+            return result;
+        } catch (Exception ex) {
+            return new ArrayList<>();
+        }
     }
 }
