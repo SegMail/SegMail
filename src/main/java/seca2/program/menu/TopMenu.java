@@ -23,7 +23,7 @@ import seca2.entity.program.Program;
 @Named("TopMenu")
 public class TopMenu {
     
-    @Inject @BootstrapRequest private ProgramModule programModule;
+    @Inject private ProgramModule programModule;
     
     @PostConstruct
     public void init(){

@@ -29,10 +29,10 @@ import seca2.entity.program.Program;
  *
  * @author vincent.a.lee
  */
-@Named("ProgramModule")
-@RequestScoped
-@BootstrapRequest
-@BootstrapType(postback=false)
+//@Named("ProgramModule")
+//@RequestScoped
+//@BootstrapRequest
+//@BootstrapType(postback=false)
 public class ProgramModule extends BootstrapModule implements Serializable {
 
     private List<String> programNames; //stud at this moment
@@ -116,11 +116,11 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return 99;
+        return -99;
     }
 
     @Override
-    protected void execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
+    protected boolean execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

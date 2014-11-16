@@ -60,9 +60,7 @@ public class EntityExplorer {
                 if (file.endsWith(".class")) {
                     // removes the .class extension
                     Class c = Class.forName(packageName + '.'+ file.substring(0, file.length() - 6));
-                    //only add annotated classes
-                    if(c.isAnnotationPresent(Entity.class))
-                        classes.add(c);
+                    classes.add(c);
                 }
             }
         } else {

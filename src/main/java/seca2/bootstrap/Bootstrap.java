@@ -18,21 +18,13 @@ import com.ocpsoft.pretty.faces.annotation.URLActions;
 import com.ocpsoft.pretty.faces.annotation.URLBeanName;
 import com.ocpsoft.pretty.faces.annotation.URLMapping;
 import com.ocpsoft.pretty.faces.annotation.URLMappings;
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Instance;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.User.UserModule;
+import seca2.bootstrap.module.Navigation.NavigationModule;
 
 /**
  *
@@ -40,7 +32,7 @@ import seca2.bootstrap.module.User.UserModule;
  */
 @URLMappings(mappings={
     @URLMapping(id="home", pattern="/",viewId="/program/index.xhtml"),
-    @URLMapping(id="program", pattern="/program/#{program}/",viewId="/program/index.xhtml"),
+    @URLMapping(id="program", pattern="/program/#{bootstrap.program}/",viewId="/program/index.xhtml"),
     @URLMapping(id="install", pattern="/install/",viewId="/program/programs/install/install.xhtml")
 })
 @URLBeanName("bootstrap")
@@ -51,8 +43,8 @@ public class Bootstrap implements Serializable {
     /**
      * Use this for anything. Anything!
      */
-    private Map<String,Object> elements;
-    
+    private Map<String,Object> output;
+    private Map<String,Object> input;
     /**
      * Chain of Responsibility object that will execute the modules in sequence.
      */
@@ -67,17 +59,25 @@ public class Bootstrap implements Serializable {
         //Start the chain!
         BootstrapModule head = this.bootstrappingChain.getHead();
         
-        
+        System.out.println(program);
     }
     
-    
-    // <editor-fold defaultstate="collapsed" desc="Getters and Setters">
-    public Map<String, Object> getElements() {
-        return elements;
+    @URLActions(actions={
+        @URLAction(mappingId="home", onPostback=false),
+        @URLAction(mappingId="program", onPostback=false)
+    })
+    public void loadProgram(){
+        System.out.println(program);
     }
+    
 
-    public void setElements(Map<String, Object> elements) {
-        this.elements = elements;
+    // <editor-fold defaultstate="collapsed" desc="Getters and Setters">
+    public Map<String, Object> getOutput() {
+        return output;
+    }
+    
+    public void setOutput(Map<String, Object> output) {    
+        this.output = output;
     }
 
     public String getProgram() {

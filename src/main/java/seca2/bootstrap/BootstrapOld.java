@@ -106,10 +106,10 @@ public class BootstrapOld implements Serializable {
      */
     @Inject private UserModule userModule;
     
-    @URLActions(actions={
-        @URLAction(mappingId="home", onPostback=true),
-        @URLAction(mappingId="program", onPostback=true)
-    })
+    //@URLActions(actions={
+    //    @URLAction(mappingId="home", onPostback=true),
+    //    @URLAction(mappingId="program", onPostback=true)
+    //})
     public void checkLogin() throws IOException{
         boolean loggedIn = userModule.checkSessionActive();
         
@@ -140,10 +140,10 @@ public class BootstrapOld implements Serializable {
      */
     //@Inject 
     private ProgramModule programModule;
-    @URLActions(actions={
-        @URLAction(mappingId="home", onPostback=false),
-        @URLAction(mappingId="program", onPostback=false)
-    })
+    //@URLActions(actions={
+    //    @URLAction(mappingId="home", onPostback=false),
+    //    @URLAction(mappingId="program", onPostback=false)
+    //})
     public void loadProgram(){
         //Let's just get the template up first
         //It's damn ugly coding but no choice....
@@ -188,10 +188,10 @@ public class BootstrapOld implements Serializable {
      * <p>
      * This is the part where you manage how to present each page nicely.
      */
-    @URLActions(actions={
-        @URLAction(mappingId="home", onPostback=false),
-        @URLAction(mappingId="program", onPostback=false)
-    })
+    //@URLActions(actions={
+    //    @URLAction(mappingId="home", onPostback=false),
+    //    @URLAction(mappingId="program", onPostback=false)
+    //})
     public void loadPresentation(){
         //shortcut for the time being
         this.elements.put("template-location", "/templates/mytemplate/template-layout.xhtml");

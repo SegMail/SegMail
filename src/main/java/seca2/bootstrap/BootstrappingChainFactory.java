@@ -5,20 +5,16 @@
  */
 package seca2.bootstrap;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import seca2.bootstrap.module.Program.ProgramModule;
 import seca2.utilities.EntityExplorer;
 
 /**
@@ -32,9 +28,11 @@ public class BootstrappingChainFactory {
      * Currently we are experimenting with executing all modules for all requests.
      * We might change the mode of execution in the future, eg. execute Session
      * and Request modules differently.
+     * 
+     * Injected Instances generates a Weld proxy which properties cannot be set
+     * normally. 
      */
     @Inject @Any private Instance<BootstrapModule> Modules;
-    
     /**
      * 
      */
@@ -43,13 +41,9 @@ public class BootstrappingChainFactory {
     
     @PostConstruct
     public void init(){
-        //Depending on the environment (SE or EE), call different methods
-        if(Modules == null){
-            bootstrapModuleList = this.generateBootstrapList();
-        } else {
-            bootstrapModuleList = this.generateBootstrapList(Modules);
-        }
+        bootstrapModuleList = this.generateBootstrapList();
         head = this.constructBoostrapChain(this.bootstrapModuleList);
+        
     }
 
     public BootstrapModule getHead() {
@@ -74,11 +68,15 @@ public class BootstrappingChainFactory {
         List<BootstrapModule> moduleList = new ArrayList<BootstrapModule>();
         Iterator<BootstrapModule> i = modules.iterator();
         
-        while(i.hasNext()){
-            moduleList.add(i.next());
+        for(BootstrapModule bm : Modules){
+            moduleList.add(bm);
         }
         
         return moduleList;
+    }
+    
+    public BootstrapModule constructBoostrapChain(){
+        return this.constructBoostrapChain(this.bootstrapModuleList);
     }
     
     /**
@@ -104,7 +102,6 @@ public class BootstrappingChainFactory {
             BootstrapModule nextHead = i.next();
             nextHead.strapNext(tempHead);
             tempHead = nextHead;
-            
         }
         
         return tempHead;
@@ -112,10 +109,9 @@ public class BootstrappingChainFactory {
     
     /**
      * A non-Java EE method to get all instances of BoostrapModule class.
+     * Not recommended, as components are not injected automatically.
      * 
      * @return
-     * @throws ClassNotFoundException
-     * @throws Exception 
      */
     public List<BootstrapModule> generateBootstrapList() {
         try{
@@ -126,8 +122,8 @@ public class BootstrappingChainFactory {
                 EntityExplorer.collectClasses(root, EntityExplorer.getClassLoader());
 
             for(Class c : allBootstrapClasses){
-                if(c.isAssignableFrom(BootstrapModule.class)){
-                    BootstrapModule newInstance = (BootstrapModule) c.getConstructor((Class) null).newInstance((Object) null);
+                if(BootstrapModule.class.isAssignableFrom(c)){
+                    BootstrapModule newInstance = (BootstrapModule) c.getConstructor().newInstance();
                     result.add(newInstance);
                 }
 
@@ -137,4 +133,17 @@ public class BootstrappingChainFactory {
             return new ArrayList<>();
         }
     }
+}
+
+//Since this class is only used by the chain factory alone, put it here.
+class BootstrapModuleComparator implements Comparator<BootstrapModule> {
+
+    @Override
+    public int compare(BootstrapModule o1, BootstrapModule o2) {
+        int w1 = o1.executionSequence();
+        int w2 = o2.executionSequence();
+        
+        return w2 - w1;
+    }
+    
 }

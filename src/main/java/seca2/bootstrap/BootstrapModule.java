@@ -23,7 +23,7 @@ public abstract class BootstrapModule {
     private BootstrapModule next;
     
     /**
-     * As with http://www.javaworld.com/article/2072857/java-web-development/the-chain-of-responsibility-pattern-s-pitfalls-and-improvements.html,
+     * As with http://www.javaworld.com/article/2072857/java-web-development/the-chain-of-responsibility-pattern-s-pitfalls-and-improvements.html
      * this is a non-classic CoR implementation where the base class decides to 
      * trigger the next responsibility in the chain.
      * 
@@ -42,17 +42,20 @@ public abstract class BootstrapModule {
     }
     
     /**
-     * The method that is used for 
+     * Execute the control logic of this module.
+     * 
      * @param inputContext
      * @param outputContext
-     * @param chain
-     * @param input
-     * @param output 
+     * @return true to continue the chain, false to stop the chain.
      */
-    protected abstract void execute(
+    protected abstract boolean execute(
             Map<String,Object> inputContext,
             Map<String,Object> outputContext);
     
+    /**
+     * 
+     * @return 
+     */
     protected abstract int executionSequence();
     
 }
