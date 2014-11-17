@@ -31,9 +31,9 @@ public abstract class BootstrapModule {
      * @param outputContext 
      */
     public void start(Map<String,Object> inputContext, Map<String,Object> outputContext){
-        this.execute(inputContext, outputContext);
+        boolean toContinue = this.execute(inputContext, outputContext);
         
-        if(next != null)
+        if(next != null && toContinue)
             next.start(inputContext, outputContext);
     }
     

@@ -7,39 +7,40 @@
 package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
-import javax.enterprise.context.SessionScoped;
+import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import seca2.entity.user.User;
+import seca2.bootstrap.BootstrapModule;
 
 /**
  *
  * @author vincent.a.lee
  */
-@SessionScoped
-public class UserModule implements Serializable{
+//@SessionScoped //Should not be a SessionScoped object
+public class UserModule extends BootstrapModule implements Serializable{
     
-    @Inject private User user;
+    @Inject private UserContainer userContainer;
     private final LoginMode loginMode = LoginMode.BLOCK;
     
     private String sSessionId;
     private String previousURI;
     private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
     
-    public boolean checkSessionActive() {
-        FacesContext fc = FacesContext.getCurrentInstance();
+    public boolean checkSessionActive(FacesContext fc) {
+        //FacesContext fc = FacesContext.getCurrentInstance();
         ExternalContext ec = fc.getExternalContext();
         HttpServletRequest req = (HttpServletRequest) ec.getRequest();
         
-        fc.getPartialViewContext().getRenderIds().add(loginContainerName);
+        fc.getPartialViewContext().getRenderIds().add(loginContainerName);//to render the login container so that the newly set fields will be updated.
         HttpSession session = req.getSession(false);
         if (session == null) {
             return false;
         } else {
-            if (sSessionId != null && sSessionId.equals(session.getId())) {
+            if (userContainer.getSessionId() != null && 
+                    userContainer.getSessionId().equals(session.getId())) {
                 //hide login block
                 //session.setAttribute("user", 1);
                 
@@ -81,6 +82,16 @@ public class UserModule implements Serializable{
 
     public LoginMode getLoginMode() {
         return loginMode;
+    }
+
+    @Override
+    protected boolean execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
+        return this.checkSessionActive((FacesContext)inputContext.get("context"));
+    }
+
+    @Override
+    protected int executionSequence() {
+        return -99;
     }
     
     

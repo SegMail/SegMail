@@ -10,19 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import org.hibernate.Session;
 import seca2.bootstrap.BootstrapModule;
-import seca2.bootstrap.BootstrapRequest;
-import seca2.bootstrap.BootstrapType;
-import seca2.bootstrap.BootstrappingChainFactory;
 import seca2.bootstrap.module.User.UserModule;
-import seca2.component.data.HibernateEMServices;
-import seca2.component.data.HibernateUtil;
 import seca2.entity.program.Program;
 
 /**
@@ -116,7 +105,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return -99;
+        return -97;
     }
 
     @Override

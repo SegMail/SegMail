@@ -34,7 +34,7 @@ public class NavigationModule extends BootstrapModule implements Serializable  {
 
     @Override
     protected int executionSequence() {
-        return -100;
+        return -98;
     }
 
     @Override

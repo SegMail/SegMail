@@ -22,8 +22,11 @@ import java.io.Serializable;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.module.Navigation.NavigationModule;
 
 /**
@@ -41,7 +44,8 @@ import seca2.bootstrap.module.Navigation.NavigationModule;
 public class Bootstrap implements Serializable {
     
     /**
-     * Use this for anything. Anything!
+     * Use a generic Map object as a trial first to see what are the parameters 
+     * that we will need.
      */
     private Map<String,Object> output;
     private Map<String,Object> input;
@@ -56,8 +60,6 @@ public class Bootstrap implements Serializable {
     
     @PostConstruct
     public void init(){
-        //Start the chain!
-        BootstrapModule head = this.bootstrappingChain.getHead();
         
         System.out.println(program);
     }
@@ -66,10 +68,21 @@ public class Bootstrap implements Serializable {
         @URLAction(mappingId="home", onPostback=false),
         @URLAction(mappingId="program", onPostback=false)
     })
-    public void loadProgram(){
+    public void startProcessing(){
+        //Debug: parameters will only get injected with @URLAction
         System.out.println(program);
+        
+        FacesContext fc = FacesContext.getCurrentInstance();
+        
+        input.put("context", fc);
+        this.startChain(input,output);
     }
     
+    public void startChain(Map<String, Object> inputContext, Map<String, Object> outputContext){
+        //Start the chain
+        BootstrapModule head = this.bootstrappingChain.getHead();
+        head.start(inputContext, outputContext);
+    }
 
     // <editor-fold defaultstate="collapsed" desc="Getters and Setters">
     public Map<String, Object> getOutput() {
