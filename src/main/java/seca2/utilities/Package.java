@@ -10,7 +10,15 @@ import java.util.Iterator;
 import java.util.Stack;
 
 /**
- *
+ * Produces a directory path of a Java Package. Its operations are emulated as 
+ * a Stack. Example:
+ * 
+ * - Push "seca2"
+ * - Push "package"
+ * - Push "programs"
+ * 
+ * produces "seca2.package.programs"
+ * 
  * @author vincent.a.lee
  */
 public class Package {

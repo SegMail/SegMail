@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
+import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.entity.program.Program;
 
@@ -37,7 +39,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     public void init() {
         //create a stub first, next time then we'll implement the actual thing
         programNames = new ArrayList<String>();
-        if (userModule != null && userModule.checkSessionActive()) {
+        if (userModule != null && userModule.checkSessionActive(null)) {
             programNames.add("test");
             programNames.add("sendmail");
             programNames.add("signupforms");
@@ -109,7 +111,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected boolean execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
+    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

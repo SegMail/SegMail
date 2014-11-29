@@ -6,6 +6,7 @@
 package seca2.bootstrap;
 
 import java.util.Map;
+import javax.inject.Inject;
 
 /**
  * A bootstrap module mimics a Servlet filter or a Struts interceptor - the 
@@ -19,6 +20,9 @@ import java.util.Map;
  * @author LeeKiatHaw
  */
 public abstract class BootstrapModule {
+   
+    @Inject protected DefaultValues defaultValues;
+    @Inject protected DefaultSites defaultSites;
     
     private BootstrapModule next;
     
@@ -30,7 +34,7 @@ public abstract class BootstrapModule {
      * @param inputContext
      * @param outputContext 
      */
-    public void start(Map<String,Object> inputContext, Map<String,Object> outputContext){
+    public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
         boolean toContinue = this.execute(inputContext, outputContext);
         
         if(next != null && toContinue)
@@ -49,8 +53,8 @@ public abstract class BootstrapModule {
      * @return true to continue the chain, false to stop the chain.
      */
     protected abstract boolean execute(
-            Map<String,Object> inputContext,
-            Map<String,Object> outputContext);
+            BootstrapInput inputContext,
+            BootstrapOutput outputContext);
     
     /**
      * 
