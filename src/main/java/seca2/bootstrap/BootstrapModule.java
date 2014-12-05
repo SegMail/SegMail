@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public abstract class BootstrapModule {
     
+    public static String FACES_CONTEXT = "context";
+    
     private BootstrapModule next;
     
     /**

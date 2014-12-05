@@ -74,7 +74,7 @@ public class Bootstrap implements Serializable {
         
         FacesContext fc = FacesContext.getCurrentInstance();
         
-        input.put("context", fc);
+        input.put(BootstrapModule.FACES_CONTEXT, fc);
         this.startChain(input,output);
     }
     

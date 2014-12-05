@@ -86,7 +86,7 @@ public class UserModule extends BootstrapModule implements Serializable{
 
     @Override
     protected boolean execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
-        return this.checkSessionActive((FacesContext)inputContext.get("context"));
+        return this.checkSessionActive((FacesContext)inputContext.get(UserModule.FACES_CONTEXT));
     }
 
     @Override
