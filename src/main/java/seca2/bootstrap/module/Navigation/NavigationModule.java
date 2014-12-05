@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
+import seca2.bootstrap.BootstrapOutput;
 import seca2.component.navigation.NavigationService;
 
 /**
@@ -38,14 +40,8 @@ public class NavigationModule extends BootstrapModule implements Serializable  {
     }
 
     @Override
-    protected boolean execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
-        
-        
-        
-        
+    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         return true;
     }
-
-    
 
 }

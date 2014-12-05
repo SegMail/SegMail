@@ -7,11 +7,11 @@
     
     <f:view contentType="text/html">
         <!--This is the old bootstrap method-->
-        <!--<ui:include src="#{bootstrap.output['program-location']}" /> program management-->
-        <!--<ui:include src="#{bootstrap.output['user-module-login-block']}" />user management-->
-        <!--<ui:include src="#{bootstrap.output['error-module-block']}" />error management-->
+        <!--<ui:include src="bootstrap.output['program-location']}" /> program management-->
+        <!--<ui:include src="bootstrap.output['user-module-login-block']}" />user management-->
+        <!--<ui:include src="bootstrap.output['error-module-block']}" />error management-->
         
         <!--This is the new bootstrap method [2014.11.16]-->
-        <ui:include src="#{bootstrap.output['program-root']}" />
+        <ui:include src="#{bootstrap.output.programRoot}" />
     </f:view>
 </html>

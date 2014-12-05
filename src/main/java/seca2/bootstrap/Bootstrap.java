@@ -19,15 +19,11 @@ import com.ocpsoft.pretty.faces.annotation.URLBeanName;
 import com.ocpsoft.pretty.faces.annotation.URLMapping;
 import com.ocpsoft.pretty.faces.annotation.URLMappings;
 import java.io.Serializable;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import seca2.bootstrap.module.Navigation.NavigationModule;
 
 /**
  *
@@ -43,12 +39,14 @@ import seca2.bootstrap.module.Navigation.NavigationModule;
 @RequestScoped
 public class Bootstrap implements Serializable {
     
+    @Inject private DefaultValues defaultValues;
+    @Inject private DefaultSites defaultSites;
     /**
      * Use a generic Map object as a trial first to see what are the parameters 
      * that we will need.
      */
-    private Map<String,Object> output;
-    private Map<String,Object> input;
+    private BootstrapInput input;
+    private BootstrapOutput output;
     /**
      * Chain of Responsibility object that will execute the modules in sequence.
      */
@@ -60,6 +58,8 @@ public class Bootstrap implements Serializable {
     
     @PostConstruct
     public void init(){
+        input = new BootstrapInput();
+        output = new BootstrapOutput();
         
         System.out.println(program);
     }
@@ -73,23 +73,28 @@ public class Bootstrap implements Serializable {
         System.out.println(program);
         
         FacesContext fc = FacesContext.getCurrentInstance();
-        
-        input.put(BootstrapModule.FACES_CONTEXT, fc);
+        input.setFacesContext(fc);
         this.startChain(input,output);
     }
     
-    public void startChain(Map<String, Object> inputContext, Map<String, Object> outputContext){
+    public void startChain(BootstrapInput inputContext, BootstrapOutput outputContext){
         //Start the chain
         BootstrapModule head = this.bootstrappingChain.getHead();
-        head.start(inputContext, outputContext);
+        try{
+            head.start(inputContext, outputContext);
+        } catch(Exception ex){
+            outputContext.setProgramRoot(defaultSites.ERROR_PAGE);
+        }
+        
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="Getters and Setters">
-    public Map<String, Object> getOutput() {
+    public BootstrapOutput getOutput() {
         return output;
     }
     
-    public void setOutput(Map<String, Object> output) {    
+    public void setOutput(BootstrapOutput output) {    
         this.output = output;
     }
 

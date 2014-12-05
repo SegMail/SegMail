@@ -41,7 +41,7 @@ public class BootstrappingChainFactory {
     
     @PostConstruct
     public void init(){
-        bootstrapModuleList = this.generateBootstrapList();
+        bootstrapModuleList = this.generateBootstrapList(this.Modules);
         head = this.constructBoostrapChain(this.bootstrapModuleList);
         
     }

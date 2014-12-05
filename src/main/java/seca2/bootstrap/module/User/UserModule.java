@@ -7,13 +7,12 @@
 package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
-import java.util.Map;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
+import seca2.bootstrap.BootstrapOutput;
 
 /**
  *
@@ -22,44 +21,37 @@ import seca2.bootstrap.BootstrapModule;
 //@SessionScoped //Should not be a SessionScoped object
 public class UserModule extends BootstrapModule implements Serializable{
     
-    @Inject private UserContainer userContainer;
+    @Inject private UserContainer userContainer; //this is not resolved precisely
     private final LoginMode loginMode = LoginMode.BLOCK;
     
     private String sSessionId;
     private String previousURI;
     private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
     
-    public boolean checkSessionActive(FacesContext fc) {
-        //FacesContext fc = FacesContext.getCurrentInstance();
-        ExternalContext ec = fc.getExternalContext();
-        HttpServletRequest req = (HttpServletRequest) ec.getRequest();
+    
+    
+    /**
+     * Checks if a user is authenticated from a HttpSession object.
+     * 
+     * @param session
+     * @return 
+     */
+    public boolean checkSessionActive(HttpSession session) {
         
-        fc.getPartialViewContext().getRenderIds().add(loginContainerName);//to render the login container so that the newly set fields will be updated.
-        HttpSession session = req.getSession(false);
-        if (session == null) {
+        if (session == null) { //If user is visiting site for the first time
+            
             return false;
-        } else {
-            if (userContainer.getSessionId() != null && 
-                    userContainer.getSessionId().equals(session.getId())) {
-                //hide login block
-                //session.setAttribute("user", 1);
+        } else { //If HTTP session has been created, ie not the first visit.
+            System.out.println(userContainer.getSessionId());
+            
+            //If there is an HTTP session, compare the sessionId with the existing user sessionId
+            if (userContainer.getSessionId() == null || 
+                    !userContainer.getSessionId().equals(session.getId())) {
+                
+                return false;
+            } else {
                 
                 return true;
-            } else {
-                //pop up login block
-                //session.setAttribute("user", 0);
-                //store this current requestURI for redirection after login
-                String originalURI = (String) req.getAttribute("javax.servlet.forward.request_uri");
-                if (originalURI != null || !originalURI.isEmpty()) {
-                    this.previousURI = originalURI;
-                }
-                //Check if application was installed by calling CheeckInstaller.
-                /*if (checkInstaller.getStatus() != CheckInstaller.INSTALL_STATUS.INSTALLED) {
-                    FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_INFO,
-                            "Application is not installed yet, "
-                            + "click here to <a href='/install/'>install</a> now", null);
-                }*/
-                return false;
             }
         }
     }
@@ -85,8 +77,18 @@ public class UserModule extends BootstrapModule implements Serializable{
     }
 
     @Override
-    protected boolean execute(Map<String, Object> inputContext, Map<String, Object> outputContext) {
-        return this.checkSessionActive((FacesContext)inputContext.get(UserModule.FACES_CONTEXT));
+
+    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
+        FacesContext fc = (FacesContext)inputContext.getFacesContext();
+        HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
+        
+        boolean sessionActive = this.checkSessionActive(session);
+        
+        if(!sessionActive){//if session is not active
+            outputContext.setProgramRoot(this.defaultSites.LOGIN_PAGE);
+        }
+        
+        return true;
     }
 
     @Override

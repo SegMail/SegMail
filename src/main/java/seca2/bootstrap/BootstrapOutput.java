@@ -9,14 +9,17 @@ package seca2.bootstrap;
  *
  * @author LeeKiatHaw
  */
-public class BootstrapExecutionException extends Exception {
+public class BootstrapOutput {
+    
+    private String programRoot;
 
-    public BootstrapExecutionException(String message) {
-        super(message);
+    public String getProgramRoot() {
+        return programRoot;
     }
 
-    public BootstrapExecutionException(String message, Throwable cause) {
-        super(message, cause);
+    public void setProgramRoot(String programRoot) {
+        this.programRoot = programRoot;
     }
+    
     
 }
