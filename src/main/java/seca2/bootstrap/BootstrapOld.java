@@ -104,7 +104,8 @@ public class BootstrapOld implements Serializable {
      * up it should allow error module to handle any sort of exceptions.
      * 
      */
-    @Inject private UserModule userModule;
+    //@Inject 
+    private UserModule userModule;
     
     //@URLActions(actions={
     //    @URLAction(mappingId="home", onPostback=true),

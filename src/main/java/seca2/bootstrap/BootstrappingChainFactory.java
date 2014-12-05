@@ -32,7 +32,8 @@ public class BootstrappingChainFactory {
      * Injected Instances generates a Weld proxy which properties cannot be set
      * normally. 
      */
-    @Inject @Any private Instance<BootstrapModule> Modules;
+    @Inject @NonCoreModule private Instance<BootstrapModule> Modules;
+    @Inject @CoreModule private Instance<BootstrapModule> cModules;
     /**
      * 
      */
@@ -41,7 +42,9 @@ public class BootstrappingChainFactory {
     
     @PostConstruct
     public void init(){
-        bootstrapModuleList = this.generateBootstrapList(this.Modules);
+        bootstrapModuleList = new ArrayList<BootstrapModule>();
+        bootstrapModuleList.addAll(this.generateBootstrapList(this.cModules));
+        bootstrapModuleList.addAll(this.generateBootstrapList(this.Modules));
         head = this.constructBoostrapChain(this.bootstrapModuleList);
         
     }
@@ -66,9 +69,8 @@ public class BootstrappingChainFactory {
      */
     public List<BootstrapModule> generateBootstrapList(Instance<BootstrapModule> modules){
         List<BootstrapModule> moduleList = new ArrayList<BootstrapModule>();
-        Iterator<BootstrapModule> i = modules.iterator();
         
-        for(BootstrapModule bm : Modules){
+        for(BootstrapModule bm : modules){
             moduleList.add(bm);
         }
         

@@ -11,14 +11,23 @@ package seca2.bootstrap;
  */
 public class BootstrapOutput {
     
-    private String programRoot;
+    private String pageRoot;
+    private String templateRoot;
 
-    public String getProgramRoot() {
-        return programRoot;
+    public String getPageRoot() {
+        return pageRoot;
     }
 
-    public void setProgramRoot(String programRoot) {
-        this.programRoot = programRoot;
+    public void setPageRoot(String pageRoot) {
+        this.pageRoot = pageRoot;
+    }
+
+    public String getTemplateRoot() {
+        return templateRoot;
+    }
+
+    public void setTemplateRoot(String templateRoot) {
+        this.templateRoot = templateRoot;
     }
     
     

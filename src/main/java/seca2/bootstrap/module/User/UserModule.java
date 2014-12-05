@@ -13,12 +13,14 @@ import javax.servlet.http.HttpSession;
 import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
+import seca2.bootstrap.CoreModule;
 
 /**
  *
  * @author vincent.a.lee
  */
 //@SessionScoped //Should not be a SessionScoped object
+@CoreModule
 public class UserModule extends BootstrapModule implements Serializable{
     
     @Inject private UserContainer userContainer; //this is not resolved precisely
@@ -77,7 +79,6 @@ public class UserModule extends BootstrapModule implements Serializable{
     }
 
     @Override
-
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         FacesContext fc = (FacesContext)inputContext.getFacesContext();
         HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
@@ -85,7 +86,10 @@ public class UserModule extends BootstrapModule implements Serializable{
         boolean sessionActive = this.checkSessionActive(session);
         
         if(!sessionActive){//if session is not active
-            outputContext.setProgramRoot(this.defaultSites.LOGIN_PAGE);
+            outputContext.setPageRoot(this.defaultSites.LOGIN_PAGE);
+        }
+        else{
+            outputContext.setPageRoot(this.defaultSites.DEFAULT_HOME);
         }
         
         return true;

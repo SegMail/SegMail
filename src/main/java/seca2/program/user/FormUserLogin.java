@@ -36,7 +36,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormUserLogin {
     
     @EJB private UserServiceHibernate userService;
-    @Inject private UserModule userModule; //to check if there was a previous URL to be redirected and set the sessionID
+    /*@Inject*/ private UserModule userModule; //to check if there was a previous URL to be redirected and set the sessionID
     
     private String username;
     private String password;

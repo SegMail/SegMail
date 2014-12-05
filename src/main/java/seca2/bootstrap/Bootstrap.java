@@ -83,7 +83,7 @@ public class Bootstrap implements Serializable {
         try{
             head.start(inputContext, outputContext);
         } catch(Exception ex){
-            outputContext.setProgramRoot(defaultSites.ERROR_PAGE);
+            outputContext.setPageRoot(defaultSites.ERROR_PAGE);
         }
         
         
