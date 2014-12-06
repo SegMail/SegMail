@@ -10,9 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramModule;
+import seca2.component.navigation.NavigationService;
 import seca2.entity.program.Program;
 
 /**
@@ -22,20 +24,7 @@ import seca2.entity.program.Program;
 @Named("TopMenu")
 public class TopMenu {
     
-    @Inject private ProgramModule programModule;
     
-    @PostConstruct
-    public void init(){
-        
-    }
-    
-    public List<Program> getPrograms(){
-        return programModule.getPrograms();
-    }
-    
-    public int getCurrentProgramIndex(){
-        return programModule.getCurrentProgramIndex();
-    }
     
     
 }

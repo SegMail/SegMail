@@ -86,11 +86,13 @@ public class UserModule extends BootstrapModule implements Serializable{
         boolean sessionActive = this.checkSessionActive(session);
         
         if(!sessionActive){//if session is not active
+            //These 2 attributes should be taken from a "container", preferably something like UserContainer
             outputContext.setPageRoot(this.defaultSites.LOGIN_PAGE);
+            outputContext.setTemplateRoot(this.defaultSites.LOGIN_PAGE_TEMPLATE);
+            return false;
         }
-        else{
-            outputContext.setPageRoot(this.defaultSites.DEFAULT_HOME);
-        }
+        
+        outputContext.setPageRoot(this.defaultSites.DEFAULT_HOME);
         
         return true;
     }

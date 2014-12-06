@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
+import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.entity.program.Program;
 
@@ -24,6 +25,7 @@ import seca2.entity.program.Program;
 //@RequestScoped
 //@BootstrapRequest
 //@BootstrapType(postback=false)
+@CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
 
     private List<String> programNames; //stud at this moment

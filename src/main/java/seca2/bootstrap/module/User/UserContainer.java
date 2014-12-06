@@ -7,6 +7,7 @@ package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
+import seca2.entity.user.UserType;
 
 /**
  * Container for retrieving user info and setting user parameters.
@@ -20,6 +21,8 @@ public class UserContainer implements Serializable{
     private String userId;
     private String sessionId;
     private String previousURL;
+    
+    private UserType userType;
 
     public String getSessionId() {
         return sessionId;
@@ -43,6 +46,14 @@ public class UserContainer implements Serializable{
 
     public void setPreviousURL(String previousURL) {
         this.previousURL = previousURL;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
     
     
