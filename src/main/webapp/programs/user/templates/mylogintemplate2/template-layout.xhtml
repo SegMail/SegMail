@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <f:view contentType="text/html">
+        <h:head>
+            <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/bootstrap.min.css" /><!-- Loading Bootstrap UI -->
+            <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/bootstrap-responsive.min.css" /><!-- Loading Flat UI -->
+            <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/style.css" /><!-- Loading Flat UI -->
+            <!--custom hacks-->
+            <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+        </h:head>
+        <h:body>
+            <h:panelGroup layout="block" class="container-fluid" style="">
+                <!--A login page for an enterprise software should not have a menu.-->
+                
+                <ui:insert name="header" />
+                <ui:insert name="login-block" />
+            </h:panelGroup>
+        </h:body>
+        <!--load all scripts-->
+        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/bootstrap.min.js"></script>
+        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery.easing.1.3.js"></script>
+        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery.easing-1.3.min.js"></script>
+        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery.scrollTo-1.4.3.1-min.js"></script>
+        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery-1.9.1.min.js"></script>
+
+        <!--Custom components/hacks-->
+
+    </f:view>
+</html>
