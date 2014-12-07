@@ -65,8 +65,8 @@ public class Bootstrap implements Serializable {
     }
     
     @URLActions(actions={
-        @URLAction(mappingId="home", onPostback=false),
-        @URLAction(mappingId="program", onPostback=false)
+        @URLAction(mappingId="home", onPostback=true),
+        @URLAction(mappingId="program", onPostback=true)
     })
     public void startProcessing(){
         //Debug: parameters will only get injected with @URLAction

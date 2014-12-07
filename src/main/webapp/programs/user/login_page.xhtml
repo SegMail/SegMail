@@ -39,17 +39,31 @@
             </nav>
         </ui:define>
         <ui:define name="login-block">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 col-sm-12">
-                        <h1>Login to Segmail</h1>
-                        <form>
-                            <div class="form-group">
-                                <input type="text" placeholder="Username" class="form-control" />
-                            </div>
-                        </form>
-                        
-                        
+            <div class="login" style="margin-bottom: 0px;"> <!--hack to cover the whole screen with the canvas colour-->
+                <div class="login-screen">
+                    <div class="login-icon">
+                        <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/images/login/icon.png"/>
+                        <h4>Login to <small>Segmail</small></h4>
+                    </div>
+                    <div class="login-form col-lg-8">
+                        <h:form styleClass="login-form">
+                            <h:panelGroup layout="block" class="form-group">
+                                <h:inputText id="login-username" class="form-control login-field"
+                                             value="#{FormUserLogin.username}"/>
+                                <p:watermark for="login-username" value="Username" />
+                                <label class="login-field-icon fui-user" for="login-username"></label>
+                            </h:panelGroup>
+                            <h:panelGroup layout="block" class="form-group">
+                                <h:inputText id="login-password" class="form-control login-field"
+                                             value="#{FormUserLogin.password}"/>
+                                <p:watermark for="login-password" value="Password" />
+                                <label class="login-field-icon fui-user" for="login-password"></label>
+                            </h:panelGroup>
+                            <p:commandButton styleClass="btn btn-lg btn-primary btn-block"
+                                             value="Log in" action="#{FormUserLogin.login(session.id)}"
+                                             update="@form"/>
+                            <h:commandLink styleClass="login-link" value="Lost your password?" />
+                        </h:form>
                     </div>
                 </div>
                 <!-- /.row -->

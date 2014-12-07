@@ -81,9 +81,13 @@ public class UserModule extends BootstrapModule implements Serializable{
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         FacesContext fc = (FacesContext)inputContext.getFacesContext();
-        HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
+        HttpSession session = (HttpSession) fc.getExternalContext().getSession(true);
         
         boolean sessionActive = this.checkSessionActive(session);
+        
+        //Because all requests are handled here, so even a login form submission will
+        //also be stopped here because there is not yet an authenticated session.
+        //Solution? 
         
         if(!sessionActive){//if session is not active
             //These 2 attributes should be taken from a "container", preferably something like UserContainer
@@ -91,6 +95,7 @@ public class UserModule extends BootstrapModule implements Serializable{
             outputContext.setTemplateRoot(this.defaultSites.LOGIN_PAGE_TEMPLATE);
             return false;
         }
+        
         
         outputContext.setPageRoot(this.defaultSites.DEFAULT_HOME);
         
