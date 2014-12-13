@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package seca2.bootstrap.module.User;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -21,49 +23,27 @@ import seca2.bootstrap.CoreModule;
  */
 //@SessionScoped //Should not be a SessionScoped object
 @CoreModule
-public class UserModule extends BootstrapModule implements Serializable{
-    
-    @Inject private UserContainer userContainer; //this is not resolved precisely
+public class UserModule extends BootstrapModule implements Serializable {
+
+    @Inject
+    private UserContainer userContainer; //this is not resolved precisely
     private final LoginMode loginMode = LoginMode.BLOCK;
-    
-    private String sSessionId;
+
     private String previousURI;
     private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
-    
-    
-    
-    /**
-     * Checks if a user is authenticated from a HttpSession object.
-     * 
-     * @param session
-     * @return 
-     */
-    public boolean checkSessionActive(HttpSession session) {
-        
-        if (session == null) { //If user is visiting site for the first time
-            
+
+    public boolean sameSession(HttpSession session, UserContainer uc){
+        if(uc == null)
             return false;
-        } else { //If HTTP session has been created, ie not the first visit.
-            System.out.println(userContainer.getSessionId());
-            
-            //If there is an HTTP session, compare the sessionId with the existing user sessionId
-            if (userContainer.getSessionId() == null || 
-                    !userContainer.getSessionId().equals(session.getId())) {
-                
-                return false;
-            } else {
-                
-                return true;
-            }
-        }
+        
+        if(session == null)
+            return false;
+        
+        return (session.getId().equals(uc.getSessionId()));
     }
-
-    public String getsSessionId() {
-        return sSessionId;
-    }
-
-    public void setsSessionId(String sSessionId) {
-        this.sSessionId = sSessionId;
+    
+    public boolean isAuthenticated(UserContainer uc){
+        return uc.isLoggedIn();
     }
 
     public String getPreviousURI() {
@@ -80,24 +60,37 @@ public class UserModule extends BootstrapModule implements Serializable{
 
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        FacesContext fc = (FacesContext)inputContext.getFacesContext();
-        HttpSession session = (HttpSession) fc.getExternalContext().getSession(true);
+        FacesContext fc = (FacesContext) inputContext.getFacesContext();
+        HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
         
-        boolean sessionActive = this.checkSessionActive(session);
+        boolean sameSession = this.sameSession(session,this.userContainer);
+        boolean isAuthenticated = this.isAuthenticated(this.userContainer);
         
-        //Because all requests are handled here, so even a login form submission will
-        //also be stopped here because there is not yet an authenticated session.
-        //Solution? 
-        
-        if(!sessionActive){//if session is not active
-            //These 2 attributes should be taken from a "container", preferably something like UserContainer
+        //If it's not the same session, meaning it could be the first vist, or 
+        //the previous session has timed out, load the login page.
+        if(!sameSession){
             outputContext.setPageRoot(this.defaultSites.LOGIN_PAGE);
             outputContext.setTemplateRoot(this.defaultSites.LOGIN_PAGE_TEMPLATE);
+            
+            //Regenerate a session object and store the session ID.
+            session = (HttpSession) fc.getExternalContext().getSession(true);
+            this.userContainer.setSessionId(session.getId());
+            
+            //Don't forget to return false to break the bootstrapping chain!
             return false;
         }
         
+        //If it's the same session but it is not logged in, the user could be 
+        //browsing non-secured pages or authenticating.
+        if(sameSession && !isAuthenticated){
+            return false;
+        }
         
-        outputContext.setPageRoot(this.defaultSites.DEFAULT_HOME);
+        //If session is still active and user is authenticated, continue the bootstrapping
+        //chain
+        if(sameSession && isAuthenticated){
+            return true;
+        }
         
         return true;
     }
@@ -106,7 +99,5 @@ public class UserModule extends BootstrapModule implements Serializable{
     protected int executionSequence() {
         return -99;
     }
-    
-    
-}
 
+}

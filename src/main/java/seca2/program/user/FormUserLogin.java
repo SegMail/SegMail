@@ -87,10 +87,10 @@ public class FormUserLogin {
 
         //HttpSession session = req.getSession(true);
         //session.setAttribute("user", 1);
-        userModule.setsSessionId(sessionId);
+        //userModule.setsSessionId(sessionId);
         //sSessionId = session.getId();
         DateTime sessionStarttime = new DateTime();
-        System.out.println("Session " + userModule.getsSessionId() + " started at " + sessionStarttime);
+        //System.out.println("Session " + userModule.getsSessionId() + " started at " + sessionStarttime);
         password = "";
         username = "";
 

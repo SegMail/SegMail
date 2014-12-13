@@ -45,8 +45,8 @@ public class Bootstrap implements Serializable {
      * Use a generic Map object as a trial first to see what are the parameters 
      * that we will need.
      */
-    private BootstrapInput input;
-    private BootstrapOutput output;
+    @Inject private BootstrapInput input;
+    @Inject private BootstrapOutput output;
     /**
      * Chain of Responsibility object that will execute the modules in sequence.
      */
@@ -58,8 +58,8 @@ public class Bootstrap implements Serializable {
     
     @PostConstruct
     public void init(){
-        input = new BootstrapInput();
-        output = new BootstrapOutput();
+        //input = new BootstrapInput();
+        //output = new BootstrapOutput();
         
         System.out.println(program);
     }

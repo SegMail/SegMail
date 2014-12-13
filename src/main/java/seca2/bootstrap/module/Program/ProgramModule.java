@@ -41,7 +41,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     public void init() {
         //create a stub first, next time then we'll implement the actual thing
         programNames = new ArrayList<String>();
-        if (userModule != null && userModule.checkSessionActive(null)) {
+        if (userModule != null){// && userModule.checkSessionActive(null)) {
             programNames.add("test");
             programNames.add("sendmail");
             programNames.add("signupforms");

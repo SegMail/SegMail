@@ -46,13 +46,25 @@
                         <h4>Login to <small>Segmail</small></h4>
                     </div>
                     <div class="login-form col-lg-8">
-                        <h:form styleClass="login-form">
+                        <h:form id="login-form" styleClass="login-form">
                             <h:panelGroup layout="block" class="form-group">
                                 <h:inputText id="login-username" class="form-control login-field"
                                              value="#{FormUserLogin.username}"/>
-                                <p:watermark for="login-username" value="Username" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
+                                <input type="text" id="test-tooltip" title="Test tooltip" />
+                                <script type="text/javascript">
+                                    $(function () {
+                                        $(document).tooltip();
+                                    });
+                                </script>
+                                <!--<h:panelGroup layout="block" styleClass="tooltip fade bottom in">
+                                    <h:panelGroup layout="block" styleClass="tooltip-arrow"></h:panelGroup>
+                                    <h:panelGroup layout="block" styleClass="tooltip-inner">
+                                        Error!
+                                    </h:panelGroup>
+                                </h:panelGroup>-->
                             </h:panelGroup>
+
                             <h:panelGroup layout="block" class="form-group">
                                 <h:inputText id="login-password" class="form-control login-field"
                                              value="#{FormUserLogin.password}"/>

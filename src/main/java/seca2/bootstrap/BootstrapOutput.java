@@ -5,13 +5,16 @@
  */
 package seca2.bootstrap;
 
+import java.io.Serializable;
 import java.util.Map;
+import javax.enterprise.context.SessionScoped;
 
 /**
  *
  * @author LeeKiatHaw
  */
-public class BootstrapOutput {
+@SessionScoped
+public class BootstrapOutput implements Serializable {
     
     private String pageRoot;
     private String templateRoot;

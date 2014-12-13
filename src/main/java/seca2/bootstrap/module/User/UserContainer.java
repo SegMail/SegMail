@@ -23,6 +23,8 @@ public class UserContainer implements Serializable{
     private String previousURL;
     
     private UserType userType;
+    
+    private boolean loggedIn = false; //default is always false
 
     public String getSessionId() {
         return sessionId;
@@ -54,6 +56,14 @@ public class UserContainer implements Serializable{
 
     public void setUserType(UserType userType) {
         this.userType = userType;
+    }
+
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
+
+    public void setLoggedIn(boolean loggedIn) {
+        this.loggedIn = loggedIn;
     }
     
     

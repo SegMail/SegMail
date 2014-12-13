@@ -37,6 +37,7 @@ public abstract class BootstrapModule {
      * @param outputContext 
      */
     public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
+        System.out.println("BootstrapModule "+this.getClass().getSimpleName()+" started.");
         boolean toContinue = this.execute(inputContext, outputContext);
         
         if(next != null && toContinue)

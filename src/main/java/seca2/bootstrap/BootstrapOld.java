@@ -112,7 +112,7 @@ public class BootstrapOld implements Serializable {
     //    @URLAction(mappingId="program", onPostback=true)
     //})
     public void checkLogin() throws IOException{
-        boolean loggedIn = userModule.checkSessionActive(null);
+        boolean loggedIn = true;//userModule.checkSessionActive(null);
         
         //Put it inside elements for login mode BLOCK
         this.elements.put("user", loggedIn);
