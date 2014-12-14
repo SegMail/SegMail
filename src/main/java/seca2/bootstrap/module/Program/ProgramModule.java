@@ -114,6 +114,15 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
+        //Hardcoded for testing
+        outputContext.setPageRoot("/programs/test/layout.xhtml");
+        outputContext.getNonCoreValues().put("TEST_MENU", this.programs);
+        
+        return true;
+    }
+
+    @Override
+    protected boolean inService() {
         return true;
     }
 

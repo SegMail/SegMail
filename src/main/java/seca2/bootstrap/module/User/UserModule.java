@@ -100,4 +100,10 @@ public class UserModule extends BootstrapModule implements Serializable {
         return -99;
     }
 
+    @Override
+    protected boolean inService() {
+        return false;
+    }
+
+
 }

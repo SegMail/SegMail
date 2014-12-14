@@ -3,7 +3,8 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:s2="http://seca2.jsf/custom">
     <!--The login page has its own template-->
     <ui:composition template="#{bootstrap.output.templateRoot}">
         <ui:define name="header">
@@ -46,16 +47,21 @@
                         <h4>Login to <small>Segmail</small></h4>
                     </div>
                     <div class="login-form col-lg-8">
-                        <h:form id="login-form" styleClass="login-form">
+                        <h:form id="form-user-login" styleClass="login-form">
                             <h:panelGroup layout="block" class="form-group">
                                 <h:inputText id="login-username" class="form-control login-field"
-                                             value="#{FormUserLogin.username}"/>
+                                             value="#{FormUserLogin.username}" title="test-tooltip"/>
+                                <p:watermark for="login-username" value="Username" />
+                                <p:tooltip for="login-username" styleClass="tooltip fade bottom in"
+                                           showEvent="focus" hideEvent="blur" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
-                                <input type="text" id="test-tooltip" title="Test tooltip" />
                                 <script type="text/javascript">
-                                    $(function () {
-                                        $(document).tooltip();
-                                    });
+                                    $(document).ready(function(){
+                                        $('#test-tooltip').tooltip({
+                                            'trigger': 'focus',
+                                            'title' : 'test-tooltip'
+                                        });
+                                    })
                                 </script>
                                 <!--<h:panelGroup layout="block" styleClass="tooltip fade bottom in">
                                     <h:panelGroup layout="block" styleClass="tooltip-arrow"></h:panelGroup>
@@ -75,6 +81,8 @@
                                              value="Log in" action="#{FormUserLogin.login(session.id)}"
                                              update="@form"/>
                             <h:commandLink styleClass="login-link" value="Lost your password?" />
+                            
+                            <s2:messenger id="login-messenger" />
                         </h:form>
                     </div>
                 </div>

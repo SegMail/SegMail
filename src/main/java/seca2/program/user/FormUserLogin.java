@@ -13,18 +13,13 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import org.hibernate.exception.JDBCConnectionException;
 import org.joda.time.DateTime;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.user.UserAccountLockedException;
 import seca2.component.user.UserServiceHibernate;
 import seca2.entity.user.User;
-import seca2.entity.user.UserAccount;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**

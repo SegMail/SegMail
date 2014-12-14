@@ -80,4 +80,9 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         return true;
     }
 
+    @Override
+    protected boolean inService() {
+        return false;
+    }
+
 }

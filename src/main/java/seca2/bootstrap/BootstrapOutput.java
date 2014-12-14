@@ -6,6 +6,7 @@
 package seca2.bootstrap;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import javax.enterprise.context.SessionScoped;
 
@@ -18,8 +19,10 @@ public class BootstrapOutput implements Serializable {
     
     private String pageRoot;
     private String templateRoot;
+    private String errorMessage;
+    private String errorStackTrace;
     
-    private Map<String,Object> nonCoreValues;
+    private Map<String,Object> nonCoreValues = new HashMap<String,Object>();
 
     public String getPageRoot() {
         return pageRoot;
@@ -43,6 +46,22 @@ public class BootstrapOutput implements Serializable {
 
     public void setNonCoreValues(Map<String, Object> nonCoreValues) {
         this.nonCoreValues = nonCoreValues;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getErrorStackTrace() {
+        return errorStackTrace;
+    }
+
+    public void setErrorStackTrace(String errorStackTrace) {
+        this.errorStackTrace = errorStackTrace;
     }
     
     

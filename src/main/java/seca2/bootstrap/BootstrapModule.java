@@ -38,7 +38,8 @@ public abstract class BootstrapModule {
      */
     public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
         System.out.println("BootstrapModule "+this.getClass().getSimpleName()+" started.");
-        boolean toContinue = this.execute(inputContext, outputContext);
+        
+        boolean toContinue = (this.inService() ? this.execute(inputContext, outputContext) : true );
         
         if(next != null && toContinue)
             next.start(inputContext, outputContext);
@@ -65,4 +66,11 @@ public abstract class BootstrapModule {
      */
     protected abstract int executionSequence();
     
+    /**
+     * Returns the state of this bootstrap module. True means it is in service.
+     * False means bypass.
+     * 
+     * @return 
+     */
+    protected abstract boolean inService();
 }

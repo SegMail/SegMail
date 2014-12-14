@@ -18,7 +18,9 @@ import com.ocpsoft.pretty.faces.annotation.URLActions;
 import com.ocpsoft.pretty.faces.annotation.URLBeanName;
 import com.ocpsoft.pretty.faces.annotation.URLMapping;
 import com.ocpsoft.pretty.faces.annotation.URLMappings;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
@@ -84,6 +86,10 @@ public class Bootstrap implements Serializable {
             head.start(inputContext, outputContext);
         } catch(Exception ex){
             outputContext.setPageRoot(defaultSites.ERROR_PAGE);
+            
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            outputContext.setErrorStackTrace(sw.toString());
         }
         
         

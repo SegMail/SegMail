@@ -6,9 +6,15 @@
       xmlns:p="http://primefaces.org/ui">
     <ui:composition>
         <h3>This is the error page</h3>
+        <h:inputTextarea >
+            this is the error stack trace   
+            #{bootstrap.output.errorStackTrace}
+        </h:inputTextarea>
         <ui:define name="login">
             <h:panelGroup id="login-page" layout="block" >
-                <h3>This is the error page</h3>
+                <h3>This is the error page2</h3>
+                this is the error stack trace  
+
             </h:panelGroup>
         </ui:define>
     </ui:composition>

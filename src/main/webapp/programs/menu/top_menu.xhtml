@@ -15,13 +15,13 @@
             </div>
             <div class="collapse navbar-collapse" id="navbar-collapse-02">
                 <ul class="nav navbar-nav">
-                    <!--<c:forEach items="#(TopMenu.programs)" var="program">
+                    <c:forEach items="#{bootstrap.output.nonCoreValues["TEST_MENU"]}" var="program">
                         
-                        <li class="#(TopMenu.currentProgramIndex == program.OBJECTID ? 'active' : '')">
-                            <a href="#(request.contextPath.concat(program.VIEW_DIRECTORY))">#(program.PROGRAM_NAME)</a>
+                        <li class="#{0 == program.OBJECTID ? 'active' : ''}">
+                            <a href="#{request.contextPath.concat(program.VIEW_DIRECTORY)}">#{program.PROGRAM_NAME}</a>
                         </li>
 
-                    </c:forEach>-->
+                    </c:forEach>
                 </ul>
                 <!--leave this here to look good...
                 <form class="navbar-form navbar-right" action="#" role="search" style="">

@@ -11,6 +11,7 @@
             <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/bootstrap/the-big-picture.css" /><!-- Loading Flat UI -->
             <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/flat-ui/docs.css" /><!-- Loading Flat UI -->
             <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/flat-ui/flat-ui.css" /><!-- Loading Flat UI -->
+            
             <!--custom hacks-->
             <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
         </h:head>
@@ -23,9 +24,11 @@
             </h:panelGroup>
         </h:body>
         <!--load all scripts-->
+        <!--<h:outputScript library="primefaces" name="jquery/jquery.js" target="head" />-->
+        
         <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/bootstrap.min.js"></script>
-        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery.js"></script>
-
+        <!--<script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery.js"></script>-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
         <!--Custom components/hacks-->
 
     </f:view>

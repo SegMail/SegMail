@@ -41,5 +41,10 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     protected int executionSequence() {
         return -96;
     }
+
+    @Override
+    protected boolean inService() {
+        return true;
+    }
     
 }

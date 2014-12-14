@@ -19,7 +19,7 @@ import seca2.bootstrap.BootstrapOutput;
  */
 //@SessionScoped //Should not be a SessionScoped object
 //@CoreModule
-public class UserModule_1 extends BootstrapModule implements Serializable {
+public abstract class UserModule_1 extends BootstrapModule implements Serializable {
 
     @Inject
     private UserContainer userContainer; //this is not resolved precisely
