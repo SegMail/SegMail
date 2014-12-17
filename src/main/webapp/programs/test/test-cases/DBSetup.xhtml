@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+    <ui:composition  template="/programs/test/template/test-case-panel.xhtml">
+        <!--test DB generation-->
+        <ui:define name="panel-heading">
+            For setting up the DB schema
+        </ui:define>
+        <ui:define name="panel-body">
+            <h:form id="setupDBForm">
+                <p:blockUI id="setupDBFormBlock" block="setupDBForm" 
+                           trigger="setupDBForm:setupDBEM,setupDBForm:setupDBSession">
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <!--<h:outputLabel for="setupDBEM" styleClass="control-label col-md-6">Generate DB with EntityManager: </h:outputLabel>-->
+                        <p:commandButton id="setupDBEM" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via EM"
+                                         update="@form"
+                                         actionListener="#{ProgramTest.formTestDB.generateDBEM()}"></p:commandButton>
+                    </div>
+                </div><br />
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
+                        <p:commandButton id="setupDBSession" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via Session"
+                                         update="@form"
+                                         actionListener="#{ProgramTest.formTestDB.generateDBSession()}"></p:commandButton>
+                    </div>
+                </div><br />
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <s2:messenger for="setupDBForm" closable="true"
+                                      showDetail="false"
+                                      showSummary="true"></s2:messenger>
+                    </div>
+                </div>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

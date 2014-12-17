@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+    <ui:composition template="/programs/test/template/test-case-panel.xhtml">
+        <!--test creation of usertypes-->
+        <ui:define name="panel-heading">
+            Creation of Usertypes
+        </ui:define>
+        <ui:define name="panel-body">
+            <h:form id="createUsertypeForm">
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <!--<h:outputLabel for="usertypeName" styleClass="control-label col-md-4">Usertype name:</h:outputLabel>-->
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Usertype Name</span>
+                                <h:inputText id="usertypeName" styleClass="form-control"
+                                             value="#{ProgramTest.formTestUser.userTypeName}" ></h:inputText>
+                                <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <!--<h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>-->
+                        <div class="col-md-12">
+                            <h:inputTextarea id="usertypeDesc" styleClass="form-control" 
+                                             value="#{ProgramTest.formTestUser.description}" ></h:inputTextarea>
+                            <p:watermark for="usertypeDesc" value="Usertype Description" ></p:watermark>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <p:commandButton id="createUserTypeButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Usertype"
+                                         actionListener="#{ProgramTest.formTestUser.createUserType()}"
+                                         update="@form">
+                        </p:commandButton>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <s2:messenger for="createUsertypeForm" />
+                    </div>
+                </div>
+                <p:blockUI id="setupNavigationFormBlock" block="createUsertypeForm" trigger="createUsertypeForm:createUserTypeButton">
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
