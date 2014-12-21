@@ -54,7 +54,7 @@ public class DropdownComponent extends UIInput implements NamingContainer {
     
     @Override
     public String getFamily() {
-        return UINamingContainer.COMPONENT_FAMILY; 
+        return DropdownComponent.COMPONENT_FAMILY; 
     }
     
     public String getEmptyMessage(){

@@ -44,4 +44,55 @@
         </attribute>
         
     </tag>
+    <tag>
+        <tag-name>dropdown</tag-name>
+        
+        <component>
+            <component-type>Dropdown</component-type>
+            <renderer-type>seca2.jsf.custom.dropdown.DropdownRenderer</renderer-type>
+        </component>
+        
+        <attribute>
+            <name>emptyMessage</name>
+            <type>java.lang.String</type>
+            <description>Message to be displayed if there are no items.</description>
+        </attribute>
+        
+        <attribute>
+            <name>dropdownClass</name>
+            <type>java.lang.String</type>
+            <description>The style class for the outer div tags.</description>
+        </attribute>
+        
+        <attribute>
+            <name>buttonClass</name>
+            <type>java.lang.String</type>
+            <description>The style class for the outer button tags.</description>
+        </attribute>
+        
+        <attribute>
+            <name>arrowClass</name>
+            <type>java.lang.String</type>
+            <description>The style class for the arrow.</description>
+        </attribute>
+        
+        <attribute>
+            <name>listClass</name>
+            <type>java.lang.String</type>
+            <description>The style class for the ul tags.</description>
+        </attribute>
+        
+        <attribute>
+            <name>addListClass</name>
+            <type>java.lang.String</type>
+            <description>Additional style class for the ul tags.</description>
+        </attribute>
+        
+        <attribute>
+            <name>listItems</name>
+            <type>java.util.List</type>
+            <description>List object containing all items</description>
+        </attribute>
+        
+    </tag>
 </facelet-taglib>
