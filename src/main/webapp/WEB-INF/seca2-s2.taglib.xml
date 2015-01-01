@@ -94,5 +94,10 @@
             <description>List object containing all items</description>
         </attribute>
         
+        <attribute>
+            <name>buttonColor</name>
+            <type>java.lang.String</type>
+            <description>Bootstrap color (default, primary, etc)</description>
+        </attribute>
     </tag>
 </facelet-taglib>

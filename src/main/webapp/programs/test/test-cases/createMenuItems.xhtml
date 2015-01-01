@@ -15,10 +15,21 @@
             <h:form id="setupNavigationForm">
 
                 <div class="row">
-                    <s2:dropdown id="dropdownItems" listItems="#{null}"
-                                 >
-                        <f:selectItem itemLabel="Test" ></f:selectItem>
-                    </s2:dropdown>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <s2:dropdown id="dropdownItems" listItems="#{null}" buttonColor="danger"
+                                     >
+                            <f:selectItem itemLabel="Test" ></f:selectItem>
+                            <f:selectItems value="#{ProgramTest.formTestNavigation.selectOneMenuTest}"
+                                           var="testMenuItem"
+                                           itemLabel="#{testMenuItem.toString}" />
+                        </s2:dropdown>
+                        <h:selectOneMenu>
+                            <f:selectItems value="#{ProgramTest.formTestNavigation.selectOneMenuTest}"
+                                           var="testMenuItem"
+                                           itemLabel="#{testMenuItem.toString}" />
+                        </h:selectOneMenu>
+                    </div>
+
                 </div>
 
                 <div class="row"><!--form to enter menu-->

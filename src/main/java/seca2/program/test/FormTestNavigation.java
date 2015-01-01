@@ -48,6 +48,9 @@ public class FormTestNavigation implements Serializable{
     private long selectedAssignedMenuItemId;
     private long selectedUserTypeId;
     
+    //Test custom selectonemenu tag
+    private List<String> selectOneMenuTest;
+    
     //Build Menu
     private long selectedUserTypeIdToBuildMenu;
     
@@ -57,6 +60,14 @@ public class FormTestNavigation implements Serializable{
     public void init(){
         initializeAllMenuItems();
         initializeAllUserTypes();
+        
+    }
+    
+    public void initializeSelectOneMenuTest(){
+        selectOneMenuTest = new ArrayList();
+        selectOneMenuTest.add("first");
+        selectOneMenuTest.add("second");
+        selectOneMenuTest.add("third");
     }
     
     public void initializeAllMenuItems(){
@@ -217,6 +228,14 @@ public class FormTestNavigation implements Serializable{
 
     public void setSelectedUserTypeIdToBuildMenu(long selectedUserTypeIdToBuildMenu) {
         this.selectedUserTypeIdToBuildMenu = selectedUserTypeIdToBuildMenu;
+    }
+
+    public List<String> getSelectOneMenuTest() {
+        return selectOneMenuTest;
+    }
+
+    public void setSelectOneMenuTest(List<String> selectOneMenuTest) {
+        this.selectOneMenuTest = selectOneMenuTest;
     }
 
     

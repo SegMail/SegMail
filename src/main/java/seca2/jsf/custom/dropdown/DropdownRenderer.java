@@ -8,10 +8,13 @@ package seca2.jsf.custom.dropdown;
 import java.io.IOException;
 import java.util.List;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UISelectOne;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
+import javax.faces.model.SelectItem;
 import javax.faces.render.FacesRenderer;
 import javax.faces.render.Renderer;
+import org.primefaces.renderkit.SelectOneRenderer;
 
 /**
  *
@@ -19,7 +22,7 @@ import javax.faces.render.Renderer;
  */
 @FacesRenderer(componentFamily = DropdownComponent.COMPONENT_FAMILY,
         rendererType = DropdownRenderer.RENDERER_TYPE)
-public class DropdownRenderer extends Renderer {
+public class DropdownRenderer extends SelectOneRenderer {
 
     public static final String RENDERER_TYPE = "seca2.jsf.custom.dropdown.DropdownRenderer";
 
@@ -35,7 +38,7 @@ public class DropdownRenderer extends Renderer {
         
         //Render button appearance
         writer.startElement("button", component);
-        writer.writeAttribute("class", component.getButtonClass(), null);
+        writer.writeAttribute("class", component.getButtonClass() + " btn-"+component.getButtonColor(), null);
         writer.writeAttribute("data-toggle", "dropdown", null);
         
         //Render caret
@@ -53,7 +56,7 @@ public class DropdownRenderer extends Renderer {
         writer.startElement("ul", component);
         writer.writeAttribute("class", component.getListClass(), null);
         
-        
+        this.encodeChildren(context, uicomponent);
     }
 
     @Override
@@ -61,16 +64,13 @@ public class DropdownRenderer extends Renderer {
         ResponseWriter writer = context.getResponseWriter();
         DropdownComponent component = (DropdownComponent) uicomponent;
         
+        //This is to retrieve all child components declared in the xhtml page
+        List<SelectItem> listItems = this.getSelectItems(context, component);
+        //This is to retrieve the value that has been tagged to this component, usually a List object
+        Object values = this.getValues(component);
+        Object submittedValues = getSubmittedValues(component);
         //Render empty list message
-        if(this.hasNoList(component)){
-            writer.startElement("li", component);
-            writer.startElement("a", component);
-            writer.write(component.getEmptyMessage());
-            writer.endElement("a");
-            writer.endElement("li");
-        } else{
-            super.encodeChildren(context, uicomponent); //To change body of generated methods, choose Tools | Templates.
-        }
+        
         
     }
 
@@ -83,18 +83,13 @@ public class DropdownRenderer extends Renderer {
         writer.endElement("ul");
         writer.endElement("button");
         writer.endElement("div");
-    }
-
-    //Helper
-    private boolean hasNoList(DropdownComponent uicomponent){
-        //get list items
-        List items = uicomponent.getListItems();
-        
-        //If list is empty, print out 
-        if(items == null || items.size() <= 0){
-            return true;
         }
-        
-        return false;
+
+    
+
+    @Override
+    protected String getSubmitParam(FacesContext context, UISelectOne selectOne) {
+        //Copied from primefaces
+        return selectOne.getClientId(context) + "_input";
     }
 }

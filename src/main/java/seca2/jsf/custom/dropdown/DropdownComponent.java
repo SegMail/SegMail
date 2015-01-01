@@ -5,15 +5,13 @@
  */
 package seca2.jsf.custom.dropdown;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.NamingContainer;
 import javax.faces.component.UIInput;
-import javax.faces.component.UINamingContainer;
-import javax.faces.component.html.HtmlSelectOneMenu;
-import javax.faces.context.FacesContext;
+import org.primefaces.component.selectonemenu.SelectOneMenu;
+import seca2.jsf.BootstrapColor;
 
 /**
  * It seems better to use a composite component than a custom one, since the 
@@ -21,7 +19,7 @@ import javax.faces.context.FacesContext;
  * @author LeeKiatHaw
  */
 @FacesComponent(DropdownComponent.COMPONENT_TYPE)
-public class DropdownComponent extends UIInput implements NamingContainer {
+public class DropdownComponent extends SelectOneMenu implements NamingContainer {
 
     public static final String COMPONENT_FAMILY = "Dropdown";
     public static final String COMPONENT_TYPE = "Dropdown";
@@ -31,10 +29,13 @@ public class DropdownComponent extends UIInput implements NamingContainer {
     public static final String EMPTY_MESSAGE_DEFAULT = "No Item exists yet";
     
     public static final String DROPDOWN_CLASS = "dropdownClass";
-    public static final String DROPDOWN_CLASS_DEFAULT = "dropdown"; //The bootstrap class
+    public static final String DROPDOWN_CLASS_DEFAULT = "btn-group"; //The bootstrap class
     
     public static final String BUTTON_CLASS = "buttonClass";
-    public static final String BUTTON_CLASS_DEFAULT = "btn btn-primary dropdown-toggle";
+    public static final String BUTTON_CLASS_DEFAULT = "btn dropdown-toggle";
+    
+    public static final String BUTTON_COLOR = "buttonColor";
+    public static final String BUTTON_COLOR_DEFAULT = "default";
     
     public static final String ARROW_CLASS = "arrowClass";
     public static final String ARROW_CLASS_DEFAULT = "dropdown-arrow";
@@ -45,7 +46,7 @@ public class DropdownComponent extends UIInput implements NamingContainer {
     public static final String ADD_LIST_CLASS = "addListClass";
     public static final String ADD_LIST_CLASS_DEFAULT = "";
     
-    public static final String LIST_ITEMS = "listItems";
+    //public static final String LIST_ITEMS = "listItems";
     
 
     public DropdownComponent() {
@@ -105,11 +106,21 @@ public class DropdownComponent extends UIInput implements NamingContainer {
         this.getStateHelper().put(ADD_LIST_CLASS, addListClass);
     }
     
+    /*
     public List getListItems(){
         return (List) this.getStateHelper().eval(LIST_ITEMS, new ArrayList());
     }
     
     public void setListItems(List listItems){
         this.getStateHelper().put(LIST_ITEMS, listItems);
+    }
+    */
+    
+    public String getButtonColor(){
+        return (String) this.getStateHelper().eval(BUTTON_COLOR, BUTTON_COLOR_DEFAULT);
+    }
+    
+    public void setButtonColor(String color){
+        this.getStateHelper().put(BUTTON_COLOR, color);
     }
 }
