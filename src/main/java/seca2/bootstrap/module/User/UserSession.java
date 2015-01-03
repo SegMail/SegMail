@@ -16,7 +16,7 @@ import seca2.entity.user.UserType;
  * @author LeeKiatHaw
  */
 @SessionScoped
-public class UserContainer implements Serializable{
+public class UserSession implements Serializable{
     
     private String userId;
     private String sessionId;

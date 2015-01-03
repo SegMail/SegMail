@@ -7,6 +7,8 @@
 package seca2.program.user;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -17,7 +19,10 @@ import javax.inject.Named;
 import org.hibernate.exception.JDBCConnectionException;
 import org.joda.time.DateTime;
 import seca2.bootstrap.module.User.UserModule;
+import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserAccountLockedException;
+import seca2.component.user.UserContainer;
+import seca2.component.user.UserService;
 import seca2.component.user.UserServiceHibernate;
 import seca2.entity.user.User;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -30,7 +35,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @RequestScoped
 public class FormUserLogin {
     
-    @EJB private UserServiceHibernate userService;
+    @EJB private UserService userService;
     /*@Inject*/ private UserModule userModule; //to check if there was a previous URL to be redirected and set the sessionID
     
     private String username;
@@ -51,25 +56,24 @@ public class FormUserLogin {
                     "Please enter password", null);
             return;
         }
-        User user = null;
+        UserContainer uc = null;
         try {
             //use UserService to login
-            user = userService.login(username, password);
-        } catch (UserAccountLockedException ex) {
+            uc = userService.login(username, password);
+            
+        } catch (UserAccountLockedException usalex) {
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR,
                     "Oops...Your account has been locked. Please contact administrator to unlock it.", null);
             return;
-        } catch (EJBException ejbex) {
-            String message = ejbex.getCause().getMessage();
-            if (ejbex.getCause() instanceof JDBCConnectionException) {
-                message = "There was a problem connecting to the database. Please try again later.";
-            }
-
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, message, null);
+        } catch (DBConnectionException dbex) {
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, dbex.getMessage(), null);
+            return;
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
             return;
         }
 
-        if (user == null) {
+        if (uc == null) {
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR,
                     "Wrong credentials. Are you sure you entered the correct credentials?",
                     "Alternatively, would you like to created a new account? ");

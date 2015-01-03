@@ -10,6 +10,7 @@ import java.util.List;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.NamingContainer;
 import javax.faces.component.UIInput;
+import javax.faces.component.UISelectOne;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import seca2.jsf.BootstrapColor;
 
@@ -19,7 +20,7 @@ import seca2.jsf.BootstrapColor;
  * @author LeeKiatHaw
  */
 @FacesComponent(DropdownComponent.COMPONENT_TYPE)
-public class DropdownComponent extends SelectOneMenu implements NamingContainer {
+public class DropdownComponent extends UISelectOne implements NamingContainer {
 
     public static final String COMPONENT_FAMILY = "Dropdown";
     public static final String COMPONENT_TYPE = "Dropdown";

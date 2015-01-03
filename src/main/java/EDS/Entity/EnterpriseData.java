@@ -8,6 +8,7 @@ package EDS.Entity;
 
 import java.sql.Date;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -31,7 +32,12 @@ public abstract class EnterpriseData extends AuditedObject{
     protected Date DATE_CREATED;
     protected String CREATED_BY;
 
-    @Id @ManyToOne
+    
+    /**
+     * 
+     * @return 
+     */
+    @Id @ManyToOne(fetch=FetchType.LAZY) //For performance's sake
     public EnterpriseObject getOWNER() {
         return OWNER;
     }

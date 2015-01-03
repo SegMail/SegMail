@@ -26,7 +26,7 @@ import seca2.bootstrap.BootstrapOutput;
 //@SessionScoped //Should not be a SessionScoped object
 public abstract class UserModuleOld extends BootstrapModule implements Serializable{
     
-    @Inject private UserContainer userContainer; //this is not resolved precisely
+    @Inject private UserSession userContainer; //this is not resolved precisely
     private final LoginMode loginMode = LoginMode.BLOCK;
     
     private String sSessionId;

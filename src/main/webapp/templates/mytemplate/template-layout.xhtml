@@ -51,6 +51,7 @@
         <!--<script src="#{request.contextPath}/templates/mytemplate/js/ajax/ajax-loader-hack.js"></script>-->
         <!--Custom components/hacks-->
         <h:outputScript target="head">
+            <!--this is a hack for rendering JSF's h:selectOneMenu as a button-->
             $(document).ready(function() {
             loadNiceButtons();
             });

@@ -26,13 +26,13 @@ import seca2.bootstrap.CoreModule;
 public class UserModule extends BootstrapModule implements Serializable {
 
     @Inject
-    private UserContainer userContainer; //this is not resolved precisely
+    private UserSession userContainer; //this is not resolved precisely
     private final LoginMode loginMode = LoginMode.BLOCK;
 
     private String previousURI;
     private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
 
-    public boolean sameSession(HttpSession session, UserContainer uc){
+    public boolean sameSession(HttpSession session, UserSession uc){
         if(uc == null)
             return false;
         
@@ -42,7 +42,7 @@ public class UserModule extends BootstrapModule implements Serializable {
         return (session.getId().equals(uc.getSessionId()));
     }
     
-    public boolean isAuthenticated(UserContainer uc){
+    public boolean isAuthenticated(UserSession uc){
         return uc.isLoggedIn();
     }
 
@@ -102,7 +102,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean inService() {
-        return false;
+        return true;
     }
 
 

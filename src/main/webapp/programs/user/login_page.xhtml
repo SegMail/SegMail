@@ -56,10 +56,10 @@
                                            showEvent="focus" hideEvent="blur" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
                                 <script type="text/javascript">
-                                    $(document).ready(function(){
+                                    $(document).ready(function () {
                                         $('#test-tooltip').tooltip({
                                             'trigger': 'focus',
-                                            'title' : 'test-tooltip'
+                                            'title': 'test-tooltip'
                                         });
                                     })
                                 </script>
@@ -72,17 +72,22 @@
                             </h:panelGroup>
 
                             <h:panelGroup layout="block" class="form-group">
-                                <h:inputText id="login-password" class="form-control login-field"
-                                             value="#{FormUserLogin.password}"/>
+                                <h:inputSecret id="login-password" class="form-control login-field"
+                                               value="#{FormUserLogin.password}"
+                                               />
                                 <p:watermark for="login-password" value="Password" />
                                 <label class="login-field-icon fui-user" for="login-password"></label>
                             </h:panelGroup>
-                            <p:commandButton styleClass="btn btn-lg btn-primary btn-block"
+                            <p:commandButton id="login-button" styleClass="btn btn-lg btn-primary btn-block"
                                              value="Log in" action="#{FormUserLogin.login(session.id)}"
                                              update="@form"/>
                             <h:commandLink styleClass="login-link" value="Lost your password?" />
-                            
-                            <s2:messenger id="login-messenger" />
+
+                            <s2:messenger id="login-messenger" for="form-user-login" />
+
+                            <p:blockUI id="loginFormBlock" block="form-user-login" trigger="form-user-login:login-button">
+                                <p id="spinner">Please wait while we do what we do best.</p>
+                            </p:blockUI>
                         </h:form>
                     </div>
                 </div>

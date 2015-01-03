@@ -19,7 +19,7 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultSites;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.module.User.UserSession;
 import seca2.component.data.DBConnectionException;
 import seca2.component.navigation.MenuContainer;
 import seca2.component.navigation.NavigationService;
@@ -42,7 +42,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     //A MenuContainer should be inside a UserContainer, so there's no need for so many containers.
     //@Inject private MenuContainer menuContainer; //This module initializes the menu so that other programs and components can use it
     @Inject
-    private UserContainer userContainer;
+    private UserSession userContainer;
 
     @PostConstruct
     public void init() {

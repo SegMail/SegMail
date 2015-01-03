@@ -22,7 +22,7 @@ import seca2.bootstrap.BootstrapOutput;
 public abstract class UserModule_1 extends BootstrapModule implements Serializable {
 
     @Inject
-    private UserContainer userContainer; //this is not resolved precisely
+    private UserSession userContainer; //this is not resolved precisely
     private final LoginMode loginMode = LoginMode.BLOCK;
 
     private String previousURI;
