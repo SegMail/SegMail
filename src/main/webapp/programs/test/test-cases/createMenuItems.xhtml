@@ -16,13 +16,16 @@
 
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <s2:dropdown id="dropdownItems" buttonColor="danger"
+                        <s2:dropdown id="dropdownItems" buttonColor="danger" 
+                                     
                                      >
                             <f:selectItem itemLabel="No parent" itemValue="" />
-                            <f:selectItems value="#{ProgramTest.formTestNavigation.selectOneMenuTest}"
-                                           var="testMenuItem" 
-                                           itemLabel="#{testMenuItem}"
-                                           itemValue="#{testMenuItem}"/>
+                            <f:selectItems value="#{FormTestNavigation.allMenuItems}"
+                                            var="menuItem" 
+                                            itemLabel="#{menuItem.MENU_ITEM_NAME}"
+                                            itemValue="#{menuItem.OBJECTID}"
+                                            >
+                            </f:selectItems>
                         </s2:dropdown>
                     </div>
 

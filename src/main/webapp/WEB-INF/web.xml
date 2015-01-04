@@ -12,7 +12,7 @@
     <!--non-JSF values-->
     <context-param>
         <param-name>BYPASS_AUTHENTICATION</param-name>
-        <param-value>FALSE</param-value>
+        <param-value>true</param-value>
     </context-param>
     
     

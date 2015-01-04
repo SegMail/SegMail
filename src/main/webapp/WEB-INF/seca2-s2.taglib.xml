@@ -50,6 +50,7 @@
         <component>
             <component-type>Dropdown</component-type>
             <renderer-type>seca2.jsf.custom.dropdown.DropdownRenderer</renderer-type>
+            <component-extension>javax.faces.SelectOne</component-extension>
         </component>
         
         <attribute>
@@ -59,7 +60,7 @@
         </attribute>
         
         <attribute>
-            <name>dropdownClass</name>
+            <name>styleClass</name>
             <type>java.lang.String</type>
             <description>The style class for the outer div tags.</description>
         </attribute>
@@ -99,5 +100,6 @@
             <type>java.lang.String</type>
             <description>Bootstrap color (default, primary, etc)</description>
         </attribute>
+            
     </tag>
 </facelet-taglib>

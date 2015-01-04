@@ -5,14 +5,9 @@
  */
 package seca2.jsf.custom.dropdown;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.faces.component.FacesComponent;
 import javax.faces.component.NamingContainer;
-import javax.faces.component.UIInput;
 import javax.faces.component.UISelectOne;
-import org.primefaces.component.selectonemenu.SelectOneMenu;
-import seca2.jsf.BootstrapColor;
 
 /**
  * It seems better to use a composite component than a custom one, since the 
@@ -29,8 +24,8 @@ public class DropdownComponent extends UISelectOne implements NamingContainer {
     public static final String EMPTY_MESSAGE = "emptyMessage";
     public static final String EMPTY_MESSAGE_DEFAULT = "No Item exists yet";
     
-    public static final String DROPDOWN_CLASS = "dropdownClass";
-    public static final String DROPDOWN_CLASS_DEFAULT = "btn-group"; //The bootstrap class
+    public static final String STYLECLASS = "styleClass";
+    public static final String STYLECLASS_DEFAULT = ""; 
     
     public static final String BUTTON_CLASS = "buttonClass";
     public static final String BUTTON_CLASS_DEFAULT = "btn dropdown-toggle";
@@ -67,12 +62,12 @@ public class DropdownComponent extends UISelectOne implements NamingContainer {
         this.getStateHelper().put(EMPTY_MESSAGE, emptyMessage);
     }
     
-    public String getDropdownClass(){
-        return (String) this.getStateHelper().eval(DROPDOWN_CLASS, DROPDOWN_CLASS_DEFAULT);
+    public String getStyleClass(){
+        return (String) this.getStateHelper().eval(STYLECLASS, STYLECLASS_DEFAULT);
     }
     
-    public void setDropdownClass(String dropdownClass){
-        this.getStateHelper().put(DROPDOWN_CLASS, dropdownClass);
+    public void setStyleClass(String StyleClass){
+        this.getStateHelper().put(STYLECLASS, StyleClass);
     }
     
     public String getButtonClass(){

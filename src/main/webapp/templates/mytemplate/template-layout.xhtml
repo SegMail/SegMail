@@ -51,12 +51,12 @@
         <!--<script src="#{request.contextPath}/templates/mytemplate/js/ajax/ajax-loader-hack.js"></script>-->
         <!--Custom components/hacks-->
         <h:outputScript target="head">
-            <!--this is a hack for rendering JSF's h:selectOneMenu as a button-->
+            <!--this is a hack for rendering JSF's h:selectOneMenu as a button. See: https://github.com/silviomoreto/bootstrap-select#usage-->
             $(document).ready(function() {
-            loadNiceButtons();
+                loadNiceButtons();
             });
             function loadNiceButtons() {
-            $('.selectpicker').selectpicker({style: 'btn  btn-wide btn-primary', menuStyle: 'dropdown-inverse'});
+                $('.selectpicker').selectpicker({style: 'btn  btn-wide btn-primary', menuStyle: 'dropdown-inverse'});
             };
         </h:outputScript>
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
