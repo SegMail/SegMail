@@ -7,24 +7,18 @@
 package seca2.program.user;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import org.hibernate.exception.JDBCConnectionException;
 import org.joda.time.DateTime;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserAccountLockedException;
 import seca2.component.user.UserContainer;
 import seca2.component.user.UserService;
-import seca2.component.user.UserServiceHibernate;
-import seca2.entity.user.User;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -101,6 +95,7 @@ public class FormUserLogin {
             ec.redirect(ec.getRequestContextPath());//go to home
         }
 
+        //Remember to construct the UserSession before redirecting!
     }
 
     public String getUsername() {

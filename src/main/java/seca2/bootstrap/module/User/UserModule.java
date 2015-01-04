@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -62,6 +63,16 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         FacesContext fc = (FacesContext) inputContext.getFacesContext();
         HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
+        
+        //allow bypass authentication if application is not in PRODUCTION stage
+        if(!fc.getApplication().getProjectStage().equals(ProjectStage.Production)){
+            String bypass = fc.getExternalContext().getInitParameter("BYPASS_AUTHENTICATION");
+            //if not in PRODUCTION and BYPASS_AUTHENTICATION flag is set
+            if(bypass.equalsIgnoreCase("true")){
+                return true;
+            }
+        }
+            
         
         boolean sameSession = this.sameSession(session,this.userContainer);
         boolean isAuthenticated = this.isAuthenticated(this.userContainer);

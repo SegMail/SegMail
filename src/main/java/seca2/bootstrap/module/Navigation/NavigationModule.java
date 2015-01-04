@@ -5,12 +5,8 @@
  */
 package seca2.bootstrap.module.Navigation;
 
-import TreeAPI.TreeNode;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -18,10 +14,8 @@ import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.DefaultSites;
 import seca2.bootstrap.module.User.UserSession;
 import seca2.component.data.DBConnectionException;
-import seca2.component.navigation.MenuContainer;
 import seca2.component.navigation.NavigationService;
 import seca2.entity.navigation.MenuItem;
 
@@ -82,7 +76,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean inService() {
-        return false;
+        return true;
     }
 
 }

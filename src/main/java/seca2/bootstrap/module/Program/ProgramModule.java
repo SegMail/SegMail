@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
@@ -109,7 +111,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return -97;
+        return -97; 
     }
 
     @Override
@@ -117,6 +119,12 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //Hardcoded for testing
         outputContext.setPageRoot("/programs/test/layout.xhtml");
         outputContext.getNonCoreValues().put("TEST_MENU", this.programs);
+        
+        //Try this awesome stuff
+        FacesContext fc = inputContext.getFacesContext();
+        String pathInfo = ((HttpServletRequest) fc.getExternalContext().getRequest()).getPathInfo();
+        
+        System.out.println(pathInfo);
         
         return true;
     }

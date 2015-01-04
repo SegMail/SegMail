@@ -7,6 +7,7 @@ package seca2.component.user;
 
 import seca2.entity.user.User;
 import seca2.entity.user.UserPreferenceSet;
+import seca2.entity.user.UserType;
 
 /**
  *
@@ -16,6 +17,7 @@ public class UserContainer {
     
     private User user;
     private UserPreferenceSet preferences;
+    private UserType userType;
 
     public User getUser() {
         return user;
@@ -31,6 +33,14 @@ public class UserContainer {
 
     public void setPreferences(UserPreferenceSet preferences) {
         this.preferences = preferences;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
     
     

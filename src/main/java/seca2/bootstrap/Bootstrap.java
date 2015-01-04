@@ -64,6 +64,7 @@ public class Bootstrap implements Serializable {
         //output = new BootstrapOutput();
         
         System.out.println(program);
+        input.setProgram(program);
     }
     
     @URLActions(actions={

@@ -7,6 +7,7 @@ package seca2.entity.user;
 
 import EDS.Entity.EnterpriseObject;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -20,7 +21,16 @@ import javax.persistence.TableGenerator;
 @TableGenerator(name="USER_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
 public class User extends EnterpriseObject {
 
-    
+    private UserType USERTYPE;
+
+    @ManyToOne
+    public UserType getUSERTYPE() {
+        return USERTYPE;
+    }
+
+    public void setUSERTYPE(UserType USERTYPE) {
+        this.USERTYPE = USERTYPE;
+    }
     
     @Override
     public void randInit() {

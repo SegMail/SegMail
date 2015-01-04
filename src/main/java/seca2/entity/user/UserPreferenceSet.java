@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.MapKey;
@@ -34,7 +35,8 @@ public class UserPreferenceSet extends EnterpriseData implements Serializable {
     
     private Map<String,String> PREFERENCES = new HashMap<String,String>();
 
-    @MapKey(name="name")
+    //@MapKey(name="name")
+    @ElementCollection
     public Map<String,String> getPREFERENCES() {
         return PREFERENCES;
     }

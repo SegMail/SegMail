@@ -242,6 +242,7 @@ public class UserService {
                 UserContainer uc = new UserContainer();
                 uc.setPreferences(preferences);
                 uc.setUser(user);
+                uc.setUserType(user.getUSERTYPE());
                 
                 return uc;
                 
