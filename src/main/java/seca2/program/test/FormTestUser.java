@@ -7,6 +7,8 @@
 package seca2.program.test;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -14,6 +16,7 @@ import javax.faces.application.FacesMessage;
 import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserService;
 import seca2.component.user.UserTypeException;
+import seca2.entity.user.UserType;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -23,31 +26,59 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @RequestScoped
 public class FormTestUser implements Serializable {
     
+    //Create UserType
     private String userTypeName;
     private String description;
     
-    private final String formName = "createUsertypeForm";
+    private final String createUsertypeFormName = "createUsertypeForm";
+    
+    //Create User
+    private List<UserType> allUserTypes = new ArrayList<UserType>();
+    private long chosenUserType;
+    private String username;
+    private String password;
+    
+    private final String createUserFormName = "createUserForm";
     
     @EJB private UserService userService;
     
     @PostConstruct
     public void init(){
-        
+        this.initializeAllUserTypes();
     }
     
     public void createUserType(){
         try{
             userService.createUserType(userTypeName, description);
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Usertype "+userTypeName+" created!", null);
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "Usertype "+userTypeName+" created!", null);
         } 
         catch (UserTypeException utex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, utex.getClass().getSimpleName(), utex.getMessage());
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, utex.getClass().getSimpleName(), utex.getMessage());
         } 
         catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } 
         catch(Exception ex){
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
+    }
+    
+    public void createUser(){
+        
+    }
+    
+    public void initializeAllUserTypes(){
+         try{
+            allUserTypes = userService.getAllUserTypes();
+            //who knows whether there is empty list or not?
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        }
+        catch(Exception ex){
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
         }
     }
 
@@ -65,6 +96,38 @@ public class FormTestUser implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<UserType> getAllUserTypes() {
+        return allUserTypes;
+    }
+
+    public void setAllUserTypes(List<UserType> allUserTypes) {
+        this.allUserTypes = allUserTypes;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public long getChosenUserType() {
+        return chosenUserType;
+    }
+
+    public void setChosenUserType(long chosenUserType) {
+        this.chosenUserType = chosenUserType;
     }
     
     

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+    <ui:composition template="/programs/test/template/test-case-panel.xhtml">
+        <!--test creation of usertypes-->
+        <ui:define name="panel-heading">
+            Create Users
+        </ui:define>
+        <ui:define name="panel-body">
+            <h:form id="createUserForm" >
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <s2:dropdown id="userType"
+                                             value="#{ProgramTest.formTestUser.chosenUserType}">
+                                    <c:choose>
+                                        <c:when test="#{(ProgramTest.formTestUser.allUserTypes.size() == 0)}">
+                                            <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <f:selectItems value="#{ProgramTest.formTestUser.allUserTypes}"
+                                                           var="userType" 
+                                                           itemLabel="#{userType.USERTYPENAME}"
+                                                           itemValue="#{userType.OBJECTID}"
+                                                           >
+                                            </f:selectItems>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </s2:dropdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">User Name</span>
+                                <h:inputText id="username" styleClass="form-control"
+                                             value="#{ProgramTest.formTestUser.username}" ></h:inputText>
+                                <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <!--<h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>-->
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Password</span>
+                                <h:inputSecret id="password" styleClass="form-control"
+                                               value="#{ProgramTest.formTestUser.password}" ></h:inputSecret>
+                                <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <p:commandButton id="createUserButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Usertype"
+                                         actionListener="#{ProgramTest.formTestUser.createUser()}"
+                                         update="@form">
+                        </p:commandButton>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <s2:messenger for="createUserForm" />
+                    </div>
+                </div>
+                <p:blockUI id="setupNavigationFormBlock" block="createUserForm" 
+                           trigger="createUserForm:createUserButton"
+                           >
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
