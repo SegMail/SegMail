@@ -36,6 +36,7 @@ import seca2.entity.user.UserPreferenceSet;
 import seca2.entity.user.UserPreferenceSet_;
 import seca2.entity.user.UserType;
 import seca2.entity.user.UserType_;
+import seca2.entity.user.User_;
 
 /**
  *
@@ -53,6 +54,14 @@ public class UserService {
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
 
+    /**
+     * Should I return something like UserTypeID?
+     * 
+     * @param userTypeName
+     * @param description
+     * @throws UserTypeException
+     * @throws DBConnectionException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void createUserType(String userTypeName, String description)
             throws UserTypeException, DBConnectionException {
@@ -81,6 +90,101 @@ public class UserService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public User createUser(long userTypeId) 
+            throws UserCreationException, DBConnectionException{
+        try{
+            UserType type = this.getUserTypeById(userTypeId);
+            if(type == null)
+                throw new UserCreationException("UserType Id "+userTypeId+" not found.");
+            
+            User user = new User();
+            user.setUSERTYPE(type);
+            em.persist(user);
+            return user;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void registerUserByUserId(long userId, String username, String password) 
+            throws UserRegistrationException, DBConnectionException{
+        try{
+            //Check if the userId already exist by retrieving it. If no, throw exception.
+            User existingUser = this.getUserById(userId);
+            if(existingUser == null)
+                throw new UserRegistrationException("User ID "+userId+" does not exist yet.");
+            
+            //Check if username is null
+            if(username == null || username.isEmpty())
+                throw new UserRegistrationException("Username cannot be empty.");
+            
+            //Check if password is null
+            if(password == null || password.isEmpty())
+                throw new UserRegistrationException("Password cannot be empty.");
+            
+            //Create the UserAccount object and link it to the User object
+            UserAccount userAccount = new UserAccount();
+            userAccount.setUSERNAME(username);
+            userAccount.setPASSWORD(password);
+            userAccount.setOWNER(existingUser);
+            
+            //Persist and throw any errors
+            em.persist(userAccount);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void registerUserByUserTypeId(long userTypeId, String username, String password)
+        throws UserRegistrationException, DBConnectionException{
+        try{
+            //Check if username is null
+            if(username == null || username.isEmpty())
+                throw new UserRegistrationException("Username cannot be empty.");
+            
+            //Check if password is null
+            if(password == null || password.isEmpty())
+                throw new UserRegistrationException("Password cannot be empty.");
+            
+            //Create a new User object
+            User newUser = this.createUser(userTypeId);
+            
+            //Create the UserAccount object and link it to the User object
+            UserAccount userAccount = new UserAccount();
+            userAccount.setUSERNAME(username);
+            userAccount.setPASSWORD(password);
+            userAccount.setOWNER(newUser);
+            
+            //Persist and throw any errors
+            em.persist(userAccount);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (UserCreationException ucex){
+            throw new UserRegistrationException(ucex.getLocalizedMessage());
         } catch (Exception ex) {
             throw ex;
         }
@@ -156,6 +260,31 @@ public class UserService {
                     .getResultList();
 
             return results;
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public User getUserById(long userId) throws DBConnectionException{
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<User> criteria = builder.createQuery(User.class);
+            Root<User> sourceEntity = criteria.from(User.class); //FROM UserType
+            
+            criteria.select(sourceEntity); // SELECT *
+            criteria.where(builder.equal(sourceEntity.get(User_.OBJECTID), userId)); //WHERE USERTYPENAME = userTypeName
+
+            User result = em.createQuery(criteria)
+                    .getSingleResult();
+
+            return result;
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

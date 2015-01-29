@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-package seca2.entity.user;
+package seca2.component.user;
 
 /**
  *
- * @author KH
+ * @author LeeKiatHaw
  */
-public class NewUserListener {
-    
+public class UserCreationException extends Exception{
+
+    public UserCreationException(String message) {
+        super(message);
+    }
     
 }

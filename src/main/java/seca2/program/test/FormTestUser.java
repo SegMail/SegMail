@@ -9,11 +9,14 @@ package seca2.program.test;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import seca2.component.data.DBConnectionException;
+import seca2.component.user.UserRegistrationException;
 import seca2.component.user.UserService;
 import seca2.component.user.UserTypeException;
 import seca2.entity.user.UserType;
@@ -64,7 +67,18 @@ public class FormTestUser implements Serializable {
     }
     
     public void createUser(){
-        
+        try{
+            userService.registerUserByUserTypeId(chosenUserType, username, password);
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "User "+username+" has been created!", null);
+        } catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        } catch (UserRegistrationException ex) {
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not find UserTypeId "+chosenUserType+"!", "Please contact admin.");
+        } catch(Exception ex){
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
+        }
     }
     
     public void initializeAllUserTypes(){

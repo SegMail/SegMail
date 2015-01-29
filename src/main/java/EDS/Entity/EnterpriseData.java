@@ -8,6 +8,7 @@ package EDS.Entity;
 
 import java.sql.Date;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
@@ -22,6 +23,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ENTERPRISEDATA")
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@EntityListeners(EnterpriseDataListener.class)
 public abstract class EnterpriseData extends AuditedObject{
     
     protected EnterpriseObject OWNER;

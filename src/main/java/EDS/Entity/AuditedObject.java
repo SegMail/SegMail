@@ -7,10 +7,6 @@
 package EDS.Entity;
 
 import java.io.Serializable;
-import java.sql.Date;
-import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-import org.joda.time.DateTime;
 
 /**
  *

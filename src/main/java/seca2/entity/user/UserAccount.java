@@ -7,12 +7,7 @@
 package seca2.entity.user;
 
 import EDS.Entity.EnterpriseData;
-import EDS.Entity.EnterpriseObject;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -23,8 +18,8 @@ import javax.persistence.TemporalType;
  * @author KH
  */
 @Entity
-@Table(name="USERENTITY")
-@TableGenerator(name="USERENTITY_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
+@Table(name="USERACCOUNT")
+@TableGenerator(name="USERACCOUNT_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
 public class UserAccount extends EnterpriseData {
     
     private String USERNAME;
