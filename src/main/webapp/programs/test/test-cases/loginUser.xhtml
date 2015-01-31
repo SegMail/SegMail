@@ -8,43 +8,19 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
-        <!--test creation of user-->
+        <!--test login of user-->
         <ui:define name="panel-heading">
-            Create Users
+            Login Users
         </ui:define>
         <ui:define name="panel-body">
-            <h:form id="createUserForm" >
-                <div class="row">
-                    <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <s2:dropdown id="userType"
-                                             value="#{ProgramTest.formTestUser.chosenUserType}">
-                                    <c:choose>
-                                        <c:when test="#{(ProgramTest.formTestUser.allUserTypes.size() == 0)}">
-                                            <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <f:selectItems value="#{ProgramTest.formTestUser.allUserTypes}"
-                                                           var="userType" 
-                                                           itemLabel="#{userType.USERTYPENAME}"
-                                                           itemValue="#{userType.OBJECTID}"
-                                                           >
-                                            </f:selectItems>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </s2:dropdown>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <h:form id="loginUserForm" >
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="col-md-12">
                             <div class="input-group">
                                 <span class="input-group-addon">User Name</span>
                                 <h:inputText id="username" styleClass="form-control"
-                                             value="#{ProgramTest.formTestUser.username}" ></h:inputText>
+                                             value="#{ProgramTest.formTestUser.loginUsername}" ></h:inputText>
                                 <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
                             </div>
 
@@ -56,7 +32,7 @@
                             <div class="input-group">
                                 <span class="input-group-addon">Password</span>
                                 <h:inputSecret id="password" styleClass="form-control"
-                                               value="#{ProgramTest.formTestUser.password}" ></h:inputSecret>
+                                               value="#{ProgramTest.formTestUser.loginPassword}" ></h:inputSecret>
                                 <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
                             </div>
                         </div>
@@ -64,8 +40,8 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <p:commandButton id="createUserButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new User"
-                                         actionListener="#{ProgramTest.formTestUser.createUser()}"
+                        <p:commandButton id="loginUserButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Login User"
+                                         actionListener="#{ProgramTest.formTestUser.loginUser()}"
                                          update="@form">
                         </p:commandButton>
 
@@ -73,11 +49,11 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
-                        <s2:messenger for="createUserForm" />
+                        <s2:messenger for="loginUserForm" />
                     </div>
                 </div>
-                <p:blockUI id="setupNavigationFormBlock" block="createUserForm" 
-                           trigger="createUserForm:createUserButton"
+                <p:blockUI id="setupNavigationFormBlock" block="loginUserForm" 
+                           trigger="loginUserForm:loginUserButton"
                            >
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>

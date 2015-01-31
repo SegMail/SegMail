@@ -16,6 +16,8 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import seca2.component.data.DBConnectionException;
+import seca2.component.user.UserAccountLockedException;
+import seca2.component.user.UserContainer;
 import seca2.component.user.UserRegistrationException;
 import seca2.component.user.UserService;
 import seca2.component.user.UserTypeException;
@@ -43,6 +45,12 @@ public class FormTestUser implements Serializable {
     
     private final String createUserFormName = "createUserForm";
     
+    //Login User
+    private String loginUsername;
+    private String loginPassword;
+    
+    private final String loginUserFormName = "loginUserForm";
+    
     @EJB private UserService userService;
     
     @PostConstruct
@@ -69,15 +77,31 @@ public class FormTestUser implements Serializable {
     public void createUser(){
         try{
             userService.registerUserByUserTypeId(chosenUserType, username, password);
-            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "User "+username+" has been created!", null);
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_FATAL, "User "+username+" has been created!", null);
         } catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (UserRegistrationException ex) {
-            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not find UserTypeId "+chosenUserType+"!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage(), "Please contact admin.");
         } catch(Exception ex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getClass().getSimpleName(), //why? i forgot why...
                     ex.getCause().getMessage());
+        }
+    }
+    
+    public void loginUser(){
+        try{
+            UserContainer uc = userService.login(this.loginUsername, this.loginPassword);
+            if(uc == null)
+                throw new Exception("Wrong credentials.");
+            
+            FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
+        } catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        } catch(UserAccountLockedException ualex){
+            FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, ualex.getLocalizedMessage(), "Please contact admin.");
+        } catch(Exception ex){
+            FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage(), null);
         }
     }
     
@@ -142,6 +166,22 @@ public class FormTestUser implements Serializable {
 
     public void setChosenUserType(long chosenUserType) {
         this.chosenUserType = chosenUserType;
+    }
+
+    public String getLoginUsername() {
+        return loginUsername;
+    }
+
+    public void setLoginUsername(String loginUsername) {
+        this.loginUsername = loginUsername;
+    }
+
+    public String getLoginPassword() {
+        return loginPassword;
+    }
+
+    public void setLoginPassword(String loginPassword) {
+        this.loginPassword = loginPassword;
     }
     
     

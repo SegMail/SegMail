@@ -13,6 +13,9 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
 import seca2.bootstrap.module.User.UserModule;
 import seca2.component.data.DBConnectionException;
@@ -30,14 +33,16 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormUserLogin {
     
     @EJB private UserService userService;
-    /*@Inject*/ private UserModule userModule; //to check if there was a previous URL to be redirected and set the sessionID
+    /*@Inject private UserModule userModule; //to check if there was a previous URL to be redirected and set the sessionID
+    
+    */
     
     private String username;
     private String password;
     
     private final String messageBoxId = "form-user-login";
     
-    public void login(String sessionId) throws IOException {
+    public void login() throws IOException {
 
         //Check if username and password are present
         if (username == null || username.isEmpty()) {
@@ -75,8 +80,8 @@ public class FormUserLogin {
         }
 
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        //HttpServletRequest req = (HttpServletRequest) ec.getRequest();
-        //HttpServletResponse resp = (HttpServletResponse) ec.getResponse();
+        HttpServletRequest req = (HttpServletRequest) ec.getRequest();
+        HttpServletResponse resp = (HttpServletResponse) ec.getResponse();
 
         //HttpSession session = req.getSession(true);
         //session.setAttribute("user", 1);
@@ -86,9 +91,15 @@ public class FormUserLogin {
         //System.out.println("Session " + userModule.getsSessionId() + " started at " + sessionStarttime);
         password = "";
         username = "";
-
+        
+        //Regenerate session ID
+        HttpSession session = req.getSession(true);
+        //Set UserContainer with session ID
+        String sessionId = session.getId();
+        uc.setSessionId(sessionId);
+        
         //do a redirect to refresh the view
-        String previousURI = userModule.getPreviousURI();
+        String previousURI = uc.getLastURL();
         if (previousURI != null && !previousURI.isEmpty()) {
             ec.redirect(previousURI);
         } else {

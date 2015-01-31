@@ -5,10 +5,7 @@
  */
 package seca2.bootstrap.module.User;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -17,6 +14,7 @@ import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
+import seca2.component.user.UserContainer;
 
 /**
  *
@@ -27,13 +25,13 @@ import seca2.bootstrap.CoreModule;
 public class UserModule extends BootstrapModule implements Serializable {
 
     @Inject
-    private UserSession userContainer; //this is not resolved precisely
+    private UserContainer userContainer; //this is not resolved precisely [20150131]
     private final LoginMode loginMode = LoginMode.BLOCK;
 
     private String previousURI;
     private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
 
-    public boolean sameSession(HttpSession session, UserSession uc){
+    public boolean sameSession(HttpSession session, UserContainer uc){
         if(uc == null)
             return false;
         
@@ -43,7 +41,7 @@ public class UserModule extends BootstrapModule implements Serializable {
         return (session.getId().equals(uc.getSessionId()));
     }
     
-    public boolean isAuthenticated(UserSession uc){
+    public boolean isAuthenticated(UserContainer uc){
         return uc.isLoggedIn();
     }
 
@@ -73,7 +71,6 @@ public class UserModule extends BootstrapModule implements Serializable {
             }
         }
             
-        
         boolean sameSession = this.sameSession(session,this.userContainer);
         boolean isAuthenticated = this.isAuthenticated(this.userContainer);
         

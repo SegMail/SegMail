@@ -48,6 +48,11 @@ public abstract class EnterpriseData extends AuditedObject{
         this.OWNER = OWNER;
     }
 
+    /**
+     * Start date is a primary as all EnterpriseObjects can have multiple EnterpriseData
+     * records
+     * @return 
+     */
     @Id 
     public Date getSTART_DATE() {
         return START_DATE;
@@ -57,6 +62,11 @@ public abstract class EnterpriseData extends AuditedObject{
         this.START_DATE = START_DATE;
     }
 
+    /**
+     * End date is a primary as all EnterpriseObjects can have multiple EnterpriseData
+     * records
+     * @return 
+     */
     @Id 
     public Date getEND_DATE() {
         return END_DATE;

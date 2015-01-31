@@ -5,7 +5,7 @@
  */
 package seca2.component.user;
 
-import EDS.Entity.EnterpriseObject_;
+import EDS.Entity.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -22,13 +22,13 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 import seca2.bootstrap.GlobalValues;
+import seca2.component.Service;
 import seca2.component.data.DBConnectionException;
 import seca2.component.data.HibernateEMServices;
-import seca2.entity.navigation.MenuItem;
+import seca2.component.data.HibernateHelper;
 import seca2.entity.user.User;
 import seca2.entity.user.UserAccount;
 import seca2.entity.user.UserAccount_;
@@ -43,7 +43,7 @@ import seca2.entity.user.User_;
  * @author vincent.a.lee
  */
 @Stateless
-public class UserService {
+public class UserService extends Service {
 
     private static final String HASH_KEY = "33150291203315029120";
     private static final int MAX_UNSUCCESS_ATTEMPTS = 3;
@@ -135,10 +135,13 @@ public class UserService {
             if(password == null || password.isEmpty())
                 throw new UserRegistrationException("Password cannot be empty.");
             
+            //Hash passwords
+            String hashedPassword = this.getPasswordHash(username, password, HASH_KEY);
+            
             //Create the UserAccount object and link it to the User object
             UserAccount userAccount = new UserAccount();
             userAccount.setUSERNAME(username);
-            userAccount.setPASSWORD(password);
+            userAccount.setPASSWORD(hashedPassword);
             userAccount.setOWNER(existingUser);
             
             //Persist and throw any errors
@@ -166,13 +169,20 @@ public class UserService {
             if(password == null || password.isEmpty())
                 throw new UserRegistrationException("Password cannot be empty.");
             
-            //Create a new User object
+            //Check if username has been used
+            if(this.checkUsernameExist(username))
+                throw new UserRegistrationException("Username "+username+" already exist.");
+            
+            //Create a new User object first
             User newUser = this.createUser(userTypeId);
+            
+            //Hash passwords
+            String hashedPassword = this.getPasswordHash(username, password, HASH_KEY);
             
             //Create the UserAccount object and link it to the User object
             UserAccount userAccount = new UserAccount();
             userAccount.setUSERNAME(username);
-            userAccount.setPASSWORD(password);
+            userAccount.setPASSWORD(hashedPassword);
             userAccount.setOWNER(newUser);
             
             //Persist and throw any errors
@@ -182,6 +192,7 @@ public class UserService {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
+            
             throw pex;
         } catch (UserCreationException ucex){
             throw new UserRegistrationException(ucex.getLocalizedMessage());
@@ -229,7 +240,7 @@ public class UserService {
             criteria.where(builder.equal(sourceEntity.get(UserType_.OBJECTID), userTypeId)); //WHERE USERTYPENAME = userTypeName
 
             UserType result = em.createQuery(criteria)
-                    .getSingleResult();
+                    .getSingleResult(); //appropriate! because it is an EO
 
             return result;
         } catch (PersistenceException pex) {
@@ -282,7 +293,7 @@ public class UserService {
             criteria.where(builder.equal(sourceEntity.get(User_.OBJECTID), userId)); //WHERE USERTYPENAME = userTypeName
 
             User result = em.createQuery(criteria)
-                    .getSingleResult();
+                    .getSingleResult();//appropriate! because it is an EO
 
             return result;
 
@@ -365,14 +376,18 @@ public class UserService {
                  * or UserAccount object. User object is useless and UserAccount
                  * object would contain passwords.
                  */
-                User user = (User) result.getOWNER();
-                UserPreferenceSet preferences = this.getUserPreferences(user.getOBJECTID());
+                EnterpriseObject owner = result.getOWNER();
+                
+                User user = (User) HibernateHelper.initializeAndUnproxy(owner);
+                
+                List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
                 
                 UserContainer uc = new UserContainer();
                 uc.setPreferences(preferences);
                 uc.setUser(user);
                 uc.setUserType(user.getUSERTYPE());
                 
+                uc.setLoggedIn(true);
                 return uc;
                 
                 
@@ -389,7 +404,8 @@ public class UserService {
         throw new RuntimeException("This code has not handled certain cases yet!");
     }
     
-    public UserPreferenceSet getUserPreferences(long userid){
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<UserPreferenceSet> getUserPreferences(long userid){
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<UserPreferenceSet> criteria = builder.createQuery(UserPreferenceSet.class);
 
@@ -398,10 +414,71 @@ public class UserService {
 
         criteria.where(builder.equal(sourceEntity.get(UserPreferenceSet_.OWNER), userid));
         
-        UserPreferenceSet result = em.createQuery(criteria)
-                .getSingleResult();
+        /* Faulty assumption to use getSingleResult()
+        * getSingleResult() throws exception as long as there is no 1 single result 
+        * returned!
+        *
+        *UserPreferenceSet result = em.createQuery(criteria)
+        *       .getSingleResult();
+        */
         
-        return result;
+        List<UserPreferenceSet> results = em.createQuery(criteria)
+                .getResultList();
+        
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public UserAccount getUserAccountByUsername(String username) 
+            throws DBConnectionException{
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
+            Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
+            
+            criteria.select(sourceEntity); // SELECT *
+            criteria.where(builder.equal(sourceEntity.get(UserAccount_.USERNAME), username)); //WHERE USERTYPENAME = userTypeName
+            
+            UserAccount result = em.createQuery(criteria)
+                    .getSingleResult();
+
+            return result;
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public boolean checkUsernameExist(String username) throws DBConnectionException{
+        try{
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+            Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
+            
+            criteria.select(builder.count(criteria.from(UserAccount.class))); // SELECT *
+            criteria.where(builder.equal(sourceEntity.get(UserAccount_.USERNAME), username)); //WHERE USERNAME = username
+            
+            Long result = em.createQuery(criteria)
+                    .getSingleResult();
+            
+            if(result > 0) return true;
+            
+            return false;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     /**

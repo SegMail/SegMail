@@ -38,6 +38,7 @@ public abstract class EnterpriseObject implements Serializable, Comparable<Enter
      * - Only 1 instance of an entity should exist anytime
      * - If both start and end dates are PK, this means >1 record can be created
      * for 1 object id.
+     * - Each object instance can only have 1 record
      */
     /*@Id*/ protected java.sql.Date START_DATE;
     /*@Id*/ protected java.sql.Date END_DATE;
