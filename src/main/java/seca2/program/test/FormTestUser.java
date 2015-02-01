@@ -15,9 +15,11 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.inject.Inject;
 import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserAccountLockedException;
 import seca2.component.user.UserContainer;
+import seca2.component.user.UserLoginException;
 import seca2.component.user.UserRegistrationException;
 import seca2.component.user.UserService;
 import seca2.component.user.UserTypeException;
@@ -48,6 +50,8 @@ public class FormTestUser implements Serializable {
     //Login User
     private String loginUsername;
     private String loginPassword;
+    @Inject
+    private UserContainer userContainer; //this is not resolved precisely [20150131]
     
     private final String loginUserFormName = "loginUserForm";
     
@@ -91,11 +95,10 @@ public class FormTestUser implements Serializable {
     
     public void loginUser(){
         try{
-            UserContainer uc = userService.login(this.loginUsername, this.loginPassword);
-            if(uc == null)
-                throw new Exception("Wrong credentials.");
-            
+            userService.login(this.loginUsername, this.loginPassword, this.userContainer);
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
+        } catch(UserLoginException esliex){
+            FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, esliex.getLocalizedMessage(), null);
         } catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch(UserAccountLockedException ualex){

@@ -17,6 +17,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -317,91 +318,75 @@ public class UserService extends Service {
      *
      * @param username
      * @param password
+     * @param uc
      * @return
      * @throws UserAccountLockedException
+     * @throws seca2.component.user.UserLoginException
+     * @throws seca2.component.data.DBConnectionException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public UserContainer login(String username, String password) throws UserAccountLockedException, DBConnectionException {
-
-        String secureHash = this.getPasswordHash(username, password, HASH_KEY);
-
+    public void login(String username, String password, UserContainer uc) 
+            throws UserAccountLockedException,
+                   UserLoginException, 
+                   DBConnectionException {
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
-
-            Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
-            criteria.select(sourceEntity);
-
-            criteria.where(builder.equal(sourceEntity.get(UserAccount_.USERNAME), username));
-
-            /**
-             * We are assuming that username is unique here. If in any case
-             * there are duplicated usernames, we are also assuming there is
-             * only 1 valid UserAccount record for each User object (Time
-             * constraint T). If there are any duplicates, an exception will be
-             * thrown here.
-             */
-            UserAccount result = em.createQuery(criteria)
-                    .getSingleResult();
-
-            if (result == null) {
-                return null;
-            }
+            //Check if username exists
+            UserAccount userAccount = this.getUserAccountByUsername(username);
+            if(userAccount == null) //Do not tell user that username does not exist for security reasons
+                throw new UserLoginException("Wrong credentials.");
             
             //If user's account is already locked, no need to authenticate further
-            if(result.isUSER_LOCKED())
+            if(userAccount.isUSER_LOCKED())
                 throw new UserAccountLockedException(username);
             
-            if (!secureHash.equals(result.getPASSWORD())) { //authentication fails
+            String secureHash = this.getPasswordHash(username, password, HASH_KEY);
+            if (!secureHash.equals(userAccount.getPASSWORD())) { //authentication fails
                 //increment unsuccessful counter and set lock flag
-                result.setLAST_UNSUCCESS_ATTEMPT((new DateTime()).toDate());
-                result.setUNSUCCESSFUL_ATTEMPTS(result.getUNSUCCESSFUL_ATTEMPTS() + 1);
-                if (result.getUNSUCCESSFUL_ATTEMPTS() >= MAX_UNSUCCESS_ATTEMPTS)
-                    result.setUSER_LOCKED(true);
+                userAccount.setLAST_UNSUCCESS_ATTEMPT((new DateTime()).toDate());
+                userAccount.setUNSUCCESSFUL_ATTEMPTS(userAccount.getUNSUCCESSFUL_ATTEMPTS() + 1);
+                if (userAccount.getUNSUCCESSFUL_ATTEMPTS() >= MAX_UNSUCCESS_ATTEMPTS)
+                    userAccount.setUSER_LOCKED(true);
                 
-                em.persist(result);
+                em.persist(userAccount);
                 
-                return null;
+                throw new UserLoginException("Wrong credentials.");
             }
             
             //If authentication passes
-            if(secureHash.equals(result.getPASSWORD())){
+            if(secureHash.equals(userAccount.getPASSWORD())){
                 //Only if there were any unsuccessful login attempts, reset counter
-                if(result.getUNSUCCESSFUL_ATTEMPTS() > 0){
-                    result.setUNSUCCESSFUL_ATTEMPTS(0);
-                    em.persist(result);
+                if(userAccount.getUNSUCCESSFUL_ATTEMPTS() > 0){
+                    userAccount.setUNSUCCESSFUL_ATTEMPTS(0);
+                    em.persist(userAccount);
                 }
                 /**
                  * Should construct and return a UserContainer instead of the User 
                  * or UserAccount object. User object is useless and UserAccount
                  * object would contain passwords.
                  */
-                EnterpriseObject owner = result.getOWNER();
+                EnterpriseObject owner = userAccount.getOWNER();
                 
                 User user = (User) HibernateHelper.initializeAndUnproxy(owner);
                 
                 List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
                 
-                UserContainer uc = new UserContainer();
                 uc.setPreferences(preferences);
                 uc.setUser(user);
                 uc.setUserType(user.getUSERTYPE());
-                
                 uc.setLoggedIn(true);
-                return uc;
                 
-                
+            } else {
+                throw new UserLoginException("UserService: Something not handled yet!");
             }
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
+        } 
+        catch (Exception ex) {
             throw ex;
         }
-        
-        throw new RuntimeException("This code has not handled certain cases yet!");
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -439,12 +424,18 @@ public class UserService extends Service {
             criteria.select(sourceEntity); // SELECT *
             criteria.where(builder.equal(sourceEntity.get(UserAccount_.USERNAME), username)); //WHERE USERTYPENAME = userTypeName
             
+            //Temporary measure before we find a better way to define the underlying
+            //data of UserAccount object and subsequently how to retrieve the correct
+            //result.
+            //
             UserAccount result = em.createQuery(criteria)
-                    .getSingleResult();
+                    .setMaxResults(1)
+                    .getResultList()
+                    .get(0);
 
             return result;
 
-        } catch (PersistenceException pex) {
+        }  catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
