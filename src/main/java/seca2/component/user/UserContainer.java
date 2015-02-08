@@ -22,7 +22,7 @@ import seca2.entity.user.UserType;
  * @author LeeKiatHaw
  */
 @SessionScoped
-public class UserContainer implements Serializable, UserContainerInterface {
+public class UserContainer implements Serializable {
     
     private User user;
     private List<UserPreferenceSet> preferences;
@@ -31,7 +31,6 @@ public class UserContainer implements Serializable, UserContainerInterface {
     private boolean loggedIn; //default is always false
     private String sessionId;
     
-    @Override
     public String regenerateSessionId(){
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         HttpServletRequest req = (HttpServletRequest) ec.getRequest();
@@ -40,67 +39,59 @@ public class UserContainer implements Serializable, UserContainerInterface {
         HttpSession session = req.getSession(true);
         session.invalidate();
         
-        HttpSession newSession = req.getSession(true);
-        this.sessionId = newSession.getId();
+        //https://github.com/hareluya86/SegMail/issues/6 the bug is here!
+        //Old code
+        //HttpSession newSession = req.getSession(true);
+        //Old code
+        session = req.getSession(true);
+        this.sessionId = session.getId();
         return this.sessionId;
     }
 
-    @Override
     public User getUser() {
         return user;
     }
 
-    @Override
     public void setUser(User user) {
         this.user = user;
     }
 
-    @Override
     public UserType getUserType() {
         return userType;
     }
 
-    @Override
     public void setUserType(UserType userType) {
         this.userType = userType;
     }
 
-    @Override
     public List<UserPreferenceSet> getPreferences() {
         return preferences;
     }
 
-    @Override
     public void setPreferences(List<UserPreferenceSet> preferences) {
         this.preferences = preferences;
     }
 
-    @Override
     public String getLastURL() {
         return lastURL;
     }
 
-    @Override
     public void setLastURL(String lastURL) {
         this.lastURL = lastURL;
     }
 
-    @Override
     public boolean isLoggedIn() {
         return loggedIn;
     }
 
-    @Override
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
     }
 
-    @Override
     public String getSessionId() {
         return sessionId;
     }
 
-    @Override
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }

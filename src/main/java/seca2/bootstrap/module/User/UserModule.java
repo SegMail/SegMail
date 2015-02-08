@@ -16,7 +16,6 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.component.user.UserContainer;
-import seca2.component.user.UserContainerInterface;
 
 /**
  *

@@ -43,7 +43,7 @@ public class FormUserLogin {
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
 
             //Regenerate session ID
-            this.userContainer.regenerateSessionId();
+            //this.userContainer.regenerateSessionId();
 
             //do a redirect to refresh the view
             //Something is faulty here after a redirect
