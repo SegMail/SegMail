@@ -64,7 +64,7 @@ public class Bootstrap implements Serializable {
         //output = new BootstrapOutput();
         
         System.out.println(program);
-        input.setProgram(program);
+        
     }
     
     @URLActions(actions={
@@ -74,6 +74,7 @@ public class Bootstrap implements Serializable {
     public void startProcessing(){
         //Debug: parameters will only get injected with @URLAction
         System.out.println(program);
+        input.setProgram(program);
         
         FacesContext fc = FacesContext.getCurrentInstance();
         input.setFacesContext(fc);

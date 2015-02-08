@@ -50,7 +50,7 @@ public class FormUserLogin {
             String previousURI = this.userContainer.getLastURL();
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             if (previousURI != null && !previousURI.isEmpty()) {
-                ec.redirect(previousURI);
+                ec.redirect(previousURI); //calling "test" -> "/SegMail/program/test/test"
             } else {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }

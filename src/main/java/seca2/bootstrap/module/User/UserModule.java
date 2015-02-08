@@ -75,6 +75,10 @@ public class UserModule extends BootstrapModule implements Serializable {
         boolean sameSession = this.sameSession(session,this.userContainer);
         boolean isAuthenticated = this.isAuthenticated(this.userContainer);
         
+        String program = inputContext.getProgram();
+        System.out.println("Requested for progrom: "+program); //debug
+        this.userContainer.setLastURL(program);
+        
         //If it's not the same session, meaning it could be the first vist, or 
         //the previous session has timed out, load the login page.
         if(!sameSession){
