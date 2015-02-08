@@ -6,6 +6,7 @@
 package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
+import javax.enterprise.context.Dependent;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.component.user.UserContainer;
+import seca2.component.user.UserContainerInterface;
 
 /**
  *
@@ -24,8 +26,8 @@ import seca2.component.user.UserContainer;
 @CoreModule
 public class UserModule extends BootstrapModule implements Serializable {
 
-    @Inject
-    private UserContainer userContainer; //this is not resolved precisely [20150131]
+    @Inject @Dependent
+    private UserContainer userContainer; //this is not resolved precisely after redirect[20150131]
     private final LoginMode loginMode = LoginMode.BLOCK;
 
     private String previousURI;

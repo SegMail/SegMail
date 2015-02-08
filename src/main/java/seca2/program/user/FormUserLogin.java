@@ -5,7 +5,6 @@
  */
 package seca2.program.user;
 
-import java.io.IOException;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -13,11 +12,6 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.joda.time.DateTime;
-import seca2.bootstrap.module.User.UserModule;
 import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserAccountLockedException;
 import seca2.component.user.UserContainer;
@@ -52,6 +46,7 @@ public class FormUserLogin {
             this.userContainer.regenerateSessionId();
 
             //do a redirect to refresh the view
+            //Something is faulty here after a redirect
             String previousURI = this.userContainer.getLastURL();
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             if (previousURI != null && !previousURI.isEmpty()) {
