@@ -11,13 +11,14 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -48,10 +49,10 @@ public class UserService extends Service {
 
     private static final String HASH_KEY = "33150291203315029120";
     private static final int MAX_UNSUCCESS_ATTEMPTS = 3;
-
-    @EJB
-    private HibernateEMServices hibernateDB;
-
+    
+    @Resource()
+    private String US_USER;
+    
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
 
@@ -325,7 +326,7 @@ public class UserService extends Service {
      * @throws seca2.component.data.DBConnectionException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void login(String username, String password, UserContainer uc) 
+    public void login(String username, String password, Map<String,Object> userValues) 
             throws UserAccountLockedException,
                    UserLoginException, 
                    DBConnectionException {
@@ -370,10 +371,13 @@ public class UserService extends Service {
                 
                 List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
                 
-                uc.setPreferences(preferences);
-                uc.setUser(user);
-                uc.setUserType(user.getUSERTYPE());
-                uc.setLoggedIn(true);
+                userValues.put(this.US_USER, user);
+                /*
+                userValues.put(USER, user);
+                userValues.put(USER_TYPE, user.getUSERTYPE());
+                userValues.put(USER_ATTRIBUTES, preferences);
+                */
+                System.out.println("");//debug
                 
             } else {
                 throw new UserLoginException("UserService: Something not handled yet!");
@@ -495,4 +499,14 @@ public class UserService extends Service {
         return hashedPassword;
     }
 
+    public String getUS_USER() {
+        return US_USER;
+    }
+
+    public void setUS_USER(String US_USER) {
+        this.US_USER = US_USER;
+    }
+
+    
+    
 }

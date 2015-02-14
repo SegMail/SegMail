@@ -5,6 +5,8 @@
  */
 package seca2.program.user;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -39,11 +41,15 @@ public class FormUserLogin {
 
     public void login() {
         try {
-            userService.login(this.username, this.password, this.userContainer);
+            Map<String,Object> userValues = new HashMap<String,Object>();
+            userService.login(this.username, this.password, userValues);
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
-
+            
             //Regenerate session ID
-            //this.userContainer.regenerateSessionId();
+            //this.userContainer.regenerateSessionId(); //20150214 let's not use this 1st & think of a better idea
+            
+            //Initialize userValues into userContainer
+            this.userContainer.setLoggedIn(true);
 
             //do a redirect to refresh the view
             //Something is faulty here after a redirect
@@ -51,6 +57,8 @@ public class FormUserLogin {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             if (previousURI != null && !previousURI.isEmpty()) {
                 ec.redirect(previousURI); //calling "test" -> "/SegMail/program/test/test"
+                //we need an adaptor pattern for redirection!
+                //this should be in the navigation module
             } else {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }

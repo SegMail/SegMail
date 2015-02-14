@@ -154,8 +154,8 @@ public class BootstrapOld implements Serializable {
             program = programModule.getProgramNames().get(programModule.getCurrentProgramIndex());
         }else{
             programModule.setCurrentProgramIndex(-1);
-            for(int i=0; i<programModule.getPrograms().size(); i++){
-                String prog = programModule.getPrograms().get(i).getPROGRAM_NAME();
+            for(int i=0; i<programModule.getPrograms2().size(); i++){
+                String prog = programModule.getPrograms2().get(i).getPROGRAM_NAME();
                 if(this.program.equalsIgnoreCase(prog)){
                     programModule.setCurrentProgramIndex(i);
                 }

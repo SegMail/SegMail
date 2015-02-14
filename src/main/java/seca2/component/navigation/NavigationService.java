@@ -49,14 +49,10 @@ import seca2.entity.user.UserType;
 public class NavigationService implements Serializable {
 
     @EJB
-    private HibernateEMServices hibernateDB;
-    @EJB
     private UserService userService;
     
     @PersistenceContext(name="HIBERNATE")
     private EntityManager em;
-
-    //private EntityManager em;
 
     /**
      * 
@@ -304,10 +300,7 @@ public class NavigationService implements Serializable {
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public TreeBranch<MenuItem> buildMenuTree(long rootMenuItemId) throws DBConnectionException{
-        //may not be necessary
-        if (em == null || !em.isOpen()) {
-            em = hibernateDB.getEM();
-        }
+        
         
         List<MenuItem> allMenuItems = this.getAllMenuItems();
         return null;

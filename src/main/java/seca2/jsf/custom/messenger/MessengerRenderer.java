@@ -112,7 +112,7 @@ public class MessengerRenderer extends Renderer {
                 }
                 //If not, just get its summary and details to encode it here.
                 else{
-                    if(component.isShowSummary()){
+                    if(component.isShowSummary() && message.getSummary() != null){ //only show summary if supposed to and there's a non-null summary
                         if(SUMMARY_HTML_ELEMENT != null &&
                                 SUMMARY_HTML_ELEMENT.length() > 0)
                             writer.startElement(SUMMARY_HTML_ELEMENT, component);

@@ -8,7 +8,10 @@ package seca2.bootstrap.module.Program;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapInput;
@@ -16,6 +19,8 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.module.User.UserModule;
+import seca2.component.data.DBConnectionException;
+import seca2.component.program.ProgramService;
 import seca2.entity.program.Program;
 
 /**
@@ -30,40 +35,26 @@ import seca2.entity.program.Program;
 public class ProgramModule extends BootstrapModule implements Serializable {
 
     private List<String> programNames; //stud at this moment
-    private List<Program> programs;
+    private List<Program> programs2;
     private int currentProgramIndex;
     public static final int DEFAULT_PROGRAM = 0;
-
-    //@Inject 
-    private UserModule userModule;
     
+    @EJB private ProgramService programService;
 
     @PostConstruct
     public void init() {
         //create a stub first, next time then we'll implement the actual thing
         programNames = new ArrayList<String>();
-        if (userModule != null){// && userModule.checkSessionActive(null)) {
-            programNames.add("test");
-            programNames.add("sendmail");
-            programNames.add("signupforms");
-            programNames.add("lists");
-            programNames.add("subscribers");
-            programNames.add("campaigns");
-            programNames.add("mysettings");
 
-        }
-        else{
-            programNames.add("test");
-            programNames.add("sendmail");
-            programNames.add("signupforms");
-            programNames.add("lists");
-            programNames.add("subscribers");
-            programNames.add("campaigns");
-            programNames.add("mysettings");
+        programNames.add("test");
+        programNames.add("sendmail");
+        programNames.add("signupforms");
+        programNames.add("lists");
+        programNames.add("subscribers");
+        programNames.add("campaigns");
+        programNames.add("mysettings");
 
-        }
-
-        programs = new ArrayList<Program>();
+        programs2 = new ArrayList<Program>();
 
         for (int i = 0; i < programNames.size(); i++) {
             Program program = new Program();
@@ -76,12 +67,12 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             program.setVIEW_ROOT("/programs/" + dir + "/layout.xhtml");
             //program.setPROGRAM_ID(i);//not correct, just for the time being
 
-            programs.add(program);
+            programs2.add(program);
         }
     }
 
     public Program getCurrentProgram() {
-        return this.programs.get(this.currentProgramIndex);
+        return this.programs2.get(this.currentProgramIndex);
     }
 
     public List<String> getProgramNames() {
@@ -100,31 +91,49 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         this.currentProgramIndex = currentProgramIndex;
     }
 
-    public List<Program> getPrograms() {
-        return programs;
+    public List<Program> getPrograms2() {
+        return programs2;
     }
 
-    public void setPrograms(List<Program> programs) {
-        this.programs = programs;
+    public void setPrograms2(List<Program> programs) {
+        this.programs2 = programs;
     }
 
     @Override
     protected int executionSequence() {
-        return -97; 
+        return -97;
     }
 
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         //Hardcoded for testing
         outputContext.setPageRoot("/programs/test/layout.xhtml");
-        outputContext.getNonCoreValues().put("TEST_MENU", this.programs);
-        
-        //Try this awesome stuff
-        FacesContext fc = inputContext.getFacesContext();
-        String pathInfo = ((HttpServletRequest) fc.getExternalContext().getRequest()).getPathInfo();
-        
-        System.out.println(pathInfo);
-        
+        outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
+
+        /*
+         Actual processing
+         1) Check the program requested by retrieving it from inputContext.
+         */
+        String program = inputContext.getProgram();
+        try {
+            /*
+            2) Retrieve the program from database by calling ProgramServices.
+            */
+            List<Program> programs = programService.getProgramByName(program);
+            System.out.println(programs); //debug
+            
+            //select only the first result
+            Program programObject = programs.get(0);
+            outputContext.setPageRoot(programObject.getVIEW_ROOT());
+            
+            /*
+            3) Authorization checks for program access by calling ProgramServices.
+            */
+        } catch (DBConnectionException ex) {
+            //Set error page and stop processing
+            return false;
+        }
+
         return true;
     }
 

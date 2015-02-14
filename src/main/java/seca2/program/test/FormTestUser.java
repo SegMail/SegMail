@@ -8,7 +8,9 @@ package seca2.program.test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -93,7 +95,8 @@ public class FormTestUser implements Serializable {
     
     public void loginUser(){
         try{
-            userService.login(this.loginUsername, this.loginPassword, this.userContainer);
+            Map<String,Object> userValues = new HashMap<String,Object>();
+            userService.login(this.loginUsername, this.loginPassword, userValues);
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
         } catch(UserLoginException esliex){
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, esliex.getLocalizedMessage(), null);
