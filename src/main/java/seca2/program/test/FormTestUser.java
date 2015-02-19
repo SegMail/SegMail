@@ -18,7 +18,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import seca2.component.data.DBConnectionException;
 import seca2.component.user.UserAccountLockedException;
-import seca2.component.user.UserContainer;
+import seca2.bootstrap.module.User.UserContainer;
 import seca2.component.user.UserLoginException;
 import seca2.component.user.UserRegistrationException;
 import seca2.component.user.UserService;

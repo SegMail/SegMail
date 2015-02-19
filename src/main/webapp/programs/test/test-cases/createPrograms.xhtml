@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+    <ui:composition template="/programs/test/template/test-case-panel.xhtml">
+        <!--test creation of user-->
+        <ui:define name="panel-heading">
+            Create Program
+        </ui:define>
+        <ui:define name="panel-body">
+                <h:form id="createProgramForm" >
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Program Name</span>
+                                <h:inputText id="programNameInput" styleClass="form-control"
+                                             value="#{ProgramTest.formTestProgram.programName}" ></h:inputText>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">View Directory</span>
+                                <h:inputText id="viewDirInput" styleClass="form-control"
+                                             value="#{ProgramTest.formTestProgram.programDirectory}" ></h:inputText>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">View Root</span>
+                                <h:inputText id="viewRootInput" styleClass="form-control"
+                                             value="#{ProgramTest.formTestProgram.programViewRoot}" ></h:inputText>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Bean</span>
+                                <h:inputText id="beanInput" styleClass="form-control"
+                                             value="#{ProgramTest.formTestProgram.programBeanLocation}" ></h:inputText>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <p:commandButton id="createProgramButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Program"
+                                         actionListener="#{ProgramTest.formTestProgram.createProgram()}"
+                                         update="@form">
+                        </p:commandButton>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <s2:messenger for="createProgramForm" />
+                    </div>
+                </div>
+                <p:blockUI id="createProgramFormBlock" block="createProgramForm" 
+                           trigger="createProgramForm:createProgramButton"
+                           >
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

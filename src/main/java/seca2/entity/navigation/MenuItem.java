@@ -27,7 +27,7 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
 
     private String MENU_ITEM_NAME; //display name
     private String MENU_ITEM_URL; //request URL
-    private String MENU_ITEM_XHTML; //actual layout.xhtml path
+    //private String MENU_ITEM_XHTML; //actual layout.xhtml path
     private MenuItem PARENT_MENU_ITEM;
 
     public String getMENU_ITEM_NAME() {
@@ -46,6 +46,7 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         this.MENU_ITEM_URL = MENU_ITEM_URL;
     }
 
+    /*
     public String getMENU_ITEM_XHTML() {
         return MENU_ITEM_XHTML;
     }
@@ -53,6 +54,7 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
     public void setMENU_ITEM_XHTML(String MENU_ITEM_XHTML) {
         this.MENU_ITEM_XHTML = MENU_ITEM_XHTML;
     }
+    */
 
     @ManyToOne
     public MenuItem getPARENT_MENU_ITEM() {

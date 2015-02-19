@@ -15,19 +15,17 @@
             <h:form id="setupNavigationForm">
                 <div class="row"><!--form to enter menu-->
                     <div class="col-md-12 col-xs-12 form-group">
-
-                        <h:outputLabel for="allMenuItems" styleClass="control-label col-md-4">Parent MenuItem: </h:outputLabel>
                         <div class="col-md-8">
 
                             <s2:dropdown id="allMenuItems" buttonColor="primary"
-                                             value="#{ProgramTest.formTestNavigation.selectedParentMenuItemId}"
-                                             >
+                                         value="#{ProgramTest.formTestNavigation.selectedParentMenuItemId}"
+                                         >
                                 <c:choose>
                                     <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
                                         <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
                                     </c:when>
                                     <c:otherwise>
-                                        <f:selectItem itemLabel="No parent" itemValue="" />
+                                        <f:selectItem itemLabel="No parent MenuItem" itemValue="" />
                                         <f:selectItems value="#{FormTestNavigation.allMenuItems}"
                                                        var="menuItem" 
                                                        itemLabel="#{menuItem.MENU_ITEM_NAME}"
@@ -43,30 +41,39 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="menuItemName" styleClass="control-label col-md-4">MenuItem name: </h:outputLabel>
-                        <div class="col-md-8">
-                            <h:inputText id="menuItemName" styleClass="form-control" 
-                                         value="#{ProgramTest.formTestNavigation.menuItemName}" ></h:inputText>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">MenuItem name</span>
+                                <h:inputText id="menuItemName" styleClass="form-control"
+                                             value="#{ProgramTest.formTestNavigation.menuItemName}" ></h:inputText>
+                            </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="menuURL" styleClass="control-label col-md-4">MenuItem URL: </h:outputLabel>
-                        <div class="col-md-8">
-                            <h:inputText id="menuURL" styleClass="form-control" 
-                                         value="#{ProgramTest.formTestNavigation.menuItemURL}" ></h:inputText>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">MenuItem URL</span>
+                                <h:inputText id="menuURL" styleClass="form-control"
+                                             value="#{ProgramTest.formTestNavigation.menuItemURL}" ></h:inputText>
+                            </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="menuXHTML" styleClass="control-label col-md-4">MenuItem XHTML:  </h:outputLabel>
-                        <div class="col-md-8">
-                            <h:inputText id="menuXHTML" styleClass="form-control" 
-                                         value="#{ProgramTest.formTestNavigation.menuItemXHTML}" ></h:inputText>
+                        <div class="col-md-12">
+
+                            <p:accordionPanel styleClass="panel-heading">
+                                <p:tab title="Program">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Program name</span>
+                                        <h:inputText id="programNameInput" styleClass="form-control"
+                                              ></h:inputText>
+                                    </div>
+                                </p:tab>
+                            </p:accordionPanel>
                         </div>
                     </div>
                 </div>

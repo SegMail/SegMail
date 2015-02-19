@@ -6,13 +6,10 @@
 
 package seca2.program.test;
 
-import seca2.program.file.*;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.entity.file.FileEntity;
 import seca2.entity.program.Program;
 
 /**
@@ -26,6 +23,7 @@ public class ProgramTest extends Program {
     @Inject private FormTestDB formTestDB;
     @Inject private FormTestNavigation formTestNavigation;
     @Inject private FormTestUser formTestUser;
+    @Inject private FormTestProgram formTestProgram;
     
     @PostConstruct
     public void init(){
@@ -54,6 +52,14 @@ public class ProgramTest extends Program {
 
     public void setFormTestUser(FormTestUser formTestUser) {
         this.formTestUser = formTestUser;
+    }
+
+    public FormTestProgram getFormTestProgram() {
+        return formTestProgram;
+    }
+
+    public void setFormTestProgram(FormTestProgram formTestProgram) {
+        this.formTestProgram = formTestProgram;
     }
     
     

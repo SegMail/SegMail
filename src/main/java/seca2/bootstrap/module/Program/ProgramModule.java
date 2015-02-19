@@ -38,8 +38,9 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     private List<Program> programs2;
     private int currentProgramIndex;
     public static final int DEFAULT_PROGRAM = 0;
-    
-    @EJB private ProgramService programService;
+
+    @EJB
+    private ProgramService programService;
 
     @PostConstruct
     public void init() {
@@ -106,10 +107,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        //Hardcoded for testing
-        outputContext.setPageRoot("/programs/test/layout.xhtml");
-        outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
-
+        
         /*
          Actual processing
          1) Check the program requested by retrieving it from inputContext.
@@ -117,18 +115,27 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         String program = inputContext.getProgram();
         try {
             /*
-            2) Retrieve the program from database by calling ProgramServices.
-            */
-            List<Program> programs = programService.getProgramByName(program);
-            System.out.println(programs); //debug
-            
-            //select only the first result
-            Program programObject = programs.get(0);
-            outputContext.setPageRoot(programObject.getVIEW_ROOT());
-            
+             2) Retrieve the program from database by calling ProgramServices.
+             */
+            //List<Program> programs = programService.getProgramByName(program);
+            String viewRoot = programService.getViewRootFromProgramName(program);
+            System.out.println(viewRoot); //debug
+            Program programObject;
+
+            //If there are results returned, select only the first result
+            if (viewRoot != null && !viewRoot.isEmpty()) {
+                
+                outputContext.setPageRoot(viewRoot);
+            } 
+            else {//if no results returned, show the error page
+                //Hardcoded for testing
+                outputContext.setPageRoot("/programs/test/layout.xhtml");
+                outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
+            }
+
             /*
-            3) Authorization checks for program access by calling ProgramServices.
-            */
+             3) Authorization checks for program access by calling ProgramServices.
+             */
         } catch (DBConnectionException ex) {
             //Set error page and stop processing
             return false;

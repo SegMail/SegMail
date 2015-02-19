@@ -12,7 +12,6 @@ import TreeAPI.TreeBuilder;
 import TreeAPI.TreeNode;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -29,12 +28,10 @@ import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import seca2.bootstrap.GlobalValues;
 import seca2.component.data.DBConnectionException;
-import seca2.component.data.HibernateEMServices;
 import seca2.component.user.UserService;
 import seca2.entity.navigation.MenuItem;
 import seca2.entity.navigation.MenuItemAccess;
 import seca2.entity.navigation.MenuItemAccess_;
-import seca2.entity.navigation.MenuItemComparator;
 import seca2.entity.navigation.MenuItem_;
 import seca2.entity.user.UserType;
 
@@ -78,8 +75,8 @@ public class NavigationService implements Serializable {
             criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId));
 
             List<MenuItemAccess> results = em.createQuery(criteria)
-                    .setFirstResult(0)
-                    .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
+                    //.setFirstResult(0)
+                    //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
                     .getResultList();
             
             /**
@@ -125,7 +122,7 @@ public class NavigationService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public MenuItem createMenuItem(String name, String requestUrl, String xhtml, long parentMenuItemId)
+    public MenuItem createMenuItem(String name, String requestUrl, long parentMenuItemId)
             throws CreateMenuItemException, DBConnectionException {
         
         try {
@@ -133,8 +130,7 @@ public class NavigationService implements Serializable {
                 throw new CreateMenuItemException("MenuItem name cannot be empty!");
             if(requestUrl == null || requestUrl.length() <= 0)
                 throw new CreateMenuItemException("MenuItem URL cannot be empty!");
-            if(xhtml == null || xhtml.length() <= 0)
-                throw new CreateMenuItemException("MenuItem XHTML cannot be empty!");
+            
             //get parent MenuItem
             MenuItem parentMenuItem = em.find(MenuItem.class, parentMenuItemId);
 
@@ -150,7 +146,6 @@ public class NavigationService implements Serializable {
             newMenuItem.setMENU_ITEM_NAME(name);
             newMenuItem.setPARENT_MENU_ITEM(parentMenuItem);
             newMenuItem.setMENU_ITEM_URL(requestUrl);
-            newMenuItem.setMENU_ITEM_XHTML(xhtml);
             
             //em.getTransaction().begin();
             em.persist(newMenuItem);
@@ -284,8 +279,8 @@ public class NavigationService implements Serializable {
             criteria.select(sourceEntity);
 
             List<MenuItem> results = em.createQuery(criteria)
-                    .setFirstResult(0)
-                    .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
+                    //.setFirstResult(0)
+                    //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
                     .getResultList();
             return results;
         } catch (PersistenceException pex) {

@@ -42,7 +42,6 @@ public class FormTestNavigation implements Serializable{
     private long selectedParentMenuItemId;
     private String menuItemName;
     private String menuItemURL;
-    private String menuItemXHTML;
     
     //Assign MenuItemAccess
     private long selectedAssignedMenuItemId;
@@ -106,7 +105,7 @@ public class FormTestNavigation implements Serializable{
         
         try{
             //Thread.sleep(5000);//for testing ajax loader
-            MenuItem newMenuItem = navigationService.createMenuItem(menuItemName, menuItemURL, menuItemXHTML, selectedParentMenuItemId);
+            MenuItem newMenuItem = navigationService.createMenuItem(menuItemName, menuItemURL, selectedParentMenuItemId);
             //if successful, reload the page
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+newMenuItem.getMENU_ITEM_NAME()+" created successfully!", null);
             this.initializeAllMenuItems();
@@ -188,14 +187,6 @@ public class FormTestNavigation implements Serializable{
 
     public void setMenuItemURL(String menuItemURL) {
         this.menuItemURL = menuItemURL;
-    }
-
-    public String getMenuItemXHTML() {
-        return menuItemXHTML;
-    }
-
-    public void setMenuItemXHTML(String menuItemXHTML) {
-        this.menuItemXHTML = menuItemXHTML;
     }
 
     public long getSelectedAssignedMenuItemId() {

@@ -5,18 +5,13 @@
  */
 package seca2.jsf.custom.dropdown;
 
-import com.sun.faces.io.FastStringWriter;
 import com.sun.faces.renderkit.Attribute;
 import com.sun.faces.renderkit.AttributeManager;
-import com.sun.faces.renderkit.RenderKitUtils;
-import com.sun.faces.renderkit.SelectItemsIterator;
 import com.sun.faces.renderkit.html_basic.MenuRenderer;
 import java.io.IOException;
-import java.util.logging.Level;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
-import javax.faces.model.SelectItem;
 import javax.faces.render.FacesRenderer;
 import seca2.jsf.TagCloser;
 

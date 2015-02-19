@@ -6,11 +6,33 @@
 
 package seca2.bootstrap;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.enterprise.context.ApplicationScoped;
+
 /**
  *
  * @author vincent.a.lee
  */
+@ApplicationScoped
 public class GlobalValues {
     
-    public static int MAX_RESULT_SIZE_DB = 9999;
+    private final int MAX_RESULT_SIZE_DB = 9999;
+    
+    private boolean INSTALLED;
+        
+    @PostConstruct
+    public void init(){
+        
+    }
+
+    public boolean isINSTALLED() {
+        return INSTALLED;
+    }
+
+    public void setINSTALLED(boolean INSTALLED) {
+        this.INSTALLED = INSTALLED;
+    }
+    
+    
 }

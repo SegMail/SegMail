@@ -39,9 +39,19 @@
                     </h:panelGroup>
                 </div>
                 <div class="col-sm-12 col-md-4">
+                    <!--test create programs-->
+                    <h:panelGroup layout="block" styleClass="panel panel-success" id="programSetup">
+                        <ui:include src="test-cases/createPrograms.xhtml" />
+                    </h:panelGroup>
+                    
                     <!--test create menu items-->
                     <h:panelGroup layout="block" styleClass="panel panel-success" id="navigationSetup">
                         <ui:include src="test-cases/createMenuItems.xhtml" />
+                    </h:panelGroup>
+                    
+                    <!--test assign program to UserType-->
+                    <h:panelGroup layout="block" styleClass="panel panel-success" id="programAccessSetup">
+                        <ui:include src="test-cases/assignProgramsToUserTypes.xhtml" />
                     </h:panelGroup>
                 </div>
                 <div class="col-sm-12 col-md-4">

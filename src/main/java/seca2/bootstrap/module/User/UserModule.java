@@ -6,7 +6,7 @@
 package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
-import javax.enterprise.context.Dependent;
+import javax.ejb.EJB;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -15,7 +15,8 @@ import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
-import seca2.component.user.UserContainer;
+import seca2.bootstrap.GlobalValues;
+import seca2.component.user.UserService;
 
 /**
  *
@@ -24,8 +25,11 @@ import seca2.component.user.UserContainer;
 //@SessionScoped //Should not be a SessionScoped object
 @CoreModule
 public class UserModule extends BootstrapModule implements Serializable {
+    
+    @EJB private UserService userService;
+    @Inject private GlobalValues globalValues;
 
-    @Inject @Dependent
+    @Inject //@Dependent
     private UserContainer userContainer; //this is not resolved precisely after redirect[20150131]
     private final LoginMode loginMode = LoginMode.BLOCK;
 
@@ -70,6 +74,20 @@ public class UserModule extends BootstrapModule implements Serializable {
             if(bypass.equalsIgnoreCase("true")){
                 return true;
             }
+            /**
+             * If the database has not been set up yet, bypass authentication step
+             * and direct to setup page(production)/testing page(development).
+             * The following criteria can be used:
+             * - no user has been created
+             * - (other checks to be implemented...)
+             * 
+             * Notes:
+             * - Calling this check for every request is not feasible as it will 
+             * incur lots of DB reads each time. There must be some ApplicationScoped
+             * object that can be maintained to keep the status of installation.
+             * 
+             */
+            
         }
             
         boolean sameSession = this.sameSession(session,this.userContainer);

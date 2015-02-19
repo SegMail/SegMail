@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.component.user;
+package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,7 +25,7 @@ import seca2.entity.user.UserType;
 public class UserContainer implements Serializable {
     
     private User user;
-    private List<UserPreferenceSet> preferences;
+    //private List<UserPreferenceSet> preferences;
     private UserType userType;
     private String lastURL;
     private boolean loggedIn; //default is always false
@@ -62,14 +62,6 @@ public class UserContainer implements Serializable {
 
     public void setUserType(UserType userType) {
         this.userType = userType;
-    }
-
-    public List<UserPreferenceSet> getPreferences() {
-        return preferences;
-    }
-
-    public void setPreferences(List<UserPreferenceSet> preferences) {
-        this.preferences = preferences;
     }
 
     public String getLastURL() {

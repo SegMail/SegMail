@@ -13,7 +13,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -29,7 +28,6 @@ import org.joda.time.DateTime;
 import seca2.bootstrap.GlobalValues;
 import seca2.component.Service;
 import seca2.component.data.DBConnectionException;
-import seca2.component.data.HibernateEMServices;
 import seca2.component.data.HibernateHelper;
 import seca2.entity.user.User;
 import seca2.entity.user.UserAccount;
@@ -83,9 +81,7 @@ public class UserService extends Service {
             UserType userType = new UserType();
             userType.setUSERTYPENAME(userTypeName);
 
-            //em.getTransaction().begin();
             em.persist(userType);
-            //em.getTransaction().commit();
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -214,8 +210,8 @@ public class UserService extends Service {
             criteria.select(sourceEntity); // SELECT *
 
             List<UserType> results = em.createQuery(criteria)
-                    .setFirstResult(0)
-                    .setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB)
+                    //.setFirstResult(0)
+                    //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //Don't do this first, not necessary!
                     .getResultList();
 
             return results;
@@ -432,14 +428,15 @@ public class UserService extends Service {
             //data of UserAccount object and subsequently how to retrieve the correct
             //result.
             //
-            UserAccount result = em.createQuery(criteria)
-                    .setMaxResults(1)
-                    .getResultList()
-                    .get(0);
+            List<UserAccount> results = em.createQuery(criteria)
+                    .getResultList();
+            
+            if(results == null || results.size() <= 0)
+                return null;
 
-            return result;
+            return results.get(0);
 
-        }  catch (PersistenceException pex) {
+        } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
@@ -462,9 +459,31 @@ public class UserService extends Service {
             Long result = em.createQuery(criteria)
                     .getSingleResult();
             
-            if(result > 0) return true;
+            return result > 0;
             
-            return false;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long getUserCount() throws DBConnectionException{
+        try{
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+            Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
+            
+            criteria.select(builder.count(criteria.from(UserAccount.class))); // SELECT *
+            
+            Long result = em.createQuery(criteria)
+                    .getSingleResult();
+            
+            return result;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
