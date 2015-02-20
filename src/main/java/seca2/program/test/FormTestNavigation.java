@@ -14,14 +14,14 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
-import seca2.component.data.DBConnectionException;
-import seca2.component.navigation.AssignMenuItemAccessException;
-import seca2.component.navigation.CreateMenuItemException;
-import seca2.component.navigation.NavigationService;
-import seca2.component.user.UserService;
-import seca2.entity.navigation.MenuItem;
-import seca2.entity.navigation.MenuItemAccess;
-import seca2.entity.user.UserType;
+import eds.component.data.DBConnectionException;
+import eds.component.navigation.AssignMenuItemAccessException;
+import eds.component.navigation.CreateMenuItemException;
+import eds.component.navigation.NavigationService;
+import eds.component.user.UserService;
+import eds.entity.navigation.MenuItem;
+import eds.entity.navigation.MenuItemAccess;
+import eds.entity.user.UserType;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**

@@ -6,11 +6,11 @@
 
 package seca2.program.test;
 
+import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.entity.program.Program;
 
 /**
  *
@@ -18,7 +18,7 @@ import seca2.entity.program.Program;
  */
 @Named("ProgramTest")
 @SessionScoped
-public class ProgramTest extends Program {
+public class ProgramTest implements Serializable {
     
     @Inject private FormTestDB formTestDB;
     @Inject private FormTestNavigation formTestNavigation;

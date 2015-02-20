@@ -11,8 +11,8 @@ import javax.enterprise.context.SessionScoped;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.entity.file.FileEntity;
-import seca2.entity.program.Program;
+import eds.entity.file.FileEntity;
+import java.io.Serializable;
 
 /**
  *
@@ -20,7 +20,7 @@ import seca2.entity.program.Program;
  */
 @Named("ProgramFile")
 @SessionScoped
-public class ProgramFile extends Program {
+public class ProgramFile implements Serializable {
     
     @Inject private FormFileFinder formFileFinder;
     @Inject private FormFileEditor formFileEditor;

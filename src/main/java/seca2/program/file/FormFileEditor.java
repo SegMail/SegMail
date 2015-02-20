@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import seca2.component.file.FileService;
-import seca2.entity.file.FileEntity;
-import seca2.entity.file.FileSequence;
+import eds.component.file.FileService;
+import eds.entity.file.FileEntity;
+import eds.entity.file.FileSequence;
 
 /**
  *

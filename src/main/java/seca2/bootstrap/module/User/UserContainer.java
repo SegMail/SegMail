@@ -13,9 +13,9 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import seca2.entity.user.User;
-import seca2.entity.user.UserPreferenceSet;
-import seca2.entity.user.UserType;
+import eds.entity.user.User;
+import eds.entity.user.UserPreferenceSet;
+import eds.entity.user.UserType;
 
 /**
  *

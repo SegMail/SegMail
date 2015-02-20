@@ -15,12 +15,10 @@ import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.JDBCConnectionException;
-import seca2.component.data.HibernateUtil;
-import seca2.component.file.FileService;
-import seca2.entity.file.FileEntity;
+import eds.component.data.HibernateUtil;
+import eds.component.file.FileService;
+import eds.entity.file.FileEntity;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -43,7 +41,7 @@ public class FormFileFinder implements Serializable {
     
     //Dependencies
     //@Inject private EntitySearchDemo entitySearch;
-    @Inject private HibernateUtil hibernateUtil;
+    @EJB private HibernateUtil hibernateUtil;
     
     @PostConstruct
     public void init(){

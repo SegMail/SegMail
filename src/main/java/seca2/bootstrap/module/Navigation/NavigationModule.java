@@ -5,6 +5,9 @@
  */
 package seca2.bootstrap.module.Navigation;
 
+import eds.component.data.DBConnectionException;
+import eds.component.navigation.NavigationService;
+import eds.entity.navigation.MenuItem;
 import java.io.Serializable;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -15,9 +18,6 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.module.User.UserSession;
-import seca2.component.data.DBConnectionException;
-import seca2.component.navigation.NavigationService;
-import seca2.entity.navigation.MenuItem;
 
 /**
  * Builds the navigation structure for the user.

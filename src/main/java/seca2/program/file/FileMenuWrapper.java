@@ -8,7 +8,7 @@ package seca2.program.file;
 
 import java.util.ArrayList;
 import java.util.List;
-import seca2.entity.file.FileEntity;
+import eds.entity.file.FileEntity;
 
 /**
  *

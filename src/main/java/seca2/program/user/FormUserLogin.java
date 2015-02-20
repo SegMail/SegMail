@@ -14,11 +14,11 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.component.data.DBConnectionException;
-import seca2.component.user.UserAccountLockedException;
+import eds.component.data.DBConnectionException;
+import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.module.User.UserContainer;
-import seca2.component.user.UserLoginException;
-import seca2.component.user.UserService;
+import eds.component.user.UserLoginException;
+import eds.component.user.UserService;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**

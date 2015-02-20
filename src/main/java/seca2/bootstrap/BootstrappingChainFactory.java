@@ -11,11 +11,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.PostConstruct;
-import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import seca2.bootstrap.module.Program.ProgramModule;
-import seca2.utilities.EntityExplorer;
+import eds.utilities.EntityExplorer;
 
 /**
  * This is a chain of responsibility for all bootstrap modules.
@@ -117,7 +115,7 @@ public class BootstrappingChainFactory {
      */
     public List<BootstrapModule> generateBootstrapList() {
         try{
-            seca2.utilities.Package root = new seca2.utilities.Package();
+            eds.utilities.Package root = new eds.utilities.Package();
             root.push("seca2").push("bootstrap");
             List<BootstrapModule> result = new ArrayList<>();
             List<Class> allBootstrapClasses = 

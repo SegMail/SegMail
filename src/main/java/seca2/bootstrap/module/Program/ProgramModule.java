@@ -8,20 +8,15 @@ package seca2.bootstrap.module.Program;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.module.User.UserModule;
-import seca2.component.data.DBConnectionException;
-import seca2.component.program.ProgramService;
-import seca2.entity.program.Program;
+import eds.component.data.DBConnectionException;
+import eds.component.program.ProgramService;
+import eds.entity.program.Program;
 
 /**
  *
@@ -69,6 +64,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             //program.setPROGRAM_ID(i);//not correct, just for the time being
 
             programs2.add(program);
+            
         }
     }
 

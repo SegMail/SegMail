@@ -7,7 +7,7 @@ package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
-import seca2.entity.user.UserType;
+import eds.entity.user.UserType;
 
 /**
  * Container for retrieving user info and setting user parameters.

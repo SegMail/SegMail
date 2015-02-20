@@ -13,16 +13,12 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.http.Part;
 import org.hibernate.Query;
@@ -31,13 +27,12 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.joda.time.DateTime;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
-import seca2.component.data.HibernateUtil;
-import seca2.component.file.FileOperationException;
-import seca2.component.file.FileService;
-import seca2.entity.file.FileEntity;
-import static seca2.entity.file.FileEntity.FILE_STATUS.COMPLETED;
-import static seca2.entity.file.FileEntity.FILE_STATUS.INCOMPLETE;
-import seca2.entity.file.FileSequence;
+import eds.component.data.HibernateUtil;
+import eds.component.file.FileOperationException;
+import eds.component.file.FileService;
+import eds.component.file.InvalidFileException;
+import eds.entity.file.FileEntity;
+import eds.entity.file.FileSequence;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -54,7 +49,7 @@ public class FormFileUploader implements Serializable {
     private final long MAX_FLUSH_COMMIT = 3;
 
     @EJB private FileService fileService;
-    @Inject private HibernateUtil hibernateUtil;
+    @EJB private HibernateUtil hibernateUtil;
     private UploadedFile uploadedFile;
     private FileEntity holdingFile;
     Future<String> insert;
@@ -108,7 +103,7 @@ public class FormFileUploader implements Serializable {
                 if (!existingFile.getMD5_HASH().equals(checkedLengthAndChecksum.getMD5_HASH())) { //corrupted file
                     System.out.println("Existing file " + existingFile.getFILENAME() + " found but corrupted. "
                             + "You may want to delete the file and re-upload it again.");//debug
-                    throw new seca2.component.file.InvalidFileException("Existing file " + existingFile.getFILENAME() + " found but corrupted. "
+                    throw new InvalidFileException("Existing file " + existingFile.getFILENAME() + " found but corrupted. "
                             + "You may want to delete the file and re-upload it again.");
                 }
 
@@ -146,7 +141,7 @@ public class FormFileUploader implements Serializable {
         } catch (FileOperationException foex) {
             this.reset();
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, foex.getMessage(), "");
-        } catch (seca2.component.file.InvalidFileException ifex) {
+        } catch (InvalidFileException ifex) {
             this.reset();
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ifex.getMessage(), "");
         } catch (EJBException ejbex){
@@ -158,7 +153,7 @@ public class FormFileUploader implements Serializable {
                 FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, message, null);
             }
             this.reset();
-        }
+        } 
     }
 
     /**
@@ -409,7 +404,7 @@ public class FormFileUploader implements Serializable {
         fileEntity.setFILE_SIZE_BYTE(0);
         fileEntity.setLAST_SEQUENCE(0);
         fileEntity.setREMAINING_SEQUENCE(0);
-        fileEntity.setUPLOAD_STATUS(INCOMPLETE);
+        fileEntity.setUPLOAD_STATUS(FileEntity.FILE_STATUS.INCOMPLETE);
 
         return fileEntity;
     }
@@ -417,7 +412,7 @@ public class FormFileUploader implements Serializable {
     ;
     
     public FileSequence addSequence(FileEntity file, FileSequence sequence) {
-        if (file.getUPLOAD_STATUS() == COMPLETED) {
+        if (file.getUPLOAD_STATUS() == FileEntity.FILE_STATUS.COMPLETED) {
             throw new RuntimeException("File " + file.getFILENAME() + " has completed uploading and cannot be overwritten. "
                     + "Please delete file and re-upload again.");
         }
@@ -428,7 +423,7 @@ public class FormFileUploader implements Serializable {
         sequence.setORIGINAL_LINE_NUM(file.getLAST_SEQUENCE());
         sequence.setCURRENT_LINE_NUM(file.getLAST_SEQUENCE());
         if (file.getNUM_OF_SEQUENCE() <= file.getLAST_SEQUENCE()) {
-            file.setUPLOAD_STATUS(COMPLETED);
+            file.setUPLOAD_STATUS(FileEntity.FILE_STATUS.COMPLETED);
         }
         return sequence;
     }

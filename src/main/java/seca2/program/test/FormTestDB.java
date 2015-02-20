@@ -7,19 +7,17 @@
 package seca2.program.test;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-import seca2.component.data.DBConnectionException;
-import seca2.utilities.EntityExplorer;
-import seca2.component.data.HibernateEMServices;
+import eds.component.data.DBConnectionException;
+import eds.utilities.EntityExplorer;
+import eds.component.data.HibernateEMServices;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -48,7 +46,7 @@ public class FormTestDB implements Serializable {
             Configuration cfg = hibernateDBServices.createFullConfig();
             
             //add all entity packages
-            seca2.utilities.Package root = new seca2.utilities.Package();
+            eds.utilities.Package root = new eds.utilities.Package();
             root.push("seca2").push("entity");
 
             ClassLoader loader = EntityExplorer.getClassLoader();

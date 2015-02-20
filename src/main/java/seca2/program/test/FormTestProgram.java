@@ -13,12 +13,11 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
-import seca2.component.data.DBConnectionException;
-import seca2.component.program.ProgramService;
-import seca2.component.user.UserService;
-import seca2.entity.program.Program;
-import seca2.entity.user.User;
-import seca2.entity.user.UserType;
+import eds.component.data.DBConnectionException;
+import eds.component.program.ProgramService;
+import eds.component.user.UserService;
+import eds.entity.program.Program;
+import eds.entity.user.UserType;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**

@@ -16,14 +16,14 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
-import seca2.component.data.DBConnectionException;
-import seca2.component.user.UserAccountLockedException;
+import eds.component.data.DBConnectionException;
+import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.module.User.UserContainer;
-import seca2.component.user.UserLoginException;
-import seca2.component.user.UserRegistrationException;
-import seca2.component.user.UserService;
-import seca2.component.user.UserTypeException;
-import seca2.entity.user.UserType;
+import eds.component.user.UserLoginException;
+import eds.component.user.UserRegistrationException;
+import eds.component.user.UserService;
+import eds.component.user.UserTypeException;
+import eds.entity.user.UserType;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**

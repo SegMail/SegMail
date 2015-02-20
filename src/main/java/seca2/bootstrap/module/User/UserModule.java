@@ -16,7 +16,7 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.GlobalValues;
-import seca2.component.user.UserService;
+import eds.component.user.UserService;
 
 /**
  *
