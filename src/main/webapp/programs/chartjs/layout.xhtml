@@ -19,17 +19,55 @@
                 <div class="col-lg-4">
                     <div id="slider" class="ui-slider"></div>
                     <script>
-                        $(document).ready(function(){
-                            $( "#slider" ).on( "slidechange", function( event, ui ) {
+                        $(document).ready(function () {
+                            $("#slider").on("slidechange", function (event, ui) {
                                 //window.alert("Slider has been changed");
                                 var points = window.myLine.datasets[0].points;
-                                points.forEach(function(entry){
-                                    entry.value = $( "#slider" ).slider("value") - entry.value;
+                                points.forEach(function (entry) {
+                                    entry.value = $("#slider").slider("value") - entry.value;
                                 })
                                 window.myLine.update();
-                            } );
+                            });
+
+                            $("#principalInput").bind("change paste keyup", function () {
+                                var points = window.myLine.datasets[0].points;
+                                points.forEach(function (entry) {
+                                    entry.value = $("#slider").slider("value") - entry.value;
+                                })
+                                setTimeout(
+                                        function ()
+                                        {
+                                            //do something special
+                                            window.myLine.update();
+                                        }, 1000);
+                                
+                            });
                         })
                     </script>
+
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">Principal</span>
+                            <input type="number" id="principalInput" class="form-control"
+                                   ></input>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">Interest Rate</span>
+                            <input type="number" id="intRateInput" class="form-control"
+                                   ></input>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">Num of Years</span>
+                            <input type="number" id="numYearsInput" class="form-control"
+                                   ></input>
+                        </div>
+                    </div>
                 </div>
                 <!--this is where the chart will be-->
                 <div id="chart" class="col-lg-8">
@@ -43,7 +81,7 @@
                     return Math.round(Math.random() * 100)
                 };
                 var lineChartData = {
-                    labels: ["January", "February", "March", "April", "May", "June", "July"],
+                    labels: ["2014", "February", "March", "April", "May", "June", "July"],
                     datasets: [
                         {
                             label: "My First dataset",
