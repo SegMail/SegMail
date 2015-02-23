@@ -6,12 +6,17 @@
       xmlns:p="http://primefaces.org/ui">
     <f:view contentType="text/html">
         <h:head>
+            
             <link rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/bootstrap/bootstrap.css" /><!-- Loading Bootstrap UI -->
             <!--<link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/bootstrap/bootstrap-docs.css" />
             <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/bootstrap/prettify.css" />-->
             <link rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/flat-ui/flat-ui.css" /><!-- Loading Flat UI -->
             <link rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/spinner/spinner.css" /><!-- AJAX Loader -->
 
+            <!--JQuery sources must be declared at the start of the page, if not some custom scripts will not be able to recognize $-->
+            <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+            <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+            
             <!--custom hacks-->
             <link rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/hacks/primefaces-hacks.css" /><!--PF hacks-->
             <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
@@ -34,10 +39,11 @@
         <!--load all scripts-->
         <!--<script type="text/javascript" src="#{request.contextPath}/templates/mytemplate/js/flat-ui/bootstrap.min.js" />-->
         <!--use PF's JQuery instead>-->
-        <h:outputScript library="primefaces" name="jquery/jquery.js" target="head" />
-        <!--use PF's JQuery instead
-        <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery-1.8.3.min.js"></script> 
-        <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery-ui-1.10.3.custom.min.js"></script>-->
+        <!--<h:outputScript library="primefaces" name="jquery/jquery.js" target="head" />-->
+        <!--use PF's JQuery instead-->
+
+<!--<script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery-1.10.2.min.js"></script>-->
+        <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery-ui-1.10.3.custom.min.js"></script>
         <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery.ui.touch-punch.min.js"></script>
         <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/bootstrap.min.js"></script>
         <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/bootstrap-select.js"></script>
@@ -46,19 +52,21 @@
         <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/flatui-radio.js"></script>
         <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery.tagsinput.js"></script>
         <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/jquery.placeholder.js"></script>
+        <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/html5shiv.js"></script>
+        <script src="#{request.contextPath}/templates/mytemplate/js/flat-ui/application.js"></script>
         <!--ajax loader-->
         <script src="#{request.contextPath}/templates/mytemplate/js/ajax/ajax-loader.js"></script>
         <!--<script src="#{request.contextPath}/templates/mytemplate/js/ajax/ajax-loader-hack.js"></script>-->
         <!--Custom components/hacks-->
-        <h:outputScript target="head">
-            <!--this is a hack for rendering JSF's h:selectOneMenu as a button. See: https://github.com/silviomoreto/bootstrap-select#usage-->
+        <!--<h:outputScript target="head">
+            this is a hack for rendering JSF's h:selectOneMenu as a button. See: https://github.com/silviomoreto/bootstrap-select#usage
             $(document).ready(function() {
                 loadNiceButtons();
             });
             function loadNiceButtons() {
                 $('.selectpicker').selectpicker({style: 'btn  btn-wide btn-primary', menuStyle: 'dropdown-inverse'});
             };
-        </h:outputScript>
+        </h:outputScript>-->
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" /> 
         <!--<script>
