@@ -15,7 +15,6 @@ import javax.ejb.Stateless;
  * @author LeeKiatHaw
  */
 @WebService(serviceName = "ChartJSService")
-@Stateless()
 public class ChartJSService {
 
     /**
@@ -27,24 +26,30 @@ public class ChartJSService {
         return firstNum + secondNum;
     }
     
+    @WebMethod(operationName = "outstandingLoanOverTime")
     public double[] outstandingLoanOverTime(
             @WebParam(name="int") double intRate,
             @WebParam(name="n") int numYears,
             @WebParam(name="p") double principal
             ){
         
+        double monthlyInt = intRate/12;
+        double onePlusN = 1 + monthlyInt;
+        int months = numYears*12;
         //Compute monthly installment first
-        double monthlyPmt = intRate*principal/(1 - (1/ Math.pow(1+intRate,numYears)));
+        double monthlyPmt = principal*monthlyInt*(Math.pow(onePlusN, months)) / (Math.pow(onePlusN, months) - 1);
         
-        double[] yearlyAmt = new double[numYears];
+        double[] monthlyAmt = new double[months];
         double outstandingLoan = principal;
-        yearlyAmt[0] = outstandingLoan;
+        monthlyAmt[0] = outstandingLoan;
         
-        for(int i = 1; i < numYears; i++){
-            outstandingLoan = (1+intRate)*outstandingLoan - monthlyPmt;
-            yearlyAmt[i] = outstandingLoan;
+        for(int i = 1; i < months; i++){
+            outstandingLoan = (onePlusN)*outstandingLoan - monthlyPmt;
+            monthlyAmt[i] = outstandingLoan;
         }
         
-        return yearlyAmt;
+        return monthlyAmt;
     }
+    
+    
 }
