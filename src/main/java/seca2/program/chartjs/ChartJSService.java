@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package seca2.program.chartjs;
 
 import javax.jws.WebService;
@@ -47,9 +48,8 @@ public class ChartJSService {
             outstandingLoan = (onePlusN)*outstandingLoan - monthlyPmt;
             monthlyAmt[i] = outstandingLoan;
         }
-        
+
         return monthlyAmt;
+
     }
-    
-    
 }
