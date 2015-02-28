@@ -24,53 +24,62 @@
                 })
                 window.myLine.update();
             });
-            $("#principalInput").bind("change paste keyup", function () {
+            $("#principalInput, #intRateInput, #numYearsInput").bind("change paste keyup", function () {
                 var callout = callSOAP();
+                $('#soapRequest').text(callout);
             });
             function callSOAP() {
                 return $.soap({
-                    url: '#{ProgramChartJS.WEB_SERVICE_ENDPOINT}',
-                    method: '#{ProgramChartJS.WEB_SERVICE_METHOD}',
+                    url: "#{ProgramChartJS.WEB_SERVICE_ENDPOINT}",
+                    method: "outstandingLoanOverTime",
                     appendMethodToURL: 0,
-                    SOAPAction: '',
-                    soap12: $('#soap12').prop('checked'),
-                    async: $('#async').prop('checked'),
+                    //SOAPAction: 'outstandingLoanOverTime',
+                    //soap12: $('#soap12').prop('checked'),
+                    //async: $('#async').prop('checked'),
                     data: {
                         int: $('#intRateInput').val(),
                         n: $('#numYearsInput').val(),
                         p: $('#principalInput').val()
                     },
                     //wss: wss,
-                    HTTPHeaders: {
+                    //HTTPHeaders: {
                         // Authentication: 'Basic ' + btoa('test:test')
-                    },
+                    //},
                     envAttributes: {
-                        'xmlns:test': 'http://www.test.org/'
+                        //'xmlns:test': 'http://www.test.org/'
+                        'xmlns:SOAP-ENV': 'http://schemas.xmlsoap.org/soap/envelope/'
                     },
-                    SOAPHeader: '<test>SOAPHeader</test>',
-                    //namespaceQualifier: $('#namespaceQualifier').val(),
-                    //namespaceURL: $('#namespaceURL').val(),
-                    //noPrefix: $('#noPrefix').prop('checked'),
+                    //SOAPHeader: '<test>"SOAPHeader"</test>',
+                    namespaceQualifier: 'ns2',
+                    namespaceURL: 'http://chartjs.program.seca2/',
+                    noPrefix: 0, //You definitely need a namespace prepended to the operationName
                     //elementName: $('#elementName').val(),
                     //enableLogging: $('#enableLogging').prop('checked'),
                     //context: $('#feedback'),
-                    //beforeSend: function (SOAPEnvelope) {
-                    //    var xmlout = dom2html($.parseXML(SOAPEnvelope.toString()).firstChild);
-                    //    $('#requestXML').text(xmlout);
-                    //},
+                    
+                    //My variables
+                    HTTPHeaders : {
+                        
+                    },
+                    
+                    beforeSend: function (SOAPEnvelope) {
+                        var xmlout = dom2html($.parseXML(SOAPEnvelope.toString()).firstChild);
+                        $('#soapRequest').text(xmlout);
+                    },
                     success: function (SOAPResponse) {
 
                         //	console.log(this)
 
                         $('#soapcall').html('Response: Success!');
                         //$('#soapcall').text(dom2html(SOAPResponse.toXML().firstChild));
+                        $('#soapResult').text(dom2html(SOAPResponse.toXML().firstChild));
                     },
                     error: function (SOAPResponse) {
 
                         console.log(this)
 
-                        $('#soapcall').html('Response: Error!');
-                        $('#soapcall').text(SOAPResponse.toString());
+                        $('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
+                        //$('#soapcall')
                     },
                     statusCode: {
                         404: function () {
@@ -85,4 +94,6 @@
         });
 
     </script>
+    <script src="#{request.contextPath}/programs/chartjs/js/jquery.soap.js"></script>
+    <script src="#{request.contextPath}/programs/chartjs/js/demo.js"></script>
 </html>

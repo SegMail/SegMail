@@ -10,6 +10,7 @@ import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.ejb.Stateless;
+import javax.jws.WebResult;
 
 /**
  *
@@ -27,21 +28,27 @@ public class ChartJSService {
         return firstNum + secondNum;
     }
     
-    @WebMethod(operationName = "outstandingLoanOverTime")
+    @WebMethod(operationName = "outstandingLoanOverTime",action="outstandingLoanOverTime")
+    //@WebResult
     public double[] outstandingLoanOverTime(
-            @WebParam(name="int") double intRate,
-            @WebParam(name="n") int numYears,
-            @WebParam(name="p") double principal
+            @WebParam(name="int")/*, targetNamespace="ns2")*/ double intR,
+            @WebParam(name="n")/*, targetNamespace="ns2")*/ int n,
+            @WebParam(name="p")/*, targetNamespace="ns2")*/ double p
             ){
+        //if any of the parameters are empty, do not do any calculation and return null;
+        //Is it ok to do this or throw exception?
+        //if(intRate <= 0) return null;
+        //if(numYears <= 0) return null;
+        //if(principal <= 0) return null;
         
-        double monthlyInt = intRate/12;
+        double monthlyInt = intR/12;
         double onePlusN = 1 + monthlyInt;
-        int months = numYears*12;
+        int months = n*12;
         //Compute monthly installment first
-        double monthlyPmt = principal*monthlyInt*(Math.pow(onePlusN, months)) / (Math.pow(onePlusN, months) - 1);
+        double monthlyPmt = p*monthlyInt*(Math.pow(onePlusN, months)) / (Math.pow(onePlusN, months) - 1);
         
         double[] monthlyAmt = new double[months];
-        double outstandingLoan = principal;
+        double outstandingLoan = p;
         monthlyAmt[0] = outstandingLoan;
         
         for(int i = 1; i < months; i++){

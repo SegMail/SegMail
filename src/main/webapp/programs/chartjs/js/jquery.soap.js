@@ -103,6 +103,7 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 						}
 					} else {
 						soapEnvelope.addHeader(soapHeader);
+                                                
 					}
 				}
 			}
@@ -123,7 +124,10 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 				context: config.context,
 				async: config.async,
 				headers: (config.HTTPHeaders) ? config.HTTPHeaders : {},
-				action: (!!config.SOAPAction) ? config.SOAPAction : config.method,
+                                //this is the cause of the problem!!!
+                                //do not create the request header element "SOAPAction". 
+                                //or if u do, your WS class must be annotated with the action!
+				action: '"'+(!!config.SOAPAction) ? config.SOAPAction : config.method +'"',//debug
 				soap12: config.soap12,
 				beforeSend: config.beforeSend,
 				statusCode: config.statusCode,
@@ -160,7 +164,7 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 	//Soap request - this is what being sent
 	function SOAPEnvelope (soapObject) {
 		this.typeOf = "SOAPEnvelope";
-		this.prefix = 'soap';
+		this.prefix = 'S';
 		this.soapConfig = null;
 		this.attributes = {};
 		this.headers = [];
@@ -229,10 +233,16 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 			//Add Headers
 			if (this.headers.length > 0) {
 				var soapHeader = soapEnv.newChild(this.prefix + ':Header');
+                                
 				for (var i = 0; i < this.headers.length; i++) {
 					soapHeader.appendChild(this.headers[i]);
 				}
 			}
+                        //My code
+                        //else{
+                        //    var soapHeader = soapEnv.newChild('SOAP-ENV' + ':Header');
+                        //}
+                        //My code
 			//Add Bodies
 			if (this.bodies.length > 0) {
 				var soapBody = soapEnv.newChild(this.prefix + ':Body');
@@ -426,6 +436,8 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 			}
 			//Close Tag
 			out.push('</' + this.name + '>');
+                        //my code
+                        //if(this.name == "SOAP-ENV:header") 
 			return out.join('');
 		}
 	};
@@ -515,7 +527,8 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 				} else {
 					soapObject = new SOAPObject(prefix+name);
 					for(var y in params) {
-						childObject = this.json2soap(y, params[y], prefix, soapObject);
+						//childObject = this.json2soap(y, params[y], prefix, soapObject);//debug
+                                                childObject = this.json2soap(y, params[y], '', soapObject);//don't provide NS for parameters
 						if (childObject) {
 							soapObject.appendChild(childObject);
 						}
