@@ -122,19 +122,23 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             if (viewRoot != null && !viewRoot.isEmpty()) {
                 
                 outputContext.setPageRoot(viewRoot);
+                return true;
             } 
-            else {//if no results returned, show the error page
+            
+            //else {//if no results returned, show the error page
                 //Hardcoded for testing
-                outputContext.setPageRoot("/programs/test/layout.xhtml");
-                outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
-            }
+            outputContext.setPageRoot("/programs/test/layout.xhtml");
+            outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
+            //}
 
             /*
              3) Authorization checks for program access by calling ProgramServices.
              */
         } catch (DBConnectionException ex) {
             //Set error page and stop processing
-            return false;
+            //return false;
+            outputContext.setPageRoot("/programs/test/layout.xhtml");
+            outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
         }
 
         return true;
