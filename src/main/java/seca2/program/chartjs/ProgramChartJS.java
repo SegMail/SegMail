@@ -20,6 +20,9 @@ public class ProgramChartJS extends Program {
     private final String WEB_SERVICE_ENDPOINT = "/SegMail/ChartJSService";
     
     private final String WEB_SERVICE_METHOD = "outstandingLoanOverTime";
+    
+    
+    private final String WEB_SERVICE_NAMESPACE_QUALIFIER = "ns2";
 
     public String getWEB_SERVICE_ENDPOINT() {
         return WEB_SERVICE_ENDPOINT;
@@ -27,6 +30,10 @@ public class ProgramChartJS extends Program {
 
     public String getWEB_SERVICE_METHOD() {
         return WEB_SERVICE_METHOD;
+    }
+
+    public String getWEB_SERVICE_NAMESPACE_QUALIFIER() {
+        return WEB_SERVICE_NAMESPACE_QUALIFIER;
     }
     
     

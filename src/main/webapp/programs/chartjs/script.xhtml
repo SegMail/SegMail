@@ -21,17 +21,28 @@
                 var points = window.myLine.datasets[0].points;
                 points.forEach(function (entry) {
                     entry.value = $("#slider").slider("value") - entry.value;
-                })
+                });
                 window.myLine.update();
             });
             $("#principalInput, #intRateInput, #numYearsInput").bind("change paste keyup", function () {
-                var callout = callSOAP();
-                $('#soapRequest').text(callout);
+                //Send SOAP request
+                var result = callSOAP();
+                $('#soapResult').text(result);
+                replotChart([100,90,80,70],window.myLine,true,[]);
             });
+            //$(".form")
+            //        .delayedChange({
+            //            delay : 5000
+            //        })
+            //        .on("delayedchange", function(){
+            //    var callout = callSOAP();
+            //    $('#soapRequest').text(callout);
+            //});
+            //var ns = 'ns2';
             function callSOAP() {
                 return $.soap({
                     url: "#{ProgramChartJS.WEB_SERVICE_ENDPOINT}",
-                    method: "outstandingLoanOverTime",
+                    method: "#{ProgramChartJS.WEB_SERVICE_METHOD}",
                     appendMethodToURL: 0,
                     //SOAPAction: 'outstandingLoanOverTime',
                     //soap12: $('#soap12').prop('checked'),
@@ -50,7 +61,7 @@
                         'xmlns:SOAP-ENV': 'http://schemas.xmlsoap.org/soap/envelope/'
                     },
                     //SOAPHeader: '<test>"SOAPHeader"</test>',
-                    namespaceQualifier: 'ns2',
+                    namespaceQualifier: '#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}',
                     namespaceURL: 'http://chartjs.program.seca2/',
                     noPrefix: 0, //You definitely need a namespace prepended to the operationName
                     //elementName: $('#elementName').val(),
@@ -72,7 +83,17 @@
 
                         $('#soapcall').html('Response: Success!');
                         //$('#soapcall').text(dom2html(SOAPResponse.toXML().firstChild));
-                        $('#soapResult').text(dom2html(SOAPResponse.toXML().firstChild));
+                        var result = SOAPResponse.content;
+                        //$('#soapResult').append("<p>"+SOAPResponse.toString()+"</p>");
+                        //$('#soapResult').text(dom2html(SOAPResponse.content));
+                        var xmlResults = SOAPResponse.toJSON();
+                        var test = JSON.stringify(xmlResults);
+                        //amount = $(xmlResults).find("return");
+                        var points = xmlResults["#document"]["S:Envelope"]["S:Body"]["#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}:#{ProgramChartJS.WEB_SERVICE_METHOD}Response"];  
+                        //for( point in amount){
+                        //$('#soapResult').text(test+"<br/>");
+                        //};
+                        ;
                     },
                     error: function (SOAPResponse) {
 
@@ -91,9 +112,37 @@
                     }
                 });
             }
+            //replots the chart with new dataset
+            //var data : the dataset to be added, should be an array
+            //var chart : the chart object
+            //var append : a boolean to determine if the new dataset should replace 
+            //
+            function replotChart(newData,chart,append=true,options={}){
+                
+                //create new dataset
+                //if not actual options is passed in, chart will take on default values?
+                newDataset = options;
+                newDataset.data = newData;
+                
+                //determine X-axis
+                var xDiv = newData.length; // number of divisions in the X-axis
+                var xAxis = [];
+                for(i in newData){
+                    xAxis.push(i);
+                }
+                
+                //clear data first before replotting
+                if(!append) chart.removeData();
+                chart.addData(newData);
+                
+                //refresh the chart
+                chart.update();
+            }
         });
 
     </script>
     <script src="#{request.contextPath}/programs/chartjs/js/jquery.soap.js"></script>
     <script src="#{request.contextPath}/programs/chartjs/js/demo.js"></script>
+    <script src="#{request.contextPath}/programs/chartjs/js/jquery.delayedchange.js"></script>
+    <script src="#{request.contextPath}/programs/chartjs/js/xml2json.js"></script>
 </html>

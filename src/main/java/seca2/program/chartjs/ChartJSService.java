@@ -28,7 +28,7 @@ public class ChartJSService {
         return firstNum + secondNum;
     }
     
-    @WebMethod(operationName = "outstandingLoanOverTime",action="outstandingLoanOverTime")
+    @WebMethod(operationName = "outstandingLoanOverTime")
     //@WebResult
     public double[] outstandingLoanOverTime(
             @WebParam(name="int")/*, targetNamespace="ns2")*/ double intR,

@@ -44,7 +44,8 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 		async: true,
 		enableLogging: false,
 		noPrefix: false,
-		soap12: false
+		soap12: false,
+                prefix: 'S'
 	};
 
 	$.soap = function(options) {
@@ -127,7 +128,8 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
                                 //this is the cause of the problem!!!
                                 //do not create the request header element "SOAPAction". 
                                 //or if u do, your WS class must be annotated with the action!
-				action: '"'+(!!config.SOAPAction) ? config.SOAPAction : config.method +'"',//debug
+				//action: '"'+(!!config.SOAPAction) ? config.SOAPAction : config.method +'"',//debug
+                                action: (!!config.SOAPAction) ? config.SOAPAction : '',//debug
 				soap12: config.soap12,
 				beforeSend: config.beforeSend,
 				statusCode: config.statusCode,
@@ -164,7 +166,7 @@ https://github.com/doedje/jquery.soap/blob/1.6.0/README.md
 	//Soap request - this is what being sent
 	function SOAPEnvelope (soapObject) {
 		this.typeOf = "SOAPEnvelope";
-		this.prefix = 'S';
+		this.prefix = globalConfig.prefix;
 		this.soapConfig = null;
 		this.attributes = {};
 		this.headers = [];

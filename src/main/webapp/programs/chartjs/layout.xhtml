@@ -17,12 +17,13 @@
             <div class="row">
                 <!--this is where the controls will be-->
                 <div class="col-lg-4">
+                    <form id="form">
                     <div id="slider" class="ui-slider"></div>
 
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
                             <span class="input-group-addon">Principal</span>
-                            <input type="number" id="principalInput" class="form-control"
+                            <input type="number" id="principalInput" class="form-control delayedchange"
                                    ></input>
                         </div>
                     </div>
@@ -30,7 +31,7 @@
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
                             <span class="input-group-addon">Interest Rate</span>
-                            <input type="number" id="intRateInput" class="form-control"
+                            <input type="number" id="intRateInput" class="form-control delayedchange"
                                    ></input>
                         </div>
                     </div>
@@ -38,7 +39,7 @@
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
                             <span class="input-group-addon">Num of Years</span>
-                            <input type="number" id="numYearsInput" class="form-control"
+                            <input type="number" id="numYearsInput" class="form-control delayedchange"
                                    ></input>
                         </div>
                     </div>
@@ -49,9 +50,9 @@
                     </div>
                     <div class="col-lg-12" style="height: 200">
                         <pre id='soapcall' style="height: 100"></pre>
-                        <pre id="soapRequest"></pre>
+                        <div id="soapResult"></div>
                     </div>
-                    
+                    </form>
                 </div>
                 <!--this is where the chart will be-->
                 <div id="chart" class="col-lg-8">
