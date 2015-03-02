@@ -89,28 +89,7 @@ $(document).ready(function () {
         // console.log(ajaxReturn);
     });
 
-    $("#slider").on("slidechange", function (event, ui) {
-        //window.alert("Slider has been changed");
-        var points = window.myLine.datasets[0].points;
-        points.forEach(function (entry) {
-            entry.value = $("#slider").slider("value") - entry.value;
-        })
-        window.myLine.update();
-    });
-
-    $("#principalInput").bind("change paste keyup", function () {
-        var points = window.myLine.datasets[0].points;
-        points.forEach(function (entry) {
-            entry.value = $("#slider").slider("value") - entry.value;
-        })
-        setTimeout(
-                function ()
-                {
-                    //do something special
-                    window.myLine.update();
-                }, 2000);
-
-    });
+    
 });
 
 function writeSoapCall() {

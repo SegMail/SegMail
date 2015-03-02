@@ -16,6 +16,9 @@
     <script>
 
         $(document).ready(function () {
+            //global variables
+            
+            
             $("#slider").on("slidechange", function (event, ui) {
                 //window.alert("Slider has been changed");
                 var points = window.myLine.datasets[0].points;
@@ -26,8 +29,9 @@
             });
             $("#principalInput, #intRateInput, #numYearsInput").bind("change paste keyup", function () {
                 //Send SOAP request
-                var result = callSOAP();
-                $('#soapResult').text(result);
+                var points;
+                var result = callSOAP(points);
+                $('#soapResult').text(points);
                 replotChart([100,90,80,70],window.myLine,true,[]);
             });
             //$(".form")
@@ -39,7 +43,7 @@
             //    $('#soapRequest').text(callout);
             //});
             //var ns = 'ns2';
-            function callSOAP() {
+            function callSOAP(points) {
                 return $.soap({
                     url: "#{ProgramChartJS.WEB_SERVICE_ENDPOINT}",
                     method: "#{ProgramChartJS.WEB_SERVICE_METHOD}",
@@ -89,11 +93,8 @@
                         var xmlResults = SOAPResponse.toJSON();
                         var test = JSON.stringify(xmlResults);
                         //amount = $(xmlResults).find("return");
-                        var points = xmlResults["#document"]["S:Envelope"]["S:Body"]["#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}:#{ProgramChartJS.WEB_SERVICE_METHOD}Response"];  
-                        //for( point in amount){
-                        //$('#soapResult').text(test+"<br/>");
-                        //};
-                        ;
+                        points = xmlResults["#document"]["S:Envelope"]["S:Body"]["#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}:#{ProgramChartJS.WEB_SERVICE_METHOD}Response"];  
+                        
                     },
                     error: function (SOAPResponse) {
 
@@ -121,19 +122,37 @@
                 
                 //create new dataset
                 //if not actual options is passed in, chart will take on default values?
-                newDataset = options;
+                newDataset = (options.length === 0) ? chart.datasets[0] : options;
                 newDataset.data = newData;
                 
                 //determine X-axis
                 var xDiv = newData.length; // number of divisions in the X-axis
-                var xAxis = [];
+                var newLabels = [];
                 for(i in newData){
-                    xAxis.push(i);
+                    newLabels.push(i);
                 }
                 
+                chart.datasets[0] = {
+                    labels : newLabels,
+                    datasets: [
+                        {
+                            label: newDataset.label,
+                            fillColor: newDataset.fillColor,
+                            strokeColor: newDataset.strokeColor,
+                            pointColor: newDataset.pointColor,
+                            pointStrokeColor: newDataset.pointStrokeColor,
+                            pointHighlightFill: newDataset.pointHighlightFill,
+                            pointHighlightStroke: newDataset.pointHighlightStroke,
+                            data: newData
+                        }
+                    ]
+                }
+                
+                
                 //clear data first before replotting
-                if(!append) chart.removeData();
-                chart.addData(newData);
+                //if(!append) chart.removeData();
+                //chart.removeData();
+                //chart.addData([40, 60], "August");
                 
                 //refresh the chart
                 chart.update();
