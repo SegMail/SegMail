@@ -29,10 +29,19 @@
             });
             $("#principalInput, #intRateInput, #numYearsInput").bind("change paste keyup", function () {
                 //Send SOAP request
-                var points;
-                var result = callSOAP(points);
-                $('#soapResult').text(points);
-                replotChart([100,90,80,70],window.myLine,true,[]);
+                var points = {
+                    name : "points",
+                    data : []
+                };
+                
+                if(($("#principalInput").val() !== 0 &amp;&amp; $("#principalInput").val() !== "") &amp;&amp;
+                   ($("#intRateInput").val() !== 0 &amp;&amp; $("#intRateInput").val() !== "") &amp;&amp;
+                   ($("#numYearsInput").val() !== 0 &amp;&amp; $("#numYearsInput").val() !== "")){
+                       var result = callSOAP(points);
+                        $('#soapResult').text(points);
+                        replotChart(points.data.return,window.myLine,true,[]);
+                   }
+                    
             });
             //$(".form")
             //        .delayedChange({
@@ -93,7 +102,7 @@
                         var xmlResults = SOAPResponse.toJSON();
                         var test = JSON.stringify(xmlResults);
                         //amount = $(xmlResults).find("return");
-                        points = xmlResults["#document"]["S:Envelope"]["S:Body"]["#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}:#{ProgramChartJS.WEB_SERVICE_METHOD}Response"];  
+                        points.data = xmlResults["#document"]["S:Envelope"]["S:Body"]["#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}:#{ProgramChartJS.WEB_SERVICE_METHOD}Response"];  
                         
                     },
                     error: function (SOAPResponse) {
@@ -123,7 +132,7 @@
                 //create new dataset
                 //if not actual options is passed in, chart will take on default values?
                 newDataset = (options.length === 0) ? chart.datasets[0] : options;
-                newDataset.data = newData;
+                //newDataset.data = newData;
                 
                 //determine X-axis
                 var xDiv = newData.length; // number of divisions in the X-axis
@@ -132,7 +141,7 @@
                     newLabels.push(i);
                 }
                 
-                chart.datasets[0] = {
+                var data = {
                     labels : newLabels,
                     datasets: [
                         {
@@ -148,13 +157,11 @@
                     ]
                 }
                 
+                var ctx = document.getElementById("canvas").getContext("2d");
                 
-                //clear data first before replotting
-                //if(!append) chart.removeData();
-                //chart.removeData();
-                //chart.addData([40, 60], "August");
-                
-                //refresh the chart
+                chart = new Chart(ctx).Line(data, {
+                    responsive: true
+                });
                 chart.update();
             }
         });
