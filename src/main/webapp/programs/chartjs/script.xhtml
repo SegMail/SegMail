@@ -16,8 +16,24 @@
     <script>
 
         $(document).ready(function () {
-            //global variables
             
+            //test debug
+            //window.alert("JS is running");
+            
+            //global variables
+            var globalChartSettings = {
+                label: "Outstanding Loan",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)"
+            }
+            
+            var globalBoundSettings = {
+                maxLabels : 10
+            }
             
             $("#slider").on("slidechange", function (event, ui) {
                 //window.alert("Slider has been changed");
@@ -27,74 +43,95 @@
                 });
                 window.myLine.update();
             });
-            $("#principalInput, #intRateInput, #numYearsInput").bind("change paste keyup", function () {
+            //$("#principalInput, #intRateInput, #numYearsInput").bind("change keyup", function () {
+            //    //Send SOAP request
+            //    if(($("#principalInput").val().length > 0 &amp;&amp; $("#principalInput").val() > 0) &amp;&amp;
+            //       ($("#intRateInput").val().length > 0 &amp;&amp; $("#intRateInput").val() > 0 ) &amp;&amp;
+            //       ($("#numYearsInput").val().length > 0 &amp;&amp; $("#numYearsInput").val() > 0))
+            //       {
+            //            callSOAP();
+            //            replotChart(window.returnedData.return,false,globalChartSettings,globalBoundSettings,"canvas","chart",window.myLine);
+            //       }      
+            //});
+            $("#principalInput, #intRateInput, #numYearsInput").delayedChange({
+                delay : 1500
+            }).on("delayedchange", function () {
                 //Send SOAP request
-                var points = {
-                    name : "points",
-                    data : []
-                };
-                
-                if(($("#principalInput").val() !== 0 &amp;&amp; $("#principalInput").val() !== "") &amp;&amp;
-                   ($("#intRateInput").val() !== 0 &amp;&amp; $("#intRateInput").val() !== "") &amp;&amp;
-                   ($("#numYearsInput").val() !== 0 &amp;&amp; $("#numYearsInput").val() !== "")){
-                       var result = callSOAP(points);
-                        $('#soapResult').text(points);
-                        replotChart(points.data.return,window.myLine,true,[]);
+                if(($("#principalInput").val().length > 0 &amp;&amp; $("#principalInput").val() > 0) &amp;&amp;
+                   ($("#intRateInput").val().length > 0 &amp;&amp; $("#intRateInput").val() > 0 ) &amp;&amp;
+                   ($("#numYearsInput").val().length > 0 &amp;&amp; $("#numYearsInput").val() > 0))
+                   {
+                        callSOAP($("#intRateInput").val(),$("#principalInput").val(),$("#numYearsInput").val());
+                        replotChart(window.returnedData.return,false,globalChartSettings,globalBoundSettings,"canvas","chart",window.myLine);
                    }
                     
             });
-            //$(".form")
-            //        .delayedChange({
-            //            delay : 5000
-            //        })
-            //        .on("delayedchange", function(){
-            //    var callout = callSOAP();
-            //    $('#soapRequest').text(callout);
-            //});
-            //var ns = 'ns2';
-
-            //replots the chart with new dataset
-            //var data : the dataset to be added, should be an array
-            //var chart : the chart object
-            //var append : a boolean to determine if the new dataset should replace 
-            //
-            function replotChart(newData,chart,append=true,options={}){
-                
-                //create new dataset
-                //if not actual options is passed in, chart will take on default values?
-                newDataset = (options.length === 0) ? chart.datasets[0] : options;
-                //newDataset.data = newData;
-                
-                //determine X-axis
-                var xDiv = newData.length; // number of divisions in the X-axis
-                var newLabels = [];
-                for(i in newData){
-                    newLabels.push(i);
-                }
-                
-                var data = {
-                    labels : newLabels,
-                    datasets: [
-                        {
-                            label: newDataset.label,
-                            fillColor: newDataset.fillColor,
-                            strokeColor: newDataset.strokeColor,
-                            pointColor: newDataset.pointColor,
-                            pointStrokeColor: newDataset.pointStrokeColor,
-                            pointHighlightFill: newDataset.pointHighlightFill,
-                            pointHighlightStroke: newDataset.pointHighlightStroke,
-                            data: newData
+            function callSOAP(interest,principal,num) {
+                $.soap({
+                    url: "#{ProgramChartJS.WEB_SERVICE_ENDPOINT}",
+                    method: "#{ProgramChartJS.WEB_SERVICE_METHOD}",
+                    appendMethodToURL: 0,
+                    //SOAPAction: 'outstandingLoanOverTime',
+                    //soap12: $('#soap12').prop('checked'),
+                    //async: $('#async').prop('checked'),
+                    data: {
+                        int: interest,
+                        n: num,
+                        p: principal
+                    },
+                    //wss: wss,
+                    //HTTPHeaders: {
+                        // Authentication: 'Basic ' + btoa('test:test')
+                    //},
+                    envAttributes: {
+                        //'xmlns:test': 'http://www.test.org/'
+                        'xmlns:SOAP-ENV': 'http://schemas.xmlsoap.org/soap/envelope/'
+                    },
+                    //SOAPHeader: '<test>"SOAPHeader"</test>',
+                    namespaceQualifier: '#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}',
+                    namespaceURL: 'http://chartjs.program.seca2/',
+                    noPrefix: 0, //You definitely need a namespace prepended to the operationName
+                    //elementName: $('#elementName').val(),
+                    //enableLogging: $('#enableLogging').prop('checked'),
+                    //context: $('#feedback'),
+                    
+                    //My variables
+                    HTTPHeaders : {
+                        
+                    },
+                    
+                    beforeSend: function (SOAPEnvelope) {
+                        var xmlout = dom2html($.parseXML(SOAPEnvelope.toString()).firstChild);
+                        $('#soapRequest').text(xmlout);
+                    },
+                    success: function (SOAPResponse) {
+                        //	console.log(this)
+                        $('#soapcall').html('Response: Success!');
+                        //$('#soapcall').text(dom2html(SOAPResponse.toXML().firstChild));
+                        var result = SOAPResponse.content;
+                        //$('#soapResult').append("<p>"+SOAPResponse.toString()+"</p>");
+                        //$('#soapResult').text(dom2html(SOAPResponse.content));
+                        var xmlResults = SOAPResponse.toJSON();
+                        var test = JSON.stringify(xmlResults);
+                        //amount = $(xmlResults).find("return");
+                        window.returnedData = xmlResults["#document"]["S:Envelope"]["S:Body"]["#{ProgramChartJS.WEB_SERVICE_NAMESPACE_QUALIFIER}:#{ProgramChartJS.WEB_SERVICE_METHOD}Response"];  
+                        
+                    },
+                    error: function (SOAPResponse) {
+                        console.log(this)
+                        $('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
+                    },
+                    statusCode: {
+                        404: function () {
+                            console.log('404')
+                        },
+                        200: function () {
+                            console.log('200')
                         }
-                    ]
-                }
-                
-                var ctx = document.getElementById("canvas").getContext("2d");
-                
-                chart = new Chart(ctx).Line(data, {
-                    responsive: true
+                    }
                 });
-                chart.update();
             }
+            
         });
 
     </script>
@@ -102,5 +139,5 @@
     <script src="#{request.contextPath}/programs/chartjs/js/demo.js"></script>
     <script src="#{request.contextPath}/programs/chartjs/js/jquery.delayedchange.js"></script>
     <script src="#{request.contextPath}/programs/chartjs/js/xml2json.js"></script>
-    <script src="#{request.contextPath}/programs/chartjs/js/oopjavascript.js"></script>
+    <script src="#{request.contextPath}/programs/chartjs/js/oopjavascript-chartjs.js"></script>
 </html>

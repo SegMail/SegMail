@@ -18,7 +18,7 @@
                 <!--this is where the controls will be-->
                 <div class="col-lg-4">
                     <form id="form">
-                    <div id="slider" class="ui-slider"></div>
+                    <!--<div id="slider" class="ui-slider"></div>-->
 
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
@@ -91,14 +91,14 @@
                         }
                     ]
 
-                }
+                };
 
-                window.onload = function () {
-                    var ctx = document.getElementById("canvas").getContext("2d");
-                    window.myLine = new Chart(ctx).Line(lineChartData, {
-                        responsive: true
-                    });
-                }
+                //window.onload = function () {
+                //    var ctx = document.getElementById("canvas").getContext("2d");
+                //    window.myLine = new Chart(ctx).Line(lineChartData, {
+                //        responsive: true
+                //    });
+                //};
             </script>
 
             <script src="#{request.contextPath}/programs/chartjs/js/Chart.min.js"></script>
