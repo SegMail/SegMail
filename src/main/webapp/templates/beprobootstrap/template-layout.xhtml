@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <f:view contentType="text/html">
+        <head>
+            <title>SegMail - send large mail fast and cheap</title>    
+
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />        
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+            <link href="#{request.contextPath}/templates/beprobootstrap/css/styles.css" rel="stylesheet" type="text/css" id="theme"/>
+            <!--[if lt IE 10]><link rel="stylesheet" type="text/css" href="css/ie.css"/><![endif]-->
+
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery-ui.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap/bootstrap.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/mcustomscrollbar/jquery.mCustomScrollbar.min.js"></script>        
+
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/sparkline/jquery.sparkline.min.js"></script>        
+            <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=places"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/fancybox/jquery.fancybox.pack.js"></script>                
+
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/d3.v3.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/rickshaw.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js"></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/excanvas.min.js'></script>    
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js'></script>    
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.stack.js'></script>    
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.pie.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.resize.js'></script>          
+
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/knob/jquery.knob.js'></script>
+
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/moment.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/daterangepicker.js"></script> 
+
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-europe-mill-en.js'></script>
+
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins.js"></script>        
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/demo.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/maps.js"></script>        
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/charts.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/actions.js"></script>        
+        </head>
+        <body>
+            <div class="page-container"><!-- page wrapper -->
+
+                <div class="page-head">
+                    <ul class="page-head-elements"><!-- Head elements such as buttons -->
+                        <li><!-- nem element -->
+                            <a href="#"><!-- link(button) -->
+                                <span class="fa fa-bars"></span><!-- icon -->
+                            </a>
+                        </li><!-- end of element -->
+                        <li class="search"><!-- new serach element -->
+                            <input type="text" class="form-control" placeholder="Search..."></input><!-- search input -->
+                        </li><!-- end of element -->
+                    </ul>
+                </div><!-- page header wrapper -->
+
+                <div class="page-navigation">
+                    <div class="page-navigation-info"><!-- navigation info block -->
+                        <a href="index.html" class="logo">Your logo text</a><!-- Your logo link -->
+                    </div>
+                    <div class="profile"></div><!-- profile block -->
+                    <ul class="navigation">
+                        <ui:include src="#{bootstrap.output.menuRoot}" />
+                    </ul>
+                    <!-- page navigation(menu) -->
+                    
+                </div><!-- page navigation wrapper -->
+                
+                <div class="page-content">
+                    <ui:insert name="main-program-panel" />
+                </div><!-- page content wrapper -->
+                <div class="page-sidebar"></div><!-- page sidebar -->
+
+            </div>
+        </body>
+    </f:view>
+</html>

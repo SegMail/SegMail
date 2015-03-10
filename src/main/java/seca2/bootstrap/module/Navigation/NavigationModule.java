@@ -64,6 +64,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
          return false;
          }
          }*/
+        outputContext.setMenuRoot("/programs/menu/top_menu.xhtml");
         if (userContainer != null && userContainer.isLoggedIn()) {
             //What else should I do here?
             

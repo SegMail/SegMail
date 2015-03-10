@@ -21,7 +21,8 @@ import seca2.bootstrap.CoreModule;
 public class LayoutModule extends BootstrapModule implements Serializable {
 
     //Hard code only 1 template at the moment, we will build this entire module later!
-    private final String DEFAULT_TEMPLATE_LOCATION = "/templates/mytemplate/template-layout.xhtml";
+    //private final String DEFAULT_TEMPLATE_LOCATION = "/templates/mytemplate/template-layout.xhtml";
+    private final String DEFAULT_TEMPLATE_LOCATION = "/templates/beprobootstrap/template-layout.xhtml";
     
     @PostConstruct
     public void init(){

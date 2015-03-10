@@ -19,6 +19,7 @@ public class BootstrapOutput implements Serializable {
     
     private String pageRoot;
     private String templateRoot;
+    private String menuRoot;
     private String errorMessage;
     private String errorStackTrace;
     
@@ -62,6 +63,14 @@ public class BootstrapOutput implements Serializable {
 
     public void setErrorStackTrace(String errorStackTrace) {
         this.errorStackTrace = errorStackTrace;
+    }
+
+    public String getMenuRoot() {
+        return menuRoot;
+    }
+
+    public void setMenuRoot(String menuRoot) {
+        this.menuRoot = menuRoot;
     }
     
     

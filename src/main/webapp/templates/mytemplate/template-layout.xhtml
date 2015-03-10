@@ -6,7 +6,7 @@
       xmlns:p="http://primefaces.org/ui">
     <f:view contentType="text/html">
         <h:head>
-            
+
             <link rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/bootstrap/bootstrap.css" /><!-- Loading Bootstrap UI -->
             <!--<link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/bootstrap/bootstrap-docs.css" />
             <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/bootstrap/prettify.css" />-->
@@ -16,7 +16,7 @@
             <!--JQuery sources must be declared at the start of the page, if not some custom scripts will not be able to recognize $-->
             <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
             <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
-            
+
             <!--custom hacks-->
             <link rel="stylesheet" href="#{request.contextPath}/templates/mytemplate/css/hacks/primefaces-hacks.css" /><!--PF hacks-->
             <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
@@ -30,9 +30,24 @@
         </h:head>
         <h:body>
             <h:panelGroup layout="block" class="container-fluid" style="">
-                <ui:include src="/programs/menu/top_menu.xhtml" /><!--hard code for the moment-->
+                <!--<ui:include src="/programs/menu/top_menu.xhtml" />hard code for the moment-->
+                <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
+                            <span class="sr-only">Toggle navigation</span>
+                        </button>
+                        <a class="navbar-brand" href="#">SegMail Dev 1.0</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="navbar-collapse-02">
+                        <ul class="nav navbar-nav">
+                            <ui:include src="#{bootstrap.output.menuRoot}" />
+                        </ul>
+                    </div>
+                </nav>
+            </h:panelGroup>
+            
 
-                <ui:insert name="main-program-panel" />
+            <ui:insert name="main-program-panel" />
 
             </h:panelGroup>
         </h:body>
