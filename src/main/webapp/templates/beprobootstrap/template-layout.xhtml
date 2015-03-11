@@ -72,11 +72,28 @@
                         <ui:include src="#{bootstrap.output.menuRoot}" />
                     </ul>
                     <!-- page navigation(menu) -->
-                    
+
                 </div><!-- page navigation wrapper -->
-                
+
                 <div class="page-content">
-                    <ui:insert name="main-program-panel" />
+                    <div class="container">
+                        <div class="page-toolbar">
+
+                            <div class="page-toolbar-block">
+                                <div class="page-toolbar-title">This is the testing page</div>
+                                <div class="page-toolbar-subtitle">All our test cases in html forms!</div>
+                            </div>                                                
+
+                            <ul class="breadcrumb">
+                                <li><a href="#">Dashboard</a></li>
+                                <li><a href="#">UI Elements</a></li>
+                                <li class="active">Blocks &amp; Panels</li>
+                            </ul>                 
+
+                        </div>
+                        <ui:insert name="main-program-panel" />
+                    </div>
+
                 </div><!-- page content wrapper -->
                 <div class="page-sidebar"></div><!-- page sidebar -->
 

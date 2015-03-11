@@ -8,7 +8,9 @@ package seca2.bootstrap.module.Navigation;
 import eds.component.data.DBConnectionException;
 import eds.component.navigation.NavigationService;
 import eds.entity.navigation.MenuItem;
+import eds.entity.program.Program;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -31,17 +33,48 @@ import seca2.bootstrap.module.User.UserSession;
 @CoreModule
 public class NavigationModule extends BootstrapModule implements Serializable {
 
+    public static final String CONTEXT_PATH_TOKEN = "#{site_url}";
     @EJB
     private NavigationService navigationService;
     //A MenuContainer should be inside a UserContainer, so there's no need for so many containers.
     //@Inject private MenuContainer menuContainer; //This module initializes the menu so that other programs and components can use it
     @Inject
     private UserSession userContainer;
+    
+    private List<String> programNames; //stud at this moment
+    private List<Program> programs2;
+    private int currentProgramIndex;
 
     @PostConstruct
     public void init() {
         //Construct menuTree from DB
+        //create a stub first, next time then we'll implement the actual thing
+        programNames = new ArrayList<String>();
 
+        programNames.add("test");
+        programNames.add("sendmail");
+        programNames.add("signupforms");
+        programNames.add("lists");
+        programNames.add("subscribers");
+        programNames.add("campaigns");
+        programNames.add("mysettings");
+
+        programs2 = new ArrayList<Program>();
+
+        for (int i = 0; i < programNames.size(); i++) {
+            Program program = new Program();
+            program.setPROGRAM_NAME(programNames.get(i));
+
+            String dir = programNames.get(i).toLowerCase();
+            program.setOBJECTID(i);
+            program.setBEAN_DIRECTORY("seca2.program." + dir);
+            program.setVIEW_DIRECTORY("/program/" + dir + "/");
+            program.setVIEW_ROOT("/programs/" + dir + "/layout.xhtml");
+            //program.setPROGRAM_ID(i);//not correct, just for the time being
+
+            programs2.add(program);
+            
+        }
     }
 
     public List<MenuItem> getAllMenuList() throws DBConnectionException {
@@ -69,7 +102,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             //What else should I do here?
             
         }
-        
+        outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
         //As of 20141210, I can't find any reason why this module should stop the
         //entire chain processing, so we'll just return true for now.
         return true;
@@ -78,6 +111,34 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean inService() {
         return true;
+    }
+
+    public List<String> getProgramNames() {
+        return programNames;
+    }
+
+    public void setProgramNames(List<String> programs) {
+        this.programNames = programs;
+    }
+    
+    public List<Program> getPrograms2() {
+        return programs2;
+    }
+
+    public void setPrograms2(List<Program> programs) {
+        this.programs2 = programs;
+    }
+    
+    public Program getCurrentProgram() {
+        return this.programs2.get(this.currentProgramIndex);
+    }
+
+    public int getCurrentProgramIndex() {
+        return currentProgramIndex;
+    }
+    
+    public void setCurrentProgramIndex(int currentProgramIndex) {
+        this.currentProgramIndex = currentProgramIndex;
     }
 
 }

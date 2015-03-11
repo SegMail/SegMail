@@ -11,28 +11,24 @@
                     >
 
         <ui:define name="main-program-panel">
-            <div class="row">
-                <div class="col-sm-12 col-md-12">
-                    <h2>This is the testing page</h2>
-                </div>
-            </div>
+                
             <div class="row">
                 <div class="col-sm-12 col-md-4">
                     <!--test DB generation-->
-                    <h:panelGroup layout="block" styleClass="panel panel-success" id="DBSetup">
+                    <div class="panel panel-primary" id="DBSetup">
                         <ui:include src="test-cases/DBSetup.xhtml" />
-                    </h:panelGroup>
-                    
+                    </div>
+
                     <!--test create usertype-->
-                    <h:panelGroup layout="block" styleClass="panel panel-success" id="createUsertype">
+                    <div class="panel panel-success" id="createUsertype">
                         <ui:include src="test-cases/createUserType.xhtml" />
-                    </h:panelGroup>
-                    
+                    </div>
+
                     <!--test create user-->
                     <h:panelGroup layout="block" styleClass="panel panel-success" id="createUser">
                         <ui:include src="test-cases/createUsers.xhtml" />
                     </h:panelGroup>
-                    
+
                     <!--test login user-->
                     <h:panelGroup layout="block" styleClass="panel panel-success" id="loginUser">
                         <ui:include src="test-cases/loginUser.xhtml" />
@@ -43,12 +39,12 @@
                     <h:panelGroup layout="block" styleClass="panel panel-success" id="programSetup">
                         <ui:include src="test-cases/createPrograms.xhtml" />
                     </h:panelGroup>
-                    
+
                     <!--test create menu items-->
                     <h:panelGroup layout="block" styleClass="panel panel-success" id="navigationSetup">
                         <ui:include src="test-cases/createMenuItems.xhtml" />
                     </h:panelGroup>
-                    
+
                     <!--test assign program to UserType-->
                     <h:panelGroup layout="block" styleClass="panel panel-success" id="programAccessSetup">
                         <ui:include src="test-cases/assignProgramsToUserTypes.xhtml" />
@@ -60,7 +56,7 @@
                         <ui:include src="test-cases/assignMenuItemsToUserTypes.xhtml" />
                     </h:panelGroup>
                 </div>
-                
+
                 <div class="col-sm-12 col-md-4">
 
                     <h:panelGroup styleClass="panel panel-success" id="buildMenu"><!--test build menu-->
@@ -147,7 +143,7 @@
                     </h:panelGroup>
                 </div>
             </div>
-            
+
         </ui:define>
 
     </ui:composition>

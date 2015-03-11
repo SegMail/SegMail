@@ -6,21 +6,17 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
-      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition  template="/programs/test/template/test-case-panel.xhtml">
         <!--test DB generation-->
         <ui:define name="panel-heading">
             For setting up the DB schema
         </ui:define>
         <ui:define name="panel-body">
-            <h:form id="setupDBForm">
-                <p:blockUI id="setupDBFormBlock" block="setupDBForm" 
-                           trigger="setupDBForm:setupDBEM,setupDBForm:setupDBSession">
-                    <p id="spinner">Please wait while we do what we do best.</p>
-                </p:blockUI>
+            <form jsf:id="setupDBForm">
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
-                        <!--<h:outputLabel for="setupDBEM" styleClass="control-label col-md-6">Generate DB with EntityManager: </h:outputLabel>-->
                         <p:commandButton id="setupDBEM" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via EM"
                                          update="@form"
                                          actionListener="#{ProgramTest.formTestDB.generateDBEM()}"></p:commandButton>
@@ -41,7 +37,10 @@
                                       showSummary="true"></s2:messenger>
                     </div>
                 </div>
-            </h:form>
+                <p:blockUI id="setupDBFormBlock" block="setupDBForm" trigger="setupDBForm:setupDBSession,setupDBForm:setupDBEM">
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </form>
         </ui:define>
     </ui:composition>
 </html>
