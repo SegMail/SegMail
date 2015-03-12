@@ -12,13 +12,17 @@ import eds.entity.program.Program;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
+import seca2.bootstrap.GlobalValues;
 import seca2.bootstrap.module.User.UserSession;
 
 /**
@@ -40,10 +44,15 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     //@Inject private MenuContainer menuContainer; //This module initializes the menu so that other programs and components can use it
     @Inject
     private UserSession userContainer;
-    
+
+    @Inject
+    private GlobalValues globalValues;
+
     private List<String> programNames; //stud at this moment
     private List<Program> programs2;
     private int currentProgramIndex;
+
+    private List<MenuItem> menuItems;
 
     @PostConstruct
     public void init() {
@@ -73,7 +82,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             //program.setPROGRAM_ID(i);//not correct, just for the time being
 
             programs2.add(program);
-            
+
         }
     }
 
@@ -100,9 +109,37 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         outputContext.setMenuRoot("/programs/menu/top_menu.xhtml");
         if (userContainer != null && userContainer.isLoggedIn()) {
             //What else should I do here?
-            
+
         }
-        outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
+        try {
+            //Build the menu tree here.
+            //For each menu item, if it is a program type, prepend the context path.
+            //If it is a URL, leave it as it is
+            menuItems = this.navigationService.getAllMenuItems();
+            
+            //Encapsulate all menuItems into a MenuItemContainer
+            List<MenuItemContainer> menuItemContainers = new ArrayList<MenuItemContainer>();
+            for(MenuItem menuItem : menuItems){
+                MenuItemContainer container = new MenuItemContainer();
+                container.setMenuItem(menuItem);
+                
+                container.setActive(false);
+                //Set active if the path info is the URL of the menuitem
+                if(menuItem.getMENU_ITEM_URL()
+                        .equalsIgnoreCase(
+                                globalValues.getPROGRAM_CONTEXT_NAME()+"/"+inputContext.getProgram()+"/")){
+                    container.setActive(true);
+                }
+                menuItemContainers.add(container);
+            }
+            
+            outputContext.getNonCoreValues().put("TEST_MENU2", menuItemContainers);
+            //outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
+        } catch (DBConnectionException ex) {
+            //set error page
+            return false;
+        }
+
         //As of 20141210, I can't find any reason why this module should stop the
         //entire chain processing, so we'll just return true for now.
         return true;
@@ -120,7 +157,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     public void setProgramNames(List<String> programs) {
         this.programNames = programs;
     }
-    
+
     public List<Program> getPrograms2() {
         return programs2;
     }
@@ -128,7 +165,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     public void setPrograms2(List<Program> programs) {
         this.programs2 = programs;
     }
-    
+
     public Program getCurrentProgram() {
         return this.programs2.get(this.currentProgramIndex);
     }
@@ -136,7 +173,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     public int getCurrentProgramIndex() {
         return currentProgramIndex;
     }
-    
+
     public void setCurrentProgramIndex(int currentProgramIndex) {
         this.currentProgramIndex = currentProgramIndex;
     }

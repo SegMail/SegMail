@@ -62,13 +62,14 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-default">
-                            <input type="radio" name="options" id="url-option">URL</input>
-                        </label>
-                        <label class="btn btn-default">
-                            <input type="radio" name="options" id="program-option">Program</input>
-                        </label>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Prepend HTML tags</span>
+                                <h:inputText id="prependHTMLTagss" styleClass="form-control"
+                                             value="#{ProgramTest.formTestNavigation.prependHTMLTags}" ></h:inputText>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -89,7 +90,7 @@
 
                     </div>
                 </div>
-                <p:blockUI id="setupNavigationFormBlock" block="setupNavigationForm" trigger="setupNavigationForm:createMenuItem">
+                <p:blockUI id="setupNavigationsFormBlock" block="setupNavigationForm" trigger="setupNavigationForm:createMenuItem">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
             </h:form>

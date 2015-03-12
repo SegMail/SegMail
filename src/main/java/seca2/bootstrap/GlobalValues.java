@@ -7,7 +7,6 @@
 package seca2.bootstrap;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
 
 /**
@@ -18,6 +17,8 @@ import javax.enterprise.context.ApplicationScoped;
 public class GlobalValues {
     
     private final int MAX_RESULT_SIZE_DB = 9999;
+    private final String CONTEXT_PATH_TOKEN = "[contextpath]";
+    private final String PROGRAM_CONTEXT_NAME = "program";
     
     private boolean INSTALLED;
         
@@ -32,6 +33,18 @@ public class GlobalValues {
 
     public void setINSTALLED(boolean INSTALLED) {
         this.INSTALLED = INSTALLED;
+    }
+
+    public int getMAX_RESULT_SIZE_DB() {
+        return MAX_RESULT_SIZE_DB;
+    }
+
+    public String getCONTEXT_PATH_TOKEN() {
+        return CONTEXT_PATH_TOKEN;
+    }
+
+    public String getPROGRAM_CONTEXT_NAME() {
+        return PROGRAM_CONTEXT_NAME;
     }
     
     

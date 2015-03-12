@@ -14,6 +14,17 @@
             </li>
 
         </c:forEach>
+        <!--test using the real menuitem object-->
+        <c:forEach items="#{bootstrap.output.nonCoreValues['TEST_MENU2']}" var="menuitem">
+
+            <li class="#{menuitem.active ? 'active' : ''}">
+                <a href="#{menuitem.getURL()}">
+                    #{menuitem.getPrependTags()}
+                    #{menuitem.getName()}
+                </a>
+            </li>
+
+        </c:forEach>
         <!--leave this here to look good...
         <form class="navbar-form navbar-right" action="#" role="search" style="">
             <div class="form-group">

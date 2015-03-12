@@ -6,8 +6,6 @@
 package seca2.bootstrap.module.Program;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import seca2.bootstrap.BootstrapInput;
@@ -29,9 +27,6 @@ import eds.entity.program.Program;
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
 
-    
-    
-    
     public static final int DEFAULT_PROGRAM = 0;
 
     @EJB
@@ -41,9 +36,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     public void init() {
         
     }
-
-    
-
     
     @Override
     protected int executionSequence() {
