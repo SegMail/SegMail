@@ -19,6 +19,7 @@ public class BootstrapInput implements Serializable{
     private FacesContext facesContext;
     
     private String program;
+    private String contextPath;
 
     public FacesContext getFacesContext() {
         return facesContext;
@@ -34,6 +35,14 @@ public class BootstrapInput implements Serializable{
 
     public void setProgram(String program) {
         this.program = program;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
     
     

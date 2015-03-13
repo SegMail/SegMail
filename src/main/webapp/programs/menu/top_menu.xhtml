@@ -10,7 +10,11 @@
         <c:forEach items="#{bootstrap.output.nonCoreValues['TEST_MENU']}" var="program">
 
             <li class="#{0 == program.OBJECTID ? 'active' : ''}">
-                <a href="#{request.contextPath.concat(program.VIEW_DIRECTORY)}">#{program.PROGRAM_NAME}</a>
+                <a href="#{request.contextPath.concat(program.VIEW_DIRECTORY)}">
+                    <!--<img src="#{request.contextPath}/templates/beprobootstrap/img/themes/default.jpg"/>--><!--hard code for the moment-->
+                    <i class="fa fa-dashboard"></i>
+                    #{program.PROGRAM_NAME}
+                </a>
             </li>
 
         </c:forEach>
@@ -19,7 +23,7 @@
 
             <li class="#{menuitem.active ? 'active' : ''}">
                 <a href="#{menuitem.getURL()}">
-                    #{menuitem.getPrependTags()}
+                    <h:outputText value="#{menuitem.getPrependTags()}" escape="false" ></h:outputText>
                     #{menuitem.getName()}
                 </a>
             </li>

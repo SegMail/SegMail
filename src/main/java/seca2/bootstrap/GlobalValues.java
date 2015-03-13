@@ -13,12 +13,13 @@ import javax.enterprise.context.ApplicationScoped;
  *
  * @author vincent.a.lee
  */
-@ApplicationScoped
+//@ApplicationScoped
 public class GlobalValues {
     
     private final int MAX_RESULT_SIZE_DB = 9999;
     private final String CONTEXT_PATH_TOKEN = "[contextpath]";
     private final String PROGRAM_CONTEXT_NAME = "program";
+    private final String CONTEXT_PATH = "SegMail/";
     
     private boolean INSTALLED;
         
@@ -45,6 +46,10 @@ public class GlobalValues {
 
     public String getPROGRAM_CONTEXT_NAME() {
         return PROGRAM_CONTEXT_NAME;
+    }
+
+    public String getCONTEXT_PATH() {
+        return CONTEXT_PATH;
     }
     
     

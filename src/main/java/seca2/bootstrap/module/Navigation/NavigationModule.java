@@ -58,7 +58,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     public void init() {
         //Construct menuTree from DB
         //create a stub first, next time then we'll implement the actual thing
-        programNames = new ArrayList<String>();
+        /*programNames = new ArrayList<String>();
 
         programNames.add("test");
         programNames.add("sendmail");
@@ -82,8 +82,8 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             //program.setPROGRAM_ID(i);//not correct, just for the time being
 
             programs2.add(program);
-
-        }
+        }*/
+        
     }
 
     public List<MenuItem> getAllMenuList() throws DBConnectionException {
@@ -122,7 +122,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             for(MenuItem menuItem : menuItems){
                 MenuItemContainer container = new MenuItemContainer();
                 container.setMenuItem(menuItem);
-                
+                container.setContextPath(inputContext.getContextPath());
                 container.setActive(false);
                 //Set active if the path info is the URL of the menuitem
                 if(menuItem.getMENU_ITEM_URL()

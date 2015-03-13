@@ -78,6 +78,7 @@ public class Bootstrap implements Serializable {
         
         FacesContext fc = FacesContext.getCurrentInstance();
         input.setFacesContext(fc);
+        input.setContextPath(fc.getExternalContext().getRequestContextPath());
         this.startChain(input,output);
     }
     
