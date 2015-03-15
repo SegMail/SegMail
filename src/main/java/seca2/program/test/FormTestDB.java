@@ -47,7 +47,7 @@ public class FormTestDB implements Serializable {
             
             //add all entity packages
             eds.utilities.Package root = new eds.utilities.Package();
-            root.push("seca2").push("entity");
+            root.push("eds").push("entity");
 
             ClassLoader loader = EntityExplorer.getClassLoader();
             List<Class> entities = EntityExplorer.collectEntities(root, loader);

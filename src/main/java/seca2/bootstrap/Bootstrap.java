@@ -88,6 +88,8 @@ public class Bootstrap implements Serializable {
         try{
             head.start(inputContext, outputContext);
         } catch(Exception ex){
+            outputContext.setErrorMessage(ex.getMessage());
+            outputContext.setTemplateRoot(defaultSites.ERROR_PAGE_TEMPLATE);
             outputContext.setPageRoot(defaultSites.ERROR_PAGE);
             
             StringWriter sw = new StringWriter();

@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 public class DefaultSites {
     
     public final String ERROR_PAGE = "/programs/error/error_page.xhtml";
+    public final String ERROR_PAGE_TEMPLATE = "/programs/error/template/error-page-layout.xhtml";
     
     public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
     public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";

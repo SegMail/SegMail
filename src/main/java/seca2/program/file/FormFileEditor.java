@@ -12,8 +12,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import eds.component.file.FileService;
-import eds.entity.file.FileEntity;
-import eds.entity.file.FileSequence;
+import eds.entity.file.SecaFileEntity;
+import eds.entity.file.SecaFileSequence;
 
 /**
  *
@@ -21,8 +21,8 @@ import eds.entity.file.FileSequence;
  */
 public class FormFileEditor implements Serializable {
     
-    private FileEntity editingFile;
-    private List<FileSequence> cachedSequences; //Application managed cached list
+    private SecaFileEntity editingFile;
+    private List<SecaFileSequence> cachedSequences; //Application managed cached list
     
     private int sequenceCachedStart; //Which sequence # to load from DB  (DB Object-specific) [dynamic]
     private int sequenceCachedRows; //How many sequence from start to be loaded from DB [static]
@@ -44,7 +44,7 @@ public class FormFileEditor implements Serializable {
      * @param end
      * @return 
      */
-    public List<FileSequence> loadSequencesFromDB(FileService fileService, long fileId, long start, long end){
+    public List<SecaFileSequence> loadSequencesFromDB(FileService fileService, long fileId, long start, long end){
         return fileService.getSequences(fileId, start, end);
     }
     
@@ -97,7 +97,7 @@ public class FormFileEditor implements Serializable {
             nextCacheEndIndex = 0;
         }
         System.out.println("Loading seqeunces from "+nextCacheStartIndex+" to "+nextCacheEndIndex);
-        List<FileSequence> temp = loadSequencesFromDB(fileService, fileId, nextCacheStartIndex, nextCacheEndIndex);
+        List<SecaFileSequence> temp = loadSequencesFromDB(fileService, fileId, nextCacheStartIndex, nextCacheEndIndex);
         temp.addAll(this.cachedSequences);
         this.cachedSequences = temp;
         
@@ -115,15 +115,15 @@ public class FormFileEditor implements Serializable {
         editingFile = null;
     }
 
-    public FileEntity getEditingFile() {
+    public SecaFileEntity getEditingFile() {
         return editingFile;
     }
 
-    public void setEditingFile(FileEntity editingFile) {
+    public void setEditingFile(SecaFileEntity editingFile) {
         this.editingFile = editingFile;
     }
     
-    public List<FileSequence> getSampleSequence(){
+    public List<SecaFileSequence> getSampleSequence(){
         
         if(editingFile != null){
             return this.editingFile.getSequences();
@@ -131,11 +131,11 @@ public class FormFileEditor implements Serializable {
         return new ArrayList<>();
     }
     
-    public List<FileSequence> getCachedSequences() {
+    public List<SecaFileSequence> getCachedSequences() {
         return cachedSequences;
     }
 
-    public void setCachedSequences(List<FileSequence> cachedSequences) {
+    public void setCachedSequences(List<SecaFileSequence> cachedSequences) {
         this.cachedSequences = cachedSequences;
     }
 

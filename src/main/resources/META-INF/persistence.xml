@@ -33,6 +33,9 @@
         
             <!--<property name="hibernate.transaction.auto_close_session" value="false" />-->
             <property name="hibernate.transaction.flush_before_completion" value="true" />
+            
+            <!--http://stackoverflow.com/questions/3677380/proper-hibernate-annotation-for-byte-->
+            <property name="hibernate.jdbc.use_streams_for_binary" value="false" />
         </properties>
     </persistence-unit>
 </persistence>  

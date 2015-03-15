@@ -14,7 +14,7 @@ import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
-import eds.entity.program.Program;
+import javax.faces.context.FacesContext;
 
 /**
  *
@@ -49,40 +49,51 @@ public class ProgramModule extends BootstrapModule implements Serializable {
          Actual processing
          1) Check the program requested by retrieving it from inputContext.
          */
+        
+        //If there is no program entered in the URL, set the global default program
+        //[20150314] First, we should get the user's own default program, but we
+        // de-prioritize this at the moment.
+        if(inputContext.getProgram() == null || inputContext.getProgram().isEmpty()){
+            FacesContext fc = (FacesContext) inputContext.getFacesContext();
+            if(fc.getExternalContext().getInitParameter("javax.faces.PROJECT_STAGE")
+                    .equalsIgnoreCase("Development")){
+                String defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
+                inputContext.setProgram(defaultProgram);
+            }
+        }
         String program = inputContext.getProgram();
+            
         try {
             /*
-             2) Retrieve the program from database by calling ProgramServices.
+             * 2) Authorization checks for program access by calling ProgramServices.
+             * [20150314] De-prioritize at the moment
              */
-            //List<Program> programs = programService.getProgramByName(program);
+            /*
+             3) Retrieve the program from database by calling ProgramServices.
+             */
             String viewRoot = programService.getViewRootFromProgramName(program);
             System.out.println(viewRoot); //debug
-            Program programObject;
 
             //If there are results returned, select only the first result
             if (viewRoot != null && !viewRoot.isEmpty()) {
-                
                 outputContext.setPageRoot(viewRoot);
                 return true;
             } 
             
-            //else {//if no results returned, show the error page
-                //Hardcoded for testing
-            outputContext.setPageRoot("/programs/test/layout.xhtml");
+            //For development purpoose, remove after deployment!
+            //To get the test page if no DB exist
+            FacesContext fc = (FacesContext) inputContext.getFacesContext();
+            String testing = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_VIEWROOT");
+            outputContext.setPageRoot(testing);
+            return true;
             
-            //}
-
-            /*
-             3) Authorization checks for program access by calling ProgramServices.
-             */
         } catch (DBConnectionException ex) {
             //Set error page and stop processing
             //return false;
-            outputContext.setPageRoot("/programs/test/layout.xhtml");
-            
+            outputContext.setPageRoot("/programs/error/error_page.xhtml");
+            return false;
+            //throw ex; //It's not a programming error, so 
         }
-
-        return true;
     }
 
     @Override

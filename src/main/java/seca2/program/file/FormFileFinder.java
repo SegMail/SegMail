@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import org.hibernate.exception.JDBCConnectionException;
 import eds.component.data.HibernateUtil;
 import eds.component.file.FileService;
-import eds.entity.file.FileEntity;
+import eds.entity.file.SecaFileEntity;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -31,9 +31,9 @@ public class FormFileFinder implements Serializable {
     private String searchName;
     private Date searchStartDate;
     private Date searchEndDate;
-    private List<FileEntity> results;
+    private List<SecaFileEntity> results;
     private List<FileMenuWrapper> wrappedResults;
-    private FileEntity selectedFile;
+    private SecaFileEntity selectedFile;
     private String mode;
     private String FORM_ID = "form-file-finder";
     
@@ -45,7 +45,7 @@ public class FormFileFinder implements Serializable {
     
     @PostConstruct
     public void init(){
-        results = new ArrayList<FileEntity>();
+        results = new ArrayList<SecaFileEntity>();
         wrappedResults = new ArrayList<FileMenuWrapper>();
         //Initialize required criteria
         
@@ -55,7 +55,7 @@ public class FormFileFinder implements Serializable {
         try{
             results = fileService.searchFileByName(searchName);
             wrappedResults = new ArrayList<FileMenuWrapper>();
-            for(FileEntity f:results){
+            for(SecaFileEntity f:results){
                 FileMenuWrapper wrappedF = new FileMenuWrapper();
                 wrappedF.setWrappedFile(f);
                 wrappedF.setSelected(false);
@@ -73,11 +73,11 @@ public class FormFileFinder implements Serializable {
         }
     }
 
-    public List<FileEntity> getResults() {
+    public List<SecaFileEntity> getResults() {
         return results;
     }
 
-    public void setResults(List<FileEntity> results) {
+    public void setResults(List<SecaFileEntity> results) {
         this.results = results;
     }
 
@@ -85,7 +85,7 @@ public class FormFileFinder implements Serializable {
         this.searchName = "";
         this.searchStartDate = null;
         this.searchEndDate = null;
-        this.results = new ArrayList<FileEntity>();
+        this.results = new ArrayList<SecaFileEntity>();
         this.wrappedResults = new ArrayList<FileMenuWrapper>();
     }
 
@@ -129,11 +129,11 @@ public class FormFileFinder implements Serializable {
         this.wrappedResults = wrappedResults;
     }
 
-    public FileEntity getSelectedFile() {
+    public SecaFileEntity getSelectedFile() {
         return selectedFile;
     }
 
-    public void setSelectedFile(FileEntity selectedFile) {
+    public void setSelectedFile(SecaFileEntity selectedFile) {
         this.selectedFile = selectedFile;
     }
 

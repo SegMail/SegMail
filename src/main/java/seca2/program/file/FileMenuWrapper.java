@@ -8,7 +8,7 @@ package seca2.program.file;
 
 import java.util.ArrayList;
 import java.util.List;
-import eds.entity.file.FileEntity;
+import eds.entity.file.SecaFileEntity;
 
 /**
  *
@@ -16,7 +16,7 @@ import eds.entity.file.FileEntity;
  */
 public class FileMenuWrapper {
     
-    private FileEntity wrappedFile;
+    private SecaFileEntity wrappedFile;
     private boolean selected;
     private FileMenuItemWrapper selectedItem;
     private String selectedValue;
@@ -55,11 +55,11 @@ public class FileMenuWrapper {
         items = dropdownMenu;
     }
 
-    public FileEntity getWrappedFile() {
+    public SecaFileEntity getWrappedFile() {
         return wrappedFile;
     }
 
-    public void setWrappedFile(FileEntity wrappedFile) {
+    public void setWrappedFile(SecaFileEntity wrappedFile) {
         this.wrappedFile = wrappedFile;
     }
 

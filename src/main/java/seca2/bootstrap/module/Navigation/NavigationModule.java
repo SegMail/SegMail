@@ -9,14 +9,13 @@ import eds.component.data.DBConnectionException;
 import eds.component.navigation.NavigationService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.program.Program;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
@@ -56,33 +55,6 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @PostConstruct
     public void init() {
-        //Construct menuTree from DB
-        //create a stub first, next time then we'll implement the actual thing
-        /*programNames = new ArrayList<String>();
-
-        programNames.add("test");
-        programNames.add("sendmail");
-        programNames.add("signupforms");
-        programNames.add("lists");
-        programNames.add("subscribers");
-        programNames.add("campaigns");
-        programNames.add("mysettings");
-
-        programs2 = new ArrayList<Program>();
-
-        for (int i = 0; i < programNames.size(); i++) {
-            Program program = new Program();
-            program.setPROGRAM_NAME(programNames.get(i));
-
-            String dir = programNames.get(i).toLowerCase();
-            program.setOBJECTID(i);
-            program.setBEAN_DIRECTORY("seca2.program." + dir);
-            program.setVIEW_DIRECTORY("/program/" + dir + "/");
-            program.setVIEW_ROOT("/programs/" + dir + "/layout.xhtml");
-            //program.setPROGRAM_ID(i);//not correct, just for the time being
-
-            programs2.add(program);
-        }*/
         
     }
 
@@ -97,15 +69,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        //BootstrapModules should not access database, but let individual forms do it 
-        /*if(menuContainer.getAllMenuItems() == null){
-         try {
-         menuContainer.setAllMenuItems(this.getAllMenuList());
-         } catch (DBConnectionException ex) {
-         outputContext.setPageRoot(this.defaultSites.ERROR_PAGE);
-         return false;
-         }
-         }*/
+        
         outputContext.setMenuRoot("/programs/menu/top_menu.xhtml");
         if (userContainer != null && userContainer.isLoggedIn()) {
             //What else should I do here?
@@ -135,8 +99,16 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             
             outputContext.getNonCoreValues().put("TEST_MENU2", menuItemContainers);
             //outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
-        } catch (DBConnectionException ex) {
+        } catch (DBConnectionException dbex) {
+            
             //set error page
+            outputContext.setErrorMessage(dbex.getMessage());
+            StringWriter sw = new StringWriter();
+            dbex.printStackTrace(new PrintWriter(sw));
+            outputContext.setErrorStackTrace(sw.toString());
+            outputContext.setTemplateRoot(defaultSites.ERROR_PAGE_TEMPLATE);
+            outputContext.setPageRoot(defaultSites.ERROR_PAGE);
+            
             return false;
         }
 

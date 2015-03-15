@@ -87,13 +87,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
-                        <c:forEach items="#{facesContext.messageList}" var="m" >
-
-                            <div class="alert alert-link" >
-                                <strong>#{m.summary}</strong><br />
-                                #{m.detail}
-                            </div>
-                        </c:forEach>
+                        <s2:messenger for="assignMenuItemForm"></s2:messenger>
                     </div>
                 </div>
                 <p:blockUI id="setupNavigationFormBlock" block="assignMenuItemForm" trigger="assignMenuItemForm:createMenuItemAccess">

@@ -20,6 +20,7 @@ import eds.component.data.DBConnectionException;
 import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.module.User.UserContainer;
 import eds.component.user.UserLoginException;
+import eds.component.user.UserNotFoundException;
 import eds.component.user.UserRegistrationException;
 import eds.component.user.UserService;
 import eds.component.user.UserTypeException;
@@ -52,6 +53,11 @@ public class FormTestUser implements Serializable {
     private String loginPassword;
     @Inject
     private UserContainer userContainer; //this is not resolved precisely [20150131]
+    
+    //Profile pic
+    private String usernameProfilePic;
+    private String profilePicLocation;
+    private final String setProfilePicFormName = "setProfilePicForm";
     
     private final String loginUserFormName = "loginUserForm";
     
@@ -123,6 +129,23 @@ public class FormTestUser implements Serializable {
                     ex.getCause().getMessage());
         }
     }
+    
+    public void setProfilePicLocation(){
+        try{
+            userService.setProfilePicLocationForUsername(this.usernameProfilePic, this.profilePicLocation);
+        }
+        catch(UserNotFoundException usnfex){
+            FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, "Username "+usnfex.getUsername()+" does not exist!", "Please contact admin.");
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        }
+        catch(Exception ex){
+            FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, 
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
+        }
+    }
 
     public String getUserTypeName() {
         return userTypeName;
@@ -186,6 +209,22 @@ public class FormTestUser implements Serializable {
 
     public void setLoginPassword(String loginPassword) {
         this.loginPassword = loginPassword;
+    }
+
+    public String getUsernameProfilePic() {
+        return usernameProfilePic;
+    }
+
+    public void setUsernameProfilePic(String usernameProfilePic) {
+        this.usernameProfilePic = usernameProfilePic;
+    }
+
+    public String getProfilePicLocation() {
+        return profilePicLocation;
+    }
+
+    public void setProfilePicLocation(String profilePicLocation) {
+        this.profilePicLocation = profilePicLocation;
     }
     
     

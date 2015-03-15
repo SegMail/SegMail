@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="/programs/test/template/test-case-panel.xhtml">
+        <!--test login of user-->
+        <ui:define name="panel-heading">
+            Set Profile Pic for Users
+        </ui:define>
+        <ui:define name="panel-body">
+            <h:form id="setProfilePicForm" >
+                <s2:messenger for="setProfilePicForm" ></s2:messenger>
+                
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" jsf:id="usernameProfilePic" class="form-control"
+                           jsf:value="#{ProgramTest.formTestUser.usernameProfilePic}" />
+                </div>
+                <div class="form-group">
+                    <label>Profile pic location:</label>
+                    <input type="text" jsf:id="profilePicLocation" class="form-control"
+                           jsf:value="#{ProgramTest.formTestUser.profilePicLocation}" />
+                </div>
+                
+                <div class="block-footer">
+                    <div class="pull-right">
+                        <button class="btn btn-success" jsf:id="setProfilePicButton"
+                                jsf:actionListener="#{ProgramTest.formTestUser.setProfilePicLocation()}"
+                                >
+                            Set Profile Pic
+                        </button>
+                    </div>
+                </div>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

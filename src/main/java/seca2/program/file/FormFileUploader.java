@@ -31,8 +31,8 @@ import eds.component.data.HibernateUtil;
 import eds.component.file.FileOperationException;
 import eds.component.file.FileService;
 import eds.component.file.InvalidFileException;
-import eds.entity.file.FileEntity;
-import eds.entity.file.FileSequence;
+import eds.entity.file.SecaFileEntity;
+import eds.entity.file.SecaFileSequence;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -51,7 +51,7 @@ public class FormFileUploader implements Serializable {
     @EJB private FileService fileService;
     @EJB private HibernateUtil hibernateUtil;
     private UploadedFile uploadedFile;
-    private FileEntity holdingFile;
+    private SecaFileEntity holdingFile;
     Future<String> insert;
 
     private Part file;
@@ -94,9 +94,9 @@ public class FormFileUploader implements Serializable {
         String fileName = event.getFile().getFileName();
         try {
             is = event.getFile().getInputstream();
-            FileEntity checkedLengthAndChecksum = this.fileService.checkLengthAndComputeChecksum(fileName, is);
+            SecaFileEntity checkedLengthAndChecksum = this.fileService.checkLengthAndComputeChecksum(fileName, is);
             
-            FileEntity existingFile = this.fileService.checkFileExists(checkedLengthAndChecksum);
+            SecaFileEntity existingFile = this.fileService.checkFileExists(checkedLengthAndChecksum);
             if (existingFile != null) {
                 System.out.println("Existing file " + existingFile.getFILENAME() + " found");//debug
 
@@ -168,13 +168,13 @@ public class FormFileUploader implements Serializable {
      */
     public void uploadFile(FileUploadEvent event) throws Exception {
         try {
-            FileEntity checkedLengthAndChecksum = checkLengthAndComputeChecksum(event.getFile().getFileName(),event.getFile().getInputstream());
+            SecaFileEntity checkedLengthAndChecksum = checkLengthAndComputeChecksum(event.getFile().getFileName(),event.getFile().getInputstream());
             if (checkedLengthAndChecksum == null) {
                 throw new InvalidFileException("File " + event.getFile().getFileName() + " does not contain equal length sequences!");
             }
             //Compare with existing file and determine if insert button should be a "Insert new file"/"Resume existing file"/"File already uploaded"
             Session session = hibernateUtil.getSession();
-            FileEntity existingFile = this.checkFileExists(session, checkedLengthAndChecksum);
+            SecaFileEntity existingFile = this.checkFileExists(session, checkedLengthAndChecksum);
             //session.close();
             if (existingFile != null) {
                 System.out.println("Existing file " + existingFile.getFILENAME() + " found");//debug
@@ -242,8 +242,8 @@ public class FormFileUploader implements Serializable {
      * @return
      * @throws Exception
      */
-    public FileEntity checkLengthAndComputeChecksum(String filename, InputStream is) throws Exception {
-        FileEntity checkedFile;
+    public SecaFileEntity checkLengthAndComputeChecksum(String filename, InputStream is) throws Exception {
+        SecaFileEntity checkedFile;
         String md5Checksum = "";
         int lineNum = 0;
         //long fileSize = uploadedFile.getSize();
@@ -301,7 +301,7 @@ public class FormFileUploader implements Serializable {
         System.out.println(holdingFile.getFILENAME());
         DateTime startTime = new DateTime();
         Session session = hibernateUtil.getSession();
-        FileEntity insertThisFile = this.holdingFile;
+        SecaFileEntity insertThisFile = this.holdingFile;
         UploadedFile fileContents = this.uploadedFile;//obsolete
 
         //resume from the sequence number where the upload has stopped
@@ -320,7 +320,7 @@ public class FormFileUploader implements Serializable {
                 if (++lineNum <= insertThisFile.getLAST_SEQUENCE()) {
                     continue; //skip to the last inserted sequence
                 }
-                FileSequence nextSequence = this.addSequence(insertThisFile, lineSequence);
+                SecaFileSequence nextSequence = this.addSequence(insertThisFile, lineSequence);
                 session.save(nextSequence);
                 if (insertThisFile.getLAST_SEQUENCE() % MAX_RECORD_FLUSH == 0) {
                     System.out.println("Flush at: " + lineSequence);
@@ -397,22 +397,22 @@ public class FormFileUploader implements Serializable {
         }
     }
 
-    public FileEntity createNewFile(String filename) {
-        FileEntity fileEntity = new FileEntity();
+    public SecaFileEntity createNewFile(String filename) {
+        SecaFileEntity fileEntity = new SecaFileEntity();
         fileEntity.setFILENAME(filename);
         fileEntity.setNUM_OF_SEQUENCE(0);
         fileEntity.setFILE_SIZE_BYTE(0);
         fileEntity.setLAST_SEQUENCE(0);
         fileEntity.setREMAINING_SEQUENCE(0);
-        fileEntity.setUPLOAD_STATUS(FileEntity.FILE_STATUS.INCOMPLETE);
+        fileEntity.setUPLOAD_STATUS(SecaFileEntity.FILE_STATUS.INCOMPLETE);
 
         return fileEntity;
     }
 
     ;
     
-    public FileSequence addSequence(FileEntity file, FileSequence sequence) {
-        if (file.getUPLOAD_STATUS() == FileEntity.FILE_STATUS.COMPLETED) {
+    public SecaFileSequence addSequence(SecaFileEntity file, SecaFileSequence sequence) {
+        if (file.getUPLOAD_STATUS() == SecaFileEntity.FILE_STATUS.COMPLETED) {
             throw new RuntimeException("File " + file.getFILENAME() + " has completed uploading and cannot be overwritten. "
                     + "Please delete file and re-upload again.");
         }
@@ -423,17 +423,17 @@ public class FormFileUploader implements Serializable {
         sequence.setORIGINAL_LINE_NUM(file.getLAST_SEQUENCE());
         sequence.setCURRENT_LINE_NUM(file.getLAST_SEQUENCE());
         if (file.getNUM_OF_SEQUENCE() <= file.getLAST_SEQUENCE()) {
-            file.setUPLOAD_STATUS(FileEntity.FILE_STATUS.COMPLETED);
+            file.setUPLOAD_STATUS(SecaFileEntity.FILE_STATUS.COMPLETED);
         }
         return sequence;
     }
 
     ;
     
-    public FileSequence addSequence(FileEntity file, String sequenceContent) {
-        FileSequence sequence = new FileSequence();
+    public SecaFileSequence addSequence(SecaFileEntity file, String sequenceContent) {
+        SecaFileSequence sequence = new SecaFileSequence();
         sequence.setSEQUENCE_CONTENT(sequenceContent);
-        sequence.setSTATUS(FileSequence.SEQUENCE_STATUS.ACTIVE);
+        sequence.setSTATUS(SecaFileSequence.SEQUENCE_STATUS.ACTIVE);
         return addSequence(file, sequence);
     }
 
@@ -474,8 +474,8 @@ public class FormFileUploader implements Serializable {
      * @param file
      * @return
      */
-    public FileEntity checkFileExists(Session session, FileEntity file) {
-        List<FileEntity> results;
+    public SecaFileEntity checkFileExists(Session session, SecaFileEntity file) {
+        List<SecaFileEntity> results;
         String hashValueQuery = "SELECT file "
                 + "FROM FileEntity file "
                 + "WHERE "
@@ -546,11 +546,11 @@ public class FormFileUploader implements Serializable {
         this.startUpload = startUpload;
     }
 
-    public FileEntity getHoldingFile() {
+    public SecaFileEntity getHoldingFile() {
         return holdingFile;
     }
 
-    public void setHoldingFile(FileEntity holdingFile) {
+    public void setHoldingFile(SecaFileEntity holdingFile) {
         this.holdingFile = holdingFile;
     }
 

@@ -12,19 +12,19 @@ import javax.inject.Inject;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
 import eds.component.data.HibernateUtil;
-import eds.entity.file.FileSequence;
+import eds.entity.file.SecaFileSequence;
 import javax.ejb.EJB;
 
 /**
  *
  * @author vincent.a.lee
  */
-public class LazyFileSequenceModel extends LazyDataModel<FileSequence>{
+public class LazyFileSequenceModel extends LazyDataModel<SecaFileSequence>{
 
     @EJB private HibernateUtil hibernateUtil;
     
     @Override
-    public List<FileSequence> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+    public List<SecaFileSequence> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         
         
         

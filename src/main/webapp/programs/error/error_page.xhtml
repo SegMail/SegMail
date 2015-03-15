@@ -4,18 +4,18 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
-    <ui:composition>
-        <h3>This is the error page</h3>
-        <h:inputTextarea >
-            this is the error stack trace   
-            #{bootstrap.output.errorStackTrace}
-        </h:inputTextarea>
-        <ui:define name="login">
-            <h:panelGroup id="login-page" layout="block" >
-                <h3>This is the error page2</h3>
-                this is the error stack trace  
-
-            </h:panelGroup>
+    <ui:composition template="/programs/error/template/error-page-layout.xhtml">
+        <ui:define name="error-heading">
+            This is the error page. Your application has just encountered an error.
         </ui:define>
+        
+        <ui:define name="error-name">
+            #{bootstrap.output.errorMessage}
+        </ui:define>
+        <ui:define name="error-trace">
+            #{bootstrap.output.errorStackTrace}
+        </ui:define>
+        
+        
     </ui:composition>
 </html>

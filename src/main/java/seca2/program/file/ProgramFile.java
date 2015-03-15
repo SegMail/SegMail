@@ -11,7 +11,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import eds.entity.file.FileEntity;
+import eds.entity.file.SecaFileEntity;
 import java.io.Serializable;
 
 /**
@@ -41,7 +41,7 @@ public class ProgramFile implements Serializable {
 
         //find the selected file and set the wrapper to selected
         for(FileMenuWrapper wrappedFile:formFileFinder.getWrappedResults()){
-           FileEntity file = wrappedFile.getWrappedFile();
+           SecaFileEntity file = wrappedFile.getWrappedFile();
            if(selectedFileId == file.getFILE_ID()){//this is the selected file
                wrappedFile.select();
                wrappedFile.setSelectedValue("1");
