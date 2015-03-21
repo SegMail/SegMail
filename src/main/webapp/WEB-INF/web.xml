@@ -27,6 +27,12 @@
         <!--This is here for development purpose only. Once the installer is setup, this will no longer be required-->
     </context-param>
     
+    <context-param>
+        <param-name>DEFAULT_TEMPLATE_LOCATION</param-name>
+        <param-value>/templates/beprobootstrap/template-layout.xhtml</param-value>
+        <!--<param-value>/templates/mytemplate/template-layout.xhtml</param-value>-->
+    </context-param>
+    
     <env-entry>
         <env-entry-name>US_USER</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>

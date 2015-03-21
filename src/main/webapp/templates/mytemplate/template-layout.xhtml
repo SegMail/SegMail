@@ -27,6 +27,9 @@
                           &lt;script src=&quot;#{request.contextPath}/templates/mytemplate/js/flat-ui/respond.min.js&quot;&gt;&lt;/script&gt;
                           &lt;![endif]-->"
                           escape="false" />
+            
+            <!--all other additional required resoures-->
+            <ui:insert name="head" />
         </h:head>
         <h:body>
             <h:panelGroup layout="block" class="container-fluid" style="">
@@ -44,12 +47,12 @@
                         </ul>
                     </div>
                 </nav>
+                <ui:insert name="main-program-panel" />
             </h:panelGroup>
             
 
-            <ui:insert name="main-program-panel" />
+            
 
-            </h:panelGroup>
         </h:body>
         <!--load all scripts-->
         <!--<script type="text/javascript" src="#{request.contextPath}/templates/mytemplate/js/flat-ui/bootstrap.min.js" />-->
@@ -84,16 +87,8 @@
         </h:outputScript>-->
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" /> 
-        <!--<script>
-            $(document).ready(function() {
-                var cl = new CanvasLoader('canvasloader-container-fileupload');
-                cl.show(); // Hidden by default
-                var c2 = new CanvasLoader('canvasloader-container-login');
-                c2.show(); // Hidden by default
-            });
-
-        </script>-->
-        <!--for select buttons-->
+        
+        <ui:insert name="scripts-bottom" />
 
     </f:view>
 </html>

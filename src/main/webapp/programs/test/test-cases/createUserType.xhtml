@@ -6,23 +6,23 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
-      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
         <!--test creation of usertypes-->
         <ui:define name="panel-heading">
             Creation of Usertypes
         </ui:define>
         <ui:define name="panel-body">
-            <h:form id="createUsertypeForm">
+            <form jsf:id="createUsertypeForm">
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <!--<h:outputLabel for="usertypeName" styleClass="control-label col-md-4">Usertype name:</h:outputLabel>-->
                         <div class="col-md-12">
                             <div class="input-group">
                                 <span class="input-group-addon">Usertype Name</span>
-                                <h:inputText id="usertypeName" styleClass="form-control"
-                                             value="#{ProgramTest.formTestUser.userTypeName}" ></h:inputText>
-                                <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
+                                <input type="text" jsf:id="usertypeName" class="form-control"
+                                             jsf:value="#{ProgramTest.formTestUser.userTypeName}" ></input>
                             </div>
 
                         </div>
@@ -32,7 +32,6 @@
                         <div class="col-md-12">
                             <h:inputTextarea id="usertypeDesc" styleClass="form-control" 
                                              value="#{ProgramTest.formTestUser.description}" ></h:inputTextarea>
-                            <p:watermark for="usertypeDesc" value="Usertype Description" ></p:watermark>
                         </div>
                     </div>
                 </div>
@@ -53,7 +52,7 @@
                 <p:blockUI id="setupNavigationFormBlock" block="createUsertypeForm" trigger="createUsertypeForm:createUserTypeButton">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
-            </h:form>
+            </form>
         </ui:define>
     </ui:composition>
 </html>
