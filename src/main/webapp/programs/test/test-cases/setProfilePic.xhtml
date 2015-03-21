@@ -14,7 +14,7 @@
             Set Profile Pic for Users
         </ui:define>
         <ui:define name="panel-body">
-            <h:form id="setProfilePicForm" >
+            <form jsf:id="setProfilePicForm" >
                 <s2:messenger for="setProfilePicForm" ></s2:messenger>
                 
                 <div class="form-group">
@@ -33,11 +33,20 @@
                         <button class="btn btn-success" jsf:id="setProfilePicButton"
                                 jsf:actionListener="#{ProgramTest.formTestUser.setProfilePicLocation()}"
                                 >
+                            <f:ajax execute="setProfilePicForm" render="setProfilePicForm"></f:ajax>
                             Set Profile Pic
                         </button>
+                        <p:commandButton styleClass="btn btn-success" id="setProfilePicButton2" value="Set Profile Pic2"
+                                         actionListener="#{ProgramTest.formTestUser.setProfilePicLocation()}"
+                                         >
+                            <f:ajax execute="setProfilePicForm" render="setProfilePicForm" ></f:ajax>
+                        </p:commandButton>
                     </div>
                 </div>
-            </h:form>
+                <p:blockUI id="blockSetProfilePicForm" block="setProfilePicForm" trigger="setProfilePicButton2" >
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </form>
         </ui:define>
     </ui:composition>
 </html>
