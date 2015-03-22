@@ -21,8 +21,8 @@ import javax.inject.Inject;
  */
 public abstract class BootstrapModule {
    
-    @Inject protected DefaultValues defaultValues;
-    @Inject protected DefaultSites defaultSites;
+    /*@Inject*/ protected DefaultValues defaultValues = new DefaultValues();
+    /*@Inject*/ protected DefaultSites defaultSites = new DefaultSites();
     
     public static String FACES_CONTEXT = "context";
     
@@ -43,6 +43,9 @@ public abstract class BootstrapModule {
         
         if(next != null && toContinue)
             next.start(inputContext, outputContext);
+        
+        if(!toContinue)
+            System.out.println("Bootstrap processing stopped at "+this.getClass().getSimpleName()+".");
     }
     
     public void strapNext(BootstrapModule next){

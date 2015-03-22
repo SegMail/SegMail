@@ -14,13 +14,14 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import eds.utilities.EntityExplorer;
+import java.io.Serializable;
 
 /**
  * This is a chain of responsibility for all bootstrap modules.
  * 
  * @author LeeKiatHaw
  */
-public class BootstrappingChainFactory {
+public class BootstrappingChainFactory implements Serializable {
     
     /**
      * Currently we are experimenting with executing all modules for all requests.

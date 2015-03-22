@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -42,8 +43,8 @@ import javax.inject.Named;
 @RequestScoped
 public class Bootstrap implements Serializable {
     
-    @Inject private DefaultValues defaultValues;
-    @Inject private DefaultSites defaultSites;
+    /*@Inject*/ private DefaultValues defaultValues = new DefaultValues();
+    /*@Inject*/ private DefaultSites defaultSites = new DefaultSites();
     /**
      * Use a generic Map object as a trial first to see what are the parameters 
      * that we will need.
@@ -73,12 +74,10 @@ public class Bootstrap implements Serializable {
         @URLAction(mappingId="program", onPostback=true)
     })
     public void startProcessing(){
-        //Debug: parameters will only get injected with @URLAction
-        System.out.println(program);
-        input.setProgram(program);
         
         FacesContext fc = FacesContext.getCurrentInstance();
-        input.setFacesContext(fc);
+        input.setProgram(program);
+        //input.setFacesContext(fc);
         input.setContextPath(fc.getExternalContext().getRequestContextPath());
         this.startChain(input,output);
         

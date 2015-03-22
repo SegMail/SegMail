@@ -8,10 +8,15 @@ package seca2.bootstrap;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.bean.ViewScoped;
 
 /**
- *
+ * This class has to be SessionScoped, because it holds the view locations
+ * of the different parts of the application. Is it a bad idea? I'm still figuring
+ * out...
+ * 
  * @author LeeKiatHaw
  */
 @SessionScoped

@@ -64,7 +64,8 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        FacesContext fc = (FacesContext) inputContext.getFacesContext();
+        //FacesContext fc = (FacesContext) inputContext.getFacesContext();
+        FacesContext fc = FacesContext.getCurrentInstance();
         HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
         
         //allow bypass authentication if application is not in PRODUCTION stage
@@ -81,6 +82,8 @@ public class UserModule extends BootstrapModule implements Serializable {
              * - no user has been created
              * - (other checks to be implemented...)
              * 
+             * [20150322] This should be handled in the ProgramModule, not here.
+             * 
              * Notes:
              * - Calling this check for every request is not feasible as it will 
              * incur lots of DB reads each time. There must be some ApplicationScoped
@@ -94,7 +97,7 @@ public class UserModule extends BootstrapModule implements Serializable {
         boolean isAuthenticated = this.isAuthenticated(this.userContainer);
         
         String program = inputContext.getProgram();
-        System.out.println("Requested for progrom: "+program); //debug
+        System.out.println("Requested for program: "+program); //debug
         this.userContainer.setLastURL(program);
         
         //If it's not the same session, meaning it could be the first vist, or 

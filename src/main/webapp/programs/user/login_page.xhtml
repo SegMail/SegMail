@@ -4,7 +4,8 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:s2="http://seca2.jsf/custom">
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
     <!--The login page has its own template-->
     <ui:composition template="#{bootstrap.output.templateRoot}">
         <ui:define name="header">
@@ -47,37 +48,23 @@
                         <h4>Login to <small>Segmail</small></h4>
                     </div>
                     <div class="login-form col-lg-8">
-                        <h:form id="form-user-login" styleClass="login-form">
-                            <h:panelGroup layout="block" class="form-group">
+                        <form jsf:id="form-user-login" class="login-form">
+                            <div class="form-group">
                                 <h:inputText id="login-username" class="form-control login-field"
                                              value="#{FormUserLogin.username}" title="test-tooltip"/>
                                 <p:watermark for="login-username" value="Username" />
                                 <p:tooltip for="login-username" styleClass="tooltip fade bottom in"
                                            showEvent="focus" hideEvent="blur" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
-                                <script type="text/javascript">
-                                    $(document).ready(function () {
-                                        $('#test-tooltip').tooltip({
-                                            'trigger': 'focus',
-                                            'title': 'test-tooltip'
-                                        });
-                                    })
-                                </script>
-                                <!--<h:panelGroup layout="block" styleClass="tooltip fade bottom in">
-                                    <h:panelGroup layout="block" styleClass="tooltip-arrow"></h:panelGroup>
-                                    <h:panelGroup layout="block" styleClass="tooltip-inner">
-                                        Error!
-                                    </h:panelGroup>
-                                </h:panelGroup>-->
-                            </h:panelGroup>
-
-                            <h:panelGroup layout="block" class="form-group">
+                                
+                            </div>
+                            <div class="form-group">
                                 <h:inputSecret id="login-password" class="form-control login-field"
                                                value="#{FormUserLogin.password}"
                                                />
                                 <p:watermark for="login-password" value="Password" />
                                 <label class="login-field-icon fui-user" for="login-password"></label>
-                            </h:panelGroup>
+                            </div>
                             <p:commandButton id="login-button" styleClass="btn btn-lg btn-primary btn-block"
                                              value="Log in" action="#{FormUserLogin.login()}"
                                              update="@form"/>
@@ -88,7 +75,7 @@
                             <p:blockUI id="loginFormBlock" block="form-user-login" trigger="form-user-login:login-button">
                                 <p id="spinner">Please wait while we do what we do best.</p>
                             </p:blockUI>
-                        </h:form>
+                        </form>
                     </div>
                 </div>
                 <!-- /.row -->

@@ -47,7 +47,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     
     @Override
     protected int executionSequence() {
-        return -97;
+        return -98;
     }
 
     @Override
@@ -62,7 +62,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //[20150314] First, we should get the user's own default program, but we
         // de-prioritize this at the moment.
         if(inputContext.getProgram() == null || inputContext.getProgram().isEmpty()){
-            FacesContext fc = (FacesContext) inputContext.getFacesContext();
+            //FacesContext fc = (FacesContext) inputContext.getFacesContext();
+            FacesContext fc = FacesContext.getCurrentInstance();
             if(!fc.getApplication().getProjectStage().equals(ProjectStage.Production)){
                 String defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
                 inputContext.setProgram(defaultProgram);
@@ -81,7 +82,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
              3) Retrieve the program from database by calling ProgramServices.
              */
             String viewRoot = programService.getViewRootFromProgramName(program);
-            FacesContext fc = (FacesContext) inputContext.getFacesContext();
+            //FacesContext fc = (FacesContext) inputContext.getFacesContext();
+            FacesContext fc = FacesContext.getCurrentInstance();
             
             if(fc.getApplication().getProjectStage().equals(ProjectStage.Development))
                 System.out.println(viewRoot); //debug
