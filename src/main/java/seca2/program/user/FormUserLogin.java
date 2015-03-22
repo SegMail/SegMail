@@ -19,6 +19,7 @@ import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.module.User.UserContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
+import eds.entity.user.User;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -42,7 +43,7 @@ public class FormUserLogin {
     public void login() {
         try {
             Map<String,Object> userValues = new HashMap<String,Object>();
-            userService.login(this.username, this.password, userValues);
+            User authenticatedUser = userService.login(this.username, this.password);
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
             
             //Regenerate session ID
@@ -50,6 +51,8 @@ public class FormUserLogin {
             
             //Initialize userValues into userContainer
             this.userContainer.setLoggedIn(true);
+            this.userContainer.setUser(authenticatedUser);
+            this.userContainer.setUserType(authenticatedUser.getUSERTYPE());
 
             //do a redirect to refresh the view
             //Something is faulty here after a redirect

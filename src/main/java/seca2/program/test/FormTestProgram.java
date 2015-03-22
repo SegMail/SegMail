@@ -62,8 +62,8 @@ public class FormTestProgram implements Serializable {
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
+                    ex.getClass().getSimpleName(), 
+                    ex.getMessage());
         }
     }
     
@@ -76,8 +76,8 @@ public class FormTestProgram implements Serializable {
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(TestAssignProgramToUserTypeName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
+                    ex.getClass().getSimpleName(), 
+                    ex.getMessage());
         }
     }
     
@@ -90,8 +90,8 @@ public class FormTestProgram implements Serializable {
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
+                    ex.getClass().getSimpleName(), 
+                    ex.getMessage());
         }
     }
     
@@ -104,8 +104,8 @@ public class FormTestProgram implements Serializable {
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
+                    ex.getClass().getSimpleName(), 
+                    ex.getMessage());
         }
     }
 

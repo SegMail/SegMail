@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="#{bootstrap.output.templateRoot}">
+        <ui:define name="main-program-panel">
+            <div class="page-container">
+
+                <div class="page-content page-content-default">
+
+                    <div class="block-error">
+
+                        <div class="error-num">404</div>
+                        <div class="error-text">Page not found</div>
+
+                        <div class="error-description">Unfortunately we're having trouble loading the page you are looking for. Please wait a moment and try again or use action below.</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-info btn-block" onClick="document.location.href = 'index.html';">Back to dashboard</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-primary btn-block" onClick="history.back();">Previous page</button>
+                            </div>
+                        </div>
+                        <div class="copy">
+                            © All Rights Reserved Be Pro 2014
+                        </div>
+                    </div>
+
+                </div>
+            </div> 
+        </ui:define>
+    </ui:composition>
+</html>

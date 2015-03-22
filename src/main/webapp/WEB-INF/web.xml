@@ -12,7 +12,7 @@
     <!--non-JSF values-->
     <context-param>
         <param-name>BYPASS_AUTHENTICATION</param-name>
-        <param-value>true</param-value>
+        <param-value>false</param-value>
     </context-param>
     
     <context-param>
@@ -31,6 +31,11 @@
         <param-name>DEFAULT_TEMPLATE_LOCATION</param-name>
         <param-value>/templates/beprobootstrap/template-layout.xhtml</param-value>
         <!--<param-value>/templates/mytemplate/template-layout.xhtml</param-value>-->
+    </context-param>
+        
+    <context-param>
+        <param-name>NO_AUTHORIZATION_VIEWROOT</param-name>
+        <param-value>/programs/program/no_auth_view.xhtml</param-value>
     </context-param>
     
     <env-entry>

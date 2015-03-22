@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -80,6 +81,10 @@ public class Bootstrap implements Serializable {
         input.setFacesContext(fc);
         input.setContextPath(fc.getExternalContext().getRequestContextPath());
         this.startChain(input,output);
+        
+        if(fc.getApplication().getProjectStage().equals(ProjectStage.Development)){
+            System.out.println("Bootstrap processing is completed.");
+        }
     }
     
     public void startChain(BootstrapInput inputContext, BootstrapOutput outputContext){
