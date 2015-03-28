@@ -70,7 +70,7 @@
                                              update="@form"/>
                             <h:commandLink styleClass="login-link" value="Lost your password?" />
 
-                            <s2:messenger id="login-messenger" for="form-user-login" />
+                            <s2:messenger id="login-messenger" for="form-user-login" showSummary="true" showDetail="true"/>
 
                             <p:blockUI id="loginFormBlock" block="form-user-login" trigger="form-user-login:login-button">
                                 <p id="spinner">Please wait while we do what we do best.</p>

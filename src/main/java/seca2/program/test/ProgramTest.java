@@ -25,6 +25,7 @@ public class ProgramTest implements Serializable {
     @Inject private FormTestNavigation formTestNavigation;
     @Inject private FormTestUser formTestUser;
     @Inject private FormTestProgram formTestProgram;
+    @Inject private FormCreateLayout formCreateLayout;
     
     @PostConstruct
     public void init(){
@@ -61,6 +62,14 @@ public class ProgramTest implements Serializable {
 
     public void setFormTestProgram(FormTestProgram formTestProgram) {
         this.formTestProgram = formTestProgram;
+    }
+
+    public FormCreateLayout getFormCreateLayout() {
+        return formCreateLayout;
+    }
+
+    public void setFormCreateLayout(FormCreateLayout formCreateLayout) {
+        this.formCreateLayout = formCreateLayout;
     }
     
     

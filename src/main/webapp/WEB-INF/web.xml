@@ -10,9 +10,10 @@
     </context-param>
     
     <!--non-JSF values-->
+    
     <context-param>
-        <param-name>BYPASS_AUTHENTICATION</param-name>
-        <param-value>false</param-value>
+        <param-name>SETUP</param-name>
+        <param-value>true</param-value>
     </context-param>
     
     <context-param>

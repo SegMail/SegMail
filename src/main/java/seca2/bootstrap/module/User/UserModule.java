@@ -69,12 +69,14 @@ public class UserModule extends BootstrapModule implements Serializable {
         HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
         
         //allow bypass authentication if application is not in PRODUCTION stage
-        if(!fc.getApplication().getProjectStage().equals(ProjectStage.Production)){
-            String bypass = fc.getExternalContext().getInitParameter("BYPASS_AUTHENTICATION");
+        //if(!fc.getApplication().getProjectStage().equals(ProjectStage.Production)){
+        //[20150328] allow bypass if application is in SETUP
+        if(fc.getExternalContext().getInitParameter("SETUP").compareToIgnoreCase("true") == 0){
+            //String bypass = fc.getExternalContext().getInitParameter("BYPASS_AUTHENTICATION");
             //if not in PRODUCTION and BYPASS_AUTHENTICATION flag is set
-            if(bypass.equalsIgnoreCase("true")){
+            //if(bypass.equalsIgnoreCase("true")){
                 return true;
-            }
+            //}
             /**
              * If the database has not been set up yet, bypass authentication step
              * and direct to setup page(production)/testing page(development).

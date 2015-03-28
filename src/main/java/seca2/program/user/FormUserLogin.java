@@ -66,13 +66,13 @@ public class FormUserLogin {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }
         } catch (UserLoginException esliex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, esliex.getLocalizedMessage(), null);
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
         } catch (DBConnectionException dbex) {
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (UserAccountLockedException ualex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ualex.getLocalizedMessage(), "Please contact admin.");
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage(), null);
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
 
