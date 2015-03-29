@@ -25,7 +25,7 @@
                                             <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
                                         </c:when>
                                         <c:otherwise>
-                                            <f:selectItems value="#{ProgramTest.formTestUser.allUserTypes}"
+                                            <f:selectItems value="#{ProgramTest.allUserTypes}"
                                                            var="userType" 
                                                            itemLabel="#{userType.USERTYPENAME}"
                                                            itemValue="#{userType.OBJECTID}"

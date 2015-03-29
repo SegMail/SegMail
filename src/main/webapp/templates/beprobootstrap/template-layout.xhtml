@@ -3,7 +3,8 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:s2="http://seca2.jsf/custom">
     <f:view contentType="text/html">
         <h:head>
             <title>SegMail - send large mail fast and cheap</title>    
@@ -66,6 +67,9 @@
                                 <li class="active">Blocks &amp; Panels</li>
                             </ul>                 
 
+                        </div>
+                        <div class="col-md-12 col-xs-12">
+                            <s2:messenger for="ProgramTest" showDetail="true" showSummary="true" />
                         </div>
                         <ui:insert name="main-program-panel" />
                     </div>

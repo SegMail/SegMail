@@ -15,7 +15,6 @@
         </ui:define>
         <ui:define name="panel-body">
             <form jsf:id="setProfilePicForm" >
-                <s2:messenger for="setProfilePicForm" ></s2:messenger>
                 
                 <div class="form-group">
                     <label>Username:</label>
@@ -43,6 +42,7 @@
                         </p:commandButton>
                     </div>
                 </div>
+                <s2:messenger for="setProfilePicForm" showDetail="true" showSummary="true" ></s2:messenger>
                 <p:blockUI id="blockSetProfilePicForm" block="setProfilePicForm" trigger="setProfilePicButton2" >
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>

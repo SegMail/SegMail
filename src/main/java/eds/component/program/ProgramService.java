@@ -54,7 +54,7 @@ public class ProgramService implements Serializable {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<Program> getProgramByName(String programName) throws DBConnectionException {
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
             Root<Program> sourceEntity = criteria.from(Program.class); //FROM UserType
 
@@ -64,7 +64,8 @@ public class ProgramService implements Serializable {
             List<Program> results = em.createQuery(criteria)
                     .getResultList();
 
-            return results;
+            return results;*/
+            return this.genericEntepriseObjectService.getEnterpriseObjectsByName(programName, Program.class);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

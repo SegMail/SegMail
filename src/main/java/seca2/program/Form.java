@@ -5,14 +5,20 @@
  */
 package seca2.program;
 
+import java.io.Serializable;
+import javax.annotation.PostConstruct;
+
 /**
  * A template for the backing beans for JSF/HTML forms
  * 
  * @author LeeKiatHaw
  */
-public abstract class Form {
+public abstract class Form implements Serializable {
     
     protected String FORM_NAME;
+    
+    @PostConstruct
+    protected abstract void init();
 
     public String getFORM_NAME() {
         return FORM_NAME;

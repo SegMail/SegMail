@@ -5,6 +5,7 @@
  */
 package eds.component.user;
 
+import eds.component.GenericEnterpriseObjectService;
 import eds.entity.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -36,6 +37,7 @@ import eds.entity.user.UserPreferenceSet_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
 import eds.entity.user.User_;
+import javax.ejb.EJB;
 
 /**
  *
@@ -52,6 +54,8 @@ public class UserService extends Service {
     
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
+    
+    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
 
     /**
      * Should I return something like UserTypeID?
@@ -282,7 +286,7 @@ public class UserService extends Service {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public User getUserById(long userId) throws DBConnectionException{
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<User> criteria = builder.createQuery(User.class);
             Root<User> sourceEntity = criteria.from(User.class); //FROM UserType
             
@@ -290,7 +294,9 @@ public class UserService extends Service {
             criteria.where(builder.equal(sourceEntity.get(User_.OBJECTID), userId)); //WHERE USERTYPENAME = userTypeName
 
             User result = em.createQuery(criteria)
-                    .getSingleResult();//appropriate! because it is an EO
+                    .getSingleResult();//appropriate! because it is an EO*/
+            
+            User result = this.genericEnterpriseObjectService.getEnterpriseObjectById(userId, User.class);
 
             return result;
 

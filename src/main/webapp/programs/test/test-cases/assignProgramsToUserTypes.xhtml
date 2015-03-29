@@ -6,60 +6,59 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
-      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
         <ui:define name="panel-heading">
             Assign Programs to UserTypes
         </ui:define>
         <ui:define name="panel-body">
-            <h:form id="assignProgramToUsertypeForm">
+            <form jsf:id="assignProgramToUsertypeForm">
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="allProgramsForAssignment" styleClass="control-label col-md-4">Program: </h:outputLabel>
-                        <div class="col-md-8">
-                            <s2:dropdown id="allProgramsForAssignment" 
-                                         value="#{ProgramTest.formTestProgram.selectedProgramId}">
-                                <c:choose>
-                                    <c:when test="#{(ProgramTest.formTestProgram.allPrograms.size() == 0)}">
-                                        <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <f:selectItems value="#{ProgramTest.formTestProgram.allPrograms}"
-                                                       var="program" 
-                                                       itemLabel="#{program.PROGRAM_NAME}"
-                                                       itemValue="#{program.OBJECTID}"
-                                                       >
-                                        </f:selectItems>
-                                    </c:otherwise>
-                                </c:choose>
-                            </s2:dropdown>
-
-                        </div>
+                        <s2:dropdown id="allUserTypesForAssignment" 
+                                     value="#{ProgramTest.formTestProgram.selectedUserTypeId}">
+                            <c:choose>
+                                <c:when test="#{(ProgramTest.formTestProgram.allUserTypes.size() == 0)}">
+                                    <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
+                                </c:when>
+                                <c:otherwise>
+                                    <f:selectItems value="#{ProgramTest.formTestProgram.allUserTypes}"
+                                                   var="usertype" 
+                                                   itemLabel=" #{usertype.USERTYPENAME}"
+                                                   itemValue="#{usertype.OBJECTID}"
+                                                   >
+                                    </f:selectItems>
+                                </c:otherwise>
+                            </c:choose>
+                        </s2:dropdown>
                     </div>
                 </div>
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="allUserTypesForAssignment" styleClass="control-label col-md-4">Usertypes: </h:outputLabel>
-                        <div class="col-md-8">
-                            <s2:dropdown id="allUserTypesForAssignment"
-                                         value="#{ProgramTest.formTestProgram.selectedUserTypeId}">
-                                <c:choose>
-                                    <c:when test="#{(ProgramTest.formTestProgram.allUserTypes.size() == 0)}">
-                                        <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <f:selectItems value="#{ProgramTest.formTestProgram.allUserTypes}"
-                                                       var="userType" 
-                                                       itemLabel="#{userType.USERTYPENAME}"
-                                                       itemValue="#{userType.OBJECTID}"
-                                                       >
-                                        </f:selectItems>
-                                    </c:otherwise>
-                                </c:choose>
-                            </s2:dropdown>
-                        </div>
+                        <!--<h:outputLabel for="allProgramsForAssignment" styleClass="control-label col-md-4">Program: </h:outputLabel>-->
+
+                        <s2:dropdown id="allProgramsForAssignment" 
+                                     value="#{ProgramTest.formTestProgram.selectedProgramId}">
+                            <c:choose>
+                                <c:when test="#{(ProgramTest.formTestProgram.allPrograms.size() == 0)}">
+                                    <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
+                                </c:when>
+                                <c:otherwise>
+                                    <f:selectItems value="#{ProgramTest.formTestProgram.allPrograms}"
+                                                   var="program" 
+                                                   itemLabel="Program  #{program.PROGRAM_NAME}"
+                                                   itemValue="#{program.OBJECTID}"
+                                                   >
+                                    </f:selectItems>
+                                </c:otherwise>
+                            </c:choose>
+                        </s2:dropdown>
+
+
                     </div>
-                </div> 
+                </div>
+
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="assignProgramAccess" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to user type"
@@ -77,7 +76,7 @@
                 <p:blockUI id="assignProgramToUsertypeFormBlock" block="assignProgramToUsertypeForm" trigger="assignProgramToUsertypeForm:assignProgramAccess">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
-            </h:form>
+            </form>
         </ui:define>
     </ui:composition>
 </html>
