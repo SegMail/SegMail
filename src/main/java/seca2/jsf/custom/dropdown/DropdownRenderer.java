@@ -91,6 +91,7 @@ public class DropdownRenderer extends MenuRenderer {
         
         String buttonColor = "btn-"+component.getButtonColor();
         
+        /*
         writer.startElement("script", component);
         writer.writeText("$(document).ready(function() {\n",component,null);
         writer.writeText("\tloadButton"+component.getId()+"();\n",component,null);
@@ -104,6 +105,18 @@ public class DropdownRenderer extends MenuRenderer {
                 + "menuStyle: 'dropdown-inverse'});\n",
                 component,null);
         writer.writeText("};\n",component,null);
+        writer.endElement("script");
+        */
+        writer.startElement("script", component);
+        writer.writeText("$(document).ready(function() {\n",component,null);
+        writer.writeText("$('#"+component.getNamingContainer().getParent().getClientId()+"\\\\:"
+                + component.getId() + "')"
+                + ".selectpicker({style: 'btn btn-wide "
+                + buttonColor
+                + "', "
+                + "menuStyle: 'dropdown-inverse'});\n",
+                component,null);
+        writer.writeText("});\n",component,null);
         writer.endElement("script");
     }
     
