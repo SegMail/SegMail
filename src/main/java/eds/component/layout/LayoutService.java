@@ -193,8 +193,8 @@ public class LayoutService implements Serializable {
                 throw new LayoutAssignmentException("Layout "+layoutid+" does not exist.");
             
             //Check if the assignment already exists
-            List<EnterpriseRelationship> existingRels1 = genericEOService.getRelationshipsForObjects(clientid, layoutid);
-            List<EnterpriseRelationship> existingRels2 = genericEOService.getRelationshipsForObjects(layoutid, clientid);
+            List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(clientid, LayoutAssignment.class);
+            List<LayoutAssignment> existingRels2 = genericEOService.getRelationshipsForTargetObject(clientid, LayoutAssignment.class);
             
             if(existingRels1.size() > 0 || existingRels2.size() > 0)
                 throw new LayoutAssignmentException("Assignment already exists!");
@@ -232,7 +232,7 @@ public class LayoutService implements Serializable {
      * @throws LayoutAssignmentException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void assignLayout(long layoutid, long objectid)
+    public void assignLayout(long objectid, long layoutid)
             throws DBConnectionException, LayoutAssignmentException {
         try {
             
@@ -247,8 +247,8 @@ public class LayoutService implements Serializable {
                 throw new LayoutAssignmentException("Object "+objectid+" does not exist.");
             
             //Check if the assignment already exists
-            List<EnterpriseRelationship> existingRels1 = genericEOService.getRelationshipsForObjects(objectid, layoutid);
-            List<EnterpriseRelationship> existingRels2 = genericEOService.getRelationshipsForObjects(layoutid, objectid);
+            List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(objectid,LayoutAssignment.class);
+            List<LayoutAssignment> existingRels2 = genericEOService.getRelationshipsForTargetObject(objectid,LayoutAssignment.class);
             
             if(existingRels1.size() > 0 || existingRels2.size() > 0)
                 throw new LayoutAssignmentException("Assignment already exists!");
@@ -343,9 +343,6 @@ public class LayoutService implements Serializable {
         return this.getLayoutByName(layoutName).getVIEW_ROOT();
     }
     
-    public String getLayoutViewRootForSite(){
-        throw new UnsupportedOperationException();
-    }
     
     /**
      * If there is a assignment for that particular user, return it. 
@@ -358,7 +355,7 @@ public class LayoutService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Layout getLayoutByUserAssignment(User user)
+    public List<LayoutAssignment> getLayoutAssignmentsByUser(User user)
         throws DBConnectionException {
         try{
             //To optimize, pull out all assignments for User, UserType and Client
@@ -382,7 +379,7 @@ public class LayoutService implements Serializable {
             
             //Looping shouldn't cause NullPointerExceptions
             //Look for User first
-            for(LayoutAssignment result:results){
+            /*for(LayoutAssignment result:results){
                 EnterpriseObject source = result.getSOURCE();
                 if(source instanceof User)
                     return (Layout) result.getTARGET();
@@ -392,30 +389,11 @@ public class LayoutService implements Serializable {
                 EnterpriseObject source = result.getSOURCE();
                 if(source instanceof UserType)
                     return (Layout) result.getTARGET();
-            }
+            }*/
             
             //Then look for Client
             
-            return null;
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Layout getLayoutByUsernameAssignment(String username)
-        throws DBConnectionException {
-        
-        try{
-            User user = (User) this.userService.getUserAccountByUsername(username).getOWNER();
-            
-            return this.getLayoutByUserAssignment(user);
+            return results;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

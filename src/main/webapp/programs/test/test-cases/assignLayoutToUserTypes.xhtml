@@ -60,19 +60,15 @@
                         </div>
                     </div>
                 </div> 
-                <div class="row">
-                    <div class="col-md-12 col-xs-12 form-group">
-                        <p:commandButton id="assignLayoutToUserType" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to user type"
-                                         actionListener="#{ProgramTest.formAssignLayoutUserType.assignLayoutToUserType()}"
-                                         update="@form">
-                        </p:commandButton>
+                <div class="form-group">
+                    <p:commandButton id="assignLayoutToUserType" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to user type"
+                                     actionListener="#{ProgramTest.formAssignLayoutUserType.assignLayoutToUserType()}"
+                                     update="@form">
+                    </p:commandButton>
 
-                    </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12 col-xs-12">
-                        <s2:messenger for="assignLayoutToUsertypeForm" showDetail="true" />
-                    </div>
+                <div class="form-group">
+                    <s2:messenger for="assignLayoutToUsertypeForm" showSummary="true" showDetail="true" />
                 </div>
                 <p:blockUI id="assignLayoutToUsertypeFormBlock" block="assignLayoutToUsertypeForm" trigger="assignLayoutToUsertypeForm:assignLayoutToUserType">
                     <p id="spinner">Please wait while we do what we do best.</p>

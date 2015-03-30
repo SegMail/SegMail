@@ -49,9 +49,9 @@ public class FormAssignLayoutUserType extends Form {
         try{
             this.allLayouts = this.layoutService.getAllLayouts();
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
         }
     }
     
@@ -59,31 +59,23 @@ public class FormAssignLayoutUserType extends Form {
         try{
             this.allUserTypes = this.userService.getAllUserTypes();
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
         }
     }
     
     public void assignLayoutToUserType(){
         try{
-            this.layoutService.assignLayout(layoutId, usertypeid);
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_FATAL, "Layout has been assigned!",null);
+            this.layoutService.assignLayout(usertypeid, layoutId);
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Layout has been assigned!",null);
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (LayoutAssignmentException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
-    }
-
-    public LayoutService getLayoutService() {
-        return layoutService;
-    }
-
-    public void setLayoutService(LayoutService layoutService) {
-        this.layoutService = layoutService;
     }
 
     public UserService getUserService() {
