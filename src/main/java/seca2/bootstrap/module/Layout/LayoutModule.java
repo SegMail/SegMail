@@ -51,11 +51,20 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         try {
+            //1st priority is Program, if can find, return it first
+            String program = inputContext.getProgram();
+            Layout layout = this.layoutService.getLayoutAssignmentsByProgram(program);
+            if(layout != null) {
+                outputContext.setTemplateRoot(layout.getVIEW_ROOT());
+                return true;
+            }
+            
+            //Next priority is User and UserType
             if (userContainer == null) {
                 outputContext.setTemplateRoot(this.DEFAULT_TEMPLATE_LOCATION);
                 return true;
             }
-
+            
             if (!userContainer.isLoggedIn()) {
                 outputContext.setTemplateRoot(this.DEFAULT_TEMPLATE_LOCATION);
                 return true;
@@ -74,7 +83,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
             for(LayoutAssignment assignment:assignments){
                 EnterpriseObject source = assignment.getSOURCE();
                 if(source instanceof User){
-                    Layout layout = (Layout) assignment.getTARGET();
+                    layout = (Layout) assignment.getTARGET();
                     outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                     return true;
                 }
@@ -83,7 +92,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
             for(LayoutAssignment assignment:assignments){
                 EnterpriseObject source = assignment.getSOURCE();
                 if(source instanceof UserType){
-                    Layout layout = (Layout) assignment.getTARGET();
+                    layout = (Layout) assignment.getTARGET();
                     outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                     return true;
                 }

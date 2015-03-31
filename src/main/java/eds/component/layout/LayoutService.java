@@ -3,6 +3,7 @@ package eds.component.layout;
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
+import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.EnterpriseObject;
 import eds.entity.EnterpriseRelationship;
@@ -11,6 +12,7 @@ import eds.entity.client.Client;
 import eds.entity.layout.Layout;
 import eds.entity.layout.LayoutAssignment;
 import eds.entity.layout.LayoutAssignment_;
+import eds.entity.program.Program;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
 import java.io.Serializable;
@@ -25,6 +27,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 
@@ -41,6 +44,7 @@ import org.hibernate.exception.GenericJDBCException;
 public class LayoutService implements Serializable {
 
     @EJB private UserService userService;
+    @EJB private ProgramService programService;
     @EJB private ClientService clientService;
     @EJB private GenericEnterpriseObjectService genericEOService;
 
@@ -343,6 +347,38 @@ public class LayoutService implements Serializable {
         return this.getLayoutByName(layoutName).getVIEW_ROOT();
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Layout getLayoutAssignmentsByProgram(String programName)
+        throws DBConnectionException {
+        try{
+            
+            List<Program> programs = this.programService.getProgramByName(programName);
+            if(programs == null || programs.size() <= 0)
+                return null;
+            
+            //Get only the first matching program
+            Program program = programs.get(0);
+            List<LayoutAssignment> assignments = 
+                    this.genericEOService.getRelationshipsForSourceObject(program.getOBJECTID(), LayoutAssignment.class);
+            //If no results returned, return null
+            if(assignments == null || assignments.size() <= 0)
+                return null;
+            //If assigned target is not a Layout, return null
+            if(!(assignments.get(0).getTARGET() instanceof Layout))
+                return null;
+            
+            return (Layout) assignments.get(0).getTARGET();
+            
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
     
     /**
      * If there is a assignment for that particular user, return it. 

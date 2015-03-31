@@ -63,7 +63,7 @@ public class FormAssignLayoutUsername extends Form {
             //this.layoutService.assignLayoutToUser(layoutId, user.getOBJECTID()); //the wrong IDs were passed in, should we pass in objects instead?
             this.layoutService.assignLayoutToUser(user.getOBJECTID(), layoutId);
             
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_FATAL, "Layout successfully registered.",null);
+            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_FATAL, "Layout successfully assigned.",null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database! ", "Please contact admin.");
         } catch (LayoutAssignmentException ex) {

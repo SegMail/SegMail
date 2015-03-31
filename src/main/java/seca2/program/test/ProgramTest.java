@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormGroup;
+import seca2.program.test.layout.FormAssignLayoutProgram;
 import seca2.program.test.layout.FormAssignLayoutUserType;
 import seca2.program.test.layout.FormAssignLayoutUsername;
 
@@ -42,6 +43,7 @@ public class ProgramTest extends FormGroup implements Serializable {
     @Inject private FormCreateLayout formCreateLayout;
     @Inject private FormAssignLayoutUsername formAssignLayoutUsername;
     @Inject private FormAssignLayoutUserType formAssignLayoutUserType;
+    @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     
     
     @EJB private UserService userService;
@@ -129,6 +131,14 @@ public class ProgramTest extends FormGroup implements Serializable {
 
     public void setFormAssignLayoutUserType(FormAssignLayoutUserType formAssignLayoutUserType) {
         this.formAssignLayoutUserType = formAssignLayoutUserType;
+    }
+
+    public FormAssignLayoutProgram getFormAssignLayoutProgram() {
+        return formAssignLayoutProgram;
+    }
+
+    public void setFormAssignLayoutProgram(FormAssignLayoutProgram formAssignLayoutProgram) {
+        this.formAssignLayoutProgram = formAssignLayoutProgram;
     }
     
     

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+    <ui:composition template="/programs/test/template/test-case-panel.xhtml">
+        <ui:define name="panel-heading">
+            Assign Layouts to Programs
+        </ui:define>
+        <ui:define name="panel-body">
+            <h:form id="assignLayoutToProgramForm">
+                <div class="row"><!--form to assign menu items to usertypes-->
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <h:outputLabel for="allLayoutsForAssignment" styleClass="control-label col-md-4">Layout: </h:outputLabel>
+                        <div class="col-md-8">
+                            <s2:dropdown id="allLayoutsForAssignment" 
+                                         value="#{ProgramTest.formAssignLayoutProgram.layoutId}">
+                                <c:choose>
+                                    <c:when test="#{(ProgramTest.formAssignLayoutProgram.allLayouts.size() == 0)}">
+                                        <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <f:selectItems value="#{ProgramTest.formAssignLayoutProgram.allLayouts}"
+                                                       var="layout" 
+                                                       itemLabel="#{layout.LAYOUT_NAME}"
+                                                       itemValue="#{layout.OBJECTID}"
+                                                       >
+                                        </f:selectItems>
+                                    </c:otherwise>
+                                </c:choose>
+                            </s2:dropdown>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <h:outputLabel for="allProgramsForAssignment" styleClass="control-label col-md-4">Programs: </h:outputLabel>
+                        <div class="col-md-8">
+                            <s2:dropdown id="allProgramsForAssignment"
+                                         value="#{ProgramTest.formAssignLayoutProgram.programId}">
+                                <c:choose>
+                                    <c:when test="#{(ProgramTest.formAssignLayoutProgram.allPrograms.size() == 0)}">
+                                        <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <f:selectItems value="#{ProgramTest.formAssignLayoutProgram.allPrograms}"
+                                                       var="program" 
+                                                       itemLabel="#{program.PROGRAM_NAME}"
+                                                       itemValue="#{program.OBJECTID}"
+                                                       >
+                                        </f:selectItems>
+                                    </c:otherwise>
+                                </c:choose>
+                            </s2:dropdown>
+                        </div>
+                    </div>
+                </div> 
+                <div class="form-group">
+                    <p:commandButton id="assignLayoutToProgram" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign layout to program"
+                                     actionListener="#{ProgramTest.formAssignLayoutProgram.assignLayoutToProgram()}"
+                                     update="@form">
+                    </p:commandButton>
+
+                </div>
+                <div class="form-group">
+                    <s2:messenger for="assignLayoutToProgramForm" showSummary="true" showDetail="true" />
+                </div>
+                <p:blockUI id="assignLayoutToProgramFormBlock" block="assignLayoutToProgramForm" trigger="assignLayoutToProgramForm:assignLayoutToProgram">
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
