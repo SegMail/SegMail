@@ -20,6 +20,7 @@ import seca2.bootstrap.module.User.UserContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
+import javax.servlet.http.HttpServletRequest;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -59,9 +60,16 @@ public class FormUserLogin {
             String previousURI = this.userContainer.getLastURL();
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             if (previousURI != null && !previousURI.isEmpty()) {
-                ec.redirect(previousURI); //calling "test" -> "/SegMail/program/test/test"
+                ec.redirect(ec.getRequestContextPath()
+                        +ec.getRequestServletPath()
+                        +"/"
+                        +previousURI
+                        +"/"); //calling "test" -> "/SegMail/program/test/test"
                 //we need an adaptor pattern for redirection!
                 //this should be in the navigation module
+                
+                String URI = ((HttpServletRequest)ec.getRequest()).getRequestURI();//debug
+                System.out.println(URI);
             } else {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }

@@ -70,9 +70,9 @@
             3
         </session-timeout>
     </session-config>
-    <welcome-file-list>
+    <!--<welcome-file-list>
         <welcome-file>program/index.xhtml</welcome-file>
-    </welcome-file-list>
+    </welcome-file-list>-->
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>
