@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -120,5 +119,15 @@ public class Bootstrap implements Serializable {
     public void setProgram(String program) {
         this.program = program;
     }
+    
+    
+    public BootstrapInput getInput() {
+        return input;
+    }
+
+    public void setInput(BootstrapInput input) {
+        this.input = input;
+    }
     // </editor-fold>
+
 }

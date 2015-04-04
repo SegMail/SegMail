@@ -23,6 +23,7 @@ import javax.faces.bean.ViewScoped;
 public class BootstrapOutput implements Serializable {
     
     private String pageRoot;
+    private String templateName;
     private String templateRoot;
     private String menuRoot;
     private String errorMessage;
@@ -76,6 +77,14 @@ public class BootstrapOutput implements Serializable {
 
     public void setMenuRoot(String menuRoot) {
         this.menuRoot = menuRoot;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
     }
     
     

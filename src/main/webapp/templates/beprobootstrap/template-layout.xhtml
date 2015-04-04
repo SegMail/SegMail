@@ -16,13 +16,13 @@
             <!-- AJAX Loader -->
             <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/spinner/spinner.css" />
             <script src="#{request.contextPath}/templates/beprobootstrap/js/ajax/ajax-loader.js"></script> 
-            
+
             <!--custom hacks-->
             <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/hacks/primefaces-hacks.css" /><!--PF hacks-->
-            
+
             <!--all other additional required resoures-->
             <ui:insert name="head" />
-            
+
         </h:head>
         <body>
             <div class="page-container"><!-- page wrapper -->
@@ -44,7 +44,13 @@
                     <div class="page-navigation-info"><!-- navigation info block -->
                         <a href="index.html" class="logo">Your logo text</a><!-- Your logo link -->
                     </div>
-                    <div class="profile"></div><!-- profile block -->
+                    <!--"Template-tize" this section in the future-->
+                    <div class="profile">
+                        <div class="profile-info">
+                            <a href="#" class="profile-title">Howdy, #{bootstrap.input.userContainer.username}</a>
+                            <span class="profile-subtitle">#{bootstrap.input.userContainer.userType.OBJECT_NAME}</span>
+                        </div>
+                    </div><!-- profile block -->
                     <ul class="navigation">
                         <ui:include src="#{bootstrap.output.menuRoot}" />
                     </ul>
@@ -79,6 +85,8 @@
 
             </div>
         </body>
+
+
         <!--template scripts-->
         <link href="#{request.contextPath}/templates/beprobootstrap/css/styles.css" rel="stylesheet" type="text/css" id="theme"/>
         <!--[if lt IE 10]><link rel="stylesheet" type="text/css" href="css/ie.css"/><![endif]-->
@@ -118,8 +126,9 @@
 
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" />
-        
-        <ui:insert name="scripts-bottom" />
-        
+
+        <script src="#{request.contextPath}/templates/common/js/bootstrap-select.js"></script>
+        <ui:insert name="scripts-bottom"></ui:insert>
+
     </f:view>
 </html>

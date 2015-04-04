@@ -54,6 +54,8 @@ public class FormUserLogin {
             this.userContainer.setLoggedIn(true);
             this.userContainer.setUser(authenticatedUser);
             this.userContainer.setUserType(authenticatedUser.getUSERTYPE());
+            //Temporary arrangement
+            this.userContainer.setUsername(this.userService.getUserAccountById(authenticatedUser.getOBJECTID()).getUSERNAME());
 
             //do a redirect to refresh the view
             //Something is faulty here after a redirect

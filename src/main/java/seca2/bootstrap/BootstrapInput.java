@@ -8,6 +8,8 @@ package seca2.bootstrap;
 import java.io.Serializable;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import seca2.bootstrap.module.User.UserContainer;
 
 /**
  *
@@ -17,6 +19,7 @@ import javax.enterprise.context.SessionScoped;
 public class BootstrapInput implements Serializable{
     
     //private FacesContext facesContext;
+    @Inject private UserContainer userContainer;
     
     private String program;
     private String contextPath;
@@ -35,6 +38,14 @@ public class BootstrapInput implements Serializable{
 
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
+    }
+
+    public UserContainer getUserContainer() {
+        return userContainer;
+    }
+
+    public void setUserContainer(UserContainer userContainer) {
+        this.userContainer = userContainer;
     }
     
     

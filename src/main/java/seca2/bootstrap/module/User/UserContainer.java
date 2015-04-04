@@ -31,6 +31,9 @@ public class UserContainer implements Serializable {
     private boolean loggedIn; //default is always false
     private String sessionId;
     
+    private String username;
+    private String lastname;
+    
     public String regenerateSessionId(){
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         HttpServletRequest req = (HttpServletRequest) ec.getRequest();
@@ -86,6 +89,22 @@ public class UserContainer implements Serializable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
     
     

@@ -29,8 +29,7 @@ public class UserModule extends BootstrapModule implements Serializable {
     @EJB private UserService userService;
     @Inject private GlobalValues globalValues;
 
-    @Inject //@Dependent
-    private UserContainer userContainer; //this is not resolved precisely after redirect[20150131]
+    @Inject private UserContainer userContainer; //Should we inject or should we put it in InputContext?
     private final LoginMode loginMode = LoginMode.BLOCK;
 
     private String previousURI;
