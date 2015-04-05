@@ -21,6 +21,7 @@ import javax.persistence.Table;
 public class ClientType extends EnterpriseObject {
     
     private String CLIENT_TYPE_NAME;
+    private String DESCRIPTION;
 
     public String getCLIENT_TYPE_NAME() {
         return CLIENT_TYPE_NAME;
@@ -29,8 +30,14 @@ public class ClientType extends EnterpriseObject {
     public void setCLIENT_TYPE_NAME(String CLIENT_TYPE_NAME) {
         this.CLIENT_TYPE_NAME = CLIENT_TYPE_NAME;
     }
-    
-    
+
+    public String getDESCRIPTION() {
+        return DESCRIPTION;
+    }
+
+    public void setDESCRIPTION(String DESCRIPTION) {
+        this.DESCRIPTION = DESCRIPTION;
+    }
 
     @Override
     public void randInit() {

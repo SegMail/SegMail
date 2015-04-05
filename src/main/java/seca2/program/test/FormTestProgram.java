@@ -35,9 +35,9 @@ public class FormTestProgram implements Serializable {
         
     //Create Program Form input variables
     private String programName;
-    private String programDirectory;
+    private String displayName;
     private String programViewRoot;
-    private String programBeanLocation;
+    private String displayDesc;
     
     private final String TestAssignProgramToUserTypeName = "assignProgramToUsertypeForm";
     
@@ -55,7 +55,7 @@ public class FormTestProgram implements Serializable {
     
     public void createProgram(){
         try{
-            programService.registerProgram(programName, programDirectory, programViewRoot, programBeanLocation);
+            programService.registerProgram(programName, programViewRoot, displayName, displayDesc);
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_FATAL, "Program "+programName+" successfully created!", null);
         } catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
@@ -117,12 +117,12 @@ public class FormTestProgram implements Serializable {
         this.programName = programName;
     }
 
-    public String getProgramDirectory() {
-        return programDirectory;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setProgramDirectory(String programDirectory) {
-        this.programDirectory = programDirectory;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getProgramViewRoot() {
@@ -133,12 +133,12 @@ public class FormTestProgram implements Serializable {
         this.programViewRoot = programViewRoot;
     }
 
-    public String getProgramBeanLocation() {
-        return programBeanLocation;
+    public String getDisplayDesc() {
+        return displayDesc;
     }
 
-    public void setProgramBeanLocation(String programBeanLocation) {
-        this.programBeanLocation = programBeanLocation;
+    public void setDisplayDesc(String displayDesc) {
+        this.displayDesc = displayDesc;
     }
 
     public List<Program> getAllPrograms() {

@@ -16,25 +16,19 @@
             <h:form id="loginUserForm" >
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">User Name</span>
-                                <h:inputText id="username" styleClass="form-control"
-                                             value="#{ProgramTest.formTestUser.loginUsername}" ></h:inputText>
-                                <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
-                            </div>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">User Name</span>
+                            <h:inputText id="username" styleClass="form-control"
+                                         value="#{ProgramTest.formTestUser.loginUsername}" ></h:inputText>
+                            <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
-                        <!--<h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>-->
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">Password</span>
-                                <h:inputSecret id="password" styleClass="form-control"
-                                               value="#{ProgramTest.formTestUser.loginPassword}" ></h:inputSecret>
-                                <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
-                            </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">Password</span>
+                            <h:inputSecret id="password" styleClass="form-control"
+                                           value="#{ProgramTest.formTestUser.loginPassword}" ></h:inputSecret>
+                            <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
                         </div>
                     </div>
                 </div>

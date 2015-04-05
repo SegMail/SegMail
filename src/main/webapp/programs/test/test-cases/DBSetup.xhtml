@@ -33,9 +33,19 @@
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
                         <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
-                        <p:commandButton id="setupDBMixed" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via both EM and Session"
-                                         update="@form"
+                        <p:commandButton id="setupDBMixed" styleClass="btn btn-primary col-md-12 col-xs-12" 
+                                         value="Delete and re-generate tables"
+                                         update="@form" style="word-wrap: normal;"
                                          actionListener="#{ProgramTest.formTestDB.generateDB()}"></p:commandButton>
+                    </div>
+                </div><br />
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
+                        <p:commandButton id="setupDBUpdate" styleClass="btn btn-primary col-md-12 col-xs-12" 
+                                         value="Update tables"
+                                         update="@form" style="word-wrap: normal;"
+                                         actionListener="#{ProgramTest.formTestDB.updateDB()}"></p:commandButton>
                     </div>
                 </div><br />
                 <div class="row">
@@ -45,7 +55,10 @@
                                       showSummary="true"></s2:messenger>
                     </div>
                 </div>
-                <p:blockUI id="setupDBFormBlock" block="setupDBForm" trigger="setupDBForm:setupDBSession,setupDBForm:setupDBEM,setupDBForm:setupDBMixed">
+                <p:blockUI id="setupDBFormBlock" block="setupDBForm" trigger="setupDBForm:setupDBSession,
+                           setupDBForm:setupDBEM,
+                           setupDBForm:setupDBMixed
+                           setupDBForm:setupDBUpdate">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
             </form>

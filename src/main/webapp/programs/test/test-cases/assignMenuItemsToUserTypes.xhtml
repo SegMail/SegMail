@@ -15,65 +15,47 @@
             <h:form id="assignMenuItemForm">
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="allMenuItemsForAssignment" styleClass="control-label col-md-4">MenuItem: </h:outputLabel>
-                        <div class="col-md-8">
-                            <!--potential custom component-->
-                            <h:selectOneMenu id="allMenuItemsForAssignment" class="selectpicker" 
-                                             value="#{ProgramTest.formTestNavigation.selectedAssignedMenuItemId}"   
-                                             >
-                                <c:choose>
-                                    <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
-                                        <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <f:selectItem itemLabel="No MenuItems selected" itemValue="" />
-                                        <f:selectItems value="#{FormTestNavigation.allMenuItems}"
-                                                       var="menuItem"
-                                                       itemLabel="#{menuItem.MENU_ITEM_NAME}"
-                                                       itemValue="#{menuItem.OBJECTID}"
-                                                       >
-                                        </f:selectItems>
-                                    </c:otherwise>
-                                </c:choose>
-                            </h:selectOneMenu>
-                            <!--Impt! This script must be called here, if not the above select element won't be rendered as a 
-                                button
-                            <script>
-                                loadNiceButtons();
-                            </script>-->
-                            <!--potential custom component-->
-
-                        </div>
+                        <!--potential custom component-->
+                        <s2:dropdown id="allMenuItemsForAssignment" class="selectpicker" 
+                                     value="#{ProgramTest.formTestNavigation.selectedAssignedMenuItemId}"   
+                                     >
+                            <c:choose>
+                                <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
+                                    <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
+                                </c:when>
+                                <c:otherwise>
+                                    <f:selectItem itemLabel="No MenuItems selected" itemValue="" />
+                                    <f:selectItems value="#{FormTestNavigation.allMenuItems}"
+                                                   var="menuItem"
+                                                   itemLabel="Menuitem #{menuItem.MENU_ITEM_NAME}"
+                                                   itemValue="#{menuItem.OBJECTID}"
+                                                   >
+                                    </f:selectItems>
+                                </c:otherwise>
+                            </c:choose>
+                        </s2:dropdown>
                     </div>
                 </div>
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="allUserTypesForAssignment" styleClass="control-label col-md-4">Usertypes: </h:outputLabel>
-                        <div class="col-md-8">
-                            <h:selectOneMenu id="allUserTypesForAssignment" class="selectpicker" 
-                                             value="#{ProgramTest.formTestNavigation.selectedUserTypeId}"
-                                             >
-                                <c:choose>
-                                    <c:when test="#{(ProgramTest.formTestNavigation.allUserTypes.size() == 0)}">
-                                        <f:selectItem itemLabel="No UserTypes exist yet"></f:selectItem>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <f:selectItem itemLabel="No UserTypes selected" itemValue="" />
-                                        <f:selectItems value="#{FormTestNavigation.allUserTypes}"
-                                                       var="userType"
-                                                       itemLabel="#{userType.USERTYPENAME}"
-                                                       itemValue="#{userType.OBJECTID}"
-                                                       >
-                                        </f:selectItems>
-                                    </c:otherwise>
-                                </c:choose>
-                            </h:selectOneMenu>
-                            <!--Impt! This script must be called here, if not the above select element won't be rendered as a 
-                                button
-                            <script>
-                                loadNiceButtons();
-                            </script>-->
-                        </div>
+                        <s2:dropdown id="allUserTypesForAssignment" class="selectpicker" 
+                                         value="#{ProgramTest.formTestNavigation.selectedUserTypeId}"
+                                         >
+                            <c:choose>
+                                <c:when test="#{(ProgramTest.formTestNavigation.allUserTypes.size() == 0)}">
+                                    <f:selectItem itemLabel="No UserTypes exist yet"></f:selectItem>
+                                </c:when>
+                                <c:otherwise>
+                                    <f:selectItem itemLabel="No UserTypes selected" itemValue="" />
+                                    <f:selectItems value="#{FormTestNavigation.allUserTypes}"
+                                                   var="userType"
+                                                   itemLabel="Usertype #{userType.USERTYPENAME}"
+                                                   itemValue="#{userType.OBJECTID}"
+                                                   >
+                                    </f:selectItems>
+                                </c:otherwise>
+                            </c:choose>
+                        </s2:dropdown>
                     </div>
                 </div> 
                 <div class="row">

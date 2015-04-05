@@ -47,12 +47,14 @@ public class ProgramService implements Serializable {
     @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
     /**
      * 
+     * Only returns 1 result.
+     * 
      * @param programName
      * @return
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<Program> getProgramByName(String programName) throws DBConnectionException {
+    public Program getProgramByName(String programName) throws DBConnectionException {
         try {
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
@@ -65,7 +67,12 @@ public class ProgramService implements Serializable {
                     .getResultList();
 
             return results;*/
-            return this.genericEntepriseObjectService.getEnterpriseObjectsByName(programName, Program.class);
+            
+            List<Program> results = this.genericEntepriseObjectService.getEnterpriseObjectsByName(programName, Program.class);
+            if(results == null || results.size() <= 0)
+                return null;
+            
+            return results.get(0);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -157,7 +164,7 @@ public class ProgramService implements Serializable {
      * @throws EDS.component.program.ProgramRegistrationException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerProgram(String programName, String viewDir, String viewRoot, String beanDir)
+    public void registerProgram(String programName, String viewRoot, String displayName, String displayDesc)
             throws DBConnectionException, ProgramRegistrationException {
         try{
             //Check if program name is empty
@@ -170,17 +177,19 @@ public class ProgramService implements Serializable {
                 throw new ProgramRegistrationException("View root cannot be empty!");
             
             //Check if program name already exist
-            List<Program> existingPrograms = this.getProgramByName(programName);
-            if(existingPrograms != null && existingPrograms.size() >0)
+            Program existingProgram = this.getProgramByName(programName);
+            if(existingProgram != null)
                 throw new ProgramRegistrationException("Program "+programName+" already exists!");
             
             Program program = new Program();
             
             //Set basic variables
             program.setPROGRAM_NAME(programName);
-            program.setVIEW_DIRECTORY(viewDir);
+            //program.setVIEW_DIRECTORY(viewDir);
             program.setVIEW_ROOT(viewRoot);
-            program.setBEAN_DIRECTORY(beanDir);
+            //program.setBEAN_DIRECTORY(beanDir);
+            program.setDISPLAY_TITLE(displayName);
+            program.setDISPLAY_DESCRIPTION(displayDesc);
             
             //Set EnterpriseObject properties
             //program.setOBJECT_NAME(programName);//Do this in ProgramListener
@@ -267,12 +276,12 @@ public class ProgramService implements Serializable {
     public boolean checkProgramAuthForUserType(long usertypeid, String programName) 
             throws DBConnectionException{
         
-        List<Program> programs = this.getProgramByName(programName);
+        Program program = this.getProgramByName(programName);
         //Always use the first result
-        if(programs == null || programs.size() <=0)
+        if(program == null)
             return false;
         
-        Program program = programs.get(0);
+        //Program program = programs.get(0);
         return this.checkProgramAuthForUserType(usertypeid, program.getOBJECTID());
     }
     

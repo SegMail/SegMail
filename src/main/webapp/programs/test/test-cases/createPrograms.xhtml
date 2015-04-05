@@ -13,46 +13,34 @@
             Create Program
         </ui:define>
         <ui:define name="panel-body">
-                <h:form id="createProgramForm" >
+            <h:form id="createProgramForm" >
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">Program Name</span>
-                                <h:inputText id="programNameInput" styleClass="form-control"
-                                             value="#{ProgramTest.formTestProgram.programName}" ></h:inputText>
-                            </div>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">Program Name</span>
+                            <h:inputText id="programNameInput" styleClass="form-control"
+                                         value="#{ProgramTest.formTestProgram.programName}" ></h:inputText>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">View Directory</span>
-                                <h:inputText id="viewDirInput" styleClass="form-control"
-                                             value="#{ProgramTest.formTestProgram.programDirectory}" ></h:inputText>
-                            </div>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">Display Name</span>
+                            <h:inputText id="viewDirInput" styleClass="form-control"
+                                         value="#{ProgramTest.formTestProgram.displayName}" ></h:inputText>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">View Root</span>
-                                <h:inputText id="viewRootInput" styleClass="form-control"
-                                             value="#{ProgramTest.formTestProgram.programViewRoot}" ></h:inputText>
-                            </div>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">View Root</span>
+                            <h:inputText id="viewRootInput" styleClass="form-control"
+                                         value="#{ProgramTest.formTestProgram.programViewRoot}" ></h:inputText>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">Bean</span>
-                                <h:inputText id="beanInput" styleClass="form-control"
-                                             value="#{ProgramTest.formTestProgram.programBeanLocation}" ></h:inputText>
-                            </div>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">Display Description</span>
+                            <h:inputText id="beanInput" styleClass="form-control"
+                                         value="#{ProgramTest.formTestProgram.displayDesc}" ></h:inputText>
                         </div>
                     </div>
                 </div>

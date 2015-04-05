@@ -3,13 +3,17 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:p="http://primefaces.org/ui">
-    <div class="panel-heading">
-        <h3 class="panel-title">
-            <ui:insert name="panel-heading" />
-        </h3>
-    </div>
-    <div class="panel-body">
-        <ui:insert name="panel-body" />
+      xmlns:p="http://primefaces.org/ui">
+    <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="panel panel-default"  style="min-height: 220px;">
+            <div class="panel-heading">
+                <h5 class="panel-title">
+                    <ui:insert name="panel-heading" />
+                </h5>
+            </div>
+            <div class="panel-body">
+                <ui:insert name="panel-body" />
+            </div>
+        </div>
     </div>
 </html>

@@ -16,6 +16,16 @@ import javax.persistence.Table;
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
 public class SubscriptionList extends EnterpriseObject {
+    
+    public static enum LOCATION{
+        REMOTE,
+        LOCAL
+    }
+    
+    private String LIST_NAME;
+    private String SEND_AS_EMAIL;
+    private String SEND_AS_NAME;
+    private LOCATION LOCATION;
 
     @Override
     public void randInit() {

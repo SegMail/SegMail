@@ -18,6 +18,7 @@ import javax.persistence.Table;
 public class Client extends EnterpriseObject {
 
     private String CLIENT_NAME;
+    private String CLIENT_DESCRIPTION;
 
     public String getCLIENT_NAME() {
         return CLIENT_NAME;
@@ -25,6 +26,14 @@ public class Client extends EnterpriseObject {
 
     public void setCLIENT_NAME(String CLIENT_NAME) {
         this.CLIENT_NAME = CLIENT_NAME;
+    }
+
+    public String getCLIENT_DESCRIPTION() {
+        return CLIENT_DESCRIPTION;
+    }
+
+    public void setCLIENT_DESCRIPTION(String CLIENT_DESCRIPTION) {
+        this.CLIENT_DESCRIPTION = CLIENT_DESCRIPTION;
     }
     
     

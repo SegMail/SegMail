@@ -14,61 +14,51 @@
         <ui:define name="panel-body">
             <h:form id="setupNavigationForm">
                 <div class="row"><!--form to enter menu-->
+                    <div class="col-md-12 col-xs-12">
+                        <s2:dropdown id="allMenuItems" buttonColor="primary"
+                                     value="#{ProgramTest.formTestNavigation.selectedParentMenuItemId}"
+                                     >
+                            <c:choose>
+                                <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
+                                    <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
+                                </c:when>
+                                <c:otherwise>
+                                    <f:selectItem itemLabel="No parent MenuItem" itemValue="" />
+                                    <f:selectItems value="#{FormTestNavigation.allMenuItems}"
+                                                   var="menuItem" 
+                                                   itemLabel="#{menuItem.MENU_ITEM_NAME}"
+                                                   itemValue="#{menuItem.OBJECTID}"
+                                                   >
+                                    </f:selectItems>
+                                </c:otherwise>
+                            </c:choose>
+                        </s2:dropdown>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-8">
-
-                            <s2:dropdown id="allMenuItems" buttonColor="primary"
-                                         value="#{ProgramTest.formTestNavigation.selectedParentMenuItemId}"
-                                         >
-                                <c:choose>
-                                    <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
-                                        <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <f:selectItem itemLabel="No parent MenuItem" itemValue="" />
-                                        <f:selectItems value="#{FormTestNavigation.allMenuItems}"
-                                                       var="menuItem" 
-                                                       itemLabel="#{menuItem.MENU_ITEM_NAME}"
-                                                       itemValue="#{menuItem.OBJECTID}"
-                                                       >
-                                        </f:selectItems>
-                                    </c:otherwise>
-                                </c:choose>
-                            </s2:dropdown>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">MenuItem name</span>
+                            <h:inputText id="menuItemName" styleClass="form-control"
+                                         value="#{ProgramTest.formTestNavigation.menuItemName}" ></h:inputText>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">MenuItem name</span>
-                                <h:inputText id="menuItemName" styleClass="form-control"
-                                             value="#{ProgramTest.formTestNavigation.menuItemName}" ></h:inputText>
-                            </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">MenuItem URL</span>
+                            <h:inputText id="menuURL" styleClass="form-control"
+                                         value="#{ProgramTest.formTestNavigation.menuItemURL}" ></h:inputText>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">MenuItem URL</span>
-                                <h:inputText id="menuURL" styleClass="form-control"
-                                             value="#{ProgramTest.formTestNavigation.menuItemURL}" ></h:inputText>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">Prepend HTML tags</span>
-                                <h:inputText id="prependHTMLTagss" styleClass="form-control"
-                                             value="#{ProgramTest.formTestNavigation.prependHTMLTags}" ></h:inputText>
-                            </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">Prepend HTML tags</span>
+                            <h:inputText id="prependHTMLTagss" styleClass="form-control"
+                                         value="#{ProgramTest.formTestNavigation.prependHTMLTags}" ></h:inputText>
                         </div>
                     </div>
                 </div>

@@ -59,6 +59,8 @@ public class FormAssignLayoutUsername extends Form {
     public void assignLayoutToUsername(){
         try{
             UserAccount userAccount = this.userService.getUserAccountByUsername(username);
+            if(userAccount == null)
+                throw new LayoutAssignmentException("User "+username+" does not exist!");
             User user = (User) userAccount.getOWNER();
             //this.layoutService.assignLayoutToUser(layoutId, user.getOBJECTID()); //the wrong IDs were passed in, should we pass in objects instead?
             this.layoutService.assignLayoutToUser(user.getOBJECTID(), layoutId);

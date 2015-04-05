@@ -17,11 +17,7 @@ import javax.persistence.Table;
 @Table(name="SUBSCRIBER")
 public class Subscriber extends EnterpriseObject {
     
-    public static enum STATUS{
-        NEW,
-        CONFIRMED,
-        BOUNCED
-    }
+    
 
     private String EMAIL;
     private String FIRSTNAME;

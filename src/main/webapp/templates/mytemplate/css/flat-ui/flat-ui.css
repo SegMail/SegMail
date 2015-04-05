@@ -200,7 +200,7 @@ you can use the generic selector below, but it's slower:
 }
 body {
   font-family: "Lato", Helvetica, Arial, sans-serif;
-  font-size: 18px;
+  font-size: 12px;
   line-height: 1.72222;
   color: #34495e;
   background-color: #ffffff;
@@ -526,7 +526,7 @@ a.thumbnail.active {
 }
 .btn {
   border: none;
-  font-size: 15px;
+  /*font-size: 15px;*/
   font-weight: normal;
   line-height: 1.4;
   border-radius: 4px;

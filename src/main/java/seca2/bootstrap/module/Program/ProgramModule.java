@@ -14,6 +14,7 @@ import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
+import eds.entity.program.Program;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Level;
@@ -58,52 +59,56 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         try {
             //Very coupled to JSF
             FacesContext fc = FacesContext.getCurrentInstance();
-            //1. Find the program object
-            //- If empty, assign the default program
+            //1. Find the programName object
+            //- If empty, assign the default programName
             //- If not empty, continue.
             if (inputContext.getProgram() == null || inputContext.getProgram().isEmpty()) {
                 String defaultProgram = "";
                 //FacesContext fc = (FacesContext) inputContext.getFacesContext();
                 
                 
-                //Rightfully, we should check if the user has a default program configured, if yes, we
-                //should get it before we move on to the default program.
+                //Rightfully, we should check if the user has a default programName configured, if yes, we
+                //should get it before we move on to the default programName.
                 //- User
                 //- UserType
                 //- Site/Client
 
-                //Actually, even in the production environment, there can also be a default program set.
+                //Actually, even in the production environment, there can also be a default programName set.
                 //[20150328] There is no need to restrict this feature to the development stage
                 //if (fc.getApplication().getProjectStage().equals(ProjectStage.Development)) {
                     defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
                     inputContext.setProgram(defaultProgram);
                 //}
                 
-                //If totally no default program is found, throw exception
+                //If totally no default programName is found, throw exception
                 if(defaultProgram.isEmpty())
                     throw new Exception("No default program found.");
                 
-                //Assign default program
+                //Assign default programName
                 inputContext.setProgram(defaultProgram);
             }
-            String program = inputContext.getProgram();
+            String programName = inputContext.getProgram();
 
-            //2. Find the viewRoot of the program, which cannot be empty by now
+            //2. Find the viewRoot of the programName, which cannot be empty by now
             //- If not found, throw exception.
             //- If not found but project is in development stage, get the GLOBAL_DEFAULT_VIEWROOT
             //- If found, continue.
-            String viewRoot = this.programService.getViewRootFromProgramName(program);
+            //String viewRoot = this.programService.getViewRootFromProgramName(programName);
+            Program program = this.programService.getProgramByName(programName);
+            String viewRoot = program == null ? null : program.getVIEW_ROOT();
+            String programTitle = program == null ? null : program.getDISPLAY_TITLE();
+            String programDesc = program == null ? null : program.getDISPLAY_DESCRIPTION();
             String defaultViewRoot = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_VIEWROOT");
             
             if(viewRoot == null || viewRoot.isEmpty()){
                 if(defaultViewRoot == null || defaultViewRoot.isEmpty())
-                    throw new Exception("View root location is not found for program "+program+".");
+                    throw new Exception("View root location is not found for program "+programName+".");
                 
                 viewRoot = defaultViewRoot;
             }
             
             //3. Check the user's authorization.
-            //By this time, the program name and viewRoot cannot be empty
+            //By this time, the programName name and viewRoot cannot be empty
             //- If not authorized, show the not authorized view root.
             //- If found, continue.
             
@@ -111,7 +116,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             //By passing through the UserModule, the user should already been authorized
             boolean authorized = false;
             if(this.userContainer.getUserType() != null){
-                authorized = this.programService.checkProgramAuthForUserType(userContainer.getUserType().getOBJECTID(), program);
+                authorized = this.programService.checkProgramAuthForUserType(userContainer.getUserType().getOBJECTID(), programName);
             }
             
             //4. Decide what to show
@@ -126,6 +131,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             
             //authenticated
             outputContext.setPageRoot(viewRoot);
+            outputContext.setProgramTitle(programTitle);
+            outputContext.setProgramDescription(programDesc);
             return true;
                 
         } catch (DBConnectionException dbex) {
@@ -155,16 +162,16 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
         /*
          Actual processing
-         1) Check the program requested by retrieving it from inputContext.
+         1) Check the programName requested by retrieving it from inputContext.
          */
-        //If there is no program entered in the URL, set the global default program
-        //[20150314] First, we should get the user's own default program, but we
+        //If there is no programName entered in the URL, set the global default programName
+        //[20150314] First, we should get the user's own default programName, but we
         // de-prioritize this at the moment.
         if (inputContext.getProgram() == null || inputContext.getProgram().isEmpty()) {
             //FacesContext fc = (FacesContext) inputContext.getFacesContext();
             FacesContext fc = FacesContext.getCurrentInstance();
 
-            //Actually, even in the production environment, there can also be a default program set.
+            //Actually, even in the production environment, there can also be a default programName set.
             if (!fc.getApplication().getProjectStage().equals(ProjectStage.Production)) {
                 String defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
                 inputContext.setProgram(defaultProgram);
@@ -174,7 +181,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
         try {
             /*
-             * 2) Authorization checks for program access by calling ProgramServices.
+             * 2) Authorization checks for programName access by calling ProgramServices.
              * - If user is authorized, then call ProgramService to check for authorization.
              * - If user is not, then treat user as unauthorized, as it does not matter.
              */
@@ -184,7 +191,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             }
 
             /*
-             3) Retrieve the program from database by calling ProgramServices.
+             3) Retrieve the programName from database by calling ProgramServices.
              */
             String viewRoot = programService.getViewRootFromProgramName(program);
             //FacesContext fc = (FacesContext) inputContext.getFacesContext();

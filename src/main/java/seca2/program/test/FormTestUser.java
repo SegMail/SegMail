@@ -25,14 +25,18 @@ import eds.component.user.UserRegistrationException;
 import eds.component.user.UserService;
 import eds.component.user.UserTypeException;
 import eds.entity.user.UserType;
+import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *
  * @author vincent.a.lee
  */
+@Named("FormTestUser")
 @RequestScoped
 public class FormTestUser implements Serializable {
+    
+    @Inject private ProgramTest programTest;
     
     //Create UserType
     private String userTypeName;
@@ -65,7 +69,7 @@ public class FormTestUser implements Serializable {
     
     @PostConstruct
     public void init(){
-        this.initializeAllUserTypes();
+        //this.initializeAllUserTypes();
     }
     
     public void createUserType(){
@@ -115,6 +119,7 @@ public class FormTestUser implements Serializable {
         }
     }
     
+    /*
     public void initializeAllUserTypes(){
          try{
             allUserTypes = userService.getAllUserTypes();
@@ -128,7 +133,7 @@ public class FormTestUser implements Serializable {
                     ex.getCause().getClass().getSimpleName(), 
                     ex.getCause().getMessage());
         }
-    }
+    }*/
     
     public void setProfilePicLocation(){
         try{
@@ -161,14 +166,6 @@ public class FormTestUser implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public List<UserType> getAllUserTypes() {
-        return allUserTypes;
-    }
-
-    public void setAllUserTypes(List<UserType> allUserTypes) {
-        this.allUserTypes = allUserTypes;
     }
 
     public String getUsername() {
@@ -225,6 +222,18 @@ public class FormTestUser implements Serializable {
 
     public void setProfilePicLocation(String profilePicLocation) {
         this.profilePicLocation = profilePicLocation;
+    }
+
+    public ProgramTest getProgramTest() {
+        return programTest;
+    }
+
+    public void setProgramTest(ProgramTest programTest) {
+        this.programTest = programTest;
+    }
+
+    public List<UserType> getAllUserTypes() {
+        return this.programTest.getAllUserTypes();
     }
     
     

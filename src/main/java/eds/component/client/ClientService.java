@@ -72,7 +72,7 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerClientType(String clienttypename)
+    public void registerClientType(String clienttypename, String clienttypedesc)
         throws DBConnectionException, ClientTypeRegistrationException{
         
         try{
@@ -87,6 +87,7 @@ public class ClientService {
             
             ClientType newClientType = new ClientType();
             newClientType.setCLIENT_TYPE_NAME(clienttypename);
+            newClientType.setDESCRIPTION(clienttypedesc);
             
             this.em.persist(newClientType);
             

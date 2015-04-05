@@ -16,48 +16,38 @@
             <h:form id="createUserForm" >
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <s2:dropdown id="userType"
-                                             value="#{ProgramTest.formTestUser.chosenUserType}">
-                                    <c:choose>
-                                        <c:when test="#{(ProgramTest.formTestUser.allUserTypes.size() == 0)}">
-                                            <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <f:selectItems value="#{ProgramTest.allUserTypes}"
-                                                           var="userType" 
-                                                           itemLabel="#{userType.USERTYPENAME}"
-                                                           itemValue="#{userType.OBJECTID}"
-                                                           >
-                                            </f:selectItems>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </s2:dropdown>
-                            </div>
-                        </div>
+                        <s2:dropdown id="userType"
+                                     value="#{FormTestUser.chosenUserType}">
+                            <c:choose>
+                                <c:when test="#{(FormTestUser.allUserTypes.size() == 0)}">
+                                    <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
+                                </c:when>
+                                <c:otherwise>
+                                    <f:selectItems value="#{FormTestUser.allUserTypes}"
+                                                   var="userType" 
+                                                   itemLabel="Usertype #{userType.USERTYPENAME}"
+                                                   itemValue="#{userType.OBJECTID}"
+                                                   >
+                                    </f:selectItems>
+                                </c:otherwise>
+                            </c:choose>
+                        </s2:dropdown>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <div class="col-md-12">
                             <div class="input-group">
                                 <span class="input-group-addon">User Name</span>
                                 <h:inputText id="username" styleClass="form-control"
                                              value="#{ProgramTest.formTestUser.username}" ></h:inputText>
                             </div>
-
-                        </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
-                        <!--<h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>-->
-                        <div class="col-md-12">
                             <div class="input-group">
                                 <span class="input-group-addon">Password</span>
                                 <h:inputSecret id="password" styleClass="form-control"
                                                value="#{ProgramTest.formTestUser.password}" ></h:inputSecret>
                             </div>
-                        </div>
                     </div>
                 </div>
                 <div class="row">

@@ -352,12 +352,12 @@ public class LayoutService implements Serializable {
         throws DBConnectionException {
         try{
             
-            List<Program> programs = this.programService.getProgramByName(programName);
-            if(programs == null || programs.size() <= 0)
+            Program program = this.programService.getProgramByName(programName);
+            if(program == null)
                 return null;
             
             //Get only the first matching program
-            Program program = programs.get(0);
+            //Program program = programs.get(0);
             List<LayoutAssignment> assignments = 
                     this.genericEOService.getRelationshipsForSourceObject(program.getOBJECTID(), LayoutAssignment.class);
             //If no results returned, return null

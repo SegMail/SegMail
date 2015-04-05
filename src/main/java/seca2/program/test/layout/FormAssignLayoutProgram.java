@@ -9,28 +9,28 @@ import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutAssignmentException;
 import eds.component.layout.LayoutService;
 import eds.component.program.ProgramService;
-import eds.entity.layout.Layout;
-import eds.entity.program.Program;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Form;
+import seca2.program.test.ProgramTest;
 
 /**
  *
  * @author LeeKiatHaw
  */
+@Named("FormAssignLayoutProgram")
 @RequestScoped
 public class FormAssignLayoutProgram extends Form {
     
     @EJB private LayoutService layoutService;
     @EJB private ProgramService programService;
     
-    private List<Layout> allLayouts;
-    private List<Program> allPrograms;
+    @Inject private ProgramTest programTest;
     
     private long programId;
     private long layoutId;
@@ -41,28 +41,6 @@ public class FormAssignLayoutProgram extends Form {
     @Override
     protected void init() {
         this.FORM_NAME = "assignLayoutToProgramForm";
-        initializeAllLayout();
-        initializeAllProgram();
-    }
-    
-    public void initializeAllLayout(){
-        try{
-            this.allLayouts = this.layoutService.getAllLayouts();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-    
-    public void initializeAllProgram(){
-        try{
-            this.allPrograms = this.programService.getAllPrograms();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
     }
     
     public void assignLayoutToProgram(){
@@ -77,16 +55,7 @@ public class FormAssignLayoutProgram extends Form {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
-
-
-    public List<Layout> getAllLayouts() {
-        return allLayouts;
-    }
-
-    public void setAllLayouts(List<Layout> allLayouts) {
-        this.allLayouts = allLayouts;
-    }
-
+    
     public long getLayoutId() {
         return layoutId;
     }
@@ -95,20 +64,20 @@ public class FormAssignLayoutProgram extends Form {
         this.layoutId = layoutId;
     }
 
-    public List<Program> getAllPrograms() {
-        return allPrograms;
-    }
-
-    public void setAllPrograms(List<Program> allPrograms) {
-        this.allPrograms = allPrograms;
-    }
-
     public long getProgramId() {
         return programId;
     }
 
     public void setProgramId(long programId) {
         this.programId = programId;
+    }
+
+    public ProgramTest getProgramTest() {
+        return programTest;
+    }
+
+    public void setProgramTest(ProgramTest programTest) {
+        this.programTest = programTest;
     }
 
     

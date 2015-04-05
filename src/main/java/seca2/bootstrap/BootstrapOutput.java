@@ -28,6 +28,8 @@ public class BootstrapOutput implements Serializable {
     private String menuRoot;
     private String errorMessage;
     private String errorStackTrace;
+    private String programTitle;
+    private String programDescription;
     
     private Map<String,Object> nonCoreValues = new HashMap<String,Object>();
 
@@ -85,6 +87,22 @@ public class BootstrapOutput implements Serializable {
 
     public void setTemplateName(String templateName) {
         this.templateName = templateName;
+    }
+
+    public String getProgramTitle() {
+        return programTitle;
+    }
+
+    public void setProgramTitle(String programTitle) {
+        this.programTitle = programTitle;
+    }
+
+    public String getProgramDescription() {
+        return programDescription;
+    }
+
+    public void setProgramDescription(String programDescription) {
+        this.programDescription = programDescription;
     }
     
     

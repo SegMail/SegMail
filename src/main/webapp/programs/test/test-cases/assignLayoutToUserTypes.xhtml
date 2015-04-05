@@ -9,14 +9,12 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
         <ui:define name="panel-heading">
-            Assign Programs to UserTypes
+            Assign Layout to UserTypes
         </ui:define>
         <ui:define name="panel-body">
             <h:form id="assignLayoutToUsertypeForm">
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="allLayoutsForAssignment" styleClass="control-label col-md-4">Layout: </h:outputLabel>
-                        <div class="col-md-8">
                             <s2:dropdown id="allLayoutsForAssignment" 
                                          value="#{ProgramTest.formAssignLayoutUserType.layoutId}">
                                 <c:choose>
@@ -26,21 +24,17 @@
                                     <c:otherwise>
                                         <f:selectItems value="#{ProgramTest.formAssignLayoutUserType.allLayouts}"
                                                        var="layout" 
-                                                       itemLabel="#{layout.LAYOUT_NAME}"
+                                                       itemLabel="Layout #{layout.LAYOUT_NAME}"
                                                        itemValue="#{layout.OBJECTID}"
                                                        >
                                         </f:selectItems>
                                     </c:otherwise>
                                 </c:choose>
                             </s2:dropdown>
-
-                        </div>
                     </div>
                 </div>
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <h:outputLabel for="allUserTypesForAssignment" styleClass="control-label col-md-4">Usertypes: </h:outputLabel>
-                        <div class="col-md-8">
                             <s2:dropdown id="allUserTypesForAssignment"
                                          value="#{ProgramTest.formAssignLayoutUserType.usertypeid}">
                                 <c:choose>
@@ -50,14 +44,13 @@
                                     <c:otherwise>
                                         <f:selectItems value="#{ProgramTest.formAssignLayoutUserType.allUserTypes}"
                                                        var="userType" 
-                                                       itemLabel="#{userType.USERTYPENAME}"
+                                                       itemLabel="Usertype #{userType.USERTYPENAME}"
                                                        itemValue="#{userType.OBJECTID}"
                                                        >
                                         </f:selectItems>
                                     </c:otherwise>
                                 </c:choose>
                             </s2:dropdown>
-                        </div>
                     </div>
                 </div> 
                 <div class="form-group">

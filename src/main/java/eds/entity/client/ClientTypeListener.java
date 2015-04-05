@@ -17,11 +17,11 @@ public class ClientTypeListener {
     
     @PrePersist
     @PreUpdate
-    public void PrePersistUpdate(Program program){
-        this.replicateObjectName(program);
+    public void PrePersistUpdate(Client client){
+        this.replicateObjectName(client);
     }
     
-    public void replicateObjectName(Program program){
-        program.setOBJECT_NAME(program.getPROGRAM_NAME());
+    public void replicateObjectName(Client client){
+        client.setOBJECT_NAME(client.getCLIENT_NAME());
     }
 }

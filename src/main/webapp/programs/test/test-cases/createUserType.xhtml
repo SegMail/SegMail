@@ -17,22 +17,15 @@
             <form jsf:id="createUsertypeForm">
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <!--<h:outputLabel for="usertypeName" styleClass="control-label col-md-4">Usertype name:</h:outputLabel>-->
-                        <div class="col-md-12">
-                            <div class="input-group">
-                                <span class="input-group-addon">Usertype Name</span>
-                                <input type="text" jsf:id="usertypeName" class="form-control"
-                                             jsf:value="#{ProgramTest.formTestUser.userTypeName}" ></input>
-                            </div>
-
+                        <div class="input-group">
+                            <span class="input-group-addon">Usertype Name</span>
+                            <input type="text" jsf:id="usertypeName" class="form-control"
+                                   jsf:value="#{ProgramTest.formTestUser.userTypeName}" ></input>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
-                        <!--<h:outputLabel for="usertypeDesc" styleClass="control-label col-md-4">Usertype description </h:outputLabel>-->
-                        <div class="col-md-12">
-                            <h:inputTextarea id="usertypeDesc" styleClass="form-control" 
-                                             value="#{ProgramTest.formTestUser.description}" ></h:inputTextarea>
-                        </div>
+                            <textArea jsf:id="usertypeDesc" class="form-control" placeholder="Description"
+                                      jsf:value="#{ProgramTest.formTestUser.description}"></textArea>
                     </div>
                 </div>
                 <div class="row">

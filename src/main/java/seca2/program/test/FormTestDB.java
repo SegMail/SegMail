@@ -104,4 +104,29 @@ public class FormTestDB implements Serializable {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
         }
     }
+    
+    public void updateDB() {
+        try {
+            //Seems like you can't use Hibernate session methods within a CMT in an EJB
+            //hibernateDBServices.regenerateDBTables();
+            List<Class> allEntities = this.hibernateDBServices.getAllEntities();
+
+            Configuration cfg = this.hibernateDBServices.createFullConfig();
+            for (Class c : allEntities) {
+                cfg.addAnnotatedClass(c);
+            }
+
+            //Delete all tables first
+            //new SchemaExport(cfg).drop(true, true);
+            //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
+            //.execute(true, true, true, false);
+            new SchemaExport(cfg)
+                    .execute(true, true, false, true);
+            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
+        } catch (DBConnectionException dbcex) {
+            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", dbcex.getMessage());
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
+        }
+    }
 }

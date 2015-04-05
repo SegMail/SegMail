@@ -31,6 +31,9 @@ public class Program extends EnterpriseObject{
     private String VIEW_ROOT;
     private String BEAN_DIRECTORY;
     
+    private String DISPLAY_TITLE;
+    private String DISPLAY_DESCRIPTION;
+    
     public String getPROGRAM_NAME() {
         return PROGRAM_NAME;
     }
@@ -62,6 +65,24 @@ public class Program extends EnterpriseObject{
     public void setVIEW_ROOT(String VIEW_ROOT) {
         this.VIEW_ROOT = VIEW_ROOT;
     }
+
+    public String getDISPLAY_TITLE() {
+        return DISPLAY_TITLE;
+    }
+
+    public void setDISPLAY_TITLE(String DISPLAY_TITLE) {
+        this.DISPLAY_TITLE = DISPLAY_TITLE;
+    }
+
+    public String getDISPLAY_DESCRIPTION() {
+        return DISPLAY_DESCRIPTION;
+    }
+
+    public void setDISPLAY_DESCRIPTION(String DISPLAY_DESCRIPTION) {
+        this.DISPLAY_DESCRIPTION = DISPLAY_DESCRIPTION;
+    }
+    
+    
 
     @Override
     public void randInit() {

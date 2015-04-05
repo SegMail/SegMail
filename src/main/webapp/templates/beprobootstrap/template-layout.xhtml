@@ -4,7 +4,8 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:s2="http://seca2.jsf/custom">
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
     <f:view contentType="text/html">
         <h:head>
             <title>SegMail - send large mail fast and cheap</title>    
@@ -62,10 +63,15 @@
                     <div class="container">
                         <div class="page-toolbar">
 
-                            <div class="page-toolbar-block">
-                                <div class="page-toolbar-title">This is the testing page</div>
-                                <div class="page-toolbar-subtitle">All our test cases in html forms!</div>
-                            </div>                                                
+                            <c:if test="#{
+                                not empty bootstrap.output.programTitle ||
+                                not empty bootstrap.output.programDescription}" >
+                                <div class="page-toolbar-block">
+                                    <div class="page-toolbar-title">#{bootstrap.output.programTitle}</div>
+                                    <div class="page-toolbar-subtitle">#{bootstrap.output.programDescription}</div>
+                                </div>
+                            </c:if>
+                                                                         
 
                             <ul class="breadcrumb">
                                 <li><a href="#">Dashboard</a></li>

@@ -17,5 +17,6 @@ import javax.persistence.metamodel.StaticMetamodel;
  */
 @StaticMetamodel(ClientType.class)
 public class ClientType_ extends EnterpriseObject_{
-    public static volatile SingularAttribute<Layout,String> CLIENT_TYPE_NAME;
+    public static volatile SingularAttribute<ClientType,String> CLIENT_TYPE_NAME;
+    public static volatile SingularAttribute<ClientType,String> CLIENT_TYPE_DESCRIPTION;
 }

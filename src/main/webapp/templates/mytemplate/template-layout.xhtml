@@ -32,8 +32,8 @@
             <ui:insert name="head" />
         </h:head>
         <h:body>
-            <h:panelGroup layout="block" class="container-fluid" style="">
-                <!--<ui:include src="/programs/menu/top_menu.xhtml" />hard code for the moment-->
+            <div class="page-container">
+
                 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
@@ -47,10 +47,14 @@
                         </ul>
                     </div>
                 </nav>
-                <ui:insert name="main-program-panel" />
-            </h:panelGroup>
+                <div class="page-content">
+                    <div class="container" style="">
 
+                        <ui:insert name="main-program-panel" />
+                    </div>
+                </div>
 
+            </div>
 
 
         </h:body>

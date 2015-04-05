@@ -24,4 +24,5 @@ public class SubscriptionService {
     @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
     
     
+    
 }
