@@ -12,6 +12,7 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.program.test.client.FormRegisterClientType;
 import seca2.program.test.layout.FormAssignLayoutProgram;
 import seca2.program.test.layout.FormAssignLayoutUserType;
 import seca2.program.test.layout.FormAssignLayoutUsername;
@@ -34,7 +35,7 @@ public class FormTestEverything {
     @Inject private FormAssignLayoutUsername formAssignLayoutUsername;
     @Inject private FormAssignLayoutUserType formAssignLayoutUserType;
     @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
-    
+    @Inject private FormRegisterClientType formRegisterClientType;
     
     public void init(){
         
@@ -116,8 +117,13 @@ public class FormTestEverything {
         
         programTest.init();
         
+        this.formRegisterClientType.setClientType("Organization");
+        this.formRegisterClientType.setClientTypeDesc("Represents an organization.");
+        this.formRegisterClientType.registerClientType();
         
-        
+        this.formRegisterClientType.setClientType("Person");
+        this.formRegisterClientType.setClientTypeDesc("Represents a human being.");
+        this.formRegisterClientType.registerClientType();
         
     }
     

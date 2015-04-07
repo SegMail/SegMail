@@ -37,6 +37,7 @@ public class FormRegisterClientType {
     public void registerClientType(){
         try{
             this.clientService.registerClientType(clientType,clientTypeDesc);
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Client registered successfully.", null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (ClientTypeRegistrationException ex) {

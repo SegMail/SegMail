@@ -22,7 +22,7 @@
                     <textArea jsf:id="clienttypeDesc" class="form-control" placeholder="Description"
                               jsf:value="#{FormRegisterClientType.clientTypeDesc}"></textArea>
                     <br />
-                    
+
 
                 </div>
                 <div class="row">
@@ -34,12 +34,10 @@
 
                     </div>
                 </div>
-                <div class="row">
-                    <s2:messenger for="registerClientTypeForm" closable="true"
-                                  showDetail="true"
-                                  showSummary="true"
-                                  ></s2:messenger>
-                </div>
+                <s2:messenger for="registerClientTypeForm" closable="true"
+                              showDetail="true"
+                              showSummary="true"
+                              ></s2:messenger>
                 <p:blockUI id="registerClientTypeFormBlock" block="registerClientTypeForm" trigger="registerClientTypeForm:registerClientTypeButton">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
