@@ -92,6 +92,7 @@ public class FormTestUser implements Serializable {
         try{
             userService.registerUserByUserTypeId(chosenUserType, username, password);
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_FATAL, "User "+username+" has been created!", null);
+            
         } catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (UserRegistrationException ex) {

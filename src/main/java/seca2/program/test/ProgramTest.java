@@ -6,11 +6,13 @@
 
 package seca2.program.test;
 
+import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutService;
 import eds.component.navigation.NavigationService;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
+import eds.entity.client.ClientType;
 import eds.entity.layout.Layout;
 import eds.entity.navigation.MenuItem;
 import eds.entity.program.Program;
@@ -43,7 +45,7 @@ public class ProgramTest extends FormGroup implements Serializable {
     private final String PROGRAM_NAME = "ProgramTest";
     
     //@Inject private FormTestDB formTestDB;
-    @Inject private FormTestNavigation formTestNavigation;
+    //@Inject private FormTestNavigation formTestNavigation;
     //@Inject private FormTestUser formTestUser;
     //@Inject private FormTestProgram formTestProgram;
     //@Inject private FormCreateLayout formCreateLayout;
@@ -56,11 +58,13 @@ public class ProgramTest extends FormGroup implements Serializable {
     @EJB private LayoutService layoutService;
     @EJB private ProgramService programService;
     @EJB private NavigationService navigationService;
+    @EJB private ClientService clientService;
     
     private List<UserType> allUserTypes = new ArrayList<UserType>();
     private List<Layout> allLayouts;
     private List<Program> allPrograms;
     private List<MenuItem> allMenuItems;
+    private List<ClientType> allClientTypes;
     
     @PostConstruct
     public void init(){
@@ -157,6 +161,14 @@ public class ProgramTest extends FormGroup implements Serializable {
 
     public void setAllMenuItems(List<MenuItem> allMenuItems) {
         this.allMenuItems = allMenuItems;
+    }
+
+    public List<ClientType> getAllClientTypes() {
+        return allClientTypes;
+    }
+
+    public void setAllClientTypes(List<ClientType> allClientTypes) {
+        this.allClientTypes = allClientTypes;
     }
     
     
