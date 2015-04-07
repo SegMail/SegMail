@@ -17,13 +17,13 @@
                 <div class="row"><!--form to assign layout to username-->
                     <div class="col-md-12 col-xs-12 form-group">
                         <s2:dropdown id="allLayoutsForAssignment" 
-                                     value="#{ProgramTest.formAssignLayoutUsername.layoutId}">
+                                     value="#{FormAssignLayoutUsername.layoutId}">
                             <c:choose>
-                                <c:when test="#{(ProgramTest.formAssignLayoutUsername.allLayouts.size() == 0)}">
+                                <c:when test="#{(FormAssignLayoutUsername.allLayouts.size() == 0)}">
                                     <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
                                 </c:when>
                                 <c:otherwise>
-                                    <f:selectItems value="#{ProgramTest.formAssignLayoutUsername.allLayouts}"
+                                    <f:selectItems value="#{FormAssignLayoutUsername.allLayouts}"
                                                    var="layout" 
                                                    itemLabel="#{layout.LAYOUT_NAME}"
                                                    itemValue="#{layout.OBJECTID}"
@@ -37,12 +37,12 @@
                 <div class="form-group">
                     <label>Username:</label>
                     <input type="text" jsf:id="usernameLayout" class="form-control"
-                           jsf:value="#{ProgramTest.formAssignLayoutUsername.username}" />
+                           jsf:value="#{FormAssignLayoutUsername.username}" />
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="assignLayoutUsername" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to username"
-                                         actionListener="#{ProgramTest.formAssignLayoutUsername.assignLayoutToUsername()}"
+                                         actionListener="#{FormAssignLayoutUsername.assignLayoutToUsername()}"
                                          update="@form">
                         </p:commandButton>
 

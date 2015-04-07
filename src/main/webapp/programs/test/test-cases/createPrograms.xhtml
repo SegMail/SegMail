@@ -19,35 +19,35 @@
                         <div class="input-group">
                             <span class="input-group-addon">Program Name</span>
                             <h:inputText id="programNameInput" styleClass="form-control"
-                                         value="#{ProgramTest.formTestProgram.programName}" ></h:inputText>
+                                         value="#{FormTestProgram.programName}" ></h:inputText>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
                             <span class="input-group-addon">Display Name</span>
                             <h:inputText id="viewDirInput" styleClass="form-control"
-                                         value="#{ProgramTest.formTestProgram.displayName}" ></h:inputText>
+                                         value="#{FormTestProgram.displayName}" ></h:inputText>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
                             <span class="input-group-addon">View Root</span>
                             <h:inputText id="viewRootInput" styleClass="form-control"
-                                         value="#{ProgramTest.formTestProgram.programViewRoot}" ></h:inputText>
+                                         value="#{FormTestProgram.programViewRoot}" ></h:inputText>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
                         <div class="input-group">
                             <span class="input-group-addon">Display Description</span>
                             <h:inputText id="beanInput" styleClass="form-control"
-                                         value="#{ProgramTest.formTestProgram.displayDesc}" ></h:inputText>
+                                         value="#{FormTestProgram.displayDesc}" ></h:inputText>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="createProgramButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Program"
-                                         actionListener="#{ProgramTest.formTestProgram.createProgram()}"
+                                         actionListener="#{FormTestProgram.createProgram()}"
                                          update="@form">
                         </p:commandButton>
 

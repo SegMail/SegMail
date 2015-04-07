@@ -16,13 +16,13 @@
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
                             <s2:dropdown id="allLayoutsForAssignment" 
-                                         value="#{ProgramTest.formAssignLayoutUserType.layoutId}">
+                                         value="#{FormAssignLayoutUserType.layoutId}">
                                 <c:choose>
-                                    <c:when test="#{(ProgramTest.formAssignLayoutUserType.allLayouts.size() == 0)}">
+                                    <c:when test="#{(FormAssignLayoutUserType.allLayouts.size() == 0)}">
                                         <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
                                     </c:when>
                                     <c:otherwise>
-                                        <f:selectItems value="#{ProgramTest.formAssignLayoutUserType.allLayouts}"
+                                        <f:selectItems value="#{FormAssignLayoutUserType.allLayouts}"
                                                        var="layout" 
                                                        itemLabel="Layout #{layout.LAYOUT_NAME}"
                                                        itemValue="#{layout.OBJECTID}"
@@ -36,13 +36,13 @@
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
                             <s2:dropdown id="allUserTypesForAssignment"
-                                         value="#{ProgramTest.formAssignLayoutUserType.usertypeid}">
+                                         value="#{FormAssignLayoutUserType.usertypeid}">
                                 <c:choose>
-                                    <c:when test="#{(ProgramTest.formAssignLayoutUserType.allUserTypes.size() == 0)}">
+                                    <c:when test="#{(FormAssignLayoutUserType.allUserTypes.size() == 0)}">
                                         <f:selectItem itemLabel="No Usertype exist yet"></f:selectItem>
                                     </c:when>
                                     <c:otherwise>
-                                        <f:selectItems value="#{ProgramTest.formAssignLayoutUserType.allUserTypes}"
+                                        <f:selectItems value="#{FormAssignLayoutUserType.allUserTypes}"
                                                        var="userType" 
                                                        itemLabel="Usertype #{userType.USERTYPENAME}"
                                                        itemValue="#{userType.OBJECTID}"
@@ -55,7 +55,7 @@
                 </div> 
                 <div class="form-group">
                     <p:commandButton id="assignLayoutToUserType" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to user type"
-                                     actionListener="#{ProgramTest.formAssignLayoutUserType.assignLayoutToUserType()}"
+                                     actionListener="#{FormAssignLayoutUserType.assignLayoutToUserType()}"
                                      update="@form">
                     </p:commandButton>
 

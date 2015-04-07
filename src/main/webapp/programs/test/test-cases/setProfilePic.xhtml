@@ -19,12 +19,12 @@
                 <div class="form-group">
                     <label>Username:</label>
                     <input type="text" jsf:id="usernameProfilePic" class="form-control"
-                           jsf:value="#{ProgramTest.formTestUser.usernameProfilePic}" />
+                           jsf:value="#{FormTestUser.usernameProfilePic}" />
                 </div>
                 <div class="form-group">
                     <label>Profile pic location:</label>
                     <input type="text" jsf:id="profilePicLocation" class="form-control"
-                           jsf:value="#{ProgramTest.formTestUser.profilePicLocation}" />
+                           jsf:value="#{FormTestUser.profilePicLocation}" />
                 </div>
                 
                 <div class="block-footer">
@@ -36,7 +36,7 @@
                             Set Profile Pic
                         </button>-->
                         <p:commandButton styleClass="btn btn-success" id="setProfilePicButton2" value="Set Profile Pic"
-                                         actionListener="#{ProgramTest.formTestUser.setProfilePicLocation()}"
+                                         actionListener="#{FormTestUser.setProfilePicLocation()}"
                                          >
                             <f:ajax execute="setProfilePicForm" render="setProfilePicForm" ></f:ajax>
                         </p:commandButton>

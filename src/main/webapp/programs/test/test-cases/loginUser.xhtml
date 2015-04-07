@@ -19,7 +19,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">User Name</span>
                             <h:inputText id="username" styleClass="form-control"
-                                         value="#{ProgramTest.formTestUser.loginUsername}" ></h:inputText>
+                                         value="#{FormTestUser.loginUsername}" ></h:inputText>
                             <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
                         </div>
                     </div>
@@ -27,7 +27,7 @@
                         <div class="input-group">
                             <span class="input-group-addon">Password</span>
                             <h:inputSecret id="password" styleClass="form-control"
-                                           value="#{ProgramTest.formTestUser.loginPassword}" ></h:inputSecret>
+                                           value="#{FormTestUser.loginPassword}" ></h:inputSecret>
                             <!--<p:watermark for="usertypeName" value="Usertype Name" ></p:watermark>-->
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="loginUserButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Login User"
-                                         actionListener="#{ProgramTest.formTestUser.loginUser()}"
+                                         actionListener="#{FormTestUser.loginUser()}"
                                          update="@form">
                         </p:commandButton>
 

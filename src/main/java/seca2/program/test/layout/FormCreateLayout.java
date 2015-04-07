@@ -14,8 +14,10 @@ import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutRegistrationException;
 import eds.component.layout.LayoutService;
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Form;
+import seca2.program.test.ProgramTest;
 
 /**
  *
@@ -30,6 +32,8 @@ public class FormCreateLayout extends Form implements Serializable {
     private String viewRoot;
     
     @EJB private LayoutService layoutService;
+    
+    @Inject private ProgramTest programTest;
     
     @PostConstruct
     @Override

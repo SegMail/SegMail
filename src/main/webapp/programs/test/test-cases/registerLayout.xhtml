@@ -20,18 +20,18 @@
                 <div class="form-group">
                     <label>Layout name: </label>
                     <input type="text" jsf:id="layoutNameInput" class="form-control"
-                           jsf:value="#{ProgramTest.formCreateLayout.layoutName}" />
+                           jsf:value="#{FormCreateLayout.layoutName}" />
                 </div>
                 <div class="form-group">
                     <label>View Root: </label>
                     <input type="text" jsf:id="viewRootInput" class="form-control"
-                           jsf:value="#{ProgramTest.formCreateLayout.viewRoot}" />
+                           jsf:value="#{FormCreateLayout.viewRoot}" />
                 </div>
                 
                 <div class="block-footer">
                     <div class="pull-right">
                         <p:commandButton styleClass="btn btn-success" id="registerLayoutButton" value="Register Layout"
-                                         actionListener="#{ProgramTest.formCreateLayout.registerLayout()}"
+                                         actionListener="#{FormCreateLayout.registerLayout()}"
                                          update="@form"
                                          >
                         </p:commandButton>

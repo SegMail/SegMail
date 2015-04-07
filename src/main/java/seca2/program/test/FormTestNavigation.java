@@ -22,6 +22,7 @@ import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
 import eds.entity.user.UserType;
+import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -35,8 +36,7 @@ public class FormTestNavigation implements Serializable{
     @EJB private NavigationService navigationService;
     @EJB private UserService userService;
     
-    private List<MenuItem> allMenuItems = new ArrayList<MenuItem>();
-    private List<UserType> allUserTypes = new ArrayList<UserType>();
+    @Inject private ProgramTest programTest;
     
     //Create MenuItem
     private long selectedParentMenuItemId;
@@ -58,8 +58,6 @@ public class FormTestNavigation implements Serializable{
     
     @PostConstruct
     public void init(){
-        initializeAllMenuItems();
-        initializeAllUserTypes();
         
     }
     
@@ -70,38 +68,6 @@ public class FormTestNavigation implements Serializable{
         selectOneMenuTest.add("third");
     }
     
-    public void initializeAllMenuItems(){
-        try{
-            allMenuItems = navigationService.getAllMenuItems();
-            //who knows whether there is empty list or not?
-        }
-        catch(DBConnectionException dbex){
-            //FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_INFO, "Could not connect to database!", "Please contact admin.");
-            FacesMessenger.constructBootstrapMessage(setupNavigationFormName).appendSummary("Could not connect to database! Click here: ")
-                    .appendSummaryLink("test", "/", "");
-        }
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
-        }
-    }
-    
-    public void initializeAllUserTypes(){
-         try{
-            allUserTypes = userService.getAllUserTypes();
-            //who knows whether there is empty list or not?
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
-        }
-    }
-    
     public void createNewMenuItem(){
         
         try{
@@ -109,7 +75,6 @@ public class FormTestNavigation implements Serializable{
             MenuItem newMenuItem = navigationService.createMenuItem(menuItemName, menuItemURL, selectedParentMenuItemId,prependHTMLTags);
             //if successful, reload the page
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+newMenuItem.getMENU_ITEM_NAME()+" created successfully!", null);
-            this.initializeAllMenuItems();
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
@@ -159,11 +124,7 @@ public class FormTestNavigation implements Serializable{
 
     
     public List<MenuItem> getAllMenuItems() {
-        return allMenuItems;
-    }
-
-    public void setAllMenuItems(List<MenuItem> allMenuItems) {
-        this.allMenuItems = allMenuItems;
+        return this.programTest.getAllMenuItems();
     }
 
     public long getSelectedParentMenuItemId() {
@@ -199,11 +160,7 @@ public class FormTestNavigation implements Serializable{
     }
 
     public List<UserType> getAllUserTypes() {
-        return allUserTypes;
-    }
-
-    public void setAllUserTypes(List<UserType> allUserTypes) {
-        this.allUserTypes = allUserTypes;
+        return this.programTest.getAllUserTypes();
     }
 
     public long getSelectedUserTypeId() {

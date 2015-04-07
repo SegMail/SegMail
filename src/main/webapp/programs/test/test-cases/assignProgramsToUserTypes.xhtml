@@ -17,13 +17,13 @@
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
                         <s2:dropdown id="allUserTypesForAssignment" 
-                                     value="#{ProgramTest.formTestProgram.selectedUserTypeId}">
+                                     value="#{FormTestProgram.selectedUserTypeId}">
                             <c:choose>
-                                <c:when test="#{(ProgramTest.formTestProgram.allUserTypes.size() == 0)}">
+                                <c:when test="#{(FormTestProgram.allUserTypes.size() == 0)}">
                                     <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
                                 </c:when>
                                 <c:otherwise>
-                                    <f:selectItems value="#{ProgramTest.formTestProgram.allUserTypes}"
+                                    <f:selectItems value="#{FormTestProgram.allUserTypes}"
                                                    var="usertype" 
                                                    itemLabel=" #{usertype.USERTYPENAME}"
                                                    itemValue="#{usertype.OBJECTID}"
@@ -39,13 +39,13 @@
                         <!--<h:outputLabel for="allProgramsForAssignment" styleClass="control-label col-md-4">Program: </h:outputLabel>-->
 
                         <s2:dropdown id="allProgramsForAssignment" 
-                                     value="#{ProgramTest.formTestProgram.selectedProgramId}">
+                                     value="#{FormTestProgram.selectedProgramId}">
                             <c:choose>
-                                <c:when test="#{(ProgramTest.formTestProgram.allPrograms.size() == 0)}">
+                                <c:when test="#{(FormTestProgram.allPrograms.size() == 0)}">
                                     <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
                                 </c:when>
                                 <c:otherwise>
-                                    <f:selectItems value="#{ProgramTest.formTestProgram.allPrograms}"
+                                    <f:selectItems value="#{FormTestProgram.allPrograms}"
                                                    var="program" 
                                                    itemLabel="Program  #{program.PROGRAM_NAME}"
                                                    itemValue="#{program.OBJECTID}"
@@ -62,7 +62,7 @@
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="assignProgramAccess" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to user type"
-                                         actionListener="#{ProgramTest.formTestProgram.assignProgramAccess()}"
+                                         actionListener="#{FormTestProgram.assignProgramAccess()}"
                                          update="@form">
                         </p:commandButton>
 

@@ -8,9 +8,11 @@ package seca2.program.test;
 
 import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutService;
+import eds.component.navigation.NavigationService;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.layout.Layout;
+import eds.entity.navigation.MenuItem;
 import eds.entity.program.Program;
 import eds.entity.user.UserType;
 import seca2.program.test.layout.FormCreateLayout;
@@ -40,36 +42,38 @@ public class ProgramTest extends FormGroup implements Serializable {
     
     private final String PROGRAM_NAME = "ProgramTest";
     
-    @Inject private FormTestDB formTestDB;
+    //@Inject private FormTestDB formTestDB;
     @Inject private FormTestNavigation formTestNavigation;
-    @Inject private FormTestUser formTestUser;
-    @Inject private FormTestProgram formTestProgram;
-    @Inject private FormCreateLayout formCreateLayout;
-    @Inject private FormAssignLayoutUsername formAssignLayoutUsername;
-    @Inject private FormAssignLayoutUserType formAssignLayoutUserType;
+    //@Inject private FormTestUser formTestUser;
+    //@Inject private FormTestProgram formTestProgram;
+    //@Inject private FormCreateLayout formCreateLayout;
+    //@Inject private FormAssignLayoutUsername formAssignLayoutUsername;
+    //@Inject private FormAssignLayoutUserType formAssignLayoutUserType;
     //@Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     
     
     @EJB private UserService userService;
     @EJB private LayoutService layoutService;
     @EJB private ProgramService programService;
+    @EJB private NavigationService navigationService;
     
     private List<UserType> allUserTypes = new ArrayList<UserType>();
     private List<Layout> allLayouts;
     private List<Program> allPrograms;
+    private List<MenuItem> allMenuItems;
     
     @PostConstruct
     public void init(){
         initializeAllUserTypes();
         initializeAllLayout();
         initializeAllProgram();
+        initializeAllMenuItems();
     }
     
     public void initializeAllUserTypes(){
          try{
             allUserTypes = userService.getAllUserTypes();
             //who knows whether there is empty list or not?
-            
             
         }
         catch(DBConnectionException dbex){
@@ -101,13 +105,22 @@ public class ProgramTest extends FormGroup implements Serializable {
             FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
-
-    public FormTestDB getFormTestDB() {
-        return formTestDB;
-    }
-
-    public void setFormTestDB(FormTestDB formTestDB) {
-        this.formTestDB = formTestDB;
+    
+    public void initializeAllMenuItems(){
+        try{
+            allMenuItems = navigationService.getAllMenuItems();
+            //who knows whether there is empty list or not?
+        }
+        catch(DBConnectionException dbex){
+            FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_INFO, "Could not connect to database!", "Please contact admin.");
+            //FacesMessenger.constructBootstrapMessage(setupNavigationFormName).appendSummary("Could not connect to database! Click here: ")
+            //        .appendSummaryLink("test", "/", "");
+        }
+        catch(Exception ex){
+            FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, 
+                    ex.getCause().getClass().getSimpleName(), 
+                    ex.getCause().getMessage());
+        }
     }
 
     public FormTestNavigation getFormTestNavigation() {
@@ -118,48 +131,8 @@ public class ProgramTest extends FormGroup implements Serializable {
         this.formTestNavigation = formTestNavigation;
     }
 
-    public FormTestProgram getFormTestProgram() {
-        return formTestProgram;
-    }
-
-    public void setFormTestProgram(FormTestProgram formTestProgram) {
-        this.formTestProgram = formTestProgram;
-    }
-
-    public FormCreateLayout getFormCreateLayout() {
-        return formCreateLayout;
-    }
-
-    public void setFormCreateLayout(FormCreateLayout formCreateLayout) {
-        this.formCreateLayout = formCreateLayout;
-    }
-
     public List<UserType> getAllUserTypes() {
         return allUserTypes;
-    }
-
-    public FormAssignLayoutUsername getFormAssignLayoutUsername() {
-        return formAssignLayoutUsername;
-    }
-
-    public void setFormAssignLayoutUsername(FormAssignLayoutUsername formAssignLayoutUsername) {
-        this.formAssignLayoutUsername = formAssignLayoutUsername;
-    }
-
-    public FormAssignLayoutUserType getFormAssignLayoutUserType() {
-        return formAssignLayoutUserType;
-    }
-
-    public void setFormAssignLayoutUserType(FormAssignLayoutUserType formAssignLayoutUserType) {
-        this.formAssignLayoutUserType = formAssignLayoutUserType;
-    }
-
-    public FormTestUser getFormTestUser() {
-        return formTestUser;
-    }
-
-    public void setFormTestUser(FormTestUser formTestUser) {
-        this.formTestUser = formTestUser;
     }
 
     public List<Layout> getAllLayouts() {
@@ -176,6 +149,14 @@ public class ProgramTest extends FormGroup implements Serializable {
 
     public void setAllPrograms(List<Program> allPrograms) {
         this.allPrograms = allPrograms;
+    }
+
+    public List<MenuItem> getAllMenuItems() {
+        return allMenuItems;
+    }
+
+    public void setAllMenuItems(List<MenuItem> allMenuItems) {
+        this.allMenuItems = allMenuItems;
     }
     
     

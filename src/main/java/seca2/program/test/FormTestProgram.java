@@ -18,6 +18,7 @@ import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.program.Program;
 import eds.entity.user.UserType;
+import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -27,6 +28,8 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @RequestScoped
 @Named("FormTestProgram")
 public class FormTestProgram implements Serializable {
+    
+    @Inject private ProgramTest programTest;
     
     @EJB private ProgramService programService;
     @EJB private UserService userService;
@@ -49,8 +52,7 @@ public class FormTestProgram implements Serializable {
     
     @PostConstruct
     public void init(){
-        this.initializeAllProgram();
-        this.initializeAllUserTypes();
+        
     }
     
     public void createProgram(){
@@ -80,35 +82,7 @@ public class FormTestProgram implements Serializable {
                     ex.getMessage());
         }
     }
-    
-    public void initializeAllProgram(){
-        try{
-            this.allPrograms = programService.getAllPrograms();
-            
-        } catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getClass().getSimpleName(), 
-                    ex.getMessage());
-        }
-    }
-    
-    public void initializeAllUserTypes(){
-        try{
-            this.allUserTypes = userService.getAllUserTypes();
-            
-        } catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getClass().getSimpleName(), 
-                    ex.getMessage());
-        }
-    }
-
+   
     public String getProgramName() {
         return programName;
     }
@@ -142,11 +116,7 @@ public class FormTestProgram implements Serializable {
     }
 
     public List<Program> getAllPrograms() {
-        return allPrograms;
-    }
-
-    public void setAllPrograms(List<Program> allPrograms) {
-        this.allPrograms = allPrograms;
+        return this.programTest.getAllPrograms();
     }
 
     public long getSelectedProgramId() {
@@ -158,11 +128,7 @@ public class FormTestProgram implements Serializable {
     }
 
     public List<UserType> getAllUserTypes() {
-        return allUserTypes;
-    }
-
-    public void setAllUserTypes(List<UserType> allUserTypes) {
-        this.allUserTypes = allUserTypes;
+        return this.programTest.getAllUserTypes();
     }
 
     public long getSelectedUserTypeId() {

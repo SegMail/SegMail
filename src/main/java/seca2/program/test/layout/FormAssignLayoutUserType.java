@@ -16,59 +16,43 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Form;
+import seca2.program.test.ProgramTest;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @RequestScoped
+@Named("FormAssignLayoutUserType")
 public class FormAssignLayoutUserType extends Form {
-    
-    @EJB private LayoutService layoutService;
-    @EJB private UserService userService;
-    
-    private List<Layout> allLayouts;
-    private List<UserType> allUserTypes;
-    
+
+    @Inject
+    private ProgramTest programTest;
+
+    @EJB
+    private LayoutService layoutService;
+    @EJB
+    private UserService userService;
+
     private long usertypeid;
     private long layoutId;
-    
+
     private final String formName = "assignLayoutToUsertypeForm";
-    
+
     @PostConstruct
     @Override
     protected void init() {
         this.FORM_NAME = "assignLayoutToUsername";
-        initializeAllLayout();
-        initializeAllUserType();
     }
-    
-    public void initializeAllLayout(){
-        try{
-            this.allLayouts = this.layoutService.getAllLayouts();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-    
-    public void initializeAllUserType(){
-        try{
-            this.allUserTypes = this.userService.getAllUserTypes();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-    
-    public void assignLayoutToUserType(){
-        try{
+
+    public void assignLayoutToUserType() {
+        try {
             this.layoutService.assignLayout(usertypeid, layoutId);
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Layout has been assigned!",null);
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Layout has been assigned!", null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (LayoutAssignmentException ex) {
@@ -87,11 +71,7 @@ public class FormAssignLayoutUserType extends Form {
     }
 
     public List<Layout> getAllLayouts() {
-        return allLayouts;
-    }
-
-    public void setAllLayouts(List<Layout> allLayouts) {
-        this.allLayouts = allLayouts;
+        return this.programTest.getAllLayouts();
     }
 
     public long getUsertypeid() {
@@ -111,13 +91,8 @@ public class FormAssignLayoutUserType extends Form {
     }
 
     public List<UserType> getAllUserTypes() {
-        return allUserTypes;
+        return this.programTest.getAllUserTypes();
     }
 
-    public void setAllUserTypes(List<UserType> allUserTypes) {
-        this.allUserTypes = allUserTypes;
-    }
-    
-    
-    
+
 }

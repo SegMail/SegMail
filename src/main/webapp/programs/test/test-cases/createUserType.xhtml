@@ -20,18 +20,18 @@
                         <div class="input-group">
                             <span class="input-group-addon">Usertype Name</span>
                             <input type="text" jsf:id="usertypeName" class="form-control"
-                                   jsf:value="#{ProgramTest.formTestUser.userTypeName}" ></input>
+                                   jsf:value="#{FormTestUser.userTypeName}" ></input>
                         </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
                             <textArea jsf:id="usertypeDesc" class="form-control" placeholder="Description"
-                                      jsf:value="#{ProgramTest.formTestUser.description}"></textArea>
+                                      jsf:value="#{FormTestUser.description}"></textArea>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="createUserTypeButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new Usertype"
-                                         actionListener="#{ProgramTest.formTestUser.createUserType()}"
+                                         actionListener="#{FormTestUser.createUserType()}"
                                          update="@form">
                         </p:commandButton>
 

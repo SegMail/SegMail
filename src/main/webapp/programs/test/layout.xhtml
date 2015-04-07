@@ -6,7 +6,8 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
-      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="#{bootstrap.output.templateRoot}"
                     >
 
@@ -15,9 +16,12 @@
                 <h4>#{bootstrap.output.programDescription}</h4>
             </div>
                 
-            <div class="row-fluid">
+            <div jsf:id="everything" class="row-fluid">
                     <!--test DB generation-->
                     <ui:include src="test-cases/DBSetup.xhtml" />
+                    
+                    <!--everything at once-->
+                    <ui:include src="test-cases/testEverything.xhtml" />
 
                     <!--test create usertype-->
                     <ui:include src="test-cases/createUserType.xhtml" />
@@ -57,6 +61,7 @@
                     <!--test register client type-->
                     <ui:include src="test-cases/registerClientType.xhtml" />
                         
+                    
             </div>
             
         </ui:define>

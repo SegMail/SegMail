@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition  template="/programs/test/template/test-case-panel.xhtml">
+        <!--test DB generation-->
+        <ui:define name="panel-heading">
+            For setting up everything
+        </ui:define>
+        <ui:define name="panel-body">
+            <form jsf:id="setupEverythingForm">
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <p:commandButton id="setupEverything" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create all entities."
+                                         update=":everything"
+                                         actionListener="#{FormTestEverything.testEverything()}"></p:commandButton>
+                    </div>
+                </div><br />
+                <p:blockUI id="testEverythingBlock" block="setupEverythingForm" trigger="setupEverythingForm:setupEverything">
+                    <p id="spinner">Please wait while we do what we do best.</p>
+                </p:blockUI>
+            </form>
+        </ui:define>
+    </ui:composition>
+</html>

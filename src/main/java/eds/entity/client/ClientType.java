@@ -41,7 +41,9 @@ public class ClientType extends EnterpriseObject {
 
     @Override
     public void randInit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int randInt = (int) (Math.random()*10000);
+        this.CLIENT_TYPE_NAME = "Client type "+randInt;
+        this.DESCRIPTION = this.CLIENT_TYPE_NAME + " description";
     }
 
     @Override

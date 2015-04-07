@@ -20,21 +20,24 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Form;
+import seca2.program.test.ProgramTest;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @RequestScoped
+@Named("FormAssignLayoutUsername")
 public class FormAssignLayoutUsername extends Form {
+    
+    @Inject private ProgramTest programTest;
     
     @EJB private LayoutService layoutService;
     @EJB private UserService userService;
-    
-    private List<Layout> allLayouts;
     
     private String username;
     private long layoutId;
@@ -43,18 +46,8 @@ public class FormAssignLayoutUsername extends Form {
     @Override
     protected void init() {
         this.FORM_NAME = "assignLayoutToUsername";
-        initializeAllLayout();
     }
     
-    public void initializeAllLayout(){
-        try{
-            this.allLayouts = this.layoutService.getAllLayouts();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage().getClass().getSimpleName(), ex.getMessage());
-        }
-    }
     
     public void assignLayoutToUsername(){
         try{
@@ -92,11 +85,7 @@ public class FormAssignLayoutUsername extends Form {
     }
 
     public List<Layout> getAllLayouts() {
-        return allLayouts;
-    }
-
-    public void setAllLayouts(List<Layout> allLayouts) {
-        this.allLayouts = allLayouts;
+        return this.programTest.getAllLayouts();
     }
     
     

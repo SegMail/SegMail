@@ -39,21 +39,21 @@
                             <div class="input-group">
                                 <span class="input-group-addon">User Name</span>
                                 <h:inputText id="username" styleClass="form-control"
-                                             value="#{ProgramTest.formTestUser.username}" ></h:inputText>
+                                             value="#{FormTestUser.username}" ></h:inputText>
                             </div>
                     </div>
                     <div class="col-md-12 col-xs-12 form-group">
                             <div class="input-group">
                                 <span class="input-group-addon">Password</span>
                                 <h:inputSecret id="password" styleClass="form-control"
-                                               value="#{ProgramTest.formTestUser.password}" ></h:inputSecret>
+                                               value="#{FormTestUser.password}" ></h:inputSecret>
                             </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="createUserButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create new User"
-                                         actionListener="#{ProgramTest.formTestUser.createUser()}"
+                                         actionListener="#{FormTestUser.createUser()}"
                                          update="@form">
                         </p:commandButton>
 

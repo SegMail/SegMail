@@ -17,6 +17,7 @@ import eds.component.data.DBConnectionException;
 import eds.utilities.EntityExplorer;
 import eds.component.data.HibernateEMServices;
 import java.util.ArrayList;
+import javax.inject.Named;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -25,6 +26,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
  *
  * @author KH
  */
+@Named("FormTestDB")
 @RequestScoped
 public class FormTestDB implements Serializable {
 
