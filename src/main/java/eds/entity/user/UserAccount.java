@@ -20,7 +20,7 @@ import javax.persistence.TemporalType;
 @Entity
 @Table(name="USERACCOUNT")
 @TableGenerator(name="USERACCOUNT_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
-public class UserAccount extends EnterpriseData {
+public class UserAccount extends EnterpriseData<User> {
     
     private String USERNAME;
     private String PASSWORD;

@@ -7,8 +7,10 @@ package eds.component.client;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
+import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.entity.client.ClientType;
+import eds.entity.user.User;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -27,6 +29,7 @@ import org.hibernate.exception.GenericJDBCException;
 public class ClientService {
     
     @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private UserService userService;
     
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
@@ -39,6 +42,44 @@ public class ClientService {
             
             Client result = this.genericEnterpriseObjectService.getEnterpriseObjectById(clientid, Client.class);
             return result;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public ClientType getClientTypeById(long clienttypeid) throws DBConnectionException{
+        try{
+            
+            ClientType result = this.genericEnterpriseObjectService.getEnterpriseObjectById(clienttypeid, ClientType.class);
+            
+            return result;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Client getClientByClientname(String clientname) throws DBConnectionException{
+        try{
+            //Try the shorter JPA way
+            //Client result = em.find(Client.class, clientid);
+            
+            List<Client> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(clientname, Client.class);
+            
+            return (results == null || results.size() <= 0) ? null : results.get(0);
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -90,6 +131,66 @@ public class ClientService {
             newClientType.setDESCRIPTION(clienttypedesc);
             
             this.em.persist(newClientType);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void registerClient(long clienttypeid, String clientname)
+        throws DBConnectionException, ClientRegistrationException{
+        try{
+            if(clientname == null || clientname.isEmpty())
+                throw new ClientRegistrationException("Client name cannot be empty.");
+            
+            Client existingClient = this.getClientByClientname(clientname);
+            
+            if(existingClient != null)
+                throw new ClientRegistrationException("Client "+clientname+" already exist.");
+            
+            ClientType clientType = this.getClientTypeById(clienttypeid);
+            
+            Client newClient = new Client();
+            newClient.setCLIENT_NAME(clientname);
+            newClient.setCLIENTTYPE(clientType);
+            
+            em.persist(newClient);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void registerClientForObject(EnterpriseObject, String clientname)
+        throws DBConnectionException, ClientRegistrationException{
+        try{
+            if(clientname == null || clientname.isEmpty())
+                throw new ClientRegistrationException("Client name cannot be empty.");
+            
+            Client existingClient = this.getClientByClientname(clientname);
+            
+            if(existingClient != null)
+                throw new ClientRegistrationException("Client "+clientname+" already exist.");
+            
+            ClientType clientType = this.getClientTypeById(clienttypeid);
+            
+            Client newClient = new Client();
+            newClient.setCLIENT_NAME(clientname);
+            newClient.setCLIENTTYPE(clientType);
+            
+            em.persist(newClient);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

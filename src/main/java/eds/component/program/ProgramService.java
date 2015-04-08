@@ -137,12 +137,12 @@ public class ProgramService implements Serializable {
             programAccess1.setSOURCE(program);
             programAccess1.setTARGET(userType);
 
-            ProgramAssignment programAccess2 = new ProgramAssignment();
-            programAccess2.setSOURCE(userType);
-            programAccess2.setTARGET(program);
+            //ProgramAssignment programAccess2 = new ProgramAssignment();
+            //programAccess2.setSOURCE(userType);
+            //programAccess2.setTARGET(program);
 
             em.persist(programAccess1);
-            em.persist(programAccess2);
+            //em.persist(programAccess2);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -326,15 +326,14 @@ public class ProgramService implements Serializable {
     public List<ProgramAssignment> getProgramAssignmentsForUserType(long usertypeid)
             throws DBConnectionException{
         try{
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<ProgramAssignment> criteria = builder.createQuery(ProgramAssignment.class);
             Root<ProgramAssignment> sourceEntity = criteria.from(ProgramAssignment.class); //FROM ProgramAssignment
             
             criteria.select(sourceEntity); // SELECT *
-            criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.SOURCE), usertypeid));
+            criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.SOURCE), usertypeid));*/
             
-            List<ProgramAssignment> result = em.createQuery(criteria)
-                    .getResultList();
+            List<ProgramAssignment> result = this.genericEntepriseObjectService.getRelationshipsForTargetObject(usertypeid, ProgramAssignment.class);
             
             return result;
         } catch (PersistenceException pex) {

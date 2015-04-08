@@ -127,14 +127,6 @@ public class ProgramTest extends FormGroup implements Serializable {
         }
     }
 
-    public FormTestNavigation getFormTestNavigation() {
-        return formTestNavigation;
-    }
-
-    public void setFormTestNavigation(FormTestNavigation formTestNavigation) {
-        this.formTestNavigation = formTestNavigation;
-    }
-
     public List<UserType> getAllUserTypes() {
         return allUserTypes;
     }

@@ -10,6 +10,7 @@ import eds.entity.EnterpriseObject_;
 import TreeAPI.TreeBranch;
 import TreeAPI.TreeBuilder;
 import TreeAPI.TreeNode;
+import eds.component.GenericEnterpriseObjectService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class NavigationService implements Serializable {
 
     @EJB
     private UserService userService;
+    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
     
     @PersistenceContext(name="HIBERNATE")
     private EntityManager em;
@@ -65,7 +67,7 @@ public class NavigationService implements Serializable {
             //1. Get all MenuItemAccess by userType ID.
             //This uses EnterpriseRelationship to pull both MenuItem and UserType objects instead of using MenuItem to pull
             //both MenuItemAccess and UserType. This is because there is no mapping for EnterpriseObject->EnterpriseRelationship
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class);
             Root<MenuItemAccess> menuItem = criteria.from(MenuItemAccess.class);
             criteria.select(menuItem);
@@ -76,7 +78,9 @@ public class NavigationService implements Serializable {
             List<MenuItemAccess> results = em.createQuery(criteria)
                     //.setFirstResult(0)
                     //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
-                    .getResultList();
+                    .getResultList();*/
+            
+            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForSourceObject(userTypeId, MenuItemAccess.class);
             
             /**
              * Aborted as it is too complex to query all accessible MenuItems first then build the
@@ -86,8 +90,8 @@ public class NavigationService implements Serializable {
             List<TreeBranch> menuItems = new ArrayList<>();
             System.out.println("Before sort...");
             for(MenuItemAccess mia:results){
-                menuItems.add((MenuItem) mia.getTARGET());
-                System.out.println("MenuItem: "+mia.getTARGET()+"    Parent: "+((MenuItem)mia.getTARGET()).getPARENT_MENU_ITEM());
+                menuItems.add(mia.getSOURCE());
+                System.out.println("MenuItem: "+mia.getSOURCE()+"    Parent: "+mia.getSOURCE().getPARENT_MENU_ITEM());
             }
             
             List<TreeNode> sortedRoots = TreeBuilder.buildTreeByParentBruteForce(menuItems);
@@ -181,7 +185,7 @@ public class NavigationService implements Serializable {
     public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId) throws AssignMenuItemAccessException, DBConnectionException {
         
         try{
-            //check if userType already has access to menuItem
+            /*//check if userType already has access to menuItem
             CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class); //AS criteria
             Root<MenuItemAccess> menuItemAccess = criteria.from(MenuItemAccess.class); //FROM MenuItemAccess
@@ -194,12 +198,13 @@ public class NavigationService implements Serializable {
                            builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)));  // AND MenuItemAccess.TARGET.OBJECTID = userTypeId
             
             List<MenuItemAccess> results = em.createQuery(criteria)
-                    .getResultList();
+                    .getResultList();*/
+            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userTypeId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
-                throw new AssignMenuItemAccessException("Menu Item "+first.getTARGET().getOBJECT_NAME()+" is already assigned "
-                        + "to UserType "+first.getSOURCE().getOBJECT_NAME());
+                throw new AssignMenuItemAccessException("Menu Item "+first.getSOURCE().getMENU_ITEM_NAME()+" is already assigned "
+                        + "to UserType "+first.getTARGET().getUSERTYPENAME());
             }
             
             //get menuItem first
@@ -213,21 +218,21 @@ public class NavigationService implements Serializable {
                 throw new AssignMenuItemAccessException("UserType with ID "+userTypeId+" could not be found!");
             
             //Create the MenuItemAccess objects (bi-directional)
-            MenuItemAccess assignment1 = new MenuItemAccess();
-            assignment1.setSOURCE(assignUserType);
-            assignment1.setTARGET(assignMenuItem);
+            //MenuItemAccess assignment1 = new MenuItemAccess();
+            //assignment1.setSOURCE(assignUserType);
+            //assignment1.setTARGET(assignMenuItem);
             
             MenuItemAccess assignment2 = new MenuItemAccess();
             assignment2.setSOURCE(assignMenuItem);
             assignment2.setTARGET(assignUserType);
             
             //em.getTransaction().begin();
-            em.persist(assignment1);
+            //em.persist(assignment1);
             em.persist(assignment2);
             //em.getTransaction().commit();
             
             List<MenuItemAccess> biRel = new ArrayList<MenuItemAccess>();
-            biRel.add(assignment1);
+            //biRel.add(assignment1);
             biRel.add(assignment2);
             
             return biRel;

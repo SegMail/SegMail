@@ -5,6 +5,7 @@
  */
 package eds.entity.layout;
 
+import eds.entity.EnterpriseObject;
 import eds.entity.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,7 +17,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="LAYOUT_ASSIGNMENT")
-public class LayoutAssignment extends EnterpriseRelationship{
+public class LayoutAssignment extends EnterpriseRelationship<Layout,EnterpriseObject>{
     
     private int PRIORITY;
 

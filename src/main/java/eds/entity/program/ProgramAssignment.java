@@ -7,9 +7,9 @@
 package eds.entity.program;
 
 import eds.entity.EnterpriseRelationship;
+import eds.entity.user.User;
+import eds.entity.user.UserType;
 import javax.persistence.Entity;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -18,7 +18,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="PROGRAM_ASSIGNMENT")
-public class ProgramAssignment extends EnterpriseRelationship {
+public class ProgramAssignment extends EnterpriseRelationship<Program,UserType> {
 
     //Any additional attributes to be maintained for this relationship?
     //protected String REL_TYPE = "MENU_ITEM_ACCESS"; no need to redefine it here

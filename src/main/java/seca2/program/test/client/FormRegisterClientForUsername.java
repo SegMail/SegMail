@@ -5,11 +5,14 @@
  */
 package seca2.program.test.client;
 
+import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientService;
 import eds.component.client.ClientTypeRegistrationException;
 import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutAssignmentException;
+import eds.component.user.UserService;
 import eds.entity.client.ClientType;
+import eds.entity.user.User;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -30,6 +33,7 @@ public class FormRegisterClientForUsername {
     @Inject private ProgramTest programTest;
     
     @EJB private ClientService clientService;
+    @EJB private UserService userService;
     
     private final String formName = "registerClientForUsernameForm";
     
@@ -38,7 +42,10 @@ public class FormRegisterClientForUsername {
 
     public void registerClientForUsername(){
         try{
-            this.clientService.;
+            
+            
+            
+            User user = userService.getUserByUsername(username);
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Client registered successfully.", null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");

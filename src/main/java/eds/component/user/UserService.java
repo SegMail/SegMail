@@ -309,6 +309,26 @@ public class UserService extends Service {
             throw ex;
         }
     }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public User getUserByUsername(String username) throws DBConnectionException{
+        try {
+            UserAccount userAccount = this.getUserAccountByUsername(username);
+            
+            if(userAccount == null)
+                return null;
+
+            return userAccount.getOWNER();
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
 
     /**
      * Returns the UserAccount object if authentication passes. If
