@@ -26,7 +26,7 @@ import javax.persistence.Transient;
 @Table(name="MENUITEM")
 @DiscriminatorValue("MENUITEM")
 public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
-    
+
     public static enum TARGET_TYPE{
         URL,
         PROGRAM
@@ -91,6 +91,10 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         this.PREPEND_TAGS = PREPEND_TAGS;
     }
 
+    @Override
+    public String getAlias() {
+        return this.MENU_ITEM_NAME;
+    }
     
     
     @Override
@@ -103,11 +107,11 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    @PrePersist
+    /*@PrePersist
     @PreUpdate
     public void PrePersist(){
         this.OBJECT_NAME = this.MENU_ITEM_NAME;
-    }
+    }*/
 
     @Transient
     @Override

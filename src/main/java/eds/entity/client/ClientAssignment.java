@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.subscription;
+package eds.entity.client;
 
 import eds.entity.EnterpriseObject;
+import eds.entity.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -14,13 +15,9 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="SUBSCRIBER")
-public class Subscriber extends EnterpriseObject {
-    
-    private String EMAIL;
-    private String FIRSTNAME;
-    private String LASTNAME;
-    
+@Table(name="CLIENT_ASSIGNMENT")
+public class ClientAssignment extends EnterpriseRelationship<Client,EnterpriseObject> {
+
     @Override
     public void randInit() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -29,11 +26,6 @@ public class Subscriber extends EnterpriseObject {
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String getAlias() {
-        return this.EMAIL;
     }
     
 }

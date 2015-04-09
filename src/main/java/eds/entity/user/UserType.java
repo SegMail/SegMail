@@ -78,4 +78,9 @@ public class UserType extends EnterpriseObject {
     public void PrePersist(){
         this.OBJECT_NAME = this.USERTYPENAME;
     }
+
+    @Override
+    public String getAlias() {
+        return this.USERTYPENAME;
+    }
 }

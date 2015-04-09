@@ -47,5 +47,10 @@ public class Layout extends EnterpriseObject {
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public String getAlias() {
+        return this.LAYOUT_NAME;
+    }
     
 }

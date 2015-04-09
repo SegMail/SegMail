@@ -113,16 +113,16 @@ public class LayoutService implements Serializable {
                 throw new LayoutAssignmentException("A Layout is already assigned to this UserType!");
             
 
-            LayoutAssignment layoutAssignment1 = new LayoutAssignment();
+            //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
             LayoutAssignment layoutAssignment2 = new LayoutAssignment();
 
-            layoutAssignment1.setSOURCE(user);
-            layoutAssignment1.setTARGET(layout);
+            //layoutAssignment1.setSOURCE(user);
+            //layoutAssignment1.setTARGET(layout);
 
             layoutAssignment2.setTARGET(user);
             layoutAssignment2.setSOURCE(layout);
 
-            em.persist(layoutAssignment1);
+            //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);
 
         } catch (PersistenceException pex) {
@@ -158,16 +158,16 @@ public class LayoutService implements Serializable {
             if(existingRels1.size() > 0 || existingRels2.size() > 0)
                 throw new LayoutAssignmentException("A Layout is already assigned to this UserType!");
 
-            LayoutAssignment layoutAssignment1 = new LayoutAssignment();
+            //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
             LayoutAssignment layoutAssignment2 = new LayoutAssignment();
 
-            layoutAssignment1.setSOURCE(usertype);
-            layoutAssignment1.setTARGET(layout);
+            //layoutAssignment1.setSOURCE(usertype);
+            //layoutAssignment1.setTARGET(layout);
 
             layoutAssignment2.setTARGET(usertype);
             layoutAssignment2.setSOURCE(layout);
 
-            em.persist(layoutAssignment1);
+            //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);
 
         } catch (PersistenceException pex) {
@@ -187,36 +187,35 @@ public class LayoutService implements Serializable {
         try {
             //Try the new GenericEnterpriseObjectService!
             //Check if client exists
-            EnterpriseObject clientEO = genericEOService.getEnterpriseObjectById(clientid);
-            if(clientEO == null || !(clientEO instanceof Client))
+            Client clientEO = genericEOService.getEnterpriseObjectById(clientid,Client.class);
+            if(clientEO == null)
                 throw new LayoutAssignmentException("Client "+clientid+" does not exist.");
             
             //Check if client exists
-            EnterpriseObject layoutEO = genericEOService.getEnterpriseObjectById(layoutid);
-            if(layoutEO == null || !(layoutEO instanceof Layout))
+            Layout layoutEO = genericEOService.getEnterpriseObjectById(layoutid,Layout.class);
+            if(layoutEO == null)
                 throw new LayoutAssignmentException("Layout "+layoutid+" does not exist.");
             
             //Check if the assignment already exists
-            List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(clientid, LayoutAssignment.class);
+            //List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(layoutid, LayoutAssignment.class);
             List<LayoutAssignment> existingRels2 = genericEOService.getRelationshipsForTargetObject(clientid, LayoutAssignment.class);
             
-            if(existingRels1.size() > 0 || existingRels2.size() > 0)
+            if(existingRels2.size() > 0)
                 throw new LayoutAssignmentException("Assignment already exists!");
             
             //If all validations are passed, create the bidirectional relationship
             LayoutAssignment layoutAssignment1 = new LayoutAssignment();
-            LayoutAssignment layoutAssignment2 = new LayoutAssignment();
+            //LayoutAssignment layoutAssignment2 = new LayoutAssignment();
 
-            layoutAssignment1.setSOURCE(clientEO);
-            layoutAssignment1.setTARGET(layoutEO);
+            layoutAssignment1.setSOURCE(layoutEO);
+            layoutAssignment1.setTARGET(clientEO);
 
-            layoutAssignment2.setTARGET(clientEO);
-            layoutAssignment2.setSOURCE(layoutEO);
+            //layoutAssignment2.setTARGET(clientEO);
+            //layoutAssignment2.setSOURCE(layoutEO);
 
             em.persist(layoutAssignment1);
-            em.persist(layoutAssignment2);
+            //em.persist(layoutAssignment2);
             
-
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -251,23 +250,23 @@ public class LayoutService implements Serializable {
                 throw new LayoutAssignmentException("Object "+objectid+" does not exist.");
             
             //Check if the assignment already exists
-            List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(objectid,LayoutAssignment.class);
+            //List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(objectid,LayoutAssignment.class);
             List<LayoutAssignment> existingRels2 = genericEOService.getRelationshipsForTargetObject(objectid,LayoutAssignment.class);
             
-            if(existingRels1.size() > 0 || existingRels2.size() > 0)
+            if(existingRels2.size() > 0)
                 throw new LayoutAssignmentException("Assignment already exists!");
             
             //If all validations are passed, create the bidirectional relationship
-            LayoutAssignment layoutAssignment1 = new LayoutAssignment();
+            //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
             LayoutAssignment layoutAssignment2 = new LayoutAssignment();
 
-            layoutAssignment1.setSOURCE(clientEO);
-            layoutAssignment1.setTARGET(layoutEO);
+            //layoutAssignment1.setSOURCE(clientEO);
+            //layoutAssignment1.setTARGET(layoutEO);
 
             layoutAssignment2.setTARGET(clientEO);
             layoutAssignment2.setSOURCE(layoutEO);
 
-            em.persist(layoutAssignment1);
+            //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);
             
 

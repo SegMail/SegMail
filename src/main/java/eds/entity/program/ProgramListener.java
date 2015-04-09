@@ -17,10 +17,7 @@ public class ProgramListener {
     @PrePersist
     @PreUpdate
     public void PrePersistUpdate(Program program){
-        this.replicateObjectName(program);
+        
     }
     
-    public void replicateObjectName(Program program){
-        program.setOBJECT_NAME(program.getPROGRAM_NAME());
-    }
 }

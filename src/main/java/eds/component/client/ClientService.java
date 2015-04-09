@@ -8,6 +8,7 @@ package eds.component.client;
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
+import eds.entity.EnterpriseObject;
 import eds.entity.client.Client;
 import eds.entity.client.ClientType;
 import eds.entity.user.User;
@@ -173,24 +174,30 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerClientForObject(EnterpriseObject, String clientname)
+    public void registerClientForObject(long enterpriseobjectid, long clienttypeid)
         throws DBConnectionException, ClientRegistrationException{
         try{
-            if(clientname == null || clientname.isEmpty())
-                throw new ClientRegistrationException("Client name cannot be empty.");
             
-            Client existingClient = this.getClientByClientname(clientname);
+            EnterpriseObject existingObject = this.genericEnterpriseObjectService.getEnterpriseObjectById(enterpriseobjectid);
             
-            if(existingClient != null)
-                throw new ClientRegistrationException("Client "+clientname+" already exist.");
+            if(existingObject == null)
+                throw new ClientRegistrationException("Object "+enterpriseobjectid+" doesn not exist.");
             
             ClientType clientType = this.getClientTypeById(clienttypeid);
             
+            if(clientType == null)
+                throw new ClientRegistrationException("Client type "+clienttypeid+" doesn not exist.");
+            
+            Client existingClient = this.getClientByClientname(existingObject.getAlias());
+            
+            if(existingClient != null)
+                throw new ClientRegistrationException("Client "+existingClient.getAlias()+" already exist.");
+            
             Client newClient = new Client();
-            newClient.setCLIENT_NAME(clientname);
+            newClient.setCLIENT_NAME(existingObject.getAlias());
             newClient.setCLIENTTYPE(clientType);
             
-            em.persist(newClient);
+            this.em.persist(newClient);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

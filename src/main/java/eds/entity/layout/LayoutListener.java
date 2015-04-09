@@ -18,10 +18,6 @@ public class LayoutListener {
     @PrePersist
     @PreUpdate
     public void PrePersistUpdate(Layout layout){
-        this.replicateObjectName(layout);
-    }
-    
-    public void replicateObjectName(Layout layout){
-        layout.setOBJECT_NAME(layout.getLAYOUT_NAME());
+        
     }
 }

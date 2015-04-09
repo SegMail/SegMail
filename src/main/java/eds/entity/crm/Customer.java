@@ -6,9 +6,7 @@
 package eds.entity.crm;
 
 import eds.entity.EnterpriseObject;
-import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -28,6 +26,11 @@ public class Customer extends EnterpriseObject {
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getAlias() {
+        return "";
     }
     
 }
