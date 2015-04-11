@@ -21,7 +21,7 @@ import javax.persistence.Table;
 //@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 //@DiscriminatorColumn(name="CONNECTION_TYPE")
 //How do I store subtype (LOCAL, REMOTE)?
-public abstract class AbstractListConnection extends EnterpriseData {
+public abstract class AbstractListConnection extends EnterpriseData<SubscriptionList> {
     
     private String HOSTNAME;
     private String PORT;

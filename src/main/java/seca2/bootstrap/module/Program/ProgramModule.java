@@ -17,8 +17,6 @@ import eds.component.program.ProgramService;
 import eds.entity.program.Program;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -42,6 +40,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Inject
     private UserContainer userContainer;
+    @Inject
+    private ProgramContainer programContainer;
 
     @PostConstruct
     public void init() {
@@ -65,29 +65,35 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             if (inputContext.getProgram() == null || inputContext.getProgram().isEmpty()) {
                 String defaultProgram = "";
                 //FacesContext fc = (FacesContext) inputContext.getFacesContext();
-                
-                
+
                 //Rightfully, we should check if the user has a default programName configured, if yes, we
                 //should get it before we move on to the default programName.
                 //- User
                 //- UserType
                 //- Site/Client
-
                 //Actually, even in the production environment, there can also be a default programName set.
                 //[20150328] There is no need to restrict this feature to the development stage
                 //if (fc.getApplication().getProjectStage().equals(ProjectStage.Development)) {
-                    defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
-                    inputContext.setProgram(defaultProgram);
+                defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
+                inputContext.setProgram(defaultProgram);
                 //}
-                
+
                 //If totally no default programName is found, throw exception
-                if(defaultProgram.isEmpty())
+                if (defaultProgram.isEmpty()) {
                     throw new Exception("No default program found.");
-                
+                }
+
                 //Assign default programName
                 inputContext.setProgram(defaultProgram);
             }
             String programName = inputContext.getProgram();
+            
+            //Determine if can skip the rest of the processing
+            /*if(this.canSkip(inputContext, outputContext)){
+                programContainer.visitNewProgram(programName);
+                return true;
+            }*/
+            
 
             //2. Find the viewRoot of the programName, which cannot be empty by now
             //- If not found, throw exception.
@@ -99,42 +105,44 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             String programTitle = program == null ? null : program.getDISPLAY_TITLE();
             String programDesc = program == null ? null : program.getDISPLAY_DESCRIPTION();
             String defaultViewRoot = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_VIEWROOT");
-            
-            if(viewRoot == null || viewRoot.isEmpty()){
-                if(defaultViewRoot == null || defaultViewRoot.isEmpty())
-                    throw new Exception("View root location is not found for program "+programName+".");
-                
+
+            if (viewRoot == null || viewRoot.isEmpty()) {
+                if (defaultViewRoot == null || defaultViewRoot.isEmpty()) {
+                    throw new Exception("View root location is not found for program " + programName + ".");
+                }
+
                 viewRoot = defaultViewRoot;
             }
-            
+
             //3. Check the user's authorization.
             //By this time, the programName name and viewRoot cannot be empty
             //- If not authorized, show the not authorized view root.
             //- If found, continue.
-            
             //To check authorization, you need to first know if the person is authorized
             //By passing through the UserModule, the user should already been authorized
             boolean authorized = false;
-            if(this.userContainer.getUserType() != null){
+            if (this.userContainer.getUserType() != null) {
                 authorized = this.programService.checkProgramAuthForUserType(userContainer.getUserType().getOBJECTID(), programName);
             }
-            
+
             //4. Decide what to show
-            if(!authorized && 
-                    //If the SETUP flag is set in web.xml but user is not authorized, show the default viewroot anyway
-                    fc.getExternalContext().getInitParameter("SETUP").compareToIgnoreCase("true") != 0){
-                
+            if (!authorized
+                    && //If the SETUP flag is set in web.xml but user is not authorized, show the default viewroot anyway
+                    fc.getExternalContext().getInitParameter("SETUP").compareToIgnoreCase("true") != 0) {
+
                 String noAuthView = fc.getExternalContext().getInitParameter("NO_AUTHORIZATION_VIEWROOT");
                 outputContext.setPageRoot(noAuthView);
+                programContainer.visitNewProgram(programName);
                 return true;
             }
-            
+
             //authenticated
             outputContext.setPageRoot(viewRoot);
             outputContext.setProgramTitle(programTitle);
             outputContext.setProgramDescription(programDesc);
+            programContainer.visitNewProgram(programName);
             return true;
-                
+
         } catch (DBConnectionException dbex) {
             outputContext.setErrorMessage(dbex.getMessage());
             StringWriter sw = new StringWriter();
@@ -144,7 +152,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             outputContext.setPageRoot(defaultSites.ERROR_PAGE);
 
             return false;
-            
+
         } catch (Exception ex) {
             outputContext.setErrorMessage(ex.getMessage());
             StringWriter sw = new StringWriter();
@@ -275,4 +283,18 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     }
 
     /*=================Helper methods=====================*/
+    private boolean canSkip(BootstrapInput inputContext, BootstrapOutput outputContext) {
+        //If the following conditions are met:
+        //- Previous request and current request are the same,
+        boolean sameRequest = (programContainer.getLastProgram() == null) ? false
+                : programContainer.getLastProgram().equalsIgnoreCase(inputContext.getProgram());
+        //- UserContainer isLoggedIn(),
+        boolean isLoggedIn = userContainer.isLoggedIn();
+        //- PageRoot is not empty
+        boolean pageRootExists = (outputContext.getPageRoot() == null) ? false
+                : (!outputContext.getPageRoot().isEmpty());
+        //return results;
+        return sameRequest && isLoggedIn && pageRootExists;
+
+    }
 }

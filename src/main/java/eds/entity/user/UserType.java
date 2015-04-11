@@ -19,7 +19,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="USERTYPE")
-@DiscriminatorValue("USERTYPE")
 public class UserType extends EnterpriseObject {
     
     private String USERTYPENAME;
@@ -80,7 +79,7 @@ public class UserType extends EnterpriseObject {
     }
 
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.USERTYPENAME;
     }
 }

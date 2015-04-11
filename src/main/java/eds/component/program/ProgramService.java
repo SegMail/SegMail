@@ -302,7 +302,7 @@ public class ProgramService implements Serializable {
             criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.TARGET), programid));
             */
             
-            List<EnterpriseRelationship> results = this.genericEntepriseObjectService.getRelationshipsForObjects(usertypeid, programid);
+            List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForObjects(programid,usertypeid,ProgramAssignment.class);
             
             /*List<ProgramAssignment> results = em.createQuery(criteria)
                     .getResultList();*/

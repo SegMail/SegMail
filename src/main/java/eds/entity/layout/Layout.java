@@ -16,7 +16,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="LAYOUT")
-@EntityListeners(LayoutListener.class)
+//@EntityListeners(LayoutListener.class)
 public class Layout extends EnterpriseObject {
 
     private String LAYOUT_NAME;
@@ -49,7 +49,7 @@ public class Layout extends EnterpriseObject {
     }
 
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.LAYOUT_NAME;
     }
     

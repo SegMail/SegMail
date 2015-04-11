@@ -54,7 +54,7 @@ public class Client extends EnterpriseObject {
     }
 
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.CLIENT_NAME;
     }
     

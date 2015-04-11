@@ -94,7 +94,7 @@ public class Program extends EnterpriseObject{
     }
 
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.PROGRAM_NAME;
     }
 

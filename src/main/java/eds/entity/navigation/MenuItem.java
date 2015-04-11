@@ -8,13 +8,10 @@ package eds.entity.navigation;
 
 import eds.entity.EnterpriseObject;
 import TreeAPI.TreeBranch;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -24,7 +21,6 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="MENUITEM")
-@DiscriminatorValue("MENUITEM")
 public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
 
     public static enum TARGET_TYPE{
@@ -92,7 +88,7 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
     }
 
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.MENU_ITEM_NAME;
     }
     

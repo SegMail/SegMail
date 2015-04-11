@@ -98,7 +98,6 @@ public class UserModule extends BootstrapModule implements Serializable {
         boolean isAuthenticated = this.isAuthenticated(this.userContainer);
         
         String program = inputContext.getProgram();
-        System.out.println("Requested for program: "+program); //debug
         this.userContainer.setLastURL(program);
         
         //If it's not the same session, meaning it could be the first vist, or 
@@ -110,7 +109,8 @@ public class UserModule extends BootstrapModule implements Serializable {
             //Regenerate a session object and store the session ID.
             session = (HttpSession) fc.getExternalContext().getSession(true);
             this.userContainer.setSessionId(session.getId());
-            
+            //Set the last URL, because user is redirected to the login page now
+            //this.userContainer.setLastURL(program);
             //Don't forget to return false to break the bootstrapping chain!
             return false;
         }

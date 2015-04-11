@@ -5,11 +5,13 @@
  */
 package seca2.program.test.client;
 
+import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientRegistrationException;
 import eds.component.client.ClientService;
 import eds.component.client.ClientTypeRegistrationException;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
+import eds.entity.EnterpriseObject;
 import eds.entity.client.ClientType;
 import eds.entity.user.User;
 import java.util.List;
@@ -25,27 +27,33 @@ import seca2.program.test.ProgramTest;
  *
  * @author LeeKiatHaw
  */
-@Named("FormRegisterClientType")
+@Named("FormRegisterClientForObjectname")
 @RequestScoped
-public class FormRegisterClientForUsername {
+public class FormRegisterClientForObjectname {
     
     @Inject private ProgramTest programTest;
     
     @EJB private ClientService clientService;
-    @EJB private UserService userService;
+    //@EJB private UserService userService;
+    @EJB private GenericEnterpriseObjectService genericDBService;
     
-    private final String formName = "registerClientForUsernameForm";
+    private final String formName = "registerClientForm";
     
     private long clientTypeId;
-    private String username;
+    private String objectname;
 
     public void registerClientForUsername(){
         try{
             
-            User user = userService.getUserByUsername(username);
-            this.clientService.registerClientForObject(user.getOBJECTID(), clientTypeId);
+            List<EnterpriseObject> objects = this.genericDBService.getEnterpriseObjectByName(objectname);
+            if(objects == null || objects.size() <= 0)
+                throw new Exception("Object "+objectname+" is not found!");
             
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Client registered successfully.", null);
+            //Only chose the first object found
+            EnterpriseObject object = objects.get(0);
+            this.clientService.registerClientForObject(object, clientTypeId);
+            
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Client registered for object successfully.", null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (ClientRegistrationException ex) {
@@ -63,12 +71,12 @@ public class FormRegisterClientForUsername {
         this.clientTypeId = clientTypeId;
     }
 
-    public String getUsername() {
-        return username;
+    public String getObjectname() {
+        return objectname;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setObjectname(String objectname) {
+        this.objectname = objectname;
     }
 
     public List<ClientType> getAllClientTypes(){

@@ -52,7 +52,7 @@ public class ClientType extends EnterpriseObject {
     }
 
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.CLIENT_TYPE_NAME;
     }
     

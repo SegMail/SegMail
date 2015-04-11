@@ -6,8 +6,6 @@ import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.EnterpriseObject;
-import eds.entity.EnterpriseRelationship;
-import eds.entity.EnterpriseRelationship_;
 import eds.entity.client.Client;
 import eds.entity.layout.Layout;
 import eds.entity.layout.LayoutAssignment;
@@ -27,7 +25,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 
@@ -358,15 +355,12 @@ public class LayoutService implements Serializable {
             //Get only the first matching program
             //Program program = programs.get(0);
             List<LayoutAssignment> assignments = 
-                    this.genericEOService.getRelationshipsForSourceObject(program.getOBJECTID(), LayoutAssignment.class);
+                    this.genericEOService.getRelationshipsForTargetObject(program.getOBJECTID(), LayoutAssignment.class);
             //If no results returned, return null
             if(assignments == null || assignments.size() <= 0)
                 return null;
-            //If assigned target is not a Layout, return null
-            if(!(assignments.get(0).getTARGET() instanceof Layout))
-                return null;
             
-            return (Layout) assignments.get(0).getTARGET();
+            return assignments.get(0).getSOURCE();
             
             
         } catch (PersistenceException pex) {

@@ -38,7 +38,7 @@ public class SubscriptionList extends EnterpriseObject {
     }
     
     @Override
-    public String getAlias() {
+    public String alias() {
         return this.LIST_NAME;
     }
 }

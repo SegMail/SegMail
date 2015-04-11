@@ -36,7 +36,6 @@ import eds.entity.user.UserPreferenceSet;
 import eds.entity.user.UserPreferenceSet_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
-import eds.entity.user.User_;
 import javax.ejb.EJB;
 
 /**
@@ -107,6 +106,8 @@ public class UserService extends Service {
             User user = new User();
             user.setUSERTYPE(type);
             em.persist(user);
+            //debug
+            System.out.println("The user id is "+user.getOBJECTID());
             return user;
             
         } catch (PersistenceException pex) {
@@ -176,6 +177,9 @@ public class UserService extends Service {
             
             //Create a new User object first
             User newUser = this.createUser(userTypeId);
+            
+            //Impt! Set the username to the user object's name
+            newUser.setOBJECT_NAME(username);
             
             //Hash passwords
             String hashedPassword = this.getPasswordHash(username, password, HASH_KEY);
