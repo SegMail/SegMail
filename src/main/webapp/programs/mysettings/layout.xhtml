@@ -14,15 +14,17 @@
         <ui:define name="main-program-panel">
             <div class="row">
                 <div class="col-md-12 col-xs-12">
-                    <s2:messenger for="my_settings_program" showDetail="true" showSummary="true">
-                        #{MySettingsProgram.testActivateInjectedBean}
-                    </s2:messenger>
+                    <form jsf:id="my_settings_program">
+                        <s2:messenger for="my_settings_program" showDetail="true" showSummary="true">
+                            #{MySettingsProgram.testActivateInjectedBean}
+                        </s2:messenger>
+                    </form>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div jsf:id="contact_details_block" class="block">
-                        <form jsf:id="contact_details_form">
+                        <form jsf:id="contact_details_form" class="validate-form">
                             <div class="block-content">
                                 <h2>My Contact Details</h2>
                                 <p></p>
@@ -31,7 +33,8 @@
                                     <span class="help-block">
                                         How do we address you?
                                     </span>
-                                    <input type="text" jsf:id="contact_first_name" class="form-control"
+                                    <input type="text" jsf:id="contact_first_name" class="form-control validate[required]"
+                                           
                                            jsf:value="#{ContactDetailsForm.contactInfo.FIRSTNAME}"
                                            placeholder="Your first name"></input>
                                 </div>
@@ -49,14 +52,16 @@
                                     <span class="help-block">
                                         This is how we will contact you.
                                     </span>
-                                    <input type="text" jsf:id="contact_email" class="form-control validate[required]"
-                                           jsf:value="#{ContactDetailsForm.contactInfo.LASTNAME}"
+                                    <input type="email" jsf:id="contact_email" class="form-control validate[required,custom[email]]"
+                                           
+                                           jsf:value="#{ContactDetailsForm.contactInfo.EMAIL}"
                                            placeholder="Your email"></input>
                                 </div>
                             </div>
                             <div class="block-footer">
                                 <div class="pull-left">
-                                    <button type="button" class="btn btn-default">
+                                    <button type="button" class="btn btn-default"
+                                            onclick="document.getElementById('contact_details_form').reset()">
                                         I screwed up. Help!
                                     </button>
                                 </div>
@@ -74,13 +79,25 @@
                         </form>
                     </div>
                 </div>
+                
+                <div class="col-md-6 col-xs-12">
+                    <div jsf:id="billing_block" class="block">
+                        <form jsf:id="billing_form" class="validate-form">
+                            <div class="block-content">
+                                <h2>Billing</h2>
+                                <p>You can choose to bill to your own account or use organizational billing, where the bill can be sent to your organization's address instead of your own.</p>
+                                
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
-
+            
 
         </ui:define>
 

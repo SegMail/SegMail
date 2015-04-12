@@ -49,7 +49,7 @@ public class ContactDetailsForm {
     public void initContactInfo() throws DBConnectionException, Exception{
         if(!userContainer.isLoggedIn() || userContainer.getUser() == null){
             //This will most likely not happen in production, hence we don't really have to handle it
-            throw new Exception("You are not logged in and you cannot execute any functionalities on this page.");
+            throw new RuntimeException("You are not logged in and you cannot execute any functionalities on this page.");
         }
         
         this.contactInfo = clientService.getContactInfoForObject(userContainer.getUser().getOBJECTID());

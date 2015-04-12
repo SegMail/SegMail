@@ -7,6 +7,7 @@ package eds.component.client;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
 import eds.entity.EnterpriseObject;
 import eds.entity.client.Client;
@@ -244,7 +245,7 @@ public class ClientService {
             
             List<ContactInfo> contactInfos = 
                     this.genericEnterpriseObjectService
-                            .getEnterpriseDataForObject(objectid, todaySQL, todaySQL, ContactInfo.class);
+                            .getEnterpriseDataForObject(client.getOBJECTID(), todaySQL, todaySQL, ContactInfo.class);
             
             if(contactInfos == null || contactInfos.isEmpty())
                 return null;
@@ -265,19 +266,25 @@ public class ClientService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateClientContact(ContactInfo contactInfo) 
-            throws DBConnectionException{
+            throws DBConnectionException, MissingOwnerException{
         try{
-            //em.merge() ill insert new if doesn't exist
-            this.em.merge(contactInfo);
+            if(contactInfo.getOWNER() == null)
+                throw new MissingOwnerException(contactInfo);
+            //em.merge() will insert new if doesn't exist, but need to set
+            //the owner with the managed instance
+            ContactInfo ci = this.em.merge(contactInfo); //ci is the one getting persisted and managed actually
+            
+            if(ci.getOWNER() == null)
+                ci.setOWNER(contactInfo.getOWNER());
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } //You don't have to catch everything, that's counter-productive@
+        //Just catch whatever you know, and let the other errors propagate up
+        //so that they can be "glaring", not hidden.
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
