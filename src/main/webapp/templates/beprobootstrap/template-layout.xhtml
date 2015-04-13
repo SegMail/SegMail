@@ -138,6 +138,7 @@
 
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" />
+        <h:outputScript library="primefaces" name="jquery/jquery.js" target="head"/><!--must be included, if not when there are no PF components on the page, JQuery would not be automatically loaded-->
 
         <script src="#{request.contextPath}/templates/common/js/bootstrap-select.js"></script>
         <ui:insert name="scripts-bottom"></ui:insert>
