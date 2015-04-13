@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.crm;
+package eds.entity.client;
 
 import eds.entity.EnterpriseObject;
-import java.util.List;
+import eds.entity.EnterpriseRelationship;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -16,10 +15,9 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="CUSTOMER")
-public class Customer extends EnterpriseObject {
+@Table(name="CLIENT_ASSIGNMENT")
+public class ClientAssignment extends EnterpriseRelationship<Client,EnterpriseObject> {
 
-    
     @Override
     public void randInit() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

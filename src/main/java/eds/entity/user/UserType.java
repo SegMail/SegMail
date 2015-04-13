@@ -19,7 +19,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="USERTYPE")
-@DiscriminatorValue("USERTYPE")
 public class UserType extends EnterpriseObject {
     
     private String USERTYPENAME;
@@ -77,5 +76,10 @@ public class UserType extends EnterpriseObject {
     @PreUpdate
     public void PrePersist(){
         this.OBJECT_NAME = this.USERTYPENAME;
+    }
+
+    @Override
+    public String alias() {
+        return this.USERTYPENAME;
     }
 }

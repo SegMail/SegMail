@@ -10,23 +10,23 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
         <ui:define name="panel-heading">
-            Assign Layout to Username
+            Register Client
         </ui:define>
         <ui:define name="panel-body">
-            <h:form id="assignLayoutToUsername">
+            <h:form id="registerClientForm">
                 <div class="row"><!--form to assign layout to username-->
                     <div class="col-md-12 col-xs-12 form-group">
-                        <s2:dropdown id="allLayoutsForAssignment" 
-                                     value="#{FormAssignLayoutUsername.layoutId}">
+                        <s2:dropdown id="allClientTypes" 
+                                     value="#{FormRegisterClientForObjectname.clientTypeId}">
                             <c:choose>
-                                <c:when test="#{(FormAssignLayoutUsername.allLayouts.size() == 0)}">
-                                    <f:selectItem itemLabel="No Programs exist yet"></f:selectItem>
+                                <c:when test="#{(FormRegisterClientForObjectname.allClientTypes.size() == 0)}">
+                                    <f:selectItem itemLabel="No ClientTypes exist yet"></f:selectItem>
                                 </c:when>
                                 <c:otherwise>
-                                    <f:selectItems value="#{FormAssignLayoutUsername.allLayouts}"
-                                                   var="layout" 
-                                                   itemLabel="#{layout.LAYOUT_NAME}"
-                                                   itemValue="#{layout.OBJECTID}"
+                                    <f:selectItems value="#{FormRegisterClientForObjectname.allClientTypes}"
+                                                   var="clienttype" 
+                                                   itemLabel="#{clienttype.CLIENT_TYPE_NAME}"
+                                                   itemValue="#{clienttype.OBJECTID}"
                                                    >
                                     </f:selectItems>
                                 </c:otherwise>
@@ -35,14 +35,17 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Username:</label>
-                    <input type="text" jsf:id="usernameLayout" class="form-control"
-                           jsf:value="#{FormAssignLayoutUsername.username}" />
+                    <label>Object name:</label>
+                    <span class="help-block">
+                        Only the first object found will be used!
+                    </span>
+                    <input type="text" jsf:id="objectnameClient" class="form-control"
+                           jsf:value="#{FormRegisterClientForObjectname.objectname}" />
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
-                        <p:commandButton id="assignLayoutUsername" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign program to username"
-                                         actionListener="#{FormAssignLayoutUsername.assignLayoutToUsername()}"
+                        <p:commandButton id="assignClientUsernameButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign client to username"
+                                         actionListener="#{FormRegisterClientForObjectname.registerClientForUsername()}"
                                          update="@form">
                         </p:commandButton>
 
@@ -50,10 +53,10 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
-                        <s2:messenger for="assignLayoutToUsername" showSummary="true" showDetail="true" />
+                        <s2:messenger for="registerClientForm" showSummary="true" showDetail="true" />
                     </div>
                 </div>
-                <p:blockUI id="assignLayoutToUsernameBlock" block="assignLayoutToUsername" trigger="assignLayoutToUsername:assignLayoutUsername">
+                <p:blockUI id="registerClientFormBlock" block="registerClientForm" trigger="registerClientForm:assignClientUsernameButton">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
             </h:form>

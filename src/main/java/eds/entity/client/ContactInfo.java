@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.crm;
+package eds.entity.client;
 
 import eds.entity.EnterpriseData;
 import javax.persistence.Entity;
@@ -15,13 +15,55 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CONTACT_INFO")
-public class ContactInfo extends EnterpriseData{
+public class ContactInfo extends EnterpriseData<Client>{
 
     private String FIRSTNAME;
     private String LASTNAME;
     private String EMAIL;
     private String MOBILE;
     private String OTHER;
+
+    public String getFIRSTNAME() {
+        return FIRSTNAME;
+    }
+
+    public void setFIRSTNAME(String FIRSTNAME) {
+        this.FIRSTNAME = FIRSTNAME;
+    }
+
+    public String getLASTNAME() {
+        return LASTNAME;
+    }
+
+    public void setLASTNAME(String LASTNAME) {
+        this.LASTNAME = LASTNAME;
+    }
+
+    public String getEMAIL() {
+        return EMAIL;
+    }
+
+    public void setEMAIL(String EMAIL) {
+        this.EMAIL = EMAIL;
+    }
+
+    public String getMOBILE() {
+        return MOBILE;
+    }
+
+    public void setMOBILE(String MOBILE) {
+        this.MOBILE = MOBILE;
+    }
+
+    public String getOTHER() {
+        return OTHER;
+    }
+
+    public void setOTHER(String OTHER) {
+        this.OTHER = OTHER;
+    }
+    
+    
     
     @Override
     public void randInit() {

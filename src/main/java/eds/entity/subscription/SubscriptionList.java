@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
 public class SubscriptionList extends EnterpriseObject {
-    
+
     public static enum LOCATION{
         REMOTE,
         LOCAL
@@ -37,4 +37,8 @@ public class SubscriptionList extends EnterpriseObject {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    @Override
+    public String alias() {
+        return this.LIST_NAME;
+    }
 }

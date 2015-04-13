@@ -7,7 +7,6 @@
 package eds.entity.program;
 
 
-import eds.entity.AuditedObjectListener;
 import eds.entity.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -92,6 +91,11 @@ public class Program extends EnterpriseObject{
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String alias() {
+        return this.PROGRAM_NAME;
     }
 
     

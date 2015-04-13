@@ -17,8 +17,6 @@ import javax.persistence.Table;
 @Table(name="SUBSCRIBER")
 public class Subscriber extends EnterpriseObject {
     
-    
-
     private String EMAIL;
     private String FIRSTNAME;
     private String LASTNAME;
@@ -31,6 +29,11 @@ public class Subscriber extends EnterpriseObject {
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String alias() {
+        return this.EMAIL;
     }
     
 }

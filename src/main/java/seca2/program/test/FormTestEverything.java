@@ -5,10 +5,7 @@
  */
 package seca2.program.test;
 
-import eds.component.user.UserService;
 import eds.entity.user.UserType;
-import java.util.List;
-import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -104,6 +101,18 @@ public class FormTestEverything {
         this.formTestNavigation.setMenuItemName("Manage Signup Forms");
         this.formTestNavigation.setMenuItemURL("/program/signup/");
         this.formTestNavigation.setPrependHTMLTags("<i class=\"fa fa-code\"></i>");
+        this.formTestNavigation.createNewMenuItem();
+        
+        //Create mysettings page
+        this.formTestProgram.setProgramName("mysettings");
+        this.formTestProgram.setProgramViewRoot("/programs/mysettings/layout.xhtml");
+        this.formTestProgram.setDisplayName("My settings");
+        this.formTestProgram.setDisplayDesc("This is where you manage all your personal stuff.");
+        this.formTestProgram.createProgram();
+        
+        this.formTestNavigation.setMenuItemName("My settings");
+        this.formTestNavigation.setMenuItemURL("/program/mysettings/");
+        this.formTestNavigation.setPrependHTMLTags("<i class=\"fa fa-cogs\"></i>");
         this.formTestNavigation.createNewMenuItem();
         
         //Create layouts

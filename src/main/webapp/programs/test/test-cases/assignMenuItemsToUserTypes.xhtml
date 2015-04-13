@@ -17,10 +17,10 @@
                     <div class="col-md-12 col-xs-12 form-group">
                         <!--potential custom component-->
                         <s2:dropdown id="allMenuItemsForAssignment" class="selectpicker" 
-                                     value="#{ProgramTest.formTestNavigation.selectedAssignedMenuItemId}"   
+                                     value="#{FormTestNavigation.selectedAssignedMenuItemId}"   
                                      >
                             <c:choose>
-                                <c:when test="#{(ProgramTest.formTestNavigation.allMenuItems.size() == 0)}">
+                                <c:when test="#{(FormTestNavigation.allMenuItems.size() == 0)}">
                                     <f:selectItem itemLabel="No MenuItem exist yet"></f:selectItem>
                                 </c:when>
                                 <c:otherwise>
@@ -39,10 +39,10 @@
                 <div class="row"><!--form to assign menu items to usertypes-->
                     <div class="col-md-12 col-xs-12 form-group">
                         <s2:dropdown id="allUserTypesForAssignment" class="selectpicker" 
-                                         value="#{ProgramTest.formTestNavigation.selectedUserTypeId}"
+                                         value="#{FormTestNavigation.selectedUserTypeId}"
                                          >
                             <c:choose>
-                                <c:when test="#{(ProgramTest.formTestNavigation.allUserTypes.size() == 0)}">
+                                <c:when test="#{(FormTestNavigation.allUserTypes.size() == 0)}">
                                     <f:selectItem itemLabel="No UserTypes exist yet"></f:selectItem>
                                 </c:when>
                                 <c:otherwise>
@@ -61,7 +61,7 @@
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="createMenuItemAccess" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign menu item to user type"
-                                         actionListener="#{ProgramTest.formTestNavigation.assignMenuAccess()}"
+                                         actionListener="#{FormTestNavigation.assignMenuAccess()}"
                                          update="@form">
                         </p:commandButton>
 

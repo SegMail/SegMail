@@ -16,7 +16,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="LAYOUT")
-@EntityListeners(LayoutListener.class)
+//@EntityListeners(LayoutListener.class)
 public class Layout extends EnterpriseObject {
 
     private String LAYOUT_NAME;
@@ -46,6 +46,11 @@ public class Layout extends EnterpriseObject {
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String alias() {
+        return this.LAYOUT_NAME;
     }
     
 }

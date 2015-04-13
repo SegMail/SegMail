@@ -8,13 +8,10 @@ package eds.entity.navigation;
 
 import eds.entity.EnterpriseObject;
 import TreeAPI.TreeBranch;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -24,9 +21,8 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="MENUITEM")
-@DiscriminatorValue("MENUITEM")
 public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
-    
+
     public static enum TARGET_TYPE{
         URL,
         PROGRAM
@@ -91,6 +87,10 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         this.PREPEND_TAGS = PREPEND_TAGS;
     }
 
+    @Override
+    public String alias() {
+        return this.MENU_ITEM_NAME;
+    }
     
     
     @Override
@@ -103,11 +103,11 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    @PrePersist
+    /*@PrePersist
     @PreUpdate
     public void PrePersist(){
         this.OBJECT_NAME = this.MENU_ITEM_NAME;
-    }
+    }*/
 
     @Transient
     @Override

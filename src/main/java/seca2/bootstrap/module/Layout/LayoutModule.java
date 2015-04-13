@@ -14,8 +14,6 @@ import eds.entity.user.User;
 import eds.entity.user.UserType;
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
@@ -51,20 +49,21 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         try {
+
             //1st priority is Program, if can find, return it first
             String program = inputContext.getProgram();
             Layout layout = this.layoutService.getLayoutAssignmentsByProgram(program);
-            if(layout != null) {
+            if (layout != null) {
                 outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                 return true;
             }
-            
+
             //Next priority is User and UserType
             if (userContainer == null) {
                 outputContext.setTemplateRoot(this.DEFAULT_TEMPLATE_LOCATION);
                 return true;
             }
-            
+
             if (!userContainer.isLoggedIn()) {
                 outputContext.setTemplateRoot(this.DEFAULT_TEMPLATE_LOCATION);
                 return true;
@@ -80,28 +79,28 @@ public class LayoutModule extends BootstrapModule implements Serializable {
                 return true;
             }
             List<LayoutAssignment> assignments = layoutService.getLayoutAssignmentsByUser(userContainer.getUser());
-            for(LayoutAssignment assignment:assignments){
+            for (LayoutAssignment assignment : assignments) {
                 EnterpriseObject source = assignment.getSOURCE();
-                if(source instanceof User){
+                if (source instanceof User) {
                     layout = (Layout) assignment.getTARGET();
                     outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                     return true;
                 }
             }
-            
-            for(LayoutAssignment assignment:assignments){
+
+            for (LayoutAssignment assignment : assignments) {
                 EnterpriseObject source = assignment.getSOURCE();
-                if(source instanceof UserType){
+                if (source instanceof UserType) {
                     layout = (Layout) assignment.getTARGET();
                     outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                     return true;
                 }
-                    
+
             }
             outputContext.setTemplateRoot(this.DEFAULT_TEMPLATE_LOCATION);
-            
+
             return true;
-            
+
         } catch (DBConnectionException ex) {
             outputContext.setTemplateRoot(this.DEFAULT_TEMPLATE_LOCATION);
             return true;
@@ -116,6 +115,20 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean inService() {
         return true;
+    }
+
+    private boolean canSkip(BootstrapInput inputContext, BootstrapOutput outputContext) {
+        //If the following conditions are met:
+        //- Previous request and current request are the same,
+        boolean sameRequest = (userContainer.getLastURL() == null) ? false
+                : userContainer.getLastURL().equalsIgnoreCase(inputContext.getProgram());
+        //- UserContainer isLoggedIn(),
+        boolean isLoggedIn = userContainer.isLoggedIn();
+        //- PageRoot is not empty
+        boolean templateRootExists = (outputContext.getTemplateRoot() == null) ? false
+                : (!outputContext.getTemplateRoot().isEmpty());
+        //then skip processing
+        return sameRequest && isLoggedIn && templateRootExists;
     }
 
 }

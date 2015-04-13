@@ -126,6 +126,8 @@ public class MessengerRenderer extends Renderer {
                         if(SUMMARY_HTML_ELEMENT != null &&
                                 SUMMARY_HTML_ELEMENT.length() > 0)
                             writer.endElement(SUMMARY_HTML_ELEMENT);
+                        
+                        writer.write("<br//>");
                     }
                     if(component.isShowDetail() && message.getSummary().compareTo(message.getDetail()) != 0){ //because of a stupid design in the standard JSF implementation
                         if(DETAIL_HTML_ELEMENT != null &&

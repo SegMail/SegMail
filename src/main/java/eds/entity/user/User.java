@@ -41,5 +41,11 @@ public class User extends EnterpriseObject {
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public String alias() {
+        //User is a special object, because it uses the UserAccount name as its object_name.
+        return (OBJECT_NAME == null || OBJECT_NAME.isEmpty()) ? "USER "+this.OBJECTID : OBJECT_NAME;
+    }
     
 }
