@@ -5,6 +5,7 @@
  */
 package eds.entity.subscription;
 
+import eds.entity.EnterpriseObject;
 import eds.entity.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,6 +19,13 @@ import javax.persistence.Table;
 @Entity
 @Table(name="SUBSCRIPTION")
 public class Subscription extends EnterpriseRelationship {
+
+    public Subscription() {
+    }
+
+    public Subscription(EnterpriseObject s, EnterpriseObject t) {
+        super(s, t);
+    }
 
     public static enum STATUS{
         NEW,

@@ -211,9 +211,7 @@ public class ClientService {
             this.em.persist(newClient);
             
             //Assign the client object to the enterpriseobject
-            ClientAssignment newAssignment = new ClientAssignment();
-            newAssignment.setSOURCE(newClient);
-            newAssignment.setTARGET(enterpriseobject);
+            ClientAssignment newAssignment = new ClientAssignment(newClient,enterpriseobject);
             
             this.em.persist(newAssignment);
             

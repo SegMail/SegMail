@@ -222,9 +222,9 @@ public class NavigationService implements Serializable {
             //assignment1.setSOURCE(assignUserType);
             //assignment1.setTARGET(assignMenuItem);
             
-            MenuItemAccess assignment2 = new MenuItemAccess();
-            assignment2.setSOURCE(assignMenuItem);
-            assignment2.setTARGET(assignUserType);
+            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType);
+            //assignment2.setSOURCE(assignMenuItem);
+            //assignment2.setTARGET(assignUserType);
             
             //em.getTransaction().begin();
             //em.persist(assignment1);

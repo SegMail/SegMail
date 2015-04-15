@@ -22,16 +22,10 @@ import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
-import eds.entity.EnterpriseObject;
-import eds.entity.EnterpriseRelationship;
-import eds.entity.EnterpriseRelationship_;
 import eds.entity.program.Program;
 import eds.entity.program.ProgramAssignment;
-import eds.entity.program.ProgramAssignment_;
 import eds.entity.program.Program_;
-import eds.entity.user.User;
 import eds.entity.user.UserType;
-import javax.persistence.criteria.Join;
 
 /**
  *
@@ -133,9 +127,9 @@ public class ProgramService implements Serializable {
                 throw new ProgramAssignmentException("Usertype with ID "+userTypeId+" already has access to Program with ID "+programId+".");
             
             //Create bidrectional relationships
-            ProgramAssignment programAccess1 = new ProgramAssignment();
-            programAccess1.setSOURCE(program);
-            programAccess1.setTARGET(userType);
+            ProgramAssignment programAccess1 = new ProgramAssignment(program,userType);
+            //programAccess1.setSOURCE(program);
+            //programAccess1.setTARGET(userType);
 
             //ProgramAssignment programAccess2 = new ProgramAssignment();
             //programAccess2.setSOURCE(userType);

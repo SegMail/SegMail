@@ -111,13 +111,13 @@ public class LayoutService implements Serializable {
             
 
             //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
-            LayoutAssignment layoutAssignment2 = new LayoutAssignment();
+            LayoutAssignment layoutAssignment2 = new LayoutAssignment(layout,user);
 
             //layoutAssignment1.setSOURCE(user);
             //layoutAssignment1.setTARGET(layout);
 
-            layoutAssignment2.setTARGET(user);
-            layoutAssignment2.setSOURCE(layout);
+            //layoutAssignment2.setTARGET(user);
+            //layoutAssignment2.setSOURCE(layout);
 
             //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);
@@ -156,13 +156,13 @@ public class LayoutService implements Serializable {
                 throw new LayoutAssignmentException("A Layout is already assigned to this UserType!");
 
             //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
-            LayoutAssignment layoutAssignment2 = new LayoutAssignment();
+            LayoutAssignment layoutAssignment2 = new LayoutAssignment(layout,usertype);
 
             //layoutAssignment1.setSOURCE(usertype);
             //layoutAssignment1.setTARGET(layout);
 
-            layoutAssignment2.setTARGET(usertype);
-            layoutAssignment2.setSOURCE(layout);
+            //layoutAssignment2.setTARGET(usertype);
+            //layoutAssignment2.setSOURCE(layout);
 
             //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);
@@ -201,11 +201,11 @@ public class LayoutService implements Serializable {
                 throw new LayoutAssignmentException("Assignment already exists!");
             
             //If all validations are passed, create the bidirectional relationship
-            LayoutAssignment layoutAssignment1 = new LayoutAssignment();
+            LayoutAssignment layoutAssignment1 = new LayoutAssignment(layoutEO,clientEO);
             //LayoutAssignment layoutAssignment2 = new LayoutAssignment();
 
-            layoutAssignment1.setSOURCE(layoutEO);
-            layoutAssignment1.setTARGET(clientEO);
+            //layoutAssignment1.setSOURCE(layoutEO);
+            //layoutAssignment1.setTARGET(clientEO);
 
             //layoutAssignment2.setTARGET(clientEO);
             //layoutAssignment2.setSOURCE(layoutEO);
@@ -255,13 +255,13 @@ public class LayoutService implements Serializable {
             
             //If all validations are passed, create the bidirectional relationship
             //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
-            LayoutAssignment layoutAssignment2 = new LayoutAssignment();
+            LayoutAssignment layoutAssignment2 = new LayoutAssignment(layoutEO,clientEO);
 
             //layoutAssignment1.setSOURCE(clientEO);
             //layoutAssignment1.setTARGET(layoutEO);
 
-            layoutAssignment2.setTARGET(clientEO);
-            layoutAssignment2.setSOURCE(layoutEO);
+            //layoutAssignment2.setTARGET(clientEO);
+            //layoutAssignment2.setSOURCE(layoutEO);
 
             //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);

@@ -98,9 +98,43 @@
                     <div class="block-content">
                         <h2>
                             <strong>Airnav Free Newsletter</strong>
-                            <span class="badge badge-info" style="margin-left: 10px;">0</span>
+                            <span class="badge badge-info" style="margin-left: 10px;">10</span>
                         </h2>
-                        
+                        <span>Remote list. </span>
+                        <a href="#">Make local. </a>
+                        <a href="#">What are remote and local lists?</a>
+                    </div>
+
+                </div>
+                <div class="block">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
+                        </li>
+                        <li >
+                            <a href="#activities_tab" data-toggle="tab">Activities</a>
+                        </li>
+                        <li >
+                            <a href="#signupform_tab" data-toggle="tab">Signup Forms</a>
+                        </li>
+                        <li >
+                            <a href="#settings_tab" data-toggle="tab">Settings</a>
+                        </li>
+                    </ul>
+                    <div class="block-content tab-content">
+                        <div class="tab-pane active" id="subscribers_tab">
+                            <p>fjeirgnrgwrn</p>
+                        </div>
+                        <div class="tab-pane" id="activities_tab">
+                            <p>fjeirgnrgwrn</p>
+                        </div>
+                        <div class="tab-pane" id="signupform_tab">
+                            <p>fjeirgnrgwrn</p>
+                        </div>
+                        <div class="tab-pane" id="settings_tab">
+                            <p>fjeirgnrgwrn</p>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -108,41 +142,47 @@
             <div class="modal fade" id="add_list_popup"
                  >
                 <div class="modal-dialog">
-                    <div class="modal-content">
+                    <form jsf:id="FormAddList">
+                        <div class="modal-content">
 
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                X
-                            </button>
-                            <h4 class="modal-title">Add new list</h4>
-                        </div>
-
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label>
-                                    Give your list a name:
-                                </label>
-                                <input type="text" class="form-control" />
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                    X
+                                </button>
+                                <h4 class="modal-title">Add new list</h4>
                             </div>
-                            <div class="form-group">
-                                <div class="checkbox" style="margin-left: 10px;">
-                                    <label style="padding-left:0px">
-                                        <strong>Remote List</strong>
-                                        <input type="checkbox" class="icheck" style="" />
+
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>
+                                        Give your list a name:
                                     </label>
-                                    <span class="help-block">
-                                        Recommended. You will need to set up your DB connection later.
-                                    </span>
+                                    <input type="text" class="form-control"
+                                           jsf:value="#{FormAddList.listName}" />
+                                </div>
+                                <div class="form-group">
+                                    <div class="checkbox" style="margin-left: 10px;">
+                                        <label style="padding-left:0px">
+                                            <strong>Remote List</strong>
+                                            <input type="checkbox" class="icheck" style=""
+                                                   jsf:value="#{FormAddList.remote}"/>
+                                        </label>
+                                        <span class="help-block">
+                                            Recommended. You will need to set up your DB connection later.
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success">
-                                Create list
-                            </button>
-                        </div>
+                            <div class="modal-footer">
+                                <p:commandButton type="button" styleClass="btn btn-success" 
+                                                 value="Create list" update="@form"
+                                                 actionListener="#{FormAddList.addList()}">
+                                                 
+                                </p:commandButton>
+                            </div>
 
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 

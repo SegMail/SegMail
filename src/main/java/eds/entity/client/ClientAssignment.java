@@ -18,6 +18,13 @@ import javax.persistence.Table;
 @Table(name="CLIENT_ASSIGNMENT")
 public class ClientAssignment extends EnterpriseRelationship<Client,EnterpriseObject> {
 
+    public ClientAssignment() {
+    }
+
+    public ClientAssignment(Client s, EnterpriseObject t) {
+        super(s, t);
+    }
+
     @Override
     public void randInit() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

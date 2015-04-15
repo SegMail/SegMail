@@ -21,6 +21,13 @@ public class LayoutAssignment extends EnterpriseRelationship<Layout,EnterpriseOb
     
     private int PRIORITY;
 
+    public LayoutAssignment() {
+    }
+
+    public LayoutAssignment(Layout s, EnterpriseObject t) {
+        super(s, t);
+    }
+
     //@Id
     public int getPRIORITY() {
         return PRIORITY;

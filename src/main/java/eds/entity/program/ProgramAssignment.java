@@ -20,6 +20,13 @@ import javax.persistence.Table;
 @Table(name="PROGRAM_ASSIGNMENT")
 public class ProgramAssignment extends EnterpriseRelationship<Program,UserType> {
 
+    public ProgramAssignment() {
+    }
+
+    public ProgramAssignment(Program s, UserType t) {
+        super(s, t);
+    }
+
     //Any additional attributes to be maintained for this relationship?
     //protected String REL_TYPE = "MENU_ITEM_ACCESS"; no need to redefine it here
     

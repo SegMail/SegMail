@@ -1,4 +1,4 @@
-package seca2.program.signup;
+package seca2.program.list;
 
 import eds.entity.program.Program;
 
@@ -12,7 +12,9 @@ import eds.entity.program.Program;
  *
  * @author LeeKiatHaw
  */
-public class ProgramSignup {
+
+public class ProgramList {
+    
     
     
 }
