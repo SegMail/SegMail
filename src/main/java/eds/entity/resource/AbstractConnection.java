@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.subscription;
+package eds.entity.resource;
 
-import eds.entity.EnterpriseData;
-import javax.persistence.DiscriminatorColumn;
+import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -17,11 +16,11 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 //@Entity
-//@Table(name="LIST_CONNECTION")
+//@Table(name="CONNECTION")
 //@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 //@DiscriminatorColumn(name="CONNECTION_TYPE")
 //How do I store subtype (LOCAL, REMOTE)?
-public abstract class AbstractListConnection extends EnterpriseData<SubscriptionList> {
+public abstract class AbstractConnection extends SystemResource {
     
     private String HOSTNAME;
     private String PORT;
@@ -58,18 +57,6 @@ public abstract class AbstractListConnection extends EnterpriseData<Subscription
 
     public void setPASSWORD(String PASSWORD) {
         this.PASSWORD = PASSWORD;
-    }
-    
-    
-
-    @Override
-    public void randInit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Object generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

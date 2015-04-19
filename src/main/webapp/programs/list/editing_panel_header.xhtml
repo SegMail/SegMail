@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <div class="block">
+        <form jsf:id="FormEditListHeader">
+            <!--when there is a list to be edited-->
+            <div class="block-content" jsf:rendered="#{FormEditListHeader.loaded}">
+                <h2>
+                    <strong>#{ProgramList.listEditing.LIST_NAME}</strong>
+                    <span class="badge badge-info" style="margin-left: 10px;">10</span>
+                </h2>
+                <span>Remote list. </span>
+                <a href="#">Make local. </a>
+                <a href="#">What are remote and local lists?</a>
+            </div>
+
+            <!--when there's no list to be edited-->
+            <div class="block-content" jsf:rendered="#{!FormEditListHeader.loaded}">
+                
+            </div>
+        </form>
+    </div>
+</html>

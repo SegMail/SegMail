@@ -11,7 +11,7 @@ import eds.component.client.ClientService;
 import eds.component.client.ClientTypeRegistrationException;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.client.ClientType;
 import eds.entity.user.User;
 import java.util.List;

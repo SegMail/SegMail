@@ -16,6 +16,7 @@ import javax.servlet.http.HttpSession;
 import eds.entity.user.User;
 import eds.entity.user.UserPreferenceSet;
 import eds.entity.user.UserType;
+import javax.annotation.PostConstruct;
 
 /**
  *
@@ -27,30 +28,26 @@ public class UserContainer implements Serializable {
     private User user;
     //private List<UserPreferenceSet> preferences;
     private UserType userType;
-    private String lastURL;
+    private String lastProgram;
     private boolean loggedIn; //default is always false
     private String sessionId;
     
     private String username;
     private String lastname;
+    private String contextPath;
+    private String servletPath;
     
-    public String regenerateSessionId(){
+    @PostConstruct
+    public void init(){
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        HttpServletRequest req = (HttpServletRequest) ec.getRequest();
-        HttpServletResponse resp = (HttpServletResponse) ec.getResponse();
-        
-        HttpSession session = req.getSession(true);
-        session.invalidate();
-        
-        //https://github.com/hareluya86/SegMail/issues/6 the bug is here!
-        //Old code
-        //HttpSession newSession = req.getSession(true);
-        //Old code
-        session = req.getSession(true);
-        this.sessionId = session.getId();
-        return this.sessionId;
+        contextPath = ec.getRequestContextPath();
+        servletPath = ec.getRequestServletPath();
     }
-
+    
+    public String getLastURL(){
+        return this.contextPath + this.servletPath + "/"+ this.getLastProgram() + "/";
+    }
+    
     public User getUser() {
         return user;
     }
@@ -67,12 +64,12 @@ public class UserContainer implements Serializable {
         this.userType = userType;
     }
 
-    public String getLastURL() {
-        return lastURL;
+    public String getLastProgram() {
+        return lastProgram;
     }
 
-    public void setLastURL(String lastURL) {
-        this.lastURL = lastURL;
+    public void setLastProgram(String lastProgram) {
+        this.lastProgram = lastProgram;
     }
 
     public boolean isLoggedIn() {

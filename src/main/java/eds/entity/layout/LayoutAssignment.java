@@ -5,8 +5,8 @@
  */
 package eds.entity.layout;
 
-import eds.entity.EnterpriseObject;
-import eds.entity.EnterpriseRelationship;
+import eds.entity.data.EnterpriseObject;
+import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;

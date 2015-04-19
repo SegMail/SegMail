@@ -6,7 +6,7 @@
 
 package eds.entity.program;
 
-import eds.entity.EnterpriseRelationship_;
+import eds.entity.data.EnterpriseRelationship_;
 import javax.persistence.metamodel.StaticMetamodel;
 
 /**

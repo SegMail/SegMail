@@ -24,7 +24,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import eds.component.data.HibernateUtil;
-import eds.entity.FileEntity;
+import eds.entity.data.FileEntity;
 import eds.entity.file.SecaFileEntity;
 import static eds.entity.file.SecaFileEntity.FILE_STATUS.COMPLETED;
 import eds.entity.file.SecaFileSequence;

@@ -12,137 +12,87 @@
                     >
 
         <ui:define name="main-program-panel">
-            <div class="col-md-3"><!--Lists block-->
+            <c:choose>
+                <c:when test="#{FormListList.programList.allLists eq null or 
+                                FormListList.programList.allLists.size() le 0}">
 
-
-                <div class="block nb">
-                    <div class="block-head">
-                        <h2>Your lists</h2>
-                        <ul class="buttons">
-                            <li>
-                                <a href="#add_list_popup" data-toggle="modal"
-                                   >
-                                    <span class="fa fa-plus"></span>
-                                </a>
-                            </li>
-                        </ul>
+                    <div class="jumbotron" style="text-align: center;">
+                        <h1 style="margin-top: 30px;">You have no list yet</h1>
+                        <p>
+                            <a class="btn btn-primary" href="#add_list_popup" data-toggle="modal">
+                                Start creating my first list
+                            </a>
+                        </p>
                     </div>
 
-                    <div class="block-content list nbfc">
-                        <div class="list-item">
-                            <div class="list-item-content">
-                                <div class="list-item-container">
-                                    <h4>Default List</h4>
-                                    <p class="text-muted">
-                                        224 Subscribers
-                                    </p>
-                                </div>
-                                <!--<div class="list-item-container ">
-                                    <p>
-                                        <span class="label label-success">Active</span>
-                                    </p>
-                                </div>-->
-                                <div class="list-item-right">
-                                    <div>
-                                        <button class="btn btn-primary list-item-trigger">
-                                            <i class="fa fa-pencil"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="list-item-controls">
-                                    <div>
-                                        <button class="btn btn-default">
-                                            <i class="fa-pencil-square"></i>
-                                            View
-                                        </button>
-                                    </div>
-                                </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="col-md-3"><!--Lists block-->
+
+
+                        <div class="block nb">
+                            <div class="block-head">
+                                <h2>Your lists</h2>
+                                <ul class="buttons">
+                                    <li>
+                                        <a href="#add_list_popup" data-toggle="modal"
+                                           >
+                                            <span class="fa fa-plus"></span>
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
 
-
+                            <ui:include src="all_list_panel.xhtml" ></ui:include>
                         </div>
-                        <div class="list-item">
-                            <div class="list-item-content">
-                                <div class="list-item-container list-item-container-small">
-                                    <p>
-                                        <span class="label label-success">Active</span>
-                                    </p>
+
+
+                    </div>
+
+                    <div class="col-md-9">
+
+
+                        <ui:include src="editing_panel_header.xhtml"></ui:include>
+                        <div class="block">
+                            <ul class="nav nav-tabs">
+                                <li class="active">
+                                    <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
+                                </li>
+                                <li >
+                                    <a href="#activities_tab" data-toggle="tab">Activities</a>
+                                </li>
+                                <li >
+                                    <a href="#signupform_tab" data-toggle="tab">Signup Forms</a>
+                                </li>
+                                <li >
+                                    <a href="#settings_tab" data-toggle="tab">Settings</a>
+                                </li>
+                            </ul>
+                            <div class="block-content tab-content">
+                                <div class="tab-pane active" id="subscribers_tab">
+                                    <p>fjeirgnrgwrn</p>
                                 </div>
-                                <div class="list-item-container list-item-container-small">
-                                    <h4>Airnav Systems Subscribers</h4>
+                                <div class="tab-pane" id="activities_tab">
+                                    <p>fjeirgnrgwrn</p>
                                 </div>
+                                <div class="tab-pane" id="signupform_tab">
+                                    <p>fjeirgnrgwrn</p>
+                                </div>
+                                <div class="tab-pane" id="settings_tab">
+                                    <p>fjeirgnrgwrn</p>
+                                </div>
+
                             </div>
-
                         </div>
-                        <div class="list-item">
-                            <div class="list-item-content">
-                                <div class="list-item-container list-item-container-small">
-                                    <p>
-                                        <span class="label label-danger">Revoked</span>
-                                    </p>
-                                </div>
-                                <div class="list-item-container list-item-container-small">
-                                    <h4>RB24 subscribers</h4>
-                                </div>
-                            </div>
-                        </div>
-
-
                     </div>
 
-                </div>
-            </div>
-
-            <div class="col-md-9">
-                <div class="block">
-                    <div class="block-content">
-                        <h2>
-                            <strong>Airnav Free Newsletter</strong>
-                            <span class="badge badge-info" style="margin-left: 10px;">10</span>
-                        </h2>
-                        <span>Remote list. </span>
-                        <a href="#">Make local. </a>
-                        <a href="#">What are remote and local lists?</a>
-                    </div>
-
-                </div>
-                <div class="block">
-                    <ul class="nav nav-tabs">
-                        <li class="active">
-                            <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
-                        </li>
-                        <li >
-                            <a href="#activities_tab" data-toggle="tab">Activities</a>
-                        </li>
-                        <li >
-                            <a href="#signupform_tab" data-toggle="tab">Signup Forms</a>
-                        </li>
-                        <li >
-                            <a href="#settings_tab" data-toggle="tab">Settings</a>
-                        </li>
-                    </ul>
-                    <div class="block-content tab-content">
-                        <div class="tab-pane active" id="subscribers_tab">
-                            <p>fjeirgnrgwrn</p>
-                        </div>
-                        <div class="tab-pane" id="activities_tab">
-                            <p>fjeirgnrgwrn</p>
-                        </div>
-                        <div class="tab-pane" id="signupform_tab">
-                            <p>fjeirgnrgwrn</p>
-                        </div>
-                        <div class="tab-pane" id="settings_tab">
-                            <p>fjeirgnrgwrn</p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+                </c:otherwise>
+            </c:choose>
             <!--popups and modals-->
             <div class="modal fade" id="add_list_popup"
                  >
                 <div class="modal-dialog">
-                    <form jsf:id="FormAddList">
+                    <h:form id="FormAddList">
                         <div class="modal-content">
 
                             <div class="modal-header">
@@ -167,22 +117,29 @@
                                             <input type="checkbox" class="icheck" style=""
                                                    jsf:value="#{FormAddList.remote}"/>
                                         </label>
+
                                         <span class="help-block">
                                             Recommended. You will need to set up your DB connection later.
                                         </span>
                                     </div>
                                 </div>
+                                <s2:messenger id="FormAddList_messenger" for="FormAddList" showDetail="true" showSummary="true"
+                                              class="form-group"></s2:messenger>
+
                             </div>
                             <div class="modal-footer">
-                                <p:commandButton type="button" styleClass="btn btn-success" 
-                                                 value="Create list" update="@form"
+                                <p:commandButton id="add_list_button" styleClass="btn btn-success" 
+                                                 value="Create list" update="FormAddList_messenger"
                                                  actionListener="#{FormAddList.addList()}">
-                                                 
+
                                 </p:commandButton>
                             </div>
 
                         </div>
-                    </form>
+                        <p:blockUI block="FormAddList" trigger="FormAddList:add_list_button">
+                            <p id="spinner">Please wait while we do what we do best.</p>
+                        </p:blockUI>
+                    </h:form>
                 </div>
             </div>
 

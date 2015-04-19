@@ -9,7 +9,7 @@ import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.client.Client;
 import eds.entity.client.ClientAssignment;
 import eds.entity.client.ClientType;
@@ -180,7 +180,7 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerClientForObject(EnterpriseObject enterpriseobject, long clienttypeid)
+    public ClientAssignment registerClientForObject(EnterpriseObject enterpriseobject, long clienttypeid)
         throws DBConnectionException, ClientRegistrationException{
         try{
             
@@ -214,6 +214,8 @@ public class ClientService {
             ClientAssignment newAssignment = new ClientAssignment(newClient,enterpriseobject);
             
             this.em.persist(newAssignment);
+            
+            return newAssignment;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

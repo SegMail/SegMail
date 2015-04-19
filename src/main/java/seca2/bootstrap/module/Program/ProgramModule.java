@@ -18,6 +18,7 @@ import eds.entity.program.Program;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.faces.application.ProjectStage;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.module.User.UserContainer;
@@ -59,6 +60,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         try {
             //Very coupled to JSF
             FacesContext fc = FacesContext.getCurrentInstance();
+            ExternalContext ec = fc.getExternalContext();
             //1. Find the programName object
             //- If empty, assign the default programName
             //- If not empty, continue.
@@ -126,9 +128,16 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             }
 
             //4. Decide what to show
+            //Get the SETUP flag in URL
+            String bypassInURL = ec.getRequestParameterMap().get("SETUP");
+            String bypassInWebXML = ec.getInitParameter("SETUP");
             if (!authorized
-                    && //If the SETUP flag is set in web.xml but user is not authorized, show the default viewroot anyway
-                    fc.getExternalContext().getInitParameter("SETUP").compareToIgnoreCase("true") != 0) {
+                    && //If the SETUP flag is set in web.xml or URL but user is not authorized, show the default viewroot anyway
+                    !(
+                        (bypassInURL != null && bypassInURL.compareToIgnoreCase("true") == 0) ||
+                        (bypassInWebXML != null && bypassInWebXML.compareToIgnoreCase("true") == 0)
+                    )
+                ) {
 
                 String noAuthView = fc.getExternalContext().getInitParameter("NO_AUTHORIZATION_VIEWROOT");
                 outputContext.setPageRoot(noAuthView);

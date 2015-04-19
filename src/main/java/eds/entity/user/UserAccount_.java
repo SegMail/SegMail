@@ -6,8 +6,8 @@
 
 package eds.entity.user;
 
-import eds.entity.EnterpriseData_;
-import eds.entity.EnterpriseObject_;
+import eds.entity.data.EnterpriseData_;
+import eds.entity.data.EnterpriseObject_;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 

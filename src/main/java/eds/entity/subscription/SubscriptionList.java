@@ -5,8 +5,11 @@
  */
 package eds.entity.subscription;
 
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /**
@@ -15,6 +18,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
+//@DiscriminatorColumn(name="SUBSCRIPTION_LIST")
 public class SubscriptionList extends EnterpriseObject {
 
     public static enum LOCATION{
@@ -67,6 +71,7 @@ public class SubscriptionList extends EnterpriseObject {
         this.SEND_AS_NAME = SEND_AS_NAME;
     }
 
+    @Enumerated(EnumType.STRING)
     public LOCATION getLOCATION() {
         return LOCATION;
     }

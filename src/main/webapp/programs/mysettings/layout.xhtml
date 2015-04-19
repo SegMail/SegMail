@@ -13,21 +13,17 @@
 
         <ui:define name="main-program-panel">
             <div class="row">
-                <div class="col-md-12 col-xs-12">
-                    <form jsf:id="my_settings_program">
-                        <s2:messenger for="my_settings_program" showDetail="true" showSummary="true">
-                            #{MySettingsProgram.testActivateInjectedBean}
-                        </s2:messenger>
-                    </form>
-                </div>
-            </div>
-            <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div jsf:id="contact_details_block" class="block">
-                        <form jsf:id="contact_details_form" class="validate-form">
+                        <form jsf:id="ContactDetailsForm" class="validate-form">
                             <div class="block-content">
                                 <h2>My Contact Details</h2>
                                 <p></p>
+                                <div class="form-group">
+                                    <s2:messenger for="ContactDetailsForm" 
+                                        showDetail="true" showSummary="true">
+                                    </s2:messenger>
+                                </div>
                                 <div class="form-group">
                                     <label>Your first name:</label>
                                     <span class="help-block">
@@ -73,7 +69,7 @@
                                     </p:commandButton>
                                 </div>
                             </div>
-                            <p:blockUI block="contact_details_form" trigger="contact_details_form:update_contact_button">
+                            <p:blockUI block="ContactDetailsForm" trigger="ContactDetailsForm:update_contact_button">
                                 <p id="spinner"></p>
                             </p:blockUI>
                         </form>

@@ -11,6 +11,7 @@ import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.entity.client.Client;
 import eds.entity.subscription.ListAssignment;
 import eds.entity.subscription.SubscriptionList;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.ObjectNotFoundException;
@@ -35,12 +36,12 @@ public class SubscriptionService {
     @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void addList(long clientid, String listname, boolean remote) 
-            throws DBConnectionException, EnterpriseObjectNotFoundException{
+    public SubscriptionList addList(long clientid, String listname, boolean remote) {
         try{
             //1. Create the list object and persist it first
             SubscriptionList newList = new SubscriptionList();
             newList.setLIST_NAME(listname); //Right now we don't keep history
+            newList.setLOCATION( remote ? SubscriptionList.LOCATION.REMOTE : SubscriptionList.LOCATION.LOCAL);
             
             em.persist(newList);
             
@@ -52,14 +53,49 @@ public class SubscriptionService {
             
             ListAssignment listAssignment = new ListAssignment(newList,client);
             
+            em.persist(listAssignment);
+            
+            return newList;
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
-            throw pex;
-        } catch (Exception ex){
-            //Wrap it in an unchecked exception so that it will rollback
-            throw ex;
+            throw new EJBException(pex);
+        } catch (Exception ex) {
+            throw new EJBException(ex);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public boolean hasNoList(long clientid){
+        try {
+            long count = this.genericEntepriseObjectService.countRelationshipsForTarget(clientid, ListAssignment.class);
+            return (count <= 0);
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } catch (Exception ex) {
+            throw new EJBException(ex);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<SubscriptionList> getAllListForClient(long clientid){
+        try {
+            List<SubscriptionList> allList = 
+                    this.genericEntepriseObjectService.getAllSourceObjectsFromTarget(clientid, ListAssignment.class, SubscriptionList.class);
+            
+            return allList;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } catch (Exception ex) {
+            throw new EJBException(ex);
         }
     }
     

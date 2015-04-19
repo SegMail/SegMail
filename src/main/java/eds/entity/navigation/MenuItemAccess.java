@@ -6,7 +6,7 @@
 
 package eds.entity.navigation;
 
-import eds.entity.EnterpriseRelationship;
+import eds.entity.data.EnterpriseRelationship;
 import eds.entity.user.UserType;
 import javax.persistence.Entity;
 import javax.persistence.Table;

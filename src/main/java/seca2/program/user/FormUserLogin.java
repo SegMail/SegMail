@@ -21,6 +21,7 @@ import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.servlet.http.HttpServletRequest;
+import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -33,8 +34,8 @@ public class FormUserLogin {
 
     @EJB
     private UserService userService;
-    @Inject
-    private UserContainer userContainer;
+    @Inject private UserContainer userContainer;
+    @Inject private ProgramContainer programContainer;
 
     private String username;
     private String password;
@@ -59,14 +60,15 @@ public class FormUserLogin {
 
             //do a redirect to refresh the view
             //Something is faulty here after a redirect
-            String previousURI = this.userContainer.getLastURL();
+            String previousURI = this.userContainer.getLastProgram();
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             if (previousURI != null && !previousURI.isEmpty()) {
-                ec.redirect(ec.getRequestContextPath()
+                /*ec.redirect(ec.getRequestContextPath()
                         +ec.getRequestServletPath()
                         +"/"
                         +previousURI
-                        +"/"); //calling "test" -> "/SegMail/program/test/test"
+                        +"/");*/ //calling "test" -> "/SegMail/program/test/test"
+                ec.redirect(userContainer.getLastURL());
                 //we need an adaptor pattern for redirection!
                 //this should be in the navigation module
                 

@@ -5,7 +5,7 @@
  */
 package eds.entity.client;
 
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.program.ProgramListener;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;

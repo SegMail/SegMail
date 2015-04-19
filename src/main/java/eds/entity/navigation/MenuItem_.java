@@ -6,7 +6,7 @@
 
 package eds.entity.navigation;
 
-import eds.entity.EnterpriseObject_;
+import eds.entity.data.EnterpriseObject_;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 import eds.entity.program.Program;

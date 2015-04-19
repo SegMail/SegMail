@@ -8,6 +8,8 @@ package seca2.program.mysettings;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.entity.client.Client;
+import eds.entity.client.ClientAssignment;
+import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -61,18 +63,27 @@ public class ContactDetailsForm {
             
             //Get the user's clientid
             Client thisClient = clientService.getClientByAssignedObjectId(userContainer.getUser().getOBJECTID());
-            contactInfo.setOWNER(thisClient);
+            contactInfo.setOWNER(thisClient); //May be null at this point of time
         }
             
     }
     
     public void update(){
         try {
+            //Check if the user has a client object created and create one if not yet exist
+            if(contactInfo.getOWNER() == null){
+                //Check which client type is "Person", but we are assuming it's called "Person" and not by other similar names
+                ClientType personClientType = clientService.getClientTypeByName("Person");
+                ClientAssignment newClientAssignment = 
+                        clientService.registerClientForObject(userContainer.getUser(), personClientType.getOBJECTID());
+                Client newclient = newClientAssignment.getSOURCE();
+                contactInfo.setOWNER(newclient);
+            }
             this.clientService.updateClientContact(contactInfo);
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
 

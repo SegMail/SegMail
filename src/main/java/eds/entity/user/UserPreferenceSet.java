@@ -5,7 +5,7 @@
  */
 package eds.entity.user;
 
-import eds.entity.EnterpriseData;
+import eds.entity.data.EnterpriseData;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

@@ -6,7 +6,7 @@
 package eds.component.user;
 
 import eds.component.GenericEnterpriseObjectService;
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;

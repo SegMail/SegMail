@@ -6,7 +6,7 @@
 
 package eds.entity.client;
 
-import eds.entity.EnterpriseData_;
+import eds.entity.data.EnterpriseData_;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 

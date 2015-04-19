@@ -6,7 +6,7 @@
 
 package eds.entity.navigation;
 
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import TreeAPI.TreeBranch;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

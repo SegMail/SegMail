@@ -5,20 +5,14 @@
  */
 package eds.entity.subscription;
 
-import eds.entity.resource.AbstractConnection;
-import javax.persistence.DiscriminatorValue;
+import eds.entity.resource.SystemResourceAssignment;
 
 /**
  *
  * @author LeeKiatHaw
  */
-//@DiscriminatorValue("LOCAL")
-public class LocalListConnection extends AbstractConnection {
-
-    @Override
-    public String alias() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+public class RemoteListConnectionAssignment 
+    extends SystemResourceAssignment<RemoteListConnection,SubscriptionList> {
 
     @Override
     public void randInit() {

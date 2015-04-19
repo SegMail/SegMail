@@ -6,7 +6,7 @@
 
 package eds.entity.user;
 
-import eds.entity.EnterpriseData;
+import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;

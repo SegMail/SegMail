@@ -5,7 +5,7 @@
  */
 package eds.entity.subscription;
 
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 

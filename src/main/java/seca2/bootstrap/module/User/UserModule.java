@@ -7,7 +7,6 @@ package seca2.bootstrap.module.User;
 
 import java.io.Serializable;
 import javax.ejb.EJB;
-import javax.faces.application.ProjectStage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -17,6 +16,8 @@ import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.GlobalValues;
 import eds.component.user.UserService;
+import java.io.IOException;
+import javax.faces.context.ExternalContext;
 
 /**
  *
@@ -65,12 +66,17 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
         //FacesContext fc = (FacesContext) inputContext.getFacesContext();
         FacesContext fc = FacesContext.getCurrentInstance();
+        ExternalContext ec = fc.getExternalContext();
         HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
         
         //allow bypass authentication if application is not in PRODUCTION stage
         //if(!fc.getApplication().getProjectStage().equals(ProjectStage.Production)){
         //[20150328] allow bypass if application is in SETUP
-        if(fc.getExternalContext().getInitParameter("SETUP").compareToIgnoreCase("true") == 0){
+        String bypassInURL = ec.getRequestParameterMap().get("SETUP");
+        String bypassInWebXML = ec.getInitParameter("SETUP");
+        if((bypassInWebXML != null && bypassInWebXML.compareToIgnoreCase("true") == 0) ||
+                (bypassInURL != null && bypassInURL.compareToIgnoreCase("true") == 0)
+                ){
             //String bypass = fc.getExternalContext().getInitParameter("BYPASS_AUTHENTICATION");
             //if not in PRODUCTION and BYPASS_AUTHENTICATION flag is set
             //if(bypass.equalsIgnoreCase("true")){
@@ -98,11 +104,26 @@ public class UserModule extends BootstrapModule implements Serializable {
         boolean isAuthenticated = this.isAuthenticated(this.userContainer);
         
         String program = inputContext.getProgram();
-        this.userContainer.setLastURL(program);
+        this.userContainer.setLastProgram(program);
         
         //If it's not the same session, meaning it could be the first vist, or 
         //the previous session has timed out, load the login page.
         if(!sameSession){
+            //If it's a postback, then the entire page must be refreshed.
+            //System.out.println(fc.isPostback());
+            if(fc.isPostback()){
+                try {
+                    ec.redirect(ec.getRequestContextPath()
+                            +ec.getRequestServletPath()
+                            +"/"
+                            +program
+                            +"/");
+                    return true;
+                } catch (IOException ex) {
+                    return false;
+                }
+            }
+            //Else, 
             outputContext.setPageRoot(this.defaultSites.LOGIN_PAGE);
             outputContext.setTemplateRoot(this.defaultSites.LOGIN_PAGE_TEMPLATE);
             

@@ -7,7 +7,7 @@ package seca2.bootstrap.module.Layout;
 
 import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutService;
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.layout.Layout;
 import eds.entity.layout.LayoutAssignment;
 import eds.entity.user.User;
@@ -80,18 +80,18 @@ public class LayoutModule extends BootstrapModule implements Serializable {
             }
             List<LayoutAssignment> assignments = layoutService.getLayoutAssignmentsByUser(userContainer.getUser());
             for (LayoutAssignment assignment : assignments) {
-                EnterpriseObject source = assignment.getSOURCE();
-                if (source instanceof User) {
-                    layout = (Layout) assignment.getTARGET();
+                EnterpriseObject target = assignment.getTARGET();
+                if (target instanceof User) {
+                    layout = (Layout) assignment.getSOURCE();
                     outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                     return true;
                 }
             }
 
             for (LayoutAssignment assignment : assignments) {
-                EnterpriseObject source = assignment.getSOURCE();
-                if (source instanceof UserType) {
-                    layout = (Layout) assignment.getTARGET();
+                EnterpriseObject target = assignment.getTARGET();
+                if (target instanceof UserType) {
+                    layout = (Layout) assignment.getSOURCE();
                     outputContext.setTemplateRoot(layout.getVIEW_ROOT());
                     return true;
                 }
@@ -120,8 +120,8 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     private boolean canSkip(BootstrapInput inputContext, BootstrapOutput outputContext) {
         //If the following conditions are met:
         //- Previous request and current request are the same,
-        boolean sameRequest = (userContainer.getLastURL() == null) ? false
-                : userContainer.getLastURL().equalsIgnoreCase(inputContext.getProgram());
+        boolean sameRequest = (userContainer.getLastProgram() == null) ? false
+                : userContainer.getLastProgram().equalsIgnoreCase(inputContext.getProgram());
         //- UserContainer isLoggedIn(),
         boolean isLoggedIn = userContainer.isLoggedIn();
         //- PageRoot is not empty

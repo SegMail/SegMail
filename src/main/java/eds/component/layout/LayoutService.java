@@ -5,7 +5,7 @@ import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
-import eds.entity.EnterpriseObject;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.client.Client;
 import eds.entity.layout.Layout;
 import eds.entity.layout.LayoutAssignment;
@@ -402,7 +402,7 @@ public class LayoutService implements Serializable {
             Root<LayoutAssignment> sourceEntity = criteria.from(LayoutAssignment.class); //FROM Layout
 
             criteria.select(sourceEntity);
-            criteria.where(sourceEntity.get(LayoutAssignment_.SOURCE).in(IDs));
+            criteria.where(sourceEntity.get(LayoutAssignment_.TARGET).in(IDs));
             
             List<LayoutAssignment> results = em.createQuery(criteria).getResultList();
             

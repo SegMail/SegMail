@@ -5,8 +5,8 @@
  */
 package eds.component.navigation;
 
-import eds.entity.EnterpriseObject;
-import eds.entity.EnterpriseObject_;
+import eds.entity.data.EnterpriseObject;
+import eds.entity.data.EnterpriseObject_;
 import TreeAPI.TreeBranch;
 import TreeAPI.TreeBuilder;
 import TreeAPI.TreeNode;

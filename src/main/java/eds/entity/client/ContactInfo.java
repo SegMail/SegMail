@@ -5,7 +5,7 @@
  */
 package eds.entity.client;
 
-import eds.entity.EnterpriseData;
+import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 

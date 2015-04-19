@@ -32,9 +32,8 @@
             <ui:insert name="head" />
         </h:head>
         <h:body>
-            <div class="page-container">
+            <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 
-                <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-02">
                             <span class="sr-only">Toggle navigation</span>
@@ -46,11 +45,11 @@
                             <ui:include src="#{bootstrap.output.menuRoot}" />
                         </ul>
                     </div>
-                </nav>
-                <div class="page-content">
-                    <div class="container" style="">
-
-                        <ui:insert name="main-program-panel" />
+            </nav>
+            <div class="page-container">
+                <div class="page-content" >
+                    <div class="container-fluid" style="padding-top: 50px;">
+                            <ui:insert name="main-program-panel" />
                     </div>
                 </div>
 
