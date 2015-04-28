@@ -49,11 +49,11 @@
 
                     </div>
 
-                    <div class="col-md-9">
+                    <div jsf:id="list_editing_block" class="col-md-9" jsf:rendered="#{ProgramList.listEditing ne null}">
 
 
                         <ui:include src="editing_panel_header.xhtml"></ui:include>
-                        <div class="block">
+                        <div class="block" >
                             <ul class="nav nav-tabs">
                                 <li class="active">
                                     <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
@@ -70,7 +70,7 @@
                             </ul>
                             <div class="block-content tab-content">
                                 <div class="tab-pane active" id="subscribers_tab">
-                                    <p>fjeirgnrgwrn</p>
+                                    <ui:include src="subscriber_panel.xhtml"></ui:include>
                                 </div>
                                 <div class="tab-pane" id="activities_tab">
                                     <p>fjeirgnrgwrn</p>

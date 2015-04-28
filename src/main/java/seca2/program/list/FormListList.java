@@ -38,6 +38,7 @@ public class FormListList {
     @PostConstruct
     public void init(){
         this.loadAllLists();
+        this.resetEditingList();
     }
     
     /**
@@ -59,6 +60,14 @@ public class FormListList {
         
         this.programList.setAllLists(allLists);
             
+    }
+    
+    public void loadList(SubscriptionList list){
+        this.programList.setListEditing(list);
+    }
+    
+    public void resetEditingList(){
+        this.programList.setListEditing(null);
     }
 
     public ProgramList getProgramList() {
