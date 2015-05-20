@@ -52,10 +52,11 @@ public class ContactDetailsForm {
                 this.mySettingsProgram.getContactInfo().setOWNER(newclient);
             }
             this.clientService.updateClientContact(mySettingsProgram.getContactInfo());
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Your contact details has been updated!", null);
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
     

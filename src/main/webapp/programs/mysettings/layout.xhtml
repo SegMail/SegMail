@@ -20,9 +20,10 @@
                                 <h2>My Contact Details</h2>
                                 <p></p>
                                 <div class="form-group">
-                                    <s2:messenger for="contact_details_form" 
+                                    <s2:messenger id="contact_form_message" for="contact_details_form" 
                                         showDetail="true" showSummary="true">
                                     </s2:messenger>
+                                    
                                 </div>
                                 <div class="form-group">
                                     <label>Your first name:</label>
@@ -64,8 +65,8 @@
                                 </div>
                                 <div class="pull-right">
                                     <p:commandButton id="update_contact_button" styleClass="btn btn-success"
-                                                     action="#{ContactDetailsForm.update()}" value="Update"
-                                                        
+                                                     actionListener="#{ContactDetailsForm.update()}" value="Update"
+                                                     update="contact_form_message"
                                                      >
                                         
                                     </p:commandButton>
