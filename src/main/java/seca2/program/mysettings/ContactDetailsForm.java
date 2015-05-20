@@ -35,67 +35,32 @@ public class ContactDetailsForm {
     
     private final String formName = "contact_details_form";
     
-    private ContactInfo contactInfo;
-    
     @PostConstruct
     public void init(){
-        try {
-            this.initContactInfo();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.mySettingsProgram.getPageName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.mySettingsProgram.getPageName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-    
-    public void initContactInfo() throws DBConnectionException, Exception{
-        if(!userContainer.isLoggedIn() || userContainer.getUser() == null){
-            //This will most likely not happen in production, hence we don't really have to handle it
-            throw new RuntimeException("You are not logged in and you cannot execute any functionalities on this page.");
-        }
-        
-        this.contactInfo = clientService.getContactInfoForObject(userContainer.getUser().getOBJECTID());
-        
-        //You don't want a nullpointerexception on your page!
-        //This is the temporary solution, may or may not be the best.
-        if(contactInfo == null){
-            contactInfo = new ContactInfo();
-            
-            //Get the user's clientid
-            Client thisClient = clientService.getClientByAssignedObjectId(userContainer.getUser().getOBJECTID());
-            contactInfo.setOWNER(thisClient); //May be null at this point of time
-        }
-            
+        System.out.println("Contact form initiated!");
     }
     
     public void update(){
         try {
             //Check if the user has a client object created and create one if not yet exist
-            if(contactInfo.getOWNER() == null){
+            if(this.mySettingsProgram.getContactInfo().getOWNER() == null){
                 //Check which client type is "Person", but we are assuming it's called "Person" and not by other similar names
                 ClientType personClientType = clientService.getClientTypeByName("Person");
                 ClientAssignment newClientAssignment = 
                         clientService.registerClientForObject(userContainer.getUser(), personClientType.getOBJECTID());
                 Client newclient = newClientAssignment.getSOURCE();
-                contactInfo.setOWNER(newclient);
+                this.mySettingsProgram.getContactInfo().setOWNER(newclient);
             }
-            this.clientService.updateClientContact(contactInfo);
+            this.clientService.updateClientContact(mySettingsProgram.getContactInfo());
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
-
-    public ContactInfo getContactInfo() {
-        return contactInfo;
-    }
-
-    public void setContactInfo(ContactInfo contactInfo) {
-        this.contactInfo = contactInfo;
-    }
-
     
-    
+    public ContactInfo getContactInfo(){
+        return this.mySettingsProgram.getContactInfo();
+    }
     
 }

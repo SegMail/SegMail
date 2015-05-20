@@ -7,72 +7,90 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-    xmlns:jsf="http://xmlns.jcp.org/jsf">
-    
-    <h1>This is the subscriber's panel</h1>
-    <div class="row">
-        <div class="col-md-4 col-xs-12">
-            <div class="btn-group" data-toggle="buttons">
-                <label type="button" class="btn btn-default">
-                    <input type="checkbox" />
-                    Verified
-                </label>
-                <label type="button" class="btn btn-default">
-                    <input type="checkbox" />
-                    Unverified
-                </label>
-                <label type="button" class="btn btn-default">
-                    <input type="checkbox" />
-                    Removed
-                </label>
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="subscriber_panel">
+        <h1>This is the subscriber's panel</h1>
+        <div class="row">
+            <div class="col-md-4 col-xs-12">
+                <div class="btn-group" data-toggle="buttons">
+                    <label type="button" class="btn btn-default">
+                        <input type="checkbox" />
+                        Verified
+                    </label>
+                    <label type="button" class="btn btn-default">
+                        <input type="checkbox" jsf:id="unverified_button"
+                               jsf:listener="#{FormListSubscriber.testFilter()}">
+                            <f:ajax execute="@form" render="@form" ></f:ajax>
+                        </input>
+                        Unverified
+                    </label>
+                    <label type="button" class="btn btn-default">
+                        <h:selectBooleanCheckbox binding="#{removed}">
+                            <f:ajax render="subscriber_table" event="click"
+                                    listener="#{FormListSubscriber.testFilter}"></f:ajax>
+                        </h:selectBooleanCheckbox>
+                        Removed
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-push-6">
+                <a class="btn btn-success" href="#add_subscriber_popup" data-toggle="modal">
+                    Add Subscriber
+                </a>
             </div>
         </div>
-    </div>
-    <div class="row">
-        
-        <div class="col-md-12">
-            <div class="block">
-                <div class="block-content np">
-                    <div class="dataTables_wrapper" role="grid">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <td>Subscriber ID</td>
-                                    <td>Name</td>
-                                    <td>Email</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>John</td>
-                                    <td>john.doe@segmail.com</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>John</td>
-                                    <td>john.doe@segmail.com</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>John</td>
-                                    <td>john.doe@segmail.com</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>John</td>
-                                    <td>john.doe@segmail.com</td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>John</td>
-                                    <td>john.doe@segmail.com</td>
-                                </tr>
-                            </tbody>
-                        </table>
+        <div class="row">
+
+            <div class="col-md-12">
+                <div class="block">
+                    <div class="block-content np">
+                        <div class="dataTables_wrapper" role="grid">
+                            <table jsf:id="subscriber_table" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <td>Subscriber ID</td>
+                                        <td>Name</td>
+                                        <td>Email</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>John</td>
+                                        <td>john.doe@segmail.com</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>John</td>
+                                        <td>john.doe@segmail.com</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>John</td>
+                                        <td>john.doe@segmail.com</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>John</td>
+                                        <td>john.doe@segmail.com</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>John</td>
+                                        <td>john.doe@segmail.com</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+    </form>
+    <div class="modal fade" id="add_subscriber_popup">
+        <form>
+            <ui:include src="add_new_subscriber_form.xhtml"></ui:include>
+        </form>
     </div>
 </html>

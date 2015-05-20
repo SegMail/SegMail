@@ -15,12 +15,12 @@
             <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div jsf:id="contact_details_block" class="block">
-                        <form jsf:id="ContactDetailsForm" class="validate-form">
+                        <form jsf:id="contact_details_form" class="validate-form">
                             <div class="block-content">
                                 <h2>My Contact Details</h2>
                                 <p></p>
                                 <div class="form-group">
-                                    <s2:messenger for="ContactDetailsForm" 
+                                    <s2:messenger for="contact_details_form" 
                                         showDetail="true" showSummary="true">
                                     </s2:messenger>
                                 </div>
@@ -29,8 +29,8 @@
                                     <span class="help-block">
                                         How do we address you?
                                     </span>
-                                    <input type="text" jsf:id="contact_first_name" class="form-control validate[required]"
-                                           
+                                    <input type="text" jsf:id="contact_first_name" class="validate[required] form-control"
+                                           required="true"
                                            jsf:value="#{ContactDetailsForm.contactInfo.FIRSTNAME}"
                                            placeholder="Your first name"></input>
                                 </div>
@@ -39,8 +39,9 @@
                                     <span class="help-block">
                                         In case another person has the same awesome name.
                                     </span>
-                                    <input type="text" jsf:id="contact_last_name" class="form-control"
+                                    <input type="text" jsf:id="contact_last_name" class="validate[required] form-control"
                                            jsf:value="#{ContactDetailsForm.contactInfo.LASTNAME}"
+                                           required="true"
                                            placeholder="Your last name"></input>
                                 </div>
                                 <div class="form-group">
@@ -48,8 +49,8 @@
                                     <span class="help-block">
                                         This is how we will contact you.
                                     </span>
-                                    <input type="email" jsf:id="contact_email" class="form-control validate[required,custom[email]]"
-                                           
+                                    <input type="email" jsf:id="contact_email" class="validate[required,custom[email]] form-control"
+                                           required="true"
                                            jsf:value="#{ContactDetailsForm.contactInfo.EMAIL}"
                                            placeholder="Your email"></input>
                                 </div>
@@ -62,14 +63,15 @@
                                     </button>
                                 </div>
                                 <div class="pull-right">
-                                    <p:commandButton id="update_contact_button" type="submit" styleClass="btn btn-success"
-                                                     actionListener="#{ContactDetailsForm.update()}" value="Update"
-                                                     update="@form">
+                                    <p:commandButton id="update_contact_button" styleClass="btn btn-success"
+                                                     action="#{ContactDetailsForm.update()}" value="Update"
+                                                        
+                                                     >
                                         
                                     </p:commandButton>
                                 </div>
                             </div>
-                            <p:blockUI block="ContactDetailsForm" trigger="ContactDetailsForm:update_contact_button">
+                            <p:blockUI block="contact_details_form" trigger="contact_details_form:update_contact_button">
                                 <p id="spinner"></p>
                             </p:blockUI>
                         </form>

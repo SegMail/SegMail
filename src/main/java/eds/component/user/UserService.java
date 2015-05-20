@@ -29,6 +29,8 @@ import org.joda.time.DateTime;
 import eds.component.Service;
 import eds.component.data.DBConnectionException;
 import eds.component.data.HibernateHelper;
+import eds.entity.user.APIAccount;
+import eds.entity.user.APIAccount_;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserAccount_;
@@ -37,6 +39,7 @@ import eds.entity.user.UserPreferenceSet_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
 import javax.ejb.EJB;
+import javax.ejb.EJBException;
 
 /**
  *
@@ -739,4 +742,56 @@ public class UserService extends Service {
         return hashedPassword;
     }
 
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public APIAccount getAPIAccountById(long userid) 
+            throws DBConnectionException{
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<APIAccount> criteria = builder.createQuery(APIAccount.class);
+            Root<APIAccount> sourceEntity = criteria.from(APIAccount.class); //FROM UserType
+            
+            criteria.select(sourceEntity); // SELECT *
+            criteria.where(builder.equal(sourceEntity.get(APIAccount_.OWNER), userid)); //WHERE USERTYPENAME = userTypeName
+            
+            //Temporary measure before we find a better way to define the underlying
+            //data of UserAccount object and subsequently how to retrieve the correct
+            //result.
+            //
+            List<APIAccount> results = em.createQuery(criteria)
+                    .getResultList();
+            
+            if(results == null || results.size() <= 0)
+                return null;
+
+            return results.get(0);
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } catch (Exception ex) {
+            throw new EJBException(ex);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String generateAPIKey(long userid){
+        try{
+            //Get user object first
+            User user = this.getUserById(userid);
+            if(user == null)
+                throw new Exception("User ID "+userid+" not found!");
+            
+            
+            return null;
+        }  catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } catch (Exception ex) {
+            throw new EJBException(ex);
+        }
+    }
 }

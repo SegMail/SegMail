@@ -15,11 +15,37 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIBER")
-public class Subscriber extends EnterpriseObject {
+public class SubscriberAccount extends EnterpriseObject {
     
     private String EMAIL;
     private String FIRSTNAME;
     private String LASTNAME;
+
+    public String getEMAIL() {
+        return EMAIL;
+    }
+
+    public void setEMAIL(String EMAIL) {
+        this.EMAIL = EMAIL;
+    }
+
+    public String getFIRSTNAME() {
+        return FIRSTNAME;
+    }
+
+    public void setFIRSTNAME(String FIRSTNAME) {
+        this.FIRSTNAME = FIRSTNAME;
+    }
+
+    public String getLASTNAME() {
+        return LASTNAME;
+    }
+
+    public void setLASTNAME(String LASTNAME) {
+        this.LASTNAME = LASTNAME;
+    }
+    
+    
     
     @Override
     public void randInit() {

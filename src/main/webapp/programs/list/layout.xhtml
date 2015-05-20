@@ -92,7 +92,7 @@
             <div class="modal fade" id="add_list_popup"
                  >
                 <div class="modal-dialog">
-                    <h:form id="FormAddList">
+                    <form jsf:id="FormAddList" class="validate-form">
                         <div class="modal-content">
 
                             <div class="modal-header">
@@ -107,7 +107,7 @@
                                     <label>
                                         Give your list a name:
                                     </label>
-                                    <input type="text" class="form-control"
+                                    <input type="text" class="form-control validate[required]"
                                            jsf:value="#{FormAddList.listName}" />
                                 </div>
                                 <div class="form-group">
@@ -139,7 +139,7 @@
                         <p:blockUI block="FormAddList" trigger="FormAddList:add_list_button">
                             <p id="spinner">Please wait while we do what we do best.</p>
                         </p:blockUI>
-                    </h:form>
+                    </form>
                 </div>
             </div>
 

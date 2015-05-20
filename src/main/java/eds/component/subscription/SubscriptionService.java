@@ -10,17 +10,19 @@ import eds.component.data.DBConnectionException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.entity.client.Client;
 import eds.entity.subscription.ListAssignment;
+import eds.entity.subscription.SubscriberAccount;
+import eds.entity.subscription.Subscription;
 import eds.entity.subscription.SubscriptionList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
-import javax.ejb.ObjectNotFoundException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 
 /**
@@ -38,6 +40,9 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList addList(long clientid, String listname, boolean remote) {
         try{
+            if(listname == null || listname.isEmpty())
+                throw new ListException("Listname cannot be empty.");
+            
             //1. Create the list object and persist it first
             SubscriptionList newList = new SubscriptionList();
             newList.setLIST_NAME(listname); //Right now we don't keep history
@@ -89,6 +94,39 @@ public class SubscriptionService {
                     this.genericEntepriseObjectService.getAllSourceObjectsFromTarget(clientid, ListAssignment.class, SubscriptionList.class);
             
             return allList;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } catch (Exception ex) {
+            throw new EJBException(ex);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void subscribe(SubscriberAccount newSub, long listId){
+        try{
+            //Validate the email address rules
+            EmailValidator validator = EmailValidator.getInstance();
+            if(!validator.isValid(newSub.getEMAIL()))
+                throw new SubscriptionException("Email address is not valid!");
+            
+            //Find the list object
+            SubscriptionList list = this.genericEntepriseObjectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+            if(list == null)
+                throw new SubscriptionException("List "+listId+" not found!");
+            
+            
+            //Create new subscription
+            Subscription subsc = new Subscription();
+            subsc.setSOURCE(newSub);
+            subsc.setTARGET(list);
+            subsc.setSTATUS(Subscription.STATUS.NEW);
+            
+            //Send the confirmation email
+            
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
