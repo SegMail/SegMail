@@ -59,20 +59,24 @@
                             <div class="block-footer">
                                 <div class="pull-left">
                                     <button type="button" class="btn btn-default"
-                                            onclick="document.getElementById('contact_details_form').reset()">
+                                            onclick="$('#contact_details_form').validationEngine('hideAll');
+                                                    document.getElementById('contact_details_form').reset()">
                                         I screwed up. Help!
                                     </button>
                                 </div>
                                 <div class="pull-right">
                                     <p:commandButton id="update_contact_button" styleClass="btn btn-success"
                                                      actionListener="#{ContactDetailsForm.update()}" value="Update"
-                                                     update="contact_form_message"
+                                                     update="contact_form_message" 
+                                                     onclick="$('#contact_details_form').validationEngine('validate')"
+                                                     
                                                      >
                                         
                                     </p:commandButton>
                                 </div>
                             </div>
-                            <p:blockUI block="contact_details_form" trigger="contact_details_form:update_contact_button">
+                            <p:blockUI block="contact_details_form" trigger="contact_details_form:update_contact_button"
+                                       >
                                 <p id="spinner"></p>
                             </p:blockUI>
                         </form>

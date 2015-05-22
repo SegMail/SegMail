@@ -38,39 +38,9 @@ public class MySettingsProgram implements Serializable {
     
     @PostConstruct
     public void init(){
-        try {
-            this.initContactInfo();
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(getPageName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(getPageName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
+        
     }
     
-    public void initContactInfo() throws DBConnectionException, Exception{
-        if(!userContainer.isLoggedIn() || userContainer.getUser() == null){
-            //This will most likely not happen in production, hence we don't really have to handle it
-            throw new RuntimeException("You are not logged in and you cannot execute any functionalities on this page.");
-        }
-        
-        if(this.contactInfo != null)
-            return;
-        //Retrieve the contact info for this particular user
-        setContactInfo(clientService.getContactInfoForObject(userContainer.getUser().getOBJECTID()));
-        
-        //You don't want a nullpointerexception on your page!
-        //This is the temporary solution, may or may not be the best.
-        if(getContactInfo() == null){
-            ContactInfo newContactInfo = new ContactInfo();
-            
-            //Get the user's clientid
-            Client thisClient = clientService.getClientByAssignedObjectId(userContainer.getUser().getOBJECTID());
-            newContactInfo.setOWNER(thisClient); //May be null at this point of time
-            setContactInfo(newContactInfo);
-        }
-            
-    }
-
     public String getPageName() {
         return pageName;
     }

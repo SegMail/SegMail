@@ -145,10 +145,13 @@
         <ui:insert name="scripts-bottom"></ui:insert>
         
         <script type="text/javascript">
-            $("form.validate-form").validationEngine('attach',{promptPosition : "topLeft"});
-            
+            $(document).ready(function(){
+                $("#contact_details_form").validationEngine('attach',
+                    {promptPosition : "topLeft",
+                     ajaxFormValidation : true,
+                     validationEventTrigger: "blur"});
+            });
             
         </script>
-
     </f:view>
 </html>

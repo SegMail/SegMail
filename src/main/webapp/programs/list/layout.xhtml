@@ -107,7 +107,7 @@
                                     <label>
                                         Give your list a name:
                                     </label>
-                                    <input type="text" class="form-control validate[required]"
+                                    <input type="text" class="validate[required] form-control"
                                            jsf:value="#{FormAddList.listName}" />
                                 </div>
                                 <div class="form-group">
@@ -123,15 +123,18 @@
                                         </span>
                                     </div>
                                 </div>
-                                <s2:messenger id="FormAddList_messenger" for="FormAddList" showDetail="true" showSummary="true"
+                                <div class="form-group">
+                                    <s2:messenger id="FormAddList_messenger" for="FormAddList" showDetail="true" showSummary="true"
                                               class="form-group"></s2:messenger>
+                                </div>
+                                
 
                             </div>
                             <div class="modal-footer">
                                 <p:commandButton id="add_list_button" styleClass="btn btn-success" 
                                                  value="Create list" update="FormAddList_messenger"
                                                  actionListener="#{FormAddList.addList()}">
-
+                                
                                 </p:commandButton>
                             </div>
 
