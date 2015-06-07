@@ -8,12 +8,9 @@ package seca2.program.test.client;
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientRegistrationException;
 import eds.component.client.ClientService;
-import eds.component.client.ClientTypeRegistrationException;
 import eds.component.data.DBConnectionException;
-import eds.component.user.UserService;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.client.ClientType;
-import eds.entity.user.User;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -30,6 +27,7 @@ import seca2.program.test.ProgramTest;
 @Named("FormRegisterClientForObjectname")
 @RequestScoped
 public class FormRegisterClientForObjectname {
+    
     
     @Inject private ProgramTest programTest;
     
@@ -81,5 +79,25 @@ public class FormRegisterClientForObjectname {
 
     public List<ClientType> getAllClientTypes(){
         return this.programTest.getAllClientTypes();
+    }
+    
+    public void registerClientForUser(String clientTypename, String username){
+        // Refresh ProgramTest
+        this.programTest.init();
+        
+        ClientType clientType = null;
+        for(ClientType ct : this.getAllClientTypes()){
+            if(clientTypename.compareToIgnoreCase(ct.getCLIENT_TYPE_NAME()) == 0){
+                clientType = ct;
+                break;
+            }
+        }
+        if(clientType == null)
+            throw new RuntimeException("Clienttype "+clientTypename+" could not be found.");
+        
+        this.setClientTypeId(clientType.getOBJECTID());
+        this.setObjectname(username);
+        
+        this.registerClientForUsername();
     }
 }

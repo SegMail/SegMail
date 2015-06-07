@@ -16,10 +16,16 @@ public class MenuItemComparator implements Comparator<MenuItem> {
 
     @Override
     public int compare(MenuItem o1, MenuItem o2) {
+        return o1.getWEIGHT() - o1.getWEIGHT();
+    }
+
+    /**
+    @Override
+    public int compare(MenuItem o1, MenuItem o2) {
         
         /**
          * Takes care of all null scenarios.
-         */
+         *
         if(o1 == null) return (o2 == null ? 0 : -1);
         
         if(o2 == null) return 1;
@@ -34,6 +40,8 @@ public class MenuItemComparator implements Comparator<MenuItem> {
         } //sort by parents first
         System.out.println("MenuItem: "+o1+" ==="+compareOwnIds+"=== MenuItem: "+o2);
         return compareOwnIds; //sort by its own objectId
-    }
+    }*/
+    
+    
     
 }

@@ -79,9 +79,9 @@
                                     <p>fjeirgnrgwrn</p>
                                 </div>
                                 <div class="tab-pane" id="settings_tab">
-                                    <p>fjeirgnrgwrn</p>
+                                    <ui:include src="settings_panel.xhtml"></ui:include>
                                 </div>
-
+                                
                             </div>
                         </div>
                     </div>
@@ -89,61 +89,14 @@
                 </c:otherwise>
             </c:choose>
             <!--popups and modals-->
+            <!--All modals and popups must be declared in the main page. For some reason, declaring them in the 
+                higher level ui:includes make them malfunction-->
             <div class="modal fade" id="add_list_popup"
                  >
-                <div class="modal-dialog">
-                    <form jsf:id="FormAddList" class="validate-form">
-                        <div class="modal-content">
-
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                    X
-                                </button>
-                                <h4 class="modal-title">Add new list</h4>
-                            </div>
-
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label>
-                                        Give your list a name:
-                                    </label>
-                                    <input type="text" class="validate[required] form-control"
-                                           jsf:value="#{FormAddList.listName}" />
-                                </div>
-                                <div class="form-group">
-                                    <div class="checkbox" style="margin-left: 10px;">
-                                        <label style="padding-left:0px">
-                                            <strong>Remote List</strong>
-                                            <input type="checkbox" class="icheck" style=""
-                                                   jsf:value="#{FormAddList.remote}"/>
-                                        </label>
-
-                                        <span class="help-block">
-                                            Recommended. You will need to set up your DB connection later.
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <s2:messenger id="FormAddList_messenger" for="FormAddList" showDetail="true" showSummary="true"
-                                              class="form-group"></s2:messenger>
-                                </div>
-                                
-
-                            </div>
-                            <div class="modal-footer">
-                                <p:commandButton id="add_list_button" styleClass="btn btn-success" 
-                                                 value="Create list" update="FormAddList_messenger"
-                                                 actionListener="#{FormAddList.addList()}">
-                                
-                                </p:commandButton>
-                            </div>
-
-                        </div>
-                        <p:blockUI block="FormAddList" trigger="FormAddList:add_list_button">
-                            <p id="spinner">Please wait while we do what we do best.</p>
-                        </p:blockUI>
-                    </form>
-                </div>
+                <ui:include src="add_new_list.xhtml" ></ui:include>
+            </div>
+            <div class="modal fade" id="add_subscriber_popup">
+                <ui:include src="add_new_subscriber.xhtml"></ui:include>
             </div>
 
         </ui:define>

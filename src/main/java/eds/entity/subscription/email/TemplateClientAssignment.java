@@ -3,22 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.subscription;
+package eds.entity.subscription.email;
 
-import eds.entity.resource.AbstractConnection;
-import javax.persistence.DiscriminatorValue;
+import eds.entity.client.Client;
+import eds.entity.data.EnterpriseRelationship;
+import eds.entity.user.UserType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
  */
-//@DiscriminatorValue("LOCAL")
-public class LocalListConnection extends AbstractConnection {
-
-    @Override
-    public String alias() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+@Entity
+@Table(name="TEMPLATE_CLIENT_ASSIGNMENT")
+public class TemplateClientAssignment extends EnterpriseRelationship<EmailTemplate,Client> {
 
     @Override
     public void randInit() {

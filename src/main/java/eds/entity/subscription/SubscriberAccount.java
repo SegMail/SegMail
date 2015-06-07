@@ -6,6 +6,7 @@
 package eds.entity.subscription;
 
 import eds.entity.data.EnterpriseObject;
+import eds.entity.mail.MailRecipient;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -15,7 +16,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIBER")
-public class SubscriberAccount extends EnterpriseObject {
+public class SubscriberAccount extends EnterpriseObject implements MailRecipient {
     
     private String EMAIL;
     private String FIRSTNAME;
@@ -61,5 +62,27 @@ public class SubscriberAccount extends EnterpriseObject {
     public String alias() {
         return this.EMAIL;
     }
+
+    @Override
+    public String getAddress() {
+        return this.EMAIL;
+    }
+
+    @Override
+    public long getId() {
+        return this.OBJECTID;
+    }
+
+    @Override
+    public void setId(long id) {
+        this.OBJECTID = id;
+    }
+
+    @Override
+    public void setAddress(String address) {
+        this.EMAIL = address;
+    }
+
+    
     
 }

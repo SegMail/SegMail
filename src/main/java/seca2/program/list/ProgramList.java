@@ -3,6 +3,7 @@ package seca2.program.list;
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientService;
 import eds.component.subscription.SubscriptionService;
+import eds.entity.subscription.SubscriberAccount;
 import eds.entity.subscription.SubscriptionList;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -41,10 +42,11 @@ public class ProgramList implements Serializable {
     @EJB
     private SubscriptionService subscriptionService;
     
-    private SubscriptionList listEditing;
-    private final Map<String,String> editingPanelLocation = new HashMap<String,String>();
-    
     private List<SubscriptionList> allLists;
+    private SubscriptionList listEditing;
+    private List<SubscriberAccount> subscribers;
+    
+    private final Map<String,String> editingPanelLocation = new HashMap<String,String>();
     
     private boolean startFirstList;
     
@@ -82,6 +84,14 @@ public class ProgramList implements Serializable {
 
     public void setAllLists(List<SubscriptionList> allLists) {
         this.allLists = allLists;
+    }
+
+    public List<SubscriberAccount> getSubscribers() {
+        return subscribers;
+    }
+
+    public void setSubscribers(List<SubscriberAccount> subscribers) {
+        this.subscribers = subscribers;
     }
     
     

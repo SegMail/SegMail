@@ -3,17 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.subscription;
+package eds.entity.subscription.email;
 
-import eds.entity.resource.AbstractConnection;
-import javax.persistence.DiscriminatorValue;
+import eds.entity.data.EnterpriseRelationship;
+import eds.entity.subscription.SubscriptionList;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
  */
-//@DiscriminatorValue("REMOTE")
-public class RemoteListConnection extends AbstractConnection {
+@Entity
+@Table(name="TEMPLATE_LIST_ASSIGNMENT")
+public class TemplateListAssignment extends EnterpriseRelationship<EmailTemplate,SubscriptionList> {
 
     @Override
     public void randInit() {
@@ -22,11 +25,6 @@ public class RemoteListConnection extends AbstractConnection {
 
     @Override
     public Object generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String alias() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

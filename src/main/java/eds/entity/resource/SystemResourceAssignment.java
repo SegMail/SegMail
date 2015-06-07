@@ -15,6 +15,8 @@ import javax.persistence.Table;
 /**
  *
  * @author LeeKiatHaw
+ * @param <S>
+ * @param <T>
  */
 @Entity
 @Table(name="SYSTEM_RESOURCE_ASSIGNMENT")

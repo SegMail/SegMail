@@ -5,14 +5,24 @@
  */
 package eds.component.subscription;
 
+import javax.ejb.EJBException;
+
 /**
  *
  * @author LeeKiatHaw
  */
-public class ListException extends Exception {
+public class ListException extends EJBException {
 
+    private final String message;
+    
     public ListException(String message) {
-        super(message);
+        this.message = message;
     }
+
+    @Override
+    public String getMessage() {
+        return this.message;
+    }
+    
     
 }

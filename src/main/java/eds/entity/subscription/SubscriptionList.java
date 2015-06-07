@@ -6,7 +6,9 @@
 package eds.entity.subscription;
 
 import eds.entity.data.EnterpriseObject;
-import javax.persistence.DiscriminatorColumn;
+import eds.entity.document.Document;
+import eds.entity.mail.MailSender;
+import java.util.Map;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -19,7 +21,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
 //@DiscriminatorColumn(name="SUBSCRIPTION_LIST")
-public class SubscriptionList extends EnterpriseObject {
+public class SubscriptionList extends EnterpriseObject implements MailSender {
 
     public static enum LOCATION{
         REMOTE,
@@ -30,7 +32,7 @@ public class SubscriptionList extends EnterpriseObject {
     private String SEND_AS_EMAIL;
     private String SEND_AS_NAME;
     private LOCATION LOCATION;
-
+    private boolean DOUBLE_OPTIN;
     
     @Override
     public void randInit() {
@@ -79,6 +81,58 @@ public class SubscriptionList extends EnterpriseObject {
     public void setLOCATION(LOCATION LOCATION) {
         this.LOCATION = LOCATION;
     }
+
+    public boolean isDOUBLE_OPTIN() {
+        return DOUBLE_OPTIN;
+    }
+
+    public void setDOUBLE_OPTIN(boolean DOUBLE_OPTIN) {
+        this.DOUBLE_OPTIN = DOUBLE_OPTIN;
+    }
     
+    @Override
+    public String getAddress() {
+        return this.SEND_AS_EMAIL;
+    }
+
+    @Override
+    public Document createDocument(Map<String, Object> ideas) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getSignature() {
+        return this.SEND_AS_EMAIL;
+    }
+
+    @Override
+    public String getName() {
+        return this.SEND_AS_NAME;
+    }
     
+    @Override
+    public long getAuthorId() {
+        return this.OBJECTID;
+    }
+    
+    @Override
+    public void setAddress(String address) {
+        this.SEND_AS_EMAIL = address;
+    }
+
+    @Override
+    public void setAuthorId(long id) {
+        this.OBJECTID = id;
+    }
+
+    @Override
+    public void setSignature(String signature) {
+        this.SEND_AS_EMAIL = signature;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.SEND_AS_NAME = name;
+    }
+
 }

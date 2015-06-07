@@ -14,6 +14,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
@@ -37,8 +38,12 @@ public class FormListList {
     
     @PostConstruct
     public void init(){
-        this.loadAllLists();
-        this.resetEditingList();
+        //Only if it is not a postback, reload everything
+        if(!FacesContext.getCurrentInstance().isPostback()){
+            this.loadAllLists();
+            this.resetEditingList();
+        }
+        
     }
     
     /**

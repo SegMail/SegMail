@@ -8,6 +8,7 @@ package eds.entity.client;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -23,6 +24,7 @@ public class ContactInfo extends EnterpriseData<Client>{
     private String MOBILE;
     private String OTHER;
 
+    @NotNull
     public String getFIRSTNAME() {
         return FIRSTNAME;
     }
@@ -31,6 +33,7 @@ public class ContactInfo extends EnterpriseData<Client>{
         this.FIRSTNAME = FIRSTNAME;
     }
 
+    @NotNull
     public String getLASTNAME() {
         return LASTNAME;
     }
@@ -39,6 +42,7 @@ public class ContactInfo extends EnterpriseData<Client>{
         this.LASTNAME = LASTNAME;
     }
 
+    @NotNull
     public String getEMAIL() {
         return EMAIL;
     }

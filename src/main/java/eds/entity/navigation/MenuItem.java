@@ -33,6 +33,7 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
     private String MENU_ITEM_URL; //request URL
     //private String MENU_ITEM_XHTML; //actual layout.xhtml path
     private String PREPEND_TAGS;
+    private int WEIGHT; // Optional for sorting
     private MenuItem PARENT_MENU_ITEM;
 
     public String getMENU_ITEM_NAME() {
@@ -85,6 +86,14 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
 
     public void setPREPEND_TAGS(String PREPEND_TAGS) {
         this.PREPEND_TAGS = PREPEND_TAGS;
+    }
+
+    public int getWEIGHT() {
+        return WEIGHT;
+    }
+
+    public void setWEIGHT(int WEIGHT) {
+        this.WEIGHT = WEIGHT;
     }
 
     @Override

@@ -9,6 +9,7 @@ import eds.entity.user.UserType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.program.test.client.FormRegisterClientForObjectname;
 import seca2.program.test.client.FormRegisterClientType;
 import seca2.program.test.layout.FormAssignLayoutProgram;
 import seca2.program.test.layout.FormAssignLayoutUserType;
@@ -16,7 +17,8 @@ import seca2.program.test.layout.FormAssignLayoutUsername;
 import seca2.program.test.layout.FormCreateLayout;
 
 /**
- *
+ * Note: This is not a test, but a setup!
+ * 
  * @author LeeKiatHaw
  */
 @Named("FormTestEverything")
@@ -33,6 +35,13 @@ public class FormTestEverything {
     @Inject private FormAssignLayoutUserType formAssignLayoutUserType;
     @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     @Inject private FormRegisterClientType formRegisterClientType;
+    @Inject private FormRegisterClientForObjectname formRegisterClientForObjectname;
+    
+    // Setup variables
+    private final String ADMIN_USERTYPE = "Administrator";
+    private final String ADMIN_USERNAME = "admin";
+    private final String ADMIN_PASSWORD = "admin";
+    private final String CLIENT_TYPE_PERSON = "Person";
     
     public void init(){
         
@@ -43,17 +52,18 @@ public class FormTestEverything {
         formTestDB.generateDB();
         
         //Create usertype
-        this.formTestUser.setUserTypeName("Administrator");
+        this.formTestUser.setUserTypeName(ADMIN_USERTYPE);
         this.formTestUser.createUserType();
         
         programTest.init();
-        UserType administrator = this.programTest.getAllUserTypes().get(0);
+        //UserType administrator = this.programTest.getAllUserTypes().get(0);
         
         //Create user
-        this.formTestUser.setChosenUserType(administrator.getOBJECTID());
-        this.formTestUser.setUsername("admin");
-        this.formTestUser.setPassword("admin");
-        this.formTestUser.createUser();
+        //this.formTestUser.setChosenUserType(administrator.getOBJECTID());
+        //this.formTestUser.setUsername(ADMIN_USERNAME);
+        //this.formTestUser.setPassword("admin");
+        //this.formTestUser.createUser();
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE, ADMIN_USERNAME, ADMIN_PASSWORD);
         
         //Create testing page
         this.formTestProgram.setProgramName("test");
@@ -103,6 +113,18 @@ public class FormTestEverything {
         this.formTestNavigation.setPrependHTMLTags("<i class=\"fa fa-code\"></i>");
         this.formTestNavigation.createNewMenuItem();
         
+        //Create Template page
+        this.formTestProgram.setProgramName("template");
+        this.formTestProgram.setProgramViewRoot("/programs/emailtemplate/layout.xhtml");
+        this.formTestProgram.setDisplayName("Manage Templates");
+        this.formTestProgram.setDisplayDesc("Manage all your email templates here.");
+        this.formTestProgram.createProgram();
+        
+        this.formTestNavigation.setMenuItemName("Manage Templates");
+        this.formTestNavigation.setMenuItemURL("/program/template/");
+        this.formTestNavigation.setPrependHTMLTags("<i class=\"fa fa-file-text-o\"></i>");
+        this.formTestNavigation.createNewMenuItem();
+        
         //Create mysettings page
         this.formTestProgram.setProgramName("mysettings");
         this.formTestProgram.setProgramViewRoot("/programs/mysettings/layout.xhtml");
@@ -130,9 +152,15 @@ public class FormTestEverything {
         this.formRegisterClientType.setClientTypeDesc("Represents an organization.");
         this.formRegisterClientType.registerClientType();
         
-        this.formRegisterClientType.setClientType("Person");
+        this.formRegisterClientType.setClientType(CLIENT_TYPE_PERSON);
         this.formRegisterClientType.setClientTypeDesc("Represents a human being.");
         this.formRegisterClientType.registerClientType();
+        
+        // Assign all programs to user Admin
+        this.formTestProgram.assignAllProgramsToUser(ADMIN_USERNAME);
+        
+        // Create a client for Admin
+        this.formRegisterClientForObjectname.registerClientForUser(CLIENT_TYPE_PERSON,ADMIN_USERNAME);
         
     }
     

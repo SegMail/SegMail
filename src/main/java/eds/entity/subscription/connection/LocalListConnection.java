@@ -3,16 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.subscription;
+package eds.entity.subscription.connection;
 
-import eds.entity.resource.SystemResourceAssignment;
+import eds.entity.resource.AbstractConnection;
 
 /**
  *
  * @author LeeKiatHaw
  */
-public class RemoteListConnectionAssignment 
-    extends SystemResourceAssignment<RemoteListConnection,SubscriptionList> {
+//@DiscriminatorValue("LOCAL")
+public class LocalListConnection extends AbstractConnection {
+
+    
+    @Override
+    public String alias() {
+        return "LocalListConnection";
+    }
 
     @Override
     public void randInit() {
@@ -21,6 +27,11 @@ public class RemoteListConnectionAssignment
 
     @Override
     public Object generateKey() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void ping() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

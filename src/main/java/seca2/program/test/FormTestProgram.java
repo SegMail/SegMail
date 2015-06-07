@@ -17,6 +17,7 @@ import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.program.Program;
+import eds.entity.user.User;
 import eds.entity.user.UserType;
 import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -45,7 +46,7 @@ public class FormTestProgram implements Serializable {
     private final String TestAssignProgramToUserTypeName = "assignProgramToUsertypeForm";
     
     //Assign Program to UserType Form input variables
-    private List<Program> allPrograms;
+    //private List<Program> allPrograms;
     private long selectedProgramId;
     private List<UserType> allUserTypes;
     private long selectedUserTypeId;
@@ -139,5 +140,20 @@ public class FormTestProgram implements Serializable {
         this.selectedUserTypeId = selectedUserTypeId;
     }
     
+    /**
+     * Private access only to other testing forms
+    */
+    void assignAllProgramsToUser(String username){
+        // Refresh ProgramTest
+        this.programTest.init();
+        
+        UserType usertype = this.userService.getUserByUsername(username).getUSERTYPE();
+        this.setSelectedUserTypeId(usertype.getOBJECTID());
+        for(Program p : this.getAllPrograms()){
+            this.setSelectedProgramId(p.getOBJECTID());
+            this.assignProgramAccess();
+        }
+        
+    }
     
 }

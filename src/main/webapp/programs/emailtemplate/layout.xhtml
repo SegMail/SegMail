@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="#{bootstrap.output.templateRoot}"
+                    >
+        <ui:define name="main-program-panel">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="block">
+                        <div class="block-content">
+                            <h2><strong>Confirmation emails</strong></h2>
+
+                            <p>
+                                Confirmation emails are sent to your subscribers upon the first time they 
+                                signup to confirm that the email address that they have provided belongs
+                                to them. You can create your own confirmation email templates here.
+                            </p>
+                            <div class="form-group">
+                                <a class="btn btn-success" href="#add_new_template_popup" data-toggle="modal"
+                                   onclick="popupType('popup_title', 'email_type', 'confirmation').setType()">
+                                    Create new confirmation template
+                                </a>
+                            </div>
+                            <div class="list-group">
+                                <!--<a href="#" class="list-group-item">Default</a>-->
+                                <c:forEach items="#{ProgramTemplateLoader.program.confirmationTemplates}" var="confirm">
+                                    <a href="#" class="list-group-item">#{confirm.SUBJECT}</a>
+                                </c:forEach>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="block">
+                        <div class="block-content">
+                            
+                                <h2><strong>Newsletters emails</strong></h2>
+
+                                <p>
+                                    Newsletters are sent to your subscribers on a regular basis.
+                                </p>
+                                <div class="form-group">
+                                    <a class="btn btn-success" href="#add_new_template_popup" data-toggle="modal"
+                                       onclick="popupType('popup_title', 'email_type', 'newsletter').setType()">
+
+                                        Create new newsletter template
+                                    </a>
+                                </div>
+                                <div class="list-group">
+                                    <!--<a href="#" class="list-group-item">Default</a>-->
+                                    <c:forEach items="#{ProgramTemplateLoader.program.newsletterTemplates}" var="newsletter">
+                                        <a href="#edit_template_popup" class="list-group-item" 
+                                           jsf:actionListener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}">
+                                            #{newsletter.SUBJECT}
+                                        </a>
+
+                                    </c:forEach>
+
+                                </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="add_new_template_popup">
+                <ui:include src="add_new_template_popup.xhtml"></ui:include>
+            </div>
+            <div class="modal fade" id="edit_template_popup">
+                <ui:include src="edit_template_popup.xhtml"></ui:include>
+            </div>
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type="text/javascript">
+                var popupType = (function (id, type_id, type) {
+
+                    return{
+                        setType: function () {
+                            document.getElementById(id).innerHTML =
+                                    "Add new " + type + " template";
+
+                            var TYPE = type.toUpperCase();
+                            document.getElementById(type_id).value = TYPE;
+                        }
+
+                    }
+                })
+            </script>
+            <script type="text/javascript">
+            $(document).ready(function () {
+                var add_new_template_form =
+                        $("#add_new_template_form").validate({
+                    
+                    rules: {
+                        subject: {
+                            required: true},
+                        body: {
+                            required: true,
+                            minlength: 10
+                        }
+
+                    },
+                    errorPlacement: function (error, element) {
+                        if (element.attr("name") == "gender" || element.attr("name") == "rules") {
+                            element.parents(".form-gr oup").append(error);
+                        } else
+                            error.insertAfter(element);
+                    }
+                });
+            });
+        </script>
+
+        </ui:define>
+
+    </ui:composition>
+</html>
+

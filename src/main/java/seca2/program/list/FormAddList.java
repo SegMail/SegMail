@@ -64,7 +64,7 @@ public class FormAddList {
             
             SubscriptionList SubscriptionList = subscriptionService.addList(client.getOBJECTID(), listName, remote);
             
-            this.programList.setListEditing(SubscriptionList);
+            
             
             //this.checkNoListYet(); //refresh the editing panel
             
@@ -72,12 +72,13 @@ public class FormAddList {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
             ec.redirect(programContainer.getCurrentURL());
+            this.programList.setListEditing(SubscriptionList);
             
-        } catch (IOException ex) {
+        } /*catch (IOException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        } catch (EJBException ex) { //Transaction did not go through
+        }*/ catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }

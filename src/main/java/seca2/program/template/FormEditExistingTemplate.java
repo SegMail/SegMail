@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.list;
+package seca2.program.template;
 
+import eds.component.GenericEnterpriseObjectService;
 import eds.component.subscription.SubscriptionService;
-import eds.entity.subscription.SubscriberAccount;
+import eds.entity.subscription.email.EmailTemplate;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -14,49 +15,53 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@Named("FormListSubscriber")
+@Named("FormEditExistingTemplate")
 @RequestScoped
-public class FormListSubscriber {
-    @Inject private ProgramList programList;
-    @Inject private UserContainer userContainer;
+public class FormEditExistingTemplate {
     
-    @EJB private SubscriptionService subService;
+    @EJB private SubscriptionService subscriptionService;
+    @EJB private GenericEnterpriseObjectService objectService;
+    //@EJB private UserService userService;
     
-    private boolean removed;
+    @Inject private ProgramTemplate program;
+    //@Inject private UserContainer userContainer;
     
-    private SubscriberAccount subscriber;// = new SubscriberAccount();
+    //private long templateId;
     
-    private final String formName = "add_new_sub_form";
+    private EmailTemplate editingTemplate;
+    
+    private final String formName = "FormEditExistingTemplate";
     
     @PostConstruct
     public void init(){
-        //Can we use flash scope here?
-        subscriber = new SubscriberAccount();
+        
     }
     
-
-    public boolean isRemoved() {
-        return removed;
-    }
-
-    public void setRemoved(boolean removed) {
-        this.removed = removed;
-    }
-    
-    public void addSubscriber(){
+    public void loadTemplate(long templateId){
         try {
-            if(programList.getListEditing() == null)
-                throw new RuntimeException("List is not set yet but you still manage to come to this page? Notify your admin immediately! =)");
+            // Retrieve the template based on the Id
+            editingTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
             
-            subService.subscribe(subscriber, programList.getListEditing().getOBJECTID(),true);
-            //How to redirect to List editing panel?
+        } catch (EJBException ex) { //Transaction did not go through
+            //Throwable cause = ex.getCause();
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
+    }
+    
+    public void saveTemplate(){
+        try {
+            subscriptionService.saveTemplate(editingTemplate);
+            
+            //Refresh the list of email templates on the page
+            program.initializeAllTemplates();
             
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
@@ -66,23 +71,14 @@ public class FormListSubscriber {
         }
     }
 
-    public SubscriberAccount getSubscriber() {
-        return subscriber;
+    public EmailTemplate getEditingTemplate() {
+        return editingTemplate;
     }
 
-    public void setSubscriber(SubscriberAccount subscriber) {
-        this.subscriber = subscriber;
+    public void setEditingTemplate(EmailTemplate editingTemplate) {
+        this.editingTemplate = editingTemplate;
     }
+
     
-    public void loadSubscribers(){
-        try {
-            
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
     
 }

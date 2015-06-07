@@ -6,19 +6,14 @@
 package seca2.program.mysettings;
 
 import eds.component.client.ClientService;
-import eds.component.data.DBConnectionException;
-import eds.entity.client.Client;
 import eds.entity.client.ContactInfo;
 import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.User.UserContainer;
-import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *

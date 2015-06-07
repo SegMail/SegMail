@@ -3,42 +3,30 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.subscription;
+package eds.entity.subscription.connection;
 
-import eds.entity.data.EnterpriseRelationship;
-import javax.persistence.Entity;
+import com.amazonaws.services.ec2.model.Region;
+import eds.entity.resource.AbstractConnection;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="SUBSCRIPTION")
-public class Subscription extends EnterpriseRelationship<SubscriberAccount,SubscriptionList> {
+public class SMTPConnectionSES extends AbstractConnection{
 
-    public Subscription() {
-    }
-
-    public static enum STATUS{
-        NEW,
-        CONFIRMED,
-        BOUNCED
-    }
+    private Region REGION;
     
-    private STATUS STATUS;
 
     @Enumerated(EnumType.STRING)
-    public STATUS getSTATUS() {
-        return STATUS;
+    public Region getREGION() {
+        return REGION;
     }
 
-    public void setSTATUS(STATUS STATUS) {
-        this.STATUS = STATUS;
+    public void setREGION(Region REGION) {
+        this.REGION = REGION;
     }
-    
     
     @Override
     public void randInit() {
@@ -47,6 +35,16 @@ public class Subscription extends EnterpriseRelationship<SubscriberAccount,Subsc
 
     @Override
     public Object generateKey() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String alias() {
+        return "SMTPConnectionSES";
+    }
+
+    @Override
+    public void ping() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

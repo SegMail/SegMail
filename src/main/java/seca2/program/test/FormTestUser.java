@@ -237,5 +237,15 @@ public class FormTestUser implements Serializable {
         return this.programTest.getAllUserTypes();
     }
     
-    
+    public void createUserWithType(String usertypename, String username, String password){
+        List<UserType> usertypeList = this.userService.getUserTypeByName(usertypename);
+        if(usertypeList == null || usertypeList.isEmpty())
+            throw new RuntimeException("No UserTypes created yet.");
+        
+        UserType type = usertypeList.get(0);
+        this.setChosenUserType(type.getOBJECTID());
+        this.setUsername(username);
+        this.setPassword(password);
+        this.createUser();
+    }
 }

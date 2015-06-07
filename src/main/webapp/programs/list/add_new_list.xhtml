@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="FormAddList" class="validate-form">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Add new list</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>
+                            Give your list a name:
+                        </label>
+                        <input type="text" class="validate[required] form-control"
+                               jsf:value="#{FormAddList.listName}" />
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox" style="margin-left: 10px;">
+                            <label style="padding-left:0px">
+                                <strong>Remote List</strong>
+                                <input type="checkbox" class="icheck" style=""
+                                       jsf:value="#{FormAddList.remote}"/>
+                            </label>
+
+                            <span class="help-block">
+                                Recommended. You will need to set up your DB connection later.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <s2:messenger id="FormAddList_messenger" for="FormAddList" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <p:commandButton id="add_list_button" styleClass="btn btn-success" 
+                                     value="Create list" update="FormAddList"
+                                     actionListener="#{FormAddList.addList()}"
+                                     onclick="$('#FormAddList').validationEngine('validate');">
+                        
+                                     
+                    </p:commandButton>
+                </div>
+
+            </div>
+            <p:blockUI block="FormAddList" trigger="FormAddList:add_list_button">
+                <p id="spinner">Please wait while we do what we do best.</p>
+            </p:blockUI>
+        </div>
+    </form>
+</html>
