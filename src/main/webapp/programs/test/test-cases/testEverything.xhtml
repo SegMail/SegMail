@@ -17,12 +17,20 @@
             <form jsf:id="setupEverythingForm">
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
-                        <p:commandButton id="setupEverything" styleClass="btn btn-primary col-md-12 col-xs-12" value="Create all entities."
+                        <p:commandButton id="setupSegmail" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup Segmail."
                                          update=":everything"
-                                         actionListener="#{FormTestEverything.testEverything()}"></p:commandButton>
+                                         actionListener="#{FormTestEverything.setupSegmail()}"></p:commandButton>
                     </div>
                 </div><br />
-                <p:blockUI id="testEverythingBlock" block="setupEverythingForm" trigger="setupEverythingForm:setupEverything">
+                <div class="row">
+                    <div class="col-md-12 col-xs-12">
+                        <p:commandButton id="setupTalentManagement" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup Segmail."
+                                         update=":everything"
+                                         actionListener="#{FormTestEverything.setupTalentManagement()}"></p:commandButton>
+                    </div>
+                </div><br />
+                <p:blockUI id="testEverythingBlock" block="setupEverythingForm" 
+                           trigger="setupEverythingForm:setupSegmail,setupEverythingForm:setupTalentManagement">
                     <p id="spinner">Please wait while we do what we do best.</p>
                 </p:blockUI>
             </form>

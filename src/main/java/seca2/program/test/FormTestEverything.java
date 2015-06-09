@@ -47,7 +47,7 @@ public class FormTestEverything {
         
     }
     
-    public void testEverything(){
+    public void setupSegmail(){
         //Setup DB
         formTestDB.generateDB();
         
@@ -164,4 +164,35 @@ public class FormTestEverything {
         
     }
     
+    public void setupTalentManagement(){
+        //Setup DB
+        formTestDB.generateDB();
+        
+        //Create usertype
+        this.formTestUser.setUserTypeName(ADMIN_USERTYPE);
+        this.formTestUser.createUserType();
+        
+        programTest.init();
+        //UserType administrator = this.programTest.getAllUserTypes().get(0);
+        
+        //Create user
+        //this.formTestUser.setChosenUserType(administrator.getOBJECTID());
+        //this.formTestUser.setUsername(ADMIN_USERNAME);
+        //this.formTestUser.setPassword("admin");
+        //this.formTestUser.createUser();
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE, ADMIN_USERNAME, ADMIN_PASSWORD);
+        
+        //Create testing page
+        this.formTestProgram.setProgramName("test");
+        this.formTestProgram.setProgramViewRoot("/programs/test/layout.xhtml");
+        this.formTestProgram.setDisplayName("Testing page");
+        this.formTestProgram.setDisplayDesc("This is for you administrator to set up the DB.");
+        this.formTestProgram.createProgram();
+        
+        this.formTestNavigation.setMenuItemName("Testing page");
+        this.formTestNavigation.setMenuItemURL("/program/test/");
+        this.formTestNavigation.setPrependHTMLTags("<i class=\"fa fa-dashboard\"></i>");
+        this.formTestNavigation.createNewMenuItem();
+        
+    }
 }
