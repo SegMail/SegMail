@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="POSITION")
+@Table(name="ROLE")
 public class Role extends EnterpriseObject {
 
     private String JOB_TITLE;

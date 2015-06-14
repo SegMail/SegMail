@@ -2,7 +2,7 @@ package segmail.program.list;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientService;
-import eds.component.subscription.SubscriptionService;
+import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import java.io.Serializable;

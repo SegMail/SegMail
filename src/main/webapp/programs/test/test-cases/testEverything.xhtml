@@ -14,7 +14,7 @@
             For setting up everything
         </ui:define>
         <ui:define name="panel-body">
-            <form jsf:id="setupEverythingForm">
+            <form jsf:id="setupEverythingForm" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
                         <p:commandButton id="setupSegmail" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup Segmail."
@@ -22,18 +22,44 @@
                                          actionListener="#{FormTestEverything.setupSegmail()}"></p:commandButton>
                     </div>
                 </div><br />
-                <div class="row">
-                    <div class="col-md-12 col-xs-12">
-                        <p:commandButton id="setupTalentManagement" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup Segmail."
-                                         update=":everything"
-                                         actionListener="#{FormTestEverything.setupTalentManagement()}"></p:commandButton>
-                    </div>
-                </div><br />
-                <p:blockUI id="testEverythingBlock" block="setupEverythingForm" 
-                           trigger="setupEverythingForm:setupSegmail,setupEverythingForm:setupTalentManagement">
-                    <p id="spinner">Please wait while we do what we do best.</p>
-                </p:blockUI>
             </form>
+            <!--It won't work because of this http://stackoverflow.com/questions/19262356/file-upload-doesnt-work-with-ajax-in-primefaces-4-0-jsf-2-2-x-javax-servlet-s-->
+            <div class="row">
+                <h:form id="test1" prependId="true" enctype="multipart/form-data">
+
+                    <h:inputFile value="#{FormTestEverything.file}" ></h:inputFile>
+                    <p:commandButton id="upload_xml_setup" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
+                                     actionListener="#{FormTestEverything.uploadXMLPlain}"
+                                     update="@form" ajax="true" 
+                                     ></p:commandButton><!--This doesn't work-->
+                    <!--h:commandButton works, but it cannot call blockui-->
+                    <h:commandButton id="upload_xml_setup2" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
+                                     actionListener="#{FormTestEverything.uploadXMLPlain}">
+                        <f:ajax execute="@all" render="message1"/>
+                    </h:commandButton>
+                    <s2:messenger id="message1" for="test1" showDetail="true" showSummary="true" ></s2:messenger>
+                    <p:blockUI block="test1" trigger="test1:upload_xml_setup,test1:upload_xml_setup2" >
+                        <p id="spinner">Please wait while we do what we do best.</p>
+                    </p:blockUI>
+                </h:form>
+            </div>
+            <br />
+            <br />
+            <br />
+            <div class="row">
+                <h:form id="FormTestEverything" enctype="multipart/form-data">
+
+                    <p:fileUpload id="upload_pf_button" allowTypes="/(\.|\/)(XML|xml)$/"
+                                  fileUploadListener="#{FormTestEverything.uploadXMLPF}" 
+                                  auto="true" immediate="true"
+                                  update="@form"></p:fileUpload>
+                    <s2:messenger id="message1" for="FormTestEverything" showDetail="true" showSummary="true" ></s2:messenger>
+                    <p:blockUI block="FormTestEverything" trigger="FormTestEverything:upload_pf_button" >
+                        <p id="spinner">Please wait while we do what we do best.</p>
+                    </p:blockUI>
+
+                </h:form>
+            </div>
         </ui:define>
     </ui:composition>
 </html>

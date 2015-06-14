@@ -5,8 +5,6 @@
  */
 package eds.component.navigation;
 
-import eds.entity.data.EnterpriseObject;
-import eds.entity.data.EnterpriseObject_;
 import TreeAPI.TreeBranch;
 import TreeAPI.TreeBuilder;
 import TreeAPI.TreeNode;
@@ -24,14 +22,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
-import eds.entity.navigation.MenuItemAccess_;
 import eds.entity.navigation.MenuItem_;
 import eds.entity.user.UserType;
 
@@ -199,7 +195,7 @@ public class NavigationService implements Serializable {
             
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .getResultList();*/
-            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userTypeId, MenuItemAccess.class);
+            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObjects(userTypeId, menuItemId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
@@ -304,4 +300,39 @@ public class NavigationService implements Serializable {
         List<MenuItem> allMenuItems = this.getAllMenuItems();
         return null;
     }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) throws DBConnectionException {
+        
+        try {
+            List<MenuItem> results = this.genericEnterpriseObjectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<MenuItem> getAllMenuItemsByName(String menuitemname) throws DBConnectionException {
+        
+        try {
+            List<MenuItem> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(menuitemname, MenuItem.class);
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
 }

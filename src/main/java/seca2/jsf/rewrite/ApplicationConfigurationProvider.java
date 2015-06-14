@@ -7,19 +7,16 @@ package seca2.jsf.rewrite;
 
 import org.ocpsoft.logging.Logger.Level;
 import javax.servlet.ServletContext;
-import org.ocpsoft.rewrite.annotation.RewriteConfiguration;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
 import org.ocpsoft.rewrite.config.Log;
-import org.ocpsoft.rewrite.servlet.config.Forward;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
-import org.ocpsoft.rewrite.servlet.config.Path;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@RewriteConfiguration
+//@RewriteConfiguration
 public class ApplicationConfigurationProvider extends HttpConfigurationProvider {
 
     @Override

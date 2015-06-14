@@ -5,7 +5,7 @@
  */
 package segmail.program.template;
 
-import eds.component.subscription.SubscriptionService;
+import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
 import segmail.entity.subscription.email.EmailTemplate;
 import segmail.entity.subscription.email.EmailTemplate.EMAIL_TYPE;

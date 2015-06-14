@@ -7,7 +7,7 @@ package segmail.program.template;
 
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
-import eds.component.subscription.SubscriptionService;
+import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.email.EmailTemplate;

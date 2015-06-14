@@ -6,7 +6,7 @@
 package segmail.program.template;
 
 import eds.component.GenericEnterpriseObjectService;
-import eds.component.subscription.SubscriptionService;
+import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.email.EmailTemplate;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;

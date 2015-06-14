@@ -17,17 +17,9 @@ import javax.persistence.Table;
 @Table(name="PERFORMANCE_LEVEL")
 public class PerformanceLevel extends EnterpriseConfiguration{
     
-    private String LEVEL_LABEL;
+    //private String LEVEL_LABEL;
     private String LEVEL_NAME;
     private int RATING;
-
-    public String getLEVEL_LABEL() {
-        return LEVEL_LABEL;
-    }
-
-    public void setLEVEL_LABEL(String LEVEL_LABEL) {
-        this.LEVEL_LABEL = LEVEL_LABEL;
-    }
 
     public int getRATING() {
         return RATING;

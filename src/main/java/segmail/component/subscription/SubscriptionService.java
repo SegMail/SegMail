@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.component.subscription;
+package segmail.component.subscription;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;

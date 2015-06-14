@@ -195,5 +195,19 @@ public class FormTestNavigation implements Serializable{
         this.prependHTMLTags = prependHTMLTags;
     }
 
-    
+    public void assignMenuItems(String usertypename, String menuname ){
+        List<UserType> usertypes = this.userService.getUserTypeByName(usertypename);
+        List<MenuItem> menuitems = this.navigationService.getAllMenuItemsByName(menuItemName);
+        
+        if(usertypes == null || usertypes.isEmpty())
+            throw new RuntimeException("Usertypes are not created yet!");
+        
+        if(menuitems == null || menuitems.isEmpty())
+            throw new RuntimeException("MenuItmes are not created yet!");
+        
+        this.setSelectedUserTypeId(usertypes.get(0).getOBJECTID());
+        this.setSelectedAssignedMenuItemId(menuitems.get(0).getOBJECTID());
+        
+        this.assignMenuAccess();
+    }
 }

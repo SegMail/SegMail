@@ -22,6 +22,7 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.GlobalValues;
+import seca2.bootstrap.module.User.UserContainer;
 import seca2.bootstrap.module.User.UserSession;
 
 /**
@@ -42,7 +43,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     //A MenuContainer should be inside a UserContainer, so there's no need for so many containers.
     //@Inject private MenuContainer menuContainer; //This module initializes the menu so that other programs and components can use it
     @Inject
-    private UserSession userContainer;
+    private UserContainer userContainer;
 
     @Inject
     private GlobalValues globalValues;
@@ -75,11 +76,15 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             //What else should I do here?
 
         }
+        
         try {
             //Build the menu tree here.
             //For each menu item, if it is a program type, prepend the context path.
             //If it is a URL, leave it as it is
-            menuItems = this.navigationService.getAllMenuItems();
+            if(userContainer == null || userContainer.getUserType() == null)
+                menuItems = this.navigationService.getAllMenuItems();
+            else
+                menuItems = this.navigationService.getAllMenuItemsForUsertype(userContainer.getUserType().getOBJECTID());
             
             //Encapsulate all menuItems into a MenuItemContainer
             List<MenuItemContainer> menuItemContainers = new ArrayList<MenuItemContainer>();
@@ -97,7 +102,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
                 menuItemContainers.add(container);
             }
             
-            outputContext.getNonCoreValues().put("TEST_MENU2", menuItemContainers);
+            outputContext.getNonCoreValues().put("TEST_MENU", menuItemContainers);
             //outputContext.getNonCoreValues().put("TEST_MENU", this.programs2);
         } catch (DBConnectionException dbex) {
             

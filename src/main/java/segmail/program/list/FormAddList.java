@@ -7,7 +7,7 @@ package segmail.program.list;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientService;
-import eds.component.subscription.SubscriptionService;
+import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;

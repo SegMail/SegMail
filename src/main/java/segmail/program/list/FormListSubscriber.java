@@ -5,7 +5,7 @@
  */
 package segmail.program.list;
 
-import eds.component.subscription.SubscriptionService;
+import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;

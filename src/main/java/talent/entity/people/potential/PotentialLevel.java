@@ -17,17 +17,9 @@ import javax.persistence.Table;
 @Table(name="POTENTIAL_LEVEL")
 public class PotentialLevel extends EnterpriseConfiguration {
     
-    private String LEVEL_LABEL;
+    //private String LEVEL_LABEL;
     private String LEVEL_NAME;
-    private int WEIGHT;
-
-    public String getLEVEL_LABEL() {
-        return LEVEL_LABEL;
-    }
-
-    public void setLEVEL_LABEL(String LEVEL_LABEL) {
-        this.LEVEL_LABEL = LEVEL_LABEL;
-    }
+    private int VALUE;
 
     public String getLEVEL_NAME() {
         return LEVEL_NAME;
@@ -37,13 +29,14 @@ public class PotentialLevel extends EnterpriseConfiguration {
         this.LEVEL_NAME = LEVEL_NAME;
     }
 
-    public int getWEIGHT() {
-        return WEIGHT;
+    public int getVALUE() {
+        return VALUE;
     }
 
-    public void setWEIGHT(int WEIGHT) {
-        this.WEIGHT = WEIGHT;
+    public void setVALUE(int VALUE) {
+        this.VALUE = VALUE;
     }
+    
     
     
 }
