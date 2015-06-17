@@ -103,6 +103,24 @@ public class FormTestEverything {
     private final String PROGRAM_ASSIGN_PROGRAM_TAG = "PROGRAM_ASSIGN_PROGRAM";
     private final String PROGRAM_ASSIGN_USERTYPE_TAG = "PROGRAM_ASSIGN_USERTYPE";
     
+    private final String LAYOUT_TAG = "LAYOUT";
+    private final String LAYOUT_NAME_TAG = "LAYOUT_NAME";
+    private final String LAYOUT_VIEWROOT_TAG = "LAYOUT_VIEWROOT";
+    
+    private final String LAYOUT_ASSIGN_TAG = "LAYOUT_ASSIGN";
+    private final String LAYOUT_ASSIGN_LAYOUT_TAG = "LAYOUT_ASSIGN_LAYOUT";
+    private final String LAYOUT_ASSIGN_USERTYPE_TAG = "LAYOUT_ASSIGN_USERTYPE";
+    private final String LAYOUT_ASSIGN_PROGRAM_TAG = "LAYOUT_ASSIGN_PROGRAM";
+    private final String LAYOUT_ASSIGN_USERNAME_TAG = "LAYOUT_ASSIGN_USERNAME";
+    
+    private final String CLIENT_TYPE_TAG = "CLIENT_TYPE";
+    private final String CLIENT_TYPE_NAME_TAG = "CLIENT_TYPE_NAME";
+    private final String CLIENT_TYPE_DESC_TAG = "CLIENT_TYPE_DESC";
+    
+    private final String CLIENT_ASSIGN_TAG = "CLIENT_ASSIGN";
+    private final String CLIENT_ASSIGN_TYPE_NAME_TAG = "CLIENT_ASSIGN_TYPE_NAME";
+    private final String CLIENT_ASSIGN_USERTYPE_TAG = "CLIENT_ASSIGN_USERTYPE";
+    
     public void init(){
         System.out.println("Test everything init");
     }
@@ -415,14 +433,11 @@ public class FormTestEverything {
             }
             
             // Create programs
-            NodeList programs = doc.getElementsByTagName(PROGRAMS_TAG);
+            NodeList programs = doc.getElementsByTagName(PROGRAM_TAG);
             
             for(int n=0; n<programs.getLength(); n++){
                 Node nNode = programs.item(n);
                 Element element = (Element) nNode;
-                if(element.getNodeName().compareTo(PROGRAM_TAG) != 0)
-                    throw new RuntimeException("Wrong tag <"+element.getNodeName()+"> should be <"+PROGRAM_TAG+">");
-                
                 String name = element.getAttribute(PROGRAM_NAME_TAG);
                 String viewroot = element.getAttribute(PROGRAM_VIEW_TAG);
                 String dispName = element.getAttribute(PROGRAM_DISP_TAG);
@@ -441,15 +456,115 @@ public class FormTestEverything {
             for(int n=0; n<menuitems.getLength(); n++){
                 Node nNode = menuitems.item(n);
                 Element element = (Element) nNode;
-                String name = element.getAttribute(MENU_NAME_TAG);
-                String url = element.getAttribute(MENU_URL_TAG);
-                String preprend = element.getAttribute(MENU_PREPEND_TAG);
+                String name = element.getElementsByTagName(MENU_NAME_TAG).item(0).getTextContent();
+                String url = element.getElementsByTagName(MENU_URL_TAG).item(0).getTextContent();
+                String preprend = element.getElementsByTagName(MENU_PREPEND_TAG).item(0).getTextContent();
                 
                 this.formTestNavigation.setMenuItemName(name);
                 this.formTestNavigation.setMenuItemURL(url);
                 this.formTestNavigation.setPrependHTMLTags(preprend);   
                 
                 this.formTestNavigation.createNewMenuItem();
+            }
+            
+            // Create menu assignments
+            NodeList menuassignments = doc.getElementsByTagName(MENU_ASSIGN_TAG);
+            
+            for(int n=0; n<menuassignments.getLength(); n++){
+                Node nNode = menuitems.item(n);
+                Element element = (Element) nNode;
+                String menu = element.getElementsByTagName(MENU_ASSIGN_MENU_TAG).item(0).getTextContent();
+                NodeList usertypeNodes = element.getElementsByTagName(MENU_ASSIGN_USERTYPE_TAG);
+                for(int i=0; i<usertypeNodes.getLength(); i++){
+                    this.formTestNavigation.assignMenuItems(usertypeNodes.item(i).getTextContent(), menu);
+                }
+            }
+            
+            // Create program assignments
+            NodeList programassignments = doc.getElementsByTagName(PROGRAM_ASSIGN_TAG);
+            
+            for(int n=0; n<programassignments.getLength(); n++){
+                Node nNode = menuitems.item(n);
+                Element element = (Element) nNode;
+                String program = element.getElementsByTagName(PROGRAM_ASSIGN_PROGRAM_TAG).item(0).getTextContent();
+                String usertype = element.getElementsByTagName(PROGRAM_ASSIGN_USERTYPE_TAG).item(0).getTextContent();
+                
+                this.formTestProgram.assignProgramToUsertype(program, usertype);
+            }
+            
+            // Create layouts
+            NodeList layouts = doc.getElementsByTagName(LAYOUT_TAG);
+            
+            for(int n=0; n<layouts.getLength(); n++){
+                Node nNode = menuitems.item(n);
+                Element element = (Element) nNode;
+                String layout = element.getElementsByTagName(LAYOUT_NAME_TAG).item(0).getTextContent();
+                String viewroot = element.getElementsByTagName(LAYOUT_VIEWROOT_TAG).item(0).getTextContent();
+                
+                this.formCreateLayout.setLayoutName(layout);
+                this.formCreateLayout.setViewRoot(viewroot);
+                this.formCreateLayout.registerLayout();
+            }
+            
+            // Create layout assignments
+            NodeList layoutassignments = doc.getElementsByTagName(LAYOUT_ASSIGN_TAG);
+            
+            for(int n=0; n<layoutassignments.getLength(); n++){
+                Node nNode = menuitems.item(n);
+                Element element = (Element) nNode;
+                String layout = element.getElementsByTagName(LAYOUT_ASSIGN_LAYOUT_TAG).item(0).getTextContent();
+                NodeList usertypeNodes = element.getElementsByTagName(LAYOUT_ASSIGN_USERTYPE_TAG);
+                NodeList usernameNodes = element.getElementsByTagName(LAYOUT_ASSIGN_USERNAME_TAG);
+                NodeList programNodes = element.getElementsByTagName(LAYOUT_ASSIGN_PROGRAM_TAG);
+                
+                if(usertypeNodes != null && usertypeNodes.getLength() >0){
+                    for(int i=0; i<usertypeNodes.getLength(); i++){
+                        this.formAssignLayoutUserType.assignLayoutToUserType(layout, usertypeNodes.item(i).getTextContent());
+                    }
+                }
+                if(usernameNodes != null && usernameNodes.getLength() >0){
+                    for(int i=0; i<usernameNodes.getLength(); i++){
+                        this.formAssignLayoutUsername.assignLayoutToUsername(layout, usernameNodes.item(i).getTextContent());
+                    }
+                }
+                if(programNodes != null && programNodes.getLength() >0){
+                    for(int i=0; i<programNodes.getLength(); i++){
+                        this.formAssignLayoutProgram.assignLayoutToProgram(layout, programNodes.item(i).getTextContent());
+                    }
+                }
+            }
+            
+            // Create clients
+            NodeList clients = doc.getElementsByTagName(CLIENT_TYPE_TAG);
+            
+            for(int n=0; n<clients.getLength(); n++){
+                Node nNode = menuitems.item(n);
+                Element element = (Element) nNode;
+                String clientname = element.getElementsByTagName(CLIENT_TYPE_NAME_TAG).item(0).getTextContent();
+                String clientdesc = element.getElementsByTagName(CLIENT_TYPE_DESC_TAG).item(0).getTextContent();
+                
+                this.formRegisterClientType.setClientType(clientname);
+                this.formRegisterClientType.setClientTypeDesc(clientdesc);
+                this.formRegisterClientType.registerClientType();
+                
+            }
+            
+            // Create client assignments 
+            NodeList clientassignments = doc.getElementsByTagName(CLIENT_ASSIGN_TAG);
+            
+            for(int n=0; n<clientassignments.getLength(); n++){
+                Node nNode = menuitems.item(n);
+                Element element = (Element) nNode;
+                String clientname = element.getElementsByTagName(CLIENT_ASSIGN_TYPE_NAME_TAG).item(0).getTextContent();
+                NodeList usertypenodes = element.getElementsByTagName(CLIENT_ASSIGN_USERTYPE_TAG);
+                
+                for(int i=0; i<usertypenodes.getLength(); i++){
+                    String usertypename = usertypenodes.item(i).getTextContent();
+                    this.formRegisterClientForObjectname.registerClientForUser(clientname, usertypename);
+                }
+                
+                
+                
             }
             
         } catch (ParserConfigurationException ex) {

@@ -102,7 +102,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             //- If not found but project is in development stage, get the GLOBAL_DEFAULT_VIEWROOT
             //- If found, continue.
             //String viewRoot = this.programService.getViewRootFromProgramName(programName);
-            Program program = this.programService.getProgramByName(programName);
+            Program program = this.programService.getSingleProgramByName(programName);
             String viewRoot = program == null ? null : program.getVIEW_ROOT();
             String programTitle = program == null ? null : program.getDISPLAY_TITLE();
             String programDesc = program == null ? null : program.getDISPLAY_DESCRIPTION();

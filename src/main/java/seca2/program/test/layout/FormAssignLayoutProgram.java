@@ -9,6 +9,8 @@ import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutAssignmentException;
 import eds.component.layout.LayoutService;
 import eds.component.program.ProgramService;
+import eds.entity.layout.Layout;
+import eds.entity.program.Program;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -54,6 +56,15 @@ public class FormAssignLayoutProgram extends Form {
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
+    }
+    
+    public void assignLayoutToProgram(String layoutName, String programName){
+        Layout layout = this.layoutService.getLayoutByName(layoutName);
+        Program program = this.programService.getSingleProgramByName(programName);
+        
+        this.setLayoutId(layout.getOBJECTID());
+        this.setProgramId(program.getOBJECTID());
+        this.assignLayoutToProgram();
     }
     
     public long getLayoutId() {

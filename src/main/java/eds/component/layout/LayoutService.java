@@ -348,7 +348,7 @@ public class LayoutService implements Serializable {
         throws DBConnectionException {
         try{
             
-            Program program = this.programService.getProgramByName(programName);
+            Program program = this.programService.getSingleProgramByName(programName);
             if(program == null)
                 return null;
             

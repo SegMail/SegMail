@@ -160,4 +160,19 @@ public class FormTestProgram implements Serializable {
         
     }
     
+    public void assignProgramToUsertype(String programName, String usertypename){
+        Program program = this.programService.getSingleProgramByName(programName);
+        UserType usertype = this.userService.getSingleUserTypeByName(usertypename);
+        
+        if(program == null)
+            throw new RuntimeException("Program "+programName+" is not created yet.");
+        if(usertype == null)
+            throw new RuntimeException("Usertype "+usertypename+" is not created yet.");
+        
+        this.setSelectedProgramId(program.getOBJECTID());
+        this.setSelectedUserTypeId(usertype.getOBJECTID());
+        
+        this.assignProgramAccess();
+    }
+    
 }

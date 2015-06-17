@@ -87,6 +87,15 @@ public class FormAssignLayoutUsername extends Form {
     public List<Layout> getAllLayouts() {
         return this.programTest.getAllLayouts();
     }
+
+    public void assignLayoutToUsername(String layoutName, String username) {
+        Layout layout = this.layoutService.getLayoutByName(layoutName);
+        
+        this.setLayoutId(layout.getOBJECTID());
+        this.setUsername(username);
+        
+        this.assignLayoutToUsername();
+    }
     
     
     

@@ -48,7 +48,7 @@ public class ProgramService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Program getProgramByName(String programName) throws DBConnectionException {
+    public Program getSingleProgramByName(String programName) throws DBConnectionException {
         try {
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
@@ -171,7 +171,7 @@ public class ProgramService implements Serializable {
                 throw new ProgramRegistrationException("View root cannot be empty!");
             
             //Check if program name already exist
-            Program existingProgram = this.getProgramByName(programName);
+            Program existingProgram = this.getSingleProgramByName(programName);
             if(existingProgram != null)
                 throw new ProgramRegistrationException("Program "+programName+" already exists!");
             
@@ -270,7 +270,7 @@ public class ProgramService implements Serializable {
     public boolean checkProgramAuthForUserType(long usertypeid, String programName) 
             throws DBConnectionException{
         
-        Program program = this.getProgramByName(programName);
+        Program program = this.getSingleProgramByName(programName);
         //Always use the first result
         if(program == null)
             return false;
