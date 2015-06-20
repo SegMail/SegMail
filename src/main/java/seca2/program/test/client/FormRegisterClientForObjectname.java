@@ -9,6 +9,7 @@ import eds.component.GenericEnterpriseObjectService;
 import eds.component.client.ClientRegistrationException;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
+import eds.entity.client.Client;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.client.ClientType;
 import java.util.List;
@@ -82,16 +83,7 @@ public class FormRegisterClientForObjectname {
     }
     
     public void registerClientForUser(String clientTypename, String username){
-        // Refresh ProgramTest
-        this.programTest.init();
-        
-        ClientType clientType = null;
-        for(ClientType ct : this.getAllClientTypes()){
-            if(clientTypename.compareToIgnoreCase(ct.getCLIENT_TYPE_NAME()) == 0){
-                clientType = ct;
-                break;
-            }
-        }
+        ClientType clientType = this.clientService.getClientTypeByName(clientTypename);
         if(clientType == null)
             throw new RuntimeException("Clienttype "+clientTypename+" could not be found.");
         

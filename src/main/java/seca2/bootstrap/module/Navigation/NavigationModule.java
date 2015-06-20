@@ -81,7 +81,9 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             //Build the menu tree here.
             //For each menu item, if it is a program type, prepend the context path.
             //If it is a URL, leave it as it is
-            if(userContainer == null || userContainer.getUserType() == null)
+            //Security vulnerability
+            //if(userContainer == null || userContainer.getUserType() == null)
+            if(inputContext.isSetup())
                 menuItems = this.navigationService.getAllMenuItems();
             else
                 menuItems = this.navigationService.getAllMenuItemsForUsertype(userContainer.getUserType().getOBJECTID());

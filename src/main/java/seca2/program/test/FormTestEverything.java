@@ -119,7 +119,7 @@ public class FormTestEverything {
     
     private final String CLIENT_ASSIGN_TAG = "CLIENT_ASSIGN";
     private final String CLIENT_ASSIGN_TYPE_NAME_TAG = "CLIENT_ASSIGN_TYPE_NAME";
-    private final String CLIENT_ASSIGN_USERTYPE_TAG = "CLIENT_ASSIGN_USERTYPE";
+    private final String CLIENT_ASSIGN_USERNAME_TAG = "CLIENT_ASSIGN_USERNAME";
     
     public void init(){
         System.out.println("Test everything init");
@@ -438,10 +438,10 @@ public class FormTestEverything {
             for(int n=0; n<programs.getLength(); n++){
                 Node nNode = programs.item(n);
                 Element element = (Element) nNode;
-                String name = element.getAttribute(PROGRAM_NAME_TAG);
-                String viewroot = element.getAttribute(PROGRAM_VIEW_TAG);
-                String dispName = element.getAttribute(PROGRAM_DISP_TAG);
-                String dispDesc = element.getAttribute(PROGRAM_DESC_TAG);
+                String name = element.getElementsByTagName(PROGRAM_NAME_TAG).item(0).getTextContent();
+                String viewroot = element.getElementsByTagName(PROGRAM_VIEW_TAG).item(0).getTextContent();
+                String dispName = element.getElementsByTagName(PROGRAM_DISP_TAG).item(0).getTextContent();
+                String dispDesc = element.getElementsByTagName(PROGRAM_DESC_TAG).item(0).getTextContent();
                 
                 this.formTestProgram.setProgramName(name);
                 this.formTestProgram.setProgramViewRoot(viewroot);
@@ -471,7 +471,7 @@ public class FormTestEverything {
             NodeList menuassignments = doc.getElementsByTagName(MENU_ASSIGN_TAG);
             
             for(int n=0; n<menuassignments.getLength(); n++){
-                Node nNode = menuitems.item(n);
+                Node nNode = menuassignments.item(n);
                 Element element = (Element) nNode;
                 String menu = element.getElementsByTagName(MENU_ASSIGN_MENU_TAG).item(0).getTextContent();
                 NodeList usertypeNodes = element.getElementsByTagName(MENU_ASSIGN_USERTYPE_TAG);
@@ -484,7 +484,7 @@ public class FormTestEverything {
             NodeList programassignments = doc.getElementsByTagName(PROGRAM_ASSIGN_TAG);
             
             for(int n=0; n<programassignments.getLength(); n++){
-                Node nNode = menuitems.item(n);
+                Node nNode = programassignments.item(n);
                 Element element = (Element) nNode;
                 String program = element.getElementsByTagName(PROGRAM_ASSIGN_PROGRAM_TAG).item(0).getTextContent();
                 String usertype = element.getElementsByTagName(PROGRAM_ASSIGN_USERTYPE_TAG).item(0).getTextContent();
@@ -496,7 +496,7 @@ public class FormTestEverything {
             NodeList layouts = doc.getElementsByTagName(LAYOUT_TAG);
             
             for(int n=0; n<layouts.getLength(); n++){
-                Node nNode = menuitems.item(n);
+                Node nNode = layouts.item(n);
                 Element element = (Element) nNode;
                 String layout = element.getElementsByTagName(LAYOUT_NAME_TAG).item(0).getTextContent();
                 String viewroot = element.getElementsByTagName(LAYOUT_VIEWROOT_TAG).item(0).getTextContent();
@@ -510,7 +510,7 @@ public class FormTestEverything {
             NodeList layoutassignments = doc.getElementsByTagName(LAYOUT_ASSIGN_TAG);
             
             for(int n=0; n<layoutassignments.getLength(); n++){
-                Node nNode = menuitems.item(n);
+                Node nNode = layoutassignments.item(n);
                 Element element = (Element) nNode;
                 String layout = element.getElementsByTagName(LAYOUT_ASSIGN_LAYOUT_TAG).item(0).getTextContent();
                 NodeList usertypeNodes = element.getElementsByTagName(LAYOUT_ASSIGN_USERTYPE_TAG);
@@ -538,7 +538,7 @@ public class FormTestEverything {
             NodeList clients = doc.getElementsByTagName(CLIENT_TYPE_TAG);
             
             for(int n=0; n<clients.getLength(); n++){
-                Node nNode = menuitems.item(n);
+                Node nNode = clients.item(n);
                 Element element = (Element) nNode;
                 String clientname = element.getElementsByTagName(CLIENT_TYPE_NAME_TAG).item(0).getTextContent();
                 String clientdesc = element.getElementsByTagName(CLIENT_TYPE_DESC_TAG).item(0).getTextContent();
@@ -553,14 +553,14 @@ public class FormTestEverything {
             NodeList clientassignments = doc.getElementsByTagName(CLIENT_ASSIGN_TAG);
             
             for(int n=0; n<clientassignments.getLength(); n++){
-                Node nNode = menuitems.item(n);
+                Node nNode = clientassignments.item(n);
                 Element element = (Element) nNode;
                 String clientname = element.getElementsByTagName(CLIENT_ASSIGN_TYPE_NAME_TAG).item(0).getTextContent();
-                NodeList usertypenodes = element.getElementsByTagName(CLIENT_ASSIGN_USERTYPE_TAG);
+                NodeList usernamenodes = element.getElementsByTagName(CLIENT_ASSIGN_USERNAME_TAG);
                 
-                for(int i=0; i<usertypenodes.getLength(); i++){
-                    String usertypename = usertypenodes.item(i).getTextContent();
-                    this.formRegisterClientForObjectname.registerClientForUser(clientname, usertypename);
+                for(int i=0; i<usernamenodes.getLength(); i++){
+                    String username = usernamenodes.item(i).getTextContent();
+                    this.formRegisterClientForObjectname.registerClientForUser(clientname, username);
                 }
                 
                 

@@ -6,8 +6,11 @@
 package seca2.bootstrap;
 
 import java.io.Serializable;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.module.User.UserContainer;
 
@@ -23,6 +26,16 @@ public class BootstrapInput implements Serializable{
     
     private String program;
     private String contextPath;
+    // This is just a workaround before we build the installation module!
+    private boolean setup;
+    
+    @PostConstruct
+    public void init(){
+        FacesContext fc = FacesContext.getCurrentInstance();
+        ExternalContext ec = fc.getExternalContext();
+        String bypass = ec.getInitParameter("SETUP");
+        setup = (bypass != null) && bypass.compareToIgnoreCase("TRUE") == 0;
+    }
 
     public String getProgram() {
         return program;
@@ -46,6 +59,14 @@ public class BootstrapInput implements Serializable{
 
     public void setUserContainer(UserContainer userContainer) {
         this.userContainer = userContainer;
+    }
+
+    public boolean isSetup() {
+        return setup;
+    }
+
+    public void setSetup(boolean setup) {
+        this.setup = setup;
     }
     
     

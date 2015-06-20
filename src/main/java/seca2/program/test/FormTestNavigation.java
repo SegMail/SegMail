@@ -197,7 +197,7 @@ public class FormTestNavigation implements Serializable{
 
     public void assignMenuItems(String usertypename, String menuname ){
         List<UserType> usertypes = this.userService.getUserTypeByName(usertypename);
-        List<MenuItem> menuitems = this.navigationService.getAllMenuItemsByName(menuItemName);
+        List<MenuItem> menuitems = this.navigationService.getAllMenuItemsByName(menuname);
         
         if(usertypes == null || usertypes.isEmpty())
             throw new RuntimeException("Usertypes are not created yet!");
