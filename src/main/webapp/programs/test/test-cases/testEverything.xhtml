@@ -18,7 +18,7 @@
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
                         <p:commandButton id="setupSegmail" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup Segmail."
-                                         update=":everything"
+                                         update=":everything" process="@form"
                                          actionListener="#{FormTestEverything.setupSegmail()}"></p:commandButton>
                     </div>
                 </div><br />
@@ -30,11 +30,12 @@
                     <h:inputFile value="#{FormTestEverything.file}" ></h:inputFile>
                     <p:commandButton id="upload_xml_setup" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
                                      actionListener="#{FormTestEverything.uploadXMLPlain}"
-                                     update="@form" ajax="true" 
+                                     update="@form" ajax="true" process="@form"
                                      ></p:commandButton><!--This doesn't work-->
                     <!--h:commandButton works, but it cannot call blockui-->
                     <h:commandButton id="upload_xml_setup2" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
-                                     actionListener="#{FormTestEverything.uploadXMLPlain}">
+                                     actionListener="#{FormTestEverything.uploadXMLPlain}"
+                                     >
                         <f:ajax execute="@all" render="message1"/>
                     </h:commandButton>
                     <s2:messenger id="message1" for="test1" showDetail="true" showSummary="true" ></s2:messenger>
@@ -51,7 +52,7 @@
 
                     <p:fileUpload id="upload_pf_button" allowTypes="/(\.|\/)(XML|xml)$/"
                                   fileUploadListener="#{FormTestEverything.uploadXMLPF}" 
-                                  auto="true" immediate="true"
+                                  auto="true" immediate="true" process="@form"
                                   update="@form"></p:fileUpload>
                     <s2:messenger id="message1" for="FormTestEverything" showDetail="true" showSummary="true" ></s2:messenger>
                     <p:blockUI block="FormTestEverything" trigger="FormTestEverything:upload_pf_button" >

@@ -28,8 +28,11 @@ import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
+import eds.entity.navigation.MenuItemAccessComparator;
+import eds.entity.navigation.MenuItemComparator;
 import eds.entity.navigation.MenuItem_;
 import eds.entity.user.UserType;
+import java.util.Collections;
 
 /**
  * Handles the navigation of the application
@@ -178,7 +181,7 @@ public class NavigationService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId) throws AssignMenuItemAccessException, DBConnectionException {
+    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) throws AssignMenuItemAccessException, DBConnectionException {
         
         try{
             /*//check if userType already has access to menuItem
@@ -218,7 +221,7 @@ public class NavigationService implements Serializable {
             //assignment1.setSOURCE(assignUserType);
             //assignment1.setTARGET(assignMenuItem);
             
-            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType);
+            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType,order);
             //assignment2.setSOURCE(assignMenuItem);
             //assignment2.setTARGET(assignUserType);
             
@@ -273,7 +276,7 @@ public class NavigationService implements Serializable {
     public List<MenuItem> getAllMenuItems() throws DBConnectionException {
         
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
             Root<MenuItem> sourceEntity = criteria.from(MenuItem.class);
             criteria.select(sourceEntity);
@@ -282,6 +285,10 @@ public class NavigationService implements Serializable {
                     //.setFirstResult(0)
                     //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
                     .getResultList();
+            */
+            List<MenuItem> results = this.genericEnterpriseObjectService.getAllEnterpriseObjects(MenuItem.class);
+            Collections.sort(results, new MenuItemComparator());
+            
             return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -305,7 +312,15 @@ public class NavigationService implements Serializable {
     public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) throws DBConnectionException {
         
         try {
-            List<MenuItem> results = this.genericEnterpriseObjectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
+            //List<MenuItem> results = this.genericEnterpriseObjectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
+            List<MenuItemAccess> access = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
+            
+            Collections.sort(access, new MenuItemAccessComparator());
+            
+            List<MenuItem> results = new ArrayList<MenuItem>();
+            for(MenuItemAccess a : access){
+                results.add(a.getSOURCE());
+            }
             
             return results;
         } catch (PersistenceException pex) {

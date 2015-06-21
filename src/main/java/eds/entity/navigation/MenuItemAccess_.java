@@ -14,7 +14,7 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author KH
  */
-@StaticMetamodel(MenuItem.class)
+@StaticMetamodel(MenuItemAccess.class)
 public class MenuItemAccess_ extends EnterpriseRelationship_ {
-    
+    public static volatile SingularAttribute<MenuItemAccess,Integer> MENU_ORDER;
 }

@@ -18,12 +18,15 @@ import javax.persistence.Table;
 @Entity
 @Table(name="MENU_ITEM_ACCESS")
 public class MenuItemAccess extends EnterpriseRelationship<MenuItem,UserType> {
+    
+    private int MENU_ORDER;
 
     public MenuItemAccess() {
     }
 
-    public MenuItemAccess(MenuItem s, UserType t) {
+    public MenuItemAccess(MenuItem s, UserType t, int order) {
         super(s, t);
+        this.MENU_ORDER = order;
     }
 
     //Any additional attributes to be maintained for this relationship?
@@ -48,5 +51,16 @@ public class MenuItemAccess extends EnterpriseRelationship<MenuItem,UserType> {
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public int getMENU_ORDER() {
+        return MENU_ORDER;
+    }
+
+    public void setMENU_ORDER(int MENU_ORDER) {
+        this.MENU_ORDER = MENU_ORDER;
+    }
+
+    
+    
     
 }
