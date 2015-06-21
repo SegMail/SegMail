@@ -60,7 +60,8 @@
                                         </a>
                                         <ul class="dropdown-menu" role="menu">
                                             <li>
-                                                <a jsf:actionListener="#{FormUserLogout.logout()}" >
+                                                <a jsf:actionListener="#{FormUserLogout.logout()}"  >
+                                                    <f:ajax execute="@form" render="@form"></f:ajax>
                                                     Logout
                                                 </a>
                                             </li>
