@@ -18,7 +18,7 @@
                 <div class="row">
                     <div class="col-md-12 col-xs-12">
                         <p:commandButton id="setupDBEM" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via EM"
-                                         update="@form"
+                                         update="@form" process="@form"
                                          actionListener="#{FormTestDB.generateDBEM()}"></p:commandButton>
                     </div>
                 </div><br />
@@ -26,7 +26,7 @@
                     <div class="col-md-12 col-xs-12">
                         <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
                         <p:commandButton id="setupDBSession" styleClass="btn btn-primary col-md-12 col-xs-12" value="Generate DB via Session"
-                                         update="@form"
+                                         update="@form" process="@form"
                                          actionListener="#{FormTestDB.generateDBSession()}"></p:commandButton>
                     </div>
                 </div><br />
@@ -34,7 +34,7 @@
                     <div class="col-md-12 col-xs-12">
                         <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
                         <p:commandButton id="setupDBMixed" styleClass="btn btn-primary col-md-12 col-xs-12" 
-                                         value="Delete and re-generate tables"
+                                         value="Delete and re-generate tables" process="@form"
                                          update="@form" style="word-wrap: normal;"
                                          actionListener="#{FormTestDB.generateDB()}"></p:commandButton>
                     </div>
@@ -43,7 +43,7 @@
                     <div class="col-md-12 col-xs-12">
                         <!--<h:outputLabel for="setupDBSession" styleClass="control-label col-md-6">Generate DB with Hibernate Session: </h:outputLabel>-->
                         <p:commandButton id="setupDBUpdate" styleClass="btn btn-primary col-md-12 col-xs-12" 
-                                         value="Update tables"
+                                         value="Update tables" process="@form"
                                          update="@form" style="word-wrap: normal;"
                                          actionListener="#{FormTestDB.updateDB()}"></p:commandButton>
                     </div>

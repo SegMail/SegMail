@@ -37,6 +37,7 @@
                         </button>-->
                         <p:commandButton styleClass="btn btn-success" id="setProfilePicButton2" value="Set Profile Pic"
                                          actionListener="#{FormTestUser.setProfilePicLocation()}"
+                                         process="@form" update="@form"
                                          >
                             <f:ajax execute="setProfilePicForm" render="setProfilePicForm" ></f:ajax>
                         </p:commandButton>
