@@ -51,7 +51,8 @@
                         <form jsf:id="form-user-login" class="login-form">
                             <div class="form-group">
                                 <h:inputText id="login-username" class="form-control login-field"
-                                             value="#{FormUserLogin.username}" title="test-tooltip"/>
+                                             value="#{FormUserLogin.username}" title="test-tooltip"
+                                             maxlength="20"/>
                                 <p:watermark for="login-username" value="Username" />
                                 <p:tooltip for="login-username" styleClass="tooltip fade bottom in"
                                            showEvent="focus" hideEvent="blur" />
@@ -60,7 +61,7 @@
                             </div>
                             <div class="form-group">
                                 <h:inputSecret id="login-password" class="form-control login-field"
-                                               value="#{FormUserLogin.password}"
+                                               value="#{FormUserLogin.password}" maxlength="20"
                                                />
                                 <p:watermark for="login-password" value="Password" />
                                 <label class="login-field-icon fui-user" for="login-password"></label>

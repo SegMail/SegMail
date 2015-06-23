@@ -11,39 +11,32 @@
                     >
 
         <ui:define name="main-program-panel">
-            <div id="myDiagram" style="background-color: #696969; border: solid 1px black; height: 500px"></div>
 
             <div class="row">
-                <button id="SaveButton" onclick="save()">Write</button>
-                <button onclick="load()">Read</button>
-                <textarea id="mySavedModel" style="width:100%;height:250px;">
-{ "class": "go.TreeModel",
-  "nodeDataArray": [
-{"key":"1", "name":"Stella Payne Diaz", "title":"CEO"},
-{"key":"2", "name":"Luke Warm", "title":"VP Marketing/Sales", "parent":"1"},
-{"key":"3", "name":"Meg Meehan Hoffa", "title":"Sales", "parent":"2"},
-{"key":"4", "name":"Peggy Flaming", "title":"VP Engineering", "parent":"1"},
-{"key":"5", "name":"Saul Wellingood", "title":"Manufacturing", "parent":"4"},
-{"key":"6", "name":"Al Ligori", "title":"Marketing", "parent":"2"},
-{"key":"7", "name":"Dot Stubadd", "title":"Sales Rep", "parent":"3"},
-{"key":"8", "name":"Les Ismore", "title":"Project Mgr", "parent":"5"},
-{"key":"9", "name":"April Lynn Parris", "title":"Events Mgr", "parent":"6"},
-{"key":"10", "name":"Xavier Breath", "title":"Engineering", "parent":"4"},
-{"key":"11", "name":"Anita Hammer", "title":"Process", "parent":"5"},
-{"key":"12", "name":"Billy Aiken", "title":"Software", "parent":"10"},
-{"key":"13", "name":"Stan Wellback", "title":"Testing", "parent":"10"},
-{"key":"14", "name":"Marge Innovera", "title":"Hardware", "parent":"10"},
-{"key":"15", "name":"Evan Elpus", "title":"Quality", "parent":"5"},
-{"key":"16", "name":"Lotta B. Essen", "title":"Sales Rep", "parent":"3"}
- ]
-}
-                </textarea>
+                <div class="col-md-12">
+                    <div id="myDiagram" style="background-color: #696969; border: solid 1px black; height: 500px"></div>
+                    <div>
+                        <div id="propertiesPanel" style="display: none; background-color: aliceblue; border: solid 1px black">
+                            <b>Properties</b><br />
+                            Name: <input type="text" id="name" value="" onchange="updateData(this.value, 'name')" /><br />
+                            Title: <input type="text" id="title" value="" onchange="updateData(this.value, 'title')" /><br />
+                            Comments: <input type="text" id="comments" value="" onchange="updateData(this.value, 'comments')" /><br />
+                        </div>
+                    </div>
+                </div>
             </div>
-
+            <div class="row">
+                <div class="col-md-12">
+                    <button id="SaveButton" onclick="save()">Write</button>
+                    <button onclick="load()">Read</button>
+                </div>
+            </div>
         </ui:define>
         <ui:define name="scripts-bottom">
             <script src="#{request.contextPath}/programs/orgchart/js/go.js"></script>
-            <script src="#{request.contextPath}/programs/orgchart/js/orgchart.js"></script>
+            <script src="#{request.contextPath}/programs/orgchart/js/initGo.js"></script>
+            <!--<script src="#{request.contextPath}/programs/orgchart/js/goSamples.js"></script>-->
+            <!--<script src="#{request.contextPath}/programs/orgchart/js/orgchart.js"></script>-->
         </ui:define>
 
     </ui:composition>
