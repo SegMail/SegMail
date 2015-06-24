@@ -11,7 +11,6 @@
                     >
 
         <ui:define name="main-program-panel">
-
             <div class="row">
                 <div class="col-md-12">
                     <div id="myDiagram" style="background-color: #696969; border: solid 1px black; height: 500px"></div>
@@ -31,12 +30,11 @@
                     <button onclick="load()">Read</button>
                 </div>
             </div>
+            <ui:include src="jsf-models.xhtml" ></ui:include>
         </ui:define>
         <ui:define name="scripts-bottom">
-            <script src="#{request.contextPath}/programs/orgchart/js/go.js"></script>
-            <script src="#{request.contextPath}/programs/orgchart/js/initGo.js"></script>
-            <!--<script src="#{request.contextPath}/programs/orgchart/js/goSamples.js"></script>-->
-            <!--<script src="#{request.contextPath}/programs/orgchart/js/orgchart.js"></script>-->
+            <script type="text/javascript" src="#{request.contextPath}/programs/orgchart/js/go.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/programs/orgchart/js/orgchart.js"></script> 
         </ui:define>
 
     </ui:composition>
