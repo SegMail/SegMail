@@ -32,12 +32,15 @@
             </div>
             <div id="contextMenu">
                 <ul>
-                    <li><a href="#" id="cut" onclick="cxcommand(this.textContent)">Change holder</a></li>
+                    <li><a href="#change_holder" id="cut" onclick="cxcommand(this.textContent)" data-toggle="modal">Change holder</a></li>
                     <li><a href="#" id="copy" onclick="cxcommand(this.textContent)">Edit position info</a></li>
                     <li><a href="#" id="paste" onclick="cxcommand(this.textContent)">Subordinates</a></li>
                     <li><a href="#" id="delete" onclick="cxcommand(this.textContent)"></a></li>
                     <li><a href="#" id="color" onclick="cxcommand('Color')"></a></li>
                 </ul>
+            </div>
+            <div class="modal fade" id="change_holder">
+                <ui:include src="change_holder.xhtml"></ui:include>
             </div>
             <ui:include src="jsf-models.xhtml" ></ui:include>
         </ui:define>

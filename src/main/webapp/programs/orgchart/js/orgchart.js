@@ -5,7 +5,7 @@ $(document).ready(function () {
     //initContextMenu(diagram);
 });
 
-function initOrgChart() {
+function initOrgChart() {   
     var $ = go.GraphObject.make;
     var myDiagram = $(go.Diagram, "myDiagram",
             {

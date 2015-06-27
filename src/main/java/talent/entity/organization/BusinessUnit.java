@@ -16,7 +16,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name="BUSINESS_UNIT")
 public class BusinessUnit extends EnterpriseObject{
-
     
     @Override
     public void randInit() {

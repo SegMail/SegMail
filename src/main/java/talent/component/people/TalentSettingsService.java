@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package talent.component;
+package talent.component.people;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
@@ -32,7 +32,7 @@ import talent.entity.people.potential.PotentialLevel_;
  * @author LeeKiatHaw
  */
 @Stateless
-public class TalentService {
+public class TalentSettingsService {
     
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
