@@ -9,11 +9,21 @@
     xmlns:cc="http://xmlns.jcp.org/jsf/composite">
     <script type="text/javascript">
         var headshotImageAdaptor = (function(){
-            var directory = "#{HeadShotImageAdaptor.directory}";
+            var directory = "#{ProgramOrgChart.HSDirectory}";
             
             return {
-                getDirectory : function() { return "#{HeadShotImageAdaptor.directory}"; }
+                getDirectory : function() { return directory; }
             };
+        }());
+        
+        var orgCharAdaptor = (function(){
+            //JSON object
+            var model = {
+                "class": "go.TreeModel",
+                "nodeDataArray": [
+                    
+                ]
+            }
         }());
     </script>
 </html>

@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 /*
@@ -20,17 +21,19 @@ import javax.inject.Named;
 @Named("HeadShotImageAdaptor")
 public class HeadShotImageAdaptor {
     
-    private String directory;
+    @Inject private ProgramOrgChart program;
     
     @PostConstruct
     public void init(){
-        //Initialize the application context path
-        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        directory = ec.getRequestContextPath() /*+ ec.getRequestServletPath()*/ + "/programs/orgchart/images/HS";
+        if(!FacesContext.getCurrentInstance().isPostback()){
+            initDirectory();
+        }
     }
 
-    public String getDirectory() {
-        return directory;
+    public void initDirectory(){
+        //Initialize the application context path
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        program.setHSDirectory(ec.getRequestContextPath() /*+ ec.getRequestServletPath()*/ + "/programs/orgchart/images/HS");
     }
     
     

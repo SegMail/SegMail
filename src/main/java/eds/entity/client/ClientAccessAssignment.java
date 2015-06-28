@@ -7,21 +7,27 @@ package eds.entity.client;
 
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
+import eds.entity.user.User;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- *
+ * This represents a Client->User assignment, which means the user belongs to the
+ * client group. Eg. The first user assigned is the "root"/master administrator
+ * of all client resource - "SegMail" is registered as the client, "admin1" is the 
+ * first ever user assigned. admin1 can then go ahead to create user accounts 
+ * "admin2", "admin3", etc, who will then also have access to SegMail's stuff.
+ * 
  * @author LeeKiatHaw
  */
 @Entity
 @Table(name="CLIENT_ASSIGNMENT")
-public class ClientAssignment extends EnterpriseRelationship<Client,EnterpriseObject> {
+public class ClientAccessAssignment extends EnterpriseRelationship<Client,User> {
 
-    public ClientAssignment() {
+    public ClientAccessAssignment() {
     }
 
-    public ClientAssignment(Client s, EnterpriseObject t) {
+    public ClientAccessAssignment(Client s, User t) {
         super(s, t);
     }
 

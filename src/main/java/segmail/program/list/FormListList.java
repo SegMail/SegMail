@@ -56,7 +56,7 @@ public class FormListList {
             throw new RuntimeException("No user object found for this session " + userContainer);
         }
 
-        Client client = clientService.getClientByAssignedObjectId(user.getOBJECTID());
+        Client client = clientService.getClientByAssignedUser(user.getOBJECTID());
         if (client == null) {
             throw new RuntimeException("No client object found for this user " + user);
         }

@@ -14,7 +14,6 @@ import segmail.entity.subscription.email.EmailTemplate;
 import eds.entity.user.UserType;
 import java.io.Serializable;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -112,7 +111,7 @@ public class ProgramTemplate implements Serializable {
 
     public void initializeClient() {
         try {
-            this.setClient(clientService.getClientByAssignedObjectId(this.getUserContainer().getUser().getOBJECTID()));
+            this.setClient(clientService.getClientByAssignedUser(this.getUserContainer().getUser().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");

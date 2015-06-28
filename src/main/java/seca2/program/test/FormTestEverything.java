@@ -25,7 +25,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import seca2.program.test.client.FormRegisterClientForObjectname;
+import seca2.program.test.client.FormRegisterClientForUsername;
 import seca2.program.test.client.FormRegisterClientType;
 import seca2.program.test.layout.FormAssignLayoutProgram;
 import seca2.program.test.layout.FormAssignLayoutUserType;
@@ -51,7 +51,7 @@ public class FormTestEverything {
     @Inject private FormAssignLayoutUserType formAssignLayoutUserType;
     @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     @Inject private FormRegisterClientType formRegisterClientType;
-    @Inject private FormRegisterClientForObjectname formRegisterClientForObjectname;
+    @Inject private FormRegisterClientForUsername formRegisterClientForObjectname;
     
     // Setup variables
     

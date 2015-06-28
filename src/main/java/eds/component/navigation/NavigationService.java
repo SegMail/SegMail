@@ -198,7 +198,7 @@ public class NavigationService implements Serializable {
             
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .getResultList();*/
-            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObjects(userTypeId, menuItemId, MenuItemAccess.class);
+            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObject(userTypeId, menuItemId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
