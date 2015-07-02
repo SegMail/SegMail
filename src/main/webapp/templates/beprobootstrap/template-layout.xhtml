@@ -60,7 +60,7 @@
                                         </a>
                                         <ul class="dropdown-menu" role="menu">
                                             <li>
-                                                <a jsf:actionListener="#{FormUserLogout.logout()}"  >
+                                                <a jsf:actionListener="#{FormUserLogout.logout()}" >
                                                     <f:ajax execute="@form" render="@form"></f:ajax>
                                                     Logout
                                                 </a>
@@ -88,6 +88,9 @@
                                 <div class="page-toolbar-block">
                                     <div class="page-toolbar-title">#{bootstrap.output.programTitle}</div>
                                     <div class="page-toolbar-subtitle">#{bootstrap.output.programDescription}</div>
+                                </div>
+                                <div class="page-toolbar-block pull-right">
+                                    <ui:insert name="toolbar-right"></ui:insert>
                                 </div>
                             </c:if>
 

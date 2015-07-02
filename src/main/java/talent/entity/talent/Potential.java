@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package talent.entity.people;
+package talent.entity.talent;
 
 import eds.entity.data.EnterpriseData;
 import java.sql.Date;
@@ -11,19 +11,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import talent.entity.people.performance.PerformanceLevel;
+import talent.entity.people.potential.PotentialLevel;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="PERFORMANCE")
-public class Performance extends EnterpriseData<Employee> {
+@Table(name="POTENTIAL")
+public class Potential extends EnterpriseData<Employee> {
 
     private java.sql.Date DATE_OF_ASSESSMENT;
     
-    private PerformanceLevel LEVEL;
+    private PotentialLevel LEVEL;
     
     private String COMMENTS;
 
@@ -36,11 +36,11 @@ public class Performance extends EnterpriseData<Employee> {
     }
 
     @ManyToOne
-    public PerformanceLevel getLEVEL() {
+    public PotentialLevel getLEVEL() {
         return LEVEL;
     }
 
-    public void setLEVEL(PerformanceLevel LEVEL) {
+    public void setLEVEL(PotentialLevel LEVEL) {
         this.LEVEL = LEVEL;
     }
 
@@ -52,7 +52,6 @@ public class Performance extends EnterpriseData<Employee> {
     public void setCOMMENTS(String COMMENTS) {
         this.COMMENTS = COMMENTS;
     }
-    
     
     
     @Override

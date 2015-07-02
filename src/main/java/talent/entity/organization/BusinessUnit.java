@@ -17,6 +17,16 @@ import javax.persistence.Table;
 @Table(name="BUSINESS_UNIT")
 public class BusinessUnit extends EnterpriseObject{
     
+    private String UNIT_NAME;
+
+    public String getUNIT_NAME() {
+        return UNIT_NAME;
+    }
+
+    public void setUNIT_NAME(String UNIT_NAME) {
+        this.UNIT_NAME = UNIT_NAME;
+    }
+    
     @Override
     public void randInit() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

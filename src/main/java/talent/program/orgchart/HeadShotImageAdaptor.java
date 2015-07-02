@@ -23,6 +23,8 @@ public class HeadShotImageAdaptor {
     
     @Inject private ProgramOrgChart program;
     
+    private String HSDirectory;
+    
     @PostConstruct
     public void init(){
         if(!FacesContext.getCurrentInstance().isPostback()){
@@ -33,7 +35,15 @@ public class HeadShotImageAdaptor {
     public void initDirectory(){
         //Initialize the application context path
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        program.setHSDirectory(ec.getRequestContextPath() /*+ ec.getRequestServletPath()*/ + "/programs/orgchart/images/HS");
+        this.setHSDirectory(ec.getRequestContextPath() /*+ ec.getRequestServletPath()*/ + "/programs/orgchart/images/HS");
+    }
+    
+    public String getHSDirectory() {
+        return HSDirectory;
+    }
+
+    public void setHSDirectory(String HSDirectory) {
+        this.HSDirectory = HSDirectory;
     }
     
     

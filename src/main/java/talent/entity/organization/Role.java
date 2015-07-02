@@ -18,6 +18,14 @@ import javax.persistence.Table;
 public class Role extends EnterpriseObject{
 
     private String JOB_TITLE;
+
+    public String getJOB_TITLE() {
+        return JOB_TITLE;
+    }
+
+    public void setJOB_TITLE(String JOB_TITLE) {
+        this.JOB_TITLE = JOB_TITLE;
+    }
     
     @Override
     public void randInit() {

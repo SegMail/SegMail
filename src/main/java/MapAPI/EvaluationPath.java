@@ -37,7 +37,7 @@ public class EvaluationPath implements Serializable {
         this.PATH_ID = PATH_ID;
     }
 
-    @OneToMany
+    @OneToMany(targetEntity=EvaluationPathElement.class)
     public List<EvaluationPathElement> getElements() {
         return elements;
     }

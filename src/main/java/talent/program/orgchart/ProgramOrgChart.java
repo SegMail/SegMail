@@ -6,6 +6,7 @@
 package talent.program.orgchart;
 
 import MapAPI.EntityMap;
+import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import talent.entity.organization.BelongsTo;
@@ -17,12 +18,10 @@ import talent.entity.organization.BusinessUnit;
  */
 @SessionScoped
 @Named("ProgramOrgChart")
-public class ProgramOrgChart {
+public class ProgramOrgChart implements Serializable{
     
     private EntityMap<BusinessUnit,BelongsTo> orgChartMap;
     
-    private String HSDirectory;
-
     public EntityMap<BusinessUnit, BelongsTo> getOrgChartMap() {
         return orgChartMap;
     }
@@ -30,14 +29,4 @@ public class ProgramOrgChart {
     public void setOrgChartMap(EntityMap<BusinessUnit, BelongsTo> orgChartMap) {
         this.orgChartMap = orgChartMap;
     }
-
-    public String getHSDirectory() {
-        return HSDirectory;
-    }
-
-    public void setHSDirectory(String HSDirectory) {
-        this.HSDirectory = HSDirectory;
-    }
-    
-    
 }

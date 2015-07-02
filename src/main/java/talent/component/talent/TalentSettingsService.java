@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package talent.component.people;
+package talent.component.talent;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;

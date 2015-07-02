@@ -9,21 +9,50 @@
     xmlns:cc="http://xmlns.jcp.org/jsf/composite">
     <script type="text/javascript">
         var headshotImageAdaptor = (function(){
-            var directory = "#{ProgramOrgChart.HSDirectory}";
+            var directory = "#{HeadShotImageAdaptor.HSDirectory}";
             
             return {
                 getDirectory : function() { return directory; }
             };
         }());
         
-        var orgCharAdaptor = (function(){
+        var orgChartAdaptor = (function(){
             //JSON object
             var model = {
                 "class": "go.TreeModel",
                 "nodeDataArray": [
-                    
+                    {"key": "1", "name": "Stella Payne Diaz", "title": "CEO"},
+                    {"key": "2", "name": "Luke Warm", "title": "VP Marketing/Sales", "parent": "1"},
+                    {"key": "3", "name": "Meg Meehan Hoffa", "title": "Sales", "parent": "2"},
+                    {"key": "4", "name": "Peggy Flaming", "title": "VP Engineering", "parent": "1"},
+                    {"key": "5", "name": "Saul Wellingood", "title": "Manufacturing", "parent": "4"},
+                    {"key": "6", "text": "comment", "category":"comment"}
                 ]
+            }
+            
+            return {
+                getModel : function() {return model;}
+            }
+        }());
+        var setupAdaptor = (function(){
+            //JSON object
+            var model = {
+                "class": "go.TreeModel",
+                "nodeDataArray": [
+                    {"key": "1", "name": "Stella Payne Diaz", "title": "CEO"},
+                    {"key": "2", "name": "Luke Warm", "title": "VP Marketing/Sales", "parent": "1"},
+                    {"key": "3", "name": "Meg Meehan Hoffa", "title": "Sales", "parent": "2"},
+                    {"key": "4", "name": "Peggy Flaming", "title": "VP Engineering", "parent": "1"},
+                    {"key": "5", "name": "Saul Wellingood", "title": "Manufacturing", "parent": "4"},
+                    {"key": "6", "text": "comment", "category":"comment"}
+                ]
+            }
+            
+            return {
+                getModel : function() {return model;}
             }
         }());
     </script>
+    
+    
 </html>

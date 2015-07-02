@@ -8,51 +8,60 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="add_new_sub_form" onsubmit="add_new_sub_form.form()">
+    <form jsf:id="create_talent_form" onsubmit="create_talent_form.form()">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         X
                     </button>
-                    <h4 class="modal-title">Change </h4>
+                    <h4 class="modal-title">Create new role </h4>
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
+                    
+                    <div class="form-group has-success">
                         <label>
-                            Email:
+                            Organization name:
                         </label>
-                        <input type="email" class="form-control"
-                               jsf:value="#{FormListSubscriber.subscriber.EMAIL}"
-                               name="email" required="true"
-                               />
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            Firstname:
-                        </label>
+                        <span class="help-block">
+                            You have to create your organization first
+                        </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormListSubscriber.subscriber.FIRSTNAME}"
-                               name="firstname" required="true"
+                               jsf:value="#{FormCreateNewRole.unit.UNIT_NAME}"
+                               name="unit_name" required="true"
                                />
                     </div>
                     <div class="form-group">
                         <label>
-                            Lastname:
+                            Job Title:
                         </label>
+                        
+                        <input type="text" class="form-control"
+                               jsf:value="#{FormCreateNewRole.role.JOB_TITLE}"
+                               name="job_title" required="true"
+                               />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            Holder:
+                        </label>
+                        <span class="help-block">
+                            Who is going to hold this position?
+                        </span>
                         <input type="text" class="form-control"
                                jsf:value="#{FormListSubscriber.subscriber.LASTNAME}"
                                name="lastname" required="true"
                                />
                     </div>
                     <div class="form-group">
-                        <s2:messenger id="FormAddSub_messenger" for="add_new_sub_form" showDetail="true" showSummary="true"
+                        <s2:messenger id="FormAddSub_messenger" for="create_talent_form" showDetail="true" showSummary="true"
                                       class="form-group"></s2:messenger>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <p:commandButton id="add_subscriber_button" styleClass="btn btn-success" 
+                    <p:commandButton id="create_role_button" styleClass="btn btn-success" 
                                      value="Add subscriber" update="FormAddSub_messenger,"
                                      actionListener="#{FormListSubscriber.addSubscriber()}"
                                      
@@ -60,7 +69,7 @@
 
                     </p:commandButton>
                 </div>
-                <p:blockUI block="add_new_sub_form" trigger="add_new_sub_form:add_subscriber_button"
+                <p:blockUI block="create_talent_form" trigger="create_talent_form:create_role_button"
                            >
                     <p id="spinner"></p>
                 </p:blockUI>
@@ -69,8 +78,8 @@
         </div>
         <script type="text/javascript">
             $(document).ready(function(){
-                var add_new_sub_form =
-                $("#add_new_sub_form").validate({
+                var create_talent_form =
+                $("#create_talent_form").validate({
                     rules: {
                         email : {
                             required: true,

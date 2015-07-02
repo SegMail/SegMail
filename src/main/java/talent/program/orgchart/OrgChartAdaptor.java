@@ -15,7 +15,6 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
-import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import talent.component.organization.OrgService;
 import talent.entity.organization.BelongsTo;
@@ -35,7 +34,9 @@ public class OrgChartAdaptor {
     
     @Inject private ProgramOrgChart program;
     
-    public final String formName = "OrgChartAdaptor";
+    
+    
+    private final String formName = "OrgChartAdaptor";
     
     @PostConstruct
     public void init(){
@@ -46,10 +47,17 @@ public class OrgChartAdaptor {
     
     public void initOrgChartMap(){
         try {
-            program.setOrgChartMap(orgService.buildOrgChartForClient(clientContainer.getClient().getOBJECTID()));
+            setOrgChartMap(orgService.buildOrgChartForClient(clientContainer.getClient().getOBJECTID()));
         } catch(DBConnectionException ex){
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
     
+    public EntityMap<BusinessUnit, BelongsTo> getOrgChartMap() {
+        return program.getOrgChartMap();
+    }
+
+    public void setOrgChartMap(EntityMap<BusinessUnit, BelongsTo> orgChartMap) {
+        program.setOrgChartMap(orgChartMap);
+    }
 }

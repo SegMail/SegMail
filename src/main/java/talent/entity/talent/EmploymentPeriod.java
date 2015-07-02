@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package talent.entity.people;
+package talent.entity.talent;
 
-import eds.entity.data.EnterpriseObject;
+import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -14,8 +14,8 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="EMPLOYEE")
-public class Employee extends EnterpriseObject {
+@Table(name="EMPLOYMENT_PERIOD")
+public class EmploymentPeriod extends EnterpriseData<Employee> {
 
     
     @Override
@@ -25,11 +25,6 @@ public class Employee extends EnterpriseObject {
 
     @Override
     public Object generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String alias() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

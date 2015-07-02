@@ -5,12 +5,11 @@
  */
 package MapAPI;
 
-import eds.component.GenericEnterpriseObjectService;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import javax.ejb.EJB;
 
 /**
  *
@@ -18,7 +17,7 @@ import javax.ejb.EJB;
  * @param <E>
  * @param <R>
  */
-public class EntityMap<E extends EnterpriseObject, R extends EnterpriseRelationship> {
+public class EntityMap<E extends EnterpriseObject, R extends EnterpriseRelationship> implements Iterable<Node<E>> {
     
     private List<Node<E>> nodes;
     
@@ -27,6 +26,7 @@ public class EntityMap<E extends EnterpriseObject, R extends EnterpriseRelations
     private List<Edge> targetEdges;
     
     public EntityMap(List<E> objects, Class<R> r){
+        this.nodes = new ArrayList();
         this.sourceEdges = new ArrayList();
         this.targetEdges = new ArrayList();
         
@@ -35,6 +35,7 @@ public class EntityMap<E extends EnterpriseObject, R extends EnterpriseRelations
             newNode.initSourceEdges(r);
             newNode.initTargetEdges(r);
             
+            this.nodes.add(newNode);
             this.sourceEdges.addAll(newNode.getSourceEdges(r));
             this.targetEdges.addAll(newNode.getTargetEdges(r));
         }
@@ -60,6 +61,24 @@ public class EntityMap<E extends EnterpriseObject, R extends EnterpriseRelations
         return targetEdges;
     }
 
+    @Override
+    public Iterator<Node<E>> iterator() {
+        return this.nodes.iterator();
+    }
+
+    public int getNodeSize(){
+        return nodes.size();
+    }
     
+    public int getTotalEdgeSize(){
+        return getSourceEdgeSize() + getTargetEdgeSize();
+    }
     
+    public int getSourceEdgeSize(){
+        return sourceEdges.size();
+    }
+    
+    public int getTargetEdgeSize(){
+        return targetEdges.size();
+    }
 }

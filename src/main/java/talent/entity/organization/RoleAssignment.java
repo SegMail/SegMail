@@ -8,7 +8,7 @@ package talent.entity.organization;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import talent.entity.people.Employee;
+import talent.entity.talent.Employee;
 
 /**
  *

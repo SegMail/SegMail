@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package talent.entity.people;
+package talent.entity.talent;
 
 import eds.entity.data.EnterpriseData;
 import java.sql.Date;

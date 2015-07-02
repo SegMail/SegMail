@@ -5,7 +5,7 @@ $(document).ready(function () {
     //initContextMenu(diagram);
 });
 
-function initOrgChart() {   
+function initOrgChart() {
     var $ = go.GraphObject.make;
     var myDiagram = $(go.Diagram, "myDiagram",
             {
@@ -277,8 +277,15 @@ function initOrgChart() {
                                 cxElement.style.display = "none";
                                 this.currentContextMenu = null;
                             }
+                            myDiagram.add($(go.Part, "Vertical",
+                                $(go.TextBlock, { text: "a Text Block" }),
+                                $(go.TextBlock, { text: "a Text Block", stroke: "red" }),
+                                $(go.TextBlock, { text: "a Text Block", background: "lightblue" }),
+                                $(go.TextBlock, { text: "a Text Block", font: "bold 14pt serif" })
+                              ));
                             // read in the JSON-format data from the "mySavedModel" element
-                            myDiagram.model = go.Model.fromJson(model);
+                            //myDiagram.model = go.Model.fromJson(setupAdaptor.getModel());
+                            
                         }
 
 // Allow the user to edit text when a single node is selected

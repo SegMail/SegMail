@@ -30,9 +30,10 @@ public class ClientModule extends BootstrapModule implements Serializable {
     
     @Override
     protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        if(userContainer != null && userContainer.getUser() != null &&
-                clientContainer == null & clientContainer.getClient() == null){
+        if((userContainer != null || userContainer.getUser() != null) &&
+                (clientContainer == null || clientContainer.getClient() == null)){
             Client client = clientService.getClientByAssignedUser(userContainer.getUser().getOBJECTID());
+            clientContainer.setClient(client);
         }
         
         return true;
