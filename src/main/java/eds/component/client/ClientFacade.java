@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package talent.program.talent;
+package eds.component.client;
 
-import javax.enterprise.context.RequestScoped;
+import eds.entity.client.Client;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@RequestScoped
-public class FormPersonalParticulars {
+public interface ClientFacade {
     
+    public Client getClient();
 }

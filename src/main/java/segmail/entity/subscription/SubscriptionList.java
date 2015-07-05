@@ -5,6 +5,7 @@
  */
 package segmail.entity.subscription;
 
+import eds.entity.client.ClientResource;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.document.Document;
 import eds.entity.mail.MailSender;
@@ -20,6 +21,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
+@ClientResource
 //@DiscriminatorColumn(name="SUBSCRIPTION_LIST")
 public class SubscriptionList extends EnterpriseObject implements MailSender {
 

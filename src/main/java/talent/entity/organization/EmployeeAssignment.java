@@ -16,7 +16,7 @@ import talent.entity.talent.Employee;
  */
 @Entity
 @Table(name="ROLE_ASSIGNMENT")
-public class RoleAssignment extends EnterpriseRelationship<Employee,Role> {
+public class EmployeeAssignment extends EnterpriseRelationship<Employee,Position> {
 
     @Override
     public void randInit() {

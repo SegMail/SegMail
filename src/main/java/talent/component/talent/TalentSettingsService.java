@@ -9,7 +9,6 @@ import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.entity.config.GenericConfigService;
-import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -189,6 +188,17 @@ public class TalentSettingsService {
             
             return newLevel;
             
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } 
+    }
+    
+    public boolean isTalentPoolEmpty(long clientid){
+        try {
+            return true;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());

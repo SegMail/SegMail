@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.Client;
 
+import eds.component.client.ClientFacade;
 import eds.entity.client.Client;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
@@ -14,7 +15,7 @@ import javax.enterprise.context.SessionScoped;
  * @author LeeKiatHaw
  */
 @SessionScoped
-public class ClientContainer implements Serializable {
+public class ClientContainer implements Serializable, ClientFacade {
     
     private Client client;
 

@@ -5,7 +5,7 @@
  */
 package talent.entity.organization;
 
-import eds.entity.data.EnterpriseRelationship;
+import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -15,8 +15,18 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="POSITION")
-public class Position extends EnterpriseRelationship<Role,BusinessUnit> {
+public class Position extends EnterpriseObject{
 
+    private String JOB_TITLE;
+
+    public String getJOB_TITLE() {
+        return JOB_TITLE;
+    }
+
+    public void setJOB_TITLE(String JOB_TITLE) {
+        this.JOB_TITLE = JOB_TITLE;
+    }
+    
     @Override
     public void randInit() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -25,6 +35,11 @@ public class Position extends EnterpriseRelationship<Role,BusinessUnit> {
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String alias() {
+        return this.getJOB_TITLE();
     }
     
 }

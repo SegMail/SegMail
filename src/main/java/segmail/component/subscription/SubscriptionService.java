@@ -63,7 +63,7 @@ public class SubscriptionService {
     @EJB private UserService userService;
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public SubscriptionList addList(long clientid, String listname, boolean remote) {
+    public SubscriptionList addList(String listname, boolean remote) {
         try{
             if(listname == null || listname.isEmpty())
                 throw new ListException("List name cannot be empty.");
@@ -76,14 +76,14 @@ public class SubscriptionService {
             em.persist(newList);
             
             //2. Create the assignment to the client object
-            Client client = this.genericEntepriseObjectService.getEnterpriseObjectById(clientid, Client.class);
+            /*Client client = this.genericEntepriseObjectService.getEnterpriseObjectById(clientid, Client.class);
             if (client == null)
                 throw new EnterpriseObjectNotFoundException(clientid);
             //Test at this point whethe the newList object still gets persisted
             
             ListAssignment listAssignment = new ListAssignment(newList,client);
             
-            em.persist(listAssignment);
+            em.persist(listAssignment);*/
             
             return newList;
             

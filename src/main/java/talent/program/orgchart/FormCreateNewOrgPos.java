@@ -8,24 +8,30 @@ package talent.program.orgchart;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 import talent.entity.organization.BusinessUnit;
-import talent.entity.organization.Role;
+import talent.entity.organization.Position;
+import talent.entity.talent.Employee;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @RequestScoped
-@Named("FormCreateNewRole")
-public class FormCreateNewRole {
+@Named("FormCreateNewOrgPos")
+public class FormCreateNewOrgPos {
     
-    private Role role;
+    private Position role;
     private BusinessUnit unit;
+    private Employee holder;
+    
+    public void createNewOrgPos(){
+        
+    }
 
-    public Role getRole() {
+    public Position getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(Position role) {
         this.role = role;
     }
 
@@ -35,6 +41,14 @@ public class FormCreateNewRole {
 
     public void setUnit(BusinessUnit unit) {
         this.unit = unit;
+    }
+
+    public Employee getHolder() {
+        return holder;
+    }
+
+    public void setHolder(Employee holder) {
+        this.holder = holder;
     }
     
     

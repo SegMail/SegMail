@@ -11,8 +11,11 @@ import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.entity.client.ClientAccessAssignment;
+import eds.entity.client.ClientResource;
+import eds.entity.client.ClientResourceAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.user.User;
 import java.util.List;
 import javax.ejb.EJB;
@@ -296,6 +299,33 @@ public class ClientService {
                 return null;
             
             return results.get(0).getSOURCE();
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ClientResourceAssignment assignClientResource(Client client, EnterpriseObject clientResource){
+        try {
+            if(client == null )
+                throw new RuntimeException("Client is null.");
+            if(clientResource == null )
+                throw new RuntimeException("ClientResource is null.");
+            if(!clientResource.getClass().isAnnotationPresent(ClientResource.class))
+                throw new RuntimeException("EntepriseObject type "+clientResource.getClass().getSimpleName()+ " is not a Client Resource.");
+            
+            ClientResourceAssignment newAssign = new ClientResourceAssignment();
+            newAssign.setSOURCE(client);
+            newAssign.setTARGET(clientResource);
+            
+            em.persist(newAssign);
+            return newAssign;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

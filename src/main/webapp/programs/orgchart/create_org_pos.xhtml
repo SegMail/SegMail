@@ -8,19 +8,31 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="create_role_form" onsubmit="create_role_form.form()">
+    <form jsf:id="create_org_pos_form" onsubmit="create_org_pos_form.form()">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         X
                     </button>
-                    <h4 class="modal-title">Create new role </h4>
+                    <h4 class="modal-title">
+                        <c:choose>
+                            <c:when test="#{OrgChartAdaptor.orgChartMap.nodeSize le 0}">
+                                Create my first org unit
+                            </c:when>
+                            <c:otherwise>
+                                Create new Role
+                            </c:otherwise>
+                        </c:choose>
+                    </h4>
                 </div>
 
                 <div class="modal-body">
-                    
-                    <div class="form-group has-success">
+                    <div class="form-group">
+                        <s2:messenger id="FormCreateOrgPos_messenger" for="create_org_pos_form" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <div class="form-group #{OrgChartAdaptor.orgChartMap.nodeSize le 0 ? 'has-success' : ''}">
                         <label>
                             Organization name:
                         </label>
@@ -28,21 +40,23 @@
                             You have to create your organization first
                         </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormCreateNewRole.unit.UNIT_NAME}"
-                               name="unit_name" required="true"
+                               jsf:value="#{FormCreateNewOrgPos.unit.UNIT_NAME}"
+                               name="unit_name" required="#{OrgChartAdaptor.orgChartMap.nodeSize le 0}"
                                />
                     </div>
                     <div class="form-group">
                         <label>
-                            Job Title:
+                            Position Title:
                         </label>
-                        
+                        <span class="help-block">
+                            Official title of this position?
+                        </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormCreateNewRole.role.JOB_TITLE}"
-                               name="job_title" required="true"
+                               jsf:value="#{FormCreateNewOrgPos.role.JOB_TITLE}"
+                               name="job_title" required="#{OrgChartAdaptor.orgChartMap.nodeSize gt 0}"
                                />
                     </div>
-                    
+
                     <div class="form-group">
                         <label>
                             Holder:
@@ -51,25 +65,21 @@
                             Who is going to hold this position?
                         </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormListSubscriber.subscriber.LASTNAME}"
+                               jsf:value="#{FormCreateNewOrgPos.holder.OBJECTID}"
                                name="lastname" required="true"
                                />
                     </div>
-                    <div class="form-group">
-                        <s2:messenger id="FormAddSub_messenger" for="create_role_form" showDetail="true" showSummary="true"
-                                      class="form-group"></s2:messenger>
-                    </div>
+                    
                 </div>
                 <div class="modal-footer">
-                    <p:commandButton id="create_role_button" styleClass="btn btn-success" 
+                    <p:commandButton id="ccreate_org_pos_form:create_org_pos_button" styleClass="btn btn-success" 
                                      value="Add subscriber" update="FormAddSub_messenger,"
                                      actionListener="#{FormListSubscriber.addSubscriber()}"
-                                     
-                                     >
 
+                                     >
                     </p:commandButton>
                 </div>
-                <p:blockUI block="create_role_form" trigger="create_role_form:create_role_button"
+                <p:blockUI block="create_org_pos_form" trigger="ccreate_org_pos_form:create_org_pos_button"
                            >
                     <p id="spinner"></p>
                 </p:blockUI>
@@ -77,30 +87,30 @@
             </div>
         </div>
         <script type="text/javascript">
-            $(document).ready(function(){
-                var create_role_form =
-                $("#add_new_sub_form").validate({
+            $(document).ready(function () {
+                var create_org_pos_form =
+                        $("#create_org_pos_form").validate({
                     rules: {
-                        email : {
+                        email: {
                             required: true,
                             email: true
                         },
-                        firstname : {
+                        firstname: {
                             required: true
                         },
-                        lastname : {
+                        lastname: {
                             required: true
                         }
                     },
-                    errorPlacement: function(error, element) {
-                        if (element.attr("name") == "gender" || element.attr("name") == "rules" ) {                                                
-                            element.parents(".form-group").append(error);                                                
-                        }else
-                            error.insertAfter(element);   
+                    errorPlacement: function (error, element) {
+                        if (element.attr("name") == "gender" || element.attr("name") == "rules") {
+                            element.parents(".form-group").append(error);
+                        } else
+                            error.insertAfter(element);
                     }
                 });
             });
-    </script>
+        </script>
     </form>
-    
+
 </html>
