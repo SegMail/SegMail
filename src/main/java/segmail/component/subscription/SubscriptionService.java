@@ -6,6 +6,8 @@
 package segmail.component.subscription;
 
 import eds.component.GenericEnterpriseObjectService;
+import eds.component.client.ClientFacade;
+import eds.component.client.ClientResourceInterceptor;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityExistsException;
@@ -36,6 +38,8 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
@@ -53,6 +57,7 @@ import org.joda.time.DateTime;
  * @author LeeKiatHaw
  */
 @Stateless
+@Interceptors({ClientResourceInterceptor.class})
 public class SubscriptionService {
     
     @PersistenceContext(name="HIBERNATE")
@@ -61,6 +66,13 @@ public class SubscriptionService {
     @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
     @EJB private MailService mailService;
     @EJB private UserService userService;
+    
+    /**
+     * [2015.07.12] Because the EJB Interceptor way failed, so this is a very 
+     * good alternative to omit clientid input for every method call.
+     * 
+     */
+    @Inject ClientFacade clientFacade;
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList addList(String listname, boolean remote) {
@@ -76,14 +88,17 @@ public class SubscriptionService {
             em.persist(newList);
             
             //2. Create the assignment to the client object
-            /*Client client = this.genericEntepriseObjectService.getEnterpriseObjectById(clientid, Client.class);
+            //Client client = this.genericEntepriseObjectService.getEnterpriseObjectById(clientid, Client.class);
+            Client client = clientFacade.getClient();
             if (client == null)
-                throw new EnterpriseObjectNotFoundException(clientid);
+                throw new EnterpriseObjectNotFoundException(Client.class);
             //Test at this point whethe the newList object still gets persisted
             
-            ListAssignment listAssignment = new ListAssignment(newList,client);
+            ListAssignment listAssignment = new ListAssignment();
+            listAssignment.setSOURCE(client);
+            listAssignment.setTARGET(newList);
             
-            em.persist(listAssignment);*/
+            em.persist(listAssignment);
             
             return newList;
             
@@ -120,7 +135,7 @@ public class SubscriptionService {
     public List<SubscriptionList> getAllListForClient(long clientid){
         try {
             List<SubscriptionList> allList = 
-                    this.genericEntepriseObjectService.getAllSourceObjectsFromTarget(clientid, ListAssignment.class, SubscriptionList.class);
+                    this.genericEntepriseObjectService.getAllTargetObjectsFromSource(clientid, ListAssignment.class, SubscriptionList.class);
             
             return allList;
         } catch (PersistenceException pex) {

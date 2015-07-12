@@ -5,8 +5,7 @@
  */
 package seca2.bootstrap.module.User;
 
-import eds.entity.audit.ActiveUser;
-import eds.entity.audit.ActiveUserAnnotation;
+import eds.entity.audit.DefaultActiveUser;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
@@ -14,16 +13,13 @@ import javax.faces.context.FacesContext;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.Dependent;
-import javax.inject.Named;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @SessionScoped
-@ActiveUserAnnotation
-public class UserContainer implements Serializable, ActiveUser {
+public class UserContainer implements Serializable {
     
     private User user;
     private UserType userType;
@@ -85,9 +81,9 @@ public class UserContainer implements Serializable, ActiveUser {
         this.sessionId = sessionId;
     }
 
-    @Override
     public String getUsername() {
-        return user.getOBJECT_NAME();
+        
+        return (user != null) ? user.getOBJECT_NAME() : "";
     }
 
 }

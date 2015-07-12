@@ -13,15 +13,19 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 
 /**
- *
+ * [2015.07.12] Not a good idea to do business specific processing in an interceptor
+ * this is only good for backend tech stuff like logging and audit.
+ * But we now know it works!
+ * Then again, we can inject the ClientFacade in every Service that requires clients!
  * @author LeeKiatHaw
  */
+
 public class ClientResourceInterceptor {
     
     @Inject ClientFacade clientFacade;
     @EJB ClientService clientService;
     
-    @AroundInvoke
+    //@AroundInvoke
     public Object intercept(InvocationContext context) throws Exception {
         //do something before EJB call
         

@@ -87,7 +87,12 @@ public class Bootstrap implements Serializable {
     
     public void startChain(BootstrapInput inputContext, BootstrapOutput outputContext){
         //Start the chain
-        BootstrapModule head = this.bootstrappingChain.getHead();
+        BootstrapModule head = this.bootstrappingChain.getCoreHead();
+        //Only process noncore modules if application is not in setup mode
+        if(!inputContext.isSetup()){
+            head.strapNextAtLastPos(this.bootstrappingChain.getNonCoreHead());
+        }
+        
         try{
             head.start(inputContext, outputContext);
         } catch(Exception ex){

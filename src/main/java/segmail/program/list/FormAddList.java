@@ -47,6 +47,8 @@ public class FormAddList {
     @EJB private GenericEnterpriseObjectService genericDBService;
     private boolean startFirstList;
     
+    private final String formName = "FormAddList";
+    
     @PostConstruct
     public void init(){
         this.checkNoListYet();
@@ -77,8 +79,12 @@ public class FormAddList {
         } /*catch (IOException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }*/ catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            Throwable cause = ex.getCause();
+            String message = "Don't know what happened!";
+            if(cause != null) message = cause.getMessage();
+            
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, message, null);
+            
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }

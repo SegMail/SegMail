@@ -7,6 +7,7 @@ package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseRelationship;
 import eds.entity.client.Client;
+import eds.entity.client.ClientResourceAssignment;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -16,17 +17,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CLIENT_LIST_ASSIGNMENT")
-public class ListAssignment extends EnterpriseRelationship<SubscriptionList,Client> {
+public class ListAssignment extends ClientResourceAssignment{//EnterpriseRelationship<SubscriptionList,Client> {
     
     private boolean ABLE_TO_EDIT;
     private boolean ABLE_TO_ADD;
     private boolean ABLE_TO_REMOVE;
 
     public ListAssignment() {
-    }
-
-    public ListAssignment(SubscriptionList s, Client t) {
-        super(s, t);
     }
 
     public boolean isABLE_TO_EDIT() {
