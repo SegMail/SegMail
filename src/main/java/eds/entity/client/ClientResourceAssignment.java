@@ -8,10 +8,15 @@ package eds.entity.client;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 
 /**
- *
+ * After some experimentation, there is still no use for this assignment class.
+ * Each domain currently defines their own assignment relationship to client 
+ * and it doesn't seem beneficial to have a common assignment superclass at the 
+ * moment.
+ * 
  * @author LeeKiatHaw
  */
 @Entity

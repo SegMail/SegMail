@@ -14,8 +14,8 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="BUSINESS_UNIT")
-public class BusinessUnit extends EnterpriseObject{
+@Table(name="ORG_UNIT")
+public class OrgUnit extends EnterpriseObject{
     
     private String UNIT_NAME;
 

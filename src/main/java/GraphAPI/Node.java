@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package MapAPI;
+package GraphAPI;
 
 import eds.component.GenericEnterpriseObjectService;
 import eds.entity.data.EnterpriseObject;
@@ -29,11 +29,18 @@ public class Node<E extends EnterpriseObject> {
     private Map<Class<? extends EnterpriseRelationship>,List<Edge>> sourceEdges;
     
     private Map<Class<? extends EnterpriseRelationship>,List<Edge>> targetEdges;
+    
+    public Node(GenericEnterpriseObjectService objectService){
+        this.setObjectService(objectService);
+    }
 
-    public Node(E e) {
+    public Node(E e,GenericEnterpriseObjectService objectService) {
+        this(objectService);
         this.e = e;
         sourceEdges = new HashMap();
         targetEdges = new HashMap();
+        
+        //this.objectService = objectService;
     }
 
     public E getE() {
@@ -46,6 +53,43 @@ public class Node<E extends EnterpriseObject> {
     
     public <R extends EnterpriseRelationship> List<Edge> getTargetEdges(Class<R> r){
         return targetEdges.get(r);
+    }
+    
+    public <R extends EnterpriseRelationship> void addEdge(R r){
+        EnterpriseObject source = r.getSOURCE();
+        EnterpriseObject target = r.getTARGET();
+        
+        /**
+         * There could be repeated edges eg. self-directed edges.
+         */
+        if(source.equals(e)){
+            this.addSourceEdge(r);
+        }
+        if(target.equals(e)){
+            this.addTargetEdge(r);
+        }
+    }
+
+    public <R extends EnterpriseRelationship> void addSourceEdge(R r){
+        List<Edge> sourceEdgeList = this.sourceEdges.get(r.getClass());
+        if(sourceEdgeList == null){
+            sourceEdgeList = new ArrayList<Edge>();
+            this.sourceEdges.put(r.getClass(), sourceEdgeList);
+        }
+        Edge<R> newEdge = new Edge(r);
+        if(!sourceEdgeList.contains(newEdge))
+        sourceEdgeList.add(newEdge);
+    }
+    
+    public <R extends EnterpriseRelationship> void addTargetEdge(R r){
+        List<Edge> targetEdgeList = this.targetEdges.get(r.getClass());
+        if(targetEdgeList == null){
+            targetEdgeList = new ArrayList<Edge>();
+            this.targetEdges.put(r.getClass(), targetEdgeList);
+        }
+        Edge<R> newEdge = new Edge(r);
+        if(!targetEdgeList.contains(newEdge))
+        targetEdgeList.add(new Edge(r));
     }
     
     /**
@@ -97,4 +141,14 @@ public class Node<E extends EnterpriseObject> {
         }
         targetEdges.put(r, newEdges);
     }
+
+    public GenericEnterpriseObjectService getObjectService() {
+        return objectService;
+    }
+
+    public void setObjectService(GenericEnterpriseObjectService objectService) {
+        this.objectService = objectService;
+    }
+    
+    
 }

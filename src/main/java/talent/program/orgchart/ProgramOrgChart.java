@@ -5,12 +5,12 @@
  */
 package talent.program.orgchart;
 
-import MapAPI.EntityMap;
+import GraphAPI.EntityGraph;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import talent.entity.organization.BelongsTo;
-import talent.entity.organization.BusinessUnit;
+import talent.entity.organization.OrgUnit;
 
 /**
  *
@@ -20,13 +20,5 @@ import talent.entity.organization.BusinessUnit;
 @Named("ProgramOrgChart")
 public class ProgramOrgChart implements Serializable{
     
-    private EntityMap<BusinessUnit,BelongsTo> orgChartMap;
     
-    public EntityMap<BusinessUnit, BelongsTo> getOrgChartMap() {
-        return orgChartMap;
-    }
-
-    public void setOrgChartMap(EntityMap<BusinessUnit, BelongsTo> orgChartMap) {
-        this.orgChartMap = orgChartMap;
-    }
 }

@@ -15,7 +15,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="BELONGS_TO")
-public class BelongsTo extends EnterpriseRelationship<BusinessUnit,BusinessUnit> {
+public class BelongsTo extends EnterpriseRelationship<OrgUnit,OrgUnit> {
 
     @Override
     public void randInit() {

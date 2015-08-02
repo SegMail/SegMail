@@ -14,8 +14,8 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="POSITION")
-public class ManagerAssignment extends EnterpriseRelationship<Position,OrgUnit> {
+@Table(name="EXIST_UNDER")
+public class ExistUnder extends EnterpriseRelationship<Position,OrgUnit> {
 
     @Override
     public void randInit() {

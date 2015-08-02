@@ -5,6 +5,9 @@
  */
 package talent.entity.organization;
 
+import eds.entity.client.Client;
+import eds.entity.client.ClientResourceAssignment;
+import eds.entity.data.EnterpriseData;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -14,9 +17,20 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="POSITION")
-public class ManagerAssignment extends EnterpriseRelationship<Position,OrgUnit> {
+@Table(name="BUSINESSUNIT_CLIENT")
+public class BusinessUnitClientAssignment extends ClientResourceAssignment {
 
+    private boolean OWNER_FLAG;
+
+    public boolean isOWNER_FLAG() {
+        return OWNER_FLAG;
+    }
+
+    public void setOWNER_FLAG(boolean OWNER_FLAG) {
+        this.OWNER_FLAG = OWNER_FLAG;
+    }
+    
+    
     @Override
     public void randInit() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

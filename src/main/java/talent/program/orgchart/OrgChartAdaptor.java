@@ -5,7 +5,7 @@
  */
 package talent.program.orgchart;
 
-import MapAPI.EntityMap;
+import GraphAPI.EntityGraph;
 import eds.component.data.DBConnectionException;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -18,7 +18,7 @@ import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import talent.component.organization.OrgService;
 import talent.entity.organization.BelongsTo;
-import talent.entity.organization.BusinessUnit;
+import talent.entity.organization.OrgUnit;
 
 /**
  *
@@ -34,30 +34,6 @@ public class OrgChartAdaptor {
     
     @Inject private ProgramOrgChart program;
     
-    
-    
     private final String formName = "OrgChartAdaptor";
     
-    @PostConstruct
-    public void init(){
-        if(!FacesContext.getCurrentInstance().isPostback()){
-            initOrgChartMap();
-        }
-    }
-    
-    public void initOrgChartMap(){
-        try {
-            setOrgChartMap(orgService.buildOrgChartForClient(clientContainer.getClient().getOBJECTID()));
-        } catch(DBConnectionException ex){
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-    
-    public EntityMap<BusinessUnit, BelongsTo> getOrgChartMap() {
-        return program.getOrgChartMap();
-    }
-
-    public void setOrgChartMap(EntityMap<BusinessUnit, BelongsTo> orgChartMap) {
-        program.setOrgChartMap(orgChartMap);
-    }
 }

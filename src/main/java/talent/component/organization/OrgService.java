@@ -5,12 +5,13 @@
  */
 package talent.component.organization;
 
-import MapAPI.EntityMap;
-import MapAPI.Node;
+import GraphAPI.EntityGraph;
+import GraphAPI.Node;
 import eds.component.GenericEnterpriseObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
+import eds.entity.client.Client;
 import eds.entity.client.ClientResourceAssignment;
 import eds.entity.data.EnterpriseRelationship;
 import java.util.ArrayList;
@@ -24,10 +25,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import org.hibernate.exception.GenericJDBCException;
 import talent.entity.organization.BelongsTo;
-import talent.entity.organization.BusinessUnit;
+import talent.entity.organization.OrgUnit;
+import talent.entity.organization.BusinessUnitClientAssignment;
 import talent.entity.organization.ManagerAssignment;
 import talent.entity.organization.Position;
 import talent.entity.organization.EmployeeAssignment;
+import talent.entity.organization.ExistUnder;
 import talent.entity.talent.Employee;
 
 /**
@@ -44,9 +47,9 @@ public class OrgService {
     private GenericEnterpriseObjectService objectService;
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<BusinessUnit> getBusinessUnitsForClientId(long clientid) {
+    public List<OrgUnit> getBusinessUnitsForClientId(long clientid) {
         try {
-            List<BusinessUnit> results = objectService.getAllTargetObjectsFromSource(clientid, ClientResourceAssignment.class, BusinessUnit.class);
+            List<OrgUnit> results = objectService.getAllTargetObjectsFromSource(clientid, BusinessUnitClientAssignment.class, OrgUnit.class);
             return results;
 
         } catch (PersistenceException pex) {
@@ -64,9 +67,9 @@ public class OrgService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public BusinessUnit getParentForBU(long buid) {
+    public OrgUnit getParentForBU(long buid) {
         try {
-            List<BusinessUnit> results = this.objectService.getAllTargetObjectsFromSource(buid, BelongsTo.class, BusinessUnit.class);
+            List<OrgUnit> results = this.objectService.getAllTargetObjectsFromSource(buid, BelongsTo.class, OrgUnit.class);
             
             if(results == null || results.isEmpty())
                 return null;
@@ -81,10 +84,10 @@ public class OrgService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<BelongsTo> getBelongsToForBUs(List<BusinessUnit> bus){
+    public List<BelongsTo> getBelongsToForBUs(List<OrgUnit> bus){
         try {
             List<Long> ids = new ArrayList<Long>();
-            for(BusinessUnit bu : bus){
+            for(OrgUnit bu : bus){
                 ids.add(bu.getOBJECTID());
             }
             List<BelongsTo> results = objectService.getRelationshipsForSourceObjects(ids, BelongsTo.class);
@@ -99,36 +102,29 @@ public class OrgService {
     }
     
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public EntityMap<BusinessUnit,BelongsTo> buildOrgChartForClient(long clientid){
-        try {
-            // 1. Get all BusinessUnits for the client
-            List<BusinessUnit> buList = this.getBusinessUnitsForClientId(clientid);
-            
-            // 2. Build nodes using the MapAPI
-            EntityMap<BusinessUnit,BelongsTo> map = new EntityMap(buList,BelongsTo.class);
-            
-            return map;
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        }
-    }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BusinessUnit createNewOrg(String orgName) throws EntityExistsException{
+    public OrgUnit createNewOrg(String orgName, long clientid) throws EntityExistsException, EntityNotFoundException{
         try {
-            List<BusinessUnit> existingBUs = objectService.getEnterpriseObjectsByName(orgName, BusinessUnit.class);
-            if(existingBUs != null && existingBUs.isEmpty())
+            List<OrgUnit> existingBUs = objectService.getEnterpriseObjectsByName(orgName, OrgUnit.class);
+            if(existingBUs != null && !existingBUs.isEmpty())
                 throw new EntityExistsException("Business Unit "+orgName+" already exist!");
             
-            BusinessUnit bu = new BusinessUnit();
+            Client client = objectService.getEnterpriseObjectById(clientid, Client.class);
+            if(client == null)
+                throw new EntityNotFoundException(Client.class,clientid);
+            
+            OrgUnit bu = new OrgUnit();
             bu.setUNIT_NAME(orgName);
             
             em.persist(bu);
+            
+            //Create the assignment
+            BusinessUnitClientAssignment clientAssignment = new BusinessUnitClientAssignment();
+            clientAssignment.setSOURCE(client);
+            clientAssignment.setTARGET(bu);
+            
+            em.persist(clientAssignment);
             
             return bu;
             
@@ -141,8 +137,47 @@ public class OrgService {
     }
     
     /**
+     * Not going to be used now since we are only creating manager assignments.
+     * 
+     * @param posName
+     * @param orgunitid
+     * @return
+     * @throws EntityNotFoundException 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ExistUnder createNewPositionUnderOrgUnit(String posName, long orgunitid) 
+            throws EntityNotFoundException{
+        try {
+            // Get the BU
+            OrgUnit bu = objectService.getEnterpriseObjectById(orgunitid, OrgUnit.class);
+            if(bu == null)
+                throw new EntityNotFoundException("OrgUnit "+orgunitid+" not found.");
+            
+            // Create the Position
+            Position newPos = new Position();
+            newPos.setJOB_TITLE(posName);
+            
+            em.persist(newPos);
+            
+            ExistUnder existUnder = new ExistUnder();
+            existUnder.setTARGET(bu);
+            existUnder.setSOURCE(newPos);
+            
+            em.persist(existUnder);
+            
+            return existUnder;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        }
+    }
+    
+    /**
      * As of now we are only going to create a ManagerAssignment relationship between
-     * Position and BusinessUnit. Our TM app is supposed to be used for key appointment
+ Position and OrgUnit. Our TM app is supposed to be used for key appointment
      * holders only.
      * 
      * @param posName
@@ -151,11 +186,16 @@ public class OrgService {
      * @throws EntityNotFoundException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ManagerAssignment createManagerPosition(String posName, long orgId) throws EntityNotFoundException{
+    public ManagerAssignment createManagerPosition(String posName, long orgId) 
+            throws EntityNotFoundException, EntityExistsException{
         try {
-            BusinessUnit existingBU = objectService.getEnterpriseObjectById(orgId, BusinessUnit.class);
+            OrgUnit existingBU = objectService.getEnterpriseObjectById(orgId, OrgUnit.class);
             if(existingBU == null)
-                throw new EntityNotFoundException("Business unit "+orgId+" not found.");
+                throw new EntityNotFoundException("Org unit "+orgId+" not found.");
+            
+            List<Position> existingPos = objectService.getEnterpriseObjectsByName(posName, Position.class);
+            if(existingPos != null && !existingPos.isEmpty())
+                throw new EntityExistsException(existingPos.get(0));
             
             //Create position object first
             Position newPos = new Position();
@@ -209,14 +249,56 @@ public class OrgService {
      * 
      * @param orgName
      * @param posName
-     * @param empId
+     * @param empId Optional - If 0 or -1 then no employee will be assigned.
      * @return a list of newly created EmployeeAssignment and ManagerAssignment objects
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<EnterpriseRelationship> createNewOrgPos(String orgName, String posName, long empId, long clientid){
+    public List<EnterpriseRelationship> createNewOrgPos(String orgName, String posName, long empId, long clientid) 
+            throws EntityExistsException, EntityNotFoundException{
         try {
+            List<EnterpriseRelationship> results = new ArrayList<EnterpriseRelationship>();
             //1. Create the org unit first
-            return null;
+            OrgUnit newBU = this.createNewOrg(orgName, clientid);
+            
+            //2. Create the position and assign to the org unit
+            ManagerAssignment pAssignment = this.createManagerPosition(posName, newBU.getOBJECTID());
+            results.add(pAssignment);
+            
+            //3. Assign the employee
+            
+            if(empId > 0){
+                Position pos = pAssignment.getSOURCE();
+                EmployeeAssignment empAssignment = this.assignEmpToPosition(empId, pos.getOBJECTID());
+                results.add(empAssignment);
+            }
+                
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public EmployeeAssignment assignEmpToPosition(long empId, long posId) 
+            throws EntityNotFoundException{
+        try {
+            Employee emp = objectService.getEnterpriseObjectById(empId, Employee.class);
+            if(emp == null)
+                throw new EntityNotFoundException(Employee.class,empId);
+            
+            Position pos = objectService.getEnterpriseObjectById(posId, Position.class);
+            if(pos == null)
+                throw new EntityNotFoundException(Position.class,posId);
+            
+            EmployeeAssignment newAssignment = new EmployeeAssignment();
+            newAssignment.setSOURCE(emp);
+            newAssignment.setTARGET(pos);
+            
+            return newAssignment;
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());

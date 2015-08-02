@@ -5,9 +5,17 @@
  */
 package talent.program.orgchart;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.inject.Inject;
 import javax.inject.Named;
-import talent.entity.organization.BusinessUnit;
+import seca2.bootstrap.module.Client.ClientContainer;
+import seca2.jsf.custom.messenger.FacesMessenger;
+import talent.component.organization.OrgService;
+import talent.entity.organization.OrgUnit;
 import talent.entity.organization.Position;
 import talent.entity.talent.Employee;
 
@@ -19,37 +27,61 @@ import talent.entity.talent.Employee;
 @Named("FormCreateNewOrgPos")
 public class FormCreateNewOrgPos {
     
-    private Position role;
-    private BusinessUnit unit;
-    private Employee holder;
+    @EJB private OrgService orgService;
+    @Inject private ClientContainer clientContainer;
+    
+    private String role;
+    private String unit ;
+    private long holder;
+    
+    private final String formName = "create_org_pos_form";
+    
+    @PostConstruct
+    public void init(){
+        role = "";
+        unit = "";
+        holder = 0;
+    }
     
     public void createNewOrgPos(){
-        
+        try {
+            orgService.createNewOrgPos(role, unit, holder, clientContainer.getClient().getOBJECTID());
+        } catch (EJBException ex) { //Transaction did not go through
+            Throwable cause = ex.getCause();
+            String message = "Don't know what happened!";
+            if(cause != null) message = cause.getMessage();
+            
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, message, null);
+            
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
     }
 
-    public Position getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Position role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
-    public BusinessUnit getUnit() {
+    public String getUnit() {
         return unit;
     }
 
-    public void setUnit(BusinessUnit unit) {
+    public void setUnit(String unit) {
         this.unit = unit;
     }
 
-    public Employee getHolder() {
+    public long getHolder() {
         return holder;
     }
 
-    public void setHolder(Employee holder) {
+    public void setHolder(long holder) {
         this.holder = holder;
     }
+
     
     
 }

@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package MapAPI;
+package GraphAPI;
 
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
+import java.util.Objects;
 
 /**
  *
@@ -34,4 +35,28 @@ public class Edge<R extends EnterpriseRelationship> {
     public EnterpriseObject getTarget(){
         return r.getTARGET();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + Objects.hashCode(this.r);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Edge<?> other = (Edge<?>) obj;
+        if (!Objects.equals(this.r, other.r)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

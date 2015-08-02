@@ -36,11 +36,12 @@
                         <label>
                             Organization name:
                         </label>
-                        <span class="help-block">
+                        
+                        <span class="help-block" jsf:rendered="#{OrgChartAdaptor.orgChartMap.nodeSize le 0}">
                             You have to create your organization first
                         </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormCreateNewOrgPos.unit.UNIT_NAME}"
+                               jsf:value="#{FormCreateNewOrgPos.unit}"
                                name="unit_name" required="#{OrgChartAdaptor.orgChartMap.nodeSize le 0}"
                                />
                     </div>
@@ -52,7 +53,7 @@
                             Official title of this position?
                         </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormCreateNewOrgPos.role.JOB_TITLE}"
+                               jsf:value="#{FormCreateNewOrgPos.role}"
                                name="job_title" required="#{OrgChartAdaptor.orgChartMap.nodeSize gt 0}"
                                />
                     </div>
@@ -65,21 +66,21 @@
                             Who is going to hold this position?
                         </span>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormCreateNewOrgPos.holder.OBJECTID}"
+                               jsf:value="#{FormCreateNewOrgPos.holder}"
                                name="lastname" required="true"
                                />
                     </div>
                     
                 </div>
                 <div class="modal-footer">
-                    <p:commandButton id="ccreate_org_pos_form:create_org_pos_button" styleClass="btn btn-success" 
-                                     value="Add subscriber" update="FormAddSub_messenger,"
-                                     actionListener="#{FormListSubscriber.addSubscriber()}"
+                    <p:commandButton id="create_org_pos_button" styleClass="btn btn-success" 
+                                     value="Add subscriber" update="FormCreateOrgPos_messenger"
+                                     actionListener="#{FormCreateNewOrgPos.createNewOrgPos()}"
 
                                      >
                     </p:commandButton>
                 </div>
-                <p:blockUI block="create_org_pos_form" trigger="ccreate_org_pos_form:create_org_pos_button"
+                <p:blockUI block="create_org_pos_form" trigger="create_org_pos_form:create_org_pos_button"
                            >
                     <p id="spinner"></p>
                 </p:blockUI>
