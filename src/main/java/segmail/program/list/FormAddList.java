@@ -5,7 +5,7 @@
  */
 package segmail.program.list;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
@@ -44,7 +44,7 @@ public class FormAddList {
     
     @EJB private SubscriptionService subscriptionService;
     @EJB private ClientService clientService;
-    @EJB private GenericEnterpriseObjectService genericDBService;
+    @EJB private GenericObjectService genericDBService;
     private boolean startFirstList;
     
     private final String formName = "FormAddList";

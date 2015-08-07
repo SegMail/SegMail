@@ -5,7 +5,7 @@
  */
 package talent.component.talent;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.entity.config.GenericConfigService;
@@ -36,7 +36,7 @@ public class TalentSettingsService {
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
     
-    @EJB private GenericEnterpriseObjectService objectService;
+    @EJB private GenericObjectService objectService;
     @EJB private GenericConfigService configService;
     
     /**

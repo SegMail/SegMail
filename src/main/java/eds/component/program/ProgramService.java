@@ -5,7 +5,7 @@
  */
 package eds.component.program;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import java.io.Serializable;
 import java.util.List;
 import javax.ejb.EJB;
@@ -38,7 +38,7 @@ public class ProgramService implements Serializable {
     private EntityManager em;
     
     @EJB private UserService userService;
-    @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
+    @EJB private GenericObjectService genericEntepriseObjectService;
     /**
      * 
      * Only returns 1 result.

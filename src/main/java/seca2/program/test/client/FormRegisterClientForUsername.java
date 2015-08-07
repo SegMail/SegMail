@@ -5,7 +5,7 @@
  */
 package seca2.program.test.client;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.client.ClientRegistrationException;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
@@ -35,7 +35,7 @@ public class FormRegisterClientForUsername {
     
     @EJB private ClientService clientService;
     //@EJB private UserService userService;
-    @EJB private GenericEnterpriseObjectService genericDBService;
+    @EJB private GenericObjectService genericDBService;
     
     private final String formName = "registerClientForm";
     

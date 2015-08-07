@@ -5,7 +5,7 @@
  */
 package eds.component.user;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -57,7 +57,7 @@ public class UserService extends Service {
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
     
-    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService genericEnterpriseObjectService;
 
     /**
      * Should I return something like UserTypeID?

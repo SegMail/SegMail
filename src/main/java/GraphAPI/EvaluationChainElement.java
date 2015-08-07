@@ -14,20 +14,21 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- *
+ * This class exist for the purpose of a data model for the evaluation chain.
+ * 
  * @author LeeKiatHaw
  */
 @Entity
 @Table(name="EVALUATION_CHAIN_ELEMENT")
-public class EvaluationChainElement implements Serializable {
+public class EvaluationChainElement<E extends EnterpriseObject,R extends EnterpriseRelationship> implements Serializable {
     
     private Long ID;
     private boolean RECURSIVE;
-    private final Class<? extends EnterpriseObject> e;
-    private final Class<? extends EnterpriseRelationship> r;
+    private final Class<E> e;
+    private final Class<R> r;
     private final NodeType NODETYPE;
 
-    public EvaluationChainElement(boolean RECURSIVE, Class<? extends EnterpriseObject> e, Class<? extends EnterpriseRelationship> r,NodeType type) {
+    public EvaluationChainElement(boolean RECURSIVE, Class<E> e, Class<R> r,NodeType type) {
         this.RECURSIVE = RECURSIVE;
         this.e = e;
         this.r = r;
@@ -63,9 +64,10 @@ public class EvaluationChainElement implements Serializable {
         return NODETYPE;
     }
     
-    
-    
     public boolean checkElement(EvaluationChainElement anotherElement){
+        
+        if(anotherElement == null) return false;
+        
         if(!anotherElement.getE().equals(this.getE())) return false;
         
         if(!anotherElement.getR().equals(this.getR())) return false;

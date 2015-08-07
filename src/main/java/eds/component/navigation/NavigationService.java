@@ -8,7 +8,7 @@ package eds.component.navigation;
 import TreeAPI.TreeBranch;
 import TreeAPI.TreeBuilder;
 import TreeAPI.TreeNode;
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class NavigationService implements Serializable {
 
     @EJB
     private UserService userService;
-    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService genericEnterpriseObjectService;
     
     @PersistenceContext(name="HIBERNATE")
     private EntityManager em;

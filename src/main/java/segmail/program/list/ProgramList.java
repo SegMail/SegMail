@@ -1,6 +1,6 @@
 package segmail.program.list;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
@@ -38,7 +38,7 @@ public class ProgramList implements Serializable {
     @EJB
     private ClientService clientService;
     @EJB
-    private GenericEnterpriseObjectService genericDBService;
+    private GenericObjectService genericDBService;
     @EJB
     private SubscriptionService subscriptionService;
     

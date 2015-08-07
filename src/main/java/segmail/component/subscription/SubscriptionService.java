@@ -5,7 +5,7 @@
  */
 package segmail.component.subscription;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientResourceInterceptor;
 import eds.component.data.DBConnectionException;
@@ -63,7 +63,7 @@ public class SubscriptionService {
     @PersistenceContext(name="HIBERNATE")
     private EntityManager em;
     
-    @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
+    @EJB private GenericObjectService genericEntepriseObjectService;
     @EJB private MailService mailService;
     @EJB private UserService userService;
     

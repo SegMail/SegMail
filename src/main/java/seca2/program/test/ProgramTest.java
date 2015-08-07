@@ -6,7 +6,7 @@
 
 package seca2.program.test;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.entity.client.ClientType;
 import eds.entity.layout.Layout;
@@ -43,7 +43,7 @@ public class ProgramTest extends FormGroup implements Serializable {
     //@Inject private FormAssignLayoutUserType formAssignLayoutUserType;
     //@Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     
-    @EJB private GenericEnterpriseObjectService genericDBService;
+    @EJB private GenericObjectService genericDBService;
     //@EJB private UserService userService;
     //@EJB private LayoutService layoutService;
     //@EJB private ProgramService programService;

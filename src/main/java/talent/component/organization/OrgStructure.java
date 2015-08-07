@@ -5,7 +5,7 @@
  */
 package talent.component.organization;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import java.util.Iterator;
 import java.util.List;
 import talent.entity.organization.OrgUnit;
@@ -23,7 +23,7 @@ import talent.entity.organization.OrgUnit;
  */
 public class OrgStructure implements Iterable<OrgUnit> {
     
-    private GenericEnterpriseObjectService objectService;
+    private GenericObjectService objectService;
     
     private OrgUnit root;
     

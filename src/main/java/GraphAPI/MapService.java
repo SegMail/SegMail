@@ -5,7 +5,7 @@
  */
 package GraphAPI;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import java.util.List;
@@ -21,7 +21,7 @@ import javax.ejb.TransactionAttributeType;
 @Stateless
 public class MapService {
     
-    @EJB private GenericEnterpriseObjectService objectService;
+    @EJB private GenericObjectService objectService;
     
     /*
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)

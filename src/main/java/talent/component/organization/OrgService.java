@@ -7,7 +7,7 @@ package talent.component.organization;
 
 import GraphAPI.EntityGraph;
 import GraphAPI.Node;
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
@@ -44,7 +44,7 @@ public class OrgService {
     private EntityManager em;
 
     @EJB
-    private GenericEnterpriseObjectService objectService;
+    private GenericObjectService objectService;
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<OrgUnit> getBusinessUnitsForClientId(long clientid) {

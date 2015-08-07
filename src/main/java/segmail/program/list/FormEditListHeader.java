@@ -5,7 +5,7 @@
  */
 package segmail.program.list;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import segmail.entity.subscription.SubscriptionList;
 import javax.ejb.EJB;
@@ -29,7 +29,7 @@ public class FormEditListHeader {
     @EJB
     private ClientService clientService;
     @EJB
-    private GenericEnterpriseObjectService genericDBService;
+    private GenericObjectService genericDBService;
 
     public void makeLocal() {
         try {

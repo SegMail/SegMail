@@ -5,7 +5,7 @@
  */
 package eds.component.client;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
@@ -35,7 +35,7 @@ import org.joda.time.DateTime;
 @Stateless
 public class ClientService {
     
-    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService genericEnterpriseObjectService;
     @EJB private UserService userService;
     
     @PersistenceContext(name = "HIBERNATE")

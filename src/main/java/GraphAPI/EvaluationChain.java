@@ -5,6 +5,7 @@
  */
 package GraphAPI;
 
+import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import eds.entity.data.NodeType;
@@ -50,13 +51,26 @@ public class EvaluationChain implements Serializable {
         this.elements = elements;
     }
     
-    public EvaluationChain addPathElement(boolean RECURSIVE, Class<? extends EnterpriseObject> e, Class<? extends EnterpriseRelationship> r, NodeType type){
+    /**
+     * "Find [e] via [r], using current node as the [type] in [r], repeat this step if 
+     * [RECURSIVE] is true."
+     * 
+     * @param e The EnterpriseObject class which is to be searched for as the next node.
+     * @param r The EnterpriseRelationship class which is to be used to search for the next node.
+     * @param type If SOURCE is selected, the current node will be used as a SOURCE
+     * to search for the next node. Likewise for TARGET.
+     * @param RECURSIVE If this is true, the Graph will explore all repeated objects 
+     * until none is found before moving on the next evaluation criteria. If this
+     * is false, then only 1 level will be explored.
+     * @return 
+     */
+    public EvaluationChain addPathElement(Class<? extends EnterpriseObject> e, Class<? extends EnterpriseRelationship> r, NodeType type, boolean RECURSIVE){
         /**
          * When adding new elements, check if it is the same as the last element in the chain. If yes, set the previous element's 
          * recursive flag to true. In this way, we prevent redundancy and keep the chain clean
          */
         EvaluationChainElement newElement = new EvaluationChainElement(RECURSIVE,e,r,type);
-        EvaluationChainElement lastElement = elements.get(elements.size()-1);
+        EvaluationChainElement lastElement = (elements.isEmpty()) ? null : elements.get(elements.size()-1);
         
         if(newElement.checkElement(lastElement)){
             lastElement.setRECURSIVE(true);
@@ -67,5 +81,61 @@ public class EvaluationChain implements Serializable {
         return this;
     }
     
+    /**
+     * Static helper method to iterate the evaluation chain link once and get a list of objects.
+     * 
+     * @param <S>
+     * @param <E>
+     * @param s
+     * @param chainLink
+     * @param objectService
+     * @return 
+     */
+    public static <S extends EnterpriseObject,E extends EnterpriseObject> List<E> getObjects(
+            S s,
+            EvaluationChainElement chainLink,
+            GenericObjectService objectService){
+        
+        List<E> targets = new ArrayList<>();
+        NodeType type = chainLink.getNODETYPE();
+        switch(type){
+            case    SOURCE  : targets = objectService.getAllTargetObjectsFromSource(s.getOBJECTID(), chainLink.getR(), chainLink.getE());
+                              break;
+            case    TARGET  : targets = objectService.getAllSourceObjectsFromTarget(s.getOBJECTID(), chainLink.getR(), chainLink.getE());
+                              break;
+            default         : //If no nodetype is set, do not retrieve anything.
+                              break;
+        }
+        
+        return targets;
+    }
     
+    /**
+     * Static helper method to iterate the evaluation chain link once and get a list of relationships.
+     * 
+     * @param <S>
+     * @param <R>
+     * @param s
+     * @param chainLink
+     * @param objectService
+     * @return 
+     */
+    public static <S extends EnterpriseObject, R extends EnterpriseRelationship> List<R> getRelationships(
+            S s,
+            EvaluationChainElement chainLink,
+            GenericObjectService objectService){
+        
+        List<R> relationships = new ArrayList<>();
+        NodeType type = chainLink.getNODETYPE();
+        switch(type){
+            case    SOURCE  : relationships = objectService.getRelationshipsForSourceObject(s.getOBJECTID(),chainLink.getR());
+                              break;
+            case    TARGET  : relationships = objectService.getRelationshipsForTargetObject(s.getOBJECTID(), chainLink.getR());
+                              break;
+            default         : //If no nodetype is set, do not retrieve anything.
+                              break;
+        }
+        
+        return relationships;
+    }
 }

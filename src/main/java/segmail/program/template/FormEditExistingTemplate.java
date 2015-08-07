@@ -5,7 +5,7 @@
  */
 package segmail.program.template;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.email.EmailTemplate;
 import javax.annotation.PostConstruct;
@@ -26,7 +26,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormEditExistingTemplate {
     
     @EJB private SubscriptionService subscriptionService;
-    @EJB private GenericEnterpriseObjectService objectService;
+    @EJB private GenericObjectService objectService;
     //@EJB private UserService userService;
     
     @Inject private ProgramTemplate program;

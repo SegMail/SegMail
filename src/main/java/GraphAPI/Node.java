@@ -5,7 +5,7 @@
  */
 package GraphAPI;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import javax.ejb.EJB;
  */
 public class Node<E extends EnterpriseObject> {
     
-    @EJB private GenericEnterpriseObjectService objectService;
+    @EJB private GenericObjectService objectService;
     
     private E e;
     
@@ -30,11 +30,11 @@ public class Node<E extends EnterpriseObject> {
     
     private Map<Class<? extends EnterpriseRelationship>,List<Edge>> targetEdges;
     
-    public Node(GenericEnterpriseObjectService objectService){
+    public Node(GenericObjectService objectService){
         this.setObjectService(objectService);
     }
 
-    public Node(E e,GenericEnterpriseObjectService objectService) {
+    public Node(E e,GenericObjectService objectService) {
         this(objectService);
         this.e = e;
         sourceEdges = new HashMap();
@@ -142,11 +142,11 @@ public class Node<E extends EnterpriseObject> {
         targetEdges.put(r, newEdges);
     }
 
-    public GenericEnterpriseObjectService getObjectService() {
+    public GenericObjectService getObjectService() {
         return objectService;
     }
 
-    public void setObjectService(GenericEnterpriseObjectService objectService) {
+    public void setObjectService(GenericObjectService objectService) {
         this.objectService = objectService;
     }
     

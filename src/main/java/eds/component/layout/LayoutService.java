@@ -1,6 +1,6 @@
 package eds.component.layout;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
@@ -43,7 +43,7 @@ public class LayoutService implements Serializable {
     @EJB private UserService userService;
     @EJB private ProgramService programService;
     @EJB private ClientService clientService;
-    @EJB private GenericEnterpriseObjectService genericEOService;
+    @EJB private GenericObjectService genericEOService;
 
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
@@ -182,7 +182,7 @@ public class LayoutService implements Serializable {
             throws DBConnectionException, LayoutAssignmentException {
 
         try {
-            //Try the new GenericEnterpriseObjectService!
+            //Try the new GenericObjectService!
             //Check if client exists
             Client clientEO = genericEOService.getEnterpriseObjectById(clientid,Client.class);
             if(clientEO == null)
@@ -389,7 +389,7 @@ public class LayoutService implements Serializable {
         try{
             //To optimize, pull out all assignments for User, UserType and Client
             UserType userType = user.getUSERTYPE();
-            //I'm not writing this in GenericEnterpriseObjectService yet because
+            //I'm not writing this in GenericObjectService yet because
             //this is the only method using such a retrieval technique.
             List<Long> IDs = new ArrayList<Long>();
             IDs.add(user.getOBJECTID());
