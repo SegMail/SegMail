@@ -33,7 +33,7 @@ public class EvaluationChain implements Serializable {
     
     private List<EvaluationChainElement> elements = new ArrayList<EvaluationChainElement>();
 
-    @Id @GeneratedValue(generator="EVALUATION_PATH_SEQ",strategy=GenerationType.TABLE) 
+    @Id @GeneratedValue(generator="EVALUATION_CHAIN_SEQ",strategy=GenerationType.TABLE) 
     public long getPATH_ID() {
         return PATH_ID;
     }

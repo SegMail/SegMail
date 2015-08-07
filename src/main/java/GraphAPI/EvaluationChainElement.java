@@ -11,6 +11,8 @@ import eds.entity.data.NodeType;
 import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -24,9 +26,13 @@ public class EvaluationChainElement<E extends EnterpriseObject,R extends Enterpr
     
     private Long ID;
     private boolean RECURSIVE;
-    private final Class<E> e;
-    private final Class<R> r;
-    private final NodeType NODETYPE;
+    private Class<E> e;
+    private Class<R> r;
+    private NodeType NODETYPE;
+    
+    public EvaluationChainElement(){
+        
+    }
 
     public EvaluationChainElement(boolean RECURSIVE, Class<E> e, Class<R> r,NodeType type) {
         this.RECURSIVE = RECURSIVE;
@@ -52,17 +58,32 @@ public class EvaluationChainElement<E extends EnterpriseObject,R extends Enterpr
         this.RECURSIVE = RECURSIVE;
     }
 
-    public Class<? extends EnterpriseObject> getE() {
-        return e;
-    }
-
-    public Class<? extends EnterpriseRelationship> getR() {
-        return r;
-    }
-
     public NodeType getNODETYPE() {
         return NODETYPE;
     }
+
+    public void setE(Class<E> e) {
+        this.e = e;
+    }
+
+    public void setR(Class<R> r) {
+        this.r = r;
+    }
+
+    public void setNODETYPE(NodeType NODETYPE) {
+        this.NODETYPE = NODETYPE;
+    }
+
+    @ManyToOne(targetEntity=EnterpriseObject.class)
+    public Class<E> getE() {
+        return e;
+    }
+
+    @ManyToOne(targetEntity=EnterpriseRelationship.class)
+    public Class<R> getR() {
+        return r;
+    }
+    
     
     public boolean checkElement(EvaluationChainElement anotherElement){
         
