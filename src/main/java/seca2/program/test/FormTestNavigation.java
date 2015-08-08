@@ -15,6 +15,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.RelatonshipExistsException;
 import eds.component.navigation.AssignMenuItemAccessException;
 import eds.component.navigation.CreateMenuItemException;
 import eds.component.navigation.NavigationService;
@@ -22,6 +24,8 @@ import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
 import eds.entity.user.UserType;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -56,6 +60,7 @@ public class FormTestNavigation implements Serializable{
     private long selectedUserTypeIdToBuildMenu;
     
     private final String setupNavigationFormName = "setupNavigationForm";
+    private final String assignMenuItemForm = "assignMenuItemForm";
     
     @PostConstruct
     public void init(){
@@ -94,16 +99,20 @@ public class FormTestNavigation implements Serializable{
         try{
             List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId, order);
             
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+selectedAssignedMenuItemId+" is assigned to user type "+selectedUserTypeId+"!", null);
+            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_FATAL, "MenuItem "+selectedAssignedMenuItemId+" is assigned to user type "+selectedUserTypeId+"!", null);
         }
         catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+        } catch (RelatonshipExistsException ex) {
+            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, ex.getMessage(),null);
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, ex.getMessage(),null);
         }
-        catch(AssignMenuItemAccessException crmex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
-        }
+        /*catch(AssignMenuItemAccessException crmex){
+            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
+        }*/
         catch(Exception ex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
+            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR,
                     ex.getCause().getClass().getSimpleName(), 
                     ex.getCause().getMessage());
         }

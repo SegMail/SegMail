@@ -25,6 +25,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.RelationshipExistsException;
+import eds.component.data.RelatonshipExistsException;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
@@ -175,13 +178,17 @@ public class NavigationService implements Serializable {
      * 
      * @param userTypeId
      * @param menuItemId
+     * @param order
      * @return Bidirectional EnterpriseRelationship
+     * @throws eds.component.data.RelatonshipExistsException
+     * @throws eds.component.data.EntityNotFoundException
      * 
      * @throws AssignMenuItemAccessException
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) throws AssignMenuItemAccessException, DBConnectionException {
+    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) 
+            throws RelatonshipExistsException, EntityNotFoundException {
         
         try{
             /*//check if userType already has access to menuItem
@@ -198,23 +205,22 @@ public class NavigationService implements Serializable {
             
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .getResultList();*/
-            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObject(userTypeId, menuItemId, MenuItemAccess.class);
+            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObject(menuItemId, userTypeId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
-                throw new AssignMenuItemAccessException("Menu Item "+first.getSOURCE().getMENU_ITEM_NAME()+" is already assigned "
-                        + "to UserType "+first.getTARGET().getUSERTYPENAME());
+                throw new RelatonshipExistsException(first);
             }
             
             //get menuItem first
             MenuItem assignMenuItem = this.getMenuItemById(menuItemId);
             if(assignMenuItem == null)
-                throw new AssignMenuItemAccessException("MenuItem with ID "+menuItemId+" could not be found!");
+                throw new EntityNotFoundException(MenuItem.class,menuItemId);
             
             //get userType
             UserType assignUserType = userService.getUserTypeById(userTypeId);
             if(assignUserType == null)
-                throw new AssignMenuItemAccessException("UserType with ID "+userTypeId+" could not be found!");
+                throw new EntityNotFoundException(UserType.class,menuItemId);
             
             //Create the MenuItemAccess objects (bi-directional)
             //MenuItemAccess assignment1 = new MenuItemAccess();
@@ -241,9 +247,7 @@ public class NavigationService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
