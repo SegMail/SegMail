@@ -60,7 +60,8 @@
                                         </a>
                                         <ul class="dropdown-menu" role="menu">
                                             <li>
-                                                <a jsf:actionListener="#{FormUserLogout.logout()}">
+                                                <a jsf:actionListener="#{FormUserLogout.logout()}" >
+                                                    <f:ajax execute="@form" render="@form"></f:ajax>
                                                     Logout
                                                 </a>
                                             </li>
@@ -87,6 +88,9 @@
                                 <div class="page-toolbar-block">
                                     <div class="page-toolbar-title">#{bootstrap.output.programTitle}</div>
                                     <div class="page-toolbar-subtitle">#{bootstrap.output.programDescription}</div>
+                                </div>
+                                <div class="page-toolbar-block pull-right">
+                                    <ui:insert name="toolbar-right"></ui:insert>
                                 </div>
                             </c:if>
 
@@ -122,7 +126,7 @@
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/mcustomscrollbar/jquery.mCustomScrollbar.min.js"></script>        
 
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/sparkline/jquery.sparkline.min.js"></script>        
-        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=places"></script>
+        <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=places"></script>-->
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/fancybox/jquery.fancybox.pack.js"></script>                
 
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/d3.v3.js"></script>
@@ -157,6 +161,26 @@
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery-validation/additional-methods.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/icheck/jquery.icheck.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
+        
+        <!--For fileuploader-->
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.gears.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.silverlight.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.flash.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.browserplus.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.html4.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.html5.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/jquery.plupload.queue/jquery.plupload.queue.js'></script>
+        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/imgareaselect/jquery.imgareaselect.min.js'></script>
+        <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/filetree/jqueryFileTree.js"></script>
+        <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/dropzone/dropzone.js"></script>
+        <!--For fileuploader-->
+        
+        <!--For editable forms-->
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/bootstrap-editable.min.js"></script>  
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/inputs-ext/address/address.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/select2/select2.min.js"></script>
+        <!--For editable forms-->
 
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" />
@@ -165,15 +189,8 @@
         <script src="#{request.contextPath}/templates/common/js/bootstrap-select.js"></script>
         <ui:insert name="scripts-bottom"></ui:insert>
 
-        <script type="text/javascript">
-            $(document).ready(function () {
-                $("form.validate-form").validationEngine('attach',
-                        {promptPosition: "topRight",
-                            ajaxFormValidation: true,
-                            validationEventTrigger: "blur"});
-            });
-
-        </script>
+        <!--Custom JS codes-->
+        <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/custom/validateEngine.js"></script>
 
     </f:view>
 </html>

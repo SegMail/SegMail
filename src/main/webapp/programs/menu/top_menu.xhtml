@@ -7,19 +7,9 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
     <ui:composition>
 
-        <c:forEach items="#{bootstrap.output.nonCoreValues['TEST_MENU']}" var="program">
-
-            <li class="#{0 == program.OBJECTID ? 'active' : ''}">
-                <a href="#{request.contextPath.concat(program.VIEW_DIRECTORY)}">
-                    <!--<img src="#{request.contextPath}/templates/beprobootstrap/img/themes/default.jpg"/>--><!--hard code for the moment-->
-                    <i class="fa fa-dashboard"></i>
-                    #{program.PROGRAM_NAME}
-                </a>
-            </li>
-
-        </c:forEach>
+        
         <!--test using the real menuitem object-->
-        <c:forEach items="#{bootstrap.output.nonCoreValues['TEST_MENU2']}" var="menuitem">
+        <c:forEach items="#{bootstrap.output.nonCoreValues['TEST_MENU']}" var="menuitem">
 
             <li class="#{menuitem.active ? 'active' : ''}">
                 <a href="#{menuitem.getURL()}">

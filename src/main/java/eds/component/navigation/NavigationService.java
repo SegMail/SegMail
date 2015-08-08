@@ -5,12 +5,10 @@
  */
 package eds.component.navigation;
 
-import eds.entity.data.EnterpriseObject;
-import eds.entity.data.EnterpriseObject_;
 import TreeAPI.TreeBranch;
 import TreeAPI.TreeBuilder;
 import TreeAPI.TreeNode;
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +22,17 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
-import eds.entity.navigation.MenuItemAccess_;
+import eds.entity.navigation.MenuItemAccessComparator;
+import eds.entity.navigation.MenuItemComparator;
 import eds.entity.navigation.MenuItem_;
 import eds.entity.user.UserType;
+import java.util.Collections;
 
 /**
  * Handles the navigation of the application
@@ -47,7 +46,7 @@ public class NavigationService implements Serializable {
 
     @EJB
     private UserService userService;
-    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService genericEnterpriseObjectService;
     
     @PersistenceContext(name="HIBERNATE")
     private EntityManager em;
@@ -182,7 +181,7 @@ public class NavigationService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId) throws AssignMenuItemAccessException, DBConnectionException {
+    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) throws AssignMenuItemAccessException, DBConnectionException {
         
         try{
             /*//check if userType already has access to menuItem
@@ -199,7 +198,7 @@ public class NavigationService implements Serializable {
             
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .getResultList();*/
-            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userTypeId, MenuItemAccess.class);
+            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObject(userTypeId, menuItemId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
@@ -222,7 +221,7 @@ public class NavigationService implements Serializable {
             //assignment1.setSOURCE(assignUserType);
             //assignment1.setTARGET(assignMenuItem);
             
-            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType);
+            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType,order);
             //assignment2.setSOURCE(assignMenuItem);
             //assignment2.setTARGET(assignUserType);
             
@@ -277,7 +276,7 @@ public class NavigationService implements Serializable {
     public List<MenuItem> getAllMenuItems() throws DBConnectionException {
         
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
             Root<MenuItem> sourceEntity = criteria.from(MenuItem.class);
             criteria.select(sourceEntity);
@@ -286,6 +285,10 @@ public class NavigationService implements Serializable {
                     //.setFirstResult(0)
                     //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
                     .getResultList();
+            */
+            List<MenuItem> results = this.genericEnterpriseObjectService.getAllEnterpriseObjects(MenuItem.class);
+            Collections.sort(results, new MenuItemComparator());
+            
             return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -304,4 +307,47 @@ public class NavigationService implements Serializable {
         List<MenuItem> allMenuItems = this.getAllMenuItems();
         return null;
     }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) throws DBConnectionException {
+        
+        try {
+            //List<MenuItem> results = this.genericEnterpriseObjectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
+            List<MenuItemAccess> access = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
+            
+            Collections.sort(access, new MenuItemAccessComparator());
+            
+            List<MenuItem> results = new ArrayList<MenuItem>();
+            for(MenuItemAccess a : access){
+                results.add(a.getSOURCE());
+            }
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<MenuItem> getAllMenuItemsByName(String menuitemname) throws DBConnectionException {
+        
+        try {
+            List<MenuItem> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(menuitemname, MenuItem.class);
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
 }

@@ -47,6 +47,7 @@ public class FormTestNavigation implements Serializable{
     //Assign MenuItemAccess
     private long selectedAssignedMenuItemId;
     private long selectedUserTypeId;
+    private int order;
     
     //Test custom selectonemenu tag
     private List<String> selectOneMenuTest;
@@ -91,7 +92,7 @@ public class FormTestNavigation implements Serializable{
     
     public void assignMenuAccess(){
         try{
-            List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId);
+            List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId, order);
             
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+selectedAssignedMenuItemId+" is assigned to user type "+selectedUserTypeId+"!", null);
         }
@@ -195,5 +196,30 @@ public class FormTestNavigation implements Serializable{
         this.prependHTMLTags = prependHTMLTags;
     }
 
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
     
+    
+
+    public void assignMenuItems(String usertypename, String menuname, int order){
+        List<UserType> usertypes = this.userService.getUserTypeByName(usertypename);
+        List<MenuItem> menuitems = this.navigationService.getAllMenuItemsByName(menuname);
+        
+        if(usertypes == null || usertypes.isEmpty())
+            throw new RuntimeException("Usertypes are not created yet!");
+        
+        if(menuitems == null || menuitems.isEmpty())
+            throw new RuntimeException("MenuItmes are not created yet!");
+        
+        this.setSelectedUserTypeId(usertypes.get(0).getOBJECTID());
+        this.setSelectedAssignedMenuItemId(menuitems.get(0).getOBJECTID());
+        this.setOrder(order);
+        
+        this.assignMenuAccess();
+    }
 }

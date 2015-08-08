@@ -14,7 +14,7 @@ import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import eds.component.data.DBConnectionException;
 import eds.entity.mail.Email;
-import eds.entity.subscription.connection.SMTPConnectionSES;
+import segmail.entity.subscription.connection.SMTPConnectionSES;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;

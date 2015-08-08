@@ -5,7 +5,7 @@
  */
 package eds.component.user;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -57,7 +57,7 @@ public class UserService extends Service {
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
     
-    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService genericEnterpriseObjectService;
 
     /**
      * Should I return something like UserTypeID?
@@ -268,17 +268,41 @@ public class UserService extends Service {
     public List<UserType> getUserTypeByName(String userTypeName) throws DBConnectionException {
 
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<UserType> criteria = builder.createQuery(UserType.class);
             Root<UserType> sourceEntity = criteria.from(UserType.class); //FROM UserType
 
             criteria.select(sourceEntity); // SELECT *
             criteria.where(builder.equal(sourceEntity.get(UserType_.USERTYPENAME), userTypeName)); //WHERE USERTYPENAME = userTypeName
-
+            
             List<UserType> results = em.createQuery(criteria)
                     .getResultList();
+            */
+            List<UserType> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(userTypeName, UserType.class);
 
             return results;
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public UserType getSingleUserTypeByName(String userTypeName) throws DBConnectionException {
+
+        try {
+            
+            List<UserType> results = this.getUserTypeByName(userTypeName);
+            
+            if(results == null || results.isEmpty())
+                return null;
+
+            return results.get(0);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

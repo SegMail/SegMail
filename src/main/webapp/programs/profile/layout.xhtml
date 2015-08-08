@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="#{bootstrap.output.templateRoot}"
+                    >
+
+        <ui:define name="toolbar-right">
+            <div class="widget-info widget-from">
+                <c:choose>
+                    <c:when test="">
+                        <a id="first-create-button" class="btn btn-primary" href="#create_first_hire">
+                            <strong>Start Hiring</strong>
+                        </a>
+                    </c:when>
+
+                    <c:otherwise>
+                        <button id="search-button" class="btn btn-primary">
+                            <i class="fa fa-search"></i>
+                            Search Talent
+                        </button>
+                        <button id="edit-button" class="btn btn-success">
+                            <i class="fa fa-pencil"></i>
+                            Edit Talent
+                        </button>
+                        <button id="save-button" class="btn btn-success">
+                            <i class="fa fa-save"></i>
+                            Save
+                        </button>
+                        <button id="reset-button" class="btn btn-primary">
+                            <i class="fa fa-refresh"></i>
+                            Reset
+                        </button>
+                        <button id="reset-button" class="btn btn-danger">
+                            <i class="fa fa-times"></i>
+                            Cancel
+                        </button>
+                        <button id="create-button" class="btn btn-primary">
+                            <i class="fa fa-plus"></i>
+                            Create New
+                        </button>
+                    </c:otherwise>
+                </c:choose>
+            </div> 
+        </ui:define>
+        <ui:define name="main-program-panel">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="block">
+                        <div id="talent" class="block-content user-profile">
+
+                            <div class="user-profile-block">                                        
+                                <div class="user-profile-image">
+                                    <img src="#{ImageAdaptor.getImageAddress('/programs/profile/img/user-100.jpg')}" class="img-circle img-thumbnail" width="100" height="100"/>
+                                </div>                                        
+                            </div>
+                            <div class="user-profile-info">
+                                <div class="user-profile-title">
+                                    <a href="#" id="talentname" >superuser</a>
+                                </div>
+                                <div class="user-profile-text">Curabitur tempus tortor quis est feugiat eu elementum nulla commodo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</div>
+                                <div class="user-profile-text text-success"><span class="fa fa-user"></span> Administrator</div>
+                            </div>
+                            <div class="user-profile-block user-profile-address pull-right">
+                                <p><span class="fa fa-calendar"></span> 25 years old(14.02.1989)</p>
+                                <p><span class="fa fa-phone"></span> +9 8(765) 432-10-98</p>
+                                <p><span class="fa fa-envelope"></span> <a href="#">johndoe@domain.com</a></p>
+                                <p>&#160;</p>
+                                <p><span class="fa fa-map-marker"></span> 01 Streetname, City, Country, 00000</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="create_first_hire">
+                <ui:include src="create_first_hire.xhtml"></ui:include>
+            </div>
+
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <!--<script type="text/javascript" src="#{request.contextPath}/programs/profile/js/editable.js"></script>  -->
+            <script type="text/javascript" src="#{request.contextPath}/programs/profile/js/edit-talent.js"></script>  
+        </ui:define>
+
+    </ui:composition>
+</html>
+

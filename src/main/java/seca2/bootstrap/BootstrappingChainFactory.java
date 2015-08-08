@@ -15,6 +15,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import eds.utilities.EntityExplorer;
 import java.io.Serializable;
+import javax.faces.context.FacesContext;
 
 /**
  * This is a chain of responsibility for all bootstrap modules.
@@ -36,26 +37,32 @@ public class BootstrappingChainFactory implements Serializable {
     /**
      * 
      */
-    private List<BootstrapModule> bootstrapModuleList;
-    private BootstrapModule head;
+    private List<BootstrapModule> coreBootstrapModuleList;
+    private List<BootstrapModule> nonCoreBootstrapModuleList;
+    private BootstrapModule coreHead;
+    private BootstrapModule nonCoreHead;
     
     @PostConstruct
     public void init(){
-        bootstrapModuleList = new ArrayList<BootstrapModule>();
-        bootstrapModuleList.addAll(this.generateBootstrapList(this.cModules));
-        bootstrapModuleList.addAll(this.generateBootstrapList(this.Modules));
-        head = this.constructBoostrapChain(this.bootstrapModuleList);
+        //All core modules
+        coreBootstrapModuleList = new ArrayList<BootstrapModule>();
+        coreBootstrapModuleList.addAll(this.generateBootstrapList(this.cModules));
+        coreHead = this.constructBoostrapChain(this.coreBootstrapModuleList);
+        
+        //All noncore modules
+        nonCoreBootstrapModuleList = new ArrayList<BootstrapModule>();
+        nonCoreBootstrapModuleList.addAll(this.generateBootstrapList(this.Modules));
+        nonCoreHead = this.constructBoostrapChain(this.nonCoreBootstrapModuleList);
         
     }
 
-    public BootstrapModule getHead() {
-        return head;
+    public BootstrapModule getCoreHead() {
+        return coreHead;
     }
 
-    public List<BootstrapModule> getBootstrapModuleList() {
-        return bootstrapModuleList;
+    public BootstrapModule getNonCoreHead() {
+        return nonCoreHead;
     }
-    
     
     
     //Helper methods
@@ -76,9 +83,6 @@ public class BootstrappingChainFactory implements Serializable {
         return moduleList;
     }
     
-    public BootstrapModule constructBoostrapChain(){
-        return this.constructBoostrapChain(this.bootstrapModuleList);
-    }
     
     /**
      * Returns the head of a BootstrapChain
@@ -98,14 +102,22 @@ public class BootstrappingChainFactory implements Serializable {
          * the next BootstrapModule and strap on to the previous one. 
          */
         Iterator<BootstrapModule> i = moduleList.iterator();
+        BootstrapModule firstHead = null;
         BootstrapModule tempHead = null;
         while(i.hasNext()){
             BootstrapModule nextHead = i.next();
-            nextHead.strapNext(tempHead);
-            tempHead = nextHead;
+            if(firstHead == null){
+                firstHead = nextHead;
+                tempHead = nextHead;
+            }
+            else{
+                tempHead.strapNext(nextHead);
+                tempHead = nextHead;
+            }   
+            
         }
         
-        return tempHead;
+        return firstHead;
     }
     
     /**
@@ -114,7 +126,7 @@ public class BootstrappingChainFactory implements Serializable {
      * 
      * @return
      */
-    public List<BootstrapModule> generateBootstrapList() {
+    /*public List<BootstrapModule> generateBootstrapList() {
         try{
             eds.utilities.Package root = new eds.utilities.Package();
             root.push("seca2").push("bootstrap");
@@ -133,7 +145,7 @@ public class BootstrappingChainFactory implements Serializable {
         } catch (Exception ex) {
             return new ArrayList<>();
         }
-    }
+    }*/
 }
 
 //Since this class is only used by the chain factory alone, put it here.
@@ -141,10 +153,15 @@ class BootstrapModuleComparator implements Comparator<BootstrapModule> {
 
     @Override
     public int compare(BootstrapModule o1, BootstrapModule o2) {
+        //CoreModules will all be ahead of NonCoreModules no matter what
+        boolean c1 = o1.getClass().isAnnotationPresent(CoreModule.class);
+        boolean c2 = o2.getClass().isAnnotationPresent(NonCoreModule.class);
+        
         int w1 = o1.executionSequence();
         int w2 = o2.executionSequence();
         
-        return w2 - w1;
+        return !(c1 ^ c2) ? w1 - w2 : ((c1) ? w1 : w2);
+        
     }
     
 }

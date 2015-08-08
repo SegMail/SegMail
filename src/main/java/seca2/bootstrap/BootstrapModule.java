@@ -52,6 +52,14 @@ public abstract class BootstrapModule {
         this.next = next;
     }
     
+    public void strapNextAtLastPos(BootstrapModule next){
+        BootstrapModule thisPos = this;
+        while(thisPos.next != null){
+            thisPos = thisPos.next;
+        }
+        thisPos.strapNext(next);
+    }
+    
     /**
      * Execute the control logic of this module.
      * 

@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.User;
 
+import eds.entity.audit.DefaultActiveUser;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
@@ -26,8 +27,6 @@ public class UserContainer implements Serializable {
     private boolean loggedIn; //default is always false
     private String sessionId;
     
-    private String username;
-    private String lastname;
     private String contextPath;
     private String servletPath;
     
@@ -83,20 +82,8 @@ public class UserContainer implements Serializable {
     }
 
     public String getUsername() {
-        return username;
+        
+        return (user != null) ? user.getOBJECT_NAME() : "";
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-    
-    
 }

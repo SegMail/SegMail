@@ -10,11 +10,11 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
         <ui:define name="panel-heading">
-            Register Client
+            Register Client for User
         </ui:define>
         <ui:define name="panel-body">
             <h:form id="registerClientForm">
-                <div class="row"><!--form to assign layout to username-->
+                <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <s2:dropdown id="allClientTypes" 
                                      value="#{FormRegisterClientForObjectname.clientTypeId}">
@@ -35,18 +35,18 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Object name:</label>
+                    <label>User name:</label>
                     <span class="help-block">
-                        Only the first object found will be used!
+                        Only the first user found will be used!
                     </span>
-                    <input type="text" jsf:id="objectnameClient" class="form-control"
-                           jsf:value="#{FormRegisterClientForObjectname.objectname}" />
+                    <input type="text" jsf:id="usernameClient" class="form-control"
+                           jsf:value="#{FormRegisterClientForUsername.username}" />
                 </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="assignClientUsernameButton" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign client to username"
-                                         actionListener="#{FormRegisterClientForObjectname.registerClientForUsername()}"
-                                         update="@form">
+                                         actionListener="#{FormRegisterClientForUsername.registerClientForUsername()}"
+                                         update="@form" process="@form">
                         </p:commandButton>
 
                     </div>

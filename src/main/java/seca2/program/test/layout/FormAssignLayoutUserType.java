@@ -61,6 +61,15 @@ public class FormAssignLayoutUserType extends Form {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
+    
+    public void assignLayoutToUserType(String layoutName, String usertypeName){
+        Layout layout = this.layoutService.getLayoutByName(layoutName);
+        UserType usertype = this.userService.getSingleUserTypeByName(usertypeName);
+        
+        this.setLayoutId(layout.getOBJECTID());
+        this.setUsertypeid(usertype.getOBJECTID());
+        this.assignLayoutToUserType();
+    }
 
     public UserService getUserService() {
         return userService;

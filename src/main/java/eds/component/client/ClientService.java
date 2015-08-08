@@ -5,15 +5,18 @@
  */
 package eds.component.client;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
-import eds.entity.data.EnterpriseObject;
 import eds.entity.client.Client;
-import eds.entity.client.ClientAssignment;
+import eds.entity.client.ClientAccessAssignment;
+import eds.entity.client.ClientResource;
+import eds.entity.client.ClientResourceAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
+import eds.entity.data.EnterpriseObject;
+import eds.entity.user.User;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -32,7 +35,7 @@ import org.joda.time.DateTime;
 @Stateless
 public class ClientService {
     
-    @EJB private GenericEnterpriseObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService genericEnterpriseObjectService;
     @EJB private UserService userService;
     
     @PersistenceContext(name = "HIBERNATE")
@@ -180,38 +183,38 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ClientAssignment registerClientForObject(EnterpriseObject enterpriseobject, long clienttypeid)
+    public ClientAccessAssignment registerClientForUser(User user, long clienttypeid)
         throws DBConnectionException, ClientRegistrationException{
         try{
             
-            if(enterpriseobject == null)
-                throw new ClientRegistrationException("Object "+enterpriseobject.getOBJECT_NAME()+" does not exist.");
+            if(user == null)
+                throw new ClientRegistrationException("User does not exist.");
             
             ClientType clientType = this.getClientTypeById(clienttypeid);
             
             if(clientType == null)
                 throw new ClientRegistrationException("Client type "+clienttypeid+" doesn not exist.");
             
-            Client existingClient = this.getClientByClientname(enterpriseobject.alias());
+            Client existingClient = this.getClientByClientname(user.alias());
             
             if(existingClient != null)
                 throw new ClientRegistrationException("Client "+existingClient.alias()+" already exist.");
             
-            List<ClientAssignment> existingAssignments = 
-                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(enterpriseobject.getOBJECTID(), ClientAssignment.class);
+            List<ClientAccessAssignment> existingAssignments = 
+                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientAccessAssignment.class);
             
             if(existingAssignments != null && existingAssignments.size() > 0)
                 throw new ClientRegistrationException("Object is already assigned to a client.");
             
             //Create the client object
             Client newClient = new Client();
-            newClient.setCLIENT_NAME(enterpriseobject.alias());
+            newClient.setCLIENT_NAME(user.alias());
             newClient.setCLIENTTYPE(clientType);
             
             this.em.persist(newClient);
             
             //Assign the client object to the enterpriseobject
-            ClientAssignment newAssignment = new ClientAssignment(newClient,enterpriseobject);
+            ClientAccessAssignment newAssignment = new ClientAccessAssignment(newClient,user);
             
             this.em.persist(newAssignment);
             
@@ -228,10 +231,10 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public ContactInfo getContactInfoForObject(long objectid) throws DBConnectionException{
+    public ContactInfo getContactInfoForUser(long userid) throws DBConnectionException{
         try{
-            List<ClientAssignment> clientAssignment =
-                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(objectid, ClientAssignment.class);
+            List<ClientAccessAssignment> clientAssignment =
+                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientAccessAssignment.class);
             
             //Cannot find Client object
             if(clientAssignment == null || clientAssignment.isEmpty())
@@ -288,14 +291,41 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Client getClientByAssignedObjectId(long objectid) throws DBConnectionException{
+    public Client getClientByAssignedUser(long userid) throws DBConnectionException{
         try{
-            List<ClientAssignment> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(objectid, ClientAssignment.class);
+            List<ClientAccessAssignment> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientAccessAssignment.class);
             
             if(results == null || results.isEmpty())
                 return null;
             
             return results.get(0).getSOURCE();
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ClientResourceAssignment assignClientResource(Client client, EnterpriseObject clientResource){
+        try {
+            if(client == null )
+                throw new RuntimeException("Client is null.");
+            if(clientResource == null )
+                throw new RuntimeException("ClientResource is null.");
+            if(!clientResource.getClass().isAnnotationPresent(ClientResource.class))
+                throw new RuntimeException("EntepriseObject type "+clientResource.getClass().getSimpleName()+ " is not a Client Resource.");
+            
+            ClientResourceAssignment newAssign = new ClientResourceAssignment();
+            newAssign.setSOURCE(client);
+            newAssign.setTARGET(clientResource);
+            
+            em.persist(newAssign);
+            return newAssign;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

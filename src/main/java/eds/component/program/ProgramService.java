@@ -5,7 +5,7 @@
  */
 package eds.component.program;
 
-import eds.component.GenericEnterpriseObjectService;
+import eds.component.GenericObjectService;
 import java.io.Serializable;
 import java.util.List;
 import javax.ejb.EJB;
@@ -38,7 +38,7 @@ public class ProgramService implements Serializable {
     private EntityManager em;
     
     @EJB private UserService userService;
-    @EJB private GenericEnterpriseObjectService genericEntepriseObjectService;
+    @EJB private GenericObjectService genericEntepriseObjectService;
     /**
      * 
      * Only returns 1 result.
@@ -48,7 +48,7 @@ public class ProgramService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Program getProgramByName(String programName) throws DBConnectionException {
+    public Program getSingleProgramByName(String programName) throws DBConnectionException {
         try {
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
@@ -171,7 +171,7 @@ public class ProgramService implements Serializable {
                 throw new ProgramRegistrationException("View root cannot be empty!");
             
             //Check if program name already exist
-            Program existingProgram = this.getProgramByName(programName);
+            Program existingProgram = this.getSingleProgramByName(programName);
             if(existingProgram != null)
                 throw new ProgramRegistrationException("Program "+programName+" already exists!");
             
@@ -270,7 +270,7 @@ public class ProgramService implements Serializable {
     public boolean checkProgramAuthForUserType(long usertypeid, String programName) 
             throws DBConnectionException{
         
-        Program program = this.getProgramByName(programName);
+        Program program = this.getSingleProgramByName(programName);
         //Always use the first result
         if(program == null)
             return false;
@@ -296,7 +296,7 @@ public class ProgramService implements Serializable {
             criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.TARGET), programid));
             */
             
-            List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForObjects(programid,usertypeid,ProgramAssignment.class);
+            List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForObject(programid,usertypeid,ProgramAssignment.class);
             
             /*List<ProgramAssignment> results = em.createQuery(criteria)
                     .getResultList();*/

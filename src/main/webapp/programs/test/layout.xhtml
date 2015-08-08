@@ -15,60 +15,80 @@
             <div class="jumbotron">
                 <h4>#{bootstrap.output.programDescription}</h4>
             </div>
-                
+
             <div jsf:id="everything" class="row-fluid">
-                    <!--test DB generation-->
-                    <ui:include src="test-cases/DBSetup.xhtml" />
-                    
-                    <!--everything at once-->
-                    <ui:include src="test-cases/testEverything.xhtml" />
+                <!--test DB generation-->
+                <ui:include src="test-cases/DBSetup.xhtml" />
 
-                    <!--test create usertype-->
-                    <ui:include src="test-cases/createUserType.xhtml" />
-                    
-                    <!--test create user-->
-                    <ui:include src="test-cases/createUsers.xhtml" />
+                <!--everything at once-->
+                <ui:include src="test-cases/testEverything.xhtml" />
 
-                    <!--test login user-->
-                    <ui:include src="test-cases/loginUser.xhtml" />
-                    
-                    <!--test set user profile pic-->
-                    <ui:include src="test-cases/setProfilePic.xhtml" />
-                    
-                    <!--test create programs-->
-                    <ui:include src="test-cases/createPrograms.xhtml" />
-                    
-                    <!--test create menu items-->
-                    <ui:include src="test-cases/createMenuItems.xhtml" />
-                    
-                    <!--test assign program to UserType-->
-                    <ui:include src="test-cases/assignProgramsToUserTypes.xhtml" />
-                    
-                    <!--test register layout-->
-                    <ui:include src="test-cases/registerLayout.xhtml" />
-                    
-                    <!--test assign layout to UserType-->
-                    <ui:include src="test-cases/assignLayoutToUserTypes.xhtml" />
-                    
-                    <!--test assign layout to Username-->
-                    <ui:include src="test-cases/assignLayoutToUsername.xhtml" />
-                    
-                    <!--test assign layout to Program-->
-                    <ui:include src="test-cases/assignLayoutToProgram.xhtml" />
-                    
-                    <ui:include src="test-cases/assignMenuItemsToUserTypes.xhtml" />
-                    
-                    <!--test register client type-->
-                    <ui:include src="test-cases/registerClientType.xhtml" />
-                        
-                    <!--test register client for username-->
-                    <ui:include src="test-cases/registerClient.xhtml" />
+                <!--test create usertype-->
+                <ui:include src="test-cases/createUserType.xhtml" />
+
+                <!--test create user-->
+                <ui:include src="test-cases/createUsers.xhtml" />
+
+                <!--test login user-->
+                <ui:include src="test-cases/loginUser.xhtml" />
+
+                <!--test set user profile pic-->
+                <ui:include src="test-cases/setProfilePic.xhtml" />
+
+                <!--test create programs-->
+                <ui:include src="test-cases/createPrograms.xhtml" />
+
+                <!--test create menu items-->
+                <ui:include src="test-cases/createMenuItems.xhtml" />
+
+                <!--test assign program to UserType-->
+                <ui:include src="test-cases/assignProgramsToUserTypes.xhtml" />
+
+                <!--test register layout-->
+                <ui:include src="test-cases/registerLayout.xhtml" />
+
+                <!--test assign layout to UserType-->
+                <ui:include src="test-cases/assignLayoutToUserTypes.xhtml" />
+
+                <!--test assign layout to Username-->
+                <ui:include src="test-cases/assignLayoutToUsername.xhtml" />
+
+                <!--test assign layout to Program-->
+                <ui:include src="test-cases/assignLayoutToProgram.xhtml" />
+
+                <ui:include src="test-cases/assignMenuItemsToUserTypes.xhtml" />
+
+                <!--test register client type-->
+                <ui:include src="test-cases/registerClientType.xhtml" />
+
+                <!--test register client for username-->
+                <ui:include src="test-cases/registerClient.xhtml" />
+                
+                <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="panel panel-default"  style="min-height: 220px;">
+            <div class="panel-heading">
+                <h5 class="panel-title">
+                    Test file upload
+                </h5>
             </div>
-            
+            <div class="panel-body">
+                <form enctype="multipart/form-data">
+                    <div class="row">
+                    <h:inputFile value="#{FormTestEverything.file}" ></h:inputFile>
+                    <h:commandButton id="upload_xml_setup_test" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
+                                     actionListener="#{FormTestEverything.uploadXMLPlain}"
+                                     
+                                         ></h:commandButton>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+            </div>
+
         </ui:define>
-        
+
         <ui:define name="scripts-bottom">
-            
             
         </ui:define>
 

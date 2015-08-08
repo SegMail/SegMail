@@ -75,8 +75,9 @@ public class UserModule extends BootstrapModule implements Serializable {
         String bypassInURL = ec.getRequestParameterMap().get("SETUP");
         String bypassInWebXML = ec.getInitParameter("SETUP");
         if((bypassInWebXML != null && bypassInWebXML.compareToIgnoreCase("true") == 0) ||
-                (bypassInURL != null && bypassInURL.compareToIgnoreCase("true") == 0)
-                ){
+        //        (bypassInURL != null && bypassInURL.compareToIgnoreCase("true") == 0)
+        //        ){
+                (inputContext.isSetup())){
             //String bypass = fc.getExternalContext().getInitParameter("BYPASS_AUTHENTICATION");
             //if not in PRODUCTION and BYPASS_AUTHENTICATION flag is set
             //if(bypass.equalsIgnoreCase("true")){

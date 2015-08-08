@@ -8,7 +8,7 @@ package seca2.program.mysettings;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.entity.client.Client;
-import eds.entity.client.ClientAssignment;
+import eds.entity.client.ClientAccessAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
 import javax.annotation.PostConstruct;
@@ -52,8 +52,8 @@ public class ContactDetailsForm {
             if(this.mySettingsProgram.getContactInfo().getOWNER() == null){
                 //Check which client type is "Person", but we are assuming it's called "Person" and not by other similar names
                 ClientType personClientType = clientService.getClientTypeByName("Person");
-                ClientAssignment newClientAssignment = 
-                        clientService.registerClientForObject(userContainer.getUser(), personClientType.getOBJECTID());
+                ClientAccessAssignment newClientAssignment = 
+                        clientService.registerClientForUser(userContainer.getUser(), personClientType.getOBJECTID());
                 Client newclient = newClientAssignment.getSOURCE();
                 this.mySettingsProgram.getContactInfo().setOWNER(newclient);
             }
@@ -77,7 +77,7 @@ public class ContactDetailsForm {
         }
         
         //Retrieve the contact info for this particular user
-        this.setContactInfo(clientService.getContactInfoForObject(userContainer.getUser().getOBJECTID()));
+        this.setContactInfo(clientService.getContactInfoForUser(userContainer.getUser().getOBJECTID()));
         
         //You don't want a nullpointerexception on your page!
         //This is the temporary solution, may or may not be the best.
@@ -85,7 +85,7 @@ public class ContactDetailsForm {
             ContactInfo newContactInfo = new ContactInfo();
             
             //Get the user's clientid
-            Client thisClient = clientService.getClientByAssignedObjectId(userContainer.getUser().getOBJECTID());
+            Client thisClient = clientService.getClientByAssignedUser(userContainer.getUser().getOBJECTID());
             newContactInfo.setOWNER(thisClient); //May be null at this point of time
             setContactInfo(newContactInfo);
         }
