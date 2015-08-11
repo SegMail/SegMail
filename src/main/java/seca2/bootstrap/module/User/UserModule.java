@@ -110,9 +110,10 @@ public class UserModule extends BootstrapModule implements Serializable {
         //If it's not the same session, meaning it could be the first vist, or 
         //the previous session has timed out, load the login page.
         if(!sameSession){
-            //If it's a postback, then the entire page must be refreshed.
-            //System.out.println(fc.isPostback());
-            if(fc.isPostback()){
+            //If it's a postback, and if program is not null (null means that the
+            //session was timed out in the login page.
+            //then the entire page must be refreshed.
+            if(fc.isPostback() && program != null){
                 try {
                     ec.redirect(ec.getRequestContextPath()
                             +ec.getRequestServletPath()
