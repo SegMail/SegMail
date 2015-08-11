@@ -7,11 +7,14 @@ package segmail.program.list;
 
 import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
+import eds.component.data.IncompleteDataException;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -76,18 +79,20 @@ public class FormAddList {
             ec.redirect(programContainer.getCurrentURL());
             this.programList.setListEditing(SubscriptionList);
             
-        } /*catch (IOException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }*/ catch (EJBException ex) { //Transaction did not go through
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (EJBException ex) { //Transaction did not go through
             Throwable cause = ex.getCause();
             String message = "Don't know what happened!";
             if(cause != null) message = cause.getMessage();
             
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, message, null);
             
-        } catch (Exception ex) {
+        } catch (IOException ex) {
+            Logger.getLogger(FormAddList.class.getName()).log(Level.SEVERE, null, ex);
+        }  /*catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
+        }*/
     }
 
     public String getListName() {

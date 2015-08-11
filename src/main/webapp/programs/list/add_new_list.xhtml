@@ -31,6 +31,7 @@
                             <label style="padding-left:0px">
                                 <strong>Remote List</strong>
                                 <input type="checkbox" class="icheck" style=""
+                                       
                                        jsf:value="#{FormAddList.remote}"/>
                             </label>
 
@@ -50,9 +51,8 @@
                     <p:commandButton id="add_list_button" styleClass="btn btn-success" 
                                      value="Create list" update="FormAddList"
                                      actionListener="#{FormAddList.addList()}"
-                                     onclick="$('#FormAddList').validationEngine('validate');">
-                        
-                                     
+                                     onclick="$('#FormAddList').validationEngine('validate');"
+                                     oncomplete="gPlugins('body');">
                     </p:commandButton>
                 </div>
 
@@ -60,6 +60,8 @@
             <p:blockUI block="FormAddList" trigger="FormAddList:add_list_button">
                 <p id="spinner">Please wait while we do what we do best.</p>
             </p:blockUI>
+            
+            
         </div>
     </form>
 </html>

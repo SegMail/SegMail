@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="add_new_template_form" onsubmit="add_new_template_form.form()">
+    <form jsf:id="add_new_template_form">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -41,8 +41,11 @@
 
                     <p:commandButton id="add_new_template_button" styleClass="btn btn-success" 
                                      value="Add Template" update="FormAddTemp_messenger"
+                                     oncomplete="$('#body').summernote({height: 300});
+                                        popup.popup();
+                                        "
                                      actionListener="#{FormAddNewTemplate.addNewTemplate()}"
-                                     onclick="add_new_template_form.form()"
+                                     
                                      >
 
                     </p:commandButton>

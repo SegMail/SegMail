@@ -14,8 +14,11 @@ import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -30,6 +33,7 @@ public class FormAddNewTemplate {
     @EJB private UserService userService;
     
     @Inject private ProgramTemplate program;
+    @Inject private ProgramContainer programContainer;
     
     private String subject;
     
@@ -51,7 +55,12 @@ public class FormAddNewTemplate {
             EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, type, program.getClient().getOBJECTID());
             
             //Refresh the list of email templates on the page
-            program.initializeAllTemplates();
+            //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit
+            
+            //redirect to itself after setting list editing
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
+            ec.redirect(programContainer.getCurrentURL());
             
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();

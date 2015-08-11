@@ -75,10 +75,10 @@ public class SubscriptionService {
     @Inject ClientFacade clientFacade;
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public SubscriptionList addList(String listname, boolean remote) {
+    public SubscriptionList addList(String listname, boolean remote) throws IncompleteDataException {
         try{
             if(listname == null || listname.isEmpty())
-                throw new ListException("List name cannot be empty.");
+                throw new IncompleteDataException("List name cannot be empty.");
             
             //1. Create the list object and persist it first
             SubscriptionList newList = new SubscriptionList();
