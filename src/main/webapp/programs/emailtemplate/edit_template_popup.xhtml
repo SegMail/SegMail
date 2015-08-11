@@ -16,7 +16,7 @@
                         X
                     </button>
                     <h4 id="popup_title" class="modal-title"></h4>
-                    <input type="hidden" jsf:value="#{FormEditExistingTemplate.editingTemplate.OBJECTID}" id="template_id" />
+                    <input type="hidden" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.OBJECTID}" id="template_id" />
                 </div>
 
                 <div class="modal-body">
@@ -25,12 +25,12 @@
                             Subject:
                         </label>
                         <input type="text" class="form-control"
-                               jsf:value="#{FormEditExistingTemplate.editingTemplate.SUBJECT}"
+                               jsf:value="#{FormEditExistingTemplate.program.editingTemplate.SUBJECT}"
                                name="email" required="true"
                                />
                     </div>
                     <div class="form-group">
-                        <textarea class="editor" jsf:value="#{FormEditExistingTemplate.editingTemplate.BODY}"></textarea>
+                        <textarea class="editor" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}"></textarea>
                     </div>
                     <div class="form-group">
                         <s2:messenger id="FormEditTemp_messenger" for="edit_template_form" showDetail="true" showSummary="true"

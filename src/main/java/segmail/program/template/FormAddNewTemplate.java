@@ -5,6 +5,7 @@
  */
 package segmail.program.template;
 
+import eds.component.client.ClientFacade;
 import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
 import segmail.entity.subscription.email.EmailTemplate;
@@ -34,6 +35,7 @@ public class FormAddNewTemplate {
     
     @Inject private ProgramTemplate program;
     @Inject private ProgramContainer programContainer;
+    @Inject private ClientFacade clientFacade;
     
     private String subject;
     
@@ -52,7 +54,7 @@ public class FormAddNewTemplate {
         try {
             // Create the new template
             // Get the client associated with the user and assign it
-            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, type, program.getClient().getOBJECTID());
+            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, type, clientFacade.getClient().getOBJECTID());
             
             //Refresh the list of email templates on the page
             //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit

@@ -32,10 +32,6 @@ public class FormEditExistingTemplate {
     @Inject private ProgramTemplate program;
     //@Inject private UserContainer userContainer;
     
-    //private long templateId;
-    
-    private EmailTemplate editingTemplate;
-    
     private final String formName = "FormEditExistingTemplate";
     
     @PostConstruct
@@ -46,7 +42,7 @@ public class FormEditExistingTemplate {
     public void loadTemplate(long templateId){
         try {
             // Retrieve the template based on the Id
-            editingTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            program.setEditingTemplate(objectService.getEnterpriseObjectById(templateId, EmailTemplate.class));
             
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
@@ -58,7 +54,7 @@ public class FormEditExistingTemplate {
     
     public void saveTemplate(){
         try {
-            subscriptionService.saveTemplate(editingTemplate);
+            subscriptionService.saveTemplate(program.getEditingTemplate());
             
             //Refresh the list of email templates on the page
             program.initializeAllTemplates();
@@ -71,14 +67,13 @@ public class FormEditExistingTemplate {
         }
     }
 
-    public EmailTemplate getEditingTemplate() {
-        return editingTemplate;
+    public ProgramTemplate getProgram() {
+        return program;
     }
 
-    public void setEditingTemplate(EmailTemplate editingTemplate) {
-        this.editingTemplate = editingTemplate;
+    public void setProgram(ProgramTemplate program) {
+        this.program = program;
     }
-
     
     
 }

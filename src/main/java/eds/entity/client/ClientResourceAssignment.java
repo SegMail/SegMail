@@ -21,7 +21,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CLIENT_RESOURCE_ASSIGNMENT")
-public class ClientResourceAssignment extends EnterpriseRelationship<Client,EnterpriseObject>{
+public class ClientResourceAssignment<C,E extends EnterpriseObject> extends EnterpriseRelationship<Client,E>{
 
     @Override
     public void randInit() {

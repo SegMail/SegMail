@@ -327,7 +327,7 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public EmailTemplate addTemplate(String subject, String body, EMAIL_TYPE type) 
+    public EmailTemplate addTemplateWithoutAssignment(String subject, String body, EMAIL_TYPE type) 
             throws EntityExistsException, IncompleteDataException{
         try {
             if(subject == null || subject.isEmpty())
@@ -410,14 +410,18 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public EmailTemplate addTemplate(String subject, String body, EMAIL_TYPE type, long clientId) 
+    public EmailTemplate addTemplate(String subject, String body, EMAIL_TYPE type, long clientid) 
             throws EntityExistsException, IncompleteDataException{
         try {
             //Create the new template first
-            EmailTemplate newTemplate = this.addTemplate(subject, body, type);
+            EmailTemplate newTemplate = this.addTemplateWithoutAssignment(subject, body, type);
             
+            //Get the client
+            Client client = clientFacade.getClient();
+            if (client == null)
+                throw new EnterpriseObjectNotFoundException(Client.class);
             //Assign it to the client
-            this.assignEmailTemplateToClient(newTemplate.getOBJECTID(), clientId);
+            this.assignEmailTemplateToClient(newTemplate.getOBJECTID(), client.getOBJECTID());
             
             return newTemplate;
             

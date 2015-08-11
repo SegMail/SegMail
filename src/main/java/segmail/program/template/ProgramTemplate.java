@@ -5,6 +5,7 @@
  */
 package segmail.program.template;
 
+import eds.component.client.ClientFacade;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
@@ -41,16 +42,17 @@ public class ProgramTemplate implements Serializable {
     
     @Inject private ProgramTemplateLoader loader;
     
+    @Inject private ClientFacade clientFacade;
+    
     private List<EmailTemplate> confirmationTemplates;
     
     private List<EmailTemplate> newsletterTemplates;
     
     private List<UserType> allUserTypes;
     
-    private Client client;
-    
     private final String formName = "ProgramTemplate";
     
+    private EmailTemplate editingTemplate;
     
     // @PostConstruct
     public void init(){
@@ -63,17 +65,14 @@ public class ProgramTemplate implements Serializable {
         // Rightfully, a program bean should not be performing any loading logic, 
         // but just be a holding shell for all the required frontend data.
         // Initialize loader for the 1st time
-        this.initializeClient();
         this.initializeAllTemplates();
         
     }
     
     public void initializeAllConfirmationTemplates() {
         try {
-            if (this.getClient() == null) {
-                this.initializeClient();
-            }
-            this.setConfirmationTemplates(subscriptionService.getAvailableTemplatesForClient(this.getClient().getOBJECTID(),
+            
+            this.setConfirmationTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),
                     EmailTemplate.EMAIL_TYPE.CONFIRMATION));
 
         } catch (DBConnectionException ex) {
@@ -85,10 +84,8 @@ public class ProgramTemplate implements Serializable {
 
     public void initializeAllNewsletterTemplates() {
         try {
-            if (this.getClient() == null) {
-                this.initializeClient();
-            }
-            this.setNewsletterTemplates(subscriptionService.getAvailableTemplatesForClient(this.getClient().getOBJECTID(),
+            
+            this.setNewsletterTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),
                     EmailTemplate.EMAIL_TYPE.NEWSLETTER));
 
         } catch (DBConnectionException ex) {
@@ -108,7 +105,9 @@ public class ProgramTemplate implements Serializable {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
+    
 
+    /*
     public void initializeClient() {
         try {
             this.setClient(clientService.getClientByAssignedUser(this.getUserContainer().getUser().getOBJECTID()));
@@ -118,7 +117,7 @@ public class ProgramTemplate implements Serializable {
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
-    }
+    }*/
 
     public void initializeAllTemplates() {
         this.initializeAllConfirmationTemplates();
@@ -139,14 +138,6 @@ public class ProgramTemplate implements Serializable {
 
     public void setAllUserTypes(List<UserType> allUserTypes) {
         this.allUserTypes = allUserTypes;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
     }
 
     public List<EmailTemplate> getNewsletterTemplates() {
@@ -171,6 +162,14 @@ public class ProgramTemplate implements Serializable {
 
     void setUserContainer(UserContainer userContainer) {
         this.userContainer = userContainer;
+    }
+
+    public EmailTemplate getEditingTemplate() {
+        return editingTemplate;
+    }
+
+    public void setEditingTemplate(EmailTemplate editingTemplate) {
+        this.editingTemplate = editingTemplate;
     }
 
     
