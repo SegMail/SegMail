@@ -15,7 +15,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         X
                     </button>
-                    <h4 id="popup_title" class="modal-title"></h4>
+                    <h4 id="popup_title_edit" class="modal-title"></h4>
                     <input type="hidden" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.OBJECTID}" id="template_id" />
                 </div>
 
@@ -30,7 +30,7 @@
                                />
                     </div>
                     <div class="form-group">
-                        <textarea class="editor" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}"></textarea>
+                        <textarea id="body_edit" class="editor" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}"></textarea>
                     </div>
                     <div class="form-group">
                         <s2:messenger id="FormEditTemp_messenger" for="edit_template_form" showDetail="true" showSummary="true"
@@ -41,7 +41,8 @@
                     <p:commandButton id="save_template_button" styleClass="btn btn-success" 
                                      value="Add Template" update="FormEditTemp_messenger,"
                                      actionListener="#{FormEditExistingTemplate.saveTemplate()}"
-                                     onclick="edit_template_form.form()"
+                                     onclick="popupAdd.popup();
+                                         edit_template_form.form()"
                                      >
 
                     </p:commandButton>

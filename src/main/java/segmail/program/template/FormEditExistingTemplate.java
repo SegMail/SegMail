@@ -42,7 +42,8 @@ public class FormEditExistingTemplate {
     public void loadTemplate(long templateId){
         try {
             // Retrieve the template based on the Id
-            program.setEditingTemplate(objectService.getEnterpriseObjectById(templateId, EmailTemplate.class));
+            EmailTemplate editing = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            program.setEditingTemplate(editing);
             
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();

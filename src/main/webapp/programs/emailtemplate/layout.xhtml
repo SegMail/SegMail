@@ -26,24 +26,28 @@
                                 <a class="btn btn-success" href="#add_new_template_popup" data-toggle="modal"
                                    onclick="
                                            popup.init('popup_title', 'Add new confirmation template', 'email_type', 'CONFIRMATION');
-                                           popup.popup()"
+                                           popup.popup();"
                                    >
 
                                     Create new confirmation template
                                 </a>
                             </div>
                             <div class="list-group">
-                                <form jsf:id="edit_confirmation_popup_form">
+                                
                                     <!--<a href="#" class="list-group-item">Default</a>-->
                                     <c:forEach items="#{ProgramTemplateLoader.program.confirmationTemplates}" var="confirm">
-                                        <a href="#edit_template_popup" class="list-group-item">
+                                        <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
+                                            <a href="#edit_template_popup" class="list-group-item" data-toggle="modal"
+                                           >
                                             <f:ajax render="edit_template_form"  event="click"
-                                                    listener="#{FormEditExistingTemplate.loadTemplate(confirm.OBJECTID)}" />
-
+                                                    listener="#{FormEditExistingTemplate.loadTemplate(confirm.OBJECTID)}"
+                                                    onevent="edit"
+                                                    />
                                             #{confirm.SUBJECT}
                                         </a>
+                                        </form>
                                     </c:forEach>
-                                </form>
+                                
                             </div>
                         </div>
                     </div>
@@ -67,15 +71,21 @@
                             </div>
                             <div class="list-group">
                                 <!--<a href="#" class="list-group-item">Default</a>-->
-                                <form jsf:id="edit_newsletter_popup_form">
-                                    <c:forEach items="#{ProgramTemplateLoader.program.newsletterTemplates}" var="newsletter">
+
+                                <c:forEach items="#{ProgramTemplateLoader.program.newsletterTemplates}" var="newsletter">
+                                    <form jsf:id="edit_newsletter_popup_link_#{newsletter.OBJECTID}" name="newsletter_#{newsletter.OBJECTID}" >
                                         <a href="#edit_template_popup" class="list-group-item" data-toggle="modal"
-                                           jsf:actionListener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}">
+
+                                           >
+                                            <f:ajax event="click" render="edit_template_form"
+                                                    listener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}"
+                                                    onevent="edit"
+                                                    />
                                             #{newsletter.SUBJECT}
                                         </a>
+                                    </form>
+                                </c:forEach>
 
-                                    </c:forEach>
-                                </form>
                             </div>
 
                         </div>
