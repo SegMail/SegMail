@@ -21,6 +21,9 @@ public class GlobalValues {
     private final String PROGRAM_CONTEXT_NAME = "program";
     private final String CONTEXT_PATH = "SegMail/";
     
+    public static final String SESSION_EXPIRED_MESSAGE_NAME = "SESSION_EXPIRED_MESSAGE";
+    public static final String SESSION_EXPIRED_MESSAGE = "Your session has expired. Please login again.";
+    
     private boolean INSTALLED;
         
     @PostConstruct

@@ -1,3 +1,5 @@
+var SUMMERNOTE_HEIGHT = 300;
+
 var popup = (function() {
 
     var title_id;
@@ -24,7 +26,7 @@ var popup = (function() {
             document.getElementById(this.type_id).value = TYPE;
             
             //Re-render the summernote text editor
-            $('textarea.editor').summernote({height: 300});
+            $('textarea.editor').summernote({height: SUMMERNOTE_HEIGHT});
         }
 
     };

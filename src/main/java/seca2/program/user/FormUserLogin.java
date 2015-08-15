@@ -20,7 +20,10 @@ import seca2.bootstrap.module.User.UserContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
+import javax.annotation.PostConstruct;
+import javax.faces.context.Flash;
 import javax.servlet.http.HttpServletRequest;
+import seca2.bootstrap.GlobalValues;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -41,6 +44,19 @@ public class FormUserLogin {
     private String password;
 
     private final String messageBoxId = "form-user-login";
+    
+    /**
+     * This can work only because the variables in this bean was assessed in the xhtml page.
+     * Always remember this!
+     */
+    @PostConstruct
+    public void init(){
+        FacesContext fc = FacesContext.getCurrentInstance();
+        ExternalContext ec = fc.getExternalContext();
+        if(fc.isPostback() /* && must have some other ways to know this is a timeout*/){
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, GlobalValues.SESSION_EXPIRED_MESSAGE, null);
+        }
+    }
 
     public void login() {
         try {

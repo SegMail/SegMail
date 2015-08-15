@@ -172,5 +172,9 @@ public class ProgramTemplate implements Serializable {
         this.editingTemplate = editingTemplate;
     }
 
+    public String getFormName() {
+        return formName;
+    }
+
     
 }

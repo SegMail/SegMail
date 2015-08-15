@@ -27,7 +27,6 @@ import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.data.RelatonshipExistsException;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
@@ -180,7 +179,7 @@ public class NavigationService implements Serializable {
      * @param menuItemId
      * @param order
      * @return Bidirectional EnterpriseRelationship
-     * @throws eds.component.data.RelatonshipExistsException
+     * @throws eds.component.data.RelationshipExistsException
      * @throws eds.component.data.EntityNotFoundException
      * 
      * @throws AssignMenuItemAccessException
@@ -188,7 +187,7 @@ public class NavigationService implements Serializable {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) 
-            throws RelatonshipExistsException, EntityNotFoundException {
+            throws RelationshipExistsException, EntityNotFoundException {
         
         try{
             /*//check if userType already has access to menuItem
@@ -209,7 +208,7 @@ public class NavigationService implements Serializable {
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
-                throw new RelatonshipExistsException(first);
+                throw new RelationshipExistsException(first);
             }
             
             //get menuItem first

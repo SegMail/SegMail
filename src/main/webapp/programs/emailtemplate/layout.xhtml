@@ -11,6 +11,15 @@
     <ui:composition template="#{bootstrap.output.templateRoot}"
                     >
         <ui:define name="main-program-panel">
+            
+            <div class="row"><!--For the message-->
+                <div class="col-md-12">
+                    <form jsf:id="ProgramTemplate">
+                        <s2:messenger for="ProgramTemplate" showDetail="true" showSummary="true" closable="true" />
+                </form>
+                </div>
+                
+            </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="block">

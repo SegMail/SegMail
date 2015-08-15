@@ -12,42 +12,47 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        X
-                    </button>
                     <h4 id="popup_title_edit" class="modal-title"></h4>
                     <input type="hidden" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.OBJECTID}" id="template_id" />
                 </div>
 
                 <div class="modal-body">
                     <div class="form-group">
+                        <s2:messenger id="FormEditTemp_messenger" for="edit_template_form" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <div class="form-group">
                         <label>
                             Subject:
                         </label>
                         <input type="text" class="form-control"
                                jsf:value="#{FormEditExistingTemplate.program.editingTemplate.SUBJECT}"
-                               name="email" required="true"
+                               name="email" 
                                />
                     </div>
                     <div class="form-group">
                         <textarea id="body_edit" class="editor" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}"></textarea>
                     </div>
-                    <div class="form-group">
-                        <s2:messenger id="FormEditTemp_messenger" for="edit_template_form" showDetail="true" showSummary="true"
-                                      class="form-group"></s2:messenger>
-                    </div>
+                    
                 </div>
                 <div class="modal-footer">
-                    <p:commandButton id="save_template_button" styleClass="btn btn-success" 
-                                     value="Add Template" update="FormEditTemp_messenger,"
-                                     actionListener="#{FormEditExistingTemplate.saveTemplate()}"
-                                     onclick="popupAdd.popup();
-                                         edit_template_form.form()"
+                    <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
+                                     value="Save and continue" 
+                                     update="@form"
+                                     actionListener="#{FormEditExistingTemplate.saveTemplateAndContinue()}"
+                                     oncomplete="popup.popup();"
                                      >
-
+                    </p:commandButton>
+                    <p:commandButton id="save_close_button" styleClass="btn btn-primary" 
+                                     value="Save and close" 
+                                     update="FormEditTemp_messenger,ProgramTemplate"
+                                     actionListener="#{FormEditExistingTemplate.saveTemplateAndClose()}"
+                                     
+                                     >
                     </p:commandButton>
                 </div>
-                <p:blockUI block="edit_template_form" trigger="edit_template_form:save_template_button"
+                <p:blockUI block="edit_template_form" 
+                           trigger="edit_template_form:save_continue_button,edit_template_form:save_close_button"
                            >
                     <p id="spinner"></p>
                 </p:blockUI>
@@ -56,25 +61,4 @@
         </div>
         
     </form>
-<script type="text/javascript">
-            $(document).ready(function () {
-                var edit_template_form =
-                        $("#edit_template_form").validate({
-                    rules: {
-                        subject: {
-                            required: true},
-                        body: {
-                            required: true,
-                            minlength: 10
-                        }
-                    },
-                    errorPlacement: function (error, element) {
-                        if (element.attr("name") == "gender" || element.attr("name") == "rules") {
-                            element.parents(".form-gr oup").append(error);
-                        } else
-                            error.insertAfter(element);
-                    }
-                });
-            });
-        </script>
 </html>

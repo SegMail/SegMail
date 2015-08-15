@@ -16,7 +16,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Named;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
-import eds.component.data.RelatonshipExistsException;
+import eds.component.data.RelationshipExistsException;
 import eds.component.navigation.AssignMenuItemAccessException;
 import eds.component.navigation.CreateMenuItemException;
 import eds.component.navigation.NavigationService;
@@ -103,7 +103,7 @@ public class FormTestNavigation implements Serializable{
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (RelatonshipExistsException ex) {
+        } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, ex.getMessage(),null);
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, ex.getMessage(),null);

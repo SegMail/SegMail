@@ -35,6 +35,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     private String previousURI;
     private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
+    
 
     public boolean sameSession(HttpSession session, UserContainer uc){
         if(uc == null)
@@ -128,6 +129,11 @@ public class UserModule extends BootstrapModule implements Serializable {
             //Else, 
             outputContext.setPageRoot(this.defaultSites.LOGIN_PAGE);
             outputContext.setTemplateRoot(this.defaultSites.LOGIN_PAGE_TEMPLATE);
+            
+            //Set session expired message if it's postback but it was directed from
+            //other pages (not login page), therefore program could be null.
+            //if(fc.isPostback())
+            //    ec.getFlash().put(GlobalValues.SESSION_EXPIRED_MESSAGE_NAME, GlobalValues.SESSION_EXPIRED_MESSAGE);
             
             //Regenerate a session object and store the session ID.
             session = (HttpSession) fc.getExternalContext().getSession(true);
