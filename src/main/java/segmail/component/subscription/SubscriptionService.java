@@ -349,18 +349,20 @@ public class SubscriptionService {
     public EmailTemplate addTemplateWithoutAssignment(String subject, String body, EMAIL_TYPE type)
             throws EntityExistsException, IncompleteDataException {
         try {
-            if (subject == null || subject.isEmpty()) {
+            /*if (subject == null || subject.isEmpty()) {
                 throw new IncompleteDataException("Subject cannot be null.");
             }
             // Check if the template subject already exist for the type
-            if (this.checkTemplateSubjectExist(subject, type)) {
+            if (getTemplatesBySubjectAndType(subject, type)) {
                 throw new EntityExistsException("Please choose a different email subject");
-            }
+            }*/
 
             EmailTemplate newTemplate = new EmailTemplate();
             newTemplate.setBODY(body);
             newTemplate.setSUBJECT(subject);
             newTemplate.setTYPE(type);
+            
+            this.checkEmailTemplate(newTemplate);
 
             em.persist(newTemplate);
 
@@ -377,24 +379,28 @@ public class SubscriptionService {
 
     }
 
+    /**
+     * Check if 
+     * @param subject
+     * @param type
+     * @return 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public boolean checkTemplateSubjectExist(String subject, EMAIL_TYPE type) {
+    public List<EmailTemplate> getTemplatesBySubjectAndType(String subject, EMAIL_TYPE type) {
         try {
             CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<Long> query = builder.createQuery(Long.class);
+            CriteriaQuery<EmailTemplate> query = builder.createQuery(EmailTemplate.class);
             Root<EmailTemplate> sourceEntity = query.from(EmailTemplate.class);
-
-            query.select(builder.count(query.from(EmailTemplate.class)));
 
             query.where(builder.and(
                     builder.equal(sourceEntity.get(EmailTemplate_.SUBJECT), subject),
                     builder.equal(sourceEntity.get(EmailTemplate_.TYPE), type)
             ));
 
-            long result = em.createQuery(query)
-                    .getSingleResult();
+            List<EmailTemplate> results = em.createQuery(query)
+                    .getResultList();
 
-            return (result > 0);
+            return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -473,9 +479,8 @@ public class SubscriptionService {
     public EmailTemplate saveTemplate(EmailTemplate template) 
             throws IncompleteDataException, EntityExistsException {
         try {
-            if (template.getSUBJECT() == null || template.getSUBJECT().isEmpty()) {
-                throw new IncompleteDataException("Subject cannot be null.");
-            }
+            checkEmailTemplate(template);
+            
             return em.merge(template);
 
         } catch (PersistenceException pex) {
@@ -506,7 +511,10 @@ public class SubscriptionService {
             throw new IncompleteDataException("Subject cannot be null.");
         }
         // Check if the template subject already exist for the type
-        if (this.checkTemplateSubjectExist(temp.getSUBJECT(), temp.getTYPE())) {
+        List<EmailTemplate> existingTemplates = getTemplatesBySubjectAndType(temp.getSUBJECT(), temp.getTYPE());
+        if (existingTemplates != null 
+                && !existingTemplates.isEmpty() 
+                && !existingTemplates.contains(temp)) {
             throw new EntityExistsException("Please choose a different email subject");
         }
     }

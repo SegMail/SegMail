@@ -31,23 +31,33 @@
                                />
                     </div>
                     <div class="form-group">
-                        <textarea id="body_edit" class="editor" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}"></textarea>
+                        <textarea id="body_edit" class="editor"
+                                  jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}">
+                        </textarea>
                     </div>
                     
                 </div>
                 <div class="modal-footer">
                     <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
-                                     value="Save and continue" 
-                                     update="@form"
+                                     value="Save and continue"
+                                     update="FormEditTemp_messenger"
                                      actionListener="#{FormEditExistingTemplate.saveTemplateAndContinue()}"
+                                     onstart="reapply_textarea('body_edit')"
                                      oncomplete="popup.popup();"
+                                     
                                      >
                     </p:commandButton>
                     <p:commandButton id="save_close_button" styleClass="btn btn-primary" 
                                      value="Save and close" 
                                      update="FormEditTemp_messenger,ProgramTemplate"
                                      actionListener="#{FormEditExistingTemplate.saveTemplateAndClose()}"
-                                     
+                                     onstart="reapply_textarea('body_edit')"
+                                     >
+                    </p:commandButton>
+                    <p:commandButton id="close_button" styleClass="btn btn-danger" 
+                                     value="Close without saving" 
+                                     update="FormEditTemp_messenger,ProgramTemplate"
+                                     actionListener="#{FormEditExistingTemplate.closeWithoutSaving()}"
                                      >
                     </p:commandButton>
                 </div>

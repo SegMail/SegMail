@@ -64,7 +64,7 @@ public class FormEditExistingTemplate {
     
     public void saveTemplateAndContinue(){
         try {
-            subscriptionService.saveTemplate(program.getEditingTemplate());
+            EmailTemplate newTemplate = subscriptionService.saveTemplate(program.getEditingTemplate());
             
             //redirect to itself after setting list editing
             //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -72,7 +72,7 @@ public class FormEditExistingTemplate {
             //ec.redirect(programContainer.getCurrentURL());
             
             //Do not redirect, reload instead
-            program.setEditingTemplate(program.getEditingTemplate());
+            program.setEditingTemplate(newTemplate);
             
             //Set success message
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Template updated.", null);
@@ -111,6 +111,17 @@ public class FormEditExistingTemplate {
             //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
+    }
+    
+    public void closeWithoutSaving(){
+        try {
+            //redirect to itself after setting list editing
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
+            ec.redirect(programContainer.getCurrentURL());
+        } catch (IOException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
