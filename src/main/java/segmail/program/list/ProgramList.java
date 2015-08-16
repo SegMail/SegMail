@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
+import segmail.entity.subscription.email.EmailTemplate;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -45,8 +46,13 @@ public class ProgramList implements Serializable {
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
     private List<SubscriberAccount> subscribers;
+    private List<EmailTemplate> confirmationEmails;
+    private EmailTemplate selectedConfirmationEmail;
+    private long selectedConfirmationEmailId;
     
     private final Map<String,String> editingPanelLocation = new HashMap<String,String>();
+    
+    private final String formName = "ProgramList";
     
     private boolean startFirstList;
     
@@ -92,6 +98,34 @@ public class ProgramList implements Serializable {
 
     public void setSubscribers(List<SubscriberAccount> subscribers) {
         this.subscribers = subscribers;
+    }
+
+    public List<EmailTemplate> getConfirmationEmails() {
+        return confirmationEmails;
+    }
+
+    public void setConfirmationEmails(List<EmailTemplate> confirmationEmails) {
+        this.confirmationEmails = confirmationEmails;
+    }
+
+    public EmailTemplate getSelectedConfirmationEmail() {
+        return selectedConfirmationEmail;
+    }
+
+    public void setSelectedConfirmationEmail(EmailTemplate selectedConfirmationEmail) {
+        this.selectedConfirmationEmail = selectedConfirmationEmail;
+    }
+
+    public String getFormName() {
+        return formName;
+    }
+
+    public long getSelectedConfirmationEmailId() {
+        return selectedConfirmationEmailId;
+    }
+
+    public void setSelectedConfirmationEmailId(long selectedConfirmationEmailId) {
+        this.selectedConfirmationEmailId = selectedConfirmationEmailId;
     }
     
     

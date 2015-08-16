@@ -52,7 +52,7 @@
 
                     <p:fileUpload id="upload_pf_button" allowTypes="/(\.|\/)(XML|xml)$/"
                                   fileUploadListener="#{FormTestEverything.uploadXMLPF}" 
-                                  auto="true" immediate="true" process="@form"
+                                  auto="true"  process="@form"
                                   update="@form"></p:fileUpload>
                     <s2:messenger id="message1" for="FormTestEverything" showDetail="true" showSummary="true" ></s2:messenger>
                     <p:blockUI block="FormTestEverything" trigger="FormTestEverything:upload_pf_button" >

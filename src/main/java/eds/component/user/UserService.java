@@ -380,6 +380,7 @@ public class UserService extends Service {
      *
      * @param username
      * @param password
+     * @param userValues
      * @throws UserAccountLockedException
      * @throws UserLoginException
      * @throws eds.component.data.DBConnectionException

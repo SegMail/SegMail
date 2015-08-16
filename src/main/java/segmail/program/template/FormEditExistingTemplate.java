@@ -125,6 +125,16 @@ public class FormEditExistingTemplate {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
+    
+    public void deleteTemplate(){
+        try {
+            subscriptionService.deleteTemplate(program.getEditingTemplate().getOBJECTID());
+            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
+        } catch (EJBException ex){
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
+        
+    }
 
     public ProgramTemplate getProgram() {
         return program;

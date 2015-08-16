@@ -20,7 +20,7 @@ import eds.entity.client.Client;
 import eds.entity.client.Client_;
 import eds.entity.mail.Email;
 import eds.entity.resource.SystemResourceAssignment;
-import segmail.entity.subscription.ListAssignment;
+import segmail.entity.subscription.ClientListAssignment;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -101,7 +101,7 @@ public class SubscriptionService {
             }
             //Test at this point whethe the newList object still gets persisted
 
-            ListAssignment listAssignment = new ListAssignment();
+            ClientListAssignment listAssignment = new ClientListAssignment();
             listAssignment.setSOURCE(client);
             listAssignment.setTARGET(newList);
 
@@ -127,7 +127,7 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean hasNoList(long clientid) {
         try {
-            long count = this.objectService.countRelationshipsForTarget(clientid, ListAssignment.class);
+            long count = this.objectService.countRelationshipsForTarget(clientid, ClientListAssignment.class);
             return (count <= 0);
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -143,7 +143,7 @@ public class SubscriptionService {
     public List<SubscriptionList> getAllListForClient(long clientid) {
         try {
             List<SubscriptionList> allList
-                    = this.objectService.getAllTargetObjectsFromSource(clientid, ListAssignment.class, SubscriptionList.class);
+                    = this.objectService.getAllTargetObjectsFromSource(clientid, ClientListAssignment.class, SubscriptionList.class);
 
             return allList;
         } catch (PersistenceException pex) {
@@ -411,6 +411,7 @@ public class SubscriptionService {
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignEmailTemplateToClient(long emailTemplateId, long clientId) 
             throws EntityNotFoundException, RelationshipExistsException {
         try {
@@ -443,6 +444,43 @@ public class SubscriptionService {
          throw new EJBException(ex);
          }*/
 
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public TemplateListAssignment assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException{
+        try {
+            //Retrieve both objects and check they both exists
+            EmailTemplate confirmationEmail = objectService.getEnterpriseObjectById(confirmationEmailId, EmailTemplate.class);
+            if(confirmationEmail == null)
+                throw new EntityNotFoundException(EmailTemplate.class,confirmationEmailId);
+            
+            if(!EmailTemplate.EMAIL_TYPE.CONFIRMATION.equals(confirmationEmail.getTYPE()))
+                throw new RuntimeException("EmailTemplate (id="+confirmationEmail.getOBJECTID()+") is not a confirmation email template.");
+            
+            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+            if(list == null)
+                throw new EntityNotFoundException(SubscriptionList.class,listId);
+            
+            //Check if there is already an assignment, if yes, delete it as this is a 1-to-many (email to list) relationship
+            List<TemplateListAssignment> existingAssignemnts = objectService.getRelationshipsForTargetObject(listId, TemplateListAssignment.class);
+            if(existingAssignemnts != null && !existingAssignemnts.isEmpty()){
+                em.remove(existingAssignemnts);
+            }
+            
+            TemplateListAssignment newAssignment = new TemplateListAssignment();
+            newAssignment.setSOURCE(confirmationEmail);
+            newAssignment.setTARGET(list);
+            
+            em.persist(newAssignment);
+            
+            return newAssignment;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -492,9 +530,11 @@ public class SubscriptionService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void deleteTemplate(EmailTemplate template) {
+    public void deleteTemplate(long templateId) {
         try {
-            em.remove(template);
+            EmailTemplate delTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            
+            em.remove(delTemplate);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -518,4 +558,6 @@ public class SubscriptionService {
             throw new EntityExistsException("Please choose a different email subject");
         }
     }
+    
+    
 }

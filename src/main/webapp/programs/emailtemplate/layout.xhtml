@@ -11,14 +11,14 @@
     <ui:composition template="#{bootstrap.output.templateRoot}"
                     >
         <ui:define name="main-program-panel">
-            
+
             <div class="row"><!--For the message-->
                 <div class="col-md-12">
                     <form jsf:id="ProgramTemplate">
                         <s2:messenger for="ProgramTemplate" showDetail="true" showSummary="true" closable="true" />
-                </form>
+                    </form>
                 </div>
-                
+
             </div>
             <div class="row">
                 <div class="col-md-6">
@@ -42,11 +42,11 @@
                                 </a>
                             </div>
                             <div class="list-group">
-                                
-                                    <!--<a href="#" class="list-group-item">Default</a>-->
-                                    <c:forEach items="#{ProgramTemplateLoader.program.confirmationTemplates}" var="confirm">
-                                        <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
-                                            <a href="#edit_template_popup" class="list-group-item" data-toggle="modal"
+
+                                <!--<a href="#" class="list-group-item">Default</a>-->
+                                <c:forEach items="#{ProgramTemplateLoader.program.confirmationTemplates}" var="confirm">
+                                    <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
+                                        <a href="#edit_template_popup" class="list-group-item" data-toggle="modal"
                                            >
                                             <f:ajax render="edit_template_form"  event="click"
                                                     listener="#{FormEditExistingTemplate.loadTemplate(confirm.OBJECTID)}"
@@ -54,9 +54,9 @@
                                                     />
                                             #{confirm.SUBJECT}
                                         </a>
-                                        </form>
-                                    </c:forEach>
-                                
+                                    </form>
+                                </c:forEach>
+
                             </div>
                         </div>
                     </div>
@@ -73,7 +73,8 @@
                             <div class="form-group">
                                 <a class="btn btn-success" href="#add_new_template_popup" data-toggle="modal"
                                    onclick="popup.init('popup_title', 'Add new newsletter template', 'email_type', 'NEWSLETTER');
-                                           popup.popup();">
+                                           popup.popup();
+                                   ">
 
                                     Create new newsletter template
                                 </a>
@@ -113,7 +114,7 @@
             <script type="text/javascript" src="#{request.contextPath}/programs/emailtemplate/js/template_popup.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/emailtemplate/js/validation.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/emailtemplate/js/summernote_hack.js" />
-
+            <script type="text/javascript" src="#{request.contextPath}/programs/emailtemplate/js/delete_confirmation.js" />
             <!----><script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
         </ui:define>
 

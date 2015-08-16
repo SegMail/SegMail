@@ -24,8 +24,8 @@ import org.joda.time.DateTime;
  * @author LeeKiatHaw
  * @param <R>
  */
-@Entity
-@Table(name="EMAIL")
+//@Entity
+//@Table(name="EMAIL")
 public abstract class Email<R extends MailRecipient> extends Document<MailSender> {
     
     public enum STATUS{

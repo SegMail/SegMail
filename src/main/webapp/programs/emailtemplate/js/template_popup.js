@@ -27,6 +27,7 @@ var popup = (function() {
             
             //Re-render the summernote text editor
             $('textarea.editor').summernote({height: SUMMERNOTE_HEIGHT});
+            
         }
 
     };

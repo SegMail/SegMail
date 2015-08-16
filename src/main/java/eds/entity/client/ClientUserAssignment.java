@@ -21,13 +21,13 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="CLIENT_ASSIGNMENT")
-public class ClientAccessAssignment extends EnterpriseRelationship<Client,User> {
+@Table(name="CLIENT_USER_ASSIGNMENT")
+public class ClientUserAssignment extends EnterpriseRelationship<Client,User> {
 
-    public ClientAccessAssignment() {
+    public ClientUserAssignment() {
     }
 
-    public ClientAccessAssignment(Client s, User t) {
+    public ClientUserAssignment(Client s, User t) {
         super(s, t);
     }
 

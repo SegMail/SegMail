@@ -17,13 +17,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CLIENT_LIST_ASSIGNMENT")
-public class ListAssignment extends ClientResourceAssignment<Client,SubscriptionList>{//EnterpriseRelationship<SubscriptionList,Client> {
+public class ClientListAssignment extends ClientResourceAssignment<Client,SubscriptionList>{//EnterpriseRelationship<SubscriptionList,Client> {
     
     private boolean ABLE_TO_EDIT;
     private boolean ABLE_TO_ADD;
     private boolean ABLE_TO_REMOVE;
 
-    public ListAssignment() {
+    public ClientListAssignment() {
     }
 
     public boolean isABLE_TO_EDIT() {

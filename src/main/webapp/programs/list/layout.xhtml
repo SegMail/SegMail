@@ -27,65 +27,67 @@
 
                 </c:when>
                 <c:otherwise>
-                    <div class="col-md-3"><!--Lists block-->
+                    <div class="row"><!--Page message-->
+                        <div class="col-md-12">
+                            <form jsf:id="ProgramList">
+                                <s2:messenger for="ProgramList" showDetail="true" showSummary="true" closable="true" />
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3"><!--Lists block-->
 
+                            <div class="block nb">
+                                <div class="block-head">
+                                    <h2>Your lists</h2>
+                                    <ul class="buttons">
+                                        <li>
+                                            <a href="#add_list_popup" data-toggle="modal"
+                                               >
+                                                <span class="fa fa-plus"></span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <ui:include src="all_list_panel.xhtml" ></ui:include>
+                            </div>
+                        </div>
 
-                        <div class="block nb">
-                            <div class="block-head">
-                                <h2>Your lists</h2>
-                                <ul class="buttons">
-                                    <li>
-                                        <a href="#add_list_popup" data-toggle="modal"
-                                           >
-                                            <span class="fa fa-plus"></span>
-                                        </a>
+                        <div jsf:id="list_editing_block" class="col-md-9" jsf:rendered="#{ProgramList.listEditing ne null}">
+                            <ui:include src="editing_panel_header.xhtml"></ui:include>
+                            <div class="block" >
+                                <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
+                                    </li>
+                                    <li >
+                                        <a href="#activities_tab" data-toggle="tab">Activities</a>
+                                    </li>
+                                    <li >
+                                        <a href="#signupform_tab" data-toggle="tab">Signup &amp; Confirmation</a>
+                                    </li>
+                                    <li >
+                                        <a href="#settings_tab" data-toggle="tab">Settings</a>
                                     </li>
                                 </ul>
-                            </div>
+                                <div class="block-content tab-content">
+                                    <div class="tab-pane active" id="subscribers_tab">
+                                        <ui:include src="subscriber_panel.xhtml"></ui:include>
+                                    </div>
+                                    <div class="tab-pane" id="activities_tab">
+                                        <p>fjeirgnrgwrn</p>
+                                    </div>
+                                    <div class="tab-pane" id="signupform_tab">
+                                        <ui:include src="signupform_panel.xhtml"></ui:include>
+                                    </div>
+                                    <div class="tab-pane" id="settings_tab">
+                                        <ui:include src="settings_panel.xhtml"></ui:include>
+                                    </div>
 
-                            <ui:include src="all_list_panel.xhtml" ></ui:include>
-                        </div>
-
-
-                    </div>
-
-                    <div jsf:id="list_editing_block" class="col-md-9" jsf:rendered="#{ProgramList.listEditing ne null}">
-
-
-                        <ui:include src="editing_panel_header.xhtml"></ui:include>
-                        <div class="block" >
-                            <ul class="nav nav-tabs">
-                                <li class="active">
-                                    <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
-                                </li>
-                                <li >
-                                    <a href="#activities_tab" data-toggle="tab">Activities</a>
-                                </li>
-                                <li >
-                                    <a href="#signupform_tab" data-toggle="tab">Signup Forms</a>
-                                </li>
-                                <li >
-                                    <a href="#settings_tab" data-toggle="tab">Settings</a>
-                                </li>
-                            </ul>
-                            <div class="block-content tab-content">
-                                <div class="tab-pane active" id="subscribers_tab">
-                                    <ui:include src="subscriber_panel.xhtml"></ui:include>
                                 </div>
-                                <div class="tab-pane" id="activities_tab">
-                                    <p>fjeirgnrgwrn</p>
-                                </div>
-                                <div class="tab-pane" id="signupform_tab">
-                                    <p>fjeirgnrgwrn</p>
-                                </div>
-                                <div class="tab-pane" id="settings_tab">
-                                    <ui:include src="settings_panel.xhtml"></ui:include>
-                                </div>
-                                
                             </div>
                         </div>
                     </div>
-
                 </c:otherwise>
             </c:choose>
             <!--popups and modals-->

@@ -15,9 +15,9 @@ import javax.persistence.Table;
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="MailRecipient")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+//@Entity
+//@Table(name="MailRecipient")
+//@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public interface MailRecipient {
     
     @Id

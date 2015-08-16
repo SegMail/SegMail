@@ -42,11 +42,11 @@ public class ProgramTemplateLoader {
 
     @PostConstruct
     public void init() {
-        if (FacesContext.getCurrentInstance().isPostback() && program != null) {
+        /*if (FacesContext.getCurrentInstance().isPostback() && program != null) {
             
-        } else {
+        } else {*/
             load();
-        }
+        //}
     }
 
     /**

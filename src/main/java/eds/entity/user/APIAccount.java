@@ -15,8 +15,8 @@ import javax.persistence.TableGenerator;
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="API_ACCOUNT")
+//@Entity
+//@Table(name="API_ACCOUNT")
 public class APIAccount extends EnterpriseData<User> {
 
     private String APIKey;

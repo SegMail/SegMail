@@ -8,7 +8,7 @@ package seca2.program.mysettings;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.entity.client.Client;
-import eds.entity.client.ClientAccessAssignment;
+import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
 import javax.annotation.PostConstruct;
@@ -52,7 +52,7 @@ public class ContactDetailsForm {
             if(this.mySettingsProgram.getContactInfo().getOWNER() == null){
                 //Check which client type is "Person", but we are assuming it's called "Person" and not by other similar names
                 ClientType personClientType = clientService.getClientTypeByName("Person");
-                ClientAccessAssignment newClientAssignment = 
+                ClientUserAssignment newClientAssignment = 
                         clientService.registerClientForUser(userContainer.getUser(), personClientType.getOBJECTID());
                 Client newclient = newClientAssignment.getSOURCE();
                 this.mySettingsProgram.getContactInfo().setOWNER(newclient);

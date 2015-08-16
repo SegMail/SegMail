@@ -10,7 +10,7 @@ import eds.component.data.DBConnectionException;
 import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
-import eds.entity.client.ClientAccessAssignment;
+import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientResource;
 import eds.entity.client.ClientResourceAssignment;
 import eds.entity.client.ClientType;
@@ -183,7 +183,7 @@ public class ClientService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ClientAccessAssignment registerClientForUser(User user, long clienttypeid)
+    public ClientUserAssignment registerClientForUser(User user, long clienttypeid)
         throws DBConnectionException, ClientRegistrationException{
         try{
             
@@ -200,8 +200,8 @@ public class ClientService {
             if(existingClient != null)
                 throw new ClientRegistrationException("Client "+existingClient.alias()+" already exist.");
             
-            List<ClientAccessAssignment> existingAssignments = 
-                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientAccessAssignment.class);
+            List<ClientUserAssignment> existingAssignments = 
+                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientUserAssignment.class);
             
             if(existingAssignments != null && existingAssignments.size() > 0)
                 throw new ClientRegistrationException("Object is already assigned to a client.");
@@ -214,7 +214,7 @@ public class ClientService {
             this.em.persist(newClient);
             
             //Assign the client object to the enterpriseobject
-            ClientAccessAssignment newAssignment = new ClientAccessAssignment(newClient,user);
+            ClientUserAssignment newAssignment = new ClientUserAssignment(newClient,user);
             
             this.em.persist(newAssignment);
             
@@ -233,8 +233,8 @@ public class ClientService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ContactInfo getContactInfoForUser(long userid) throws DBConnectionException{
         try{
-            List<ClientAccessAssignment> clientAssignment =
-                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientAccessAssignment.class);
+            List<ClientUserAssignment> clientAssignment =
+                    this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
             
             //Cannot find Client object
             if(clientAssignment == null || clientAssignment.isEmpty())
@@ -293,7 +293,7 @@ public class ClientService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Client getClientByAssignedUser(long userid) throws DBConnectionException{
         try{
-            List<ClientAccessAssignment> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientAccessAssignment.class);
+            List<ClientUserAssignment> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
             
             if(results == null || results.isEmpty())
                 return null;
