@@ -14,7 +14,6 @@ import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import eds.component.data.DBConnectionException;
 import eds.entity.mail.Email;
-import segmail.entity.subscription.connection.SMTPConnectionSES;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -41,10 +40,14 @@ public class MailService {
     /**
      * Sends 1 email and logs it in the database depending on the logging flag.
      * 
+     * 20150822 - This EJB should not use any Segmail object or have any Segmail
+     * Dependencies
+     * 
      * @param email The data structure representing an email.
      * @param conn
      * @param logging If logging is turned on, the email will be logged.
      */
+    /*
     public void sendEmail(Email email, SMTPConnectionSES conn, boolean logging){
         try{
             //1) Get the sender, subject and body from email
@@ -84,7 +87,7 @@ public class MailService {
         } catch (Exception ex) {
             throw new EJBException(ex);
         }
-    }
+    }*/
     
     public void createSMTPConnection(){
         
