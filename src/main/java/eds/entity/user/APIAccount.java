@@ -6,10 +6,6 @@
 package eds.entity.user;
 
 import eds.entity.data.EnterpriseData;
-import eds.entity.data.EnterpriseObject;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 
 /**
  *
