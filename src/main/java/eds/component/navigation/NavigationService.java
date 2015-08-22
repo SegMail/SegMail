@@ -54,67 +54,6 @@ public class NavigationService implements Serializable {
     private EntityManager em;
 
     /**
-     * 
-     * Transitivity: Given a tree a->b->c, if userType has access to only a and b
-     * but not b, then this function will not return c as part of the menu tree.
-     * 
-     * @param userType
-     * @return 
-     */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<TreeNode> buildMenuForUserType(long userTypeId) throws DBConnectionException {
-        
-        try{
-            //1. Get all MenuItemAccess by userType ID.
-            //This uses EnterpriseRelationship to pull both MenuItem and UserType objects instead of using MenuItem to pull
-            //both MenuItemAccess and UserType. This is because there is no mapping for EnterpriseObject->EnterpriseRelationship
-            /*CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class);
-            Root<MenuItemAccess> menuItem = criteria.from(MenuItemAccess.class);
-            criteria.select(menuItem);
-            Join<MenuItemAccess,EnterpriseObject> userType = menuItem.join(MenuItemAccess_.SOURCE);
-            
-            criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId));
-
-            List<MenuItemAccess> results = em.createQuery(criteria)
-                    //.setFirstResult(0)
-                    //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
-                    .getResultList();*/
-            
-            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForSourceObject(userTypeId, MenuItemAccess.class);
-            
-            /**
-             * Aborted as it is too complex to query all accessible MenuItems first then build the
-             * tree from there. Instead, why not just select
-             */
-            //2. Iterate through MenuItemAccess list in ascending order of parent and build the tree from root
-            List<TreeBranch> menuItems = new ArrayList<>();
-            System.out.println("Before sort...");
-            for(MenuItemAccess mia:results){
-                menuItems.add(mia.getSOURCE());
-                System.out.println("MenuItem: "+mia.getSOURCE()+"    Parent: "+mia.getSOURCE().getPARENT_MENU_ITEM());
-            }
-            
-            List<TreeNode> sortedRoots = TreeBuilder.buildTreeByParentBruteForce(menuItems);
-            
-            //2a. Decide which node to be the root...
-            // Ideally, each menu can only have 1 root.
-            // How about a menu object as the root?
-            System.out.println();
-            return sortedRoots;
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
-        
-    }
-
-    /**
      * If parentMenunItemId is negative, not found, create the menu item as root.
      * 
      * @param name
@@ -148,7 +87,6 @@ public class NavigationService implements Serializable {
             
             MenuItem newMenuItem = new MenuItem();
             newMenuItem.setMENU_ITEM_NAME(name);
-            newMenuItem.setPARENT_MENU_ITEM(parentMenuItem);
             newMenuItem.setMENU_ITEM_URL(requestUrl);
             newMenuItem.setPREPEND_TAGS(prependHTMLTags);
             //em.getTransaction().begin();
