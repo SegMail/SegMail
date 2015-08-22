@@ -224,7 +224,7 @@ public class SubscriptionService {
 
             SMTPConnectionSES smtp = smtps.get(0);
 
-            mailService.sendEmail(email, smtp, true);
+            //mailService.sendEmail(email, smtp, true);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
