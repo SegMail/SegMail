@@ -20,7 +20,7 @@ import javax.persistence.Table;
 //@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public interface MailRecipient {
     
-    @Id
+    //@Id
     public long getId();
     
     public void setId(long id);
