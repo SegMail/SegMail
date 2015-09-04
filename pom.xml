@@ -112,12 +112,6 @@
             <scope>test</scope>
         </dependency>-->
         <dependency>
-            <groupId>org.glassfish.main.extras</groupId>
-            <artifactId>glassfish-embedded-static-shell</artifactId>
-            <version>4.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
             <version>7.0</version>
@@ -148,6 +142,18 @@
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-core</artifactId>
             <version>2.1.2.Final</version>
+        </dependency>-->
+        
+        <!--Test over-writing hibernate in EDS
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.3.9.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>4.3.9.Final</version>
         </dependency>-->
     </dependencies>
     

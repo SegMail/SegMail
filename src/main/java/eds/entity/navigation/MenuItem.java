@@ -21,7 +21,7 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name="MENUITEM")
-public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
+public class MenuItem extends EnterpriseObject{// implements TreeBranch<MenuItem> {
 
     public static enum TARGET_TYPE{
         URL,
@@ -34,7 +34,6 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
     //private String MENU_ITEM_XHTML; //actual layout.xhtml path
     private String PREPEND_TAGS;
     private int WEIGHT; // Optional for sorting
-    private MenuItem PARENT_MENU_ITEM;
 
     public String getMENU_ITEM_NAME() {
         return MENU_ITEM_NAME;
@@ -59,25 +58,6 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
 
     public void setMENU_ITEM_TYPE(TARGET_TYPE MENU_ITEM_TYPE) {
         this.MENU_ITEM_TYPE = MENU_ITEM_TYPE;
-    }
-
-    /*
-    public String getMENU_ITEM_XHTML() {
-        return MENU_ITEM_XHTML;
-    }
-
-    public void setMENU_ITEM_XHTML(String MENU_ITEM_XHTML) {
-        this.MENU_ITEM_XHTML = MENU_ITEM_XHTML;
-    }
-    */
-
-    @ManyToOne
-    public MenuItem getPARENT_MENU_ITEM() {
-        return PARENT_MENU_ITEM;
-    }
-
-    public void setPARENT_MENU_ITEM(MenuItem PARENT_MENU_ITEM) {
-        this.PARENT_MENU_ITEM = PARENT_MENU_ITEM;
     }
 
     public String getPREPEND_TAGS() {
@@ -118,23 +98,5 @@ public class MenuItem extends EnterpriseObject implements TreeBranch<MenuItem> {
         this.OBJECT_NAME = this.MENU_ITEM_NAME;
     }*/
 
-    @Transient
-    @Override
-    public Iterable<MenuItem> getChildren() {
-        return null;
-    }
-
-    @Transient
-    @Override
-    public MenuItem getParent() {
-        return this.PARENT_MENU_ITEM;
-    }
-
-    @Transient
-    @Override
-    public TRAVERSAL_MODE getTraversalMode() {
-        return TRAVERSAL_MODE.PARENT_ONLY;
-    }
-    
     
 }

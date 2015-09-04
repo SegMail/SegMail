@@ -118,21 +118,6 @@ public class FormTestNavigation implements Serializable{
         }
     }
     
-    public void buildMenu(){
-        try{
-            navigationService.buildMenuForUserType(selectedUserTypeIdToBuildMenu);
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
-        }
-    }
-
-    
     public List<MenuItem> getAllMenuItems() {
         return this.programTest.getAllMenuItems();
     }
