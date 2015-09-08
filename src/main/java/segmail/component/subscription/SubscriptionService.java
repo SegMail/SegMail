@@ -530,9 +530,11 @@ public class SubscriptionService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void deleteTemplate(long templateId) {
+    public void deleteTemplate(long templateId) throws EntityNotFoundException {
         try {
             EmailTemplate delTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            if(delTemplate == null)
+                throw new EntityNotFoundException(EmailTemplate.class,templateId);
             
             em.remove(delTemplate);
 
@@ -541,9 +543,7 @@ public class SubscriptionService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } catch (Exception ex) {
-            throw new EJBException(ex);
-        }
+        } 
     }
 
     public void checkEmailTemplate(EmailTemplate temp) throws IncompleteDataException, EntityExistsException {

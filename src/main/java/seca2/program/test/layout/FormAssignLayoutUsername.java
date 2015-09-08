@@ -7,15 +7,12 @@ package seca2.program.test.layout;
 
 import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutAssignmentException;
-import eds.component.layout.LayoutRegistrationException;
 import eds.component.layout.LayoutService;
 import eds.component.user.UserService;
 import eds.entity.layout.Layout;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;

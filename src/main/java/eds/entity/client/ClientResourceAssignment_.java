@@ -5,11 +5,7 @@
  */
 package eds.entity.client;
 
-import eds.entity.data.EnterpriseRelationship;
 import eds.entity.data.EnterpriseRelationship_;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
 /**

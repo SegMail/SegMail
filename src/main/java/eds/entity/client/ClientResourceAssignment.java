@@ -8,7 +8,6 @@ package eds.entity.client;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 
 /**

@@ -10,11 +10,7 @@ import eds.entity.mail.Email;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
@@ -31,7 +27,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="EMAIL_TEMPLATE")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="EMAIL_TYPE")
 public class EmailTemplate extends EnterpriseObject {
 //extends Document<Client> {
@@ -66,7 +61,7 @@ public class EmailTemplate extends EnterpriseObject {
         this.BODY = BODY;
     }
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(javax.persistence.EnumType.STRING)
     public EMAIL_TYPE getTYPE() {
         return TYPE;
     }

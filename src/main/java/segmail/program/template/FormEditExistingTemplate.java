@@ -6,7 +6,9 @@
 package segmail.program.template;
 
 import eds.component.GenericObjectService;
+import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -130,8 +132,10 @@ public class FormEditExistingTemplate {
         try {
             subscriptionService.deleteTemplate(program.getEditingTemplate().getOBJECTID());
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
-        } catch (EJBException ex){
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
+        } catch (DBConnectionException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
         
     }
