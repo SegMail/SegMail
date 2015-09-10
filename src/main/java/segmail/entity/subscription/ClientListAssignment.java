@@ -17,7 +17,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CLIENT_LIST_ASSIGNMENT")
-public class ClientListAssignment extends EnterpriseRelationship<Client,SubscriptionList> {//ClientResourceAssignment<Client,SubscriptionList>{
+public class ClientListAssignment extends ClientResourceAssignment<Client,SubscriptionList> {//ClientResourceAssignment<Client,SubscriptionList>{
     
     private boolean ABLE_TO_EDIT;
     private boolean ABLE_TO_ADD;
