@@ -6,6 +6,7 @@
 package segmail.program.list;
 
 import eds.component.client.ClientService;
+import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.SubscriptionList;
@@ -14,11 +15,13 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *
@@ -27,51 +30,66 @@ import seca2.bootstrap.module.User.UserContainer;
 @Named("FormListList")
 @RequestScoped
 public class FormListList {
-    
-    @Inject private UserContainer userContainer;
-    @Inject private ProgramContainer programContainer;
-    
-    @Inject private ProgramList programList;
-    
-    @EJB private ClientService clientService;
-    @EJB private SubscriptionService subscriptionService;
+
+    @Inject
+    private UserContainer userContainer;
+    @Inject
+    private ProgramContainer programContainer;
+
+    @Inject
+    private ProgramList programList;
+
+    @EJB
+    private ClientService clientService;
+    @EJB
+    private SubscriptionService subscriptionService;
+
     
     @PostConstruct
-    public void init(){
+    public void init() {
         //Only if it is not a postback, reload everything
-        if(!FacesContext.getCurrentInstance().isPostback()){
+        if (!FacesContext.getCurrentInstance().isPostback()) {
             this.loadAllLists();
             this.resetEditingList();
         }
-        
+
     }
-    
+
     /**
      * Load lists to ProgramList so that other Forms can use it
+     * Exceptions should be caught explicitly in every form action method instead
+     * of the @PostConstruct method, because each single exception should be caught
+     * and displayed separately in the main form page.
      */
-    public void loadAllLists(){
-        User user = userContainer.getUser();
+    public void loadAllLists() {
+        try {
+            User user = userContainer.getUser();
 
-        if (user == null) {
-            throw new RuntimeException("No user object found for this session " + userContainer);
+            if (user == null) {
+                throw new RuntimeException("No user object found for this session " + userContainer);
+            }
+
+            Client client = clientService.getClientByAssignedUser(user.getOBJECTID());
+            if (client == null) {
+                throw new RuntimeException("No client object found for this user " + user);
+            }
+
+            List<SubscriptionList> allLists = subscriptionService.getAllListForClient(client.getOBJECTID());
+
+            this.programList.setAllLists(allLists);
+        } catch (DBConnectionException ex) {
+            FacesMessenger.setFacesMessage(this.programList.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(this.programList.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
 
-        Client client = clientService.getClientByAssignedUser(user.getOBJECTID());
-        if (client == null) {
-            throw new RuntimeException("No client object found for this user " + user);
-        }
-        
-        List<SubscriptionList> allLists = subscriptionService.getAllListForClient(client.getOBJECTID());
-        
-        this.programList.setAllLists(allLists);
-            
     }
-    
-    public void loadList(SubscriptionList list){
+
+    public void loadList(SubscriptionList list) {
         this.programList.setListEditing(list);
     }
-    
-    public void resetEditingList(){
+
+    public void resetEditingList() {
         this.programList.setListEditing(null);
     }
 
@@ -82,6 +100,5 @@ public class FormListList {
     public void setProgramList(ProgramList programList) {
         this.programList = programList;
     }
-    
-    
+
 }

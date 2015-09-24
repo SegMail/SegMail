@@ -21,9 +21,9 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
-@ClientResource
+//@ClientResource
 //@DiscriminatorColumn(name="SUBSCRIPTION_LIST")
-public class SubscriptionList extends EnterpriseObject implements MailSender {
+public class SubscriptionList extends EnterpriseObject {// implements MailSender {
 
     public static enum LOCATION{
         REMOTE,
@@ -91,7 +91,7 @@ public class SubscriptionList extends EnterpriseObject implements MailSender {
     public void setDOUBLE_OPTIN(boolean DOUBLE_OPTIN) {
         this.DOUBLE_OPTIN = DOUBLE_OPTIN;
     }
-    
+    /**
     @Override
     public String getAddress() {
         return this.SEND_AS_EMAIL;
@@ -136,5 +136,5 @@ public class SubscriptionList extends EnterpriseObject implements MailSender {
     public void setName(String name) {
         this.SEND_AS_NAME = name;
     }
-
+*/
 }

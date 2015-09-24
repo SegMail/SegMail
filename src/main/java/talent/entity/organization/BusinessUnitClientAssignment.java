@@ -16,8 +16,8 @@ import javax.persistence.Table;
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="BUSINESSUNIT_CLIENT")
+//@Entity
+//@Table(name="BUSINESSUNIT_CLIENT")
 public class BusinessUnitClientAssignment extends ClientResourceAssignment {
 
     private boolean OWNER_FLAG;

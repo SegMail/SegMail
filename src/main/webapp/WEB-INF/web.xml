@@ -29,7 +29,7 @@
     
     <context-param>
         <param-name>SETUP</param-name>
-        <param-value>t</param-value>
+        <param-value>true</param-value>
     </context-param>
     
     <context-param>

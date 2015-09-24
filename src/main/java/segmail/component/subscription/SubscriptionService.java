@@ -207,7 +207,7 @@ public class SubscriptionService {
             EmailTemplate template = templates.get(0);
 
             Email email = template.generateEmail();
-            email.setAUTHOR(list);
+            //email.setAUTHOR(list);
             email.addRecipient(newSub);
 
             // Get the SMTP connection settings from the List

@@ -18,8 +18,8 @@ import javax.persistence.Table;
  * 
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="CLIENT_RESOURCE_ASSIGNMENT")
+//@Entity
+//@Table(name="CLIENT_RESOURCE_ASSIGNMENT")
 public class ClientResourceAssignment<C,E extends EnterpriseObject> extends EnterpriseRelationship<Client,E>{
 
     @Override
