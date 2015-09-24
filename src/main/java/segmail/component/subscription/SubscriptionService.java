@@ -18,6 +18,8 @@ import eds.component.mail.MailService;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.entity.client.Client_;
+import eds.component.config.GenericConfigService;
+import eds.entity.config.ConfigNotFoundException;
 import eds.entity.mail.Email;
 import eds.entity.resource.SystemResourceAssignment;
 import segmail.entity.subscription.ClientListAssignment;
@@ -34,6 +36,7 @@ import segmail.entity.subscription.email.TemplateListAssignment;
 import segmail.entity.subscription.email.TemplateClientAssignment;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -52,6 +55,8 @@ import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
+import segmail.entity.subscription.ListType;
+import segmail.entity.subscription.ListType_;
 
 /**
  *
@@ -67,6 +72,8 @@ public class SubscriptionService {
     @EJB
     private GenericObjectService objectService;
     @EJB
+    private GenericConfigService configService;
+    @EJB
     private MailService mailService;
     @EJB
     private UserService userService;
@@ -79,17 +86,77 @@ public class SubscriptionService {
     @Inject
     ClientFacade clientFacade;
 
+    @PostConstruct
+    public void init() {
+        //setupListTypes();
+    }
+
+    /**
+     * Experimental logic for EnterpriseConfiguration testing Got to build a
+     * setup EJB in the future!
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public SubscriptionList addList(String listname, boolean remote) throws IncompleteDataException {
+    public void setupListTypes() {
+        try {
+            List<ListType> listTypes = configService.getConfigList(ListType.class);
+            if (listTypes == null || listTypes.isEmpty()) {
+                ListType remote = new ListType();
+                ListType local = new ListType();
+                remote.setVALUE(ListType.TYPE.REMOTE.name());
+                local.setVALUE(ListType.TYPE.LOCAL.name());
+
+                em.persist(remote);
+                em.persist(local);
+            }
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+
+    }
+
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public ListType getListType(String listtypevalue) {
+        try {
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<ListType> criteria = builder.createQuery(ListType.class);
+            Root<ListType> sourceEntity = criteria.from(ListType.class);
+
+            criteria.select(sourceEntity);
+            criteria.where(builder.equal(sourceEntity.get(ListType_.VALUE), listtypevalue));
+
+            List<ListType> results = em.createQuery(criteria)
+                    .getResultList();
+
+            return results.get(0);//only return the first match
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public SubscriptionList addList(String listname, String listTypeName)
+            throws IncompleteDataException, ConfigNotFoundException {
         try {
             if (listname == null || listname.isEmpty()) {
                 throw new IncompleteDataException("List name cannot be empty.");
             }
 
+            ListType listType = this.getListType(listTypeName);
+            if (listType == null) {
+                throw new ConfigNotFoundException(ListType.class, listTypeName);
+            }
+
             //1. Create the list object and persist it first
             SubscriptionList newList = new SubscriptionList();
             newList.setLIST_NAME(listname); //Right now we don't keep history
-            newList.setLOCATION(remote ? SubscriptionList.LOCATION.REMOTE : SubscriptionList.LOCATION.LOCAL);
+            //newList.setLOCATION(remote ? SubscriptionList.LOCATION.REMOTE : SubscriptionList.LOCATION.LOCAL);
+            newList.setType(listType);
 
             em.persist(newList);
 
@@ -225,7 +292,6 @@ public class SubscriptionService {
             SMTPConnectionSES smtp = smtps.get(0);
 
             //mailService.sendEmail(email, smtp, true);
-
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -350,18 +416,18 @@ public class SubscriptionService {
             throws EntityExistsException, IncompleteDataException {
         try {
             /*if (subject == null || subject.isEmpty()) {
-                throw new IncompleteDataException("Subject cannot be null.");
-            }
-            // Check if the template subject already exist for the type
-            if (getTemplatesBySubjectAndType(subject, type)) {
-                throw new EntityExistsException("Please choose a different email subject");
-            }*/
+             throw new IncompleteDataException("Subject cannot be null.");
+             }
+             // Check if the template subject already exist for the type
+             if (getTemplatesBySubjectAndType(subject, type)) {
+             throw new EntityExistsException("Please choose a different email subject");
+             }*/
 
             EmailTemplate newTemplate = new EmailTemplate();
             newTemplate.setBODY(body);
             newTemplate.setSUBJECT(subject);
             newTemplate.setTYPE(type);
-            
+
             this.checkEmailTemplate(newTemplate);
 
             em.persist(newTemplate);
@@ -380,10 +446,11 @@ public class SubscriptionService {
     }
 
     /**
-     * Check if 
+     * Check if
+     *
      * @param subject
      * @param type
-     * @return 
+     * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<EmailTemplate> getTemplatesBySubjectAndType(String subject, EMAIL_TYPE type) {
@@ -412,13 +479,14 @@ public class SubscriptionService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void assignEmailTemplateToClient(long emailTemplateId, long clientId) 
+    public void assignEmailTemplateToClient(long emailTemplateId, long clientId)
             throws EntityNotFoundException, RelationshipExistsException {
         try {
             List<TemplateClientAssignment> assignments = objectService.getRelationshipsForObject(emailTemplateId, clientId, TemplateClientAssignment.class);
-            if(assignments != null && !assignments.isEmpty())
+            if (assignments != null && !assignments.isEmpty()) {
                 throw new RelationshipExistsException(assignments.get(0));
-            
+            }
+
             EmailTemplate template = this.objectService.getEnterpriseObjectById(emailTemplateId, EmailTemplate.class);
             if (template == null) {
                 throw new EntityNotFoundException("Template id " + emailTemplateId + " not found!");
@@ -445,36 +513,39 @@ public class SubscriptionService {
          }*/
 
     }
-    
+
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public TemplateListAssignment assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException{
+    public TemplateListAssignment assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException {
         try {
             //Retrieve both objects and check they both exists
             EmailTemplate confirmationEmail = objectService.getEnterpriseObjectById(confirmationEmailId, EmailTemplate.class);
-            if(confirmationEmail == null)
-                throw new EntityNotFoundException(EmailTemplate.class,confirmationEmailId);
-            
-            if(!EmailTemplate.EMAIL_TYPE.CONFIRMATION.equals(confirmationEmail.getTYPE()))
-                throw new RuntimeException("EmailTemplate (id="+confirmationEmail.getOBJECTID()+") is not a confirmation email template.");
-            
+            if (confirmationEmail == null) {
+                throw new EntityNotFoundException(EmailTemplate.class, confirmationEmailId);
+            }
+
+            if (!EmailTemplate.EMAIL_TYPE.CONFIRMATION.equals(confirmationEmail.getTYPE())) {
+                throw new RuntimeException("EmailTemplate (id=" + confirmationEmail.getOBJECTID() + ") is not a confirmation email template.");
+            }
+
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-            if(list == null)
-                throw new EntityNotFoundException(SubscriptionList.class,listId);
-            
+            if (list == null) {
+                throw new EntityNotFoundException(SubscriptionList.class, listId);
+            }
+
             //Check if there is already an assignment, if yes, delete it as this is a 1-to-many (email to list) relationship
             List<TemplateListAssignment> existingAssignemnts = objectService.getRelationshipsForTargetObject(listId, TemplateListAssignment.class);
-            if(existingAssignemnts != null && !existingAssignemnts.isEmpty()){
+            if (existingAssignemnts != null && !existingAssignemnts.isEmpty()) {
                 em.remove(existingAssignemnts);
             }
-            
+
             TemplateListAssignment newAssignment = new TemplateListAssignment();
             newAssignment.setSOURCE(confirmationEmail);
             newAssignment.setTARGET(list);
-            
+
             em.persist(newAssignment);
-            
+
             return newAssignment;
-            
+
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -514,11 +585,11 @@ public class SubscriptionService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public EmailTemplate saveTemplate(EmailTemplate template) 
+    public EmailTemplate saveTemplate(EmailTemplate template)
             throws IncompleteDataException, EntityExistsException {
         try {
             checkEmailTemplate(template);
-            
+
             return em.merge(template);
 
         } catch (PersistenceException pex) {
@@ -526,16 +597,17 @@ public class SubscriptionService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } 
+        }
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteTemplate(long templateId) throws EntityNotFoundException {
         try {
             EmailTemplate delTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
-            if(delTemplate == null)
-                throw new EntityNotFoundException(EmailTemplate.class,templateId);
-            
+            if (delTemplate == null) {
+                throw new EntityNotFoundException(EmailTemplate.class, templateId);
+            }
+
             em.remove(delTemplate);
 
         } catch (PersistenceException pex) {
@@ -543,7 +615,7 @@ public class SubscriptionService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } 
+        }
     }
 
     public void checkEmailTemplate(EmailTemplate temp) throws IncompleteDataException, EntityExistsException {
@@ -552,12 +624,11 @@ public class SubscriptionService {
         }
         // Check if the template subject already exist for the type
         List<EmailTemplate> existingTemplates = getTemplatesBySubjectAndType(temp.getSUBJECT(), temp.getTYPE());
-        if (existingTemplates != null 
-                && !existingTemplates.isEmpty() 
+        if (existingTemplates != null
+                && !existingTemplates.isEmpty()
                 && !existingTemplates.contains(temp)) {
             throw new EntityExistsException("Please choose a different email subject");
         }
     }
-    
-    
+
 }

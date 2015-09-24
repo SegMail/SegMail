@@ -5,6 +5,7 @@
  */
 package segmail.program.list;
 
+import eds.component.client.ClientFacade;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
@@ -19,6 +20,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -35,6 +37,8 @@ public class FormListList {
     private UserContainer userContainer;
     @Inject
     private ProgramContainer programContainer;
+    @Inject
+    private ClientContainer clientContainer;
 
     @Inject
     private ProgramList programList;
@@ -64,12 +68,12 @@ public class FormListList {
     public void loadAllLists() {
         try {
             User user = userContainer.getUser();
-
             if (user == null) {
                 throw new RuntimeException("No user object found for this session " + userContainer);
             }
 
-            Client client = clientService.getClientByAssignedUser(user.getOBJECTID());
+            //Client client = clientService.getClientByAssignedUser(user.getOBJECTID());
+            Client client = clientContainer.getClient();
             if (client == null) {
                 throw new RuntimeException("No client object found for this user " + user);
             }

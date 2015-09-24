@@ -13,6 +13,8 @@ import java.util.Map;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -35,6 +37,7 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     private String SEND_AS_NAME;
     private LOCATION LOCATION;
     private boolean DOUBLE_OPTIN;
+    private ListType type;
     
     @Override
     public void randInit() {
@@ -91,6 +94,17 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     public void setDOUBLE_OPTIN(boolean DOUBLE_OPTIN) {
         this.DOUBLE_OPTIN = DOUBLE_OPTIN;
     }
+
+    @ManyToOne(targetEntity=ListType.class,optional=false)
+    public ListType getType() {
+        return type;
+    }
+
+    public void setType(ListType type) {
+        this.type = type;
+    }
+    
+    
     /**
     @Override
     public String getAddress() {

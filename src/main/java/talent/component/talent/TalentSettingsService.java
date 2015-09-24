@@ -8,7 +8,7 @@ package talent.component.talent;
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
-import eds.entity.config.GenericConfigService;
+import eds.component.config.GenericConfigService;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -106,7 +106,7 @@ public class TalentSettingsService {
             PotentialLevel newLevel = new PotentialLevel();
             //newLevel.setLEVEL_LABEL(label);
             newLevel.setLEVEL_NAME(name);
-            newLevel.setVALUE(value);
+            newLevel.setLEVEL_VALUE(value);
             
             em.persist(newLevel);
             
