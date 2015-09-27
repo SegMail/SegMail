@@ -69,8 +69,7 @@ public class FormAddList {
             if(client == null)
                 throw new RuntimeException("No client object found for this user "+user);
             
-            SubscriptionList SubscriptionList = subscriptionService.addList(listName, 
-                    (remote ? ListType.TYPE.REMOTE.name : ListType.TYPE.LOCAL.name));
+            SubscriptionList SubscriptionList = subscriptionService.addList(listName, remote);
             
             //this.checkNoListYet(); //refresh the editing panel
             

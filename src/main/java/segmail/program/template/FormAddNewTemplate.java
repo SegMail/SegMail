@@ -9,7 +9,6 @@ import eds.component.client.ClientFacade;
 import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
 import segmail.entity.subscription.email.EmailTemplate;
-import segmail.entity.subscription.email.EmailTemplate.EMAIL_TYPE;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -21,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.email.EmailTemplateFactory;
 
 /**
  *
@@ -41,7 +41,7 @@ public class FormAddNewTemplate {
     
     private String body;
     
-    private EMAIL_TYPE type;
+    private EmailTemplateFactory.TYPE type;
     
     private final String formName = "add_new_template_form";
     
@@ -54,7 +54,7 @@ public class FormAddNewTemplate {
         try {
             // Create the new template
             // Get the client associated with the user and assign it
-            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, type, clientFacade.getClient().getOBJECTID());
+            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, clientFacade.getClient().getOBJECTID(), type);
             
             //Refresh the list of email templates on the page
             //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit
@@ -88,11 +88,11 @@ public class FormAddNewTemplate {
         this.body = body;
     }
 
-    public EMAIL_TYPE getType() {
+    public EmailTemplateFactory.TYPE getType() {
         return type;
     }
 
-    public void setType(EMAIL_TYPE type) {
+    public void setType(EmailTemplateFactory.TYPE type) {
         this.type = type;
     }
 

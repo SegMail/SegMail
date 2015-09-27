@@ -5,15 +5,26 @@
  */
 package segmail.entity.subscription.email;
 
+import static java.lang.Integer.TYPE;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.CONFIRMATION;
 
 /**
  *
  * @author LeeKiatHaw
  */
-//@Entity
+@Entity
+@Table(name="CONFRIMATION_EMAIL_TEMPLATE")
 //@DiscriminatorValue("CONFIRMATION")
 public class ConfirmationEmailTemplate extends EmailTemplate{
+
+    @Override
+    public EmailTemplateFactory.TYPE type() {
+        return CONFIRMATION;
+    }
+
+    
     
 }

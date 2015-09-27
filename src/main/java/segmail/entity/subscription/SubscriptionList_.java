@@ -18,7 +18,7 @@ public class SubscriptionList_ extends EnterpriseObject_ {
     public static volatile SingularAttribute<SubscriptionList,String> LIST_NAME;
     public static volatile SingularAttribute<SubscriptionList,String> SEND_AS_EMAIL;
     public static volatile SingularAttribute<SubscriptionList,String> SEND_AS_NAME;
-    public static volatile SingularAttribute<SubscriptionList,SubscriptionList.LOCATION> LOCATION;   
+    public static volatile SingularAttribute<SubscriptionList,ListType> TYPE;   
     public static volatile SingularAttribute<SubscriptionList,Boolean> DOUBLE_OPTIN;
     
 }

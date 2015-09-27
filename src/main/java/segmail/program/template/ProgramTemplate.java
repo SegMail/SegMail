@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.email.EmailTemplateFactory;
 
 /**
  *
@@ -73,7 +74,7 @@ public class ProgramTemplate implements Serializable {
         try {
             
             this.setConfirmationTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),
-                    EmailTemplate.EMAIL_TYPE.CONFIRMATION));
+                    EmailTemplateFactory.TYPE.CONFIRMATION));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -86,7 +87,7 @@ public class ProgramTemplate implements Serializable {
         try {
             
             this.setNewsletterTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),
-                    EmailTemplate.EMAIL_TYPE.NEWSLETTER));
+                    EmailTemplateFactory.TYPE.NEWSLETTER));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");

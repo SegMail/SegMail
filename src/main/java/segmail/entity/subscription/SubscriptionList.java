@@ -5,16 +5,8 @@
  */
 package segmail.entity.subscription;
 
-import eds.entity.client.ClientResource;
 import eds.entity.data.EnterpriseObject;
-import eds.entity.document.Document;
-import eds.entity.mail.MailSender;
-import java.util.Map;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -26,18 +18,13 @@ import javax.persistence.Table;
 //@ClientResource
 //@DiscriminatorColumn(name="SUBSCRIPTION_LIST")
 public class SubscriptionList extends EnterpriseObject {// implements MailSender {
-
-    public static enum LOCATION{
-        REMOTE,
-        LOCAL
-    }
     
     private String LIST_NAME;
     private String SEND_AS_EMAIL;
     private String SEND_AS_NAME;
-    private LOCATION LOCATION;
     private boolean DOUBLE_OPTIN;
-    private ListType type;
+    private boolean REMOTE;
+    //private ListType TYPE;
     
     @Override
     public void randInit() {
@@ -78,15 +65,6 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
         this.SEND_AS_NAME = SEND_AS_NAME;
     }
 
-    @Enumerated(EnumType.STRING)
-    public LOCATION getLOCATION() {
-        return LOCATION;
-    }
-
-    public void setLOCATION(LOCATION LOCATION) {
-        this.LOCATION = LOCATION;
-    }
-
     public boolean isDOUBLE_OPTIN() {
         return DOUBLE_OPTIN;
     }
@@ -95,17 +73,26 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
         this.DOUBLE_OPTIN = DOUBLE_OPTIN;
     }
 
-    @ManyToOne(targetEntity=ListType.class,optional=false)
-    public ListType getType() {
-        return type;
+    public boolean isREMOTE() {
+        return REMOTE;
     }
 
-    public void setType(ListType type) {
-        this.type = type;
+    public void setREMOTE(boolean REMOTE) {
+        this.REMOTE = REMOTE;
     }
     
     
+
     /**
+    @ManyToOne(targetEntity=ListType.class,optional=false)
+    public ListType getTYPE() {
+        return TYPE;
+    }
+
+    public void setTYPE(ListType TYPE) {
+        this.TYPE = TYPE;
+    }
+    
     @Override
     public String getAddress() {
         return this.SEND_AS_EMAIL;
