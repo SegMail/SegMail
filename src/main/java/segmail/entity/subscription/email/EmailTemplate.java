@@ -6,13 +6,10 @@
 package segmail.entity.subscription.email;
 
 import eds.entity.data.EnterpriseObject;
-import eds.entity.mail.Email;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
 
 /**
@@ -59,7 +56,7 @@ public abstract class EmailTemplate extends EnterpriseObject {
      * 
      * @return TYPE
      */
-    @Transient
+    //@Transient
     public abstract TYPE type();
 
     //@Lob //Causing a java.lang.AbstractMethodError

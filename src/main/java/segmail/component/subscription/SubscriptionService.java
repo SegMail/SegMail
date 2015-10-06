@@ -6,6 +6,7 @@
 package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientResourceInterceptor;
 import eds.component.data.DBConnectionException;
@@ -17,18 +18,14 @@ import eds.component.data.RelationshipExistsException;
 import eds.component.mail.MailService;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
-import eds.entity.client.Client_;
 import eds.component.config.GenericConfigService;
 import eds.entity.config.ConfigNotFoundException;
-import eds.entity.mail.Email;
-import eds.entity.resource.SystemResourceAssignment;
 import segmail.entity.subscription.ClientListAssignment;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionList_;
-import segmail.entity.subscription.connection.SMTPConnectionSES;
 import segmail.entity.subscription.email.EmailTemplate;
 import segmail.entity.subscription.email.EmailTemplate_;
 import segmail.entity.subscription.email.TemplateListAssignment;
@@ -53,12 +50,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
-import org.joda.time.DateTime;
 import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.email.ConfirmationEmailTemplate;
 import segmail.entity.subscription.email.EmailTemplateFactory;
 import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
+import segmail.entity.subscription.email.NewsletterEmailTemplate;
 
 /**
  *
@@ -73,6 +70,8 @@ public class SubscriptionService {
 
     @EJB
     private GenericObjectService objectService;
+    @EJB
+    private UpdateObjectService updateService;
     @EJB
     private GenericConfigService configService;
     @EJB
@@ -377,11 +376,51 @@ public class SubscriptionService {
             throw new EJBException(ex);
         }
     }
-
+    
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public <E extends EmailTemplate> List<E> getAvailableTemplatesForClient(long clientid, TYPE type) {
+    public List<ConfirmationEmailTemplate> getAvailableConfirmationTemplateForClient(long clientid){
         try {
-            Class<E> e = (Class<E>) EmailTemplateFactory.getEmailTemplateClass(type);
+            List<ConfirmationEmailTemplate> results = objectService
+                    .getAllSourceObjectsFromTarget(clientid, TemplateClientAssignment.class,
+                            ConfirmationEmailTemplate.class);
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } 
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<NewsletterEmailTemplate> getAvailableNewsletterTemplateForClient(long clientid){
+        try {
+            List<NewsletterEmailTemplate> results = objectService
+                    .getAllSourceObjectsFromTarget(clientid, TemplateClientAssignment.class,
+                            NewsletterEmailTemplate.class);
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } 
+    }
+
+    /**
+     * [2015.10.04] The filtering is done here in this EJB instead of at the DB. 
+     * We have not yet found any solution for the casting
+     * 
+     * @param clientid
+     * @param type
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<EmailTemplate> getAvailableTemplatesForClient(long clientid, TYPE type) {
+        try {
+            //Class<E> e = (Class<E>) EmailTemplateFactory.getEmailTemplateClass(type);
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<E> query = builder.createQuery(e);
             Root<TemplateClientAssignment> sourceEntity = query.from(TemplateClientAssignment.class);
@@ -398,9 +437,29 @@ public class SubscriptionService {
             query.where(conditions.toArray(new Predicate[]{}));
 
             */
+            List<EmailTemplate> results = getAllAvailableTemplatesForClient(clientid);
             
-            List<E> results = objectService.getAllSourceObjectsFromTarget(clientid, TemplateClientAssignment.class, e);
+            //Filter by class manually here
+            List<EmailTemplate> filteredResults = new ArrayList();
+            for(EmailTemplate r : results){
+                if(r.type() == type)
+                    filteredResults.add(r);
+            }
 
+            return filteredResults;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } 
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<EmailTemplate> getAllAvailableTemplatesForClient(long clientid) {
+        try {
+            List<EmailTemplate> results = objectService.getAllSourceObjectsFromTarget(clientid, TemplateClientAssignment.class, EmailTemplate.class);
+            
             return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -600,12 +659,15 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteTemplate(long templateId) throws EntityNotFoundException {
         try {
-            EmailTemplate delTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            //Again, changing to casting because https://github.com/SegMail/SegMail/issues/35 
+            //EmailTemplate delTemplate = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            /**EmailTemplate delTemplate = (EmailTemplate) objectService.getEnterpriseObjectById(templateId);
             if (delTemplate == null) {
                 throw new EntityNotFoundException(EmailTemplate.class, templateId);
             }
-
-            em.remove(delTemplate);
+            updateService.deleteObjectAndRelationships(templateId);
+            */
+            updateService.deleteObjectAndRelationships(templateId);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

@@ -6,6 +6,7 @@
 package segmail.entity.subscription.email;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
 import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.NEWSLETTER;
 
@@ -20,5 +21,6 @@ public class NewsletterEmailTemplate extends EmailTemplate{
     public TYPE type() {
         return NEWSLETTER;
     }
+
     
 }

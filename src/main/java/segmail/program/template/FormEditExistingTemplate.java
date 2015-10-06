@@ -10,9 +10,7 @@ import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import eds.entity.data.EnterpriseObject;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.email.EmailTemplate;
 import javax.annotation.PostConstruct;
@@ -53,7 +51,9 @@ public class FormEditExistingTemplate {
     public void loadTemplate(long templateId){
         try {
             // Retrieve the template based on the Id
-            EmailTemplate editing = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            // Using cast because when retrieving with EmailTemplate.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
+            EmailTemplate editing = (EmailTemplate) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
+            
             program.setEditingTemplate(editing);
             
         } catch (EJBException ex) { //Transaction did not go through
@@ -119,8 +119,9 @@ public class FormEditExistingTemplate {
     public void deleteTemplate(){
         try {
             subscriptionService.deleteTemplate(program.getEditingTemplate().getOBJECTID());
-            refresh();
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
+            refresh();
+            
             
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
