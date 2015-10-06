@@ -21,6 +21,7 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.EmailTemplate;
+import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.CONFIRMATION;
 
 /**
  *
@@ -48,7 +49,7 @@ public class FormConfirmationEmail {
     public void loadAvailableConfirmationEmails(){
         try {
             List<EmailTemplate> confirmEmails = subscriptionService.getAvailableTemplatesForClient(
-                    clientContainer.getClient().getOBJECTID(), EmailTemplate.EMAIL_TYPE.CONFIRMATION);
+                    clientContainer.getClient().getOBJECTID(), CONFIRMATION);
             program.setConfirmationEmails(confirmEmails);
         } catch(EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);

@@ -19,7 +19,7 @@ public class PotentialLevel extends EnterpriseConfiguration {
     
     //private String LEVEL_LABEL;
     private String LEVEL_NAME;
-    private int VALUE;
+    private int LEVEL_VALUE;
 
     public String getLEVEL_NAME() {
         return LEVEL_NAME;
@@ -29,14 +29,12 @@ public class PotentialLevel extends EnterpriseConfiguration {
         this.LEVEL_NAME = LEVEL_NAME;
     }
 
-    public int getVALUE() {
-        return VALUE;
+    public int getLEVEL_VALUE() {
+        return LEVEL_VALUE;
     }
 
-    public void setVALUE(int VALUE) {
-        this.VALUE = VALUE;
+    public void setLEVEL_VALUE(int LEVEL_VALUE) {
+        this.LEVEL_VALUE = LEVEL_VALUE;
     }
-    
-    
     
 }

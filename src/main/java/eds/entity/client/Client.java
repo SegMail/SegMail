@@ -24,7 +24,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CLIENT")
-public class Client extends EnterpriseObject implements DocumentAuthor {
+public class Client extends EnterpriseObject{// implements DocumentAuthor {
 
     private String CLIENT_NAME;
     
@@ -65,7 +65,7 @@ public class Client extends EnterpriseObject implements DocumentAuthor {
     public String alias() {
         return this.CLIENT_NAME;
     }
-
+/*
     @Override
     public long getAuthorId() {
         return this.getOBJECTID();
@@ -100,5 +100,5 @@ public class Client extends EnterpriseObject implements DocumentAuthor {
     public void setName(String name) {
         this.setCLIENT_NAME(name);
     }
-    
+    */
 }

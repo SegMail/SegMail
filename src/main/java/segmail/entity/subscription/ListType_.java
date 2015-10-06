@@ -3,18 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.client;
+package segmail.entity.subscription;
 
-import eds.entity.data.EnterpriseRelationship_;
+import eds.entity.config.EnterpriseConfiguration_;
 import javax.persistence.metamodel.StaticMetamodel;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(ClientResourceAssignment.class)
-public class ClientResourceAssignment_ extends EnterpriseRelationship_{
-
-    //public static volatile SingularAttribute<ClientResourceAssignment,
+@StaticMetamodel(ListType.class)
+public class ListType_ extends EnterpriseConfiguration_{
     
 }

@@ -10,7 +10,6 @@ import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
-import eds.entity.client.Client;
 import segmail.entity.subscription.email.EmailTemplate;
 import eds.entity.user.UserType;
 import java.io.Serializable;
@@ -22,6 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.CONFIRMATION;
+import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.NEWSLETTER;
 
 /**
  *
@@ -72,8 +73,7 @@ public class ProgramTemplate implements Serializable {
     public void initializeAllConfirmationTemplates() {
         try {
             
-            this.setConfirmationTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),
-                    EmailTemplate.EMAIL_TYPE.CONFIRMATION));
+            this.setConfirmationTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),CONFIRMATION));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -85,8 +85,7 @@ public class ProgramTemplate implements Serializable {
     public void initializeAllNewsletterTemplates() {
         try {
             
-            this.setNewsletterTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),
-                    EmailTemplate.EMAIL_TYPE.NEWSLETTER));
+            this.setNewsletterTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),NEWSLETTER));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -106,19 +105,6 @@ public class ProgramTemplate implements Serializable {
         }
     }
     
-
-    /*
-    public void initializeClient() {
-        try {
-            this.setClient(clientService.getClientByAssignedUser(this.getUserContainer().getUser().getOBJECTID()));
-
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }*/
-
     public void initializeAllTemplates() {
         this.initializeAllConfirmationTemplates();
         this.initializeAllNewsletterTemplates();

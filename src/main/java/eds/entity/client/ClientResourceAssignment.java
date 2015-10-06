@@ -8,7 +8,6 @@ package eds.entity.client;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 
 /**
@@ -19,8 +18,8 @@ import javax.persistence.Table;
  * 
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="CLIENT_RESOURCE_ASSIGNMENT")
+//@Entity
+//@Table(name="CLIENT_RESOURCE_ASSIGNMENT")
 public class ClientResourceAssignment<C,E extends EnterpriseObject> extends EnterpriseRelationship<Client,E>{
 
     @Override

@@ -6,11 +6,11 @@
 package segmail.program.template;
 
 import eds.component.GenericObjectService;
+import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import eds.entity.data.EnterpriseObject;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.email.EmailTemplate;
 import javax.annotation.PostConstruct;
@@ -51,7 +51,9 @@ public class FormEditExistingTemplate {
     public void loadTemplate(long templateId){
         try {
             // Retrieve the template based on the Id
-            EmailTemplate editing = objectService.getEnterpriseObjectById(templateId, EmailTemplate.class);
+            // Using cast because when retrieving with EmailTemplate.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
+            EmailTemplate editing = (EmailTemplate) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
+            
             program.setEditingTemplate(editing);
             
         } catch (EJBException ex) { //Transaction did not go through
@@ -93,10 +95,7 @@ public class FormEditExistingTemplate {
         try {
             subscriptionService.saveTemplate(program.getEditingTemplate());
             
-            //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            ec.redirect(programContainer.getCurrentURL());
+            refresh();
             
             //Set success message
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template updated.", null);
@@ -104,8 +103,6 @@ public class FormEditExistingTemplate {
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EntityExistsException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (IOException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
@@ -116,24 +113,33 @@ public class FormEditExistingTemplate {
     }
     
     public void closeWithoutSaving(){
-        try {
-            //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            ec.redirect(programContainer.getCurrentURL());
-        } catch (IOException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
+        refresh();
     }
     
     public void deleteTemplate(){
         try {
             subscriptionService.deleteTemplate(program.getEditingTemplate().getOBJECTID());
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
-        } catch (EJBException ex){
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            refresh();
+            
+            
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
+        } catch (DBConnectionException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
         
+    }
+    
+    public void refresh(){
+        try {
+            //redirect to itself after setting list editing
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
+            ec.redirect(programContainer.getCurrentURL());
+        } catch (Exception ex){
+            FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
+        }
     }
 
     public ProgramTemplate getProgram() {

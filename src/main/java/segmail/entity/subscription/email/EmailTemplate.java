@@ -6,16 +6,11 @@
 package segmail.entity.subscription.email;
 
 import eds.entity.data.EnterpriseObject;
-import eds.entity.mail.Email;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Lob;
 import javax.persistence.Table;
+import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
 
 /**
  * A template is actually different from the actual email sent. It has to exist
@@ -31,18 +26,17 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="EMAIL_TEMPLATE")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="EMAIL_TYPE")
-public class EmailTemplate extends EnterpriseObject {
-//extends Document<Client> {
+public abstract class EmailTemplate extends EnterpriseObject {
     
+    /**
     public enum EMAIL_TYPE {
         CONFIRMATION,
         NEWSLETTER,
         AUTORESPONDER
     }
     
-    protected EMAIL_TYPE TYPE;
+    protected EMAIL_TYPE TYPE;*/
     
     protected String SUBJECT;
     
@@ -55,6 +49,15 @@ public class EmailTemplate extends EnterpriseObject {
     public void setSUBJECT(String SUBJECT) {
         this.SUBJECT = SUBJECT;
     }
+    
+    /**
+     * Each subclass should implement it and return an enumeration that is defined
+     * in EmailTemplateFactory.
+     * 
+     * @return TYPE
+     */
+    //@Transient
+    public abstract TYPE type();
 
     //@Lob //Causing a java.lang.AbstractMethodError
     @Column(columnDefinition="MEDIUMTEXT")
@@ -65,51 +68,6 @@ public class EmailTemplate extends EnterpriseObject {
     public void setBODY(String BODY) {
         this.BODY = BODY;
     }
-
-    @Enumerated(EnumType.STRING)
-    public EMAIL_TYPE getTYPE() {
-        return TYPE;
-    }
-
-    public void setTYPE(EMAIL_TYPE TYPE) {
-        this.TYPE = TYPE;
-    }
-    
-    
-    
-    /**
-     * Factory method for generating the concrete Email type
-     * 
-     * @return 
-     */
-    public Email generateEmail(){
-        Email newMail = null;
-        switch(this.TYPE){
-            case CONFIRMATION   :   this.setTYPE(EMAIL_TYPE.CONFIRMATION);
-                                    newMail = new ConfirmationEmail();
-                                    break;
-            default             :   throw new RuntimeException("Email type "+this.getTYPE()+" is not implemented yet.");
-                                    
-                
-        }
-        
-        newMail.setSUBJECT(this.getSUBJECT());
-        newMail.setBODY(this.getBODY());
-        
-        return newMail;
-    }
-    
-    /*
-    public EmailTemplate getTemplate(EMAIL_TYPE type){
-        switch(type){
-            case CONFIRMATION   :   this.setTYPE(EMAIL_TYPE.CONFIRMATION);
-                                    return this;
-            default             :   break;
-                
-        }
-        return null;
-    }*/
-    
     
     @Override
     public void randInit() {
@@ -125,4 +83,5 @@ public class EmailTemplate extends EnterpriseObject {
     public String alias() {
         return this.SUBJECT;
     }
+    
 }
