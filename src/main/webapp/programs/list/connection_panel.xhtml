@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="settings_panel">
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h2>General list information</h2>
+                <div class="form-group">
+                    <label></label>
+                </div>
+                <div class="form-group">
+                    <label>List name: </label>
+                    <span class="help-block">
+                        The name displayed to your subscriber.
+                    </span>
+                    <input type="text" class="form-control"></input>
+                </div>
+                <div class="form-group">
+                    <label>Send as (Email): </label>
+                    <span class="help-block">
+                        The address displayed in the FROM line.
+                    </span>
+                    <input type="text" class="form-control"></input>
+                </div>
+                <div class="form-group">
+                    <label>Send as (Name): </label>
+                    <span class="help-block">
+                        The name displayed in the FROM line.
+                    </span>
+                    <input type="text" class="form-control"></input>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2>SMTP connection</h2>
+                <div class="form-group">
+                    <label></label>
+                </div>
+                <div class="form-group">
+                    <label>Hostname: </label>
+                    <span class="help-block">
+                        The location of your SMTP server.
+                    </span>
+                    <input type="text" class="form-control"></input>
+                </div>
+                <div class="form-group">
+                    <label>Port: </label>
+                    <span class="help-block">
+                        The port of your SMTP server. It's 25, 465 or 587. I'm betting it's 25.
+                    </span>
+                    <input type="text" class="form-control"></input>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

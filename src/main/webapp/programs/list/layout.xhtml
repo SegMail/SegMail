@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-3"><!--Lists block-->
+                        <div class="col-md-4"><!--Lists block-->
 
                             <div class="block nb">
                                 <div class="block-head">
@@ -53,37 +53,42 @@
                             </div>
                         </div>
 
-                        <div jsf:id="list_editing_block" class="col-md-9" jsf:rendered="#{ProgramList.listEditing ne null}">
+                        <div jsf:id="list_editing_block" class="col-md-8" jsf:rendered="#{ProgramList.listEditing ne null}">
                             <ui:include src="editing_panel_header.xhtml"></ui:include>
                             <div class="block" >
                                 <ul class="nav nav-tabs">
                                     <li class="active">
-                                        <a href="#subscribers_tab" data-toggle="tab">Subscribers</a>
+                                        <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
                                     </li>
                                     <li >
-                                        <a href="#activities_tab" data-toggle="tab">Activities</a>
+                                        <a href="#activities_panel" data-toggle="tab">Activities</a>
                                     </li>
                                     <li >
-                                        <a href="#signupform_tab" data-toggle="tab">Signup &amp; Confirmation</a>
+                                        <a href="#signupform_panel" data-toggle="tab">Signup &amp; Confirmation</a>
                                     </li>
                                     <li >
-                                        <a href="#settings_tab" data-toggle="tab">Settings</a>
+                                        <a href="#settings_panel" data-toggle="tab">Settings</a>
                                     </li>
+                                    <!--<li >
+                                        <a href="#delete_panel" data-toggle="tab">Delete List</a>
+                                    </li>-->
                                 </ul>
                                 <div class="block-content tab-content">
-                                    <div class="tab-pane active" id="subscribers_tab">
+                                    <div class="tab-pane active" id="subscribers_panel">
                                         <ui:include src="subscriber_panel.xhtml"></ui:include>
                                     </div>
-                                    <div class="tab-pane" id="activities_tab">
+                                    <div class="tab-pane" id="activities_panel">
                                         <p>fjeirgnrgwrn</p>
                                     </div>
-                                    <div class="tab-pane" id="signupform_tab">
+                                    <div class="tab-pane" id="signupform_panel">
                                         <ui:include src="signupform_panel.xhtml"></ui:include>
                                     </div>
-                                    <div class="tab-pane" id="settings_tab">
+                                    <div class="tab-pane" id="settings_panel">
                                         <ui:include src="settings_panel.xhtml"></ui:include>
                                     </div>
-
+                                    <!--<div class="tab-pane" id="delete_panel">
+                                        <ui:include src="delete_panel.xhtml"></ui:include>
+                                    </div>-->
                                 </div>
                             </div>
                         </div>

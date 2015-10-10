@@ -22,6 +22,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
@@ -40,6 +41,8 @@ public class ClientService {
     
     @PersistenceContext(name = "HIBERNATE")
     private EntityManager em;
+    
+    @Inject private ClientFacade clientFacade;
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Client getClientById(long clientid) throws DBConnectionException{
@@ -269,16 +272,17 @@ public class ClientService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateClientContact(ContactInfo contactInfo) 
-            throws DBConnectionException, MissingOwnerException{
+            throws DBConnectionException{
         try{
-            if(contactInfo.getOWNER() == null)
-                throw new MissingOwnerException(contactInfo);
+            //if(contactInfo.getOWNER() == null)
+            //    throw new MissingOwnerException(contactInfo);
             //em.merge() will insert new if doesn't exist, but need to set
             //the owner with the managed instance
             ContactInfo ci = this.em.merge(contactInfo); //ci is the one getting persisted and managed actually
             
+            //For newly created ContactInfo
             if(ci.getOWNER() == null)
-                ci.setOWNER(contactInfo.getOWNER());
+                ci.setOWNER(this.clientFacade.getClient());
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

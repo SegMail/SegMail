@@ -689,5 +689,23 @@ public class SubscriptionService {
             throw new EntityExistsException("Please choose a different email subject");
         }
     }
+    
+    /**
+     * A simple, stateless update method that merges the entity and commits.
+     * Potentially there could be a generic operation that updates the entity.
+     * @param list 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void saveList(SubscriptionList list){
+        try {
+            em.merge(list);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
 
 }
