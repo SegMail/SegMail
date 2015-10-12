@@ -12,6 +12,13 @@
                     >
 
         <ui:define name="main-program-panel">
+            <div class="row"><!--Page message-->
+                <div class="col-md-12">
+                    <form jsf:id="ProgramList">
+                        <s2:messenger for="ProgramList" showDetail="true" showSummary="true" closable="true" />
+                    </form>
+                </div>
+            </div>
             <c:choose>
                 <c:when test="#{FormListList.programList.allLists eq null or 
                                 FormListList.programList.allLists.size() le 0}">
@@ -27,13 +34,7 @@
 
                 </c:when>
                 <c:otherwise>
-                    <div class="row"><!--Page message-->
-                        <div class="col-md-12">
-                            <form jsf:id="ProgramList">
-                                <s2:messenger for="ProgramList" showDetail="true" showSummary="true" closable="true" />
-                            </form>
-                        </div>
-                    </div>
+
                     <div class="row">
                         <div class="col-md-4"><!--Lists block-->
 

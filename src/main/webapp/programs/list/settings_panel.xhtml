@@ -16,7 +16,7 @@
             </div>
             <div class="page-toolbar-block pull-right">
                 <button jsf:id="save_button" class="btn btn-primary"
-                        onclick="$('#FormListSettings').validationEngine('validate');"
+
                         >
                     <!--f:ajax won't append its code to the onclick attribute of the button element-->
                     <f:ajax execute="@form" render="@form :FormListList :FormEditListHeader" 
@@ -27,7 +27,7 @@
                     <i class="fa fa-floppy-o"></i>
                     Save
                 </button>
-                <button class="btn btn-default" 
+                <button class="btn btn-default" type="button"
                         onclick="$('#FormListSettings').validationEngine('hideAll');
                                 document.getElementById('FormListSettings').reset()">
                     <i class="fa fa-refresh"></i>
@@ -81,7 +81,17 @@
                 </a>
             </div>
         </div>
-        <div class="modal fade" id="delete_list_confirmation">
+
+        <p:blockUI block="FormListSettings" trigger="FormListSettings:save_button"
+
+                   >
+            <p id="spinner"></p>
+        </p:blockUI>
+    </form>
+
+
+    <div class="modal fade" id="delete_list_confirmation">
+        <form jsf:id="FormListSettingsDelete">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -111,24 +121,34 @@
                             Please type your password below to delete this list:
                         </p>
                         <div class="form-group">
-                            <input type="password" class="form-control"></input>
+                            <input type="password" class="form-control"
+                                   jsf:value="#{FormListSettingsDelete.passwordForDeletion}">
+                            </input>
+                            
                         </div>
+                        <p>
+                            <s2:messenger id="delete_list_message" for="FormListSettingsDelete" showDetail="true" showSummary="true"
+                                >
+                            </s2:messenger>
+                        </p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">
                             Cancel
                         </button>
-                        <button class="btn btn-danger">
+
+                        <button jsf:id="confirm_delete_button" styleClass="btn btn-danger" 
+                                jsf:actionListener="#{FormListSettingsDelete.deleteList()}"
+                                >
+                            <f:ajax render="@form delete_list_message :ProgramList" execute="@form" 
+                                    ></f:ajax>
                             Confirm Delete
                         </button>
+                        
                     </div>
                 </div>
             </div>
-        </div>
-        <p:blockUI block="FormListSettings" trigger="FormListSettings:save_button"
+        </form>
+    </div>
 
-                   >
-            <p id="spinner"></p>
-        </p:blockUI>
-    </form>
 </html>

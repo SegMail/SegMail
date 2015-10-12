@@ -104,6 +104,17 @@ public class MessengerRenderer extends Renderer {
                 //  find the <a> tag and append its class atttribute.
                 //We choose solution 1
                 
+                //encode the close button
+                if(component.isClosable()){
+                    writer.startElement("button", component);
+                    writer.writeAttribute("type","button",null);
+                    writer.writeAttribute("class","close",null);
+                    writer.writeAttribute("data-dismiss","alert",null);
+                    writer.writeAttribute("aria-hidden","true",null);
+                    writer.write("x");
+                    writer.endElement("button");
+                }
+                
                 //If this is a MessengerMessage, call its encode method to generate the HTML
                 if(message.getClass().equals(MessengerMessage.class)){
                     MessengerMessage messengerMessage = (MessengerMessage) message;
@@ -126,7 +137,7 @@ public class MessengerRenderer extends Renderer {
                                 SUMMARY_HTML_ELEMENT.length() > 0)
                             writer.endElement(SUMMARY_HTML_ELEMENT);
                         
-                        writer.write("<br//>");
+                        //writer.write("<br//>");
                     }
                     if(component.isShowDetail() &&
                             message.getDetail() != null &&

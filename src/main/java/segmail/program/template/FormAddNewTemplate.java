@@ -54,7 +54,7 @@ public class FormAddNewTemplate {
         try {
             // Create the new template
             // Get the client associated with the user and assign it
-            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, clientFacade.getClient().getOBJECTID(), type);
+            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, type);
             
             //Refresh the list of email templates on the page
             //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit

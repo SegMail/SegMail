@@ -142,7 +142,7 @@ public class SubscriptionService {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList addList(String listname, boolean remote)
-            throws IncompleteDataException, ConfigNotFoundException {
+            throws IncompleteDataException, EnterpriseObjectNotFoundException {
         try {
             if (listname == null || listname.isEmpty()) {
                 throw new IncompleteDataException("List name cannot be empty.");
@@ -611,8 +611,8 @@ public class SubscriptionService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public EmailTemplate addTemplate(String subject, String body, long clientid, EmailTemplateFactory.TYPE type)
-            throws EntityExistsException, IncompleteDataException, RelationshipExistsException {
+    public EmailTemplate addTemplate(String subject, String body, EmailTemplateFactory.TYPE type)
+            throws EntityExistsException, IncompleteDataException, RelationshipExistsException, EntityNotFoundException {
         try {
             //Create the new template first
             EmailTemplate newTemplate = this.addTemplateWithoutAssignment(subject, body, type);
@@ -620,7 +620,7 @@ public class SubscriptionService {
             //Get the client
             Client client = clientFacade.getClient();
             if (client == null) {
-                throw new EnterpriseObjectNotFoundException(Client.class);
+                throw new IncompleteDataException("No client id provided.");
             }
             //Assign it to the client
             this.assignEmailTemplateToClient(newTemplate.getOBJECTID(), client.getOBJECTID());
@@ -634,9 +634,9 @@ public class SubscriptionService {
             throw new EJBException(pex);
         } /*catch (Exception ex) {
          throw new EJBException(ex);
-         }*/ catch (EntityNotFoundException ex) {
+         } catch (EntityNotFoundException ex) {
             throw new RuntimeException(ex); // Something is very wrong here!
-        }
+        }*/
 
     }
 
@@ -700,6 +700,24 @@ public class SubscriptionService {
         try {
             em.merge(list);
             
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
+    
+    /**
+     * Potentially long running operation that requires the background job 
+     * scheduling mechanism.
+     * 
+     * @param listId 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void deleteList(long listId) throws EntityNotFoundException{
+        try {
+            this.updateService.deleteObjectAndRelationships(listId);
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());

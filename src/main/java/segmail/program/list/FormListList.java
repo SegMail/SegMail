@@ -54,7 +54,7 @@ public class FormListList {
         //Only if it is not a postback, reload everything
         if (!FacesContext.getCurrentInstance().isPostback()) {
             this.loadAllLists();
-            //this.resetEditingList();
+            this.resetEditingList();
         }
     }
 
@@ -92,7 +92,23 @@ public class FormListList {
         this.programList.setListEditing(list);
     }
 
+    /**
+     * If there is an editing list, reload that existing list so that when it is being
+     * edited, the List panel will also be updated.
+     */
     public void resetEditingList() {
+        SubscriptionList listEditing = programList.getListEditing();
+        if(listEditing == null) return;
+        
+        if(programList.getAllLists() == null || programList.getAllLists().isEmpty())
+            loadAllLists();
+        
+        for(SubscriptionList l : programList.getAllLists()){
+            if(l.equals(listEditing)){
+                programList.setListEditing(l);
+                return;
+            }
+        }
         this.programList.setListEditing(null);
     }
 

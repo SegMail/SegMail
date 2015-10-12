@@ -7,28 +7,22 @@ package segmail.program.list;
 
 import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
+import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.IncompleteDataException;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
-import eds.entity.config.ConfigNotFoundException;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.entity.subscription.ListType;
 
 /**
  *
@@ -74,16 +68,15 @@ public class FormAddList {
             //this.checkNoListYet(); //refresh the editing panel
             
             //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            ec.redirect(programContainer.getCurrentURL());
+            //ec.redirect(programContainer.getCurrentURL());
+            FacesMessenger.setFacesMessage(programList.getFormName(), FacesMessage.SEVERITY_FATAL, "List added. ", "You can set up your list now!");
             this.programList.setListEditing(SubscriptionList);
-            
+            programList.refresh();
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (ConfigNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (IOException ex) {
+        } catch (EnterpriseObjectNotFoundException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EJBException ex) { //Transaction did not go through
             Throwable cause = ex.getCause();
@@ -91,10 +84,7 @@ public class FormAddList {
             if(cause != null) message = cause.getMessage();
             
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, message, null);
-            
-        }   /*catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }*/
+        } 
     }
 
     public String getListName() {

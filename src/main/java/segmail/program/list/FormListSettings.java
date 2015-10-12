@@ -5,8 +5,8 @@
  */
 package segmail.program.list;
 
+import eds.component.user.UserService;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -29,6 +29,7 @@ public class FormListSettings {
     @Inject private UserContainer userContainer;
     
     @EJB private SubscriptionService subService;
+    @EJB private UserService userService;
     
     private final String formName = "FormListSettings";
     
@@ -55,5 +56,8 @@ public class FormListSettings {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
+    
+    
+    
     
 }

@@ -12,11 +12,14 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
+import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.EmailTemplate;
 
 /*
@@ -128,5 +131,17 @@ public class ProgramList implements Serializable {
         this.selectedConfirmationEmailId = selectedConfirmationEmailId;
     }
     
+    public void refresh(){
+        try {
+            //redirect to itself after setting list editing
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            //Keep all messages posted in this request
+            ec.getFlash().setKeepMessages(true);
+            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
+            ec.redirect(programContainer.getCurrentURL());
+        } catch (Exception ex){
+            FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
+        }
+    }
     
 }
