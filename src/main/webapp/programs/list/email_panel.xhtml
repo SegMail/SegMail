@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <form jsf:id="form_confirm_email">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>Confirmation email</h2>
+                    </div>
+                    <div class="page-toolbar-block pull-right">
+                        <button jsf:id="save_button" class="btn btn-primary"
+                                >
+                            <i class="fa fa-floppy-o"></i>
+                            Save
+                        </button>
+                    </div>  
+                </div>
+                <div class="row">
+                    <s2:messenger for="form_confirm_email"></s2:messenger>
+                </div>
+                <div class="row">
+                    <div class="col-md-6" >
+                        <span class="help-block">
+                            Select the email that you want your users to receive to confirm their signup.
+                        </span>
+
+                        <h:selectOneMenu styleClass="form-control" value="#{FormConfirmationEmail.program.selectedConfirmationEmailId}">
+                            <f:selectItem itemValue="-1" itemLabel="Please select one" />
+                            <f:selectItems  value="#{FormConfirmationEmail.program.confirmationEmails}" var="c"
+                                            itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
+
+                                            >
+                            </f:selectItems>
+                            <f:ajax event="change" listener="#{FormConfirmationEmail.previewConfirmationTemplate()}"
+                                    render="@form" execute="@form">
+                            </f:ajax>
+                        </h:selectOneMenu>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="help-block">
+                            Preview:
+                        </span>
+
+                        <textarea jsf:id="confirm_preview_panel" class="form-control"
+                                  disabled="true" 
+                                  jsf:value="#{FormConfirmationEmail.preview}">
+                            
+                        </textarea>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

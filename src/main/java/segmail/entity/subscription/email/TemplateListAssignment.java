@@ -13,10 +13,12 @@ import javax.persistence.Table;
 /**
  *
  * @author LeeKiatHaw
+ * @param <E>
+ * @param <SubscriptionList>
  */
 @Entity
 @Table(name="TEMPLATE_LIST_ASSIGNMENT")
-public class TemplateListAssignment extends EnterpriseRelationship<EmailTemplate,SubscriptionList> {
+public abstract class TemplateListAssignment<E extends EmailTemplate> extends EnterpriseRelationship<E,SubscriptionList> {
 
     @Override
     public void randInit() {
@@ -27,5 +29,5 @@ public class TemplateListAssignment extends EnterpriseRelationship<EmailTemplate
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

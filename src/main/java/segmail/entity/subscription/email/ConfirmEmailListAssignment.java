@@ -5,20 +5,17 @@
  */
 package segmail.entity.subscription.email;
 
-import eds.entity.client.Client;
-import eds.entity.data.EnterpriseRelationship;
-import eds.entity.user.UserType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import segmail.entity.subscription.SubscriptionList;
 
 /**
  *
  * @author LeeKiatHaw
- * @param <E>
  */
 @Entity
-@Table(name="TEMPLATE_CLIENT_ASSIGNMENT")
-public class TemplateClientAssignment<E extends EmailTemplate> extends EnterpriseRelationship<E,Client> {
+@Table(name="CONFIRM_EMAIL_LIST_ASSIGNMENT")
+public class ConfirmEmailListAssignment extends TemplateListAssignment<ConfirmationEmailTemplate> {
 
     @Override
     public void randInit() {

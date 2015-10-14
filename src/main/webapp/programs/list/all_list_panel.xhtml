@@ -13,7 +13,7 @@
             <c:forEach items="#{FormListList.programList.allLists}" var="list">
                 <div class="list-item">
                     <div class="list-item-content">
-                        <div class="list-item-container">
+                        <div class="list-item-container">   
                             <h4>#{list.LIST_NAME}</h4>
                             <p class="text-muted">
                                 224 Subscribers
@@ -22,7 +22,7 @@
                         <div class="list-item-right">
                             <div>
                                 <button class="btn btn-primary list-item-trigger"
-                                        jsf:actionListener="#{FormListList.loadList(list)}">
+                                        jsf:action="#{FormListList.loadList(list)}">
                                     <i class="fa fa-pencil"></i>
                                 </button>
                             </div>

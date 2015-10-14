@@ -20,6 +20,7 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.email.ConfirmationEmailTemplate;
 import segmail.entity.subscription.email.EmailTemplate;
 
 /*
@@ -49,7 +50,7 @@ public class ProgramList implements Serializable {
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
     private List<SubscriberAccount> subscribers;
-    private List<EmailTemplate> confirmationEmails;
+    private List<ConfirmationEmailTemplate> confirmationEmails;
     private EmailTemplate selectedConfirmationEmail;
     private long selectedConfirmationEmailId;
     
@@ -103,11 +104,11 @@ public class ProgramList implements Serializable {
         this.subscribers = subscribers;
     }
 
-    public List<EmailTemplate> getConfirmationEmails() {
+    public List<ConfirmationEmailTemplate> getConfirmationEmails() {
         return confirmationEmails;
     }
 
-    public void setConfirmationEmails(List<EmailTemplate> confirmationEmails) {
+    public void setConfirmationEmails(List<ConfirmationEmailTemplate> confirmationEmails) {
         this.confirmationEmails = confirmationEmails;
     }
 

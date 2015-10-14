@@ -5,6 +5,7 @@
  */
 package segmail.program.list;
 
+import eds.component.GenericObjectService;
 import eds.component.data.EntityNotFoundException;
 import segmail.component.subscription.SubscriptionService;
 import java.util.List;
@@ -20,8 +21,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.email.ConfirmEmailListAssignment;
+import segmail.entity.subscription.email.ConfirmationEmailTemplate;
 import segmail.entity.subscription.email.EmailTemplate;
 import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.CONFIRMATION;
+import segmail.entity.subscription.email.TemplateListAssignment;
 
 /**
  *
@@ -35,6 +39,7 @@ public class FormConfirmationEmail {
     @Inject private ClientContainer clientContainer;
     
     @EJB private SubscriptionService subscriptionService;
+    @EJB private GenericObjectService objectService;
     
     private final String formName = "form_confirm_email";
     
@@ -43,14 +48,34 @@ public class FormConfirmationEmail {
         FacesContext fc = FacesContext.getCurrentInstance();
         if(!fc.isPostback()){
             loadAvailableConfirmationEmails();
+            loadAssignedEmailTemplates();
+            //Preview confirmation panel or set as null if no template has been assigned yet
+            previewConfirmationTemplate();
         }
     }
     
     public void loadAvailableConfirmationEmails(){
         try {
-            List<EmailTemplate> confirmEmails = subscriptionService.getAvailableTemplatesForClient(
-                    clientContainer.getClient().getOBJECTID(), CONFIRMATION);
+            List<ConfirmationEmailTemplate> confirmEmails = subscriptionService.getAvailableConfirmationTemplateForClient(
+                    clientContainer.getClient().getOBJECTID());
             program.setConfirmationEmails(confirmEmails);
+            
+        } catch(EJBException ex) {
+            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        }
+    }
+    
+    public void loadAssignedEmailTemplates(){
+        try {
+            if(program.getListEditing() == null) return;
+            //If there is already a confirmation email assigned, load it
+            List<ConfirmationEmailTemplate> assignedConfirmEmails = subscriptionService.getAssignedEmailTemplatesForList(program.getListEditing().getOBJECTID(),
+                    ConfirmationEmailTemplate.class);
+            if(assignedConfirmEmails != null && !assignedConfirmEmails.isEmpty()){
+                ConfirmationEmailTemplate selected = assignedConfirmEmails.get(0);
+                program.setSelectedConfirmationEmailId(selected.getOBJECTID());
+                program.setSelectedConfirmationEmail(selected);
+            }
         } catch(EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
@@ -58,13 +83,40 @@ public class FormConfirmationEmail {
     
     public void assignConfirmationEmail(){
         try {
-            subscriptionService.assignConfirmationEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
+            long selectedConfirmEmailId = program.getSelectedConfirmationEmailId();
+            long editingListId = program.getListEditing().getOBJECTID();
+            
+            //Nothing is selected
+            if(selectedConfirmEmailId <= 0) {
+                subscriptionService.removeAllAssignedConfirmationTemplateFromList(editingListId);
+                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Confirmation email unassigned. ", "You need to assign a confirmation email to start receiving signups.");
+                this.resetConfirmationEmailPanel();
+                return;
+            }
+            
+            ConfirmEmailListAssignment newAssign = subscriptionService.assignConfirmationEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
+            program.setSelectedConfirmationEmail(newAssign.getSOURCE());
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Confirmation email assigned", null);
+            
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch(EJBException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } 
+    }
+    
+    public void previewConfirmationTemplate(){
+        long selectedConfirmEmailId = program.getSelectedConfirmationEmailId();
+        
+        //Nothing is selected
+        if(selectedConfirmEmailId <= 0){
+            resetConfirmationEmailPanel();
+            return;
+        }
+        
+        ConfirmationEmailTemplate selected = objectService.getEnterpriseObjectById(selectedConfirmEmailId, ConfirmationEmailTemplate.class);
+        program.setSelectedConfirmationEmail(selected);
+        
     }
 
     public ProgramList getProgram() {
@@ -74,6 +126,15 @@ public class FormConfirmationEmail {
     public void setProgram(ProgramList program) {
         this.program = program;
     }
+    
+    public String getPreview(){
+        return (program.getSelectedConfirmationEmail() == null) ? 
+                null : program.getSelectedConfirmationEmail().getBODY();
+    }
 
+    public void resetConfirmationEmailPanel(){
+        program.setSelectedConfirmationEmail(null);
+    }
+    
     
 }

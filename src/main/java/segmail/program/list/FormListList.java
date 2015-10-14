@@ -89,7 +89,8 @@ public class FormListList {
     }
 
     public void loadList(SubscriptionList list) {
-        this.programList.setListEditing(list);
+        programList.setListEditing(list);
+        programList.refresh();
     }
 
     /**

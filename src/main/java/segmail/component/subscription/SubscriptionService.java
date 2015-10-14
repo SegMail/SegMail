@@ -52,6 +52,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
+import segmail.entity.subscription.email.ConfirmEmailListAssignment;
 import segmail.entity.subscription.email.ConfirmationEmailTemplate;
 import segmail.entity.subscription.email.EmailTemplateFactory;
 import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
@@ -413,6 +414,8 @@ public class SubscriptionService {
      * [2015.10.04] The filtering is done here in this EJB instead of at the DB. 
      * We have not yet found any solution for the casting
      * 
+     * [2015.10.14] We can discard this
+     * 
      * @param clientid
      * @param type
      * @return 
@@ -420,24 +423,9 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<EmailTemplate> getAvailableTemplatesForClient(long clientid, TYPE type) {
         try {
-            //Class<E> e = (Class<E>) EmailTemplateFactory.getEmailTemplateClass(type);
-            /*CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<E> query = builder.createQuery(e);
-            Root<TemplateClientAssignment> sourceEntity = query.from(TemplateClientAssignment.class);
-
-            Join<TemplateClientAssignment, E> template = sourceEntity.join("SOURCE");
-            Join<TemplateClientAssignment, Client> client = sourceEntity.join("TARGET");
-
-            query.select(template);
-
-            List<Predicate> conditions = new ArrayList();
-
-            conditions.add(builder.equal(client.get(Client_.OBJECTID), clientid));
-
-            query.where(conditions.toArray(new Predicate[]{}));
-
-            */
-            List<EmailTemplate> results = getAllAvailableTemplatesForClient(clientid);
+            
+            //List<EmailTemplate> results = getAllAvailableTemplatesForClient(clientid);
+            List<ConfirmationEmailTemplate> results = objectService.getAllSourceObjectsFromTarget(clientid, TemplateClientAssignment.class, ConfirmationEmailTemplate.class);
             
             //Filter by class manually here
             List<EmailTemplate> filteredResults = new ArrayList();
@@ -570,34 +558,46 @@ public class SubscriptionService {
 
     }
 
+    /**
+     * If no email template ID is provided, all existing 
+     * @param confirmationEmailId
+     * @param listId
+     * @return
+     * @throws EntityNotFoundException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public TemplateListAssignment assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException {
+    public ConfirmEmailListAssignment assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException {
         try {
             //Retrieve both objects and check they both exists
             ConfirmationEmailTemplate confirmationEmail = objectService.getEnterpriseObjectById(confirmationEmailId, ConfirmationEmailTemplate.class);
             if (confirmationEmail == null) {
-                throw new EntityNotFoundException(EmailTemplate.class, confirmationEmailId);
+                throw new EntityNotFoundException(ConfirmationEmailTemplate.class, confirmationEmailId);
             }
-            /** No need for this check anymore we already have defined a subclass for confirmation emails
-            if (!EmailTemplateFactory.TYPE.CONFIRMATION.equals(confirmationEmail.getTYPE())) {
-                throw new RuntimeException("EmailTemplate (id=" + confirmationEmail.getOBJECTID() + ") is not a confirmation email template.");
-            }*/
-
+            
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
             if (list == null) {
                 throw new EntityNotFoundException(SubscriptionList.class, listId);
             }
-
-            //Check if there is already an assignment, if yes, delete it as this is a 1-to-many (email to list) relationship
-            List<TemplateListAssignment> existingAssignemnts = objectService.getRelationshipsForTargetObject(listId, TemplateListAssignment.class);
-            if (existingAssignemnts != null && !existingAssignemnts.isEmpty()) {
-                em.remove(existingAssignemnts);
-            }
-
-            TemplateListAssignment newAssignment = new TemplateListAssignment();
+            
+            ConfirmEmailListAssignment newAssignment = new ConfirmEmailListAssignment();
             newAssignment.setSOURCE(confirmationEmail);
             newAssignment.setTARGET(list);
 
+            //Check if there is already an assignment, if yes, delete it as this is a 1-to-many (email to list) relationship
+            //Delete all other assignments except the one we are going to add
+            /*List<ConfirmEmailListAssignment> existingAssignments = objectService.getRelationshipsForTargetObject(listId, ConfirmEmailListAssignment.class);
+            
+            List<ConfirmEmailListAssignment> modListCopy = new ArrayList<>(existingAssignments);
+            for(ConfirmEmailListAssignment assign:modListCopy){
+                if(!newAssignment.equals(assign)){
+                    em.remove(em.contains(assign) ? assign : em.merge(assign));
+                    existingAssignments.remove(assign);
+                }
+            }
+            if(existingAssignments == null || existingAssignments.isEmpty())*/
+            
+            //Let's not complicate things and just do a delete-all-and-add-new
+            this.removeAllAssignedConfirmationTemplateFromList(listId);
             em.persist(newAssignment);
 
             return newAssignment;
@@ -725,5 +725,39 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public <E extends EmailTemplate> List<E> getAssignedEmailTemplatesForList(long listId, Class<E> e){
+        try {
+            List<E> results = objectService.getAllSourceObjectsFromTarget(listId, ConfirmEmailListAssignment.class, e);
+            
+            return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeAllAssignedConfirmationTemplateFromList(long listId){
+        try {
+            List<ConfirmEmailListAssignment> existingAssignments = objectService.getRelationshipsForTargetObject(listId, ConfirmEmailListAssignment.class);
+            
+            /*if (existingAssignments != null && !existingAssignments.isEmpty()) {
+                em.remove(existingAssignments);  
+            }*/
+            List<ConfirmEmailListAssignment> modListCopy = new ArrayList<>(existingAssignments);
+            for(ConfirmEmailListAssignment assign:modListCopy){
+                    em.remove(em.contains(assign) ? assign : em.merge(assign));
+            }
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
 }

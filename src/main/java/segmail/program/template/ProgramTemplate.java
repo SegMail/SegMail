@@ -21,8 +21,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.email.ConfirmationEmailTemplate;
 import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.CONFIRMATION;
 import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.NEWSLETTER;
+import segmail.entity.subscription.email.NewsletterEmailTemplate;
 
 /**
  *
@@ -45,9 +47,9 @@ public class ProgramTemplate implements Serializable {
     
     @Inject private ClientFacade clientFacade;
     
-    private List<EmailTemplate> confirmationTemplates;
+    private List<ConfirmationEmailTemplate> confirmationTemplates;
     
-    private List<EmailTemplate> newsletterTemplates;
+    private List<NewsletterEmailTemplate> newsletterTemplates;
     
     private List<UserType> allUserTypes;
     
@@ -73,7 +75,7 @@ public class ProgramTemplate implements Serializable {
     public void initializeAllConfirmationTemplates() {
         try {
             
-            this.setConfirmationTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),CONFIRMATION));
+            this.setConfirmationTemplates(subscriptionService.getAvailableConfirmationTemplateForClient(clientFacade.getClient().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -85,7 +87,7 @@ public class ProgramTemplate implements Serializable {
     public void initializeAllNewsletterTemplates() {
         try {
             
-            this.setNewsletterTemplates(subscriptionService.getAvailableTemplatesForClient(clientFacade.getClient().getOBJECTID(),NEWSLETTER));
+            this.setNewsletterTemplates(subscriptionService.getAvailableNewsletterTemplateForClient(clientFacade.getClient().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -110,11 +112,11 @@ public class ProgramTemplate implements Serializable {
         this.initializeAllNewsletterTemplates();
     }
 
-    public List<EmailTemplate> getConfirmationTemplates() {
+    public List<ConfirmationEmailTemplate> getConfirmationTemplates() {
         return confirmationTemplates;
     }
 
-    public void setConfirmationTemplates(List<EmailTemplate> confirmationTemplates) {
+    public void setConfirmationTemplates(List<ConfirmationEmailTemplate> confirmationTemplates) {
         this.confirmationTemplates = confirmationTemplates;
     }
 
@@ -126,11 +128,11 @@ public class ProgramTemplate implements Serializable {
         this.allUserTypes = allUserTypes;
     }
 
-    public List<EmailTemplate> getNewsletterTemplates() {
+    public List<NewsletterEmailTemplate> getNewsletterTemplates() {
         return newsletterTemplates;
     }
 
-    public void setNewsletterTemplates(List<EmailTemplate> newsletterTemplates) {
+    public void setNewsletterTemplates(List<NewsletterEmailTemplate> newsletterTemplates) {
         this.newsletterTemplates = newsletterTemplates;
     }
 
