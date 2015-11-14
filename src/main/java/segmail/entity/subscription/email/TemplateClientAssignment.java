@@ -12,7 +12,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- *
+ * This class was supposed to be extended by subclasses but then we realize it 
+ * was really a hassle to create new relationship classes so we just stick with this.
+ * Also, when you create templates, you create all types of templates in one
+ * place. As a user, you need to pull all templates from the database ignoring
+ * its type.
+ * 
  * @author LeeKiatHaw
  * @param <E>
  */
@@ -29,5 +34,5 @@ public class TemplateClientAssignment<E extends EmailTemplate> extends Enterpris
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }
