@@ -10,7 +10,7 @@ import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
-import segmail.entity.subscription.email.EmailTemplate;
+import segmail.entity.subscription.email.AutoresponderEmail;
 import eds.entity.user.UserType;
 import java.io.Serializable;
 import java.util.List;
@@ -21,18 +21,18 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.entity.subscription.email.ConfirmationEmailTemplate;
-import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.CONFIRMATION;
-import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.NEWSLETTER;
-import segmail.entity.subscription.email.NewsletterEmailTemplate;
+import segmail.entity.subscription.email.AutoConfirmEmail;
+import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIRMATION;
+import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.WELCOME;
+import segmail.entity.subscription.email.AutoWelcomeEmail;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@Named("ProgramTemplate")
+@Named("ProgramWelcomeEmail")
 @SessionScoped
-public class ProgramTemplate implements Serializable {
+public class ProgramWelcomeEmail implements Serializable {
     
     @EJB
     private SubscriptionService subscriptionService;
@@ -47,21 +47,21 @@ public class ProgramTemplate implements Serializable {
     
     @Inject private ClientFacade clientFacade;
     
-    private List<ConfirmationEmailTemplate> confirmationTemplates;
+    private List<AutoConfirmEmail> confirmationTemplates;
     
-    private List<NewsletterEmailTemplate> newsletterTemplates;
+    private List<AutoWelcomeEmail> welcomeTemplates;
     
     private List<UserType> allUserTypes;
     
     private final String formName = "ProgramTemplate";
     
-    private EmailTemplate editingTemplate;
+    private AutoresponderEmail editingTemplate;
     
     // @PostConstruct
     public void init(){
         //this.initializeClient();
-        //this.initializeAllConfirmationTemplates();
-        //this.initializeAllNewsletterTemplates();
+        //this.initializeAllConfirmationEmails();
+        //this.initializeAllWelcomeEmails();
         //this.initializeAllTemplates();
         //this.initializeAllUserTypes();
         
@@ -72,10 +72,10 @@ public class ProgramTemplate implements Serializable {
         
     }
     
-    public void initializeAllConfirmationTemplates() {
+    public void initializeAllConfirmationEmails() {
         try {
             
-            this.setConfirmationTemplates(subscriptionService.getAvailableConfirmationTemplateForClient(clientFacade.getClient().getOBJECTID()));
+            this.setConfirmationTemplates(subscriptionService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -84,10 +84,10 @@ public class ProgramTemplate implements Serializable {
         }
     }
 
-    public void initializeAllNewsletterTemplates() {
+    public void initializeAllWelcomeEmails() {
         try {
             
-            this.setNewsletterTemplates(subscriptionService.getAvailableNewsletterTemplateForClient(clientFacade.getClient().getOBJECTID()));
+            this.setWelcomeTemplates(subscriptionService.getAvailableWelcomeEmailForClient(clientFacade.getClient().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -108,15 +108,15 @@ public class ProgramTemplate implements Serializable {
     }
     
     public void initializeAllTemplates() {
-        this.initializeAllConfirmationTemplates();
-        this.initializeAllNewsletterTemplates();
+        this.initializeAllConfirmationEmails();
+        this.initializeAllWelcomeEmails();
     }
 
-    public List<ConfirmationEmailTemplate> getConfirmationTemplates() {
+    public List<AutoConfirmEmail> getConfirmationTemplates() {
         return confirmationTemplates;
     }
 
-    public void setConfirmationTemplates(List<ConfirmationEmailTemplate> confirmationTemplates) {
+    public void setConfirmationTemplates(List<AutoConfirmEmail> confirmationTemplates) {
         this.confirmationTemplates = confirmationTemplates;
     }
 
@@ -128,12 +128,12 @@ public class ProgramTemplate implements Serializable {
         this.allUserTypes = allUserTypes;
     }
 
-    public List<NewsletterEmailTemplate> getNewsletterTemplates() {
-        return newsletterTemplates;
+    public List<AutoWelcomeEmail> getWelcomeTemplates() {
+        return welcomeTemplates;
     }
 
-    public void setNewsletterTemplates(List<NewsletterEmailTemplate> newsletterTemplates) {
-        this.newsletterTemplates = newsletterTemplates;
+    public void setWelcomeTemplates(List<AutoWelcomeEmail> welcomeTemplates) {
+        this.welcomeTemplates = welcomeTemplates;
     }
 
     public ProgramTemplateLoader getLoader() {
@@ -152,11 +152,11 @@ public class ProgramTemplate implements Serializable {
         this.userContainer = userContainer;
     }
 
-    public EmailTemplate getEditingTemplate() {
+    public AutoresponderEmail getEditingTemplate() {
         return editingTemplate;
     }
 
-    public void setEditingTemplate(EmailTemplate editingTemplate) {
+    public void setEditingTemplate(AutoresponderEmail editingTemplate) {
         this.editingTemplate = editingTemplate;
     }
 

@@ -29,16 +29,17 @@
                             <p>
                                 Confirmation emails are sent to your subscribers upon the first time they 
                                 signup to confirm that the email address that they have provided belongs
-                                to them. You can create your own confirmation email templates here.
+                                to them. You can create your own confirmation emails here that can be 
+                                <u>shared across different lists</u>.
                             </p>
                             <div class="form-group">
-                                <a class="btn btn-success" href="#add_new_template_popup" data-toggle="modal"
+                                <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
                                    onclick="
                                            popup.init('popup_title', 'Add new confirmation template', 'email_type', 'CONFIRMATION');
                                            popup.popup();"
                                    >
 
-                                    Create new confirmation template
+                                    Create new confirmation email
                                 </a>
                             </div>
                             <div class="list-group">
@@ -46,9 +47,9 @@
                                 <!--<a href="#" class="list-group-item">Default</a>-->
                                 <c:forEach items="#{ProgramTemplateLoader.program.confirmationTemplates}" var="confirm">
                                     <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
-                                        <a href="#edit_template_popup" class="list-group-item" data-toggle="modal"
+                                        <a href="#edit_auto_email_popup" class="list-group-item" data-toggle="modal"
                                            >
-                                            <f:ajax render="edit_template_form"  event="click"
+                                            <f:ajax render="edit_auto_email_form"  event="click"
                                                     listener="#{FormEditExistingTemplate.loadTemplate(confirm.OBJECTID)}"
                                                     onevent="edit"
                                                     />
@@ -65,29 +66,29 @@
                     <div class="block">
                         <div class="block-content">
 
-                            <h2><strong>Newsletters emails</strong></h2>
+                            <h2><strong>Welcome emails</strong></h2>
 
                             <p>
-                                Newsletters are sent to your subscribers on a regular basis.
+                                Welcome emails are sent to your subscribers upon confirmation of their subscription.
                             </p>
                             <div class="form-group">
-                                <a class="btn btn-success" href="#add_new_template_popup" data-toggle="modal"
-                                   onclick="popup.init('popup_title', 'Add new newsletter template', 'email_type', 'NEWSLETTER');
+                                <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
+                                   onclick="popup.init('popup_title', 'Add new welcome template', 'email_type', 'WELCOME');
                                            popup.popup();
                                    ">
 
-                                    Create new newsletter template
+                                    Create new welcome email
                                 </a>
                             </div>
                             <div class="list-group">
                                 <!--<a href="#" class="list-group-item">Default</a>-->
 
-                                <c:forEach items="#{ProgramTemplateLoader.program.newsletterTemplates}" var="newsletter">
+                                <c:forEach items="#{ProgramTemplateLoader.program.welcomeTemplates}" var="newsletter">
                                     <form jsf:id="edit_newsletter_popup_link_#{newsletter.OBJECTID}" name="newsletter_#{newsletter.OBJECTID}" >
-                                        <a href="#edit_template_popup" class="list-group-item" data-toggle="modal"
+                                        <a href="#edit_auto_email_popup" class="list-group-item" data-toggle="modal"
 
                                            >
-                                            <f:ajax event="click" render="edit_template_form"
+                                            <f:ajax event="click" render="edit_auto_email_form"
                                                     listener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}"
                                                     onevent="edit"
                                                     />
@@ -102,11 +103,11 @@
                     </div>
                 </div>
             </div>
-            <div class="modal fade" id="add_new_template_popup">
-                <ui:include src="add_new_template_popup.xhtml"></ui:include>
+            <div class="modal fade" id="add_new_auto_email_popup">
+                <ui:include src="add_new_auto_email_popup.xhtml"></ui:include>
             </div>
-            <div class="modal fade" id="edit_template_popup">
-                <ui:include src="edit_template_popup.xhtml"></ui:include>
+            <div class="modal fade" id="edit_auto_email_popup">
+                <ui:include src="edit_auto_email_popup.xhtml"></ui:include>
             </div>
         </ui:define>
 

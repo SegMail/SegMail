@@ -7,20 +7,22 @@ package segmail.entity.subscription.email;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
-import static segmail.entity.subscription.email.EmailTemplateFactory.TYPE.NEWSLETTER;
+import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIRMATION;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @Entity
-public class NewsletterEmailTemplate extends EmailTemplate{
+@Table(name="AUTO_CONFIRM_EMAIL")
+//@DiscriminatorValue("CONFIRMATION")
+public class AutoConfirmEmail extends AutoresponderEmail{
 
     @Override
-    public TYPE type() {
-        return NEWSLETTER;
+    public AutoEmailTypeFactory.TYPE type() {
+        return CONFIRMATION;
     }
 
+    
     
 }

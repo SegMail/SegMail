@@ -9,13 +9,14 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
 
-    <form jsf:id="form_confirm_email">
+    <form jsf:id="form_list_email">
         <div class="row">
             <div class="col-md-12">
 
                 <div class="row">
-                    <div class="col-md-8">
-                        <h2>Confirmation email</h2>
+                    <div class="col-md-12">
+                        Set the automatic emails you want to send on different events
+                        for your list.
                     </div>
                     <div class="page-toolbar-block pull-right">
                         <button jsf:id="save_button" class="btn btn-primary"
@@ -26,27 +27,80 @@
                     </div>  
                 </div>
                 <div class="row">
-                    <s2:messenger for="form_confirm_email"></s2:messenger>
+                    <s2:messenger for="form_list_email"></s2:messenger>
                 </div>
+                <!--Test the timeline gadget-->
+
                 <div class="row">
-                    <div class="col-md-6" >
-                        <span class="help-block">
-                            Select the email that you want your users to receive to confirm their signup.
-                        </span>
+                    <div class="col-md-12">
+                        <div class="timeline">
+                            <div class="timeline-event">
+                                <div class="timeline-date">
+                                    <div>
+                                        <span>0</span>Start
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="timeline-event-icon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <div class="timeline-event-content">
+                                    <div class="event-title">
+                                        Confirmation email
+                                        <div class="event-date">
+                                            Immediately
+                                        </div>
+                                    </div>
 
-                        <h:selectOneMenu styleClass="form-control" value="#{FormConfirmationEmail.program.selectedConfirmationEmailId}">
-                            <f:selectItem itemValue="-1" itemLabel="Please select one" />
-                            <f:selectItems  value="#{FormConfirmationEmail.program.confirmationEmails}" var="c"
-                                            itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
+                                    <p>Select the email that you want your users to receive to <u>confirm</u> their signup.</p>
+                                    <p><h:selectOneMenu styleClass="form-control" value="#{FormListEmail.program.selectedConfirmationEmailId}">
+                                            <f:selectItem itemValue="-1" itemLabel="Please select one" />
+                                            <f:selectItems  value="#{FormListEmail.program.confirmationEmails}" var="c"
+                                                            itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
+                                                            >
+                                            </f:selectItems>
+                                        </h:selectOneMenu>
+                                    </p>
 
-                                            >
-                            </f:selectItems>
-                            <f:ajax event="change" listener="#{FormConfirmationEmail.previewConfirmationTemplate()}"
-                                    render="@form" execute="@form">
-                            </f:ajax>
-                        </h:selectOneMenu>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="timeline-event-icon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <div class="timeline-event-content">
+                                    <div class="event-title">
+                                        Welcome email
+                                        <div class="event-date">
+                                            After confirmation
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Select the email that you want your users to receive <u>after</u> they have confirmed their signup.
+                                    </p>
+                                    <p>
+                                        <h:selectOneMenu styleClass="form-control" value="#{FormListEmail.program.selectedWelcomeEmailId}">
+                                            <f:selectItem itemValue="-1" itemLabel="Please select one" />
+                                            <f:selectItems  value="#{FormListEmail.program.welcomeEmails}" var="c"
+                                                            itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
+
+                                                            >
+                                            </f:selectItems>
+
+                                        </h:selectOneMenu>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="timeline-date">
+                                    <div>
+                                        <span>...</span>Done!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    
                 </div>
             </div>
         </div>

@@ -8,7 +8,7 @@ package segmail.program.template;
 import eds.component.client.ClientFacade;
 import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
-import segmail.entity.subscription.email.EmailTemplate;
+import segmail.entity.subscription.email.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.entity.subscription.email.EmailTemplateFactory;
+import segmail.entity.subscription.email.AutoEmailTypeFactory;
 
 /**
  *
@@ -28,12 +28,12 @@ import segmail.entity.subscription.email.EmailTemplateFactory;
  */
 @Named("FormAddNewTemplate")
 @RequestScoped
-public class FormAddNewTemplate {
+public class FormAddNewAutoEmail {
     
     @EJB private SubscriptionService subscriptionService;
     @EJB private UserService userService;
     
-    @Inject private ProgramTemplate program;
+    @Inject private ProgramWelcomeEmail program;
     @Inject private ProgramContainer programContainer;
     @Inject private ClientFacade clientFacade;
     
@@ -41,20 +41,20 @@ public class FormAddNewTemplate {
     
     private String body;
     
-    private EmailTemplateFactory.TYPE type;
+    private AutoEmailTypeFactory.TYPE type;
     
-    private final String formName = "add_new_template_form";
+    private final String formName = "add_new_auto_email_form";
     
     @PostConstruct
     public void init(){
         
     }
     
-    public void addNewTemplate(){
+    public void addNewAutoEmail(){
         try {
             // Create the new template
             // Get the client associated with the user and assign it
-            EmailTemplate newTemplate = subscriptionService.addTemplate(subject, body, type);
+            AutoresponderEmail newTemplate = subscriptionService.addAutoEmail(subject, body, type);
             
             //Refresh the list of email templates on the page
             //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit
@@ -88,11 +88,11 @@ public class FormAddNewTemplate {
         this.body = body;
     }
 
-    public EmailTemplateFactory.TYPE getType() {
+    public AutoEmailTypeFactory.TYPE getType() {
         return type;
     }
 
-    public void setType(EmailTemplateFactory.TYPE type) {
+    public void setType(AutoEmailTypeFactory.TYPE type) {
         this.type = type;
     }
 

@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="add_new_template_form">
+    <form jsf:id="add_new_auto_email_form">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -21,7 +21,7 @@
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <s2:messenger id="FormAddTemp_messenger" for="add_new_template_form" showDetail="true" showSummary="true"
+                        <s2:messenger id="FormAddTemp_messenger" for="add_new_auto_email_form" showDetail="true" showSummary="true"
                                       class="form-group"></s2:messenger>
                     </div>
                     <div class="form-group">
@@ -40,19 +40,19 @@
                 </div>
                 <div class="modal-footer">
 
-                    <p:commandButton id="add_new_template_button" styleClass="btn btn-success" 
+                    <p:commandButton id="add_new_auto_email_button" styleClass="btn btn-success" 
                                      value="Add Template" 
                                      update="FormAddTemp_messenger"
                                      oncomplete="
                                         popup.popup();
                                         "
-                                     actionListener="#{FormAddNewTemplate.addNewTemplate()}"
+                                     actionListener="#{FormAddNewTemplate.addNewAutoEmail()}"
                                      onstart="reapply_textarea('body_add')"
                                      >
 
                     </p:commandButton>
                 </div>
-                <p:blockUI block="add_new_template_form" trigger="add_new_template_form:add_new_template_button"
+                <p:blockUI block="add_new_auto_email_form" trigger="add_new_auto_email_form:add_new_auto_email_button"
                            >
                     <p id="spinner"></p>
                 </p:blockUI>

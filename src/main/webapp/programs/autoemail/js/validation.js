@@ -1,10 +1,10 @@
 $(document).ready(function () {
-    add_new_template_form.form();
-    edit_template_form.form();
+    add_new_auto_email_form.form();
+    edit_auto_email_form.form();
 });
 
-var add_new_template_form =
-        $("#add_new_template_form").validate({
+var add_new_auto_email_form =
+        $("#add_new_auto_email_form").validate({
     rules: {
         subject: {
             required: true},
@@ -16,8 +16,8 @@ var add_new_template_form =
     }
 });
 
-var edit_template_form =
-        $("#edit_template_form").validate({
+var edit_auto_email_form =
+        $("#edit_auto_email_form").validate({
     rules: {
         subject: {
             required: true},

@@ -13,9 +13,9 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(EmailTemplate.class)
-public class EmailTemplate_ extends EnterpriseObject_ {
+@StaticMetamodel(AutoresponderEmail.class)
+public class AutoresponderEmail_ extends EnterpriseObject_ {
 
-    public static volatile SingularAttribute<EmailTemplate,String> SUBJECT;
-    public static volatile SingularAttribute<EmailTemplate,String> BODY;
+    public static volatile SingularAttribute<AutoresponderEmail,String> SUBJECT;
+    public static volatile SingularAttribute<AutoresponderEmail,String> BODY;
 }

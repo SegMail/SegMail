@@ -5,20 +5,17 @@
  */
 package segmail.entity.subscription.email;
 
-import eds.entity.data.EnterpriseRelationship;
-import segmail.entity.subscription.SubscriptionList;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import segmail.entity.subscription.SubscriptionList;
 
 /**
  *
  * @author LeeKiatHaw
- * @param <E>
- * @param <SubscriptionList>
  */
 @Entity
-@Table(name="TEMPLATE_LIST_ASSIGNMENT")
-public abstract class TemplateListAssignment<E extends EmailTemplate> extends EnterpriseRelationship<E,SubscriptionList> {
+@Table(name="ASSIGN_AUTO_CONFIRM_EMAIL_LIST")
+public class Assign_AutoConfirmEmail_List extends Assign_AutoresponderEmail_List<AutoConfirmEmail> {
 
     @Override
     public void randInit() {
@@ -29,5 +26,5 @@ public abstract class TemplateListAssignment<E extends EmailTemplate> extends En
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
 }

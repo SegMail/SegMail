@@ -20,8 +20,9 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.bootstrap.module.User.UserContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.entity.subscription.email.ConfirmationEmailTemplate;
-import segmail.entity.subscription.email.EmailTemplate;
+import segmail.entity.subscription.email.AutoConfirmEmail;
+import segmail.entity.subscription.email.AutoWelcomeEmail;
+import segmail.entity.subscription.email.AutoresponderEmail;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -50,9 +51,15 @@ public class ProgramList implements Serializable {
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
     private List<SubscriberAccount> subscribers;
-    private List<ConfirmationEmailTemplate> confirmationEmails;
-    private EmailTemplate selectedConfirmationEmail;
+    
+    //For the confirmation emails
+    private List<AutoConfirmEmail> confirmationEmails;
+    private AutoresponderEmail selectedConfirmationEmail;
     private long selectedConfirmationEmailId;
+    //For the welcome emails
+    private List<AutoWelcomeEmail> welcomeEmails;
+    private AutoresponderEmail selectedWelcomeEmail;
+    private long selectedWelcomeEmailId;
     
     private final Map<String,String> editingPanelLocation = new HashMap<String,String>();
     
@@ -104,19 +111,19 @@ public class ProgramList implements Serializable {
         this.subscribers = subscribers;
     }
 
-    public List<ConfirmationEmailTemplate> getConfirmationEmails() {
+    public List<AutoConfirmEmail> getConfirmationEmails() {
         return confirmationEmails;
     }
 
-    public void setConfirmationEmails(List<ConfirmationEmailTemplate> confirmationEmails) {
+    public void setConfirmationEmails(List<AutoConfirmEmail> confirmationEmails) {
         this.confirmationEmails = confirmationEmails;
     }
 
-    public EmailTemplate getSelectedConfirmationEmail() {
+    public AutoresponderEmail getSelectedConfirmationEmail() {
         return selectedConfirmationEmail;
     }
 
-    public void setSelectedConfirmationEmail(EmailTemplate selectedConfirmationEmail) {
+    public void setSelectedConfirmationEmail(AutoresponderEmail selectedConfirmationEmail) {
         this.selectedConfirmationEmail = selectedConfirmationEmail;
     }
 
@@ -131,6 +138,32 @@ public class ProgramList implements Serializable {
     public void setSelectedConfirmationEmailId(long selectedConfirmationEmailId) {
         this.selectedConfirmationEmailId = selectedConfirmationEmailId;
     }
+
+    public List<AutoWelcomeEmail> getWelcomeEmails() {
+        return welcomeEmails;
+    }
+
+    public void setWelcomeEmails(List<AutoWelcomeEmail> welcomeEmails) {
+        this.welcomeEmails = welcomeEmails;
+    }
+
+    public AutoresponderEmail getSelectedWelcomeEmail() {
+        return selectedWelcomeEmail;
+    }
+
+    public void setSelectedWelcomeEmail(AutoresponderEmail selectedWelcomeEmail) {
+        this.selectedWelcomeEmail = selectedWelcomeEmail;
+    }
+
+    public long getSelectedWelcomeEmailId() {
+        return selectedWelcomeEmailId;
+    }
+
+    public void setSelectedWelcomeEmailId(long selectedWelcomeEmailId) {
+        this.selectedWelcomeEmailId = selectedWelcomeEmailId;
+    }
+    
+    
     
     public void refresh(){
         try {

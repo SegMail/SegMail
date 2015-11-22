@@ -12,7 +12,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.entity.data.EnterpriseObject;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.subscription.email.EmailTemplate;
+import segmail.entity.subscription.email.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -37,7 +37,7 @@ public class FormEditExistingTemplate {
     @EJB private GenericObjectService objectService;
     //@EJB private UserService userService;
     
-    @Inject private ProgramTemplate program;
+    @Inject private ProgramWelcomeEmail program;
     //@Inject private UserContainer userContainer;
     @Inject private ProgramContainer programContainer;
     
@@ -51,8 +51,8 @@ public class FormEditExistingTemplate {
     public void loadTemplate(long templateId){
         try {
             // Retrieve the template based on the Id
-            // Using cast because when retrieving with EmailTemplate.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
-            EmailTemplate editing = (EmailTemplate) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
+            // Using cast because when retrieving with AutoresponderEmail.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
+            AutoresponderEmail editing = (AutoresponderEmail) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
             
             program.setEditingTemplate(editing);
             
@@ -66,7 +66,7 @@ public class FormEditExistingTemplate {
     
     public void saveTemplateAndContinue(){
         try {
-            EmailTemplate newTemplate = subscriptionService.saveTemplate(program.getEditingTemplate());
+            AutoresponderEmail newTemplate = subscriptionService.saveAutoEmail(program.getEditingTemplate());
             
             //redirect to itself after setting list editing
             //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -93,7 +93,7 @@ public class FormEditExistingTemplate {
     
     public void saveTemplateAndClose(){
         try {
-            subscriptionService.saveTemplate(program.getEditingTemplate());
+            subscriptionService.saveAutoEmail(program.getEditingTemplate());
             
             refresh();
             
@@ -118,7 +118,7 @@ public class FormEditExistingTemplate {
     
     public void deleteTemplate(){
         try {
-            subscriptionService.deleteTemplate(program.getEditingTemplate().getOBJECTID());
+            subscriptionService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
             refresh();
             
@@ -142,11 +142,11 @@ public class FormEditExistingTemplate {
         }
     }
 
-    public ProgramTemplate getProgram() {
+    public ProgramWelcomeEmail getProgram() {
         return program;
     }
 
-    public void setProgram(ProgramTemplate program) {
+    public void setProgram(ProgramWelcomeEmail program) {
         this.program = program;
     }
     

@@ -9,26 +9,26 @@ package segmail.entity.subscription.email;
  *
  * @author LeeKiatHaw
  */
-public class EmailTemplateFactory {
+public class AutoEmailTypeFactory {
     
     public static enum TYPE{
         CONFIRMATION,
-        NEWSLETTER,
+        WELCOME,
         AUTORESPONDER
     }
     
-    public static EmailTemplate getEmailTemplateInstance(TYPE type){
+    public static AutoresponderEmail getAutoEmailTypeInstance(TYPE type){
         switch(type){
-            case CONFIRMATION   :   return new ConfirmationEmailTemplate();
-            case NEWSLETTER     :   return new NewsletterEmailTemplate();
+            case CONFIRMATION   :   return new AutoConfirmEmail();
+            case WELCOME     :   return new AutoWelcomeEmail();
             default             :   return null;
         }
     }
     
-    public static Class<? extends EmailTemplate> getEmailTemplateClass(TYPE type){
+    public static Class<? extends AutoresponderEmail> getAutoEmailTypeClass(TYPE type){
         switch(type){
-            case CONFIRMATION   :   return ConfirmationEmailTemplate.class;
-            case NEWSLETTER     :   return NewsletterEmailTemplate.class;
+            case CONFIRMATION   :   return AutoConfirmEmail.class;
+            case WELCOME     :   return AutoWelcomeEmail.class;
             default             :   throw new RuntimeException("EmailTemplateFactory cannot identify the type "+type.toString());
         }
     }

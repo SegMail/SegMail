@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="SUBSCRIBER")
+@Table(name="SUBSCRIBER_ACCOUNT")
 public class SubscriberAccount extends EnterpriseObject implements MailRecipient {
     
     private String EMAIL;

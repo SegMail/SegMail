@@ -5,8 +5,6 @@
  */
 package segmail.entity.subscription;
 
-import eds.entity.data.EnterpriseObject;
-import eds.entity.data.EnterpriseRelationship;
 import eds.entity.data.EnterpriseRelationship_;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

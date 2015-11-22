@@ -35,7 +35,7 @@ public class ProgramTemplateLoader {
 
     // Parent program bean
     @Inject
-    private ProgramTemplate program;
+    private ProgramWelcomeEmail program;
 
     private final String formName = "ProgramTemplateLoader";
 
@@ -61,11 +61,11 @@ public class ProgramTemplateLoader {
         return formName;
     }
 
-    public ProgramTemplate getProgram() {
+    public ProgramWelcomeEmail getProgram() {
         return program;
     }
 
-    public void setProgram(ProgramTemplate program) {
+    public void setProgram(ProgramWelcomeEmail program) {
         this.program = program;
     }
 

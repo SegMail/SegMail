@@ -12,7 +12,7 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(TemplateListAssignment.class)
-public class TemplateListAssignment_ extends EnterpriseRelationship_ {
+@StaticMetamodel(Assign_AutoresponderEmail_List.class)
+public class Assign_Template_List_ extends EnterpriseRelationship_ {
     
 }

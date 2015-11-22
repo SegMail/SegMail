@@ -15,7 +15,7 @@
                 These are general information about your list. Mostly display stuff.
             </div>
             <div class="page-toolbar-block pull-right">
-                <button jsf:id="save_button" class="btn btn-primary"
+                <button jsf:id="save_settings_button" class="btn btn-primary"
 
                         >
                     <!--f:ajax won't append its code to the onclick attribute of the button element-->
@@ -82,7 +82,7 @@
             </div>
         </div>
 
-        <p:blockUI block="FormListSettings" trigger="FormListSettings:save_button"
+        <p:blockUI block="FormListSettings" trigger="FormListSettings:save_settings_button"
 
                    >
             <p id="spinner"></p>

@@ -10,7 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
+import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
 
 /**
  * A template is actually different from the actual email sent. It has to exist
@@ -25,9 +25,9 @@ import segmail.entity.subscription.email.EmailTemplateFactory.TYPE;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="EMAIL_TEMPLATE")
+@Table(name="AUTORESPONDER_EMAIL")
 @DiscriminatorColumn(name="EMAIL_TYPE")
-public abstract class EmailTemplate extends EnterpriseObject {
+public abstract class AutoresponderEmail extends EnterpriseObject {
     
     /**
     public enum EMAIL_TYPE {
@@ -52,7 +52,7 @@ public abstract class EmailTemplate extends EnterpriseObject {
     
     /**
      * Each subclass should implement it and return an enumeration that is defined
-     * in EmailTemplateFactory.
+ in AutoEmailTypeFactory.
      * 
      * @return TYPE
      */
