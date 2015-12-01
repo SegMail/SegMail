@@ -53,6 +53,7 @@ import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
+import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoEmailTypeFactory;
 import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
@@ -410,52 +411,6 @@ public class SubscriptionService {
         } 
     }
 
-    /**
-     * [2015.10.04] The filtering is done here in this EJB instead of at the DB. 
-     * We have not yet found any solution for the casting
-     * 
-     * [2015.10.14] We can discard this
-     * 
-     * @param clientid
-     * @param type
-     * @return 
-     */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<AutoresponderEmail> getAvailableAutoEmailsForClient(long clientid, TYPE type) {
-        try {
-            
-            List<AutoConfirmEmail> results = objectService.getAllSourceObjectsFromTarget(clientid, Assign_AutoresponderEmail_Client.class, AutoConfirmEmail.class);
-            
-            //Filter by class manually here
-            List<AutoresponderEmail> filteredResults = new ArrayList();
-            for(AutoresponderEmail r : results){
-                if(r.type() == type)
-                    filteredResults.add(r);
-            }
-
-            return filteredResults;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        } 
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<AutoresponderEmail> getAllAvailableAutoEmailsForClient(long clientid) {
-        try {
-            List<AutoresponderEmail> results = objectService.getAllSourceObjectsFromTarget(clientid, Assign_AutoresponderEmail_Client.class, AutoresponderEmail.class);
-            
-            return results;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        } 
-    }
-
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail addAutoEmailWithoutAssignment(String subject, String body, AutoEmailTypeFactory.TYPE type)
             throws EntityExistsException, IncompleteDataException {
@@ -600,6 +555,39 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Assign_AutoWelcomeEmail_List assignWelcomeEmailToList(long welcomeEmailId, long listId) throws EntityNotFoundException {
+        try {
+            //Retrieve both objects and check they both exists
+            AutoWelcomeEmail welcomeEmail = objectService.getEnterpriseObjectById(welcomeEmailId, AutoWelcomeEmail.class);
+            if (welcomeEmail == null) {
+                throw new EntityNotFoundException(AutoWelcomeEmail.class, welcomeEmailId);
+            }
+            
+            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+            if (list == null) {
+                throw new EntityNotFoundException(SubscriptionList.class, listId);
+            }
+            
+            Assign_AutoWelcomeEmail_List newAssignment = new Assign_AutoWelcomeEmail_List();
+            newAssignment.setSOURCE(welcomeEmail);
+            newAssignment.setTARGET(list);
+
+            
+            //Let's not complicate things and just do a delete-all-and-add-new
+            this.removeAllAssignedWelcomeEmailFromList(listId);
+            em.persist(newAssignment);
+
+            return newAssignment;
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail addAutoEmail(String subject, String body, AutoEmailTypeFactory.TYPE type)
@@ -720,7 +708,7 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public <E extends AutoresponderEmail> List<E> getAssignedAutoEmailForList(long listId, Class<E> e){
         try {
-            List<E> results = objectService.getAllSourceObjectsFromTarget(listId, Assign_AutoConfirmEmail_List.class, e);
+            List<E> results = objectService.getAllSourceObjectsFromTarget(listId, Assign_AutoresponderEmail_List.class, e);
             
             return results;
         } catch (PersistenceException pex) {
@@ -741,6 +729,27 @@ public class SubscriptionService {
             }*/
             List<Assign_AutoConfirmEmail_List> modListCopy = new ArrayList<>(existingAssignments);
             for(Assign_AutoConfirmEmail_List assign:modListCopy){
+                    em.remove(em.contains(assign) ? assign : em.merge(assign));
+            }
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeAllAssignedWelcomeEmailFromList(long listId){
+        try {
+            List<Assign_AutoWelcomeEmail_List> existingAssignments = objectService.getRelationshipsForTargetObject(listId, Assign_AutoWelcomeEmail_List.class);
+            
+            /*if (existingAssignments != null && !existingAssignments.isEmpty()) {
+                em.remove(existingAssignments);  
+            }*/
+            List<Assign_AutoWelcomeEmail_List> modListCopy = new ArrayList<>(existingAssignments);
+            for(Assign_AutoWelcomeEmail_List assign:modListCopy){
                     em.remove(em.contains(assign) ? assign : em.merge(assign));
             }
             

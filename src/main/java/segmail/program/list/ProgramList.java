@@ -123,8 +123,11 @@ public class ProgramList implements Serializable {
         return selectedConfirmationEmail;
     }
 
-    public void setSelectedConfirmationEmail(AutoresponderEmail selectedConfirmationEmail) {
+    public void setSelectedConfirmationEmail(AutoConfirmEmail selectedConfirmationEmail) {
         this.selectedConfirmationEmail = selectedConfirmationEmail;
+        this.setSelectedConfirmationEmailId(
+                (selectedConfirmationEmail == null) ? -1 :
+                        selectedConfirmationEmail.getOBJECTID());
     }
 
     public String getFormName() {
@@ -151,8 +154,11 @@ public class ProgramList implements Serializable {
         return selectedWelcomeEmail;
     }
 
-    public void setSelectedWelcomeEmail(AutoresponderEmail selectedWelcomeEmail) {
+    public void setSelectedWelcomeEmail(AutoWelcomeEmail selectedWelcomeEmail) {
         this.selectedWelcomeEmail = selectedWelcomeEmail;
+        this.setSelectedWelcomeEmailId(
+                (selectedWelcomeEmail == null) ? -1 : 
+                    selectedWelcomeEmail.getOBJECTID());
     }
 
     public long getSelectedWelcomeEmailId() {

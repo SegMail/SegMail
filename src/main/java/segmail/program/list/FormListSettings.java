@@ -49,6 +49,7 @@ public class FormListSettings {
     public void saveSettings(){
         try {
             subService.saveList(program.getListEditing());
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Settings saved!", null);
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());

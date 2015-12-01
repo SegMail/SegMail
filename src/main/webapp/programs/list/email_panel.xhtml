@@ -14,20 +14,26 @@
             <div class="col-md-12">
 
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         Set the automatic emails you want to send on different events
                         for your list.
                     </div>
                     <div class="page-toolbar-block pull-right">
-                        <button jsf:id="save_button" class="btn btn-primary"
-                                >
-                            <i class="fa fa-floppy-o"></i>
-                            Save
-                        </button>
+                        <p:commandButton id="save_button_pf" class="btn btn-primary"
+                                         actionListener="#{FormListEmail.saveEmailSettings()}"
+                                         update="form_list_email_message" value="Save"
+                                         icon="fa fa-floppy-o"
+                            >
+                        </p:commandButton>
+
                     </div>  
                 </div>
                 <div class="row">
-                    <s2:messenger for="form_list_email"></s2:messenger>
+                    <div class="col-md-12">
+                        <s2:messenger id="form_list_email_message" for="form_list_email" showDetail="true" showSummary="true"></s2:messenger>
+                        
+                    </div>
+                    
                 </div>
                 <!--Test the timeline gadget-->
 
@@ -104,5 +110,9 @@
                 </div>
             </div>
         </div>
+        <p:blockUI block="form_list_email" trigger="form_list_email:save_button_pf"
+                   >
+            <p id="spinner"></p>
+        </p:blockUI>
     </form>
 </html>

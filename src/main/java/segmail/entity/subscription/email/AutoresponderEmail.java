@@ -8,6 +8,7 @@ package segmail.entity.subscription.email;
 import eds.entity.data.EnterpriseObject;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
@@ -26,7 +27,7 @@ import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
  */
 @Entity
 @Table(name="AUTORESPONDER_EMAIL")
-@DiscriminatorColumn(name="EMAIL_TYPE")
+@DiscriminatorValue("AutoresponderEmail")
 public abstract class AutoresponderEmail extends EnterpriseObject {
     
     /**

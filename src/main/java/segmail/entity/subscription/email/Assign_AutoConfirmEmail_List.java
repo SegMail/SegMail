@@ -5,6 +5,7 @@
  */
 package segmail.entity.subscription.email;
 
+import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import segmail.entity.subscription.SubscriptionList;
@@ -15,7 +16,7 @@ import segmail.entity.subscription.SubscriptionList;
  */
 @Entity
 @Table(name="ASSIGN_AUTO_CONFIRM_EMAIL_LIST")
-public class Assign_AutoConfirmEmail_List extends Assign_AutoresponderEmail_List<AutoConfirmEmail> {
+public class Assign_AutoConfirmEmail_List extends EnterpriseRelationship<AutoConfirmEmail,SubscriptionList> { //Assign_AutoresponderEmail_List<AutoConfirmEmail> {
 
     @Override
     public void randInit() {
@@ -26,5 +27,6 @@ public class Assign_AutoConfirmEmail_List extends Assign_AutoresponderEmail_List
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
     
 }

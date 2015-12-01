@@ -5,6 +5,7 @@
  */
 package segmail.entity.subscription.email;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIRMATION;
@@ -15,7 +16,7 @@ import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIR
  */
 @Entity
 @Table(name="AUTO_CONFIRM_EMAIL")
-//@DiscriminatorValue("CONFIRMATION")
+@DiscriminatorValue("AutoConfirmEmail")
 public class AutoConfirmEmail extends AutoresponderEmail{
 
     @Override

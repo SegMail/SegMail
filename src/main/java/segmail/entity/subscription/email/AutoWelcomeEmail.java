@@ -5,6 +5,7 @@
  */
 package segmail.entity.subscription.email;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
@@ -16,6 +17,7 @@ import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.WELCOM
  */
 @Entity
 @Table(name="AUTO_WELCOME_EMAIL")
+@DiscriminatorValue("AutoWelcomeEmail")
 public class AutoWelcomeEmail extends AutoresponderEmail{
 
     @Override
