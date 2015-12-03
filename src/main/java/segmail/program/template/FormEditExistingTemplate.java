@@ -52,7 +52,7 @@ public class FormEditExistingTemplate {
         try {
             // Retrieve the template based on the Id
             // Using cast because when retrieving with AutoresponderEmail.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
-            AutoresponderEmail editing = (AutoresponderEmail) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
+            AutoresponderEmail editing = objectService.getEnterpriseObjectById(templateId, AutoresponderEmail.class); 
             
             program.setEditingTemplate(editing);
             

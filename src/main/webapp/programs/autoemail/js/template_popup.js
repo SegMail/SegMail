@@ -28,12 +28,19 @@ var popup = (function() {
             //Re-render the summernote text editor
             $('textarea.editor').summernote({height: SUMMERNOTE_HEIGHT});
             
+        },
+        
+        clear : function() {
+            document.getElementById(this.title_id).innerHTML = "";
+            document.getElementById(this.type_id).value = "";
         }
 
     };
 });
 
 var popup = new popup();
+
+
 
 /**
  * http://stackoverflow.com/questions/7043840/jsf-2-how-show-different-ajax-status-in-same-input/7044332#7044332
@@ -65,3 +72,7 @@ function edit(data){
             break;
     }
 };
+
+$(document).ready(function () {
+    popup.clear();
+});

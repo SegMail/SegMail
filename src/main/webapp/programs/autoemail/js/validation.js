@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    $("#add_new_auto_email_form").reset();
+    $("#edit_auto_email_form").reset();
     add_new_auto_email_form.form();
     edit_auto_email_form.form();
 });
