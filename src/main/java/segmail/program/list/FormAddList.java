@@ -21,7 +21,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -36,7 +36,7 @@ public class FormAddList {
     
     private boolean remote;
     
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     @Inject private ProgramContainer programContainer;
     
     @Inject private ProgramList programList;

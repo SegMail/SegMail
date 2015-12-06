@@ -13,9 +13,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import eds.utilities.EntityExplorer;
 import java.io.Serializable;
-import javax.faces.context.FacesContext;
 
 /**
  * This is a chain of responsibility for all bootstrap modules.
@@ -63,6 +61,25 @@ public class BootstrappingChainFactory implements Serializable {
     public BootstrapModule getNonCoreHead() {
         return nonCoreHead;
     }
+
+    public List<BootstrapModule> getCoreBootstrapModuleList() {
+        return coreBootstrapModuleList;
+    }
+
+    public List<BootstrapModule> getNonCoreBootstrapModuleList() {
+        return nonCoreBootstrapModuleList;
+    }
+    
+    /**
+     * 
+     * @return both core and non-core BMs.
+     */
+    public List<BootstrapModule> getAllBootstrapModuleList() {
+        List<BootstrapModule> all = getCoreBootstrapModuleList();
+        all.addAll(getNonCoreBootstrapModuleList());
+        
+        return all;
+    }
     
     
     //Helper methods
@@ -77,7 +94,8 @@ public class BootstrappingChainFactory implements Serializable {
         List<BootstrapModule> moduleList = new ArrayList<BootstrapModule>();
         
         for(BootstrapModule bm : modules){
-            moduleList.add(bm);
+            if(bm.inService()) //Only add it if it's in service.
+                moduleList.add(bm);
         }
         
         return moduleList;
@@ -118,6 +136,18 @@ public class BootstrappingChainFactory implements Serializable {
         }
         
         return firstHead;
+    }
+    
+    public BootstrapModule getModuleByName(String name){
+        for(BootstrapModule mod : cModules){
+            if(name.equals(mod.getName()))
+                return mod;
+        }
+        for(BootstrapModule mod : Modules){
+            if(name.equals(mod.getName()))
+                return mod;
+        }
+        return null;
     }
     
     /**
@@ -163,5 +193,6 @@ class BootstrapModuleComparator implements Comparator<BootstrapModule> {
         return !(c1 ^ c2) ? w1 - w2 : ((c1) ? w1 : w2);
         
     }
+    
     
 }

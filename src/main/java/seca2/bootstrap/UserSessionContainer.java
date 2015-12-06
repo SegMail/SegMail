@@ -3,23 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.User;
+package seca2.bootstrap;
 
-import eds.entity.audit.DefaultActiveUser;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
 import javax.annotation.PostConstruct;
+import javax.inject.Named;
 
 /**
  *
  * @author LeeKiatHaw
  */
+@Named("UserSessionContainer")
 @SessionScoped
-public class UserContainer implements Serializable {
+public class UserSessionContainer implements Serializable {
     
     private User user;
     private UserType userType;
@@ -32,9 +31,7 @@ public class UserContainer implements Serializable {
     
     @PostConstruct
     public void init(){
-        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        contextPath = ec.getRequestContextPath();
-        servletPath = ec.getRequestServletPath();
+        
     }
     
     public String getLastURL(){

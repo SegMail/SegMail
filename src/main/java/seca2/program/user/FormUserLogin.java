@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserAccountLockedException;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
@@ -37,7 +37,7 @@ public class FormUserLogin {
 
     @EJB
     private UserService userService;
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     @Inject private ProgramContainer programContainer;
 
     private String username;
@@ -118,7 +118,7 @@ public class FormUserLogin {
      "Please enter password", null);
      return;
      }
-     UserContainer uc = null;
+     UserSessionContainer uc = null;
      try {
      //use UserService to login
      uc = userService.login(username, password);
@@ -157,7 +157,7 @@ public class FormUserLogin {
         
      //Regenerate session ID
      HttpSession session = req.getSession(true);
-     //Set UserContainer with session ID
+     //Set UserSessionContainer with session ID
      String sessionId = session.getId();
      uc.setSessionId(sessionId);
         

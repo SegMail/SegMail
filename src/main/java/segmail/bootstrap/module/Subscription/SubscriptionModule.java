@@ -3,28 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Program;
+package segmail.bootstrap.module.Subscription;
 
 import java.io.Serializable;
-import seca2.bootstrap.BootstrapModule;
-import seca2.bootstrap.CoreModule;
 import java.util.List;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import seca2.bootstrap.BootstrapModule;
+import seca2.bootstrap.NonCoreModule;
 
 /**
  *
- * @author vincent.a.lee
+ * @author LeeKiatHaw
  */
-//@Named("ProgramModule")
-//@RequestScoped
-//@BootstrapRequest
-//@BootstrapType(postback=false)
-@CoreModule
-public class ProgramModule extends BootstrapModule implements Serializable {
+@NonCoreModule
+public class SubscriptionModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
@@ -70,6 +66,5 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     public void init(FilterConfig filterConfig) throws ServletException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
     
 }

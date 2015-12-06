@@ -18,7 +18,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Program.ProgramContainer;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
@@ -38,7 +38,7 @@ import segmail.entity.subscription.email.AutoresponderEmail;
 @SessionScoped
 public class ProgramList implements Serializable {
     
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     @Inject private ProgramContainer programContainer;
     
     @EJB

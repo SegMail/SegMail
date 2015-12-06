@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.bootstrap.module.Program.ProgramContainer;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -34,7 +34,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormListList {
 
     @Inject
-    private UserContainer userContainer;
+    private UserSessionContainer userContainer;
     @Inject
     private ProgramContainer programContainer;
     @Inject

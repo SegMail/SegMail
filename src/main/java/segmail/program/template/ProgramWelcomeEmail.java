@@ -19,7 +19,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIRMATION;
@@ -41,7 +41,7 @@ public class ProgramWelcomeEmail implements Serializable {
     @EJB
     private ClientService clientService;
     
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     
     @Inject private ProgramTemplateLoader loader;
     
@@ -144,11 +144,11 @@ public class ProgramWelcomeEmail implements Serializable {
         this.loader = loader;
     }
 
-    UserContainer getUserContainer() {
+    UserSessionContainer getUserContainer() {
         return userContainer;
     }
 
-    void setUserContainer(UserContainer userContainer) {
+    void setUserContainer(UserSessionContainer userContainer) {
         this.userContainer = userContainer;
     }
 

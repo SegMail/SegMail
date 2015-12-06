@@ -6,9 +6,13 @@
 package seca2.bootstrap.module.install;
 
 import java.io.Serializable;
-import seca2.bootstrap.BootstrapInput;
+import java.util.List;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import seca2.bootstrap.BootstrapModule;
-import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 
 /**
@@ -19,7 +23,8 @@ import seca2.bootstrap.CoreModule;
 public class InstallationModule extends BootstrapModule implements Serializable{
 
     @Override
-    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
+    protected boolean execute(ServletRequest request, ServletResponse response) {
+        
         //1) Check if the database has been initialized by calling a few DB services
         //2) If app is considered installed, return true to continue the chain processing
         //3) If app is not installed, display the installation page.
@@ -33,7 +38,36 @@ public class InstallationModule extends BootstrapModule implements Serializable{
 
     @Override
     protected boolean inService() {
-        return true;
+        return false;
+    }
+
+    @Override
+    public String getName() {
+        return "InstallationModule";
     }
     
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        
+    }
+
+    @Override
+    protected void ifFail(ServletRequest request, ServletResponse response) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected String urlPattern() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected List<DispatcherType> getDispatchTypes() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected void ifException(ServletRequest request, ServletResponse response) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

@@ -5,16 +5,15 @@
  */
 package seca2.bootstrap.module.Client;
 
-import eds.component.client.ClientService;
-import eds.entity.client.Client;
 import java.io.Serializable;
-import javax.ejb.EJB;
-import javax.inject.Inject;
-import seca2.bootstrap.BootstrapInput;
+import java.util.List;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import seca2.bootstrap.BootstrapModule;
-import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.NonCoreModule;
-import seca2.bootstrap.module.User.UserContainer;
 
 /**
  *
@@ -23,30 +22,49 @@ import seca2.bootstrap.module.User.UserContainer;
 @NonCoreModule
 public class ClientModule extends BootstrapModule implements Serializable {
 
-    @Inject UserContainer userContainer;
-    @Inject ClientContainer clientContainer;
-    
-    @EJB ClientService clientService;
-    
     @Override
-    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        if((userContainer != null || userContainer.getUser() != null) &&
-                (clientContainer == null || clientContainer.getClient() == null)){
-            Client client = clientService.getClientByAssignedUser(userContainer.getUser().getOBJECTID());
-            clientContainer.setClient(client);
-        }
-        
-        return true;
+    protected boolean execute(ServletRequest request, ServletResponse response) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected void ifFail(ServletRequest request, ServletResponse response) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected void ifException(ServletRequest request, ServletResponse response) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     protected int executionSequence() {
-        return 0;
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     protected boolean inService() {
-        return true;
+        return false;
     }
-    
+
+    @Override
+    protected String urlPattern() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected List<DispatcherType> getDispatchTypes() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
