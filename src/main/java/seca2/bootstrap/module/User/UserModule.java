@@ -60,21 +60,27 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected boolean execute(ServletRequest request, ServletResponse response) {
 
         //If on login page, don't do anything and continue the filterchain
-        if(((HttpServletRequest)request).getServletPath().equalsIgnoreCase(LOGIN_PATH))
+        if(((HttpServletRequest)request).getServletPath().equalsIgnoreCase(LOGIN_PATH)){
+            //During postback of the form submission, the servlet path will be /login
+            //and if the xhtml values are not set, the form methods will not be processed.
+            //it has nothing to do with URL rewriting
+            requestContainer.setViewLocation(LOGIN_PAGE); //I'm not sure what will happen here, since we have already fowarded the request to this page below
+            requestContainer.setTemplateLocation(LOGIN_PAGE_TEMPLATE);
             return true;
-        
-        //For all other requests, if the user session is invalid or not logged in, send them to the login page
-        if(
+        }
+        //For all other requests, if the user session is logged in, let other modules decide the view
+        if(!(
             userContainer == null ||
-            userContainer.getSessionId() == null || userContainer.getSessionId().isEmpty() ||
+            userContainer.getSessionId() == null || 
+            userContainer.getSessionId().isEmpty() ||
             !userContainer.isLoggedIn()
-        ){
-            userContainer.setLastProgram(requestContainer.getProgramName());
-            return false;
+                )){
+            return true;
         }
                 
-        //For everything else not discovered, continue the filterchain
-        return true;
+        //For everything else not discovered, don't continue the filterchain
+        userContainer.setLastProgram(requestContainer.getProgramName());
+        return false;
     }
 
 

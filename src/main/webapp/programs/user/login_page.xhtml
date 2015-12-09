@@ -68,7 +68,7 @@
                             </div>
                             <p:commandButton id="login-button" styleClass="btn btn-lg btn-primary btn-block"
                                              value="Log in" action="#{FormUserLogin.login()}"
-                                             update="@form"/>
+                                             update="@form" process="@form"/>
                             <h:commandLink styleClass="login-link" value="Lost your password?" />
 
                             <s2:messenger id="login-messenger" for="form-user-login" showSummary="true" showDetail="true"/>

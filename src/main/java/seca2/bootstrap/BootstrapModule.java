@@ -181,7 +181,7 @@ public abstract class BootstrapModule implements Filter {
 
     @Override
     public void destroy() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
     
     public abstract String getName();
