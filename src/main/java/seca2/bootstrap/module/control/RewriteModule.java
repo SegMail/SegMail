@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.control;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,22 +29,43 @@ import segurl.filter.SegURLResolver;
  * @author LeeKiatHaw
  */
 @CoreModule
-public class ControlModule extends BootstrapModule implements Serializable {
+public class RewriteModule extends BootstrapModule implements Serializable {
 
     @Inject UserRequestContainer userRequestContainer;
     
     
     @Override
-    protected boolean execute(ServletRequest request, ServletResponse response) {
+    protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
+        String contextPath = req.getContextPath();
+        String servletPath = req.getServletPath();
+        String pathInfo = req.getPathInfo();
+        
+        //No actual viewId is known before this module, this module processes all viewId mappings
+        if(SegURLResolver.containsFile(((HttpServletRequest)request).getRequestURI()))
+            return true;
+        
         //1. Resolve program name
-        String program = SegURLResolver.resolveProgramName(req.getPathInfo());
+        String program = SegURLResolver.resolveProgramName(pathInfo);
         
         //2. Inject it into ControlContainer
         userRequestContainer.setProgramName(program);
+        String forwardViewId = "/index.xhtml";
         
-        return true;
+        //The mapping!
+        //Can be outsourced to a service
+        
+        //everything comes down to checking servlet path
+        if(servletPath == null || "/".equals(servletPath)){
+            //Default servletPath
+            servletPath = "/program";
+        }
+        
+        //forward don't need contextpath because it's done at the server side
+        ((HttpServletRequest)request).getRequestDispatcher(servletPath+forwardViewId).forward(request, response);
+        
+        return false; //No need to do anything after forwarding
     }
 
     @Override
@@ -53,7 +75,7 @@ public class ControlModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE;
+        return Integer.MIN_VALUE + 1;
     }
 
     @Override
@@ -70,13 +92,14 @@ public class ControlModule extends BootstrapModule implements Serializable {
     protected List<DispatcherType> getDispatchTypes() {
         List<DispatcherType> dispatchTypes = new ArrayList<DispatcherType>();
         dispatchTypes.add(DispatcherType.REQUEST);
+        //dispatchTypes.add(DispatcherType.FORWARD);
         
         return dispatchTypes;
     }
 
     @Override
     public String getName() {
-        return "ControlModule";
+        return "RewriteModule";
     }
 
     @Override

@@ -88,10 +88,11 @@ public abstract class BootstrapModule implements Filter {
      * @param request
      * @param response
      * @return true to continue the chain, false to stop the chain.
+     * @throws java.lang.Exception
      */
     protected abstract boolean execute(
             ServletRequest request, 
-            ServletResponse response);
+            ServletResponse response) throws Exception;
     
     /**
      * What will happen if the execute methods fail.
@@ -101,7 +102,7 @@ public abstract class BootstrapModule implements Filter {
      */
     protected abstract void ifFail(
             ServletRequest request, 
-            ServletResponse response);
+            ServletResponse response) throws Exception;
     
     /**
      * What happens if an exception is encountered during request processing.

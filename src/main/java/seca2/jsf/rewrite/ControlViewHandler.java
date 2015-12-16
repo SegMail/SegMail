@@ -35,8 +35,12 @@ public class ControlViewHandler extends ViewHandlerWrapper {
         String contextPath = context.getExternalContext().getRequestContextPath();
         String servletPath = context.getExternalContext().getRequestServletPath();
         String pathInfo = context.getExternalContext().getRequestPathInfo();
+        
+        if(pathInfo.endsWith("index.xhtml")){
+            pathInfo = pathInfo.replace("index.xhtml", "");
+        }
             
-        return superValue; //To change body of generated methods, choose Tools | Templates.
+        return contextPath.concat(servletPath).concat(pathInfo); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

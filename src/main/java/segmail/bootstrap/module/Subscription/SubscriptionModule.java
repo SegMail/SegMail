@@ -39,7 +39,7 @@ public class SubscriptionModule extends BootstrapModule implements Serializable 
 
     @Override
     protected int executionSequence() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Integer.MIN_VALUE;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class SubscriptionModule extends BootstrapModule implements Serializable 
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "SubscriptionModule";
     }
 
     @Override

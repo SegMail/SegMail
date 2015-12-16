@@ -97,9 +97,9 @@
     <!--<welcome-file-list>
         <welcome-file>program/index.xhtml</welcome-file>
     </welcome-file-list>-->
-    <context-param>
+    <!--<context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-        <param-value>client</param-value>
-    </context-param>
+        <param-value>client</param-value>--> <!--when u store at client side, session object will not be auto created-->
+    <!--</context-param>-->
     
 </web-app>

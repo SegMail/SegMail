@@ -64,20 +64,18 @@ public class FormUserLogin {
             User authenticatedUser = userService.login(this.username, this.password);
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
             
-            //Regenerate session ID
-            //this.userContainer.regenerateSessionId(); //20150214 let's not use this 1st & think of a better idea
-            
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Initialize userValues into userContainer
+            this.userContainer.setSessionId(ec.getSessionId(true));
             this.userContainer.setLoggedIn(true);
             this.userContainer.setUser(authenticatedUser);
             this.userContainer.setUserType(authenticatedUser.getUSERTYPE());
-            //Temporary arrangement
-            //this.userContainer.setUsername(this.userService.getUserAccountById(authenticatedUser.getOBJECTID()).getUSERNAME());
-
+            
+            
             //do a redirect to refresh the view
             //Something is faulty here after a redirect
             String previousURI = this.userContainer.getLastProgram();
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            
             if (previousURI != null && !previousURI.isEmpty()) {
                 /*ec.redirect(ec.getRequestContextPath()
                         +ec.getRequestServletPath()

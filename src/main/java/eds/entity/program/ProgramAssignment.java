@@ -19,6 +19,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name="PROGRAM_ASSIGNMENT")
 public class ProgramAssignment extends EnterpriseRelationship<Program,UserType> {
+    
+    private boolean DEFAULT_ASSIGNMENT;
 
     public ProgramAssignment() {
     }
@@ -49,5 +51,14 @@ public class ProgramAssignment extends EnterpriseRelationship<Program,UserType> 
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    public boolean isDEFAULT_ASSIGNMENT() {
+        return DEFAULT_ASSIGNMENT;
+    }
+
+    public void setDEFAULT_ASSIGNMENT(boolean DEFAULT_ASSIGNMENT) {
+        this.DEFAULT_ASSIGNMENT = DEFAULT_ASSIGNMENT;
+    }
+    
     
 }

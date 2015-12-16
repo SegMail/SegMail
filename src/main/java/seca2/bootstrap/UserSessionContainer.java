@@ -16,7 +16,7 @@ import javax.inject.Named;
  *
  * @author LeeKiatHaw
  */
-@Named("UserSessionContainer")
+//@Named("UserSessionContainer")
 @SessionScoped
 public class UserSessionContainer implements Serializable {
     

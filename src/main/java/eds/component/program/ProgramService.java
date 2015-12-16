@@ -21,9 +21,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
+import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
+import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.program.Program;
 import eds.entity.program.ProgramAssignment;
+import eds.entity.program.ProgramAssignment_;
 import eds.entity.program.Program_;
 import eds.entity.user.UserType;
 
@@ -109,7 +112,7 @@ public class ProgramService implements Serializable {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignProgramToUserType(long programId, long userTypeId) 
-            throws DBConnectionException, ProgramAssignmentException{
+            throws DBConnectionException, ProgramAssignmentException, RelationshipExistsException{
         try{
             //Get user type first
             //UserType userType = userService.getUserTypeById(userTypeId);
@@ -123,20 +126,20 @@ public class ProgramService implements Serializable {
                 throw new ProgramAssignmentException("Program with ID "+programId+" does not exist!");
 
             //Check if the assignment already exist
-            if(this.checkProgramAuthForUserType(userTypeId, programId))
-                throw new ProgramAssignmentException("Usertype with ID "+userTypeId+" already has access to Program with ID "+programId+".");
+            //if(this.checkProgramAuthForUserType(userTypeId, programId))
+            //    throw new ProgramAssignmentException("Usertype with ID "+userTypeId+" already has access to Program with ID "+programId+".");
+            List<ProgramAssignment> allAssignment = this.genericEntepriseObjectService.getRelationshipsForTargetObject(userTypeId, ProgramAssignment.class);
             
             //Create bidrectional relationships
             ProgramAssignment programAccess1 = new ProgramAssignment(program,userType);
-            //programAccess1.setSOURCE(program);
-            //programAccess1.setTARGET(userType);
-
-            //ProgramAssignment programAccess2 = new ProgramAssignment();
-            //programAccess2.setSOURCE(userType);
-            //programAccess2.setTARGET(program);
+            if(allAssignment != null && allAssignment.contains(programAccess1))
+                throw new RelationshipExistsException(programAccess1);
+            
+            //For all first assignment, set it as the default one
+            if(allAssignment == null || allAssignment.isEmpty())
+                programAccess1.setDEFAULT_ASSIGNMENT(true);
 
             em.persist(programAccess1);
-            //em.persist(programAccess2);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -330,6 +333,41 @@ public class ProgramService implements Serializable {
             List<ProgramAssignment> result = this.genericEntepriseObjectService.getRelationshipsForTargetObject(usertypeid, ProgramAssignment.class);
             
             return result;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    /**
+     * Optimized method written for ProgramModule. Retrieves the program by name
+     * and checks if the given userTypeId is authorized. If it is, return the 
+     * program, else returns the default program.
+     * 
+     * @param programName
+     * @param userTypeId
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Program getProgramForUserType(String programName,long userTypeId){
+        try {
+            List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForTargetObject(userTypeId, ProgramAssignment.class);
+            
+            
+            //Loop through, return the one that has the program name, else return the default
+            Program result = null;
+            for(ProgramAssignment p : results){
+                if(p.getSOURCE().getPROGRAM_NAME().equalsIgnoreCase(programName))
+                    return p.getSOURCE();
+                if(p.isDEFAULT_ASSIGNMENT())
+                    result = p.getSOURCE();
+            }
+            return result;
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
