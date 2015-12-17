@@ -114,6 +114,20 @@ public abstract class BootstrapModule implements Filter {
             ServletRequest request, 
             ServletResponse response);
     
+    /**
+     * What happens if the request is for a file resource.
+     * 
+     * Modules don't really need to do anything, they can just return true to
+     * bypass file processing. Maybe there will be a FileModule that will use it.
+     * 
+     * Let's not use this first
+     * 
+     * @param request
+     * @param response 
+     */
+    //protected abstract boolean ifFileRequest(
+    //        ServletRequest request, 
+    //        ServletResponse response);
     
     /**
      * List of all other BootstrapModules that this one is dependent on. If these 

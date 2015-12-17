@@ -21,6 +21,8 @@ public class UserRequestContainer {
     private String viewLocation;
     
     private String templateLocation;
+    
+    private boolean error = false; //default value
 
     public String getProgramName() {
         return programName;
@@ -44,6 +46,14 @@ public class UserRequestContainer {
 
     public void setTemplateLocation(String templateLocation) {
         this.templateLocation = templateLocation;
+    }
+
+    public boolean isError() {
+        return error;
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
     }
     
     

@@ -5,6 +5,8 @@
  */
 package seca2.bootstrap;
 
+import eds.entity.layout.Layout;
+import eds.entity.program.Program;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import eds.entity.user.User;
@@ -28,6 +30,9 @@ public class UserSessionContainer implements Serializable {
     
     private String contextPath;
     private String servletPath;
+    
+    private Program currentProgram;
+    private Layout currentLayout;
     
     @PostConstruct
     public void init(){
@@ -83,4 +88,21 @@ public class UserSessionContainer implements Serializable {
         return (user != null) ? user.getOBJECT_NAME() : "";
     }
 
+    public Program getCurrentProgram() {
+        return currentProgram;
+    }
+
+    public void setCurrentProgram(Program currentProgram) {
+        this.currentProgram = currentProgram;
+    }
+
+    public Layout getCurrentLayout() {
+        return currentLayout;
+    }
+
+    public void setCurrentLayout(Layout currentLayout) {
+        this.currentLayout = currentLayout;
+    }
+
+    
 }

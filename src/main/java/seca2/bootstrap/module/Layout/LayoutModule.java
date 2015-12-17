@@ -6,6 +6,7 @@
 package seca2.bootstrap.module.Layout;
 
 import eds.component.layout.LayoutService;
+import eds.entity.layout.Layout;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +17,13 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultSites;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import segurl.filter.SegURLResolver;
 
 /**
  *
@@ -39,9 +42,33 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
         
+        //Bypass if it's a file request
+        if (SegURLResolver.containsFile(((HttpServletRequest) request).getRequestURI())) {
+            return true;
+        }
         
+        if(requestContainer.isError()){
+            requestContainer.setTemplateLocation(defaults.ERROR_PAGE_TEMPLATE);
+            return true;
+        }
         
+        /**
+         * There is no way to keep the state of a user's layout from the request 
+         * information, so it's best to keep retrieving from the DB. Unless it is 
+         * delegated to the program forms to explicitly reload the layout object.
+         * Performance vs correctness.
+         */
+        List<Layout> layouts = layoutService.getLayoutsByUser(sessionContainer.getUser());
         
+        if(layouts == null || layouts.isEmpty())
+            layouts = layoutService.getLayoutsByProgram(requestContainer.getProgramName());
+        
+        if(layouts == null || layouts.isEmpty()) {
+            requestContainer.setTemplateLocation(defaults.getDEFAULT_TEMPLATE());
+            return true;
+        }
+        
+        requestContainer.setTemplateLocation(layouts.get(0).getVIEW_ROOT());
         
         return true;
     }
@@ -68,7 +95,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
 
     @Override
     protected String urlPattern() {
-        return "/program";
+        return "/program/*";
     }
 
     @Override
@@ -89,5 +116,6 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     public void init(FilterConfig filterConfig) throws ServletException {
         
     }
+
 
 }

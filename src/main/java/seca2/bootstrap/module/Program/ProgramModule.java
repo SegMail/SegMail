@@ -20,9 +20,11 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.DefaultSites;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import segurl.filter.SegURLResolver;
 
 /**
  *
@@ -35,34 +37,53 @@ import seca2.bootstrap.UserSessionContainer;
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
 
-    @Inject UserSessionContainer sessionContainer;
-    @Inject UserRequestContainer requestContainer;
-    
-    @Inject DefaultSites defaults;
-    
-    @EJB ProgramService programService;
-    
+    @Inject
+    UserSessionContainer sessionContainer;
+    @Inject
+    UserRequestContainer requestContainer;
+
+    @Inject
+    DefaultSites defaults;
+
+    @EJB
+    ProgramService programService;
+
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
-        
+
+        /**
+         * Bypass if it's a file request
+         * Cannot, because /program/index.xhtml is also a file.
+         * We can either
+         * 1) enhance SeqURLResolver to recognize /index.xhtml or
+         * 2) hardcode for now...
+         */
+        if (SegURLResolver.containsFile(((HttpServletRequest) request).getRequestURI())) {
+            return true;
+        }
+
         long userTypeId = sessionContainer.getUserType().getOBJECTID();
-        
+
         String programName = requestContainer.getProgramName();
-        
-        Program program = programService.getProgramForUserType(programName, userTypeId);
-        
-        
+        Program program = sessionContainer.getCurrentProgram();
+
+        if (programName == null || program == null
+                || !programName.equalsIgnoreCase(program.getPROGRAM_NAME())) {
+            program = programService.getProgramForUserType(programName, userTypeId);
+        }
+
         //If no matching program is found and no default program, stop processing and 
         //show the error page
-        if(program == null){
+        if (program == null) {
             requestContainer.setViewLocation(defaults.ERROR_PAGE);
-            requestContainer.setTemplateLocation(defaults.ERROR_PAGE_TEMPLATE);
-        } else //If found, set the viewRoot location
-            requestContainer.setViewLocation(program.getVIEW_ROOT());
-            
+            requestContainer.setError(true);
+            return true;
+        }
+        //If found, set the viewRoot location
+        requestContainer.setViewLocation(program.getVIEW_ROOT());
         //Must return true no matter what, else FacesServlet will not get called
         return true;
-        
+
     }
 
     @Override
@@ -72,7 +93,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected void ifException(ServletRequest request, ServletResponse response) {
-        
+
     }
 
     @Override
@@ -95,7 +116,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         List<DispatcherType> dispatchTypes = new ArrayList<DispatcherType>();
         dispatchTypes.add(DispatcherType.REQUEST);
         dispatchTypes.add(DispatcherType.FORWARD);
-        
+
         return dispatchTypes;
     }
 
@@ -106,8 +127,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        
+
     }
 
-    
 }

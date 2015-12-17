@@ -3,14 +3,19 @@ package eds.component.layout;
 import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.RelationshipExistsException;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseObject_;
 import eds.entity.layout.Layout;
 import eds.entity.layout.LayoutAssignment;
 import eds.entity.layout.LayoutAssignment_;
+import eds.entity.layout.Layout_;
 import eds.entity.program.Program;
+import eds.entity.program.Program_;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
 import java.io.Serializable;
@@ -45,7 +50,8 @@ public class LayoutService implements Serializable {
     @EJB private ClientService clientService;
     @EJB private GenericObjectService genericEOService;
 
-    @PersistenceContext(name = "HIBERNATE")
+    @PersistenceContext(name = "HIBERNATE") //When it's more stable, take this out
+    //All custom EJB should get the EM from EDS
     private EntityManager em;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -228,42 +234,36 @@ public class LayoutService implements Serializable {
      * 
      * @param layoutid
      * @param objectid
-     * @throws DBConnectionException
-     * @throws LayoutAssignmentException 
+     * @throws eds.component.data.EntityNotFoundException
+     * @throws eds.component.data.RelationshipExistsException
+     * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignLayout(long objectid, long layoutid)
-            throws DBConnectionException, LayoutAssignmentException {
+            throws EntityNotFoundException, RelationshipExistsException {
         try {
             
             //Check if layout exists
             Layout layoutEO = this.getLayoutById(layoutid);
             if(layoutEO == null)
-                throw new LayoutAssignmentException("Layout "+layoutid+" does not exist.");
+                //throw new LayoutAssignmentException("Layout "+layoutid+" does not exist.");
+                throw new EntityNotFoundException(Layout.class,layoutid);
             
             //Check if target exists
             EnterpriseObject clientEO = genericEOService.getEnterpriseObjectById(objectid);
             if(clientEO == null)
-                throw new LayoutAssignmentException("Object "+objectid+" does not exist.");
+                //throw new LayoutAssignmentException("Object "+objectid+" does not exist.");
+                throw new EntityNotFoundException(EnterpriseObject.class,objectid);
             
+            LayoutAssignment layoutAssignment2 = new LayoutAssignment(layoutEO,clientEO);
             //Check if the assignment already exists
             //List<LayoutAssignment> existingRels1 = genericEOService.getRelationshipsForSourceObject(objectid,LayoutAssignment.class);
             List<LayoutAssignment> existingRels2 = genericEOService.getRelationshipsForTargetObject(objectid,LayoutAssignment.class);
             
-            if(existingRels2.size() > 0)
-                throw new LayoutAssignmentException("Assignment already exists!");
+            if(existingRels2 != null && existingRels2.size() > 0)
+                //throw new LayoutAssignmentException("Assignment already exists!");
+                throw new RelationshipExistsException(layoutAssignment2);
             
-            //If all validations are passed, create the bidirectional relationship
-            //LayoutAssignment layoutAssignment1 = new LayoutAssignment();
-            LayoutAssignment layoutAssignment2 = new LayoutAssignment(layoutEO,clientEO);
-
-            //layoutAssignment1.setSOURCE(clientEO);
-            //layoutAssignment1.setTARGET(layoutEO);
-
-            //layoutAssignment2.setTARGET(clientEO);
-            //layoutAssignment2.setSOURCE(layoutEO);
-
-            //em.persist(layoutAssignment1);
             em.persist(layoutAssignment2);
             
 
@@ -272,9 +272,7 @@ public class LayoutService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
         
     }
 
@@ -344,33 +342,36 @@ public class LayoutService implements Serializable {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Layout getLayoutAssignmentsByProgram(String programName)
+    public List<Layout> getLayoutsByProgram(String programName)
         throws DBConnectionException {
         try{
             
-            Program program = this.programService.getSingleProgramByName(programName);
-            if(program == null)
-                return null;
+            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaQuery<Layout> query = builder.createQuery(Layout.class);
+            Root<LayoutAssignment> fromAssign = query.from(LayoutAssignment.class);
+            Root<Program> fromProgram = query.from(Program.class);
+            Root<Layout> fromLayout = query.from(Layout.class);
             
-            //Get only the first matching program
-            //Program program = programs.get(0);
-            List<LayoutAssignment> assignments = 
-                    this.genericEOService.getRelationshipsForTargetObject(program.getOBJECTID(), LayoutAssignment.class);
-            //If no results returned, return null
-            if(assignments == null || assignments.size() <= 0)
-                return null;
+            query.select(fromLayout);
+            query.where(
+                builder.and(
+                        builder.equal(fromAssign.get(LayoutAssignment_.SOURCE), Layout_.OBJECTID),
+                        builder.equal(fromAssign.get(LayoutAssignment_.TARGET), Program_.OBJECTID),
+                        builder.equal(fromProgram.get(Program_.PROGRAM_NAME), programName)
+                )
+            );
             
-            return assignments.get(0).getSOURCE();
+            List<Layout> results = em.createQuery(query)
+                    .getResultList();
             
+            return results;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     /**
@@ -384,7 +385,7 @@ public class LayoutService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<LayoutAssignment> getLayoutAssignmentsByUser(User user)
+    public List<Layout> getLayoutsByUser(User user)
         throws DBConnectionException {
         try{
             //To optimize, pull out all assignments for User, UserType and Client
@@ -394,33 +395,8 @@ public class LayoutService implements Serializable {
             List<Long> IDs = new ArrayList<Long>();
             IDs.add(user.getOBJECTID());
             IDs.add(user.getUSERTYPE().getOBJECTID());
-            //Add the client object ID
             
-            //Construct the query
-            CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<LayoutAssignment> criteria = builder.createQuery(LayoutAssignment.class);
-            Root<LayoutAssignment> sourceEntity = criteria.from(LayoutAssignment.class); //FROM Layout
-
-            criteria.select(sourceEntity);
-            criteria.where(sourceEntity.get(LayoutAssignment_.TARGET).in(IDs));
-            
-            List<LayoutAssignment> results = em.createQuery(criteria).getResultList();
-            
-            //Looping shouldn't cause NullPointerExceptions
-            //Look for User first
-            /*for(LayoutAssignment result:results){
-                EnterpriseObject source = result.getSOURCE();
-                if(source instanceof User)
-                    return (Layout) result.getTARGET();
-            }
-            //Then look for UserType
-            for(LayoutAssignment result:results){
-                EnterpriseObject source = result.getSOURCE();
-                if(source instanceof UserType)
-                    return (Layout) result.getTARGET();
-            }*/
-            
-            //Then look for Client
+            List<Layout> results = this.genericEOService.getAllSourceObjectsFromTargets(IDs, LayoutAssignment.class, Layout.class);
             
             return results;
             
@@ -429,9 +405,7 @@ public class LayoutService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
