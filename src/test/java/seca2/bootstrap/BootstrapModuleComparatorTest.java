@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 import seca2.bootstrap.module.Client.ClientModule;
 import seca2.bootstrap.module.Program.ProgramModule;
 import seca2.bootstrap.module.User.UserModule;
-import seca2.bootstrap.module.control.RewriteModule;
+import seca2.bootstrap.module.rewrite.RewriteModule;
 import segmail.bootstrap.module.Subscription.SubscriptionModule;
 
 /**

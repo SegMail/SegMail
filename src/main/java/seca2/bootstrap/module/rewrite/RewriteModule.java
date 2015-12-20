@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.control;
+package seca2.bootstrap.module.rewrite;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -33,6 +33,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
 
     @Inject UserRequestContainer userRequestContainer;
     
+    //@Inject SegURLResolver urlResolver;
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
@@ -41,13 +42,18 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         String contextPath = req.getContextPath();
         String servletPath = req.getServletPath();
         String pathInfo = req.getPathInfo();
+        //IMO, a bug in the 3 above methods
+        contextPath = (contextPath == null) ? "" : contextPath;
+        servletPath = (servletPath == null) ? "" : servletPath;
+        pathInfo = (pathInfo == null) ? "" : pathInfo;
         
         //No actual viewId is known before this module, this module processes all viewId mappings
-        if(SegURLResolver.containsFile(((HttpServletRequest)request).getRequestURI()))
+        if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
             return true;
         
         //1. Resolve program name
-        String program = SegURLResolver.resolveProgramName(pathInfo);
+        //String program = SegURLResolver.getResolver().resolveProgramName(pathInfo);
+        String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));
         
         //2. Inject it into ControlContainer
         userRequestContainer.setProgramName(program);
@@ -63,7 +69,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         }
         
         //forward don't need contextpath because it's done at the server side
-        ((HttpServletRequest)request).getRequestDispatcher(servletPath+forwardViewId).forward(request, response);
+        ((HttpServletRequest)request).getRequestDispatcher(servletPath.concat(forwardViewId)).forward(request, response);
         
         return false; //No need to do anything after forwarding
     }

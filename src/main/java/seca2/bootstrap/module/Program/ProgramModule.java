@@ -37,16 +37,11 @@ import segurl.filter.SegURLResolver;
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
 
-    @Inject
-    UserSessionContainer sessionContainer;
-    @Inject
-    UserRequestContainer requestContainer;
+    @Inject UserSessionContainer sessionContainer;
+    @Inject UserRequestContainer requestContainer;
+    @Inject DefaultSites defaults;
 
-    @Inject
-    DefaultSites defaults;
-
-    @EJB
-    ProgramService programService;
+    @EJB ProgramService programService;
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
@@ -58,7 +53,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
          * 1) enhance SeqURLResolver to recognize /index.xhtml or
          * 2) hardcode for now...
          */
-        if (SegURLResolver.containsFile(((HttpServletRequest) request).getRequestURI())) {
+        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
             return true;
         }
 

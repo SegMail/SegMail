@@ -43,7 +43,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     protected boolean execute(ServletRequest request, ServletResponse response) {
         
         //Bypass if it's a file request
-        if (SegURLResolver.containsFile(((HttpServletRequest) request).getRequestURI())) {
+        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
             return true;
         }
         

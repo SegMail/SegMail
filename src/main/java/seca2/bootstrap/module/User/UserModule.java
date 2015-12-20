@@ -37,7 +37,6 @@ public class UserModule extends BootstrapModule implements Serializable {
     
     @EJB private UserService userService; 
     @Inject private GlobalValues globalValues;
-
     /**
      * Should we inject or should we put it in InputContext?
      * 
@@ -63,6 +62,11 @@ public class UserModule extends BootstrapModule implements Serializable {
         String contextPath = ((HttpServletRequest)request).getContextPath();
         String servletPath = ((HttpServletRequest)request).getServletPath();
         String pathInfo = ((HttpServletRequest)request).getPathInfo();
+        
+        //IMO, a bug in the 3 above methods
+        contextPath = (contextPath == null) ? "" : contextPath;
+        servletPath = (servletPath == null) ? "" : servletPath;
+        pathInfo = (pathInfo == null) ? "" : pathInfo;
         //During postback of the form submission, the servlet path will be /login
         //and if the xhtml values are not set, the form methods will not be processed.
         //it has nothing to do with URL rewriting
@@ -86,15 +90,16 @@ public class UserModule extends BootstrapModule implements Serializable {
         }
         
         //If request is for a file resource
-        if(SegURLResolver.containsFile(servletPath))
+        if(SegURLResolver.getResolver().containsFile(servletPath))
             return true;
         //If the request has servlet path /program or /login, it would match to FacesServlet from
         //web.xml config and parsed as Faces request.
-        if(SegURLResolver.containsFile(pathInfo))//Separate out for debugging purposes
+        if(SegURLResolver.getResolver().containsFile(pathInfo))//Separate out for debugging purposes
             return true;
                 
         //For everything else not discovered, don't continue the filterchain
-        userContainer.setLastProgram(SegURLResolver.resolveProgramName(pathInfo));
+        //userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(pathInfo));
+        userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo)));
         return false;
     }
 
@@ -139,7 +144,7 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected void ifFail(ServletRequest request, ServletResponse response) {
         try {
             //If it's a file request, don't do anything
-            if(SegURLResolver.containsFile(((HttpServletRequest)request).getRequestURI()))
+            if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
                 return;
             
             ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+LOGIN_PATH);
