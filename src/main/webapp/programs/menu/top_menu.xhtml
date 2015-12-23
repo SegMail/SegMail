@@ -9,10 +9,10 @@
 
         
         <!--test using the real menuitem object-->
-        <c:forEach items="#{bootstrap.output.nonCoreValues['TEST_MENU']}" var="menuitem">
+        <c:forEach items="#{UserSessionContainer.menu}" var="menuitem">
 
             <li class="#{menuitem.active ? 'active' : ''}">
-                <a href="#{menuitem.getURL()}">
+                <a href="#{menuitem.URL}">
                     <h:outputText value="#{menuitem.getPrependTags()}" escape="false" ></h:outputText>
                     #{menuitem.getName()}
                 </a>

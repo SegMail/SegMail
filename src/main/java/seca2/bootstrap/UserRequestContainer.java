@@ -22,6 +22,8 @@ public class UserRequestContainer {
     
     private String templateLocation;
     
+    private String menuLocation;
+    
     private boolean error = false; //default value
 
     public String getProgramName() {
@@ -54,6 +56,14 @@ public class UserRequestContainer {
 
     public void setError(boolean error) {
         this.error = error;
+    }
+
+    public String getMenuLocation() {
+        return menuLocation;
+    }
+
+    public void setMenuLocation(String menuLocation) {
+        this.menuLocation = menuLocation;
     }
     
     

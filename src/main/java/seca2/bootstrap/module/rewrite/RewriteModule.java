@@ -52,7 +52,6 @@ public class RewriteModule extends BootstrapModule implements Serializable {
             return true;
         
         //1. Resolve program name
-        //String program = SegURLResolver.getResolver().resolveProgramName(pathInfo);
         String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));
         
         //2. Inject it into ControlContainer
@@ -63,7 +62,12 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         //Can be outsourced to a service
         
         //everything comes down to checking servlet path
-        if(servletPath == null || "/".equals(servletPath)){
+        //If the request is to the "/" path or it is not for "/login",
+        //meaning it is any other program except login, which is a special type 
+        //of program, then forward to "/program/index.xhtml"
+        //The program name will be passed by UserRequestContainer
+        if(servletPath == null || "/".equals(servletPath)
+                || !servletPath.contains("login")){
             //Default servletPath
             servletPath = "/program";
         }

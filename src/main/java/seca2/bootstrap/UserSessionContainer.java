@@ -6,19 +6,22 @@
 package seca2.bootstrap;
 
 import eds.entity.layout.Layout;
+import eds.entity.navigation.MenuItem;
 import eds.entity.program.Program;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
+import seca2.bootstrap.module.Navigation.MenuItemContainer;
 
 /**
  *
  * @author LeeKiatHaw
  */
-//@Named("UserSessionContainer")
+@Named("UserSessionContainer")
 @SessionScoped
 public class UserSessionContainer implements Serializable {
     
@@ -33,6 +36,10 @@ public class UserSessionContainer implements Serializable {
     
     private Program currentProgram;
     private Layout currentLayout;
+    
+    private List<MenuItemContainer> menu;
+    
+    
     
     @PostConstruct
     public void init(){
@@ -87,6 +94,10 @@ public class UserSessionContainer implements Serializable {
         
         return (user != null) ? user.getOBJECT_NAME() : "";
     }
+    
+    public String getUsertypeName() {
+        return (userType != null) ? userType.getUSERTYPENAME() : "";
+    }
 
     public Program getCurrentProgram() {
         return currentProgram;
@@ -102,6 +113,14 @@ public class UserSessionContainer implements Serializable {
 
     public void setCurrentLayout(Layout currentLayout) {
         this.currentLayout = currentLayout;
+    }
+
+    public List<MenuItemContainer> getMenu() {
+        return menu;
+    }
+
+    public void setMenu(List<MenuItemContainer> menu) {
+        this.menu = menu;
     }
 
     
