@@ -82,7 +82,9 @@ public class FormUserLogin {
                         +"/"
                         +previousURI
                         +"/");*/ //calling "test" -> "/SegMail/program/test/test"
-                ec.redirect(userContainer.getLastURL());
+                String lastProgram = "/".concat((userContainer.getLastProgram() == null) ? "" : userContainer.getLastProgram());
+                String contextPath = (ec.getRequestContextPath() == null) ? "" : ec.getRequestContextPath();
+                ec.redirect(contextPath+lastProgram);
                 //we need an adaptor pattern for redirection!
                 //this should be in the navigation module
                 

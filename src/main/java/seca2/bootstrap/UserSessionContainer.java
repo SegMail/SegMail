@@ -47,7 +47,7 @@ public class UserSessionContainer implements Serializable {
     }
     
     public String getLastURL(){
-        return this.contextPath + this.servletPath + "/"+ this.getLastProgram() + "/";
+        return this.contextPath + this.servletPath + "/"+ this.getLastProgram() + "/"; //Giving nullnull
     }
     
     public User getUser() {

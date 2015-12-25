@@ -73,6 +73,6 @@ function edit(data){
     }
 };
 
-$(document).ready(function () {
-    popup.clear();
-});
+//$(document).ready(function () {
+//    popup.clear();
+//});

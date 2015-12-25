@@ -22,8 +22,6 @@ import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.AutoConfirmEmail;
-import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIRMATION;
-import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.WELCOME;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
 
 /**

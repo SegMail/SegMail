@@ -7,7 +7,6 @@ package seca2.bootstrap;
 
 import java.io.IOException;
 import java.util.List;
-import javax.inject.Inject;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

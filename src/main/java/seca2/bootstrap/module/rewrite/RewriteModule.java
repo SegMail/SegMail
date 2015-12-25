@@ -66,6 +66,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         //meaning it is any other program except login, which is a special type 
         //of program, then forward to "/program/index.xhtml"
         //The program name will be passed by UserRequestContainer
+        ///SegMail/autoemail -> /SegMail/program/autoemail/
         if(servletPath == null || "/".equals(servletPath)
                 || !servletPath.contains("login")){
             //Default servletPath

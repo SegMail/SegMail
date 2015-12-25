@@ -5,7 +5,6 @@
  */
 package seca2.bootstrap.module.Program;
 
-import eds.component.navigation.NavigationService;
 import eds.component.program.ProgramService;
 import eds.entity.program.Program;
 import java.io.Serializable;

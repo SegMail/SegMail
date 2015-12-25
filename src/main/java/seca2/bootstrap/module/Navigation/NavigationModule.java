@@ -7,8 +7,6 @@ package seca2.bootstrap.module.Navigation;
 
 import eds.component.navigation.NavigationService;
 import eds.entity.navigation.MenuItem;
-import eds.entity.program.Program;
-import eds.entity.user.User;
 import eds.entity.user.UserType;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
-import segurl.filter.SegURLResolver;
 
 /**
  * Builds the navigation structure for the user.

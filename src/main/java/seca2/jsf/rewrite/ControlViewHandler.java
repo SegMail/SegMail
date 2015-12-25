@@ -8,6 +8,8 @@ package seca2.jsf.rewrite;
 import javax.faces.application.ViewHandler;
 import javax.faces.application.ViewHandlerWrapper;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import seca2.bootstrap.UserRequestContainer;
 
 /**
  *
@@ -16,6 +18,8 @@ import javax.faces.context.FacesContext;
 public class ControlViewHandler extends ViewHandlerWrapper {
 
     private ViewHandler wrapped;
+    
+    @Inject UserRequestContainer reqContainer;
 
     public ControlViewHandler(ViewHandler wrapped) {
         this.wrapped = wrapped;
@@ -39,8 +43,11 @@ public class ControlViewHandler extends ViewHandlerWrapper {
         if(pathInfo.endsWith("index.xhtml")){
             pathInfo = pathInfo.replace("index.xhtml", "");
         }
+        
+        pathInfo = (reqContainer.getProgramName() == null) ? 
+                pathInfo : "/".concat(reqContainer.getProgramName());
             
-        return contextPath.concat(servletPath).concat(pathInfo); //To change body of generated methods, choose Tools | Templates.
+        return contextPath.concat("").concat(pathInfo); 
     }
 
     @Override
