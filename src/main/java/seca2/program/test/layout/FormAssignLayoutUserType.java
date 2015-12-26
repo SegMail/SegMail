@@ -55,8 +55,6 @@ public class FormAssignLayoutUserType extends Form {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Layout has been assigned!", null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (LayoutAssignmentException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }

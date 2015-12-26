@@ -7,6 +7,7 @@
 package eds.entity.program;
 
 import eds.entity.data.EnterpriseRelationship_;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
 /**
@@ -15,5 +16,5 @@ import javax.persistence.metamodel.StaticMetamodel;
  */
 @StaticMetamodel(ProgramAssignment.class)
 public class ProgramAssignment_ extends EnterpriseRelationship_ {
-    
+    public static volatile SingularAttribute<ProgramAssignment,Boolean> DEFAULT;
 }

@@ -16,15 +16,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserAccountLockedException;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.annotation.PostConstruct;
-import javax.faces.context.Flash;
 import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.GlobalValues;
-import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -37,8 +35,7 @@ public class FormUserLogin {
 
     @EJB
     private UserService userService;
-    @Inject private UserContainer userContainer;
-    @Inject private ProgramContainer programContainer;
+    @Inject private UserSessionContainer userContainer;
 
     private String username;
     private String password;
@@ -64,27 +61,27 @@ public class FormUserLogin {
             User authenticatedUser = userService.login(this.username, this.password);
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
             
-            //Regenerate session ID
-            //this.userContainer.regenerateSessionId(); //20150214 let's not use this 1st & think of a better idea
-            
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Initialize userValues into userContainer
+            this.userContainer.setSessionId(ec.getSessionId(true));
             this.userContainer.setLoggedIn(true);
             this.userContainer.setUser(authenticatedUser);
             this.userContainer.setUserType(authenticatedUser.getUSERTYPE());
-            //Temporary arrangement
-            //this.userContainer.setUsername(this.userService.getUserAccountById(authenticatedUser.getOBJECTID()).getUSERNAME());
-
+            
+            
             //do a redirect to refresh the view
             //Something is faulty here after a redirect
             String previousURI = this.userContainer.getLastProgram();
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            
             if (previousURI != null && !previousURI.isEmpty()) {
                 /*ec.redirect(ec.getRequestContextPath()
                         +ec.getRequestServletPath()
                         +"/"
                         +previousURI
                         +"/");*/ //calling "test" -> "/SegMail/program/test/test"
-                ec.redirect(userContainer.getLastURL());
+                String lastProgram = "/".concat((userContainer.getLastProgram() == null) ? "" : userContainer.getLastProgram());
+                String contextPath = (ec.getRequestContextPath() == null) ? "" : ec.getRequestContextPath();
+                ec.redirect(contextPath+lastProgram);
                 //we need an adaptor pattern for redirection!
                 //this should be in the navigation module
                 
@@ -118,7 +115,7 @@ public class FormUserLogin {
      "Please enter password", null);
      return;
      }
-     UserContainer uc = null;
+     UserSessionContainer uc = null;
      try {
      //use UserService to login
      uc = userService.login(username, password);
@@ -157,7 +154,7 @@ public class FormUserLogin {
         
      //Regenerate session ID
      HttpSession session = req.getSession(true);
-     //Set UserContainer with session ID
+     //Set UserSessionContainer with session ID
      String sessionId = session.getId();
      uc.setSessionId(sessionId);
         

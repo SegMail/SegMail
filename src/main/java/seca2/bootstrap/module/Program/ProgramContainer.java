@@ -47,10 +47,12 @@ public class ProgramContainer implements Serializable{
         return (programHistory.isEmpty()) ? null : programHistory.peek();
     }
     
+    @Deprecated
     public String getCurrentURL(){
         return this.contextPath + this.servletPath + "/"+ this.currentProgram + "/";
     }
     
+    @Deprecated
     public String getLastURL(){
         return this.contextPath + this.servletPath + "/"+ this.getLastProgram() + "/";
     }

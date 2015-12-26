@@ -50,8 +50,8 @@
                     <div class="profile">
                         <img src="#{request.contextPath}/img/samples/users/user-30.jpg" />
                         <div class="profile-info">
-                            <a href="#" class="profile-title">Howdy, #{bootstrap.input.userContainer.username}</a>
-                            <span class="profile-subtitle">#{bootstrap.input.userContainer.userType.OBJECT_NAME}</span>
+                            <a href="#" class="profile-title">Howdy, #{UserSessionContainer.username}</a>
+                            <span class="profile-subtitle">#{UserSessionContainer.usertypeName}</span>
                             <div class="profile-buttons">
                                 <form jsf:id="user_action_menu">
                                     <div class="btn-group">
@@ -72,7 +72,7 @@
                         </div>
                     </div><!-- profile block -->
                     <ul class="navigation">
-                        <ui:include src="#{bootstrap.output.menuRoot}" />
+                        <ui:include src="#{UserRequestContainer.menuLocation}" />
                     </ul>
                     <!-- page navigation(menu) -->
 
@@ -82,12 +82,10 @@
                     <div class="container">
                         <div class="page-toolbar">
 
-                            <c:if test="#{
-                                  not empty bootstrap.output.programTitle ||
-                                      not empty bootstrap.output.programDescription}" >
+                            <c:if test="#{not empty UserSessionContainer.currentProgram }" >
                                 <div class="page-toolbar-block">
-                                    <div class="page-toolbar-title">#{bootstrap.output.programTitle}</div>
-                                    <div class="page-toolbar-subtitle">#{bootstrap.output.programDescription}</div>
+                                    <div class="page-toolbar-title">#{UserSessionContainer.currentProgram.DISPLAY_TITLE}</div>
+                                    <div class="page-toolbar-subtitle">#{UserSessionContainer.currentProgram.DISPLAY_DESCRIPTION}</div>
                                 </div>
                                 <div class="page-toolbar-block pull-right">
                                     <ui:insert name="toolbar-right"></ui:insert>

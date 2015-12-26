@@ -24,4 +24,8 @@
     <lifecycle>
         <phase-listener>seca2.jsf.Seca2PhaseListener</phase-listener>
     </lifecycle>
+    
+    <application>
+        <view-handler>seca2.jsf.rewrite.ControlViewHandler</view-handler>
+    </application>
 </faces-config>

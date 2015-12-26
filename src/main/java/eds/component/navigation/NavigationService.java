@@ -46,8 +46,7 @@ import java.util.Collections;
 @Stateless
 public class NavigationService implements Serializable {
 
-    @EJB
-    private UserService userService;
+    @EJB private UserService userService;
     @EJB private GenericObjectService genericEnterpriseObjectService;
     
     @PersistenceContext(name="HIBERNATE")

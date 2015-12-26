@@ -6,6 +6,8 @@
 package seca2.bootstrap;
 
 import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 
 /**
  * This is a temporary placeholder for all page locations until we figure a way
@@ -22,4 +24,22 @@ public class DefaultSites {
     public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
     
     public final String DEFAULT_HOME = "/programs/test/layout.xhtml";
+    
+    private final String DEFAULT_TEMPLATE_NAME = "DEFAULT_TEMPLATE_LOCATION";
+    
+    private String DEFAULT_TEMPLATE;
+    
+    @PostConstruct
+    public void init(){
+        
+        
+    }
+
+    public String getDEFAULT_TEMPLATE() {
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        DEFAULT_TEMPLATE = ec.getInitParameter(DEFAULT_TEMPLATE_NAME);
+        return DEFAULT_TEMPLATE;
+    }
+    
+    
 }

@@ -13,9 +13,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import eds.utilities.EntityExplorer;
 import java.io.Serializable;
-import javax.faces.context.FacesContext;
 
 /**
  * This is a chain of responsibility for all bootstrap modules.
@@ -47,12 +45,12 @@ public class BootstrappingChainFactory implements Serializable {
         //All core modules
         coreBootstrapModuleList = new ArrayList<BootstrapModule>();
         coreBootstrapModuleList.addAll(this.generateBootstrapList(this.cModules));
-        coreHead = this.constructBoostrapChain(this.coreBootstrapModuleList);
+        //coreHead = this.constructBoostrapChain(this.coreBootstrapModuleList);
         
         //All noncore modules
         nonCoreBootstrapModuleList = new ArrayList<BootstrapModule>();
         nonCoreBootstrapModuleList.addAll(this.generateBootstrapList(this.Modules));
-        nonCoreHead = this.constructBoostrapChain(this.nonCoreBootstrapModuleList);
+        //nonCoreHead = this.constructBoostrapChain(this.nonCoreBootstrapModuleList);
         
     }
 
@@ -62,6 +60,25 @@ public class BootstrappingChainFactory implements Serializable {
 
     public BootstrapModule getNonCoreHead() {
         return nonCoreHead;
+    }
+
+    public List<BootstrapModule> getCoreBootstrapModuleList() {
+        return coreBootstrapModuleList;
+    }
+
+    public List<BootstrapModule> getNonCoreBootstrapModuleList() {
+        return nonCoreBootstrapModuleList;
+    }
+    
+    /**
+     * 
+     * @return both core and non-core BMs.
+     */
+    public List<BootstrapModule> getAllBootstrapModuleList() {
+        List<BootstrapModule> all = getCoreBootstrapModuleList();
+        all.addAll(getNonCoreBootstrapModuleList());
+        
+        return all;
     }
     
     
@@ -77,8 +94,11 @@ public class BootstrappingChainFactory implements Serializable {
         List<BootstrapModule> moduleList = new ArrayList<BootstrapModule>();
         
         for(BootstrapModule bm : modules){
-            moduleList.add(bm);
+            if(bm.inService()) //Only add it if it's in service.
+                moduleList.add(bm);
         }
+        
+        Collections.sort(moduleList, new BootstrapModuleComparator());
         
         return moduleList;
     }
@@ -120,6 +140,18 @@ public class BootstrappingChainFactory implements Serializable {
         return firstHead;
     }
     
+    public BootstrapModule getModuleByName(String name){
+        for(BootstrapModule mod : cModules){
+            if(name.equals(mod.getName()))
+                return mod;
+        }
+        for(BootstrapModule mod : Modules){
+            if(name.equals(mod.getName()))
+                return mod;
+        }
+        return null;
+    }
+    
     /**
      * A non-Java EE method to get all instances of BoostrapModule class.
      * Not recommended, as components are not injected automatically.
@@ -146,6 +178,10 @@ public class BootstrappingChainFactory implements Serializable {
             return new ArrayList<>();
         }
     }*/
+    
+    public BootstrapModuleComparator getComparator(){
+        return new BootstrapModuleComparator();
+    }
 }
 
 //Since this class is only used by the chain factory alone, put it here.
@@ -155,13 +191,15 @@ class BootstrapModuleComparator implements Comparator<BootstrapModule> {
     public int compare(BootstrapModule o1, BootstrapModule o2) {
         //CoreModules will all be ahead of NonCoreModules no matter what
         boolean c1 = o1.getClass().isAnnotationPresent(CoreModule.class);
-        boolean c2 = o2.getClass().isAnnotationPresent(NonCoreModule.class);
+        boolean c2 = o2.getClass().isAnnotationPresent(CoreModule.class);
         
         int w1 = o1.executionSequence();
         int w2 = o2.executionSequence();
         
-        return !(c1 ^ c2) ? w1 - w2 : ((c1) ? w1 : w2);
+        int result = !(c1 ^ c2) ? w1 - w2 : ((c1) ? -1 : 1);
+        return result;
         
     }
     
+  
 }

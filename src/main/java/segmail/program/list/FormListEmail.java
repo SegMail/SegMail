@@ -37,8 +37,6 @@ public class FormListEmail {
     private ProgramList program;
     @Inject
     private ClientContainer clientContainer;
-    @Inject
-    private ProgramContainer programContainer;
 
     @EJB
     private SubscriptionService subscriptionService;

@@ -18,7 +18,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserAccountLockedException;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserNotFoundException;
 import eds.component.user.UserRegistrationException;
@@ -56,7 +56,7 @@ public class FormTestUser implements Serializable {
     private String loginUsername;
     private String loginPassword;
     @Inject
-    private UserContainer userContainer; //this is not resolved precisely [20150131]
+    private UserSessionContainer userContainer; //this is not resolved precisely [20150131]
     
     //Profile pic
     private String usernameProfilePic;

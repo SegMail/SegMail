@@ -13,7 +13,7 @@ import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 
 /**
  *
@@ -25,7 +25,7 @@ public class MySettingsProgram implements Serializable {
     
     private final String pageName = "my_settings_program";
     
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     
     @EJB private ClientService clientService;
     

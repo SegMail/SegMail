@@ -5,8 +5,17 @@
  */
 package seca2.bootstrap;
 
-import java.util.Map;
-import javax.inject.Inject;
+import java.io.IOException;
+import java.util.List;
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * A bootstrap module mimics a Servlet filter or a Struts interceptor - the 
@@ -19,14 +28,26 @@ import javax.inject.Inject;
  * 
  * @author LeeKiatHaw
  */
-public abstract class BootstrapModule {
+public abstract class BootstrapModule implements Filter {
    
-    /*@Inject*/ protected DefaultValues defaultValues = new DefaultValues();
     /*@Inject*/ protected DefaultSites defaultSites = new DefaultSites();
     
     public static String FACES_CONTEXT = "context";
     
     private BootstrapModule next;
+    
+    /**
+     * This is injected during runtime and it should be order-independent, ie. 
+     * each module only loads it and use it in their own way, it does not matter
+     * which module processed these 2 instances first, and the results should be 
+     * the same. Eg. If UserModule executes before program module, and the user 
+     * is not loggedin, it should redirect the user to the login page. If the 
+     * program module executes first, it would process only request starting with
+     * "/program/" and bypass the request to user module, which would then still
+     * redirect the user to the login page. 
+     */
+    //@Inject private BootstrapInput bootstrapInput;
+    //@Inject private BootstrapOutput bootstrapOutput;
     
     /**
      * As with http://www.javaworld.com/article/2072857/java-web-development/the-chain-of-responsibility-pattern-s-pitfalls-and-improvements.html
@@ -36,7 +57,7 @@ public abstract class BootstrapModule {
      * @param inputContext
      * @param outputContext 
      */
-    public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
+    /*public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
         System.out.println("BootstrapModule "+this.getClass().getSimpleName()+" started.");
         
         boolean toContinue = (this.inService() ? this.execute(inputContext, outputContext) : true );
@@ -46,7 +67,7 @@ public abstract class BootstrapModule {
         
         if(!toContinue)
             System.out.println("Bootstrap processing stopped at "+this.getClass().getSimpleName()+".");
-    }
+    }*/
     
     public void strapNext(BootstrapModule next){
         this.next = next;
@@ -63,14 +84,63 @@ public abstract class BootstrapModule {
     /**
      * Execute the control logic of this module.
      * 
-     * @param inputContext
-     * @param outputContext
+     * @param request
+     * @param response
      * @return true to continue the chain, false to stop the chain.
+     * @throws java.lang.Exception
      */
     protected abstract boolean execute(
-            BootstrapInput inputContext,
-            BootstrapOutput outputContext);
+            ServletRequest request, 
+            ServletResponse response) throws Exception;
     
+    /**
+     * What will happen if the execute methods fail.
+     * 
+     * @param request
+     * @param response 
+     */
+    protected abstract void ifFail(
+            ServletRequest request, 
+            ServletResponse response) throws Exception;
+    
+    /**
+     * What happens if an exception is encountered during request processing.
+     * 
+     * @param request
+     * @param response 
+     */
+    protected abstract void ifException(
+            ServletRequest request, 
+            ServletResponse response);
+    
+    /**
+     * What happens if the request is for a file resource.
+     * 
+     * Modules don't really need to do anything, they can just return true to
+     * bypass file processing. Maybe there will be a FileModule that will use it.
+     * 
+     * Let's not use this first
+     * 
+     * @param request
+     * @param response 
+     */
+    //protected abstract boolean ifFileRequest(
+    //        ServletRequest request, 
+    //        ServletResponse response);
+    
+    /**
+     * List of all other BootstrapModules that this one is dependent on. If these 
+     * dependencies are not present when loading this module, then the bootstrapping 
+     * process should fail.
+     * 
+     * Bad idea for now, as bootstrapping process happens for every request,
+     * you don't want to incur a O(n^2) time cost on every request. Unless in the 
+     * future we can make bootstrapping process happens in the session scope.
+     * 
+     * @param <BM>
+     * @return 
+     */
+     // protected abstract <BM extends BootstrapModule> List<BM> bootstrappingDependencies();
     /**
      * 
      * @return 
@@ -84,4 +154,50 @@ public abstract class BootstrapModule {
      * @return 
      */
     protected abstract boolean inService();
+
+    /**
+     * This is for initializing the module as a filter when Bootstrap runs.
+     * Each module can determine at runtime what is the URL pattern they are
+     * required to process.
+     * 
+     * @param request
+     * @param response
+     * @return 
+     */
+    protected abstract String urlPattern(
+            );
+    
+    /**
+     * Tells Bootstrap which dispatch type needs to execute this filter - eg. 
+     * REQUEST, FORWARD
+     * @return 
+     */
+    protected abstract List<DispatcherType> getDispatchTypes();
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        try {
+            HttpServletRequest req = (HttpServletRequest) request;
+            HttpServletResponse res = (HttpServletResponse) response;
+            HttpSession session = req.getSession(false);
+
+            if(this.execute(req, res)){
+                chain.doFilter(request, response);
+                return; // Very important!
+            }
+
+            this.ifFail(request, response);
+            
+        } catch (Exception ex) {
+            this.ifException(request, response);
+        }
+    }
+
+    @Override
+    public void destroy() {
+        
+    }
+    
+    public abstract String getName();
+    
 }

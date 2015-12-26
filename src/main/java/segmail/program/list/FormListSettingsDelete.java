@@ -15,7 +15,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.SubscriptionService;
 
@@ -28,7 +28,7 @@ import segmail.component.subscription.SubscriptionService;
 public class FormListSettingsDelete {
     
     @Inject private ProgramList program;
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     
     @EJB private SubscriptionService subService;
     @EJB private UserService userService;

@@ -9,9 +9,10 @@ package seca2.bootstrap.module.Navigation;
 import eds.entity.navigation.MenuItem;
 import javax.inject.Inject;
 import seca2.bootstrap.GlobalValues;
+import segurl.filter.SegURLResolver;
 
 /**
- * Aggregation class
+ * Wrapper class
  * @author vincent.a.lee
  */
 public class MenuItemContainer {
@@ -64,5 +65,9 @@ public class MenuItemContainer {
         this.contextPath = contextPath;
     }
     
+    public boolean containsProgram(String programName){
+        return (SegURLResolver.getResolver().resolveProgramName(this.menuItem.getMENU_ITEM_URL())
+                .equalsIgnoreCase(programName));
+    }
     
 }

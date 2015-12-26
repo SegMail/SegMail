@@ -5,23 +5,25 @@
  */
 package seca2.bootstrap.module.Program;
 
-import java.io.Serializable;
-import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import seca2.bootstrap.BootstrapInput;
-import seca2.bootstrap.BootstrapModule;
-import seca2.bootstrap.BootstrapOutput;
-import seca2.bootstrap.CoreModule;
-import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
 import eds.entity.program.Program;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import javax.faces.application.ProjectStage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
+import java.io.Serializable;
+import java.util.ArrayList;
+import seca2.bootstrap.BootstrapModule;
+import seca2.bootstrap.CoreModule;
+import java.util.List;
+import javax.ejb.EJB;
 import javax.inject.Inject;
-import seca2.bootstrap.module.User.UserContainer;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import seca2.bootstrap.DefaultSites;
+import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.UserSessionContainer;
+import segurl.filter.SegURLResolver;
 
 /**
  *
@@ -34,256 +36,65 @@ import seca2.bootstrap.module.User.UserContainer;
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
 
-    public static final int DEFAULT_PROGRAM = 0;
+    @Inject UserSessionContainer sessionContainer;
+    @Inject UserRequestContainer requestContainer;
+    @Inject DefaultSites defaults;
 
-    @EJB
-    private ProgramService programService;
+    @EJB ProgramService programService;
 
-    @Inject
-    private UserContainer userContainer;
-    @Inject
-    private ProgramContainer programContainer;
+    @Override
+    protected boolean execute(ServletRequest request, ServletResponse response) {
 
-    @PostConstruct
-    public void init() {
+        /**
+         * Bypass if it's a file request
+         * Cannot, because /program/index.xhtml is also a file.
+         * We can either
+         * 1) enhance SeqURLResolver to recognize /index.xhtml or
+         * 2) hardcode for now...
+         */
+        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+            return true;
+        }
+
+        long userTypeId = sessionContainer.getUserType().getOBJECTID();
+
+        String programName = requestContainer.getProgramName();
+        Program program = sessionContainer.getCurrentProgram();
+
+        if (programName == null || program == null
+                || !programName.equalsIgnoreCase(program.getPROGRAM_NAME())) {
+            program = programService.getProgramForUserType(programName, userTypeId);
+            requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
+            sessionContainer.setCurrentProgram(program);
+        }
+
+        //If no matching program is found and no default program, stop processing and 
+        //show the error page
+        if (program == null) {
+            requestContainer.setViewLocation(defaults.ERROR_PAGE);
+            requestContainer.setError(true);
+            return true;
+        }
+        //If found, set the viewRoot location
+        requestContainer.setViewLocation(program.getVIEW_ROOT());
+        //Must return true no matter what, else FacesServlet will not get called
+        return true;
+
+    }
+
+    @Override
+    protected void ifFail(ServletRequest request, ServletResponse response) {
+        //This module doesn't require failing, so no need to code this 
+    }
+
+    @Override
+    protected void ifException(ServletRequest request, ServletResponse response) {
 
     }
 
     @Override
     protected int executionSequence() {
-        return -98;
-    }
-
-    @Override
-    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-
-        try {
-            //Very coupled to JSF
-            FacesContext fc = FacesContext.getCurrentInstance();
-            ExternalContext ec = fc.getExternalContext();
-            //1. Find the programName object
-            //- If empty, assign the default programName
-            //- If not empty, continue.
-            if (inputContext.getProgram() == null || inputContext.getProgram().isEmpty()) {
-                String defaultProgram = "";
-                //FacesContext fc = (FacesContext) inputContext.getFacesContext();
-
-                //Rightfully, we should check if the user has a default programName configured, if yes, we
-                //should get it before we move on to the default programName.
-                //- User
-                //- UserType
-                //- Site/Client
-                //Actually, even in the production environment, there can also be a default programName set.
-                //[20150328] There is no need to restrict this feature to the development stage
-                //if (fc.getApplication().getProjectStage().equals(ProjectStage.Development)) {
-                defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
-                inputContext.setProgram(defaultProgram);
-                //}
-
-                //If totally no default programName is found, throw exception
-                if (defaultProgram.isEmpty()) {
-                    throw new Exception("No default program found.");
-                }
-
-                //Assign default programName
-                inputContext.setProgram(defaultProgram);
-            }
-            String programName = inputContext.getProgram();
-            
-            //Determine if can skip the rest of the processing
-            /*if(this.canSkip(inputContext, outputContext)){
-                programContainer.visitNewProgram(programName);
-                return true;
-            }*/
-            
-
-            //2. Find the viewRoot of the programName, which cannot be empty by now
-            //- If not found, throw exception.
-            //- If not found but project is in development stage, get the GLOBAL_DEFAULT_VIEWROOT
-            //- If found, continue.
-            //String viewRoot = this.programService.getViewRootFromProgramName(programName);
-            Program program = this.programService.getSingleProgramByName(programName);
-            String viewRoot = program == null ? null : program.getVIEW_ROOT();
-            String programTitle = program == null ? null : program.getDISPLAY_TITLE();
-            String programDesc = program == null ? null : program.getDISPLAY_DESCRIPTION();
-            String defaultViewRoot = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_VIEWROOT");
-
-            if (viewRoot == null || viewRoot.isEmpty()) {
-                if (defaultViewRoot == null || defaultViewRoot.isEmpty()) {
-                    throw new Exception("View root location is not found for program " + programName + ".");
-                }
-
-                viewRoot = defaultViewRoot;
-            }
-
-            //3. Check the user's authorization.
-            //By this time, the programName name and viewRoot cannot be empty
-            //- If not authorized, show the not authorized view root.
-            //- If found, continue.
-            //To check authorization, you need to first know if the person is authorized
-            //By passing through the UserModule, the user should already been authorized
-            boolean authorized = false;
-            if (this.userContainer.getUserType() != null) {
-                authorized = this.programService.checkProgramAuthForUserType(userContainer.getUserType().getOBJECTID(), programName);
-            }
-
-            //4. Decide what to show
-            //Get the SETUP flag in URL
-            String bypassInURL = ec.getRequestParameterMap().get("SETUP");
-            String bypassInWebXML = ec.getInitParameter("SETUP");
-            if (!authorized
-                    && //If the SETUP flag is set in web.xml or URL but user is not authorized, show the default viewroot anyway
-                    !(
-                        (bypassInURL != null && bypassInURL.compareToIgnoreCase("true") == 0) ||
-                        (bypassInWebXML != null && bypassInWebXML.compareToIgnoreCase("true") == 0)
-                    )
-                ) {
-
-                String noAuthView = fc.getExternalContext().getInitParameter("NO_AUTHORIZATION_VIEWROOT");
-                outputContext.setPageRoot(noAuthView);
-                programContainer.visitNewProgram(programName);
-                return true;
-            }
-
-            //authenticated
-            outputContext.setPageRoot(viewRoot);
-            outputContext.setProgramTitle(programTitle);
-            outputContext.setProgramDescription(programDesc);
-            programContainer.visitNewProgram(programName);
-            return true;
-
-        } catch (DBConnectionException dbex) {
-            outputContext.setErrorMessage(dbex.getMessage());
-            StringWriter sw = new StringWriter();
-            dbex.printStackTrace(new PrintWriter(sw));
-            outputContext.setErrorStackTrace(sw.toString());
-            outputContext.setTemplateRoot(defaultSites.ERROR_PAGE_TEMPLATE);
-            outputContext.setPageRoot(defaultSites.ERROR_PAGE);
-
-            return false;
-
-        } catch (Exception ex) {
-            outputContext.setErrorMessage(ex.getMessage());
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            outputContext.setErrorStackTrace(sw.toString());
-            outputContext.setTemplateRoot(defaultSites.ERROR_PAGE_TEMPLATE);
-            outputContext.setPageRoot(defaultSites.ERROR_PAGE);
-
-            return false;
-        }
-    }
-
-    //@Override
-    protected boolean execute1(BootstrapInput inputContext, BootstrapOutput outputContext) {
-
-        /*
-         Actual processing
-         1) Check the programName requested by retrieving it from inputContext.
-         */
-        //If there is no programName entered in the URL, set the global default programName
-        //[20150314] First, we should get the user's own default programName, but we
-        // de-prioritize this at the moment.
-        if (inputContext.getProgram() == null || inputContext.getProgram().isEmpty()) {
-            //FacesContext fc = (FacesContext) inputContext.getFacesContext();
-            FacesContext fc = FacesContext.getCurrentInstance();
-
-            //Actually, even in the production environment, there can also be a default programName set.
-            if (!fc.getApplication().getProjectStage().equals(ProjectStage.Production)) {
-                String defaultProgram = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_PROGRAM");
-                inputContext.setProgram(defaultProgram);
-            }
-        }
-        String program = inputContext.getProgram();
-
-        try {
-            /*
-             * 2) Authorization checks for programName access by calling ProgramServices.
-             * - If user is authorized, then call ProgramService to check for authorization.
-             * - If user is not, then treat user as unauthorized, as it does not matter.
-             */
-            boolean authorized = false;
-            if (userContainer.isLoggedIn()) {
-                authorized = this.programService.checkProgramAuthForUserType(userContainer.getUserType().getOBJECTID(), program);
-            }
-
-            /*
-             3) Retrieve the programName from database by calling ProgramServices.
-             */
-            String viewRoot = programService.getViewRootFromProgramName(program);
-            //FacesContext fc = (FacesContext) inputContext.getFacesContext();
-            FacesContext fc = FacesContext.getCurrentInstance();
-
-            if (fc.getApplication().getProjectStage().equals(ProjectStage.Development)) {
-                System.out.println(viewRoot); //debug
-            }
-            //If there are no results returned and it is in the development stage,
-            //show the user the default viewroot
-            //Note that it is necessary to have both a GLOBAL_DEFAULT_PROGRAM and GLOBAL_DEFAULT_VIEWROOT
-            //because they could be different when setting up the database. 
-            if ((viewRoot == null || viewRoot.isEmpty())
-                    && !fc.getApplication().getProjectStage().equals(ProjectStage.Production)) {
-                viewRoot = fc.getExternalContext().getInitParameter("GLOBAL_DEFAULT_VIEWROOT");;
-                //Don't end this execute() yet! Need to check if user is authorized later.
-                //outputContext.setPageRoot(testing);
-                //return true;
-            }
-
-            if ((viewRoot == null || viewRoot.isEmpty())) {
-                throw new Exception("No default program set. Please contact administrator to set it for you so "
-                        + "that you can get started! "
-                        + "Alternatively, you can type in the name of the program in the URL above like this: "
-                        + "\"[site url]/program/[program name]/");
-            }
-
-            //Netbeans tell me that the viewRoot null and empty check is actually redundant because it would 
-            //already have been filtered off in the above IF statement, but what the hack, let's just put it 
-            //here for clarity purpose.
-            if (authorized && (viewRoot != null && !viewRoot.isEmpty())) {
-                //We use web.xml at this moment, but in the future this should be 
-                viewRoot = fc.getExternalContext().getInitParameter("NO_AUTHORIZATION_VIEWROOT");
-                outputContext.setPageRoot(viewRoot);
-                return true;
-            }
-
-            //If there is a viewroot found, but user is not authorized, show the unathorized page and continue bootstrapping chain
-            /*if(     (viewRoot != null && !viewRoot.isEmpty()) &&
-             !authorized){
-             String noAuthView = fc.getExternalContext().getInitParameter("NO_AUTHORIZATION_VIEWROOT");
-             outputContext.setPageRoot(noAuthView);
-             return true;
-             }
-            
-             //If there is a viewroot found, and user is authorized, show the viewroot.
-             if(     (viewRoot != null && !viewRoot.isEmpty()) &&
-             authorized){
-             outputContext.setPageRoot(viewRoot);
-             return true;
-             }*/
-            throw new Exception("Program request processing error.");
-
-        } catch (DBConnectionException dbex) {
-            //Set error page and stop processing
-            //return false;
-            outputContext.setErrorMessage(dbex.getMessage());
-            StringWriter sw = new StringWriter();
-            dbex.printStackTrace(new PrintWriter(sw));
-            outputContext.setErrorStackTrace(sw.toString());
-            outputContext.setTemplateRoot(defaultSites.ERROR_PAGE_TEMPLATE);
-            outputContext.setPageRoot(defaultSites.ERROR_PAGE);
-
-            return false;
-            //throw ex; //It's not a programming error, so 
-        } catch (Exception ex) {
-            outputContext.setErrorMessage(ex.getMessage());
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            outputContext.setErrorStackTrace(sw.toString());
-            outputContext.setTemplateRoot(defaultSites.ERROR_PAGE_TEMPLATE);
-            outputContext.setPageRoot(defaultSites.ERROR_PAGE);
-
-            return false;
-        }
+        return Integer.MIN_VALUE + 2;
     }
 
     @Override
@@ -291,19 +102,28 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         return true;
     }
 
-    /*=================Helper methods=====================*/
-    private boolean canSkip(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        //If the following conditions are met:
-        //- Previous request and current request are the same,
-        boolean sameRequest = (programContainer.getLastProgram() == null) ? false
-                : programContainer.getLastProgram().equalsIgnoreCase(inputContext.getProgram());
-        //- UserContainer isLoggedIn(),
-        boolean isLoggedIn = userContainer.isLoggedIn();
-        //- PageRoot is not empty
-        boolean pageRootExists = (outputContext.getPageRoot() == null) ? false
-                : (!outputContext.getPageRoot().isEmpty());
-        //return results;
-        return sameRequest && isLoggedIn && pageRootExists;
+    @Override
+    protected String urlPattern() {
+        return "/program/*";
+    }
+
+    @Override
+    protected List<DispatcherType> getDispatchTypes() {
+        List<DispatcherType> dispatchTypes = new ArrayList<DispatcherType>();
+        dispatchTypes.add(DispatcherType.REQUEST);
+        dispatchTypes.add(DispatcherType.FORWARD);
+
+        return dispatchTypes;
+    }
+
+    @Override
+    public String getName() {
+        return "ProgramModule";
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
 
     }
+
 }

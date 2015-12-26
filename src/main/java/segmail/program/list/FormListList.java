@@ -5,7 +5,6 @@
  */
 package segmail.program.list;
 
-import eds.component.client.ClientFacade;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
@@ -21,8 +20,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
-import seca2.bootstrap.module.Program.ProgramContainer;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -34,9 +32,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormListList {
 
     @Inject
-    private UserContainer userContainer;
-    @Inject
-    private ProgramContainer programContainer;
+    private UserSessionContainer userContainer;
     @Inject
     private ClientContainer clientContainer;
 

@@ -20,8 +20,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.Program.ProgramContainer;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -36,8 +35,7 @@ public class FormAddList {
     
     private boolean remote;
     
-    @Inject private UserContainer userContainer;
-    @Inject private ProgramContainer programContainer;
+    @Inject private UserSessionContainer userContainer;
     
     @Inject private ProgramList programList;
     
@@ -70,7 +68,6 @@ public class FormAddList {
             //redirect to itself after setting list editing
             //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            //ec.redirect(programContainer.getCurrentURL());
             FacesMessenger.setFacesMessage(programList.getFormName(), FacesMessage.SEVERITY_FATAL, "List added. ", "You can set up your list now!");
             this.programList.setListEditing(SubscriptionList);
             programList.refresh();

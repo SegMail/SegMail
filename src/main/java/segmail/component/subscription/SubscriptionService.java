@@ -19,7 +19,6 @@ import eds.component.mail.MailService;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
-import eds.entity.config.ConfigNotFoundException;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -56,7 +55,6 @@ import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoEmailTypeFactory;
-import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
 
 /**

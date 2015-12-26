@@ -12,7 +12,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import eds.component.data.DBConnectionException;
-import seca2.bootstrap.module.User.UserContainer;
+import seca2.bootstrap.UserSessionContainer;
 import javax.servlet.http.HttpSession;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -24,7 +24,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @RequestScoped
 public class FormUserLogout {
 
-    @Inject private UserContainer userContainer;
+    @Inject private UserSessionContainer userContainer;
     
     private final String messageBoxId = "form-user-login";
 

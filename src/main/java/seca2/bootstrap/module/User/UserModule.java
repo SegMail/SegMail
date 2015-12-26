@@ -5,169 +5,158 @@
  */
 package seca2.bootstrap.module.User;
 
+import seca2.bootstrap.UserSessionContainer;
 import java.io.Serializable;
 import javax.ejb.EJB;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-import javax.servlet.http.HttpSession;
-import seca2.bootstrap.BootstrapInput;
 import seca2.bootstrap.BootstrapModule;
-import seca2.bootstrap.BootstrapOutput;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.GlobalValues;
 import eds.component.user.UserService;
 import java.io.IOException;
-import javax.faces.context.ExternalContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import seca2.bootstrap.UserRequestContainer;
+import segurl.filter.SegURLResolver;
 
 /**
  *
  * @author vincent.a.lee
  */
-//@SessionScoped //Should not be a SessionScoped object
 @CoreModule
 public class UserModule extends BootstrapModule implements Serializable {
     
-    @EJB private UserService userService;
+    @EJB private UserService userService; 
     @Inject private GlobalValues globalValues;
-
-    @Inject private UserContainer userContainer; //Should we inject or should we put it in InputContext?
-    private final LoginMode loginMode = LoginMode.BLOCK;
-
-    private String previousURI;
-    private final String loginContainerName = "form-user-login:loginbox-container"; // should not be here!
+    /**
+     * Should we inject or should we put it in InputContext?
+     * 
+     * Here, because this is a SessionScoped while InputContext is RequestScoped.
+     */
+    @Inject private UserRequestContainer requestContainer;
+    @Inject private UserSessionContainer userContainer; //
     
-
-    public boolean sameSession(HttpSession session, UserContainer uc){
-        if(uc == null)
-            return false;
-        
-        if(session == null)
-            return false;
-        
-        return (session.getId().equals(uc.getSessionId()));
-    }
+    public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
+    public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
     
-    public boolean isAuthenticated(UserContainer uc){
-        return uc.isLoggedIn();
-    }
-
-    public String getPreviousURI() {
-        return previousURI;
-    }
-
-    public void setPreviousURI(String previousURI) {
-        this.previousURI = previousURI;
-    }
-
-    public LoginMode getLoginMode() {
-        return loginMode;
-    }
-
-    @Override
-    protected boolean execute(BootstrapInput inputContext, BootstrapOutput outputContext) {
-        //FacesContext fc = (FacesContext) inputContext.getFacesContext();
-        FacesContext fc = FacesContext.getCurrentInstance();
-        ExternalContext ec = fc.getExternalContext();
-        HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
-        
-        //allow bypass authentication if application is not in PRODUCTION stage
-        //if(!fc.getApplication().getProjectStage().equals(ProjectStage.Production)){
-        //[20150328] allow bypass if application is in SETUP
-        String bypassInURL = ec.getRequestParameterMap().get("SETUP");
-        String bypassInWebXML = ec.getInitParameter("SETUP");
-        if((bypassInWebXML != null && bypassInWebXML.compareToIgnoreCase("true") == 0) ||
-        //        (bypassInURL != null && bypassInURL.compareToIgnoreCase("true") == 0)
-        //        ){
-                (inputContext.isSetup())){
-            //String bypass = fc.getExternalContext().getInitParameter("BYPASS_AUTHENTICATION");
-            //if not in PRODUCTION and BYPASS_AUTHENTICATION flag is set
-            //if(bypass.equalsIgnoreCase("true")){
-                return true;
-            //}
-            /**
-             * If the database has not been set up yet, bypass authentication step
-             * and direct to setup page(production)/testing page(development).
-             * The following criteria can be used:
-             * - no user has been created
-             * - (other checks to be implemented...)
-             * 
-             * [20150322] This should be handled in the ProgramModule, not here.
-             * 
-             * Notes:
-             * - Calling this check for every request is not feasible as it will 
-             * incur lots of DB reads each time. There must be some ApplicationScoped
-             * object that can be maintained to keep the status of installation.
-             * 
-             */
-            
-        }
-            
-        boolean sameSession = this.sameSession(session,this.userContainer);
-        boolean isAuthenticated = this.isAuthenticated(this.userContainer);
-        
-        String program = inputContext.getProgram();
-        this.userContainer.setLastProgram(program);
-        
-        //If it's not the same session, meaning it could be the first vist, or 
-        //the previous session has timed out, load the login page.
-        if(!sameSession){
-            //If it's a postback, and if program is not null (null means that the
-            //session was timed out in the login page.
-            //then the entire page must be refreshed.
-            if(fc.isPostback() && program != null){
-                try {
-                    ec.redirect(ec.getRequestContextPath()
-                            +ec.getRequestServletPath()
-                            +"/"
-                            +program
-                            +"/");
-                    return true;
-                } catch (IOException ex) {
-                    return false;
-                }
-            }
-            //Else, 
-            outputContext.setPageRoot(this.defaultSites.LOGIN_PAGE);
-            outputContext.setTemplateRoot(this.defaultSites.LOGIN_PAGE_TEMPLATE);
-            
-            //Set session expired message if it's postback but it was directed from
-            //other pages (not login page), therefore program could be null.
-            //if(fc.isPostback())
-            //    ec.getFlash().put(GlobalValues.SESSION_EXPIRED_MESSAGE_NAME, GlobalValues.SESSION_EXPIRED_MESSAGE);
-            
-            //Regenerate a session object and store the session ID.
-            session = (HttpSession) fc.getExternalContext().getSession(true);
-            this.userContainer.setSessionId(session.getId());
-            //Set the last URL, because user is redirected to the login page now
-            //this.userContainer.setLastURL(program);
-            //Don't forget to return false to break the bootstrapping chain!
-            return false;
-        }
-        
-        //If it's the same session but it is not logged in, the user could be 
-        //browsing non-secured pages or authenticating.
-        if(sameSession && !isAuthenticated){
-            return false;
-        }
-        
-        //If session is still active and user is authenticated, continue the bootstrapping
-        //chain
-        if(sameSession && isAuthenticated){
-            return true;
-        }
-        
-        return true;
-    }
-
-    @Override
-    protected int executionSequence() {
-        return -99;
-    }
+    public final String LOGIN_PATH = "/login";
+    
 
     @Override
     protected boolean inService() {
         return true;
     }
 
+    @Override
+    protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 
+        String contextPath = ((HttpServletRequest)request).getContextPath();
+        String servletPath = ((HttpServletRequest)request).getServletPath();
+        String pathInfo = ((HttpServletRequest)request).getPathInfo();
+        
+        //IMO, a bug in the 3 above methods
+        contextPath = (contextPath == null) ? "" : contextPath;
+        servletPath = (servletPath == null) ? "" : servletPath;
+        pathInfo = (pathInfo == null) ? "" : pathInfo;
+        //During postback of the form submission, the servlet path will be /login
+        //and if the xhtml values are not set, the form methods will not be processed.
+        //it has nothing to do with URL rewriting
+        //Regardless pass or fail, just populate first, the next module should correct it
+        requestContainer.setViewLocation(LOGIN_PAGE); //I'm not sure what will happen here, since we have already fowarded the request to this page below
+        requestContainer.setTemplateLocation(LOGIN_PAGE_TEMPLATE);
+        
+        //If on login page, forward the request to viewId index.xhtml
+        if(servletPath.equalsIgnoreCase(LOGIN_PATH)){
+            return true;
+        }
+        
+        //For all other requests, if the user session is logged in, let other modules decide the view
+        if(!(
+            userContainer == null ||
+            userContainer.getSessionId() == null || 
+            userContainer.getSessionId().isEmpty() ||
+            !userContainer.isLoggedIn()
+                )){
+            return true;
+        }
+        
+        //If request is for a file resource
+        if(SegURLResolver.getResolver().containsFile(servletPath))
+            return true;
+        //If the request has servlet path /program or /login, it would match to FacesServlet from
+        //web.xml config and parsed as Faces request.
+        if(SegURLResolver.getResolver().containsFile(pathInfo))//Separate out for debugging purposes
+            return true;
+                
+        //For everything else not discovered, don't continue the filterchain
+        //userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(pathInfo));
+        userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo)));
+        return false;
+    }
+
+
+    @Override
+    protected int executionSequence() {
+        return Integer.MIN_VALUE ;
+    }
+    
+    @Override
+    public String getName() {
+        return "UserModule";
+    }
+    
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        
+    }
+
+    @Override
+    protected String urlPattern() {
+        return "/*";
+    }
+
+    @Override
+    protected List<DispatcherType> getDispatchTypes() {
+        List<DispatcherType> dispatchTypes = new ArrayList<>();
+        dispatchTypes.add(DispatcherType.REQUEST);
+        //dispatchTypes.add(DispatcherType.FORWARD);
+        
+        return dispatchTypes;
+    }
+
+    /**
+     * The sole purpose of the UserSessionContainer is to see if it's necessary to forward
+ users to the login page.
+     * 
+     * @param request
+     * @param response 
+     */
+    @Override
+    protected void ifFail(ServletRequest request, ServletResponse response) {
+        try {
+            //If it's a file request, don't do anything
+            if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+                return;
+            
+            ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+LOGIN_PATH);
+            //((HttpServletRequest)request).getRequestDispatcher("/login").forward(request, response);
+            
+        } catch (Exception ex) {
+            Logger.getLogger(UserModule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Override
+    protected void ifException(ServletRequest request, ServletResponse response) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

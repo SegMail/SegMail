@@ -22,7 +22,8 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.Program.ProgramContainer;
+import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -38,8 +39,9 @@ public class FormEditExistingTemplate {
     //@EJB private UserService userService;
     
     @Inject private ProgramWelcomeEmail program;
-    //@Inject private UserContainer userContainer;
-    @Inject private ProgramContainer programContainer;
+    
+    @Inject private UserSessionContainer userContainer;
+    @Inject private UserRequestContainer requestContainer;
     
     private final String formName = "edit_template_form";
     
@@ -50,9 +52,10 @@ public class FormEditExistingTemplate {
     
     public void loadTemplate(long templateId){
         try {
+            
             // Retrieve the template based on the Id
             // Using cast because when retrieving with AutoresponderEmail.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
-            AutoresponderEmail editing = objectService.getEnterpriseObjectById(templateId, AutoresponderEmail.class); 
+            AutoresponderEmail editing = (AutoresponderEmail) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
             
             program.setEditingTemplate(editing);
             
@@ -136,7 +139,8 @@ public class FormEditExistingTemplate {
             //redirect to itself after setting list editing
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            ec.redirect(programContainer.getCurrentURL());
+            //ec.redirect(programContainer.getCurrentURL());
+            ec.redirect(ec.getRequestContextPath()+"/".concat(requestContainer.getProgramName()));
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
