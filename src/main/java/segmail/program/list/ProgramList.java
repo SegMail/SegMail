@@ -17,7 +17,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.Program.ProgramContainer;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.AutoConfirmEmail;
@@ -39,7 +39,7 @@ import segmail.entity.subscription.email.AutoresponderEmail;
 public class ProgramList implements Serializable {
     
     @Inject private UserSessionContainer userContainer;
-    @Inject private ProgramContainer programContainer;
+    @Inject private UserRequestContainer reqContainer;
     
     @EJB
     private ClientService clientService;
@@ -178,7 +178,8 @@ public class ProgramList implements Serializable {
             //Keep all messages posted in this request
             ec.getFlash().setKeepMessages(true);
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            ec.redirect(programContainer.getCurrentURL());
+            //ec.redirect(programContainer.getCurrentURL());
+            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }

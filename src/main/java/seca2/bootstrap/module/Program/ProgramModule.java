@@ -65,6 +65,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
                 || !programName.equalsIgnoreCase(program.getPROGRAM_NAME())) {
             program = programService.getProgramForUserType(programName, userTypeId);
             requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
+            sessionContainer.setCurrentProgram(program);
         }
 
         //If no matching program is found and no default program, stop processing and 

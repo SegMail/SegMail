@@ -18,7 +18,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.Program.ProgramContainer;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.AutoEmailTypeFactory;
 
@@ -34,8 +34,8 @@ public class FormAddNewAutoEmail {
     @EJB private UserService userService;
     
     @Inject private ProgramWelcomeEmail program;
-    @Inject private ProgramContainer programContainer;
     @Inject private ClientFacade clientFacade;
+    @Inject private UserRequestContainer reqContainer;
     
     private String subject;
     
@@ -62,7 +62,8 @@ public class FormAddNewAutoEmail {
             //redirect to itself after setting list editing
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            ec.redirect(programContainer.getCurrentURL());
+            //ec.redirect(programContainer.getCurrentURL());
+            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
             
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();

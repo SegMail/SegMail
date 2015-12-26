@@ -21,10 +21,8 @@ import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.annotation.PostConstruct;
-import javax.faces.context.Flash;
 import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.GlobalValues;
-import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -38,7 +36,6 @@ public class FormUserLogin {
     @EJB
     private UserService userService;
     @Inject private UserSessionContainer userContainer;
-    @Inject private ProgramContainer programContainer;
 
     private String username;
     private String password;
