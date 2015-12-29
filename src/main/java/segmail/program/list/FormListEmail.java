@@ -18,7 +18,6 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
-import seca2.bootstrap.module.Program.ProgramContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
@@ -33,15 +32,11 @@ import segmail.entity.subscription.email.AutoWelcomeEmail;
 @RequestScoped
 public class FormListEmail {
 
-    @Inject
-    private ProgramList program;
-    @Inject
-    private ClientContainer clientContainer;
+    @Inject private ProgramList program;
+    @Inject private ClientContainer clientContainer;
 
-    @EJB
-    private SubscriptionService subscriptionService;
-    @EJB
-    private GenericObjectService objectService;
+    @EJB private SubscriptionService subscriptionService;
+    @EJB private GenericObjectService objectService;
 
     private final String formName = "form_list_email";
 

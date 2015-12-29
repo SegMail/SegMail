@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <form jsf:id="form_list_fieldset">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="row">
+                    <div class="col-md-10">
+                        <p>You can choose the fields that you want to store for this list. For example,
+                            some list owners prefer to store name as just a "Name" but some prefer to 
+                            store it as "First name" and "Last name". It's your list, so you get to define
+                            it!</p>
+                        <p>One exception though, you need at least an "Email"!</p>
+                    </div>
+                    <div class="page-toolbar-block pull-right">
+                        <p:commandButton id="save_button_pf" class="btn btn-primary"
+                                         update="form_list_fieldset_message" value="Save"
+                                         icon="fa fa-floppy-o"
+                                         >
+                        </p:commandButton>
+
+                    </div>  
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <s2:messenger id="form_list_fieldset_message" for="form_list_fieldset" showDetail="true" showSummary="true"></s2:messenger>
+
+                    </div>
+
+                </div>
+                <!--Test the timeline gadget-->
+
+                <table id="fieldset_table" class="table">
+                    <tbody>
+                        <tr><!--column headers-->
+                            <th>Order</th>
+                            <th>Field name</th>
+                            <th>Field type</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Email</td>
+                            <td>Text</td>
+                            <td>Email of your subscriber <strong>(mandatory)</strong></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a id="field_id" class="editable editable-click" 
+                                   href="#">
+                                    2
+                                </a>
+                            </td>
+                            <td>Email</td>
+                            <td>Text</td>
+                            <td>Email of your subscriber <strong>(mandatory)</strong></td>
+                        </tr>
+                        <c:forEach items="#{FormListFieldSet.fieldList.FIELD_LIST}" var="field">
+                            <tr>
+                                <td>
+                                    <a id="field-id-#{field.ID}" class="editable editable-click">
+                                        #{field.ID}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a id="field-name-#{field.FIELD_NAME}" class="editable editable-click">
+                                        #{field.FIELD_NAME}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a id="field-type-#{field.TYPE}" class="editable editable-click">
+                                        #{field.TYPE}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a id="field-desc-#{field.DESCRIPTION}" class="editable editable-click">
+                                        #{field.DESCRIPTION}
+                                    </a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                        
+                    </tbody>
+                </table>
+
+
+            </div>
+        </div>
+        <p:blockUI block="form_list_fieldset" trigger="form_list_fieldset"
+                   >
+            <p id="spinner"></p>
+        </p:blockUI>
+    </form>
+</html>

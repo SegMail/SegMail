@@ -65,6 +65,9 @@
                                         <a href="#activities_panel" data-toggle="tab">Activities</a>
                                     </li>
                                     <li >
+                                        <a href="#fieldset_panel" data-toggle="tab">Define fields</a>
+                                    </li>
+                                    <li >
                                         <a href="#email_panel" data-toggle="tab">Confirmation &amp; Welcome Emails</a>
                                     </li>
                                     <li >
@@ -78,8 +81,8 @@
                                     <div class="tab-pane active" id="subscribers_panel">
                                         <ui:include src="subscriber_panel.xhtml"></ui:include>
                                     </div>
-                                    <div class="tab-pane" id="activities_panel">
-                                        <p>fjeirgnrgwrn</p>
+                                    <div class="tab-pane" id="fieldset_panel">
+                                        <ui:include src="fieldset_panel.xhtml"></ui:include>
                                     </div>
                                     <div class="tab-pane" id="email_panel">
                                         <ui:include src="email_panel.xhtml"></ui:include>
@@ -107,7 +110,7 @@
         </ui:define>
 
         <ui:define name="scripts-bottom">
-
+            <script type="text/javascript" src="#{request.contextPath}/programs/list/js/fieldset_panel-editable.js" />
 
         </ui:define>
 

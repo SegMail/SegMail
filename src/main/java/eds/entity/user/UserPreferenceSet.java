@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -24,12 +27,14 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="USER_PREFERENCE_SET")
-public class UserPreferenceSet extends EnterpriseData implements Serializable {
+public class UserPreferenceSet extends EnterpriseData<User> implements Serializable {
     
     private Map<String,String> PREFERENCES = new HashMap<String,String>();
 
     //@MapKey(name="name")
     @ElementCollection
+    @JoinTable(name="USER_PREFERENCE_SET_MAPPING")
+    
     public Map<String,String> getPREFERENCES() {
         return PREFERENCES;
     }

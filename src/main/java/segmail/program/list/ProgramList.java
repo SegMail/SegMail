@@ -20,6 +20,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.SubscriptionListFieldList;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
 import segmail.entity.subscription.email.AutoresponderEmail;
@@ -38,15 +39,7 @@ import segmail.entity.subscription.email.AutoresponderEmail;
 @SessionScoped
 public class ProgramList implements Serializable {
     
-    @Inject private UserSessionContainer userContainer;
     @Inject private UserRequestContainer reqContainer;
-    
-    @EJB
-    private ClientService clientService;
-    @EJB
-    private GenericObjectService genericDBService;
-    @EJB
-    private SubscriptionService subscriptionService;
     
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
@@ -61,17 +54,14 @@ public class ProgramList implements Serializable {
     private AutoresponderEmail selectedWelcomeEmail;
     private long selectedWelcomeEmailId;
     
-    private final Map<String,String> editingPanelLocation = new HashMap<String,String>();
+    //For field list
+    private SubscriptionListFieldList fieldList;
     
     private final String formName = "ProgramList";
     
     private boolean startFirstList;
     
     public ProgramList(){
-        editingPanelLocation.put("subscribers", "");
-        editingPanelLocation.put("activities", "");
-        editingPanelLocation.put("signupforms", "");
-        editingPanelLocation.put("settings", "");
     }
     
     @PostConstruct
@@ -169,20 +159,27 @@ public class ProgramList implements Serializable {
         this.selectedWelcomeEmailId = selectedWelcomeEmailId;
     }
     
-    
-    
     public void refresh(){
         try {
             //redirect to itself after setting list editing
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request
-            ec.getFlash().setKeepMessages(true);
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            //ec.redirect(programContainer.getCurrentURL());
+            //ec.getFlash().setKeepMessages(true);
             ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
     }
+
+    public SubscriptionListFieldList getFieldList() {
+        return fieldList;
+    }
+
+    public void setFieldList(SubscriptionListFieldList fieldList) {
+        this.fieldList = fieldList;
+    }
     
+    public long getListEditingId(){
+        return (getListEditing() == null) ? -1 : getListEditing().getOBJECTID();
+    }
 }

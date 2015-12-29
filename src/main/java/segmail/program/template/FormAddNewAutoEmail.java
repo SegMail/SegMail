@@ -54,7 +54,7 @@ public class FormAddNewAutoEmail {
         try {
             // Create the new template
             // Get the client associated with the user and assign it
-            AutoresponderEmail newTemplate = subscriptionService.addAutoEmail(subject, body, type);
+            AutoresponderEmail newTemplate = subscriptionService.createAndAssignAutoEmail(subject, body, type);
             
             //Refresh the list of email templates on the page
             //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit

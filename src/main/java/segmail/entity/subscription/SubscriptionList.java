@@ -25,6 +25,13 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     private boolean DOUBLE_OPTIN;
     private boolean REMOTE;
     //private ListType TYPE;
+
+    public SubscriptionList() {
+        this.REMOTE = true; //Default value
+        this.DOUBLE_OPTIN = true;
+    }
+    
+    
     
     @Override
     public void randInit() {
@@ -65,6 +72,7 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
         this.SEND_AS_NAME = SEND_AS_NAME;
     }
 
+    
     public boolean isDOUBLE_OPTIN() {
         return DOUBLE_OPTIN;
     }
