@@ -25,6 +25,7 @@
                         <p:commandButton id="save_button_pf" class="btn btn-primary"
                                          update="form_list_fieldset_message" value="Save"
                                          icon="fa fa-floppy-o"
+
                                          >
                         </p:commandButton>
 
@@ -39,56 +40,109 @@
                 </div>
                 <!--Test the timeline gadget-->
 
-                <table id="fieldset_table" class="table">
+                <table id="fieldset_table" class="table" >
                     <tbody>
                         <tr><!--column headers-->
                             <th>Order</th>
                             <th>Field name</th>
                             <th>Field type</th>
+                            <th>Mandatory</th>
                             <th>Description</th>
                         </tr>
+
+                        <c:forEach items="#{FormListFieldSet.fieldList}" var="field">
+
+
+                            <tr>
+                                <c:choose>
+                                    <c:when test="#{field.SNO == 1}">
+                                        <td>#{field.SNO}</td>
+                                        <td>#{field.FIELD_NAME}</td>
+                                        <td>#{field.TYPE}</td>
+                                        <td>
+                                            <div class="checkbox" style="">
+                                                <input type="checkbox" class="icheck"
+                                                       disabled="true"
+                                                       jsf:value="#{field.MANDATORY}"/>
+                                            </div>
+                                        </td>
+                                        <td>#{field.DESCRIPTION}</td>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <td>
+                                            <input type="number" style="width: 40px;"
+                                                   class="spinner"
+                                                   id="field-id-#{field.SNO}"  value="#{field.SNO}" />
+                                        </td>
+                                        <td>
+                                            <input type="text" style="width: 135px;"
+                                                   class="form-control"
+                                                   id="field-id-#{field.FIELD_NAME}"  value="whats_your_fav_food" />
+                                        </td>
+                                        <td>
+                                            <h:selectOneMenu styleClass="form-control" style="width: 65px;">
+                                                <f:selectItem itemValue="1" itemLabel="Text" />
+                                                <f:selectItem itemValue="2" itemLabel="Email" />
+
+                                            </h:selectOneMenu>
+                                        </td>
+                                        <td>
+                                            <div class="checkbox" style="padding: auto">
+                                                <input type="checkbox" class="icheck"
+                                                       style=""
+                                                       jsf:value="#{field.MANDATORY}"/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" value="#{field.DESCRIPTION}"/>
+                                        </td>
+                                    </c:otherwise>
+                                </c:choose>
+                            </tr>
+
+                        </c:forEach>
+                        <!--for adding new row-->
                         <tr>
-                            <td>1</td>
-                            <td>Email</td>
-                            <td>Text</td>
-                            <td>Email of your subscriber <strong>(mandatory)</strong></td>
+                            <td colspan="5">
+                                <span class="help-block">
+                                    Fill in the form below and click "Save" above
+                                </span>
+                                
+                            </td>
                         </tr>
                         <tr>
                             <td>
-                                <a id="field_id" class="editable editable-click" 
-                                   href="#">
-                                    2
-                                </a>
+                                <input type="number" style="width: 40px;"
+                                    class="spinner"
+                                    id="#{(FormListFieldSet.fieldList == null) ? 
+                                             1 : FormListFieldSet.fieldList.size()+1}"  
+                                    value="#{(FormListFieldSet.fieldList == null) ? 
+                                             1 : FormListFieldSet.fieldList.size()+1}" />
                             </td>
-                            <td>Email</td>
-                            <td>Text</td>
-                            <td>Email of your subscriber <strong>(mandatory)</strong></td>
+                            <td>
+                                <input type="text" style="width: 135px;"
+                                    class="form-control"
+                                    value="" />
+                            </td>
+                            <td>
+                                <h:selectOneMenu styleClass="form-control" style="width: 65px;">
+                                    <f:selectItem itemValue="1" itemLabel="Text" />
+                                    <f:selectItem itemValue="2" itemLabel="Email" />
+
+                                </h:selectOneMenu>
+                            </td>
+                            <td>
+                                            <div class="checkbox" style="padding: auto">
+                                                <input type="checkbox" class="icheck"
+                                                       style=""
+                                                       />
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" value=""/>
+                                        </td>
                         </tr>
-                        <c:forEach items="#{FormListFieldSet.fieldList.FIELD_LIST}" var="field">
-                            <tr>
-                                <td>
-                                    <a id="field-id-#{field.ID}" class="editable editable-click">
-                                        #{field.ID}
-                                    </a>
-                                </td>
-                                <td>
-                                    <a id="field-name-#{field.FIELD_NAME}" class="editable editable-click">
-                                        #{field.FIELD_NAME}
-                                    </a>
-                                </td>
-                                <td>
-                                    <a id="field-type-#{field.TYPE}" class="editable editable-click">
-                                        #{field.TYPE}
-                                    </a>
-                                </td>
-                                <td>
-                                    <a id="field-desc-#{field.DESCRIPTION}" class="editable editable-click">
-                                        #{field.DESCRIPTION}
-                                    </a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        
+
                     </tbody>
                 </table>
 

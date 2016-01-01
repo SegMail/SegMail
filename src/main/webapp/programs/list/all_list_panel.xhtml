@@ -22,7 +22,8 @@
                         <div class="list-item-right">
                             <div>
                                 <button class="btn btn-primary list-item-trigger"
-                                        jsf:action="#{FormListList.loadList(list)}">
+                                        jsf:action="#{FormListList.loadList(list)}"
+                                        jsf:disabled="#{list.OBJECTID eq FormListList.programList.listEditingId }" >
                                     <i class="fa fa-pencil"></i>
                                 </button>
                             </div>

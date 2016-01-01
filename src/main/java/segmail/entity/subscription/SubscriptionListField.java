@@ -5,11 +5,10 @@
  */
 package segmail.entity.subscription;
 
-import java.io.Serializable;
-import javax.persistence.CascadeType;
+import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /**
@@ -18,34 +17,25 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST_FIELD")
-public class SubscriptionListField implements Serializable{
+public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     
-    private long ID;
+    private boolean MANDATORY;
     private String FIELD_NAME;
-    private String TYPE;
+    private FIELD_TYPE TYPE;
     private String DESCRIPTION;
-    private SubscriptionListFieldList LIST;
 
     //A must for all JPA entities
     public SubscriptionListField() {
     }
 
-    public SubscriptionListField(long ID, String FIELD_NAME, String TYPE, String DESCRIPTION) {
-        this.ID = ID;
+    public SubscriptionListField(int order, boolean MANDATORY, String FIELD_NAME, FIELD_TYPE TYPE, String DESCRIPTION) {
         this.FIELD_NAME = FIELD_NAME;
+        this.MANDATORY = MANDATORY;
         this.TYPE = TYPE;
         this.DESCRIPTION = DESCRIPTION;
+        this.SNO = order;
     }
-
-    @Id
-    public long getID() {
-        return ID;
-    }
-
-    public void setID(long ID) {
-        this.ID = ID;
-    }
-
+    
     public String getFIELD_NAME() {
         return FIELD_NAME;
     }
@@ -54,13 +44,15 @@ public class SubscriptionListField implements Serializable{
         this.FIELD_NAME = FIELD_NAME;
     }
 
-    public String getTYPE() {
+    @Enumerated(EnumType.STRING)
+    public FIELD_TYPE getTYPE() {
         return TYPE;
     }
 
-    public void setTYPE(String TYPE) {
+    public void setTYPE(FIELD_TYPE TYPE) {
         this.TYPE = TYPE;
     }
+
 
     public String getDESCRIPTION() {
         return DESCRIPTION;
@@ -70,14 +62,24 @@ public class SubscriptionListField implements Serializable{
         this.DESCRIPTION = DESCRIPTION;
     }
 
-    @Id @ManyToOne(cascade=CascadeType.ALL)
-    public SubscriptionListFieldList getLIST() {
-        return LIST;
+    public boolean isMANDATORY() {
+        return MANDATORY;
     }
 
-    public void setLIST(SubscriptionListFieldList LIST) {
-        this.LIST = LIST;
+    public void setMANDATORY(boolean MANDATORY) {
+        this.MANDATORY = MANDATORY;
     }
     
     
+
+    @Override
+    public void randInit() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object generateKey() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

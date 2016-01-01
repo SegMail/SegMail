@@ -3,21 +3,37 @@ $(document).ready(function(){
     gFormEditable = {
         init: function(){
             
-            $('#enable').click(function() {
+            $('#save_button_pf').click(function() {
                  $('#fieldset_table .editable').editable('toggleDisabled');
              });    
 
-            //$.fn.editable.defaults.url = 'assets/form-editable.php'; 
-            $.fn.editable.defaults.url = '#'; 
+            $.fn.editable.defaults.url = '/list'; 
+            //$.fn.editable.defaults.url = '#'; 
             $.fn.editable.defaults.inputclass = 'form-control';
 
              //editables 
 
-             $('#field_id').editable({
+             $('.field-id').editable({
                     type: 'number',
-                    pk: 1,
-                    name: 'username',
-                    title: 'Change order'
+                    pk: 2,
+                    name: 'id',
+                    title: 'Edit field',
+                    value: {
+                        id: $('#field-id-1').innerhtml(), 
+                        street: "Revutskogo", 
+                        building: "44"
+                    },
+                    validate: function(value) {
+                        if(value.city == '') return 'city is required!'; 
+                    },
+                    display: function(value) {
+                        if(!value) {
+                            $(this).empty();
+                            return; 
+                        }
+                        var html = '<b>' + $('<div>').text(value.id).html() + '</b>, ' + $('<div>').text(value.street).html() + ' st., bld. ' + $('<div>').text(value.building).html();
+                        $(this).html(html); 
+                    }
              });
 
              $('#firstname').editable({

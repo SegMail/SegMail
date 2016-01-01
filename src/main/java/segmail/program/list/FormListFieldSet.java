@@ -5,6 +5,7 @@
  */
 package segmail.program.list;
 
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -16,7 +17,7 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.subscription.SubscriptionListFieldList;
+import segmail.entity.subscription.SubscriptionListField;
 
 /**
  *
@@ -46,7 +47,7 @@ public class FormListFieldSet {
             //to improve performance
             if(listId <= 0) return;
             
-            SubscriptionListFieldList fieldList = subscriptionService.getFieldListForSubscriptionList(listId);
+            List<SubscriptionListField> fieldList = subscriptionService.getFieldsForSubscriptionList(listId);
             
             this.program.setFieldList(fieldList);
             
@@ -56,7 +57,7 @@ public class FormListFieldSet {
         
     }
     
-    public SubscriptionListFieldList getFieldList(){
+    public List<SubscriptionListField> getFieldList(){
         return program.getFieldList();
     }
 }

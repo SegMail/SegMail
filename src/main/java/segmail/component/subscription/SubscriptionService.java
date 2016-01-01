@@ -15,8 +15,6 @@ import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.mail.MailService;
-import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
 import segmail.entity.subscription.Assign_Client_List;
@@ -31,7 +29,6 @@ import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -52,7 +49,7 @@ import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.SubscriptionListFieldList;
+import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
@@ -158,11 +155,10 @@ public class SubscriptionService {
             em.persist(listAssignment);
             
             //3. Create the default fieldsets and assign it to newList
-            SubscriptionListFieldList fieldlist = new SubscriptionListFieldList();
-            fieldlist.addField(new SubscriptionListField(1,"Email","Text","Email of your subscriber."));
-            fieldlist.setOWNER(newList);
+            SubscriptionListField fieldEmail = new SubscriptionListField(1,true,"Email",FIELD_TYPE.EMAIL,"Email of your subscriber.");
+            fieldEmail.setOWNER(newList);
             
-            em.persist(fieldlist);
+            em.persist(fieldEmail);
 
             return newList;
 
@@ -464,7 +460,7 @@ public class SubscriptionService {
             Root<? extends AutoresponderEmail> sourceEntity = query.from(e);
 
             query.where(builder.and(builder.equal(sourceEntity.get(AutoresponderEmail_.SUBJECT), subject)
-                    //builder.equal(sourceEntity.get(AutoresponderEmail_.TYPE), type) we define type as a Entity class instead of an enum
+                    //builder.equal(sourceEntity.get(AutoresponderEmail_.FIELD_TYPE), type) we define type as a Entity class instead of an enum
             ));
 
             List<? extends AutoresponderEmail> results = em.createQuery(query)
@@ -786,12 +782,11 @@ public class SubscriptionService {
      * @param listId
      * @return SubscriptionListFieldList if there is at least 1 record available
      */
-    public SubscriptionListFieldList getFieldListForSubscriptionList(long listId){
+    public List<SubscriptionListField> getFieldsForSubscriptionList(long listId){
         try {
-            List<SubscriptionListFieldList> allFieldList = this.objectService.getEnterpriseData(listId, SubscriptionListFieldList.class);
+            List<SubscriptionListField> allFieldList = this.objectService.getEnterpriseData(listId, SubscriptionListField.class);
             
-            //we currently only accept 1 record for each SubscriptionList
-            return (allFieldList == null || allFieldList.isEmpty()) ? null : allFieldList.get(0);
+            return allFieldList;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

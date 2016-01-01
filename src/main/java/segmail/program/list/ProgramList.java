@@ -1,16 +1,10 @@
 package segmail.program.list;
 
-import eds.component.GenericObjectService;
-import eds.component.client.ClientService;
-import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -18,9 +12,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
-import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.entity.subscription.SubscriptionListFieldList;
+import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
 import segmail.entity.subscription.email.AutoresponderEmail;
@@ -55,7 +48,7 @@ public class ProgramList implements Serializable {
     private long selectedWelcomeEmailId;
     
     //For field list
-    private SubscriptionListFieldList fieldList;
+    private List<SubscriptionListField> fieldList;
     
     private final String formName = "ProgramList";
     
@@ -171,11 +164,11 @@ public class ProgramList implements Serializable {
         }
     }
 
-    public SubscriptionListFieldList getFieldList() {
+    public List<SubscriptionListField> getFieldList() {
         return fieldList;
     }
 
-    public void setFieldList(SubscriptionListFieldList fieldList) {
+    public void setFieldList(List<SubscriptionListField> fieldList) {
         this.fieldList = fieldList;
     }
     

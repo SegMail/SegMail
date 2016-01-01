@@ -144,11 +144,7 @@
         <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js'></script>
         <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-europe-mill-en.js'></script>
 
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins.js"></script>        
-        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/demo.js"></script>-->
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/maps.js"></script>        
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/charts.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/actions.js"></script>        
+       
 
 <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery-validation/additional-methods.min.js"></script>
 <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery-validation/jquery.validate.min.js"></script>
@@ -183,6 +179,12 @@
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" />
         <h:outputScript library="primefaces" name="jquery/jquery.js" target="head"/><!--must be included, if not when there are no PF components on the page, JQuery would not be automatically loaded-->
 
+                <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins.js"></script>        
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/demo.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/maps.js"></script>        
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/charts.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/actions.js"></script> 
+        
         <script src="#{request.contextPath}/templates/common/js/bootstrap-select.js"></script>
         <ui:insert name="scripts-bottom"></ui:insert>
 
