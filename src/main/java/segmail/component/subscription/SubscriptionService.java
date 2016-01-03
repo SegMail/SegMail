@@ -54,6 +54,7 @@ import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
@@ -230,36 +231,36 @@ public class SubscriptionService {
     public void subscribe(SubscriberAccount newSub, long listId, boolean confirmation) {
         try {
             //Validate the email address rules
-            EmailValidator validator = EmailValidator.getInstance();
+            /*EmailValidator validator = EmailValidator.getInstance();
             if (!validator.isValid(newSub.getEMAIL())) {
                 throw new SubscriptionException("Email address is not valid!");
-            }
+            }*/
 
             //Find the list object
-            SubscriptionList list = this.objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+            /*SubscriptionList list = this.objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
             if (list == null) {
                 throw new SubscriptionException("List " + listId + " not found!");
             }
 
             if (this.checkSubscribed(newSub.getEMAIL(), listId)) {
                 throw new SubscriptionException("Email is already subscribed to list.");
-            }
+            }*/
 
             //Persist the new subscriber
-            updateService.getEm().persist(newSub);
+            //updateService.getEm().persist(newSub);
 
             //Create new subscription
-            Subscription subsc = new Subscription();
+            /*Subscription subsc = new Subscription();
             subsc.setSOURCE(newSub);
             subsc.setTARGET(list);
             subsc.setSTATUS(Subscription.STATUS.NEW);
 
             updateService.getEm().persist(subsc);
-
+            */
             // Send out the confimration email
-            if (!confirmation) {
+            /*if (!confirmation) {
                 return;
-            }
+            }*/
 
             /*
              // Get confirmation email autoEmail
@@ -299,9 +300,76 @@ public class SubscriptionService {
             throw new EJBException(ex);
         }
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void subscribe(long listId, List<SubscriberFieldValue> values) 
+            throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException {
+        try {
+            // Find the list object
+            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+            if(list == null)
+                throw new EntityNotFoundException(SubscriptionList.class,listId);
+            
+            // Find if there is already an existing SubscriberAccount with the email
+            String email = "";
+            for(SubscriberFieldValue value : values){
+                if(value.getFIELD() == null){
+                    throw new IncompleteDataException("Field value "+value.getVALUE()+" needs to have a SubscriptionListField object attached.");
+                }
+                if(value.getFIELD().getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)){
+                    email = value.getVALUE();// If there exist multiple fieldvalues of email, then the latest one will be used
+                }
+            }
+            if(email.isEmpty())
+                throw new IncompleteDataException(DEFAULT_EMAIL_FIELD_NAME+" is always required for a subscription.");
+            if(!EmailValidator.getInstance().isValid(email))
+                throw new DataValidationException("Email address is not valid.");
+            
+            // Check if the account exist, if not, create a new one
+            List<SubscriberAccount> existingAccs = objectService.getEnterpriseObjectsByName(email, SubscriberAccount.class);
+            // Assume that email account is new
+            SubscriberAccount newOrExistingAcc = new SubscriberAccount();
+            newOrExistingAcc.setEMAIL(email);
+            // If it is not, use the existing SubscriberAccount record found
+            if(existingAccs != null && !existingAccs.isEmpty())
+                newOrExistingAcc = existingAccs.get(0); //Get the first match
+            
+            //Update the subscriber account first by merging
+            //Even if it exist, it is required to merge it to manage it later
+            newOrExistingAcc = updateService.getEm().merge(newOrExistingAcc);
+            
+            // Connect all new field values to the account and create them in the DB
+            // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
+            for(SubscriberFieldValue value : values){
+                value.setOWNER(newOrExistingAcc);
+                value = updateService.getEm().merge(value);
+            }
+            
+            // Create the relationship
+            Subscription newSubscr = new Subscription();
+            newSubscr.setTARGET(list);
+            newSubscr.setSOURCE(newOrExistingAcc);
+            newSubscr.setSTATUS(Subscription.STATUS.NEW);
+            
+            //Check if the subscription already exist
+            if(checkSubscribed(email, listId))
+                throw new RelationshipExistsException(newSubscr);
+            
+            updateService.getEm().persist(newSubscr);
+            
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        } 
+    }
 
     /**
-     * Check if a subscriber subscriberEmail is already subscribed to a list
+     * Check if a subscriber subscriberEmail is already subscribed to a list.
+     * 
+     * Might be wrong! Re-test the implementation
      *
      * @param subscriberEmail
      * @param listId
@@ -903,10 +971,12 @@ public class SubscriptionService {
      * @param fieldList 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateSubscriptionListFields(List<SubscriptionListField> fieldList) {
+    public void updateSubscriptionListFields(List<SubscriptionListField> fieldList) 
+            throws DataValidationException, IncompleteDataException {
         try {
             EntityManager em = updateService.getEm();
             for(SubscriptionListField f : fieldList){
+                validateListField(f);
                 em.merge(f);
             }
             

@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="add_new_sub_form" onsubmit="add_new_sub_form.form()">
+    <form jsf:id="add_new_sub_form" >
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -19,24 +19,23 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>
-                            Email:
-                        </label>
-                        <input type="email" class="form-control"
-                               jsf:value="#{FormListSubscriber.subscriber.EMAIL}"
-                               name="email" required="true"
-                               />
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            Name:
-                        </label>
-                        <input type="text" class="form-control"
-                               jsf:value="#{FormListSubscriber.subscriber.LASTNAME}"
-                               name="lastname" required="true"
-                               />
-                    </div>
+                    <c:forEach items="#{FormListSubscriber.listFields}" var="field">
+                        <div class="form-group">
+                            <label>#{field.FIELD_NAME}: </label>
+                            <c:choose>
+                                <c:when test="#{field.TYPE.equals(FormListSubscriber.emailType)}">
+                                    <input type="email" class="form-control"
+                                           name="#{field.FIELD_NAME.concat(field.SNO)}" required="#{field.MANDATORY}"
+                                           />
+                                </c:when>
+                                <c:when test="#{field.TYPE.equals(FormListSubscriber.textType)}">
+                                    <input type="text" class="form-control"
+                                           name="#{field.FIELD_NAME.concat(field.SNO)}" required="#{field.MANDATORY}"
+                                           />
+                                </c:when>
+                            </c:choose>
+                        </div>
+                    </c:forEach>
                     <div class="form-group">
                         <s2:messenger id="FormAddSub_messenger" for="add_new_sub_form" showDetail="true" showSummary="true"
                                       class="form-group"></s2:messenger>
@@ -46,7 +45,7 @@
                     <p:commandButton id="add_subscriber_button" styleClass="btn btn-success" 
                                      value="Add subscriber" update="FormAddSub_messenger,"
                                      actionListener="#{FormListSubscriber.addSubscriber()}"
-                                     
+
                                      >
 
                     </p:commandButton>
@@ -59,30 +58,26 @@
             </div>
         </div>
         <script type="text/javascript">
-            $(document).ready(function(){
+            $(document).ready(function () {
                 var add_new_sub_form =
-                $("#add_new_sub_form").validate({
+                        $("#add_new_sub_form").validate({
                     rules: {
-                        email : {
-                            required: true,
-                            email: true
-                        },
-                        firstname : {
-                            required: true
-                        },
-                        lastname : {
-                            required: true
-                        }
+                        <c:forEach items="#{FormListSubscriber.listFields}" var="field" varStatus="fieldStatus">
+                            #{(fieldStatus.index > 0 ) ? "," : ""}#{field.FIELD_NAME.concat(field.SNO)} : {
+                                required: #{field.MANDATORY}
+                                #{(field.TYPE.equals(FormListSubscriber.emailType)) ? ", email : true" : ""}
+                            }
+                        </c:forEach>
                     },
-                    errorPlacement: function(error, element) {
-                        if (element.attr("name") == "gender" || element.attr("name") == "rules" ) {                                                
-                            element.parents(".form-group").append(error);                                                
-                        }else
-                            error.insertAfter(element);   
+                    errorPlacement: function (error, element) {
+                        if (element.attr("name") == "gender" || element.attr("name") == "rules") {
+                            element.parents(".form-group").append(error);
+                        } else
+                            error.insertAfter(element);
                     }
                 });
             });
-    </script>
+        </script>
     </form>
-    
+
 </html>

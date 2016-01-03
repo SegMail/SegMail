@@ -71,46 +71,44 @@
                                             <td>#{field.DESCRIPTION}</td>
                                         </c:when>
                                         <c:otherwise>
-                                            <td style="width:80px">
+                                            <td style="width:40px">
                                                 <div class="form-group">
-                                                    <input type="number" style="text-align:left;"
-                                                           class="form-control spinner"
-                                                           jsf:id="field-id-#{field.SNO}"  
-                                                           jsf:value="#{field.SNO}" />
+                                                    #{field.SNO}
                                                 </div>
                                             </td>
                                             <td style="width:130px">
                                                 <div class="form-group">
-                                                <input type="text" style=""
-                                                       class="form-control"
-                                                       id="field-id-#{field.FIELD_NAME}"  
-                                                       jsf:value="#{field.FIELD_NAME}" />
+                                                    <input type="text" style=""
+                                                           class="form-control"
+                                                           id="field-id-#{field.FIELD_NAME}"  
+                                                           jsf:value="#{field.FIELD_NAME}" />
                                                 </div>
                                             </td>
                                             <td style="width:80px">
                                                 <div class="form-group">
-                                                <h:selectOneMenu styleClass="form-control" style=""
-                                                                 value="#{field.TYPE}">
-                                                    <f:selectItems value="#{FormListFieldSet.fieldTypes}" var="type" 
-                                                                   itemLabel="#{type}"
-                                                                   itemValue="#{type}">
-                                                    </f:selectItems>
+                                                    <h:selectOneMenu styleClass="form-control" style=""
+                                                                     value="#{field.TYPE}">
+                                                        <f:selectItems value="#{FormListFieldSet.fieldTypes}" var="type" 
+                                                                       itemLabel="#{type}"
+                                                                       itemValue="#{type}">
+                                                        </f:selectItems>
 
-                                                </h:selectOneMenu>
-                                                    </div>
+                                                    </h:selectOneMenu>
+                                                </div>
                                             </td>
                                             <td style="width:60px">
-                                                <div class="checkbox" style="padding: auto">
-                                                    <input type="checkbox" class="icheck"
-                                                           style=""
-                                                           jsf:value="#{field.MANDATORY}"/>
+                                                <div class="form-group">
+                                                    <div class="checkbox" style="padding: auto">
+                                                        <input type="checkbox" class="icheck"
+                                                               style=""
+                                                               jsf:value="#{field.MANDATORY}"/>
+                                                    </div>
                                                 </div>
-                                                    
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                <input class="form-control" type="text" 
-                                                       jsf:value="#{field.DESCRIPTION}"/>
+                                                    <input class="form-control" type="text" 
+                                                           jsf:value="#{field.DESCRIPTION}"/>
                                                 </div>
                                             </td>
                                         </c:otherwise>
@@ -129,37 +127,43 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <input type="number" style=""
-                                           class="form-control spinner"
-                                           jsf:id="field-id-#{FormListFieldSet.newField.SNO}"
-                                           jsf:value="#{FormListFieldSet.newField.SNO}"/>
-                                </td>
-                                <td>
-                                    <input type="text" style=""
-                                           class="form-control"
-                                           jsf:value="#{FormListFieldSet.newField.FIELD_NAME}"/>
-                                </td>
-                                <td>
-                                    <h:selectOneMenu styleClass="form-control" style=""
-                                                     value="#{FormListFieldSet.newField.TYPE}">
-                                        <f:selectItems value="#{FormListFieldSet.fieldTypes}" var="type" 
-                                                       itemLabel="#{type}"
-                                                       itemValue="#{type}">
-                                        </f:selectItems>
-
-                                    </h:selectOneMenu>
-                                </td>
-                                <td>
-                                    <div class="checkbox" style="padding: auto">
-                                        <input type="checkbox" class="icheck"
-                                               style=""
-                                               jsf:value="#{FormListFieldSet.newField.MANDATORY}"
-                                               />
+                                    <div class="form-group">
+                                        #{FormListFieldSet.newField.SNO}
                                     </div>
                                 </td>
                                 <td>
-                                    <input class="form-control" type="text" value=""
-                                           jsf:value="#{FormListFieldSet.newField.DESCRIPTION}"/>
+                                    <div class="form-group">
+                                        <input type="text" style=""
+                                               class="form-control"
+                                               jsf:value="#{FormListFieldSet.newField.FIELD_NAME}"/></div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <h:selectOneMenu styleClass="form-control" style=""
+                                                         value="#{FormListFieldSet.newField.TYPE}">
+                                            <f:selectItems value="#{FormListFieldSet.fieldTypes}" var="type" 
+                                                           itemLabel="#{type}"
+                                                           itemValue="#{type}">
+                                            </f:selectItems>
+
+                                        </h:selectOneMenu>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <div class="checkbox" style="padding: auto">
+                                            <input type="checkbox" class="icheck"
+                                                   style=""
+                                                   jsf:value="#{FormListFieldSet.newField.MANDATORY}"
+                                                   />
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <input class="form-control" type="text" value=""
+                                               jsf:value="#{FormListFieldSet.newField.DESCRIPTION}"/>
+                                    </div>
                                 </td>
                             </tr>
 
@@ -169,7 +173,7 @@
                 </div>
             </div>
         </div>
-        <p:blockUI block="form_list_fieldset" trigger="form_list_fieldset"
+        <p:blockUI block="form_list_fieldset" trigger="form_list_fieldset:save_button_pf"
                    >
             <p id="spinner"></p>
         </p:blockUI>

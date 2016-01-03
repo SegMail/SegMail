@@ -5,6 +5,7 @@
  */
 package segmail.program.list;
 
+import java.util.List;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
@@ -16,6 +17,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 
 /**
  *
@@ -24,7 +28,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @Named("FormListSubscriber")
 @RequestScoped
 public class FormListSubscriber {
-    @Inject private ProgramList programList;
+    @Inject private ProgramList program;
     @Inject private UserSessionContainer userContainer;
     
     @EJB private SubscriptionService subService;
@@ -52,10 +56,10 @@ public class FormListSubscriber {
     
     public void addSubscriber(){
         try {
-            if(programList.getListEditing() == null)
+            if(program.getListEditing() == null)
                 throw new RuntimeException("List is not set yet but you still manage to come to this page? Notify your admin immediately! =)");
             
-            subService.subscribe(subscriber, programList.getListEditing().getOBJECTID(),true);
+            
             //How to redirect to List editing panel?
             
         } catch (EJBException ex) { //Transaction did not go through
@@ -85,4 +89,19 @@ public class FormListSubscriber {
         }
     }
     
+    public SubscriptionList getListEditing(){
+        return program.getListEditing();
+    }
+    
+    public List<SubscriptionListField> getListFields(){
+        return program.getFieldList(); //Assuming that FormListFieldSet has already loaded it
+    }
+    
+    public String getEmailType(){
+        return FIELD_TYPE.EMAIL.name();
+    }
+    
+    public String getTextType(){
+        return FIELD_TYPE.TEXT.name();
+    }
 }

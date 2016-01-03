@@ -5,7 +5,6 @@
  */
 package segmail.program.list;
 
-
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -31,61 +30,71 @@ import segmail.entity.subscription.SubscriptionListField;
 @Named("FormListFieldSet")
 @RequestScoped
 public class FormListFieldSet {
-    
-    @Inject private ProgramList program;
-    @Inject private ClientContainer clientContainer;
 
-    @EJB private SubscriptionService subscriptionService;
-    
+    @Inject
+    private ProgramList program;
+    @Inject
+    private ClientContainer clientContainer;
+
+    @EJB
+    private SubscriptionService subscriptionService;
+
     private final String formName = "form_list_fieldset";
-    
+
     @PostConstruct
-    public void init(){
+    public void init() {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
-           loadListFields();
-           initNewEmptyField();
+            loadListFields();
+            initNewEmptyField();
         }
     }
-    
-    public void save(){
+
+    public void save() {
+        updateExistingFields();
         addNewField();
+        //Don't do page refresh, just update the field list
+        loadListFields();
     }
-    
-    public void initNewEmptyField(){
+
+    public void initNewEmptyField() {
         try {
             int initSNO = (getFieldList() == null) ? 1 : getFieldList().size();
-            this.setNewField(new SubscriptionListField(initSNO+1,false,"",FIELD_TYPE.TEXT,""));
+            this.setNewField(new SubscriptionListField(initSNO + 1, false, "", FIELD_TYPE.TEXT, ""));
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
-    
-    public void loadListFields(){
+
+    public void loadListFields() {
         try {
             long listId = program.getListEditingId();
             //to improve performance
-            if(listId <= 0) return;
-            
+            if (listId <= 0) {
+                return;
+            }
+
             List<SubscriptionListField> fieldList = subscriptionService.getFieldsForSubscriptionList(listId);
-            
+
             this.program.setFieldList(fieldList);
-            
+
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
-    
-    public void addNewField(){
+
+    public void addNewField() {
         try {
+
             long currentList = program.getListEditingId();
             SubscriptionListField newField = program.getNewField();
+            //If no field name is set, take it as user did not intend to add a new field
+            if (newField.getFIELD_NAME() == null || newField.getFIELD_NAME().isEmpty()) {
+                return;
+            }
+
             newField = subscriptionService.addFieldForSubscriptionList(currentList, newField);
-            
-            //Don't do page refresh, just update the field list
-            loadListFields();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "List fields updated", null);
-            
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "New field added.", null);
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (DataValidationException ex) {
@@ -96,41 +105,45 @@ public class FormListFieldSet {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
-    
-    public void updateExistingFields(){
+
+    public void updateExistingFields() {
         try {
-            
+            subscriptionService.updateSubscriptionListFields(program.getFieldList());
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "List fields updated.", null);
+        } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
-    
-    
+
     /**
      * Setters and Getters access variables in the program object, which is
-     * session scoped. This is because users usually navigate in between programs
-     * in a single session and we do not want all forms to be session scoped.
-     * 
-     * @return 
+     * session scoped. This is because users usually navigate in between
+     * programs in a single session and we do not want all forms to be session
+     * scoped.
+     *
+     * @return
      */
-    
-    public List<SubscriptionListField> getFieldList(){
+    public List<SubscriptionListField> getFieldList() {
         return program.getFieldList();
     }
-    
-    public void setFieldList(List<SubscriptionListField> fieldList){
+
+    public void setFieldList(List<SubscriptionListField> fieldList) {
         program.setFieldList(fieldList);
     }
-    
-    public FIELD_TYPE[] getFieldTypes(){
+
+    public FIELD_TYPE[] getFieldTypes() {
         return program.getFieldTypes();
     }
-    
-    public SubscriptionListField getNewField(){
+
+    public SubscriptionListField getNewField() {
         return program.getNewField();
     }
-    
-    public void setNewField(SubscriptionListField newField){
+
+    public void setNewField(SubscriptionListField newField) {
         program.setNewField(newField);
     }
 }

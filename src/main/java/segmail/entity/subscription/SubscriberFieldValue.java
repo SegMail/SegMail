@@ -5,27 +5,34 @@
  */
 package segmail.entity.subscription;
 
-import eds.entity.data.EnterpriseObject;
-import eds.entity.mail.MailRecipient;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import eds.entity.data.EnterpriseData;
+import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="SUBSCRIBER_ACCOUNT")
-public class SubscriberAccount extends EnterpriseObject {//implements MailRecipient {
+public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
 
-    private String EMAIL;
+    private SubscriptionListField FIELD;
+    private String VALUE;
 
-    public String getEMAIL() {
-        return EMAIL;
+    @ManyToOne(cascade=CascadeType.ALL)
+    public SubscriptionListField getFIELD() {
+        return FIELD;
     }
 
-    public void setEMAIL(String EMAIL) {
-        this.EMAIL = EMAIL;
+    public void setFIELD(SubscriptionListField FIELD) {
+        this.FIELD = FIELD;
+    }
+
+    public String getVALUE() {
+        return VALUE;
+    }
+
+    public void setVALUE(String VALUE) {
+        this.VALUE = VALUE;
     }
     
     @Override
@@ -36,11 +43,6 @@ public class SubscriberAccount extends EnterpriseObject {//implements MailRecipi
     @Override
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String alias() {
-        return getEMAIL();
     }
     
 }
