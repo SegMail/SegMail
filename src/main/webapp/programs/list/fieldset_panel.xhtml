@@ -23,9 +23,11 @@
                     </div>
                     <div class="page-toolbar-block pull-right">
                         <p:commandButton id="save_button_pf" class="btn btn-primary"
-                                         update="form_list_fieldset_message" value="Save"
+                                         value="Save"
                                          icon="fa fa-floppy-o"
-
+                                         update="@form" process="@form"
+                                         oncomplete="gPlugins('body');"
+                                         actionListener="#{FormListFieldSet.save()}"
                                          >
                         </p:commandButton>
 
@@ -39,114 +41,132 @@
 
                 </div>
                 <!--Test the timeline gadget-->
-
-                <table id="fieldset_table" class="table" >
-                    <tbody>
-                        <tr><!--column headers-->
-                            <th>Order</th>
-                            <th>Field name</th>
-                            <th>Field type</th>
-                            <th>Mandatory</th>
-                            <th>Description</th>
-                        </tr>
-
-                        <c:forEach items="#{FormListFieldSet.fieldList}" var="field">
-
-
-                            <tr>
-                                <c:choose>
-                                    <c:when test="#{field.SNO == 1}">
-                                        <td>#{field.SNO}</td>
-                                        <td>#{field.FIELD_NAME}</td>
-                                        <td>#{field.TYPE}</td>
-                                        <td>
-                                            <div class="checkbox" style="">
-                                                <input type="checkbox" class="icheck"
-                                                       disabled="true"
-                                                       jsf:value="#{field.MANDATORY}"/>
-                                            </div>
-                                        </td>
-                                        <td>#{field.DESCRIPTION}</td>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <td>
-                                            <input type="number" style="width: 40px;"
-                                                   class="spinner"
-                                                   id="field-id-#{field.SNO}"  value="#{field.SNO}" />
-                                        </td>
-                                        <td>
-                                            <input type="text" style="width: 135px;"
-                                                   class="form-control"
-                                                   id="field-id-#{field.FIELD_NAME}"  value="whats_your_fav_food" />
-                                        </td>
-                                        <td>
-                                            <h:selectOneMenu styleClass="form-control" style="width: 65px;">
-                                                <f:selectItem itemValue="1" itemLabel="Text" />
-                                                <f:selectItem itemValue="2" itemLabel="Email" />
-
-                                            </h:selectOneMenu>
-                                        </td>
-                                        <td>
-                                            <div class="checkbox" style="padding: auto">
-                                                <input type="checkbox" class="icheck"
-                                                       style=""
-                                                       jsf:value="#{field.MANDATORY}"/>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input class="form-control" type="text" value="#{field.DESCRIPTION}"/>
-                                        </td>
-                                    </c:otherwise>
-                                </c:choose>
+                <div class="row">
+                    <table id="fieldset_table" class="table" >
+                        <tbody>
+                            <tr><!--column headers-->
+                                <th>Order</th>
+                                <th>Field name</th>
+                                <th>Field type</th>
+                                <th>Mandatory</th>
+                                <th>Description</th>
                             </tr>
 
-                        </c:forEach>
-                        <!--for adding new row-->
-                        <tr>
-                            <td colspan="5">
-                                <span class="help-block">
-                                    Fill in the form below and click "Save" above
-                                </span>
-                                
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <input type="number" style="width: 40px;"
-                                    class="spinner"
-                                    id="#{(FormListFieldSet.fieldList == null) ? 
-                                             1 : FormListFieldSet.fieldList.size()+1}"  
-                                    value="#{(FormListFieldSet.fieldList == null) ? 
-                                             1 : FormListFieldSet.fieldList.size()+1}" />
-                            </td>
-                            <td>
-                                <input type="text" style="width: 135px;"
-                                    class="form-control"
-                                    value="" />
-                            </td>
-                            <td>
-                                <h:selectOneMenu styleClass="form-control" style="width: 65px;">
-                                    <f:selectItem itemValue="1" itemLabel="Text" />
-                                    <f:selectItem itemValue="2" itemLabel="Email" />
-
-                                </h:selectOneMenu>
-                            </td>
-                            <td>
-                                            <div class="checkbox" style="padding: auto">
-                                                <input type="checkbox" class="icheck"
-                                                       style=""
-                                                       />
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <input class="form-control" type="text" value=""/>
-                                        </td>
-                        </tr>
-
-                    </tbody>
-                </table>
+                            <c:forEach items="#{FormListFieldSet.fieldList}" var="field">
 
 
+                                <tr>
+                                    <c:choose>
+                                        <c:when test="#{field.SNO == 1}">
+                                            <td>#{field.SNO}</td>
+                                            <td>#{field.FIELD_NAME}</td>
+                                            <td>#{field.TYPE}</td>
+                                            <td>
+                                                <div class="checkbox" style="">
+                                                    <input type="checkbox" class="icheck"
+                                                           disabled="true"
+                                                           jsf:value="#{field.MANDATORY}"/>
+                                                </div>
+                                            </td>
+                                            <td>#{field.DESCRIPTION}</td>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <td style="width:80px">
+                                                <div class="form-group">
+                                                    <input type="number" style="text-align:left;"
+                                                           class="form-control spinner"
+                                                           jsf:id="field-id-#{field.SNO}"  
+                                                           jsf:value="#{field.SNO}" />
+                                                </div>
+                                            </td>
+                                            <td style="width:130px">
+                                                <div class="form-group">
+                                                <input type="text" style=""
+                                                       class="form-control"
+                                                       id="field-id-#{field.FIELD_NAME}"  
+                                                       jsf:value="#{field.FIELD_NAME}" />
+                                                </div>
+                                            </td>
+                                            <td style="width:80px">
+                                                <div class="form-group">
+                                                <h:selectOneMenu styleClass="form-control" style=""
+                                                                 value="#{field.TYPE}">
+                                                    <f:selectItems value="#{FormListFieldSet.fieldTypes}" var="type" 
+                                                                   itemLabel="#{type}"
+                                                                   itemValue="#{type}">
+                                                    </f:selectItems>
+
+                                                </h:selectOneMenu>
+                                                    </div>
+                                            </td>
+                                            <td style="width:60px">
+                                                <div class="checkbox" style="padding: auto">
+                                                    <input type="checkbox" class="icheck"
+                                                           style=""
+                                                           jsf:value="#{field.MANDATORY}"/>
+                                                </div>
+                                                    
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                <input class="form-control" type="text" 
+                                                       jsf:value="#{field.DESCRIPTION}"/>
+                                                </div>
+                                            </td>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </tr>
+
+                            </c:forEach>
+                            <!--for adding new row-->
+                            <tr>
+                                <td colspan="5">
+                                    <span class="help-block">
+                                        Fill in the form below and click "Save" above
+                                    </span>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="number" style=""
+                                           class="form-control spinner"
+                                           jsf:id="field-id-#{FormListFieldSet.newField.SNO}"
+                                           jsf:value="#{FormListFieldSet.newField.SNO}"/>
+                                </td>
+                                <td>
+                                    <input type="text" style=""
+                                           class="form-control"
+                                           jsf:value="#{FormListFieldSet.newField.FIELD_NAME}"/>
+                                </td>
+                                <td>
+                                    <h:selectOneMenu styleClass="form-control" style=""
+                                                     value="#{FormListFieldSet.newField.TYPE}">
+                                        <f:selectItems value="#{FormListFieldSet.fieldTypes}" var="type" 
+                                                       itemLabel="#{type}"
+                                                       itemValue="#{type}">
+                                        </f:selectItems>
+
+                                    </h:selectOneMenu>
+                                </td>
+                                <td>
+                                    <div class="checkbox" style="padding: auto">
+                                        <input type="checkbox" class="icheck"
+                                               style=""
+                                               jsf:value="#{FormListFieldSet.newField.MANDATORY}"
+                                               />
+                                    </div>
+                                </td>
+                                <td>
+                                    <input class="form-control" type="text" value=""
+                                           jsf:value="#{FormListFieldSet.newField.DESCRIPTION}"/>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
             </div>
         </div>
         <p:blockUI block="form_list_fieldset" trigger="form_list_fieldset"

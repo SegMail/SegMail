@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
@@ -49,6 +50,7 @@ public class ProgramList implements Serializable {
     
     //For field list
     private List<SubscriptionListField> fieldList;
+    private SubscriptionListField newField;
     
     private final String formName = "ProgramList";
     
@@ -157,7 +159,7 @@ public class ProgramList implements Serializable {
             //redirect to itself after setting list editing
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request
-            //ec.getFlash().setKeepMessages(true);
+            ec.getFlash().setKeepMessages(true);
             ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
@@ -175,4 +177,18 @@ public class ProgramList implements Serializable {
     public long getListEditingId(){
         return (getListEditing() == null) ? -1 : getListEditing().getOBJECTID();
     }
+    
+    public FIELD_TYPE[] getFieldTypes(){
+        return FIELD_TYPE.values();
+    }
+
+    public SubscriptionListField getNewField() {
+        return newField;
+    }
+
+    public void setNewField(SubscriptionListField newField) {
+        this.newField = newField;
+    }
+    
+    
 }

@@ -10,6 +10,19 @@ package segmail.entity.subscription;
  * @author LeeKiatHaw
  */
 public enum FIELD_TYPE {
-    EMAIL,
-    TEXT
+    TEXT("TEXT"),
+    EMAIL("EMAIL");
+    
+    final String name;
+    
+    private FIELD_TYPE(String name){
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return this.name; //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 }

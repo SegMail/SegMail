@@ -256,8 +256,8 @@ $(document).ready(function(){
             if($(container+" .spinner").length > 0){
                 $(container+" .spinner").spinner();
                     /* this samples can be removed */
-                    $(container+" .spinner2").spinner({step: 0.1});
-                    $(container+" .spinner3").spinner({min: 0,max: 2500,step: 25.15,numberFormat: "C"});   
+                    /*$(container+" .spinner2").spinner({step: 0.1});
+                    $(container+" .spinner3").spinner({min: 0,max: 2500,step: 25.15,numberFormat: "C"});*/
                     /* eof this samples can be removed */            
                     
                     $(container+" .ui-spinner").find('span').html('');                    

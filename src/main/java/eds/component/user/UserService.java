@@ -26,7 +26,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
-import eds.component.Service;
+import eds.component.DBService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.HibernateHelper;
 import eds.entity.user.APIAccount;
@@ -46,7 +46,7 @@ import javax.ejb.EJBException;
  * @author vincent.a.lee
  */
 @Stateless
-public class UserService extends Service {
+public class UserService extends DBService {
 
     private static final String HASH_KEY = "33150291203315029120";
     private static final int MAX_UNSUCCESS_ATTEMPTS = 3;

@@ -17,6 +17,7 @@ import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
+import eds.component.data.DataValidationException;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -28,7 +29,10 @@ import segmail.entity.subscription.email.AutoresponderEmail_;
 import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -50,6 +54,7 @@ import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriptionListFieldComparator;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
@@ -64,19 +69,24 @@ import segmail.entity.subscription.email.AutoWelcomeEmail;
 @Interceptors({ClientResourceInterceptor.class})
 public class SubscriptionService {
 
-    @PersistenceContext(name = "HIBERNATE")
-    private EntityManager em;
+    public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
 
-    @EJB private GenericObjectService objectService;
-    @EJB private UpdateObjectService updateService;
-    @EJB private GenericConfigService configService;
+    //@PersistenceContext(name = "HIBERNATE")
+    //private EntityManager em;
+    @EJB
+    private GenericObjectService objectService;
+    @EJB
+    private UpdateObjectService updateService;
+    @EJB
+    private GenericConfigService configService;
 
     /**
      * [2015.07.12] Because the EJB Interceptor way failed, so this is a very
      * good alternative to omit clientid input for every method call.
      *
      */
-    @Inject ClientFacade clientFacade;
+    @Inject
+    ClientFacade clientFacade;
 
     /**
      * Experimental logic for EnterpriseConfiguration testing Got to build a
@@ -92,8 +102,8 @@ public class SubscriptionService {
                 remote.setVALUE(ListType.TYPE.REMOTE.name());
                 local.setVALUE(ListType.TYPE.LOCAL.name());
 
-                em.persist(remote);
-                em.persist(local);
+                configService.getEm().persist(remote);
+                configService.getEm().persist(local);
             }
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -107,14 +117,14 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ListType getListType(String listtypevalue) {
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<ListType> criteria = builder.createQuery(ListType.class);
             Root<ListType> sourceEntity = criteria.from(ListType.class);
 
             criteria.select(sourceEntity);
             criteria.where(builder.equal(sourceEntity.get(ListType_.VALUE), listtypevalue));
 
-            List<ListType> results = em.createQuery(criteria)
+            List<ListType> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
 
             return results.get(0);//only return the first match
@@ -136,10 +146,10 @@ public class SubscriptionService {
 
             //1. Create the list object and persist it first
             SubscriptionList newList = new SubscriptionList();
-            newList.setLIST_NAME(listname); 
+            newList.setLIST_NAME(listname);
             newList.setREMOTE(remote);
 
-            em.persist(newList);
+            updateService.getEm().persist(newList);
 
             //2. Create the assignment to the client object
             Client client = clientFacade.getClient();
@@ -152,13 +162,13 @@ public class SubscriptionService {
             listAssignment.setSOURCE(client);
             listAssignment.setTARGET(newList);
 
-            em.persist(listAssignment);
-            
+            updateService.getEm().persist(listAssignment);
+
             //3. Create the default fieldsets and assign it to newList
-            SubscriptionListField fieldEmail = new SubscriptionListField(1,true,"Email",FIELD_TYPE.EMAIL,"Email of your subscriber.");
+            SubscriptionListField fieldEmail = new SubscriptionListField(1, true, DEFAULT_EMAIL_FIELD_NAME, FIELD_TYPE.EMAIL, "Email of your subscriber.");
             fieldEmail.setOWNER(newList);
-            
-            em.persist(fieldEmail);
+
+            updateService.getEm().persist(fieldEmail);
 
             return newList;
 
@@ -210,7 +220,7 @@ public class SubscriptionService {
     }
 
     /**
-     * Subscribes a new subscriber to an existing list. 
+     * Subscribes a new subscriber to an existing list.
      *
      * @param newSub
      * @param listId
@@ -236,7 +246,7 @@ public class SubscriptionService {
             }
 
             //Persist the new subscriber
-            em.persist(newSub);
+            updateService.getEm().persist(newSub);
 
             //Create new subscription
             Subscription subsc = new Subscription();
@@ -244,7 +254,7 @@ public class SubscriptionService {
             subsc.setTARGET(list);
             subsc.setSTATUS(Subscription.STATUS.NEW);
 
-            em.persist(subsc);
+            updateService.getEm().persist(subsc);
 
             // Send out the confimration email
             if (!confirmation) {
@@ -252,34 +262,34 @@ public class SubscriptionService {
             }
 
             /*
-            // Get confirmation email autoEmail
-            // Assume that there is only 1
-            List<EmailTemplate> templates = this.getAutoEmailForList(listId);
-            if (templates == null || templates.isEmpty()) {
-                throw new SubscriptionException("Cannot find any confimation email templates for list " + list.getLIST_NAME());
-            }
-            AutoresponderEmail autoEmail = templates.get(0);
+             // Get confirmation email autoEmail
+             // Assume that there is only 1
+             List<EmailTemplate> templates = this.getAutoEmailForList(listId);
+             if (templates == null || templates.isEmpty()) {
+             throw new SubscriptionException("Cannot find any confimation email templates for list " + list.getLIST_NAME());
+             }
+             AutoresponderEmail autoEmail = templates.get(0);
 
-            Email email = autoEmail.generateEmail();
-            //email.setAUTHOR(list);
-            email.addRecipient(newSub);
+             Email email = autoEmail.generateEmail();
+             //email.setAUTHOR(list);
+             email.addRecipient(newSub);
 
-            // Get the SMTP connection settings from the List
-            // Assume that there is only 1
-            List<SMTPConnectionSES> smtps = this.objectService
-                    .getAllSourceObjectsFromTarget(listId, SystemResourceAssignment.class, SMTPConnectionSES.class);
+             // Get the SMTP connection settings from the List
+             // Assume that there is only 1
+             List<SMTPConnectionSES> smtps = this.objectService
+             .getAllSourceObjectsFromTarget(listId, SystemResourceAssignment.class, SMTPConnectionSES.class);
 
-            // If the connection was not found, queue the message to be sent later
-            if (smtps == null || smtps.isEmpty()) {
-                email.schedule(new DateTime());
-                em.persist(email);
-                throw new SubscriptionException("Cannot find any SMTP connection set for list " + list.getLIST_NAME());
-            }
+             // If the connection was not found, queue the message to be sent later
+             if (smtps == null || smtps.isEmpty()) {
+             email.schedule(new DateTime());
+             em.persist(email);
+             throw new SubscriptionException("Cannot find any SMTP connection set for list " + list.getLIST_NAME());
+             }
 
-            SMTPConnectionSES smtp = smtps.get(0);
+             SMTPConnectionSES smtp = smtps.get(0);
 
-            //mailService.sendEmail(email, smtp, true);
-            */
+             //mailService.sendEmail(email, smtp, true);
+             */
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -301,7 +311,7 @@ public class SubscriptionService {
     public boolean checkSubscribed(String subscriberEmail, long listId) {
         try {
             //Retrieving Subscriptions which has a SubscriberAccount subscriberEmail and a SubscriptionList ID
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<Subscription> criteria = builder.createQuery(Subscription.class);
             Root<Subscription> source = criteria.from(Subscription.class);
 
@@ -314,7 +324,7 @@ public class SubscriptionService {
 
             criteria.where(conditions.toArray(new Predicate[]{}));
 
-            List<Subscription> results = em.createQuery(criteria).getResultList();
+            List<Subscription> results = objectService.getEm().createQuery(criteria).getResultList();
 
             return !(results == null || results.isEmpty());
 
@@ -330,13 +340,14 @@ public class SubscriptionService {
 
     /**
      * Get a list of all AutoresponderEmails assigned to a particular list.
+     *
      * @param listid
-     * @return 
+     * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<AutoresponderEmail> getAutoEmailForList(long listid) {
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery query = builder.createQuery(AutoresponderEmail.class);
             Root<Assign_AutoresponderEmail_List> sourceEntity = query.from(Assign_AutoresponderEmail_List.class);
 
@@ -351,7 +362,7 @@ public class SubscriptionService {
 
             query.where(conditions.toArray(new Predicate[]{}));
 
-            List<AutoresponderEmail> results = em.createQuery(query)
+            List<AutoresponderEmail> results = objectService.getEm().createQuery(query)
                     .getResultList();
 
             return results;
@@ -365,60 +376,60 @@ public class SubscriptionService {
             throw new EJBException(ex);
         }
     }
-    
+
     /**
      * Get all available Confirmation emails assigned to a Client.
-     * 
+     *
      * @param clientid
-     * @return 
+     * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<AutoConfirmEmail> getAvailableConfirmationEmailForClient(long clientid){
+    public List<AutoConfirmEmail> getAvailableConfirmationEmailForClient(long clientid) {
         try {
             List<AutoConfirmEmail> results = objectService
                     .getAllSourceObjectsFromTarget(clientid, Assign_AutoresponderEmail_Client.class,
                             AutoConfirmEmail.class);
-            
+
             return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } 
+        }
     }
-    
+
     /**
      * Get all available Welcome emails assigned to a Client.
-     * 
+     *
      * @param clientid
-     * @return 
+     * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<AutoWelcomeEmail> getAvailableWelcomeEmailForClient(long clientid){
+    public List<AutoWelcomeEmail> getAvailableWelcomeEmailForClient(long clientid) {
         try {
             List<AutoWelcomeEmail> results = objectService
                     .getAllSourceObjectsFromTarget(clientid, Assign_AutoresponderEmail_Client.class,
                             AutoWelcomeEmail.class);
-            
+
             return results;
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } 
+        }
     }
 
     /**
      * Creates a new AutoresponderEmail without assigning to any Client or List.
-     * 
+     *
      * @param subject
      * @param body
      * @param type
      * @return
      * @throws EntityExistsException
-     * @throws IncompleteDataException 
+     * @throws IncompleteDataException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail createAutoEmailWithoutAssignment(String subject, String body, AutoEmailTypeFactory.TYPE type)
@@ -431,7 +442,7 @@ public class SubscriptionService {
 
             this.checkAutoEmail(newAutoEmail);
 
-            em.persist(newAutoEmail);
+            updateService.getEm().persist(newAutoEmail);
 
             return newAutoEmail;
 
@@ -440,30 +451,30 @@ public class SubscriptionService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } 
+        }
     }
 
     /**
      * Get a list of all AutoresponderEmails for a given type and given subject.
-     * 
+     *
      *
      * @param subject
      * @param type
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<? extends AutoresponderEmail> getAutoEmailsBySubjectAndType(String subject,AutoEmailTypeFactory.TYPE type) {
+    public List<? extends AutoresponderEmail> getAutoEmailsBySubjectAndType(String subject, AutoEmailTypeFactory.TYPE type) {
         try {
             Class<? extends AutoresponderEmail> e = AutoEmailTypeFactory.getAutoEmailTypeClass(type);
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<? extends AutoresponderEmail> query = builder.createQuery(e);
             Root<? extends AutoresponderEmail> sourceEntity = query.from(e);
 
             query.where(builder.and(builder.equal(sourceEntity.get(AutoresponderEmail_.SUBJECT), subject)
-                    //builder.equal(sourceEntity.get(AutoresponderEmail_.FIELD_TYPE), type) we define type as a Entity class instead of an enum
+            //builder.equal(sourceEntity.get(AutoresponderEmail_.FIELD_TYPE), type) we define type as a Entity class instead of an enum
             ));
 
-            List<? extends AutoresponderEmail> results = em.createQuery(query)
+            List<? extends AutoresponderEmail> results = objectService.getEm().createQuery(query)
                     .getResultList();
 
             return results;
@@ -472,16 +483,16 @@ public class SubscriptionService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } 
+        }
     }
 
     /**
      * Assigns an AutoresponderEmail to a Client.
-     * 
+     *
      * @param autoEmailId
      * @param clientId
      * @throws EntityNotFoundException
-     * @throws RelationshipExistsException 
+     * @throws RelationshipExistsException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignAutoEmailToClient(long autoEmailId, long clientId)
@@ -506,7 +517,7 @@ public class SubscriptionService {
             assignment.setSOURCE(autoEmail);
             assignment.setTARGET(client);
 
-            em.persist(assignment);
+            objectService.getEm().persist(assignment);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -521,10 +532,11 @@ public class SubscriptionService {
 
     /**
      * Assigns a ConfirmationEmail to a Subscriptionlist
+     *
      * @param confirmationEmailId
      * @param listId
      * @return
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Assign_AutoConfirmEmail_List assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException {
@@ -534,20 +546,20 @@ public class SubscriptionService {
             if (confirmationEmail == null) {
                 throw new EntityNotFoundException(AutoConfirmEmail.class, confirmationEmailId);
             }
-            
+
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
             if (list == null) {
                 throw new EntityNotFoundException(SubscriptionList.class, listId);
             }
-            
+
             Assign_AutoConfirmEmail_List newAssignment = new Assign_AutoConfirmEmail_List();
             newAssignment.setSOURCE(confirmationEmail);
             newAssignment.setTARGET(list);
-            
+
             //Let's not complicate things and just do a delete-all-and-add-new
             //this.removeAllAssignedConfirmationEmailFromList(listId);
             this.updateService.deleteRelationshipByTarget(listId, Assign_AutoConfirmEmail_List.class);
-            em.persist(newAssignment);
+            objectService.getEm().persist(newAssignment);
 
             return newAssignment;
 
@@ -558,14 +570,14 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
-    
+
     /**
      * Assigns a WelcomeEmail to a Subscriptionlist.
-     * 
+     *
      * @param welcomeEmailId
      * @param listId
      * @return
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Assign_AutoWelcomeEmail_List assignWelcomeEmailToList(long welcomeEmailId, long listId) throws EntityNotFoundException {
@@ -575,20 +587,19 @@ public class SubscriptionService {
             if (welcomeEmail == null) {
                 throw new EntityNotFoundException(AutoWelcomeEmail.class, welcomeEmailId);
             }
-            
+
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
             if (list == null) {
                 throw new EntityNotFoundException(SubscriptionList.class, listId);
             }
-            
+
             Assign_AutoWelcomeEmail_List newAssignment = new Assign_AutoWelcomeEmail_List();
             newAssignment.setSOURCE(welcomeEmail);
             newAssignment.setTARGET(list);
 
-            
             //Let's not complicate things and just do a delete-all-and-add-new
             this.removeAllAssignedWelcomeEmailFromList(listId);
-            em.persist(newAssignment);
+            objectService.getEm().persist(newAssignment);
 
             return newAssignment;
 
@@ -602,9 +613,9 @@ public class SubscriptionService {
 
     /**
      * Creates a new AutoresponderEmail and assigns it to the ClientFacade in
-     * context. If no ClientFacade is available in context, then an IncompleteDataException
-     * will be thrown.
-     * 
+     * context. If no ClientFacade is available in context, then an
+     * IncompleteDataException will be thrown.
+     *
      * @param subject
      * @param body
      * @param type
@@ -612,7 +623,7 @@ public class SubscriptionService {
      * @throws EntityExistsException
      * @throws IncompleteDataException
      * @throws RelationshipExistsException
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail createAndAssignAutoEmail(String subject, String body, AutoEmailTypeFactory.TYPE type)
@@ -639,8 +650,8 @@ public class SubscriptionService {
         } /*catch (Exception ex) {
          throw new EJBException(ex);
          } catch (EntityNotFoundException ex) {
-            throw new RuntimeException(ex); // Something is very wrong here!
-        }*/
+         throw new RuntimeException(ex); // Something is very wrong here!
+         }*/
 
     }
 
@@ -650,7 +661,7 @@ public class SubscriptionService {
         try {
             checkAutoEmail(autoEmail);
 
-            return em.merge(autoEmail);
+            return updateService.getEm().merge(autoEmail);
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -661,21 +672,22 @@ public class SubscriptionService {
     }
 
     /**
-     * 
+     *
      * @param autoEmailId
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteAutoEmail(long autoEmailId) throws EntityNotFoundException {
         try {
             //Again, changing to casting because https://github.com/SegMail/SegMail/issues/35 
             //EmailTemplate delTemplate = objectService.getEnterpriseObjectById(autoEmailId, AutoresponderEmail.class);
-            /**EmailTemplate delTemplate = (EmailTemplate) objectService.getEnterpriseObjectById(templateId);
-            if (delTemplate == null) {
-                throw new EntityNotFoundException(EmailTemplate.class, templateId);
-            }
-            updateService.deleteObjectAndRelationships(templateId);
-            */
+            /**
+             * EmailTemplate delTemplate = (EmailTemplate)
+             * objectService.getEnterpriseObjectById(templateId); if
+             * (delTemplate == null) { throw new
+             * EntityNotFoundException(EmailTemplate.class, templateId); }
+             * updateService.deleteObjectAndRelationships(templateId);
+             */
             updateService.deleteObjectDataAndRelationships(autoEmailId);
 
         } catch (PersistenceException pex) {
@@ -698,17 +710,18 @@ public class SubscriptionService {
             throw new EntityExistsException("Please choose a different email subject");
         }
     }
-    
+
     /**
      * A simple, stateless update method that merges the entity and commits.
      * Potentially there could be a generic operation that updates the entity.
-     * @param list 
+     *
+     * @param list
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveList(SubscriptionList list){
+    public void saveList(SubscriptionList list) {
         try {
-            em.merge(list);
-            
+            updateService.getEm().merge(list);
+
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -716,17 +729,18 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
-    
+
     /**
      * Deletes a list and all its assignment.
-     * 
-     * Potentially long running operation that requires the background job 
+     *
+     * Potentially long running operation that requires the background job
      * scheduling mechanism.
-     * 
-     * @param listId 
+     *
+     * @param listId
+     * @throws eds.component.data.EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void deleteList(long listId) throws EntityNotFoundException{
+    public void deleteList(long listId) throws EntityNotFoundException {
         try {
             this.updateService.deleteObjectDataAndRelationships(listId);
         } catch (PersistenceException pex) {
@@ -736,21 +750,24 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
-    
+
     /**
-     * Removes 
-     * @param listId 
+     * Removes
+     *
+     * @param listId
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void removeAllAssignedConfirmationEmailFromList(long listId){
+    public void removeAllAssignedConfirmationEmailFromList(long listId) {
         try {
             List<Assign_AutoConfirmEmail_List> existingAssignments = objectService.getRelationshipsForTargetObject(listId, Assign_AutoConfirmEmail_List.class);
-            
+
             List<Assign_AutoConfirmEmail_List> modListCopy = new ArrayList<>(existingAssignments);
-            for(Assign_AutoConfirmEmail_List assign:modListCopy){
-                    em.remove(em.contains(assign) ? assign : em.merge(assign));
+            for (Assign_AutoConfirmEmail_List assign : modListCopy) {
+                updateService.getEm().remove(
+                        updateService.getEm().contains(assign)
+                                ? assign : updateService.getEm().merge(assign));
             }
-            
+
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -758,17 +775,19 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
-    
+
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void removeAllAssignedWelcomeEmailFromList(long listId){
+    public void removeAllAssignedWelcomeEmailFromList(long listId) {
         try {
             List<Assign_AutoWelcomeEmail_List> existingAssignments = objectService.getRelationshipsForTargetObject(listId, Assign_AutoWelcomeEmail_List.class);
-            
+
             List<Assign_AutoWelcomeEmail_List> modListCopy = new ArrayList<>(existingAssignments);
-            for(Assign_AutoWelcomeEmail_List assign:modListCopy){
-                    em.remove(em.contains(assign) ? assign : em.merge(assign));
+            for (Assign_AutoWelcomeEmail_List assign : modListCopy) {
+                updateService.getEm().remove(
+                        updateService.getEm().contains(assign)
+                                ? assign : updateService.getEm().merge(assign));
             }
-            
+
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -776,17 +795,120 @@ public class SubscriptionService {
             throw new EJBException(pex);
         }
     }
-    
+
     /**
-     * 
+     *
      * @param listId
      * @return SubscriptionListFieldList if there is at least 1 record available
      */
-    public List<SubscriptionListField> getFieldsForSubscriptionList(long listId){
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<SubscriptionListField> getFieldsForSubscriptionList(long listId) {
         try {
             List<SubscriptionListField> allFieldList = this.objectService.getEnterpriseData(listId, SubscriptionListField.class);
-            
+
             return allFieldList;
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
+
+    /**
+     * A field list should always be sorted and the SNO of every member should
+     * follow a natural order - 1, 2, 3, ..., etc. If users purposely changes an
+     * existing member's SNO to skip the natural sequence, then it should be
+     * changed back.
+     *
+     * If a member's SNO has been changed to equal another member's SNO, then
+     * the "new" member should take precedence over the "old" member. Each
+     * member's old SNO should be interpreted by its list order.
+     *
+     * @param listId
+     * @param newField
+     * @return
+     * @throws EntityNotFoundException
+     * @throws DataValidationException
+     * @throws IncompleteDataException
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public SubscriptionListField addFieldForSubscriptionList(long listId, SubscriptionListField newField)
+            throws EntityNotFoundException,
+            DataValidationException,
+            IncompleteDataException {
+        try {
+            SubscriptionList list = this.objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+
+            //Check if list exist first
+            if (list == null) {
+                throw new EntityNotFoundException(SubscriptionList.class, listId);
+            }
+
+            //Check the SNO order
+            //Cannot be 1 as 1 is always Email
+            validateListField(newField);
+
+            //Reorder the SNO for the entire list
+            //If the new field added has the same SNO as an existing field, then insert it infront of the existing field
+            List<SubscriptionListField> existingFields = getFieldsForSubscriptionList(listId); //All managed?
+            Collections.sort(existingFields, new SubscriptionListFieldComparator()); //Doesn't include new field yet
+            for (int i = existingFields.size(); i > 0; i--) {
+                SubscriptionListField field = existingFields.get(i - 1);
+                /*if(newField.getSNO() == field.getSNO()){
+                 field.setSNO(i+1);
+                 updateService.getEm().merge(field); //Assuming the entity is already managed
+                 }
+                 else if(newField.getSNO() < field.getSNO()){
+                 field.setSNO(i+1);
+                 updateService.getEm().merge(field); //Assuming the entity is already managed
+                 }
+                 else {
+                 field.setSNO(i);
+                 updateService.getEm().merge(field); //Assuming the entity is already managed
+                 }*/
+                //
+                if (newField.getSNO() <= field.getSNO()) {
+                    field.setSNO(i + 1);
+                } else {
+                    field.setSNO(i);
+                }
+                updateService.getEm().merge(field); //Assuming the entity is already managed
+            }
+            newField.setOWNER(list);
+            updateService.getEm().persist(newField);
+            return newField;
+
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
+
+    /**
+     * A field list should always be sorted and the SNO of every member should
+     * follow a natural order - 1, 2, 3, ..., etc. If users purposely changes an
+     * existing member's SNO to skip the natural sequence, then it should be
+     * changed back.
+     *
+     * If a member's SNO has been changed to equal another member's SNO, then
+     * the "new" member should take precedence over the "old" member. Each
+     * member's old SNO should be interpreted by its list order.
+     * 
+     * Don't allow any change in SNO at the moment
+     * 
+     * @param fieldList 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateSubscriptionListFields(List<SubscriptionListField> fieldList) {
+        try {
+            EntityManager em = updateService.getEm();
+            for(SubscriptionListField f : fieldList){
+                em.merge(f);
+            }
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -794,5 +916,26 @@ public class SubscriptionService {
             }
             throw new EJBException(pex);
         }
+    }
+
+    public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
+        if (field.getSNO() == 1
+                && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name())
+                && !field.getFIELD_NAME().equals("Email")) {
+            throw new DataValidationException("Only the \"Email\" field can have order number 1");
+        }
+
+        if (field.getSNO() < 1) {
+            throw new DataValidationException("Field order must be greater than 1 (1 is always \"Email\").");
+        }
+
+        if (field.getFIELD_NAME() == null || field.getFIELD_NAME().isEmpty()) {
+            throw new IncompleteDataException("Field name must not be empty.");
+        }
+
+        if (field.getDESCRIPTION() == null || field.getDESCRIPTION().isEmpty()) {
+            throw new IncompleteDataException("Description must not be empty.");
+        }
+
     }
 }
