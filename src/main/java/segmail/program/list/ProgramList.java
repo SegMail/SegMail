@@ -14,6 +14,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
@@ -37,7 +38,11 @@ public class ProgramList implements Serializable {
     
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
+    
+    //For subscribers
     private List<SubscriberAccount> subscribers;
+    private SubscriberAccount subscriber;
+    private List<SubscriberFieldValue> fieldValues;
     
     //For the confirmation emails
     private List<AutoConfirmEmail> confirmationEmails;
@@ -51,6 +56,7 @@ public class ProgramList implements Serializable {
     //For field list
     private List<SubscriptionListField> fieldList;
     private SubscriptionListField newField;
+    
     
     private final String formName = "ProgramList";
     
@@ -188,6 +194,22 @@ public class ProgramList implements Serializable {
 
     public void setNewField(SubscriptionListField newField) {
         this.newField = newField;
+    }
+
+    public SubscriberAccount getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(SubscriberAccount subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    public List<SubscriberFieldValue> getFieldValues() {
+        return fieldValues;
+    }
+
+    public void setFieldValues(List<SubscriberFieldValue> fieldValues) {
+        this.fieldValues = fieldValues;
     }
     
     

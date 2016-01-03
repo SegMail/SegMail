@@ -19,18 +19,20 @@
                 </div>
 
                 <div class="modal-body">
-                    <c:forEach items="#{FormListSubscriber.listFields}" var="field">
+                    <c:forEach items="#{FormListSubscriber.fieldValues}" var="fieldvalue">
                         <div class="form-group">
-                            <label>#{field.FIELD_NAME}: </label>
+                            <label>#{fieldvalue.FIELD.FIELD_NAME}: </label>
                             <c:choose>
-                                <c:when test="#{field.TYPE.equals(FormListSubscriber.emailType)}">
+                                <c:when test="#{fieldvalue.FIELD.TYPE.equals(FormListSubscriber.emailType)}">
                                     <input type="email" class="form-control"
-                                           name="#{field.FIELD_NAME.concat(field.SNO)}" required="#{field.MANDATORY}"
+                                           name="#{fieldvalue.FIELD.FIELD_NAME.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
+                                           jsf:value="#{fieldvalue.VALUE}"
                                            />
                                 </c:when>
-                                <c:when test="#{field.TYPE.equals(FormListSubscriber.textType)}">
+                                <c:when test="#{fieldvalue.FIELD.TYPE.equals(FormListSubscriber.textType)}">
                                     <input type="text" class="form-control"
-                                           name="#{field.FIELD_NAME.concat(field.SNO)}" required="#{field.MANDATORY}"
+                                           name="#{fieldvalue.FIELD.FIELD_NAME.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
+                                           jsf:value="#{fieldvalue.VALUE}"
                                            />
                                 </c:when>
                             </c:choose>

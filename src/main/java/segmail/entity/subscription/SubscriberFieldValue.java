@@ -7,12 +7,16 @@ package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseData;
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
  */
+@Entity
+@Table(name="SUBSCRIBER_FIELD_VALUE")
 public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
 
     private SubscriptionListField FIELD;
