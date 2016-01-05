@@ -30,9 +30,7 @@ import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -41,7 +39,6 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -72,8 +69,6 @@ public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
 
-    //@PersistenceContext(name = "HIBERNATE")
-    //private EntityManager em;
     @EJB
     private GenericObjectService objectService;
     @EJB
@@ -337,12 +332,13 @@ public class SubscriptionService {
             //Update the subscriber account first by merging
             //Even if it exist, it is required to merge it to manage it later
             newOrExistingAcc = updateService.getEm().merge(newOrExistingAcc);
+            updateService.getEm().flush();
             
             // Connect all new field values to the account and create them in the DB
             // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
             for(SubscriberFieldValue value : values){
                 value.setOWNER(newOrExistingAcc);
-                value = updateService.getEm().merge(value);
+                updateService.getEm().persist(value);
             }
             
             // Create the relationship
@@ -357,6 +353,9 @@ public class SubscriptionService {
             
             updateService.getEm().persist(newSubscr);
             
+            //Update the count of the list
+            list.setCOUNT(list.getCOUNT()+1);
+            list = updateService.getEm().merge(list);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -1007,5 +1006,27 @@ public class SubscriptionService {
             throw new IncompleteDataException("Description must not be empty.");
         }
 
+    }
+    
+    /**
+     * Non-update helper method to construct a list of SubscriberFieldValue to be 
+     * populated. Mainly for frontend forms usage. The returned result is not 
+     * ready to be updated into the DB yet because it is still missing the 
+     * SubscriberAccount EnterpriseObject.
+     * 
+     * @param fields
+     * @return 
+     */
+    public List<SubscriberFieldValue> constructSubscriberFieldValues(List<SubscriptionListField> fields){
+        List<SubscriberFieldValue> values = new ArrayList<>();
+
+        for (int i=0; i<fields.size(); i++){
+            SubscriptionListField field = fields.get(i);
+            SubscriberFieldValue newValue = new SubscriberFieldValue();
+            newValue.setFIELD(field);
+            newValue.setSNO(i);
+            values.add(newValue);
+        }
+        return values;
     }
 }

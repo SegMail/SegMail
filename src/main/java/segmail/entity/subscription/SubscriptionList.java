@@ -24,6 +24,7 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     private String SEND_AS_NAME;
     private boolean DOUBLE_OPTIN;
     private boolean REMOTE;
+    private int COUNT;
     //private ListType TYPE;
 
     public SubscriptionList() {
@@ -88,6 +89,16 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     public void setREMOTE(boolean REMOTE) {
         this.REMOTE = REMOTE;
     }
+
+    public int getCOUNT() {
+        return COUNT;
+    }
+
+    public void setCOUNT(int COUNT) {
+        this.COUNT = COUNT;
+    }
+    
+    
     
     
 

@@ -43,6 +43,7 @@ public class ProgramList implements Serializable {
     private List<SubscriberAccount> subscribers;
     private SubscriberAccount subscriber;
     private List<SubscriberFieldValue> fieldValues;
+    private int page; //For data-dripping purpose
     
     //For the confirmation emails
     private List<AutoConfirmEmail> confirmationEmails;
@@ -210,6 +211,14 @@ public class ProgramList implements Serializable {
 
     public void setFieldValues(List<SubscriberFieldValue> fieldValues) {
         this.fieldValues = fieldValues;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
     
     

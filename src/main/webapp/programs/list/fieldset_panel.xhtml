@@ -25,7 +25,7 @@
                         <p:commandButton id="save_button_pf" class="btn btn-primary"
                                          value="Save"
                                          icon="fa fa-floppy-o"
-                                         update="@form" process="@form"
+                                         update="@form,:add_new_sub_form" process="@form,:add_new_sub_form"
                                          oncomplete="gPlugins('body');"
                                          actionListener="#{FormListFieldSet.save()}"
                                          >

@@ -31,6 +31,8 @@ import segmail.entity.subscription.SubscriptionListField;
 @Named("FormListSubscriber")
 @RequestScoped
 public class FormListSubscriber {
+    
+    public final int SUBSCRIBERS_PER_PAGE = 100;
 
     @Inject
     private ProgramList program;
@@ -61,15 +63,13 @@ public class FormListSubscriber {
     }
 
     public void initSubscriberFields() {
-        List<SubscriptionListField> fields = program.getFieldList();
-        List<SubscriberFieldValue> values = new ArrayList<>();
-
-        for (SubscriptionListField field : fields) {
-            SubscriberFieldValue newValue = new SubscriberFieldValue();
-            newValue.setFIELD(field);
-            values.add(newValue);
+        long listId = program.getListEditingId();
+        
+        if (listId <= 0) {
+            return;
         }
-
+        List<SubscriptionListField> fields = program.getFieldList();
+        List<SubscriberFieldValue> values = subService.constructSubscriberFieldValues(fields);
         program.setFieldValues(values);
     }
 
@@ -86,10 +86,12 @@ public class FormListSubscriber {
             if (program.getListEditing() == null) {
                 throw new RuntimeException("List is not set yet but you still manage to come to this page? Notify your admin immediately! =)");
             }
-            
-            subService.subscribe(program.getListEditingId(), this.getFieldValues());
 
+            subService.subscribe(program.getListEditingId(), this.getFieldValues());
+            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Subscriber added!", null);
             //How to redirect to List editing panel?
+            program.refresh();
+            
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
@@ -108,9 +110,13 @@ public class FormListSubscriber {
 
     public void loadSubscribers() {
         try {
-
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
+            SubscriptionList listEditing = getListEditing();
+            //Load the maximum # of subscribers depending on the page
+            //If list has 101, SUBSCRIBERS_PER_PAGE = 100 and page = 2,
+            //load subscriber # (2-1)*100=100 to # (2)*100=200.
+            
+            
+        } catch (EJBException ex) { 
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
@@ -132,8 +138,8 @@ public class FormListSubscriber {
     public String getTextType() {
         return FIELD_TYPE.TEXT.name();
     }
-    
-    public List<SubscriberFieldValue> getFieldValues(){
+
+    public List<SubscriberFieldValue> getFieldValues() {
         return program.getFieldValues();
     }
 }

@@ -70,6 +70,7 @@ public class FormListFieldSet {
         try {
             long listId = program.getListEditingId();
             //to improve performance
+            //no! it's necessary else there will be nullpointerexception :p
             if (listId <= 0) {
                 return;
             }
