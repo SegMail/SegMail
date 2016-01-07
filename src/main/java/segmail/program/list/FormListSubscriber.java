@@ -7,6 +7,7 @@ package segmail.program.list;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
@@ -32,7 +33,7 @@ import segmail.entity.subscription.SubscriptionListField;
 @RequestScoped
 public class FormListSubscriber {
     
-    public final int SUBSCRIBERS_PER_PAGE = 100;
+    private final int SUBSCRIBERS_PER_PAGE = 100;
 
     @Inject
     private ProgramList program;
@@ -53,8 +54,10 @@ public class FormListSubscriber {
         //Can we use flash scope here?
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
+            loadListFields();
             initSubscriberAccount();
             initSubscriberFields();
+            loadSubscribers();
         }
     }
 
@@ -111,15 +114,36 @@ public class FormListSubscriber {
     public void loadSubscribers() {
         try {
             SubscriptionList listEditing = getListEditing();
+            if(listEditing == null) return;
             //Load the maximum # of subscribers depending on the page
             //If list has 101, SUBSCRIBERS_PER_PAGE = 100 and page = 2,
             //load subscriber # (2-1)*100=100 to # (2)*100=200.
+            int pageNum = getPage();
+            Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> accounts = 
+                    subService.getSubscriberFieldValues(listEditing.getOBJECTID(), pageNum*SUBSCRIBERS_PER_PAGE, SUBSCRIBERS_PER_PAGE);
             
+            program.setSubscriberTable(accounts);
             
         } catch (EJBException ex) { 
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
+    }
+    
+    public void loadListFields() {
+        try {
+            long listId = program.getListEditingId();
+            //to improve performance
+            //no! it's necessary else there will be nullpointerexception :p
+            if (listId <= 0) {
+                return;
+            }
+            List<SubscriptionListField> fieldList = subService.getFieldsForSubscriptionList(listId);
+            this.program.setFieldList(fieldList);
+
+        } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
 
@@ -141,5 +165,17 @@ public class FormListSubscriber {
 
     public List<SubscriberFieldValue> getFieldValues() {
         return program.getFieldValues();
+    }
+
+    public int getSUBSCRIBERS_PER_PAGE() {
+        return SUBSCRIBERS_PER_PAGE;
+    }
+    
+    public int getPage(){
+        return program.getPage();
+    }
+    
+    public Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> getSubscriberTable(){
+        return program.getSubscriberTable();
     }
 }

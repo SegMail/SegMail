@@ -8,6 +8,7 @@ package segmail.entity.subscription;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  *
@@ -71,7 +72,11 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
         this.MANDATORY = MANDATORY;
     }
     
-    
+    @Transient
+    public String getHTMLFieldName(){
+        String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "-");
+        return htmlName;
+    }
 
     @Override
     public void randInit() {

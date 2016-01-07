@@ -4,6 +4,7 @@ import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -40,10 +41,10 @@ public class ProgramList implements Serializable {
     private SubscriptionList listEditing;
     
     //For subscribers
-    private List<SubscriberAccount> subscribers;
+    private Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> subscriberTable;
     private SubscriberAccount subscriber;
     private List<SubscriberFieldValue> fieldValues;
-    private int page; //For data-dripping purpose
+    private int page = 1; //For data-dripping purpose
     
     //For the confirmation emails
     private List<AutoConfirmEmail> confirmationEmails;
@@ -93,14 +94,6 @@ public class ProgramList implements Serializable {
 
     public void setAllLists(List<SubscriptionList> allLists) {
         this.allLists = allLists;
-    }
-
-    public List<SubscriberAccount> getSubscribers() {
-        return subscribers;
-    }
-
-    public void setSubscribers(List<SubscriberAccount> subscribers) {
-        this.subscribers = subscribers;
     }
 
     public List<AutoConfirmEmail> getConfirmationEmails() {
@@ -219,6 +212,14 @@ public class ProgramList implements Serializable {
 
     public void setPage(int page) {
         this.page = page;
+    }
+
+    public Map<SubscriberAccount, Map<SubscriptionListField, SubscriberFieldValue>> getSubscriberTable() {
+        return subscriberTable;
+    }
+
+    public void setSubscriberTable(Map<SubscriberAccount, Map<SubscriptionListField, SubscriberFieldValue>> subscriberTable) {
+        this.subscriberTable = subscriberTable;
     }
     
     

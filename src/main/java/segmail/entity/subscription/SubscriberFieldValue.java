@@ -23,7 +23,6 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
     private String VALUE;
 
     @ManyToOne(cascade={
-        CascadeType.MERGE,
         CascadeType.REFRESH
     })
     public SubscriptionListField getFIELD() {

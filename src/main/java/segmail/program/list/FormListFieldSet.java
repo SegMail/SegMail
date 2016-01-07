@@ -45,7 +45,7 @@ public class FormListFieldSet {
     public void init() {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
-            loadListFields();
+            //loadListFields(); 
             initNewEmptyField();
         }
     }
@@ -74,9 +74,7 @@ public class FormListFieldSet {
             if (listId <= 0) {
                 return;
             }
-
             List<SubscriptionListField> fieldList = subscriptionService.getFieldsForSubscriptionList(listId);
-
             this.program.setFieldList(fieldList);
 
         } catch (EJBException ex) {

@@ -18,6 +18,8 @@ import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
 import eds.component.data.DataValidationException;
+import eds.entity.data.EnterpriseObject_;
+import eds.entity.data.EnterpriseRelationship_;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -30,7 +32,9 @@ import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -52,7 +56,9 @@ import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriberFieldValue;
+import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
+import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
@@ -69,20 +75,16 @@ public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
 
-    @EJB
-    private GenericObjectService objectService;
-    @EJB
-    private UpdateObjectService updateService;
-    @EJB
-    private GenericConfigService configService;
+    @EJB private GenericObjectService objectService;
+    @EJB private UpdateObjectService updateService;
+    @EJB private GenericConfigService configService;
 
     /**
      * [2015.07.12] Because the EJB Interceptor way failed, so this is a very
      * good alternative to omit clientid input for every method call.
      *
      */
-    @Inject
-    ClientFacade clientFacade;
+    @Inject ClientFacade clientFacade;
 
     /**
      * Experimental logic for EnterpriseConfiguration testing Got to build a
@@ -214,87 +216,6 @@ public class SubscriptionService {
             throw new EJBException(ex);
         }
     }
-
-    /**
-     * Subscribes a new subscriber to an existing list.
-     *
-     * @param newSub
-     * @param listId
-     * @param confirmation
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void subscribe(SubscriberAccount newSub, long listId, boolean confirmation) {
-        try {
-            //Validate the email address rules
-            /*EmailValidator validator = EmailValidator.getInstance();
-            if (!validator.isValid(newSub.getEMAIL())) {
-                throw new SubscriptionException("Email address is not valid!");
-            }*/
-
-            //Find the list object
-            /*SubscriptionList list = this.objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-            if (list == null) {
-                throw new SubscriptionException("List " + listId + " not found!");
-            }
-
-            if (this.checkSubscribed(newSub.getEMAIL(), listId)) {
-                throw new SubscriptionException("Email is already subscribed to list.");
-            }*/
-
-            //Persist the new subscriber
-            //updateService.getEm().persist(newSub);
-
-            //Create new subscription
-            /*Subscription subsc = new Subscription();
-            subsc.setSOURCE(newSub);
-            subsc.setTARGET(list);
-            subsc.setSTATUS(Subscription.STATUS.NEW);
-
-            updateService.getEm().persist(subsc);
-            */
-            // Send out the confimration email
-            /*if (!confirmation) {
-                return;
-            }*/
-
-            /*
-             // Get confirmation email autoEmail
-             // Assume that there is only 1
-             List<EmailTemplate> templates = this.getAutoEmailForList(listId);
-             if (templates == null || templates.isEmpty()) {
-             throw new SubscriptionException("Cannot find any confimation email templates for list " + list.getLIST_NAME());
-             }
-             AutoresponderEmail autoEmail = templates.get(0);
-
-             Email email = autoEmail.generateEmail();
-             //email.setAUTHOR(list);
-             email.addRecipient(newSub);
-
-             // Get the SMTP connection settings from the List
-             // Assume that there is only 1
-             List<SMTPConnectionSES> smtps = this.objectService
-             .getAllSourceObjectsFromTarget(listId, SystemResourceAssignment.class, SMTPConnectionSES.class);
-
-             // If the connection was not found, queue the message to be sent later
-             if (smtps == null || smtps.isEmpty()) {
-             email.schedule(new DateTime());
-             em.persist(email);
-             throw new SubscriptionException("Cannot find any SMTP connection set for list " + list.getLIST_NAME());
-             }
-
-             SMTPConnectionSES smtp = smtps.get(0);
-
-             //mailService.sendEmail(email, smtp, true);
-             */
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        } catch (Exception ex) {
-            throw new EJBException(ex);
-        }
-    }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void subscribe(long listId, List<SubscriberFieldValue> values) 
@@ -378,7 +299,7 @@ public class SubscriptionService {
     public boolean checkSubscribed(String subscriberEmail, long listId) {
         try {
             //Retrieving Subscriptions which has a SubscriberAccount subscriberEmail and a SubscriptionList ID
-            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+            CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
             CriteriaQuery<Subscription> criteria = builder.createQuery(Subscription.class);
             Root<Subscription> source = criteria.from(Subscription.class);
 
@@ -391,48 +312,9 @@ public class SubscriptionService {
 
             criteria.where(conditions.toArray(new Predicate[]{}));
 
-            List<Subscription> results = objectService.getEm().createQuery(criteria).getResultList();
+            List<Subscription> results = updateService.getEm().createQuery(criteria).getResultList();
 
             return !(results == null || results.isEmpty());
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        } catch (Exception ex) {
-            throw new EJBException(ex);
-        }
-    }
-
-    /**
-     * Get a list of all AutoresponderEmails assigned to a particular list.
-     *
-     * @param listid
-     * @return
-     */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<AutoresponderEmail> getAutoEmailForList(long listid) {
-        try {
-            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-            CriteriaQuery query = builder.createQuery(AutoresponderEmail.class);
-            Root<Assign_AutoresponderEmail_List> sourceEntity = query.from(Assign_AutoresponderEmail_List.class);
-
-            Join<Assign_AutoresponderEmail_List, AutoresponderEmail> autoEmail = sourceEntity.join("SOURCE");
-            Join<Assign_AutoresponderEmail_List, SubscriptionList> list = sourceEntity.join("TARGET");
-
-            query.select(autoEmail);
-
-            List<Predicate> conditions = new ArrayList();
-
-            conditions.add(builder.equal(list.get(SubscriptionList_.OBJECTID), listid));
-
-            query.where(conditions.toArray(new Predicate[]{}));
-
-            List<AutoresponderEmail> results = objectService.getEm().createQuery(query)
-                    .getResultList();
-
-            return results;
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -968,6 +850,8 @@ public class SubscriptionService {
      * Don't allow any change in SNO at the moment
      * 
      * @param fieldList 
+     * @throws eds.component.data.DataValidationException 
+     * @throws eds.component.data.IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateSubscriptionListFields(List<SubscriptionListField> fieldList) 
@@ -978,6 +862,47 @@ public class SubscriptionService {
                 validateListField(f);
                 em.merge(f);
             }
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> getSubscriberFieldValues(long listId, int startIndex, int limit){
+        try {
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+            CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
+            Root<Subscription> fromSubscr = criteria.from(Subscription.class);
+            Root<SubscriberFieldValue> fromFieldValue = criteria.from(SubscriberFieldValue.class);
+            
+            criteria.select(fromFieldValue);
+            criteria.where(
+                    builder.and(
+                            builder.equal(fromSubscr.get(Subscription_.TARGET), listId),
+                            builder.equal(
+                                    fromSubscr.get(Subscription_.SOURCE), 
+                                    fromFieldValue.get(SubscriberFieldValue_.OWNER))
+                            )
+                    );
+                    
+            List<SubscriberFieldValue> results = objectService.getEm().createQuery(criteria)
+                    .getResultList();
+            
+            Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> resultMap = 
+                    new HashMap<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>>();
+            for(SubscriberFieldValue field : results){
+                SubscriberAccount subscriber = field.getOWNER();
+                if(!resultMap.containsKey(subscriber)){
+                    resultMap.put(subscriber, new HashMap<SubscriptionListField,SubscriberFieldValue>());
+                    
+                }
+                resultMap.get(subscriber).put(field.getFIELD(), field);
+            }
+            return resultMap;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -1018,7 +943,11 @@ public class SubscriptionService {
      * @return 
      */
     public List<SubscriberFieldValue> constructSubscriberFieldValues(List<SubscriptionListField> fields){
+        
         List<SubscriberFieldValue> values = new ArrayList<>();
+        
+        if(fields == null)
+            return values;
 
         for (int i=0; i<fields.size(); i++){
             SubscriptionListField field = fields.get(i);
