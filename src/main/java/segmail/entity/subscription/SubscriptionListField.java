@@ -72,6 +72,12 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
         this.MANDATORY = MANDATORY;
     }
     
+    /**
+     * If the field name is used as an identifier in the view layer (html), this 
+     * should be used instead of FIELD_NAME.
+     * 
+     * @return 
+     */
     @Transient
     public String getHTMLFieldName(){
         String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "-");

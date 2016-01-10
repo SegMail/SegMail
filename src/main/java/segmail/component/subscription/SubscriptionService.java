@@ -299,22 +299,24 @@ public class SubscriptionService {
     public boolean checkSubscribed(String subscriberEmail, long listId) {
         try {
             //Retrieving Subscriptions which has a SubscriberAccount subscriberEmail and a SubscriptionList ID
-            CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
-            CriteriaQuery<Subscription> criteria = builder.createQuery(Subscription.class);
-            Root<Subscription> source = criteria.from(Subscription.class);
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+            CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+            Root<Subscription> fromSubscr = criteria.from(Subscription.class);
+            Root<SubscriberAccount> fromSubscrAcc = criteria.from(SubscriberAccount.class);
+            
+            criteria.select(builder.count(fromSubscrAcc));
+            
+            criteria.where(
+                    builder.and(
+                            builder.equal(fromSubscr.get(Subscription_.TARGET), listId),
+                            builder.equal(fromSubscr.get(Subscription_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)),
+                            builder.equal(fromSubscrAcc.get(SubscriberAccount_.EMAIL), subscriberEmail)
+                    )
+            );
+            
+            Long results = objectService.getEm().createQuery(criteria).getSingleResult();
 
-            Join<Subscription, SubscriberAccount> subAcc = source.join("SOURCE");
-            Join<Subscription, SubscriptionList> subList = source.join("TARGET");
-            List<Predicate> conditions = new ArrayList();
-
-            conditions.add(builder.equal(subAcc.get(SubscriberAccount_.EMAIL), subscriberEmail));
-            conditions.add(builder.equal(subList.get(SubscriptionList_.OBJECTID), listId));
-
-            criteria.where(conditions.toArray(new Predicate[]{}));
-
-            List<Subscription> results = updateService.getEm().createQuery(criteria).getResultList();
-
-            return !(results == null || results.isEmpty());
+            return results > 0;
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -893,7 +895,9 @@ public class SubscriptionService {
                     .getResultList();
             
             Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> resultMap = 
-                    new HashMap<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>>();
+                    new HashMap<>();
+            
+            //Collections.sort(results);//Sorting before creating the map may not be the most correct solution but it's the most efficient and effective one at the moment
             for(SubscriberFieldValue field : results){
                 SubscriberAccount subscriber = field.getOWNER();
                 if(!resultMap.containsKey(subscriber)){
@@ -943,12 +947,14 @@ public class SubscriptionService {
      * @return 
      */
     public List<SubscriberFieldValue> constructSubscriberFieldValues(List<SubscriptionListField> fields){
-        
         List<SubscriberFieldValue> values = new ArrayList<>();
         
         if(fields == null)
             return values;
-
+        
+        List<SubscriptionListField> sortedFields = new ArrayList<>(fields);
+        Collections.sort(sortedFields);
+        
         for (int i=0; i<fields.size(); i++){
             SubscriptionListField field = fields.get(i);
             SubscriberFieldValue newValue = new SubscriberFieldValue();
@@ -956,6 +962,7 @@ public class SubscriptionService {
             newValue.setSNO(i);
             values.add(newValue);
         }
+        
         return values;
     }
 }

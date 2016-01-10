@@ -39,23 +39,11 @@
             </div>
         </div>
         <div class="row">
-
             <div class="col-md-12">
                 <div class="block">
                     <div class="block-content np">
                         <div class="dataTables_wrapper" role="grid">
                             <table jsf:id="subscriber_table" class="table table-hover">
-                                <c:forEach items="#{FormListSubscriber.subscriberTable.entrySet}" var="subscriber" varStatus="subscIndex">
-                                    <c:if test="#{subscIndex == 0}">
-                                        <thead>
-                                            <tr>
-                                                <c:forEach items="#{subscriber.value.entrySet}" var="fieldEntry">
-                                                    <td>#{fieldEntry.key}</td>
-                                                </c:forEach>
-                                            </tr>
-                                        </thead>
-                                    </c:if>
-                                </c:forEach>
                                 <thead>
                                     <tr>
                                         <c:forEach items="#{FormListSubscriber.listFields}" var="field">
@@ -64,31 +52,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>John</td>
-                                        <td>john.doe@segmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>John</td>
-                                        <td>john.doe@segmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>John</td>
-                                        <td>john.doe@segmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>John</td>
-                                        <td>john.doe@segmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>John</td>
-                                        <td>john.doe@segmail.com</td>
-                                    </tr>
+                                    <c:forEach items="#{FormListSubscriber.subscriberTable}" var="subscriber" varStatus="subscIndex">
+                                        <tr>
+                                            <c:forEach items="#{FormListSubscriber.listFields}" var="field">
+                                                <td>
+                                                    <span>#{subscriber.value.get(field).VALUE}</span>
+                                                </td>
+                                            </c:forEach>
+                                        </tr>
+                                    </c:forEach>
                                 </tbody>
                             </table>
                         </div>
@@ -98,5 +70,5 @@
         </div>
 
     </form>
-    
+
 </html>

@@ -25,13 +25,13 @@
                             <c:choose>
                                 <c:when test="#{fieldvalue.FIELD.TYPE.equals(FormListSubscriber.emailType)}">
                                     <input type="email" class="form-control"
-                                           name="#{fieldvalue.FIELD.FIELD_NAME.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
+                                           name="#{fieldvalue.FIELD.HTMLFieldName.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
                                            jsf:value="#{fieldvalue.VALUE}"
                                            />
                                 </c:when>
                                 <c:when test="#{fieldvalue.FIELD.TYPE.equals(FormListSubscriber.textType)}">
                                     <input type="text" class="form-control"
-                                           name="#{fieldvalue.FIELD.FIELD_NAME.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
+                                           name="#{fieldvalue.FIELD.HTMLFieldName.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
                                            jsf:value="#{fieldvalue.VALUE}"
                                            />
                                 </c:when>
@@ -65,7 +65,7 @@
                         $("#add_new_sub_form").validate({
                     rules: {
                         <c:forEach items="#{FormListSubscriber.listFields}" var="field" varStatus="fieldStatus">
-                            #{(fieldStatus.index > 0 ) ? "," : ""}#{field.FIELD_NAME.concat(field.SNO)} : {
+                            #{(fieldStatus.index > 0 ) ? "," : ""}#{field.HTMLFieldName.concat(field.SNO)} : {
                                 required: #{field.MANDATORY}
                                 #{(field.TYPE.equals(FormListSubscriber.emailType)) ? ", email : true" : ""}
                             }

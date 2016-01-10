@@ -8,6 +8,7 @@ package segmail.entity.subscription;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -50,5 +51,17 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    /*@Override
+    public int compareTo(EnterpriseData o) {
+        
+        //o is also a SubscriberFieldValue
+        if(this.getClass() == o.getClass() && this.getOWNER().equals(o.getOWNER()))
+            return this.getFIELD().compareTo(((SubscriberFieldValue)o).getFIELD());
+        
+        return super.compareTo(o);
+    }*/
+    
+    
     
 }
