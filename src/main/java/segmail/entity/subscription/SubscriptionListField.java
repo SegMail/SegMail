@@ -20,6 +20,7 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     
     private boolean MANDATORY;
     private String FIELD_NAME;
+    private String KEY_NAME; //Immutable name to retrieve for a SubscriberFieldValue
     private String TYPE;
     private String DESCRIPTION;
 
@@ -71,6 +72,14 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     public void setMANDATORY(boolean MANDATORY) {
         this.MANDATORY = MANDATORY;
     }
+
+    public String getKEY_NAME() {
+        return KEY_NAME;
+    }
+
+    public void setKEY_NAME(String KEY_NAME) {
+        this.KEY_NAME = KEY_NAME;
+    }
     
     /**
      * If the field name is used as an identifier in the view layer (html), this 
@@ -79,7 +88,8 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
      * @return 
      */
     @Transient
-    public String getHTMLFieldName(){
+    @Override
+    public String getHTMLName(){
         String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "-");
         return htmlName;
     }

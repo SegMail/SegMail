@@ -21,11 +21,11 @@
                 <div class="modal-body">
                     <c:forEach items="#{FormListSubscriber.fieldValues}" var="fieldvalue">
                         <div class="form-group">
-                            <label>#{fieldvalue.FIELD.FIELD_NAME}: </label>
+                            <label>#{fieldvalue.FIELD_NAME}: </label>
                             <c:choose>
-                                <c:when test="#{fieldvalue.FIELD.TYPE.equals(FormListSubscriber.emailType)}">
+                                <c:when test="#{fieldvalue.FIELD_NAME.equals(FormListSubscriber.emailType)}">
                                     <input type="email" class="form-control"
-                                           name="#{fieldvalue.FIELD.HTMLFieldName.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
+                                           name="#{fieldvalue.HTMLName.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
                                            jsf:value="#{fieldvalue.VALUE}"
                                            />
                                 </c:when>

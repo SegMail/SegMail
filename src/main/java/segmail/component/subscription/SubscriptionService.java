@@ -229,10 +229,10 @@ public class SubscriptionService {
             // Find if there is already an existing SubscriberAccount with the email
             String email = "";
             for(SubscriberFieldValue value : values){
-                if(value.getFIELD() == null){
-                    throw new IncompleteDataException("Field value "+value.getVALUE()+" needs to have a SubscriptionListField object attached.");
+                if(value.getFIELD_NAME()== null || value.getFIELD_NAME().isEmpty()){
+                    throw new IncompleteDataException("Field value "+value.getVALUE()+" needs to have a SubscriptionListField name provided.");
                 }
-                if(value.getFIELD().getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)){
+                if(value.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)){
                     email = value.getVALUE();// If there exist multiple fieldvalues of email, then the latest one will be used
                 }
             }
@@ -257,8 +257,11 @@ public class SubscriptionService {
             
             // Connect all new field values to the account and create them in the DB
             // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
+            // Get the highest count of the FieldValue SNO
+            int maxSNO = objectService.getHighestSNO(SubscriberFieldValue.class, newOrExistingAcc.getOBJECTID());
             for(SubscriberFieldValue value : values){
                 value.setOWNER(newOrExistingAcc);
+                value.setSNO(++maxSNO);
                 updateService.getEm().persist(value);
             }
             
@@ -806,7 +809,8 @@ public class SubscriptionService {
             List<SubscriptionListField> existingFields = getFieldsForSubscriptionList(listId); //All managed?
             Collections.sort(existingFields, new SubscriptionListFieldComparator()); //Doesn't include new field yet
             for (int i = existingFields.size(); i > 0; i--) {
-                SubscriptionListField field = existingFields.get(i - 1);
+                SubscriptionListField field = updateService.getEm().merge(existingFields.get(i - 1));
+                
                 /*if(newField.getSNO() == field.getSNO()){
                  field.setSNO(i+1);
                  updateService.getEm().merge(field); //Assuming the entity is already managed
@@ -825,7 +829,7 @@ public class SubscriptionService {
                 } else {
                     field.setSNO(i);
                 }
-                updateService.getEm().merge(field); //Assuming the entity is already managed
+                //updateService.getEm().merge(field); //Assuming the entity is already managed
             }
             newField.setOWNER(list);
             updateService.getEm().persist(newField);
@@ -874,7 +878,7 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> getSubscriberFieldValues(long listId, int startIndex, int limit){
+    public Map<SubscriberAccount,Map<String,SubscriberFieldValue>> getSubscriberFieldValues(long listId, int startIndex, int limit){
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
@@ -894,17 +898,17 @@ public class SubscriptionService {
             List<SubscriberFieldValue> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
             
-            Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> resultMap = 
+            Map<SubscriberAccount,Map<String,SubscriberFieldValue>> resultMap = 
                     new HashMap<>();
             
             //Collections.sort(results);//Sorting before creating the map may not be the most correct solution but it's the most efficient and effective one at the moment
             for(SubscriberFieldValue field : results){
                 SubscriberAccount subscriber = field.getOWNER();
                 if(!resultMap.containsKey(subscriber)){
-                    resultMap.put(subscriber, new HashMap<SubscriptionListField,SubscriberFieldValue>());
+                    resultMap.put(subscriber, new HashMap<String,SubscriberFieldValue>());
                     
                 }
-                resultMap.get(subscriber).put(field.getFIELD(), field);
+                resultMap.get(subscriber).put(field.getFIELD_NAME(), field);
             }
             return resultMap;
             
@@ -958,8 +962,8 @@ public class SubscriptionService {
         for (int i=0; i<fields.size(); i++){
             SubscriptionListField field = fields.get(i);
             SubscriberFieldValue newValue = new SubscriberFieldValue();
-            newValue.setFIELD(field);
-            newValue.setSNO(i);
+            newValue.setFIELD_NAME(field.getFIELD_NAME());
+            //newValue.setSNO(i);
             values.add(newValue);
         }
         

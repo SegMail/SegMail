@@ -119,7 +119,7 @@ public class FormListSubscriber {
             //If list has 101, SUBSCRIBERS_PER_PAGE = 100 and page = 2,
             //load subscriber # (2-1)*100=100 to # (2)*100=200.
             int pageNum = getPage();
-            Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> accounts = 
+            Map<SubscriberAccount,Map<String,SubscriberFieldValue>> accounts = 
                     subService.getSubscriberFieldValues(listEditing.getOBJECTID(), pageNum*SUBSCRIBERS_PER_PAGE, SUBSCRIBERS_PER_PAGE);
             
             program.setSubscriberTable(accounts);
@@ -175,7 +175,7 @@ public class FormListSubscriber {
         return program.getPage();
     }
     
-    public Map<SubscriberAccount,Map<SubscriptionListField,SubscriberFieldValue>> getSubscriberTable(){
+    public Map<SubscriberAccount,Map<String,SubscriberFieldValue>> getSubscriberTable(){
         return program.getSubscriberTable();
     }
 }

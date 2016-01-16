@@ -9,6 +9,7 @@ import eds.entity.data.EnterpriseData;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -20,19 +21,26 @@ import javax.persistence.Table;
 @Table(name="SUBSCRIBER_FIELD_VALUE")
 public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
 
-    private SubscriptionListField FIELD;
+    //private SubscriptionListField FIELD;
+    private String FIELD_NAME;
     private String VALUE;
 
-    @ManyToOne(cascade={
-        CascadeType.REFRESH
-    })
+    public String getFIELD_NAME() {
+        return FIELD_NAME;
+    }
+
+    public void setFIELD_NAME(String FIELD_NAME) {
+        this.FIELD_NAME = FIELD_NAME;
+    }
+
+    /*
     public SubscriptionListField getFIELD() {
         return FIELD;
     }
 
     public void setFIELD(SubscriptionListField FIELD) {
         this.FIELD = FIELD;
-    }
+    }*/
 
     public String getVALUE() {
         return VALUE;
@@ -61,6 +69,12 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
         
         return super.compareTo(o);
     }*/
+
+    @Override
+    public String getHTMLName() {
+        String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "-");
+        return htmlName;
+    }
     
     
     
