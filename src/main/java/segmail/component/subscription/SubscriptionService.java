@@ -55,6 +55,7 @@ import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
@@ -217,8 +218,20 @@ public class SubscriptionService {
         }
     }
     
+    /**
+     * This assumes that the client has constructed a list of SubscriberFieldValue
+     * with the correct FIELD_KEY values set in these objects. There should be 
+     * another method that takes in just a Map<String,String> of objects.
+     * 
+     * @param listId
+     * @param values
+     * @throws EntityNotFoundException
+     * @throws IncompleteDataException
+     * @throws DataValidationException
+     * @throws RelationshipExistsException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void subscribe(long listId, List<SubscriberFieldValue> values) 
+    public void subscribe(long listId, Map<String,Object> values) 
             throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException {
         try {
             // Find the list object
@@ -228,12 +241,14 @@ public class SubscriptionService {
             
             // Find if there is already an existing SubscriberAccount with the email
             String email = "";
-            for(SubscriberFieldValue value : values){
-                if(value.getFIELD_NAME()== null || value.getFIELD_NAME().isEmpty()){
-                    throw new IncompleteDataException("Field value "+value.getVALUE()+" needs to have a SubscriptionListField name provided.");
+            List<SubscriptionListField> fields = getFieldsForSubscriptionList(listId);
+            for(SubscriptionListField field : fields ){
+                if(field.isMANDATORY() &&
+                    (values.get(field.generateKey().toString()) == null || ((String)values.get(field.generateKey().toString())).isEmpty())){
+                    throw new IncompleteDataException("Mandatory list field "+field.getFIELD_NAME()+" is missing.");
                 }
-                if(value.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)){
-                    email = value.getVALUE();// If there exist multiple fieldvalues of email, then the latest one will be used
+                if(field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)){
+                    email = (String) values.get(field.generateKey().toString());// If there exist multiple fieldvalues of email, then the latest one will be used
                 }
             }
             if(email.isEmpty())
@@ -259,8 +274,10 @@ public class SubscriptionService {
             // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
             // Get the highest count of the FieldValue SNO
             int maxSNO = objectService.getHighestSNO(SubscriberFieldValue.class, newOrExistingAcc.getOBJECTID());
-            for(SubscriberFieldValue value : values){
+            for(SubscriptionListField field : fields){
+                SubscriberFieldValue value = new SubscriberFieldValue();
                 value.setOWNER(newOrExistingAcc);
+                value.setVALUE(values.get(field.generateKey().toString()).toString());
                 value.setSNO(++maxSNO);
                 updateService.getEm().persist(value);
             }
@@ -269,7 +286,7 @@ public class SubscriptionService {
             Subscription newSubscr = new Subscription();
             newSubscr.setTARGET(list);
             newSubscr.setSOURCE(newOrExistingAcc);
-            newSubscr.setSTATUS(Subscription.STATUS.NEW);
+            newSubscr.setSTATUS(SUBSCRIPTION_STATUS.NEW);
             
             //Check if the subscription already exist
             if(checkSubscribed(email, listId))
@@ -908,7 +925,7 @@ public class SubscriptionService {
                     resultMap.put(subscriber, new HashMap<String,SubscriberFieldValue>());
                     
                 }
-                resultMap.get(subscriber).put(field.getFIELD_NAME(), field);
+                resultMap.get(subscriber).put(field.getFIELD_KEY(), field);
             }
             return resultMap;
             
@@ -950,10 +967,10 @@ public class SubscriptionService {
      * @param fields
      * @return 
      */
-    public List<SubscriberFieldValue> constructSubscriberFieldValues(List<SubscriptionListField> fields){
-        List<SubscriberFieldValue> values = new ArrayList<>();
+    public Map<String,Object> constructSubscriberFieldValues(List<SubscriptionListField> fields){
+        Map<String,Object> values = new HashMap<>();
         
-        if(fields == null)
+        if(fields == null || fields.isEmpty())
             return values;
         
         List<SubscriptionListField> sortedFields = new ArrayList<>(fields);
@@ -961,10 +978,10 @@ public class SubscriptionService {
         
         for (int i=0; i<fields.size(); i++){
             SubscriptionListField field = fields.get(i);
-            SubscriberFieldValue newValue = new SubscriberFieldValue();
-            newValue.setFIELD_NAME(field.getFIELD_NAME());
+            //SubscriberFieldValue newValue = new SubscriberFieldValue();
+            //newValue.setFIELD_KEY(field.generateKey().toString());
             //newValue.setSNO(i);
-            values.add(newValue);
+            values.put(field.generateKey().toString(),"");
         }
         
         return values;

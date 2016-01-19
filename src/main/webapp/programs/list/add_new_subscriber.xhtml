@@ -19,22 +19,28 @@
                 </div>
 
                 <div class="modal-body">
-                    <c:forEach items="#{FormListSubscriber.fieldValues}" var="fieldvalue">
+                    <c:forEach items="#{FormListSubscriber.listFields}" var="field">
                         <div class="form-group">
-                            <label>#{fieldvalue.FIELD_NAME}: </label>
+                            <label>#{field.FIELD_NAME}: </label>
                             <c:choose>
-                                <c:when test="#{fieldvalue.FIELD_NAME.equals(FormListSubscriber.emailType)}">
+                                <c:when test="#{field.TYPE.equals(FormListSubscriber.emailType)}">
                                     <input type="email" class="form-control"
-                                           name="#{fieldvalue.HTMLName.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
-                                           jsf:value="#{fieldvalue.VALUE}"
+                                           name="#{field.generateKey()}" required="#{field.MANDATORY}"
+                                           jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
                                            />
                                 </c:when>
-                                <c:when test="#{fieldvalue.FIELD.TYPE.equals(FormListSubscriber.textType)}">
+                                <c:when test="#{field.TYPE.equals(FormListSubscriber.textType)}">
                                     <input type="text" class="form-control"
-                                           name="#{fieldvalue.FIELD.HTMLFieldName.concat(field.SNO)}" required="#{fieldvalue.FIELD.MANDATORY}"
-                                           jsf:value="#{fieldvalue.VALUE}"
+                                           name="#{field.generateKey()}" required="#{field.MANDATORY}"
+                                           jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
                                            />
                                 </c:when>
+                                <c:otherwise>
+                                    <input type="text" class="form-control"
+                                           name="#{field.generateKey()}" required="#{field.MANDATORY}"
+                                           jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
+                                           />
+                                </c:otherwise>
                             </c:choose>
                         </div>
                     </c:forEach>
@@ -65,7 +71,7 @@
                         $("#add_new_sub_form").validate({
                     rules: {
                         <c:forEach items="#{FormListSubscriber.listFields}" var="field" varStatus="fieldStatus">
-                            #{(fieldStatus.index > 0 ) ? "," : ""}#{field.HTMLFieldName.concat(field.SNO)} : {
+                            #{(fieldStatus.index > 0 ) ? "," : ""}#{field.HTMLName().concat(field.SNO)} : {
                                 required: #{field.MANDATORY}
                                 #{(field.TYPE.equals(FormListSubscriber.emailType)) ? ", email : true" : ""}
                             }

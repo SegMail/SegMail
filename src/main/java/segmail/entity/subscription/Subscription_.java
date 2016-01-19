@@ -17,5 +17,5 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class Subscription_ extends EnterpriseRelationship_ {
     //public static volatile SingularAttribute<EnterpriseRelationship,? extends EnterpriseObject> SOURCE;
     //public static volatile SingularAttribute<EnterpriseRelationship,? extends EnterpriseObject> TARGET;
-    public static volatile SingularAttribute<Subscription,Subscription.STATUS> STATUS;
+    public static volatile SingularAttribute<Subscription,String> STATUS;
 }

@@ -54,7 +54,7 @@ public class UserPreferenceSet extends EnterpriseData<User> implements Serializa
     }
 
     @Override
-    public String getHTMLName() {
+    public String HTMLName() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

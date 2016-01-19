@@ -43,7 +43,7 @@ public class ProgramList implements Serializable {
     //For subscribers
     private Map<SubscriberAccount,Map<String,SubscriberFieldValue>> subscriberTable;
     private SubscriberAccount subscriber;
-    private List<SubscriberFieldValue> fieldValues;
+    private Map<String,Object> fieldValues; //For adding new subscribers
     private int page = 1; //For data-dripping purpose
     
     //For the confirmation emails
@@ -198,11 +198,11 @@ public class ProgramList implements Serializable {
         this.subscriber = subscriber;
     }
 
-    public List<SubscriberFieldValue> getFieldValues() {
+    public Map<String, Object> getFieldValues() {
         return fieldValues;
     }
 
-    public void setFieldValues(List<SubscriberFieldValue> fieldValues) {
+    public void setFieldValues(Map<String, Object> fieldValues) {
         this.fieldValues = fieldValues;
     }
 

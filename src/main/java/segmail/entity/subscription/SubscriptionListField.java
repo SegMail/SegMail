@@ -87,10 +87,9 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
      * 
      * @return 
      */
-    @Transient
     @Override
-    public String getHTMLName(){
-        String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "-");
+    public String HTMLName(){
+        String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "");
         return htmlName;
     }
 
@@ -101,7 +100,11 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
 
     @Override
     public Object generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getOWNER().getOBJECT_NAME().replace(" ", "")
+                .concat(
+                        String.format("%010d", getOWNER().getOBJECTID())
+                                .concat(String.format("%05d", getSNO()))
+                );
     }
 
 }

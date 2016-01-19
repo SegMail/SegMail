@@ -21,22 +21,19 @@ public class Subscription extends EnterpriseRelationship<SubscriberAccount,Subsc
 
     public Subscription() {
     }
-
-    public static enum STATUS{
-        NEW,
-        CONFIRMED,
-        BOUNCED
-    }
     
-    private STATUS STATUS;
+    private String STATUS;
 
-    @Enumerated(EnumType.STRING)
-    public STATUS getSTATUS() {
+    public String getSTATUS() {
         return STATUS;
     }
 
-    public void setSTATUS(STATUS STATUS) {
+    public void setSTATUS(String STATUS) {
         this.STATUS = STATUS;
+    }
+
+    public void setSTATUS(SUBSCRIPTION_STATUS STATUS){
+        this.STATUS = STATUS.name();
     }
     
     

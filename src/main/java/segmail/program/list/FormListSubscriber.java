@@ -72,7 +72,7 @@ public class FormListSubscriber {
             return;
         }
         List<SubscriptionListField> fields = program.getFieldList();
-        List<SubscriberFieldValue> values = subService.constructSubscriberFieldValues(fields);
+        Map<String,Object> values = subService.constructSubscriberFieldValues(fields);
         program.setFieldValues(values);
     }
 
@@ -163,7 +163,7 @@ public class FormListSubscriber {
         return FIELD_TYPE.TEXT.name();
     }
 
-    public List<SubscriberFieldValue> getFieldValues() {
+    public Map<String,Object> getFieldValues() {
         return program.getFieldValues();
     }
 

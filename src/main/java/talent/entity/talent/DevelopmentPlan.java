@@ -51,7 +51,7 @@ public class DevelopmentPlan extends EnterpriseData<Employee>{
     }
 
     @Override
-    public String getHTMLName() {
+    public String HTMLName() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

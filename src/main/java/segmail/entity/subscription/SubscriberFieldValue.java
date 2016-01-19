@@ -6,11 +6,7 @@
 package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseData;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -22,15 +18,15 @@ import javax.persistence.Table;
 public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
 
     //private SubscriptionListField FIELD;
-    private String FIELD_NAME;
+    private String FIELD_KEY;
     private String VALUE;
 
-    public String getFIELD_NAME() {
-        return FIELD_NAME;
+    public String getFIELD_KEY() {
+        return FIELD_KEY;
     }
 
-    public void setFIELD_NAME(String FIELD_NAME) {
-        this.FIELD_NAME = FIELD_NAME;
+    public void setFIELD_KEY(String FIELD_KEY) {
+        this.FIELD_KEY = FIELD_KEY;
     }
 
     /*
@@ -71,8 +67,8 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
     }*/
 
     @Override
-    public String getHTMLName() {
-        String htmlName = this.FIELD_NAME.trim().replaceAll(" ", "-");
+    public String HTMLName() {
+        String htmlName = this.FIELD_KEY.trim().replaceAll(" ", "-");
         return htmlName;
     }
     
