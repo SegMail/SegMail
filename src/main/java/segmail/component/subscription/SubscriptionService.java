@@ -270,16 +270,30 @@ public class SubscriptionService {
             newOrExistingAcc = updateService.getEm().merge(newOrExistingAcc);
             updateService.getEm().flush();
             
+            //Retrieve all existing fields for SubscriberAccount
+            List<SubscriberFieldValue> existingFieldValues = objectService.getEnterpriseData(newOrExistingAcc.getOBJECTID(), SubscriberFieldValue.class);
+            
             // Connect all new field values to the account and create them in the DB
             // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
             // Get the highest count of the FieldValue SNO
             int maxSNO = objectService.getHighestSNO(SubscriberFieldValue.class, newOrExistingAcc.getOBJECTID());
             for(SubscriptionListField field : fields){
+                
                 SubscriberFieldValue value = new SubscriberFieldValue();
                 value.setOWNER(newOrExistingAcc);
-                value.setVALUE(values.get(field.generateKey().toString()).toString());
+                value.setFIELD_KEY(field.generateKey().toString());
                 value.setSNO(++maxSNO);
-                updateService.getEm().persist(value);
+                
+                //If the new field value already exist in the DB, just update it
+                if(existingFieldValues.contains(value)){
+                    value = existingFieldValues.get(existingFieldValues.indexOf(value));//Make use of equals()
+                    
+                }
+                
+                value.setVALUE(values.get(field.generateKey().toString()).toString());//Update value no matter what
+                updateService.getEm().merge(value);
+                
+                
             }
             
             // Create the relationship
@@ -895,7 +909,7 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Map<SubscriberAccount,Map<String,SubscriberFieldValue>> getSubscriberFieldValues(long listId, int startIndex, int limit){
+    public Map<Long,Map<String,String>> getSubscriberValuesMap(long listId, int startIndex, int limit){
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
@@ -915,17 +929,17 @@ public class SubscriptionService {
             List<SubscriberFieldValue> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
             
-            Map<SubscriberAccount,Map<String,SubscriberFieldValue>> resultMap = 
+            Map<Long,Map<String,String>> resultMap = 
                     new HashMap<>();
             
             //Collections.sort(results);//Sorting before creating the map may not be the most correct solution but it's the most efficient and effective one at the moment
             for(SubscriberFieldValue field : results){
                 SubscriberAccount subscriber = field.getOWNER();
-                if(!resultMap.containsKey(subscriber)){
-                    resultMap.put(subscriber, new HashMap<String,SubscriberFieldValue>());
+                if(!resultMap.containsKey(subscriber.getOBJECTID())){
+                    resultMap.put(subscriber.getOBJECTID(), new HashMap<String,String>());
                     
                 }
-                resultMap.get(subscriber).put(field.getFIELD_KEY(), field);
+                resultMap.get(subscriber.getOBJECTID()).put(field.getFIELD_KEY(), field.getVALUE());
             }
             return resultMap;
             

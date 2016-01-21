@@ -41,7 +41,7 @@ public class ProgramList implements Serializable {
     private SubscriptionList listEditing;
     
     //For subscribers
-    private Map<SubscriberAccount,Map<String,SubscriberFieldValue>> subscriberTable;
+    private Map<Long,Map<String,String>> subscriberTable;
     private SubscriberAccount subscriber;
     private Map<String,Object> fieldValues; //For adding new subscribers
     private int page = 1; //For data-dripping purpose
@@ -214,13 +214,12 @@ public class ProgramList implements Serializable {
         this.page = page;
     }
 
-    public Map<SubscriberAccount, Map<String, SubscriberFieldValue>> getSubscriberTable() {
+    public Map<Long, Map<String, String>> getSubscriberTable() {
         return subscriberTable;
     }
 
-    public void setSubscriberTable(Map<SubscriberAccount, Map<String, SubscriberFieldValue>> subscriberTable) {
+    public void setSubscriberTable(Map<Long, Map<String, String>> subscriberTable) {
         this.subscriberTable = subscriberTable;
     }
-    
     
 }

@@ -56,9 +56,7 @@
                                         <tr>
                                             <c:forEach items="#{FormListSubscriber.listFields}" var="field">
                                                 <td>
-                                                    <span>#{(subscriber.value.get(field.FIELD_NAME) != null ) ? 
-                                                            subscriber.value.get(field.FIELD_NAME).VALUE :
-                                                            ""}</span>
+                                                    <span>#{subscriber.value[field.generateKey().toString()]}</span>
                                                 </td>
                                             </c:forEach>
                                         </tr>

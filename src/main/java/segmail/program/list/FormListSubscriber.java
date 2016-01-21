@@ -5,7 +5,6 @@
  */
 package segmail.program.list;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import segmail.component.subscription.SubscriptionService;
@@ -21,7 +20,6 @@ import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.entity.subscription.FIELD_TYPE;
-import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 
@@ -119,8 +117,8 @@ public class FormListSubscriber {
             //If list has 101, SUBSCRIBERS_PER_PAGE = 100 and page = 2,
             //load subscriber # (2-1)*100=100 to # (2)*100=200.
             int pageNum = getPage();
-            Map<SubscriberAccount,Map<String,SubscriberFieldValue>> accounts = 
-                    subService.getSubscriberFieldValues(listEditing.getOBJECTID(), pageNum*SUBSCRIBERS_PER_PAGE, SUBSCRIBERS_PER_PAGE);
+            Map<Long,Map<String,String>> accounts = 
+                    subService.getSubscriberValuesMap(listEditing.getOBJECTID(), pageNum*SUBSCRIBERS_PER_PAGE, SUBSCRIBERS_PER_PAGE);
             
             program.setSubscriberTable(accounts);
             
@@ -175,7 +173,7 @@ public class FormListSubscriber {
         return program.getPage();
     }
     
-    public Map<SubscriberAccount,Map<String,SubscriberFieldValue>> getSubscriberTable(){
+    public Map<Long,Map<String,String>> getSubscriberTable(){
         return program.getSubscriberTable();
     }
 }

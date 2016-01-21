@@ -6,6 +6,7 @@
 package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseData;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -71,6 +72,42 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
         String htmlName = this.FIELD_KEY.trim().replaceAll(" ", "-");
         return htmlName;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.FIELD_KEY);
+        return hash;
+    }
+
+    /**
+     * The FIELD_KEY is used for comparing Field Value objects because this is 
+     * used to identify what values a SubscriberAccount has with a List. 
+     * 
+     * @param obj
+     * @return 
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SubscriberFieldValue other = (SubscriberFieldValue) obj;
+        if (!Objects.equals(this.OWNER, other.OWNER)) {
+            return false;
+        }
+        
+        if (!Objects.equals(this.FIELD_KEY, other.FIELD_KEY)) {
+            return false;
+        }
+        return true;
+    }
+
+    
+    
     
     
     
