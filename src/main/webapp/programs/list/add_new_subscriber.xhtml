@@ -22,26 +22,12 @@
                     <c:forEach items="#{FormListSubscriber.listFields}" var="field">
                         <div class="form-group">
                             <label>#{field.FIELD_NAME}: </label>
-                            <c:choose>
-                                <c:when test="#{field.TYPE.equals(FormListSubscriber.emailType)}">
-                                    <input type="email" class="form-control"
-                                           name="#{field.generateKey()}" required="#{field.MANDATORY}"
+                            <input type="#{field.TYPE.toLowerCase()}" required="#{field.MANDATORY}"
+                                       class="form-control 
+                                                validate[#{(field.MANDATORY) ? 'required,' : ''}#{(field.TYPE.equals(FormListSubscriber.emailType)) ? 'custom[email] ' : ''}]"
+                                           name="#{field.generateKey()}" 
                                            jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
                                            />
-                                </c:when>
-                                <c:when test="#{field.TYPE.equals(FormListSubscriber.textType)}">
-                                    <input type="text" class="form-control"
-                                           name="#{field.generateKey()}" required="#{field.MANDATORY}"
-                                           jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
-                                           />
-                                </c:when>
-                                <c:otherwise>
-                                    <input type="text" class="form-control"
-                                           name="#{field.generateKey()}" required="#{field.MANDATORY}"
-                                           jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
-                                           />
-                                </c:otherwise>
-                            </c:choose>
                         </div>
                     </c:forEach>
                     <div class="form-group">
@@ -53,7 +39,7 @@
                     <p:commandButton id="add_subscriber_button" styleClass="btn btn-success" 
                                      value="Add subscriber" update="FormAddSub_messenger,"
                                      actionListener="#{FormListSubscriber.addSubscriber()}"
-
+                                     onclick="$('#add_new_sub_form').validationEngine('validate')"
                                      >
 
                     </p:commandButton>
@@ -65,27 +51,6 @@
 
             </div>
         </div>
-        <script type="text/javascript">
-            $(document).ready(function () {
-                var add_new_sub_form =
-                        $("#add_new_sub_form").validate({
-                    rules: {
-                        <c:forEach items="#{FormListSubscriber.listFields}" var="field" varStatus="fieldStatus">
-                            #{(fieldStatus.index > 0 ) ? "," : ""}#{field.HTMLName().concat(field.SNO)} : {
-                                required: #{field.MANDATORY}
-                                #{(field.TYPE.equals(FormListSubscriber.emailType)) ? ", email : true" : ""}
-                            }
-                        </c:forEach>
-                    },
-                    errorPlacement: function (error, element) {
-                        if (element.attr("name") == "gender" || element.attr("name") == "rules") {
-                            element.parents(".form-group").append(error);
-                        } else
-                            error.insertAfter(element);
-                    }
-                });
-            });
-        </script>
+        
     </form>
-
 </html>

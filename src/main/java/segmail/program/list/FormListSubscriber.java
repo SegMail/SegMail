@@ -5,8 +5,14 @@
  */
 package segmail.program.list;
 
+import eds.component.data.DataValidationException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
@@ -96,6 +102,14 @@ public class FormListSubscriber {
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (RelationshipExistsException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Subscriber already exist in this list", "");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }

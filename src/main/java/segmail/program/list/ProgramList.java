@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import seca2.program.FormToolbarRight;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriptionListField;
@@ -34,6 +35,7 @@ import segmail.entity.subscription.email.AutoresponderEmail;
 @Named("ProgramList")
 @SessionScoped
 public class ProgramList implements Serializable {
+    
     
     @Inject private UserRequestContainer reqContainer;
     
@@ -221,5 +223,6 @@ public class ProgramList implements Serializable {
     public void setSubscriberTable(Map<Long, Map<String, String>> subscriberTable) {
         this.subscriberTable = subscriberTable;
     }
+
     
 }

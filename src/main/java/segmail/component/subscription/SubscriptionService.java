@@ -282,18 +282,19 @@ public class SubscriptionService {
                 SubscriberFieldValue value = new SubscriberFieldValue();
                 value.setOWNER(newOrExistingAcc);
                 value.setFIELD_KEY(field.generateKey().toString());
-                value.setSNO(++maxSNO);
+                
                 
                 //If the new field value already exist in the DB, just update it
                 if(existingFieldValues.contains(value)){
                     value = existingFieldValues.get(existingFieldValues.indexOf(value));//Make use of equals()
-                    
+                    value.setVALUE(values.get(field.generateKey().toString()).toString());//Update value no matter what
+                    updateService.getEm().merge(value);
                 }
-                
-                value.setVALUE(values.get(field.generateKey().toString()).toString());//Update value no matter what
-                updateService.getEm().merge(value);
-                
-                
+                else {
+                    value.setVALUE(values.get(field.generateKey().toString()).toString());//Update value no matter what
+                    value.setSNO(++maxSNO);
+                    updateService.getEm().persist(value);
+                }
             }
             
             // Create the relationship
