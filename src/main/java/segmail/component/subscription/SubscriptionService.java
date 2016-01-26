@@ -18,17 +18,14 @@ import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
 import eds.component.data.DataValidationException;
-import eds.entity.data.EnterpriseObject_;
-import eds.entity.data.EnterpriseRelationship_;
+import eds.component.mail.MailService;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
-import segmail.entity.subscription.SubscriptionList_;
 import segmail.entity.subscription.email.AutoresponderEmail;
 import segmail.entity.subscription.email.AutoresponderEmail_;
-import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,8 +43,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
@@ -79,6 +74,7 @@ public class SubscriptionService {
     @EJB private GenericObjectService objectService;
     @EJB private UpdateObjectService updateService;
     @EJB private GenericConfigService configService;
+    @EJB private MailService mailService;
 
     /**
      * [2015.07.12] Because the EJB Interceptor way failed, so this is a very
@@ -843,19 +839,6 @@ public class SubscriptionService {
             for (int i = existingFields.size(); i > 0; i--) {
                 SubscriptionListField field = updateService.getEm().merge(existingFields.get(i - 1));
                 
-                /*if(newField.getSNO() == field.getSNO()){
-                 field.setSNO(i+1);
-                 updateService.getEm().merge(field); //Assuming the entity is already managed
-                 }
-                 else if(newField.getSNO() < field.getSNO()){
-                 field.setSNO(i+1);
-                 updateService.getEm().merge(field); //Assuming the entity is already managed
-                 }
-                 else {
-                 field.setSNO(i);
-                 updateService.getEm().merge(field); //Assuming the entity is already managed
-                 }*/
-                //
                 if (newField.getSNO() <= field.getSNO()) {
                     field.setSNO(i + 1);
                 } else {
@@ -993,12 +976,27 @@ public class SubscriptionService {
         
         for (int i=0; i<fields.size(); i++){
             SubscriptionListField field = fields.get(i);
-            //SubscriberFieldValue newValue = new SubscriberFieldValue();
-            //newValue.setFIELD_KEY(field.generateKey().toString());
-            //newValue.setSNO(i);
             values.put(field.generateKey().toString(),"");
         }
         
         return values;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void sendConfirmationEmail(String email, long listId){
+        try {
+            //Retrieve the autoemail from list
+            
+            //Construct the Email object
+            
+            //Call MailService.sendEmail()
+            
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
     }
 }
