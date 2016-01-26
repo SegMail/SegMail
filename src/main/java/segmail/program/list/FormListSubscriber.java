@@ -11,8 +11,6 @@ import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
