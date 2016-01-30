@@ -31,6 +31,8 @@ import segurl.filter.SegURLResolver;
  */
 @CoreModule
 public class LayoutModule extends BootstrapModule implements Serializable {
+    
+    private final String DEFAULT_TEMPLATE_NAME = "DEFAULT_TEMPLATE_LOCATION";
 
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
@@ -64,7 +66,8 @@ public class LayoutModule extends BootstrapModule implements Serializable {
             layouts = layoutService.getLayoutsByProgram(requestContainer.getProgramName());
         
         if(layouts == null || layouts.isEmpty()) {
-            requestContainer.setTemplateLocation(defaults.getDEFAULT_TEMPLATE());
+            String defaultTemplateLocation = request.getServletContext().getInitParameter(DEFAULT_TEMPLATE_NAME);
+            requestContainer.setTemplateLocation(defaultTemplateLocation);
             return true;
         }
         
@@ -80,7 +83,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
 
     @Override
     protected void ifException(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override

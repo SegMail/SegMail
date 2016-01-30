@@ -53,7 +53,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean inService() {
-        return true;
+        return false;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE ;
+        return Integer.MIN_VALUE + 2;
     }
     
     @Override

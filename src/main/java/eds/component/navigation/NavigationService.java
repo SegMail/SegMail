@@ -47,7 +47,7 @@ import java.util.Collections;
 public class NavigationService implements Serializable {
 
     @EJB private UserService userService;
-    @EJB private GenericObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService objectService;
     
     @PersistenceContext(name="HIBERNATE")
     private EntityManager em;
@@ -64,7 +64,7 @@ public class NavigationService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public MenuItem createMenuItem(String name, String requestUrl, long parentMenuItemId, String prependHTMLTags)
+    public MenuItem createMenuItem(String name, String requestUrl, long parentMenuItemId, String prependHTMLTags, boolean isPublic)
             throws CreateMenuItemException, DBConnectionException {
         
         try {
@@ -88,6 +88,7 @@ public class NavigationService implements Serializable {
             newMenuItem.setMENU_ITEM_NAME(name);
             newMenuItem.setMENU_ITEM_URL(requestUrl);
             newMenuItem.setPREPEND_TAGS(prependHTMLTags);
+            newMenuItem.setPUBLIC(isPublic);
             //em.getTransaction().begin();
             em.persist(newMenuItem);
             //em.getTransaction().commit();
@@ -141,7 +142,7 @@ public class NavigationService implements Serializable {
             
             List<MenuItemAccess> results = em.createQuery(criteria)
                     .getResultList();*/
-            List<MenuItemAccess> results = this.genericEnterpriseObjectService.getRelationshipsForObject(menuItemId, userTypeId, MenuItemAccess.class);
+            List<MenuItemAccess> results = this.objectService.getRelationshipsForObject(menuItemId, userTypeId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
                 MenuItemAccess first = results.get(0);
@@ -226,7 +227,7 @@ public class NavigationService implements Serializable {
                     //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
                     .getResultList();
             */
-            List<MenuItem> results = this.genericEnterpriseObjectService.getAllEnterpriseObjects(MenuItem.class);
+            List<MenuItem> results = this.objectService.getAllEnterpriseObjects(MenuItem.class);
             Collections.sort(results, new MenuItemComparator());
             
             return results;
@@ -252,8 +253,8 @@ public class NavigationService implements Serializable {
     public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) throws DBConnectionException {
         
         try {
-            //List<MenuItem> results = this.genericEnterpriseObjectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
-            List<MenuItemAccess> access = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
+            //List<MenuItem> results = this.objectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
+            List<MenuItemAccess> access = this.objectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
             
             Collections.sort(access, new MenuItemAccessComparator());
             
@@ -274,12 +275,36 @@ public class NavigationService implements Serializable {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<MenuItem> getAllMenuItemsByName(String menuitemname) throws DBConnectionException {
+    public List<MenuItem> getAllMenuItemsByName(String menuitemname) {
         
         try {
-            List<MenuItem> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(menuitemname, MenuItem.class);
+            List<MenuItem> results = this.objectService.getEnterpriseObjectsByName(menuitemname, MenuItem.class);
             
             return results;
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<MenuItem> getAllPublicMenuItems(){
+        try {
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+            CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
+            Root<MenuItem> fromMenuItem = criteria.from(MenuItem.class);
+            
+            criteria.where(builder.isTrue(fromMenuItem.get(MenuItem_.PUBLIC)));
+            
+            List<MenuItem> results = objectService.getEm().createQuery(criteria)
+                    .getResultList();
+            
+            return results;
+            
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());

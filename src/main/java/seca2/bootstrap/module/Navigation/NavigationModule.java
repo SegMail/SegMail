@@ -62,14 +62,26 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         
         String currentProgram = requestContainer.getProgramName();
         if(sessionContainer.getMenu() == null ){
-            List<MenuItem> menuItems = navigationService.getAllMenuItemsForUsertype(userType.getOBJECTID());
+            List<MenuItem> privateMenuItems = navigationService.getAllMenuItemsForUsertype(userType.getOBJECTID());
+            List<MenuItem> publicMenuItems = navigationService.getAllPublicMenuItems();
+            
             List<MenuItemContainer> menuItemContainers = new ArrayList<MenuItemContainer>();
-            for(MenuItem menuItem : menuItems){
+            
+            //Add all private menuitems
+            for(MenuItem menuItem : privateMenuItems){
                 MenuItemContainer container = new MenuItemContainer();
                 container.setMenuItem(menuItem);
                 container.setContextPath(contextPath);
                 menuItemContainers.add(container);
             }
+            //All all public menuitems
+            for(MenuItem menuItem : publicMenuItems){
+                MenuItemContainer container = new MenuItemContainer();
+                container.setMenuItem(menuItem);
+                container.setContextPath(contextPath);
+                menuItemContainers.add(container);
+            }
+            
             sessionContainer.setMenu(menuItemContainers);
         }
         //Set active if the path info is the URL of the menuitem

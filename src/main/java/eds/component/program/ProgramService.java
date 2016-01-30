@@ -346,7 +346,8 @@ public class ProgramService implements Serializable {
     /**
      * Optimized method written for ProgramModule. Retrieves the program by name
      * and checks if the given userTypeId is authorized. If it is, return the 
-     * program, else returns the default program.
+     * program, else returns the default program assigned to the user.
+     * 
      * 
      * @param programName
      * @param userTypeId
@@ -356,7 +357,6 @@ public class ProgramService implements Serializable {
     public Program getProgramForUserType(String programName,long userTypeId){
         try {
             List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForTargetObject(userTypeId, ProgramAssignment.class);
-            
             
             //Loop through, return the one that has the program name, else return the default
             Program result = null;
