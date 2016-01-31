@@ -7,8 +7,6 @@
 package seca2.bootstrap.module.Navigation;
 
 import eds.entity.navigation.MenuItem;
-import javax.inject.Inject;
-import seca2.bootstrap.GlobalValues;
 import segurl.filter.SegURLResolver;
 
 /**

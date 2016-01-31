@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import seca2.bootstrap.DefaultSites;
+import seca2.bootstrap.DefaultValues;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
@@ -35,12 +35,10 @@ import segurl.filter.SegURLResolver;
 //@BootstrapType(postback=false)
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
-
-    private static final String GLOBAL_DEFAULT_PROGRAM = "GLOBAL_DEFAULT_PROGRAM";
     
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
-    @Inject DefaultSites defaults;
+    @Inject DefaultValues defaults;
 
     @EJB ProgramService programService;
 
@@ -63,6 +61,10 @@ public class ProgramModule extends BootstrapModule implements Serializable {
      */
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
+        //If system in installation mode
+        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        if(install)
+            return true;
         /**
          * Bypass if it's a file request
          * Cannot, because /program/index.xhtml is also a file.
@@ -80,8 +82,9 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         String programName = requestContainer.getProgramName();
         Program program = sessionContainer.getCurrentProgram();
         
-        if(programName == null || programName.isEmpty())
-            programName = request.getServletContext().getInitParameter(GLOBAL_DEFAULT_PROGRAM);
+        //Get the default program if it is an access to / 
+        if(programName == null || programName.isEmpty()) 
+            programName = request.getServletContext().getInitParameter(defaults.GLOBAL_DEFAULT_PROGRAM);
 
         //Instead of deciding when to reload, why not decide when not to?
         //1) When it's a specific program but the existing program in session is 
@@ -108,7 +111,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE + 2;
+        return Integer.MIN_VALUE + 3;
     }
 
     @Override
@@ -135,6 +138,13 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         return "ProgramModule";
     }
 
+    /**
+     * This is called during deployment, not at the start of every request so 
+     * it is possible to set inService() here.
+     * 
+     * @param filterConfig
+     * @throws ServletException 
+     */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -158,17 +168,11 @@ public class ProgramModule extends BootstrapModule implements Serializable {
                 program = publicProgram;
         }
         
-        //Else, retrieve the default program
-        /*if(program == null){
-            Program defaultProgram = programService.getSingleProgramByName(globalDefaultProgram);
-            if(defaultProgram != null)
-                program = defaultProgram;
-        }*/ //default program is already passed in as parameter
-        
         //If no matching program is found and no default program, stop processing and 
         //show the error page
         if (program == null) {
             requestContainer.setViewLocation(defaults.ERROR_PAGE);
+            requestContainer.setErrorMessage(this.getName()+": No programs found");
             requestContainer.setError(true);
             return;
         }

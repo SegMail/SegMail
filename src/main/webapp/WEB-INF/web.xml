@@ -12,7 +12,7 @@
         <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>
         <param-value>65535</param-value>
     </context-param>-->
-    <!--<context-param>
+    <context-param>
         <param-name>primefaces.UPLOADER</param-name>
         <param-value>commons</param-value>
     </context-param>
@@ -23,13 +23,30 @@
     <filter-mapping>
         <filter-name>Primefaces Fileupload Filter</filter-name>
         <servlet-name>Faces Servlet</servlet-name>
-    </filter-mapping>-->
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping><!---->
     
     <!--non-JSF values-->
     
     <context-param>
         <param-name>SETUP</param-name>
-        <param-value>tru</param-value>
+        <param-value>true</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>INSTALLATION_PROGRAM_NAME</param-name>
+        <param-value>test</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>INSTALLATION_VIEWROOT</param-name>
+        <param-value>/programs/test/layout.xhtml</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>INSTALLATION_TEMPLATE_LOCATION</param-name>
+        <param-value>/templates/mytemplate/template-layout.xhtml</param-value>
     </context-param>
     
     <context-param>
@@ -101,5 +118,11 @@
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>--> <!--when u store at client side, session object will not be auto created-->
     <!--</context-param>-->
+    <!--<filter-mapping>
+        <filter-name>Primefaces Fileupload Filter</filter-name>
+        <servlet-name>facesServlet</servlet-name>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>-->
     
 </web-app>

@@ -161,7 +161,7 @@ public class ProgramService implements Serializable {
      * @throws EDS.component.program.ProgramRegistrationException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerProgram(String programName, String viewRoot, String displayName, String displayDesc)
+    public void registerProgram(String programName, String viewRoot, String displayName, String displayDesc, boolean isPublic)
             throws DBConnectionException, ProgramRegistrationException {
         try{
             //Check if program name is empty
@@ -187,6 +187,7 @@ public class ProgramService implements Serializable {
             //program.setBEAN_DIRECTORY(beanDir);
             program.setDISPLAY_TITLE(displayName);
             program.setDISPLAY_DESCRIPTION(displayDesc);
+            program.setPUBLIC(isPublic);
             
             //Set EnterpriseObject properties
             //program.setOBJECT_NAME(programName);//Do this in ProgramListener

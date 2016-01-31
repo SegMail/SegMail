@@ -62,7 +62,8 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         
         String currentProgram = requestContainer.getProgramName();
         if(sessionContainer.getMenu() == null ){
-            List<MenuItem> privateMenuItems = navigationService.getAllMenuItemsForUsertype(userType.getOBJECTID());
+            List<MenuItem> privateMenuItems = ((userType == null) ? (new ArrayList<MenuItem>()) :
+                    navigationService.getAllMenuItemsForUsertype(userType.getOBJECTID()));
             List<MenuItem> publicMenuItems = navigationService.getAllPublicMenuItems();
             
             List<MenuItemContainer> menuItemContainers = new ArrayList<MenuItemContainer>();
@@ -106,7 +107,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE+4;
+        return Integer.MIN_VALUE+5;
     }
 
     @Override

@@ -30,7 +30,7 @@ import javax.servlet.http.HttpSession;
  */
 public abstract class BootstrapModule implements Filter {
    
-    /*@Inject*/ protected DefaultSites defaultSites = new DefaultSites();
+    /*@Inject*/ protected DefaultValues defaultSites = new DefaultValues();
     
     public static String FACES_CONTEXT = "context";
     
@@ -199,5 +199,12 @@ public abstract class BootstrapModule implements Filter {
     }
     
     public abstract String getName();
+    
+    protected void reportException(Exception ex, UserRequestContainer requestContainer){
+        requestContainer.setError(true);
+        requestContainer.setErrorMessage(this.getName()+": "+ex.getMessage());
+        requestContainer.setErrorStackTrace(ex.getStackTrace());
+    }
+    
     
 }

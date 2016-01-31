@@ -42,6 +42,7 @@ public class FormTestProgram implements Serializable {
     private String displayName;
     private String programViewRoot;
     private String displayDesc;
+    private boolean isPublic;
     
     private final String TestAssignProgramToUserTypeName = "assignProgramToUsertypeForm";
     
@@ -58,7 +59,7 @@ public class FormTestProgram implements Serializable {
     
     public void createProgram(){
         try{
-            programService.registerProgram(programName, programViewRoot, displayName, displayDesc);
+            programService.registerProgram(programName, programViewRoot, displayName, displayDesc, isPublic);
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_FATAL, "Program "+programName+" successfully created!", null);
         } catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
@@ -138,6 +139,14 @@ public class FormTestProgram implements Serializable {
 
     public void setSelectedUserTypeId(long selectedUserTypeId) {
         this.selectedUserTypeId = selectedUserTypeId;
+    }
+
+    public boolean isIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
     
     /**

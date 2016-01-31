@@ -35,7 +35,7 @@ public class ClientModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
-        if(clientContainer.getClient() == null){
+        if(clientContainer.getClient() == null && sessionContainer.getUser() != null){
             Client client = clientService.getClientByAssignedUser(sessionContainer.getUser().getOBJECTID());
             
             clientContainer.setClient(client);

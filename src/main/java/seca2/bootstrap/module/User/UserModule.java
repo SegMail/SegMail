@@ -11,7 +11,6 @@ import javax.ejb.EJB;
 import javax.inject.Inject;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.GlobalValues;
 import eds.component.user.UserService;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import seca2.bootstrap.DefaultValues;
 import seca2.bootstrap.UserRequestContainer;
 import segurl.filter.SegURLResolver;
 
@@ -36,29 +36,36 @@ import segurl.filter.SegURLResolver;
 public class UserModule extends BootstrapModule implements Serializable {
     
     @EJB private UserService userService; 
-    @Inject private GlobalValues globalValues;
+    @Inject DefaultValues defaults;
     /**
      * Should we inject or should we put it in InputContext?
      * 
      * Here, because this is a SessionScoped while InputContext is RequestScoped.
      */
     @Inject private UserRequestContainer requestContainer;
-    @Inject private UserSessionContainer userContainer; //
+    @Inject private UserSessionContainer userContainer;
     
     public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
     public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
     
     public final String LOGIN_PATH = "/login";
     
+    public final String BYPASS = "SETUP";
+    
 
     @Override
     protected boolean inService() {
-        return false;
+        return true;
     }
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
 
+        //If system in installation mode
+        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        if(install)
+            return true;
+        
         String contextPath = ((HttpServletRequest)request).getContextPath();
         String servletPath = ((HttpServletRequest)request).getServletPath();
         String pathInfo = ((HttpServletRequest)request).getPathInfo();
@@ -67,6 +74,7 @@ public class UserModule extends BootstrapModule implements Serializable {
         contextPath = (contextPath == null) ? "" : contextPath;
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
+        
         //During postback of the form submission, the servlet path will be /login
         //and if the xhtml values are not set, the form methods will not be processed.
         //it has nothing to do with URL rewriting
@@ -106,7 +114,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE + 2;
+        return Integer.MIN_VALUE + 1;
     }
     
     @Override

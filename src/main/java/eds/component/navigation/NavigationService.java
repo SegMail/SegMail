@@ -242,7 +242,7 @@ public class NavigationService implements Serializable {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public TreeBranch<MenuItem> buildMenuTree(long rootMenuItemId) throws DBConnectionException{
+    public TreeBranch<MenuItem> buildMenuTree(long rootMenuItemId) {
         
         
         List<MenuItem> allMenuItems = this.getAllMenuItems();
@@ -250,7 +250,7 @@ public class NavigationService implements Serializable {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) throws DBConnectionException {
+    public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) {
         
         try {
             //List<MenuItem> results = this.objectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
