@@ -25,6 +25,10 @@ public class UserRequestContainer {
     private String menuLocation;
     
     private boolean error = false; //default value
+    
+    private String errorMessage;
+    
+    private StackTraceElement[] errorStackTrace;
 
     public String getProgramName() {
         return programName;
@@ -65,6 +69,20 @@ public class UserRequestContainer {
     public void setMenuLocation(String menuLocation) {
         this.menuLocation = menuLocation;
     }
-    
-    
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public StackTraceElement[] getErrorStackTrace() {
+        return errorStackTrace;
+    }
+
+    public void setErrorStackTrace(StackTraceElement[] errorStackTrace) {
+        this.errorStackTrace = errorStackTrace;
+    }
 }

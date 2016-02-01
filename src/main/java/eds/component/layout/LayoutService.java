@@ -4,6 +4,7 @@ import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
@@ -355,8 +356,8 @@ public class LayoutService implements Serializable {
             query.select(fromLayout);
             query.where(
                 builder.and(
-                        builder.equal(fromAssign.get(LayoutAssignment_.SOURCE), Layout_.OBJECTID),
-                        builder.equal(fromAssign.get(LayoutAssignment_.TARGET), Program_.OBJECTID),
+                        builder.equal(fromAssign.get(LayoutAssignment_.SOURCE), fromLayout.get(Layout_.OBJECTID)),
+                        builder.equal(fromAssign.get(LayoutAssignment_.TARGET), fromProgram.get(Program_.OBJECTID)),
                         builder.equal(fromProgram.get(Program_.PROGRAM_NAME), programName)
                 )
             );
@@ -385,16 +386,18 @@ public class LayoutService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<Layout> getLayoutsByUser(User user)
-        throws DBConnectionException {
+    public List<Layout> getLayoutsByUser(User user) {
         try{
+            if(user == null)
+                return new ArrayList<Layout>();
             //To optimize, pull out all assignments for User, UserType and Client
             UserType userType = user.getUSERTYPE();
             //I'm not writing this in GenericObjectService yet because
             //this is the only method using such a retrieval technique.
             List<Long> IDs = new ArrayList<Long>();
             IDs.add(user.getOBJECTID());
-            IDs.add(user.getUSERTYPE().getOBJECTID());
+            
+            if(user.getUSERTYPE() != null) IDs.add(user.getUSERTYPE().getOBJECTID());
             
             List<Layout> results = this.genericEOService.getAllSourceObjectsFromTargets(IDs, LayoutAssignment.class, Layout.class);
             

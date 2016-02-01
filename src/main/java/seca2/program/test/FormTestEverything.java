@@ -91,11 +91,14 @@ public class FormTestEverything {
     private final String PROGRAM_VIEW_TAG = "PROGRAM_VIEWROOT";
     private final String PROGRAM_DISP_TAG = "PROGRAM_DISPLAY_NAME";
     private final String PROGRAM_DESC_TAG = "PROGRAM_DISPLAY_DESC";
+    private final String PROGRAM_PUBLIC = "PROGRAM_PUBLIC";
+    
     
     private final String MENU_TAG = "MENU";
     private final String MENU_NAME_TAG = "MENU_NAME";
     private final String MENU_URL_TAG = "MENU_URL";
     private final String MENU_PREPEND_TAG = "MENU_PREPEND";
+    private final String MENU_PUBLIC = "MENU_PUBLIC";
     
     private final String MENU_ASSIGN_TAG = "MENU_ASSIGN";
     private final String MENU_ASSIGN_USERTYPE_TAG = "MENU_ASSIGN_USERTYPE";
@@ -447,11 +450,13 @@ public class FormTestEverything {
                 String viewroot = element.getElementsByTagName(PROGRAM_VIEW_TAG).item(0).getTextContent();
                 String dispName = element.getElementsByTagName(PROGRAM_DISP_TAG).item(0).getTextContent();
                 String dispDesc = element.getElementsByTagName(PROGRAM_DESC_TAG).item(0).getTextContent();
+                boolean isPublic = Boolean.parseBoolean(element.getElementsByTagName(PROGRAM_PUBLIC).item(0).getTextContent());
                 
                 this.formTestProgram.setProgramName(name);
                 this.formTestProgram.setProgramViewRoot(viewroot);
                 this.formTestProgram.setDisplayName(dispName);
                 this.formTestProgram.setDisplayDesc(dispDesc);
+                this.formTestProgram.setIsPublic(isPublic);
                 this.formTestProgram.createProgram();
             }
             
@@ -464,10 +469,12 @@ public class FormTestEverything {
                 String name = element.getElementsByTagName(MENU_NAME_TAG).item(0).getTextContent();
                 String url = element.getElementsByTagName(MENU_URL_TAG).item(0).getTextContent();
                 String preprend = element.getElementsByTagName(MENU_PREPEND_TAG).item(0).getTextContent();
+                boolean isPublic = Boolean.parseBoolean(element.getElementsByTagName(MENU_PUBLIC).item(0).getTextContent());
                 
                 this.formTestNavigation.setMenuItemName(name);
                 this.formTestNavigation.setMenuItemURL(url);
                 this.formTestNavigation.setPrependHTMLTags(preprend);   
+                this.formTestNavigation.setIsPublic(isPublic);
                 
                 this.formTestNavigation.createNewMenuItem();
             }

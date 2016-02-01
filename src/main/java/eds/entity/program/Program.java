@@ -33,6 +33,8 @@ public class Program extends EnterpriseObject{
     private String DISPLAY_TITLE;
     private String DISPLAY_DESCRIPTION;
     
+    private boolean PUBLIC;
+    
     public String getPROGRAM_NAME() {
         return PROGRAM_NAME;
     }
@@ -80,8 +82,14 @@ public class Program extends EnterpriseObject{
     public void setDISPLAY_DESCRIPTION(String DISPLAY_DESCRIPTION) {
         this.DISPLAY_DESCRIPTION = DISPLAY_DESCRIPTION;
     }
-    
-    
+
+    public boolean isPUBLIC() {
+        return PUBLIC;
+    }
+
+    public void setPUBLIC(boolean PUBLIC) {
+        this.PUBLIC = PUBLIC;
+    }
 
     @Override
     public void randInit() {

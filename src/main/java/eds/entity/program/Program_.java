@@ -21,5 +21,7 @@ public class Program_ extends EnterpriseObject_ {
     public static volatile SingularAttribute<Program, String> VIEW_DIRECTORY;
     public static volatile SingularAttribute<Program, String> VIEW_ROOT;
     public static volatile SingularAttribute<Program, String> BEAN_DIRECTORY;
-
+    public static volatile SingularAttribute<Program, String> DISPLAY_TITLE;
+    public static volatile SingularAttribute<Program, String> DISPLAY_DESCRIPTION;
+    public static volatile SingularAttribute<Program, Boolean> PUBLIC;
 }

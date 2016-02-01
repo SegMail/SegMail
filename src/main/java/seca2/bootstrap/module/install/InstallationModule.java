@@ -6,7 +6,9 @@
 package seca2.bootstrap.module.install;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
@@ -14,6 +16,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
+import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.UserSessionContainer;
 
 /**
  *
@@ -22,23 +27,36 @@ import seca2.bootstrap.CoreModule;
 @CoreModule
 public class InstallationModule extends BootstrapModule implements Serializable{
 
+    @Inject DefaultValues defaults;
+    @Inject private UserRequestContainer requestContainer;
+    @Inject private UserSessionContainer userContainer;
+    
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
         
         //1) Check if the database has been initialized by calling a few DB services
         //2) If app is considered installed, return true to continue the chain processing
         //3) If app is not installed, display the installation page.
+        //If system in installation mode
+        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        if(install){
+            requestContainer.setProgramName(request.getServletContext().getInitParameter(defaults.INSTALLATION_PROGRAM_NAME));
+            requestContainer.setViewLocation(request.getServletContext().getInitParameter(defaults.INSTALLATION_VIEWROOT));
+            requestContainer.setTemplateLocation(request.getServletContext().getInitParameter(defaults.INSTALLATION_TEMPLATE_LOCATION));
+        }
+            
+        
         return true;
     }
 
     @Override
     protected int executionSequence() {
-        return -100; //How to inject this value from web.xml?
+        return Integer.MIN_VALUE; //How to inject this value from web.xml?
     }
 
     @Override
     protected boolean inService() {
-        return false;
+        return true;
     }
 
     @Override
@@ -53,17 +71,21 @@ public class InstallationModule extends BootstrapModule implements Serializable{
 
     @Override
     protected void ifFail(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     protected String urlPattern() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "/";
     }
 
     @Override
     protected List<DispatcherType> getDispatchTypes() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<DispatcherType> dispatchTypes = new ArrayList<DispatcherType>();
+        dispatchTypes.add(DispatcherType.REQUEST);
+        dispatchTypes.add(DispatcherType.FORWARD);
+
+        return dispatchTypes;
     }
 
     @Override
