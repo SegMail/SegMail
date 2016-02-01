@@ -7,13 +7,10 @@
 package eds.entity.navigation;
 
 import eds.entity.data.EnterpriseObject;
-import TreeAPI.TreeBranch;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 /**
  *
@@ -34,6 +31,7 @@ public class MenuItem extends EnterpriseObject{// implements TreeBranch<MenuItem
     //private String MENU_ITEM_XHTML; //actual layout.xhtml path
     private String PREPEND_TAGS;
     private int WEIGHT; // Optional for sorting
+    private boolean PUBLIC;
 
     public String getMENU_ITEM_NAME() {
         return MENU_ITEM_NAME;
@@ -74,6 +72,14 @@ public class MenuItem extends EnterpriseObject{// implements TreeBranch<MenuItem
 
     public void setWEIGHT(int WEIGHT) {
         this.WEIGHT = WEIGHT;
+    }
+
+    public boolean isPUBLIC() {
+        return PUBLIC;
+    }
+
+    public void setPUBLIC(boolean PUBLIC) {
+        this.PUBLIC = PUBLIC;
     }
 
     @Override

@@ -7,7 +7,6 @@ package eds.entity.layout;
 
 import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**

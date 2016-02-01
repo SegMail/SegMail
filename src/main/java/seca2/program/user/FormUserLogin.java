@@ -22,7 +22,6 @@ import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import seca2.bootstrap.GlobalValues;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -51,7 +50,7 @@ public class FormUserLogin {
         FacesContext fc = FacesContext.getCurrentInstance();
         ExternalContext ec = fc.getExternalContext();
         if(fc.isPostback() /* && must have some other ways to know this is a timeout*/){
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, GlobalValues.SESSION_EXPIRED_MESSAGE, null);
+            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
         }
     }
 

@@ -16,5 +16,5 @@ import javax.persistence.metamodel.StaticMetamodel;
  */
 @StaticMetamodel(ProgramAssignment.class)
 public class ProgramAssignment_ extends EnterpriseRelationship_ {
-    public static volatile SingularAttribute<ProgramAssignment,Boolean> DEFAULT;
+    public static volatile SingularAttribute<ProgramAssignment,Boolean> DEFAULT_ASSIGNMENT;
 }

@@ -6,7 +6,8 @@
       xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
-      xmlns:cc="http://xmlns.jcp.org/jsf/composite">
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="/programs/test/template/test-case-panel.xhtml">
         <!--test creation of user-->
         <ui:define name="panel-heading">
@@ -41,6 +42,19 @@
                             <span class="input-group-addon">Display Description</span>
                             <h:inputText id="beanInput" styleClass="form-control"
                                          value="#{FormTestProgram.displayDesc}" ></h:inputText>
+                        </div>
+                    </div>
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <div class="checkbox" style="margin-left: 10px;">
+                            <label style="padding-left:0px">
+                                <strong>Public</strong>
+                                <input type="checkbox" class="icheck" style=""
+                                       jsf:value="#{FormTestProgram.isPublic}"/>
+                            </label>
+
+                            <span class="help-block">
+                                If this menu item can be seen by unauthenticated users.
+                            </span>
                         </div>
                     </div>
                 </div>

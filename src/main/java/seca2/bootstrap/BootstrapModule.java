@@ -10,6 +10,7 @@ import java.util.List;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -30,11 +31,12 @@ import javax.servlet.http.HttpSession;
  */
 public abstract class BootstrapModule implements Filter {
    
-    /*@Inject*/ protected DefaultSites defaultSites = new DefaultSites();
+    /*@Inject*/ protected DefaultValues defaultSites = new DefaultValues();
     
     public static String FACES_CONTEXT = "context";
     
     private BootstrapModule next;
+    
     
     /**
      * This is injected during runtime and it should be order-independent, ie. 
@@ -60,7 +62,7 @@ public abstract class BootstrapModule implements Filter {
     /*public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
         System.out.println("BootstrapModule "+this.getClass().getSimpleName()+" started.");
         
-        boolean toContinue = (this.inService() ? this.execute(inputContext, outputContext) : true );
+        boolean toContinue = (this.active() ? this.execute(inputContext, outputContext) : true );
         
         if(next != null && toContinue)
             next.start(inputContext, outputContext);
@@ -164,8 +166,7 @@ public abstract class BootstrapModule implements Filter {
      * @param response
      * @return 
      */
-    protected abstract String urlPattern(
-            );
+    protected abstract String urlPattern();
     
     /**
      * Tells Bootstrap which dispatch type needs to execute this filter - eg. 
@@ -199,5 +200,17 @@ public abstract class BootstrapModule implements Filter {
     }
     
     public abstract String getName();
+    
+    protected void reportException(Exception ex, UserRequestContainer requestContainer){
+        requestContainer.setError(true);
+        requestContainer.setErrorMessage(this.getName()+": "+ex.getMessage());
+        requestContainer.setErrorStackTrace(ex.getStackTrace());
+    }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException{
+        
+    }
+    
     
 }

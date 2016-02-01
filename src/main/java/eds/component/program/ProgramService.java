@@ -161,7 +161,7 @@ public class ProgramService implements Serializable {
      * @throws EDS.component.program.ProgramRegistrationException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerProgram(String programName, String viewRoot, String displayName, String displayDesc)
+    public void registerProgram(String programName, String viewRoot, String displayName, String displayDesc, boolean isPublic)
             throws DBConnectionException, ProgramRegistrationException {
         try{
             //Check if program name is empty
@@ -187,6 +187,7 @@ public class ProgramService implements Serializable {
             //program.setBEAN_DIRECTORY(beanDir);
             program.setDISPLAY_TITLE(displayName);
             program.setDISPLAY_DESCRIPTION(displayDesc);
+            program.setPUBLIC(isPublic);
             
             //Set EnterpriseObject properties
             //program.setOBJECT_NAME(programName);//Do this in ProgramListener
@@ -346,7 +347,8 @@ public class ProgramService implements Serializable {
     /**
      * Optimized method written for ProgramModule. Retrieves the program by name
      * and checks if the given userTypeId is authorized. If it is, return the 
-     * program, else returns the default program.
+     * program, else returns the default program assigned to the user.
+     * 
      * 
      * @param programName
      * @param userTypeId
@@ -356,7 +358,6 @@ public class ProgramService implements Serializable {
     public Program getProgramForUserType(String programName,long userTypeId){
         try {
             List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForTargetObject(userTypeId, ProgramAssignment.class);
-            
             
             //Loop through, return the one that has the program name, else return the default
             Program result = null;

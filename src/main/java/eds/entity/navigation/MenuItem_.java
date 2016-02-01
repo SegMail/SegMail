@@ -25,4 +25,5 @@ public class MenuItem_ extends EnterpriseObject_{
     public static volatile SingularAttribute<MenuItem,String> PREPEND_TAGS;
     public static volatile SingularAttribute<MenuItem,Integer> WEIGHT; 
     public static volatile SingularAttribute<MenuItem,MenuItem> PARENT_MENU_ITEM;
+    public static volatile SingularAttribute<MenuItem,Boolean> PUBLIC;
 }

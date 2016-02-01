@@ -20,7 +20,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.DefaultSites;
+import seca2.bootstrap.DefaultValues;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
@@ -31,16 +31,20 @@ import segurl.filter.SegURLResolver;
  */
 @CoreModule
 public class LayoutModule extends BootstrapModule implements Serializable {
-
+    
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
     
-    @Inject DefaultSites defaults;
+    @Inject DefaultValues defaults;
     
     @EJB private LayoutService layoutService;
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
+        //If system in installation mode
+        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        if(install)
+            return true;
         
         //Bypass if it's a file request
         if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
@@ -64,7 +68,8 @@ public class LayoutModule extends BootstrapModule implements Serializable {
             layouts = layoutService.getLayoutsByProgram(requestContainer.getProgramName());
         
         if(layouts == null || layouts.isEmpty()) {
-            requestContainer.setTemplateLocation(defaults.getDEFAULT_TEMPLATE());
+            String defaultTemplateLocation = request.getServletContext().getInitParameter(defaults.DEFAULT_TEMPLATE_LOCATION);
+            requestContainer.setTemplateLocation(defaultTemplateLocation);
             return true;
         }
         
@@ -80,12 +85,12 @@ public class LayoutModule extends BootstrapModule implements Serializable {
 
     @Override
     protected void ifException(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE+3;
+        return Integer.MIN_VALUE+4;
     }
 
     @Override

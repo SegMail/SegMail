@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
+import seca2.bootstrap.DefaultValues;
 import seca2.bootstrap.UserRequestContainer;
 import segurl.filter.SegURLResolver;
 
@@ -32,11 +33,17 @@ import segurl.filter.SegURLResolver;
 public class RewriteModule extends BootstrapModule implements Serializable {
 
     @Inject UserRequestContainer userRequestContainer;
-    
+    @Inject DefaultValues defaults;
     //@Inject SegURLResolver urlResolver;
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+        //If installation mode is turned on
+        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        if(install)
+            return true;
+        */
+        
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         String contextPath = req.getContextPath();
@@ -86,7 +93,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE + 1;
+        return Integer.MIN_VALUE + 2;
     }
 
     @Override
