@@ -124,46 +124,7 @@ public class UserService extends DBService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerUserByUserId(long userId, String username, String password) 
-            throws UserRegistrationException, DBConnectionException{
-        try{
-            //Check if the userId already exist by retrieving it. If no, throw exception.
-            User existingUser = this.getUserById(userId);
-            if(existingUser == null)
-                throw new UserRegistrationException("User ID "+userId+" does not exist yet.");
-            
-            //Check if username is null
-            if(username == null || username.isEmpty())
-                throw new UserRegistrationException("Username cannot be empty.");
-            
-            //Check if password is null
-            if(password == null || password.isEmpty())
-                throw new UserRegistrationException("Password cannot be empty.");
-            
-            //Hash passwords
-            String hashedPassword = this.getPasswordHash(username, password, HASH_KEY);
-            
-            //Create the UserAccount object and link it to the User object
-            UserAccount userAccount = new UserAccount();
-            userAccount.setUSERNAME(username);
-            userAccount.setPASSWORD(hashedPassword);
-            userAccount.setOWNER(existingUser);
-            
-            //Persist and throw any errors
-            em.persist(userAccount);
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerUserByUserTypeId(long userTypeId, String username, String password)
+    public UserAccount registerUserByUserTypeId(long userTypeId, String username, String password)
         throws UserRegistrationException, DBConnectionException{
         try{
             //Check if username is null
@@ -195,6 +156,8 @@ public class UserService extends DBService {
             
             //Persist and throw any errors
             em.persist(userAccount);
+            
+            return userAccount;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

@@ -26,13 +26,25 @@ import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
 
 /**
- *
+ * A Program in SegERP is a single end-point interface of the system, or a "page"
+ * that a user goes to for a set of similar functionalities. For example, the 
+ * User program is a page that contains all user CRUD operations like maintaining
+ * usernames, passwords, user groups, etc. 
+ * <br>
+ * In SegERP, each Program has its own page, which is easily accessed by a URL
+ * /[program name]. In the page, there can be many forms that are used for 
+ * processing data. 
+ * <br>
+ * You can also pass initial parameters to a Program and have it initialize its 
+ * own page or form data elements. For example /shop?categories=phones&item=iphone6s&country=sg
+ * will bring you to the "shop" program and initializes the program parameters
+ * "categories", "item" and "country". How each Program deals with these parameters
+ * can be customized.
+ * 
+ *  
+ * 
  * @author vincent.a.lee
  */
-//@Named("ProgramModule")
-//@RequestScoped
-//@BootstrapRequest
-//@BootstrapType(postback=false)
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
     
