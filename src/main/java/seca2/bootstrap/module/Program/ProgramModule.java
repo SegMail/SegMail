@@ -188,7 +188,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //If it's a found public program
         if(newProgram == null){
             Program publicProgram = programService.getSingleProgramByName(programName);
-            if(publicProgram != null && publicProgram.isPUBLIC())
+            if(publicProgram != null && publicProgram.isIS_PUBLIC())
                 newProgram = publicProgram;
         }
         
