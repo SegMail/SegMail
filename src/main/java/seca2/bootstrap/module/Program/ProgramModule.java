@@ -26,13 +26,25 @@ import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
 
 /**
- *
+ * A Program in SegERP is a single end-point interface of the system, or a "page"
+ * that a user goes to for a set of similar functionalities. For example, the 
+ * User program is a page that contains all user CRUD operations like maintaining
+ * usernames, passwords, user groups, etc. 
+ * <br>
+ * In SegERP, each Program has its own page, which is easily accessed by a URL
+ * /[program name]. In the page, there can be many forms that are used for 
+ * processing data. 
+ * <br>
+ * You can also pass initial parameters to a Program and have it initialize its 
+ * own page or form data elements. For example /shop?categories=phones&item=iphone6s&country=sg
+ * will bring you to the "shop" program and initializes the program parameters
+ * "categories", "item" and "country". How each Program deals with these parameters
+ * can be customized.
+ * 
+ *  
+ * 
  * @author vincent.a.lee
  */
-//@Named("ProgramModule")
-//@RequestScoped
-//@BootstrapRequest
-//@BootstrapType(postback=false)
 @CoreModule
 public class ProgramModule extends BootstrapModule implements Serializable {
     
@@ -85,16 +97,30 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //Get the default program if it is an access to / 
         if(programName == null || programName.isEmpty()) 
             programName = request.getServletContext().getInitParameter(defaults.GLOBAL_DEFAULT_PROGRAM);
+        
+        
 
         //Instead of deciding when to reload, why not decide when not to?
         //1) When it's a specific program but the existing program in session is 
         // the same
-        if(programName != null && !programName.isEmpty()
-                && program != null
-                && programName.equalsIgnoreCase(program.getPROGRAM_NAME()))
-            return true;
+        if(programName == null || programName.isEmpty()
+                || program == null
+                || !programName.equalsIgnoreCase(program.getPROGRAM_NAME()))
+            program = reloadProgram(programName,userTypeId);
         
-        reloadProgram(programName,program,userTypeId);
+        //If no matching program is found and no default program, stop processing and 
+        //show the error page
+        if (program == null) {
+            requestContainer.setViewLocation(defaults.ERROR_PAGE);
+            requestContainer.setErrorMessage(this.getName()+": No programs found");
+            requestContainer.setError(true);
+            return true;
+        }
+        
+        //If found, set the viewRoot location
+        requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
+        sessionContainer.setCurrentProgram(program);
+        requestContainer.setViewLocation(program.getVIEW_ROOT());
         //Must return true no matter what, else FacesServlet will not get called
         return true;
     }
@@ -153,35 +179,20 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     /**
      * Helper method for reloading program
      */
-    private void reloadProgram(String programName, Program program, long userTypeId){
-        
+    private Program reloadProgram(String programName, long userTypeId){
+         
         //The authorized programs come first 
         //Try to retrieve the authorized programs first
-        if (programName == null || program == null
-                || !programName.equalsIgnoreCase(program.getPROGRAM_NAME())) {
-            program = programService.getProgramForUserType(programName, userTypeId);
-        }
+        Program newProgram = programService.getProgramForUserType(programName, userTypeId);
+        
         //If it's a found public program
-        if(program == null){
+        if(newProgram == null){
             Program publicProgram = programService.getSingleProgramByName(programName);
             if(publicProgram != null && publicProgram.isPUBLIC())
-                program = publicProgram;
+                newProgram = publicProgram;
         }
         
-        //If no matching program is found and no default program, stop processing and 
-        //show the error page
-        if (program == null) {
-            requestContainer.setViewLocation(defaults.ERROR_PAGE);
-            requestContainer.setErrorMessage(this.getName()+": No programs found");
-            requestContainer.setError(true);
-            return;
-        }
-        
-        //If found, set the viewRoot location
-        requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
-        sessionContainer.setCurrentProgram(program);
-        requestContainer.setViewLocation(program.getVIEW_ROOT());
-        
+        return newProgram;
     }
 
 }

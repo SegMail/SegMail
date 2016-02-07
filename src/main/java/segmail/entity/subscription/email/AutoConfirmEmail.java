@@ -5,6 +5,7 @@
  */
 package segmail.entity.subscription.email;
 
+import java.util.Map;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -23,7 +24,4 @@ public class AutoConfirmEmail extends AutoresponderEmail{
     public AutoEmailTypeFactory.TYPE type() {
         return CONFIRMATION;
     }
-
-    
-    
 }

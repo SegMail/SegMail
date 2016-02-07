@@ -6,8 +6,6 @@
 package eds.component.navigation;
 
 import TreeAPI.TreeBranch;
-import TreeAPI.TreeBuilder;
-import TreeAPI.TreeNode;
 import eds.component.GenericObjectService;
 import java.io.Serializable;
 import java.util.ArrayList;
