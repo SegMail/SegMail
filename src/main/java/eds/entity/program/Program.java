@@ -11,7 +11,6 @@ import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 
 /**
  * Not needed at this moment, because each MenuItem can point to the program's
@@ -33,7 +32,7 @@ public class Program extends EnterpriseObject{
     private String DISPLAY_TITLE;
     private String DISPLAY_DESCRIPTION;
     
-    private boolean PUBLIC;
+    private Boolean IS_PUBLIC; //http://stackoverflow.com/a/10648207/5765606
     
     public String getPROGRAM_NAME() {
         return PROGRAM_NAME;
@@ -83,12 +82,12 @@ public class Program extends EnterpriseObject{
         this.DISPLAY_DESCRIPTION = DISPLAY_DESCRIPTION;
     }
 
-    public boolean isPUBLIC() {
-        return PUBLIC;
+    public boolean isIS_PUBLIC() {
+        return (IS_PUBLIC == null) ? false : this.IS_PUBLIC;
     }
 
-    public void setPUBLIC(boolean PUBLIC) {
-        this.PUBLIC = PUBLIC;
+    public void setIS_PUBLIC(Boolean IS_PUBLIC) {
+        this.IS_PUBLIC = IS_PUBLIC;
     }
 
     @Override

@@ -17,6 +17,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityExistsException;
+import eds.component.data.IncompleteDataException;
 import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
@@ -25,6 +27,8 @@ import eds.component.user.UserRegistrationException;
 import eds.component.user.UserService;
 import eds.component.user.UserTypeException;
 import eds.entity.user.UserType;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -76,15 +80,13 @@ public class FormTestUser implements Serializable {
         try{
             userService.createUserType(userTypeName, description);
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "Usertype "+userTypeName+" created!", null);
-        } 
-        catch (UserTypeException utex) {
-            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, utex.getClass().getSimpleName(), utex.getMessage());
-        } 
+        }
         catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } 
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (EntityExistsException ex) {
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
     

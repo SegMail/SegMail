@@ -21,12 +21,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
-import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.program.Program;
 import eds.entity.program.ProgramAssignment;
-import eds.entity.program.ProgramAssignment_;
 import eds.entity.program.Program_;
 import eds.entity.user.UserType;
 
@@ -51,19 +52,8 @@ public class ProgramService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Program getSingleProgramByName(String programName) throws DBConnectionException {
+    public Program getSingleProgramByName(String programName) {
         try {
-            /*CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
-            Root<Program> sourceEntity = criteria.from(Program.class); //FROM UserType
-
-            criteria.select(sourceEntity); // SELECT *
-            criteria.where(builder.equal(sourceEntity.get(Program_.PROGRAM_NAME), programName));
-
-            List<Program> results = em.createQuery(criteria)
-                    .getResultList();
-
-            return results;*/
             
             List<Program> results = this.genericEntepriseObjectService.getEnterpriseObjectsByName(programName, Program.class);
             if(results == null || results.size() <= 0)
@@ -76,9 +66,7 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     /**
@@ -87,7 +75,7 @@ public class ProgramService implements Serializable {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<Program> getAllPrograms() throws DBConnectionException {
+    public List<Program> getAllPrograms() {
         try {
             CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
@@ -105,32 +93,29 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignProgramToUserType(long programId, long userTypeId) 
-            throws DBConnectionException, ProgramAssignmentException, RelationshipExistsException{
+            throws RelationshipExistsException, EntityNotFoundException{
         try{
             //Get user type first
             //UserType userType = userService.getUserTypeById(userTypeId);
             UserType userType = this.genericEntepriseObjectService.getEnterpriseObjectById(userTypeId, UserType.class);
             if(userType == null)
-                throw new ProgramAssignmentException("Usertype with ID "+userTypeId+" does not exist!");
+                throw new EntityNotFoundException("Usertype with ID "+userTypeId+" does not exist!");
 
             //Get the program object
             Program program = this.getProgramById(programId);
             if(program == null)
-                throw new ProgramAssignmentException("Program with ID "+programId+" does not exist!");
+                throw new EntityNotFoundException("Program with ID "+programId+" does not exist!");
 
             //Check if the assignment already exist
             //if(this.checkProgramAuthForUserType(userTypeId, programId))
             //    throw new ProgramAssignmentException("Usertype with ID "+userTypeId+" already has access to Program with ID "+programId+".");
             List<ProgramAssignment> allAssignment = this.genericEntepriseObjectService.getRelationshipsForTargetObject(userTypeId, ProgramAssignment.class);
             
-            //Create bidrectional relationships
             ProgramAssignment programAccess1 = new ProgramAssignment(program,userType);
             if(allAssignment != null && allAssignment.contains(programAccess1))
                 throw new RelationshipExistsException(programAccess1);
@@ -146,51 +131,46 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
         
     }
     /**
      * 
      * @param programName
-     * @param viewDir
      * @param viewRoot
-     * @param beanDir
+     * @param displayName
+     * @param displayDesc
+     * @param isPublic
+     * @throws eds.component.data.IncompleteDataException
+     * @throws eds.component.data.EntityExistsException
      * @throws DBConnectionException 
-     * @throws EDS.component.program.ProgramRegistrationException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void registerProgram(String programName, String viewRoot, String displayName, String displayDesc, boolean isPublic)
-            throws DBConnectionException, ProgramRegistrationException {
+            throws IncompleteDataException, EntityExistsException {
         try{
             //Check if program name is empty
             if(programName == null || programName.length() <= 0)
-                throw new ProgramRegistrationException("Program name cannot be empty!");
+                throw new IncompleteDataException("Program name cannot be empty!");
             
             //Check if viewRoot is empty
             //We should not check the format of viewRoot here, as it is View-specific (highly dependent on the view platform eg. JSF, Vaadin, etc)
             if(viewRoot == null || viewRoot.length() <= 0)
-                throw new ProgramRegistrationException("View root cannot be empty!");
+                throw new IncompleteDataException("View root cannot be empty!");
             
             //Check if program name already exist
             Program existingProgram = this.getSingleProgramByName(programName);
             if(existingProgram != null)
-                throw new ProgramRegistrationException("Program "+programName+" already exists!");
+                throw new EntityExistsException(existingProgram);
             
             Program program = new Program();
             
             //Set basic variables
             program.setPROGRAM_NAME(programName);
-            //program.setVIEW_DIRECTORY(viewDir);
             program.setVIEW_ROOT(viewRoot);
-            //program.setBEAN_DIRECTORY(beanDir);
             program.setDISPLAY_TITLE(displayName);
             program.setDISPLAY_DESCRIPTION(displayDesc);
-            program.setPUBLIC(isPublic);
-            
-            //Set EnterpriseObject properties
-            //program.setOBJECT_NAME(programName);//Do this in ProgramListener
+            program.setIS_PUBLIC(isPublic);
             
             em.persist(program);
             
@@ -199,32 +179,12 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Program getProgramById(long programId)
-            throws DBConnectionException{
+    public Program getProgramById(long programId) {
         try{
-            /*
-            CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<Program> criteria = builder.createQuery(Program.class);
-            Root<Program> sourceEntity = criteria.from(Program.class); //FROM UserType
-
-            criteria.select(sourceEntity); // SELECT *
-            criteria.where(builder.equal(sourceEntity.get(Program_.OBJECTID), programId));
-
-            List<Program> results = em.createQuery(criteria)
-                    .getResultList();
-            if(results == null || results.size() <= 0)
-                return null;
-            
-            return results.get(0); //return only the first result
-            */
-            
-            //try this
             return em.find(Program.class, programId);
             
         } catch (PersistenceException pex) {
@@ -232,15 +192,12 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
     }
     
     //Translation services
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public String getViewRootFromProgramName(String programName)
-        throws DBConnectionException{
+    public String getViewRootFromProgramName(String programName) {
         try{
             CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Tuple> criteria = builder.createTupleQuery();
@@ -264,16 +221,12 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
-        
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public boolean checkProgramAuthForUserType(long usertypeid, String programName) 
-            throws DBConnectionException{
-        
+    public boolean checkProgramAuthForUserType(long usertypeid, String programName) {
+        try {
         Program program = this.getSingleProgramByName(programName);
         //Always use the first result
         if(program == null)
@@ -281,29 +234,20 @@ public class ProgramService implements Serializable {
         
         //Program program = programs.get(0);
         return this.checkProgramAuthForUserType(usertypeid, program.getOBJECTID());
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw pex;
+        }
     }
     
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public boolean checkProgramAuthForUserType(long usertypeid, long programid) 
-            throws DBConnectionException{
+    public boolean checkProgramAuthForUserType(long usertypeid, long programid) {
         try{
-            //This is so much easier than checkProgramAuthForUserType(long usertypeid, String programName)
-            //but there won't be much business case where the client knows the programid. Most of 
-            //the time the programName is requested instead, so this would be less frequently used.
-            /*CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<ProgramAssignment> criteria = builder.createQuery(ProgramAssignment.class);
-            Root<ProgramAssignment> sourceEntity = criteria.from(ProgramAssignment.class); //FROM ProgramAssignment
-            
-            criteria.select(sourceEntity); // SELECT *
-            criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.SOURCE), usertypeid));
-            criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.TARGET), programid));
-            */
             
             List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForObject(programid,usertypeid,ProgramAssignment.class);
-            
-            /*List<ProgramAssignment> results = em.createQuery(criteria)
-                    .getResultList();*/
             
             if(results.size() > 0)
                 return true;
@@ -315,22 +259,12 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<ProgramAssignment> getProgramAssignmentsForUserType(long usertypeid)
-            throws DBConnectionException{
+    public List<ProgramAssignment> getProgramAssignmentsForUserType(long usertypeid) {
         try{
-            /*CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<ProgramAssignment> criteria = builder.createQuery(ProgramAssignment.class);
-            Root<ProgramAssignment> sourceEntity = criteria.from(ProgramAssignment.class); //FROM ProgramAssignment
-            
-            criteria.select(sourceEntity); // SELECT *
-            criteria.where(builder.equal(sourceEntity.get(ProgramAssignment_.SOURCE), usertypeid));*/
-            
             List<ProgramAssignment> result = this.genericEntepriseObjectService.getRelationshipsForTargetObject(usertypeid, ProgramAssignment.class);
             
             return result;
@@ -339,9 +273,7 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     /**
@@ -374,9 +306,7 @@ public class ProgramService implements Serializable {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
 }

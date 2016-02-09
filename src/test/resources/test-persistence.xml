@@ -4,7 +4,7 @@
         <jar-file>lib/EDS-1.0-SNAPSHOT.jar</jar-file>
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        <jta-data-source>jdbc/__default</jta-data-source>
+        <jta-data-source>jdbc/__test</jta-data-source> <!--this is different from our main DB!-->
         <properties>
             <property name="hibernate.archive.autodetection" value="class"/>
             <!--<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
@@ -16,12 +16,13 @@
             <property name="hibernate.connection.username" value="segmail"/>
             <property name="hibernate.connection.password" value="segmail"/>
             <property name="hibernate.connection.datasource" value="jdbc/__default" />-->
-            <property name="hibernate.current_session_context_class" value="jta"/>
-            <property name="hibernate.c3p0.min_size" value="5"/>
+            <!--<property name="hibernate.current_session_context_class" value="jta"/>-->
+            <property name="hibernate.current_session_context_class" value="thread"/>
+            <!--<property name="hibernate.c3p0.min_size" value="5"/>
             <property name="hibernate.c3p0.max_size" value="20"/>
             <property name="hibernate.c3p0.timeout" value="30"/>
-            <property name="hibernate.c3p0.max_statements" value="100"/>
-            <!---->
+            <property name="hibernate.c3p0.max_statements" value="100"/>-->
+            
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.connection.autocommit" value="false"/>
@@ -33,7 +34,7 @@
         
             <!--<property name="hibernate.transaction.auto_close_session" value="false" />-->
             <property name="hibernate.transaction.flush_before_completion" value="true" />
-            
+            <property name="hibernate.classloading.use_current_tccl_as_parent" value="false" />
             <!--http://stackoverflow.com/questions/3677380/proper-hibernate-annotation-for-byte-->
             <property name="hibernate.jdbc.use_streams_for_binary" value="false" />
         </properties>

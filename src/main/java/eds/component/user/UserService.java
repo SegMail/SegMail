@@ -17,9 +17,7 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -28,7 +26,9 @@ import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 import eds.component.DBService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityExistsException;
 import eds.component.data.HibernateHelper;
+import eds.component.data.IncompleteDataException;
 import eds.entity.user.APIAccount;
 import eds.entity.user.APIAccount_;
 import eds.entity.user.User;
@@ -54,48 +54,49 @@ public class UserService extends DBService {
     @Resource()
     private String US_USER;
     
-    @PersistenceContext(name = "HIBERNATE")
-    private EntityManager em;
     
-    @EJB private GenericObjectService genericEnterpriseObjectService;
+    @EJB private GenericObjectService objectService;
 
     /**
-     * Should I return something like UserTypeID?
+     * Creates and returns a new UserType entity. If userTypeName is empty or null,
+     * throw an IncompleteDataException. If username is taken, throw an EntityExistsException.
      * 
      * @param userTypeName
      * @param description
-     * @throws UserTypeException
+     * @return the newly created UserType object
+     * @throws eds.component.data.IncompleteDataException
+     * @throws eds.component.data.EntityExistsException
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void createUserType(String userTypeName, String description)
-            throws UserTypeException, DBConnectionException {
-
+    public UserType createUserType(String userTypeName, String description) 
+            throws IncompleteDataException, EntityExistsException
+    {
         try {
             if (userTypeName == null || userTypeName.length() <= 0) {
-                throw new UserTypeException("Usertype name cannot be empty!");
+                throw new IncompleteDataException("Usertype name cannot be empty!");
             }
 
             List<UserType> existingUserTypes = this.getUserTypeByName(userTypeName);
 
             if (existingUserTypes != null && !existingUserTypes.isEmpty()) {
-                throw new UserTypeException("Usertype name \"" + userTypeName + "\" has been taken. Please choose a different name.");
+                throw new EntityExistsException("Usertype name \"" + userTypeName + "\" has been taken. Please choose a different name.");
             }
 
             //Instantiate the UserType object
             UserType userType = new UserType();
             userType.setUSERTYPENAME(userTypeName);
 
-            em.persist(userType);
+            objectService.getEm().persist(userType);
+            
+            return userType;
 
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -108,7 +109,7 @@ public class UserService extends DBService {
             
             User user = new User();
             user.setUSERTYPE(type);
-            em.persist(user);
+            objectService.getEm().persist(user);
             //debug
             System.out.println("The user id is "+user.getOBJECTID());
             return user;
@@ -124,46 +125,7 @@ public class UserService extends DBService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerUserByUserId(long userId, String username, String password) 
-            throws UserRegistrationException, DBConnectionException{
-        try{
-            //Check if the userId already exist by retrieving it. If no, throw exception.
-            User existingUser = this.getUserById(userId);
-            if(existingUser == null)
-                throw new UserRegistrationException("User ID "+userId+" does not exist yet.");
-            
-            //Check if username is null
-            if(username == null || username.isEmpty())
-                throw new UserRegistrationException("Username cannot be empty.");
-            
-            //Check if password is null
-            if(password == null || password.isEmpty())
-                throw new UserRegistrationException("Password cannot be empty.");
-            
-            //Hash passwords
-            String hashedPassword = this.getPasswordHash(username, password, HASH_KEY);
-            
-            //Create the UserAccount object and link it to the User object
-            UserAccount userAccount = new UserAccount();
-            userAccount.setUSERNAME(username);
-            userAccount.setPASSWORD(hashedPassword);
-            userAccount.setOWNER(existingUser);
-            
-            //Persist and throw any errors
-            em.persist(userAccount);
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void registerUserByUserTypeId(long userTypeId, String username, String password)
+    public UserAccount registerUserByUserTypeId(long userTypeId, String username, String password)
         throws UserRegistrationException, DBConnectionException{
         try{
             //Check if username is null
@@ -194,7 +156,9 @@ public class UserService extends DBService {
             userAccount.setOWNER(newUser);
             
             //Persist and throw any errors
-            em.persist(userAccount);
+            objectService.getEm().persist(userAccount);
+            
+            return userAccount;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -213,13 +177,13 @@ public class UserService extends DBService {
     public List<UserType> getAllUserTypes() throws DBConnectionException {
 
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserType> criteria = builder.createQuery(UserType.class);
             Root<UserType> sourceEntity = criteria.from(UserType.class); //FROM UserType
 
             criteria.select(sourceEntity); // SELECT *
 
-            List<UserType> results = em.createQuery(criteria)
+            List<UserType> results = objectService.getEm().createQuery(criteria)
                     //.setFirstResult(0)
                     //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //Don't do this first, not necessary!
                     .getResultList();
@@ -240,14 +204,14 @@ public class UserService extends DBService {
     public UserType getUserTypeById(long userTypeId) throws DBConnectionException {
 
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserType> criteria = builder.createQuery(UserType.class);
             Root<UserType> sourceEntity = criteria.from(UserType.class); //FROM UserType
 
             criteria.select(sourceEntity); // SELECT *
             criteria.where(builder.equal(sourceEntity.get(UserType_.OBJECTID), userTypeId)); //WHERE USERTYPENAME = userTypeName
 
-            UserType result = em.createQuery(criteria)
+            UserType result = objectService.getEm().createQuery(criteria)
                     .getSingleResult(); //appropriate! because it is an EO
 
             return result;
@@ -278,7 +242,7 @@ public class UserService extends DBService {
             List<UserType> results = em.createQuery(criteria)
                     .getResultList();
             */
-            List<UserType> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(userTypeName, UserType.class);
+            List<UserType> results = this.objectService.getEnterpriseObjectsByName(userTypeName, UserType.class);
 
             return results;
 
@@ -292,8 +256,15 @@ public class UserService extends DBService {
         }
     }
     
+    /**
+     * Returns the UserType entity with the exact matching userTypeName.
+     * 
+     * @param userTypeName
+     * @return
+     * @throws DBConnectionException 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public UserType getSingleUserTypeByName(String userTypeName) throws DBConnectionException {
+    public UserType getSingleUserTypeByName(String userTypeName) {
 
         try {
             
@@ -309,8 +280,6 @@ public class UserService extends DBService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
     }
     
@@ -327,7 +296,7 @@ public class UserService extends DBService {
             User result = em.createQuery(criteria)
                     .getSingleResult();//appropriate! because it is an EO*/
             
-            User result = this.genericEnterpriseObjectService.getEnterpriseObjectById(userId, User.class);
+            User result = this.objectService.getEnterpriseObjectById(userId, User.class);
 
             return result;
 
@@ -408,7 +377,7 @@ public class UserService extends DBService {
                 if (userAccount.getUNSUCCESSFUL_ATTEMPTS() >= MAX_UNSUCCESS_ATTEMPTS)
                     userAccount.setUSER_LOCKED(true);
                 
-                em.persist(userAccount);
+                objectService.getEm().persist(userAccount);
                 
                 throw new UserLoginException("Wrong credentials.");
             }
@@ -418,7 +387,7 @@ public class UserService extends DBService {
                 //Only if there were any unsuccessful login attempts, reset counter
                 if(userAccount.getUNSUCCESSFUL_ATTEMPTS() > 0){
                     userAccount.setUNSUCCESSFUL_ATTEMPTS(0);
-                    em.persist(userAccount);
+                    objectService.getEm().persist(userAccount);
                 }
                 /**
                  * Should construct and return a UserContainer instead of the User 
@@ -458,8 +427,8 @@ public class UserService extends DBService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public User login(String username, String password) 
             throws UserAccountLockedException,
-                   UserLoginException, 
-                   DBConnectionException {
+                   UserLoginException 
+                    {
         try {
             //Check if username is empty
             if(username == null || username.length() <= 0)
@@ -486,7 +455,7 @@ public class UserService extends DBService {
                 if (userAccount.getUNSUCCESSFUL_ATTEMPTS() >= MAX_UNSUCCESS_ATTEMPTS)
                     userAccount.setUSER_LOCKED(true);
                 
-                em.persist(userAccount);
+                objectService.getEm().persist(userAccount);
                 
                 throw new UserLoginException("Wrong credentials.");
             }
@@ -496,7 +465,7 @@ public class UserService extends DBService {
                 //Only if there were any unsuccessful login attempts, reset counter
                 if(userAccount.getUNSUCCESSFUL_ATTEMPTS() > 0){
                     userAccount.setUNSUCCESSFUL_ATTEMPTS(0);
-                    em.persist(userAccount);
+                    objectService.getEm().persist(userAccount);
                 }
                 /**
                  * Should construct and return a UserContainer instead of the User 
@@ -519,15 +488,12 @@ public class UserService extends DBService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } 
-        catch (Exception ex) {
-            throw ex;
         }
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<UserPreferenceSet> getUserPreferences(long userid){
-        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<UserPreferenceSet> criteria = builder.createQuery(UserPreferenceSet.class);
 
         Root<UserPreferenceSet> sourceEntity = criteria.from(UserPreferenceSet.class); //FROM UserAccount
@@ -543,7 +509,7 @@ public class UserService extends DBService {
         *       .getSingleResult();
         */
         
-        List<UserPreferenceSet> results = em.createQuery(criteria)
+        List<UserPreferenceSet> results = objectService.getEm().createQuery(criteria)
                 .getResultList();
         
         return results;
@@ -553,7 +519,7 @@ public class UserService extends DBService {
     public UserAccount getUserAccountByUsername(String username) 
             throws DBConnectionException{
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
             
@@ -564,7 +530,7 @@ public class UserService extends DBService {
             //data of UserAccount object and subsequently how to retrieve the correct
             //result.
             //
-            List<UserAccount> results = em.createQuery(criteria)
+            List<UserAccount> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
             
             if(results == null || results.size() <= 0)
@@ -586,7 +552,7 @@ public class UserService extends DBService {
     public UserAccount getUserAccountById(long userid) 
             throws DBConnectionException{
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
             
@@ -597,7 +563,7 @@ public class UserService extends DBService {
             //data of UserAccount object and subsequently how to retrieve the correct
             //result.
             //
-            List<UserAccount> results = em.createQuery(criteria)
+            List<UserAccount> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
             
             if(results == null || results.size() <= 0)
@@ -618,14 +584,14 @@ public class UserService extends DBService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean checkUsernameExist(String username) throws DBConnectionException{
         try{
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
             
             criteria.select(builder.count(criteria.from(UserAccount.class))); // SELECT *
             criteria.where(builder.equal(sourceEntity.get(UserAccount_.USERNAME), username)); //WHERE USERNAME = username
             
-            Long result = em.createQuery(criteria)
+            Long result = objectService.getEm().createQuery(criteria)
                     .getSingleResult();
             
             return result > 0;
@@ -643,13 +609,13 @@ public class UserService extends DBService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getUserCount() throws DBConnectionException{
         try{
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
             
             criteria.select(builder.count(criteria.from(UserAccount.class))); // SELECT *
             
-            Long result = em.createQuery(criteria)
+            Long result = objectService.getEm().createQuery(criteria)
                     .getSingleResult();
             
             return result;
@@ -668,14 +634,14 @@ public class UserService extends DBService {
     public String getUserProfilePicLocation(long userid) throws DBConnectionException{
         
         try{
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<String> criteria = builder.createQuery(String.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
             
             criteria.select(sourceEntity.get(UserAccount_.PROFILE_PIC_URL)); // SELECT PROFILE_PIC_URL
             criteria.where(builder.equal(sourceEntity.get(UserAccount_.OWNER), userid)); //WHERE OWNER.OBJECT_ID = userid
             
-            List<String> results = em.createQuery(criteria)
+            List<String> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
             
             if(results == null || results.size() <= 0)
@@ -706,7 +672,7 @@ public class UserService extends DBService {
             
             userAccount.setPROFILE_PIC_URL(profilePicLocation);
             
-            em.persist(userAccount);
+            objectService.getEm().persist(userAccount);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -731,7 +697,7 @@ public class UserService extends DBService {
             
             userAccount.setPROFILE_PIC_URL(profilePicLocation);
             
-            em.persist(userAccount);
+            objectService.getEm().persist(userAccount);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -771,7 +737,7 @@ public class UserService extends DBService {
     public APIAccount getAPIAccountById(long userid) 
             throws DBConnectionException{
         try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<APIAccount> criteria = builder.createQuery(APIAccount.class);
             Root<APIAccount> sourceEntity = criteria.from(APIAccount.class); //FROM UserType
             
@@ -782,7 +748,7 @@ public class UserService extends DBService {
             //data of UserAccount object and subsequently how to retrieve the correct
             //result.
             //
-            List<APIAccount> results = em.createQuery(criteria)
+            List<APIAccount> results = objectService.getEm().createQuery(criteria)
                     .getResultList();
             
             if(results == null || results.size() <= 0)

@@ -6,6 +6,8 @@
 package segmail.entity.subscription.email;
 
 import eds.entity.data.EnterpriseObject;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
@@ -83,6 +85,38 @@ public abstract class AutoresponderEmail extends EnterpriseObject {
     @Override
     public String alias() {
         return this.SUBJECT;
+    }
+    
+    /**
+     * Gets an input of parameters and generates the HTML content based on those 
+     * parameters.
+     * 
+     * @param params 
+     * @return 
+     */
+    public String generateHTMLContent(Map<String,Object> params){
+        String content = this.getBODY();
+        for(Entry<String,Object> entry : params.entrySet()){
+            content = content.replaceAll(entry.getKey(), entry.getValue().toString());
+        }
+        
+        return content;
+    }
+    
+    /**
+     * Gets an input of parameters and generates the subject based on those 
+     * parameters.
+     * 
+     * @param params
+     * @return 
+     */
+    public String generateSubject(Map<String,Object> params){
+        String subject = this.getSUBJECT();
+        for(Entry<String,Object> entry : params.entrySet()){
+            subject = subject.replaceAll(entry.getKey(), entry.getValue().toString());
+        }
+        
+        return subject;
     }
     
 }
