@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap;
 
+import eds.component.link.LogicalPathParser;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
@@ -29,6 +30,8 @@ public class UserRequestContainer {
     private String errorMessage;
     
     private StackTraceElement[] errorStackTrace;
+    
+    private LogicalPathParser pathParser;
 
     public String getProgramName() {
         return programName;
@@ -85,4 +88,14 @@ public class UserRequestContainer {
     public void setErrorStackTrace(StackTraceElement[] errorStackTrace) {
         this.errorStackTrace = errorStackTrace;
     }
+
+    public LogicalPathParser getPathParser() {
+        return pathParser;
+    }
+
+    public void setPathParser(LogicalPathParser pathParser) {
+        this.pathParser = pathParser;
+    }
+    
+    
 }

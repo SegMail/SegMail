@@ -31,7 +31,7 @@ import javax.servlet.http.HttpSession;
  */
 public abstract class BootstrapModule implements Filter {
    
-    /*@Inject*/ protected DefaultValues defaultSites = new DefaultValues();
+    /*@Inject*/ protected DefaultKeys defaultSites = new DefaultKeys();
     
     public static String FACES_CONTEXT = "context";
     

@@ -16,7 +16,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 
@@ -27,7 +27,7 @@ import seca2.bootstrap.UserSessionContainer;
 @CoreModule
 public class InstallationModule extends BootstrapModule implements Serializable{
 
-    @Inject DefaultValues defaults;
+    @Inject DefaultKeys defaults;
     @Inject private UserRequestContainer requestContainer;
     @Inject private UserSessionContainer userContainer;
     

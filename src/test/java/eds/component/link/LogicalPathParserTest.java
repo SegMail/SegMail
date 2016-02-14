@@ -46,7 +46,7 @@ public class LogicalPathParserTest {
      * Test of parse method, of class LogicalPathParser.
      */
     @Test
-    public void testGetProgramNameSimple() {
+    public void testGetProgramNameSimple1() {
         String link = "/program/param0/param1/param2/param3/param4/param5";
         int paramSize = 6;
         LogicalPathParser parser = new LogicalPathParser(link,DEFAULT_VIEW_ID);
@@ -58,6 +58,18 @@ public class LogicalPathParserTest {
         for(int i=0; i<params.size(); i++){
             assertEquals(params.get(i),"param"+i);
         }
+    }
+    
+    @Test
+    public void testGetProgramNameEmpty() {
+        String link = "/";
+        int paramSize = 0;
+        LogicalPathParser parser = new LogicalPathParser(link,DEFAULT_VIEW_ID);
+        
+        assertEquals(parser.getProgram(),"");
+        
+        List<String> params = parser.getOrderedParams();
+        assertEquals(params.size(),paramSize);
     }
 
     @Test

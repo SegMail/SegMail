@@ -20,7 +20,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
@@ -35,7 +35,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
     
-    @Inject DefaultValues defaults;
+    @Inject DefaultKeys defaults;
     
     @EJB private LayoutService layoutService;
     

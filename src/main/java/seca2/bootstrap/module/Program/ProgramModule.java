@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
@@ -50,7 +50,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
-    @Inject DefaultValues defaults;
+    @Inject DefaultKeys defaults;
 
     @EJB ProgramService programService;
 

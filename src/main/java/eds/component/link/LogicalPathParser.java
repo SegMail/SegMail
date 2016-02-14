@@ -39,7 +39,7 @@ public final class LogicalPathParser {
     /**
      * 
      */
-    private String program;
+    private String program = "";
     
     /**
      * An ordered list of parameters that appears in the link. 
@@ -56,7 +56,7 @@ public final class LogicalPathParser {
     
     public LogicalPathParser(String link, String viewId) {
         this.parse(link);
-        this.viewId = viewId;
+        this.viewId = (viewId == null) ? "" : viewId;
     }
     
     /**
@@ -72,7 +72,9 @@ public final class LogicalPathParser {
         
         orderedParams = new ArrayList<String>();
         for(int i=0; i<splitElements.length; i++){
-            if(program == null && splitElements[i] != null && !splitElements[i].isEmpty()){ //program should be set first
+            if((program == null || program.isEmpty()) 
+                    && splitElements[i] != null 
+                    && !splitElements[i].isEmpty()){ //program should be set first
                 program = splitElements[i];
                 continue;
             }

@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import segurl.filter.SegURLResolver;
 
@@ -33,7 +33,7 @@ import segurl.filter.SegURLResolver;
 public class RewriteModule extends BootstrapModule implements Serializable {
 
     @Inject UserRequestContainer userRequestContainer;
-    @Inject DefaultValues defaults;
+    @Inject DefaultKeys defaults;
     //@Inject SegURLResolver urlResolver;
     
     @Override
