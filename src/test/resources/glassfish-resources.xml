@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE resources PUBLIC
+    "-//GlassFish.org//DTD GlassFish Application Server 3.1 Resource Definitions//EN"
+    "http://glassfish.org/dtds/glassfish-resources_1_5.dtd">
+<resources>
+    <jdbc-resource pool-name="ArquillianPoolMySQL"
+        jndi-name="jdbc/segmail_test"/>
+    <jdbc-connection-pool name="ArquillianPoolMySQL"
+        res-type="javax.sql.DataSource"
+        datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" >
+        <property name="user" value="root"/>
+        <property name="password" value="root"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/segmail_test"/>
+    </jdbc-connection-pool>
+</resources>

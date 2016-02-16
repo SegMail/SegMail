@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<arquillian xmlns="http://jboss.org/schema/arquillian"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://jboss.org/schema/arquillian
+        http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
+
+	<container qualifier="glassfish-embedded" default="true">
+		<configuration>
+			<property name="resourcesXml">
+                src/test/resources/glassfish-resources.xml
+            </property>
+		</configuration>
+	</container>
+	<extension qualifier="persistence">
+		<property name="defaultDataSource">jdbc/segmail_test</property>
+		<property name="defaultCleanupPhase">AFTER</property>
+		<property name="defaultCleanupStrategy">USED_TABLES_ONLY</property>
+		 <property name="defaultTransactionMode">COMMIT</property>
+	</extension>
+	<extension qualifier="persistence-dbunit">
+		<property name="defaultDataSetFormat">YAML</property>
+		<property name="schema">segmail_test</property>
+		<property name="excludeTablesFromCleanup">hibernate_sequence</property>
+		<property name="excludeTablesFromComparisonWhenEmptyExpected">hibernate_sequence</property>
+		<property name="datatypeFactory">org.dbunit.ext.mssql.MsSqlDataTypeFactory</property>
+		<property name="metadataHandler">org.dbunit.ext.mysql.MySqlMetadataHandler</property>
+		<property name="useIdentityInsert">true</property>
+		<property name="excludePoi">true</property>
+	</extension>
+	<extension qualifier="persistence-script">
+		<property name="sqlStatementDelimiter">NEW_LINE</property>
+		<property name="sqlDialect">mysql</property>
+	</extension>
+
+</arquillian>

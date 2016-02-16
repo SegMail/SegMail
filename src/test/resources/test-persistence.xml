@@ -4,7 +4,7 @@
         <jar-file>lib/EDS-1.0-SNAPSHOT.jar</jar-file>
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        <jta-data-source>jdbc/segmail</jta-data-source>
+        <jta-data-source>jdbc/segmail_test</jta-data-source>
         <properties>
             <property name="hibernate.archive.autodetection" value="class"/>
             <!--<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
