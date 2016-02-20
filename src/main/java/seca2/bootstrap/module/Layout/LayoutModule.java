@@ -42,9 +42,9 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
         //If system in installation mode
-        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
         if(install)
-            return true;
+            return true;*/
         
         //Bypass if it's a file request
         if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
@@ -97,7 +97,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     protected boolean inService() {
         return true;
     }
-
+    
     @Override
     protected String urlPattern() {
         return "/program/*";

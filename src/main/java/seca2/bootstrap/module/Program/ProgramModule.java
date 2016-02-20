@@ -73,10 +73,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
      */
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
-        //If system in installation mode
-        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
-        if(install)
-            return true;
+
         /**
          * Bypass if it's a file request
          * Cannot, because /program/index.xhtml is also a file.
@@ -195,4 +192,10 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         return newProgram;
     }
 
+    @Override
+    protected boolean bypassDuringInstall() {
+        return false; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 }

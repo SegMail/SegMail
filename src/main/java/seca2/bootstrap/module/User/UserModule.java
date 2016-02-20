@@ -37,7 +37,7 @@ import segurl.filter.SegURLResolver;
 public class UserModule extends BootstrapModule implements Serializable {
     
     @EJB private UserService userService; 
-    @Inject DefaultKeys defaults;
+    
     /**
      * Should we inject or should we put it in InputContext?
      * 
@@ -58,14 +58,15 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected boolean inService() {
         return true;
     }
+    
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
         
         //If system in installation mode
-        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
         if(install)
-            return true;
+            return true;*/
         
         String contextPath = ((HttpServletRequest)request).getContextPath();
         String servletPath = ((HttpServletRequest)request).getServletPath();
@@ -176,4 +177,6 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected void ifException(ServletRequest request, ServletResponse response) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    
 }

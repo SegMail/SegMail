@@ -31,7 +31,7 @@
     
     <context-param>
         <param-name>INSTALL</param-name>
-        <param-value>tru</param-value>
+        <param-value>true</param-value>
     </context-param>
     
     <context-param>

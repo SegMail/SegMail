@@ -38,12 +38,6 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-        //If installation mode is turned on
-        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
-        if(install)
-            return true;
-        */
-        
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         String contextPath = req.getContextPath();
@@ -129,5 +123,11 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     protected void ifException(ServletRequest request, ServletResponse response) {
         
     }
+
+    @Override
+    protected boolean bypassDuringInstall() {
+        return false; //To change body of generated methods, choose Tools | Templates.
+    }
+    
     
 }

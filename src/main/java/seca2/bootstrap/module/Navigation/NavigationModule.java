@@ -139,4 +139,11 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         
     }
 
+    @Override
+    protected boolean bypassDuringInstall() {
+        return false; //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+
 }
