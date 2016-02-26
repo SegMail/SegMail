@@ -197,5 +197,13 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         return false; //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+
+    @Override
+    protected boolean bypassDuringWeb() {
+        return false;
+    }
 }

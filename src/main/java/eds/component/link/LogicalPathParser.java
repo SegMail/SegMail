@@ -36,6 +36,8 @@ import java.util.Objects;
  */
 public final class LogicalPathParser {
     
+    private final String originalLink;
+    
     /**
      * 
      */
@@ -53,10 +55,22 @@ public final class LogicalPathParser {
      */
     private final String viewId;
     
+    /**
+     * Additional filtering because sometimes your URL will contain no servletPath
+     * and your servletPath will contain your entire desired pathInfo. Eg.
+     * "/SegMail/subscribe" will give servletPath = "/subscribe" and pathInfo = ""
+     * "/SegMail/program/subscribe" will give servletPath = "/program" and pathInfo = "/subscribe"
+     * both should point to the same view.
+     */
+    private final String servletPath;
     
-    public LogicalPathParser(String link, String viewId) {
-        this.parse(link);
+    
+    public LogicalPathParser(String link, String viewId, String servletPath) {
+        this.originalLink = link;
         this.viewId = (viewId == null) ? "" : viewId;
+        this.servletPath = (servletPath == null) ? "" : servletPath;
+        this.parse(link);
+        
     }
     
     /**
@@ -66,7 +80,10 @@ public final class LogicalPathParser {
      */
     private void parse(String link){
         
-        String[] splitElements = link.split("/");
+        //Before splitting, we need to remove the servletPath
+        String linkNoServlet = (link.startsWith(servletPath)) ? link.replaceFirst(servletPath, "") : link;
+        
+        String[] splitElements = linkNoServlet.split("/");
         
         //program = (splitElements.length > 0) ? splitElements[0] : "";
         
@@ -81,6 +98,13 @@ public final class LogicalPathParser {
             if(program != null && !program.isEmpty()) //Program has been set
                 orderedParams.add(splitElements[i]);
         }
+        
+        //Additional step to hide serlvetPath
+        /*
+        if(program!= null && program.equalsIgnoreCase(servletPath)){
+            String actualProgram = (orderedParams.isEmpty()) ? "" : orderedParams.remove(0);
+            program = actualProgram;
+        }*/
     }
 
     public String getProgram() {
@@ -109,6 +133,10 @@ public final class LogicalPathParser {
             if(!element.equals(viewId) && elementContainsFile(element))
                 return true;
         }
+        
+        //Check in servletPath, in case the file exists in servletPath
+        if(elementContainsFile(servletPath))
+            return true;
         
         return false;
     }
@@ -154,7 +182,7 @@ public final class LogicalPathParser {
         for(String param : orderedParams){
             link = link.concat("/").concat(param);
         }
-        link = link.concat("/");
+        if(link.charAt(link.length()-1) != '/') link = link.concat("/");
         
         return link;
     }

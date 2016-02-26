@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.rewrite;
 
+import eds.component.link.LogicalPathParser;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,15 +50,23 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
         //No actual viewId is known before this module, this module processes all viewId mappings
-        if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+        /*if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+            return true;*/
+        String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
+        //LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot);
+        //LogicalPathParser newParser = new LogicalPathParser(pathInfo,globalViewRoot);
+        //userRequestContainer.setPathParser(newParser);
+        //No need the above initialization, UserModule has already done it
+        if(userRequestContainer.getPathParser().containsFileResource())
             return true;
         
         //1. Resolve program name
-        String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));
+        //String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));
+        String program = userRequestContainer.getPathParser().getProgram();
         
         //2. Inject it into ControlContainer
         userRequestContainer.setProgramName(program);
-        String forwardViewId = "/index.xhtml";
+        String forwardViewId = "/".concat(globalViewRoot);
         
         //The mapping!
         //Can be outsourced to a service
@@ -68,10 +77,12 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         //of program, then forward to "/program/index.xhtml"
         //The program name will be passed by UserRequestContainer
         ///SegMail/autoemail -> /SegMail/program/autoemail/
+        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+        String programPath = request.getServletContext().getInitParameter(defaults.PROGRAM_PATH);
         if(servletPath == null || "/".equals(servletPath)
-                || !servletPath.contains("login")){
+                || !servletPath.equalsIgnoreCase(loginPath)){
             //Default servletPath
-            servletPath = "/program";
+            servletPath = programPath;
         }
         
         //forward don't need contextpath because it's done at the server side
@@ -127,6 +138,16 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     @Override
     protected boolean bypassDuringInstall() {
         return false; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+
+    @Override
+    protected boolean bypassDuringWeb() {
+        return false;
     }
     
     

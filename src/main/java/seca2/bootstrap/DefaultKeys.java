@@ -17,7 +17,7 @@ import javax.faces.context.FacesContext;
  */
 public class DefaultKeys {
     
-    public final String LOGIN_PATH = "/login";
+    
     
     public final String ERROR_PAGE = "/programs/error/error_page.xhtml";
     public final String ERROR_PAGE_TEMPLATE = "/programs/error/template/error-page-layout.xhtml";
@@ -34,6 +34,22 @@ public class DefaultKeys {
      * the BootstrapModules would be turned off in this mode.
      */
     public final String INSTALL = "INSTALL";
+    
+    /**
+     * A flag to indicate which mode the application is running on. Reference to 
+     * the RunMode enumeration.
+     */
+    public final String RUN_MODE = "RUN_MODE";
+    
+    /**
+     * The servlet path for login page
+     */
+    public final String LOGIN_PATH = "LOGIN_PATH";
+    
+    /**
+     * The servlet path for programs
+     */
+    public final String PROGRAM_PATH = "PROGRAM_PATH";
     
     /**
      * The name of the installation program.

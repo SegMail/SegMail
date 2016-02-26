@@ -31,7 +31,22 @@
     
     <context-param>
         <param-name>INSTALL</param-name>
-        <param-value>true</param-value>
+        <param-value>tru</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>RUN_MODE</param-name>
+        <param-value>normal</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>LOGIN_PATH</param-name>
+        <param-value>/login</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>PROGRAM_PATH</param-name>
+        <param-value>/program</param-value>
     </context-param>
     
     <context-param>

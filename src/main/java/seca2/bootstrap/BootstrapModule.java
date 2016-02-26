@@ -181,9 +181,29 @@ public abstract class BootstrapModule implements Filter {
      * 
      * @return boolean
      */
-    protected boolean bypassDuringInstall(){
-        return true;
-    }
+    protected abstract boolean bypassDuringInstall();
+    
+    /**
+     * Indicate if this BootstrapModule should run the execute(ServletRequest,
+     * ServletResponse) method during normal operations. If true, the bootstrapping/
+     * filter chain processing will continue without executing the method. If 
+     * false, it will continue to execute() and let the results determine if it
+     * should continue to the next module/filter or fail.
+     * 
+     * @return boolean
+     */
+    protected abstract boolean bypassDuringNormal();
+    
+    /**
+     * Indicate if this BootstrapModule should run the execute(ServletRequest,
+     * ServletResponse) method during web operations. If true, the bootstrapping/
+     * filter chain processing will continue without executing the method. If 
+     * false, it will continue to execute() and let the results determine if it
+     * should continue to the next module/filter or fail.
+     * 
+     * @return boolean
+     */
+    protected abstract boolean bypassDuringWeb();
 
     /**
      * This is for initializing the module as a filter when Bootstrap runs.
@@ -211,8 +231,14 @@ public abstract class BootstrapModule implements Filter {
             HttpSession session = req.getSession(false);
 
             boolean install = Boolean.parseBoolean(req.getServletContext().getInitParameter(defaults.INSTALL));
+            String runModeString = req.getServletContext().getInitParameter(defaults.RUN_MODE);
+            RunMode runMode = RunMode.getRunMode(runModeString);
             
-            if((install && this.bypassDuringInstall()) || this.execute(req, res)){
+            if(
+                    (runMode.equals(RunMode.INSTALL) && this.bypassDuringInstall()) || 
+                    (runMode.equals(RunMode.NORMAL) && this.bypassDuringNormal()) ||
+                    (runMode.equals(RunMode.WEB) && this.bypassDuringWeb()) ||
+                    this.execute(req, res)){
                 chain.doFilter(request, response);
                 return; // Very important!
             }

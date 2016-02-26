@@ -25,9 +25,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
-import segurl.filter.SegURLResolver;
 
 /**
  *
@@ -81,8 +79,15 @@ public class UserModule extends BootstrapModule implements Serializable {
         //This parser is totally separated from the RewriteModule's parser, because UserModule is supposed to be 
         //independent of other modules.
         String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
-        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot);
-        //requestContainer.setPathParser(newParser);
+        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, servletPath);
+        /**
+         * Cannot work, because sometimes your URL doesn't contain your servletPath, which is either
+         * /program or /login (based on Servlet's config pattern in web.xml), so your programName will
+         * be in your servletPath.
+         * 
+         */
+        //LogicalPathParser newParser = new LogicalPathParser(pathInfo,globalViewRoot);
+        requestContainer.setPathParser(newParser);
         
         //During postback of the form submission, the servlet path will be /login
         //and if the xhtml values are not set, the form methods will not be processed.
@@ -92,7 +97,8 @@ public class UserModule extends BootstrapModule implements Serializable {
         requestContainer.setTemplateLocation(defaults.LOGIN_PAGE_TEMPLATE);
         
         //If on login page, forward the request to viewId index.xhtml
-        if(servletPath.equalsIgnoreCase(defaults.LOGIN_PATH)){
+        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+        if(servletPath.equalsIgnoreCase(loginPath)){ //
             return true;
         }
         
@@ -115,9 +121,8 @@ public class UserModule extends BootstrapModule implements Serializable {
         //    return true;
                 
         //For everything else not discovered, don't continue the filterchain
-        //userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(pathInfo));
-        //userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo)));
-        userContainer.setLastProgram(newParser.getProgram());
+        String lastProgram = newParser.getProgram();
+        userContainer.setLastProgram(lastProgram);
         return false;
     }
 
@@ -162,10 +167,13 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected void ifFail(ServletRequest request, ServletResponse response) {
         try {
             //If it's a file request, don't do anything
-            if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+            /*if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+                return;*/
+            if(requestContainer.getPathParser().containsFileResource())
                 return;
             
-            ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+defaults.LOGIN_PATH);
+            String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+            ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+loginPath);//No trailing slash before and now so why it doesn't work now?
             //((HttpServletRequest)request).getRequestDispatcher("/login").forward(request, response);
             
         } catch (Exception ex) {
@@ -177,6 +185,20 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected void ifException(ServletRequest request, ServletResponse response) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    protected boolean bypassDuringInstall() {
+        return true;
+    }
+
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
     
+    @Override
+    protected boolean bypassDuringWeb() {
+        return true;
+    }
     
 }

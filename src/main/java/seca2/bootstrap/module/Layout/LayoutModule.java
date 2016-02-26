@@ -122,5 +122,19 @@ public class LayoutModule extends BootstrapModule implements Serializable {
         
     }
 
+    @Override
+    protected boolean bypassDuringInstall() {
+        return true;
+    }
 
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+
+
+    @Override
+    protected boolean bypassDuringWeb() {
+        return false;
+    }
 }

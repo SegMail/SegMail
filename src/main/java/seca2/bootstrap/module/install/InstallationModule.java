@@ -94,7 +94,16 @@ public class InstallationModule extends BootstrapModule implements Serializable 
 
     @Override
     protected boolean bypassDuringInstall() {
-        return false; //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
+    @Override
+    protected boolean bypassDuringNormal() {
+        return true;
+    }
+
+    @Override
+    protected boolean bypassDuringWeb() {
+        return true;
+    }
 }
