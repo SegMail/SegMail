@@ -81,9 +81,12 @@ public class ProgramModule extends BootstrapModule implements Serializable {
          * 1) enhance SeqURLResolver to recognize /index.xhtml or
          * 2) hardcode for now...
          */
-        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
             return true;
-        }
+        }*/
+        if(requestContainer.getPathParser().containsFileResource())
+            return true;
+        
         
         long userTypeId = (sessionContainer.getUserType() == null) ? 
                 -1 : sessionContainer.getUserType().getOBJECTID();
@@ -95,8 +98,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         if(programName == null || programName.isEmpty()) 
             programName = request.getServletContext().getInitParameter(defaults.GLOBAL_DEFAULT_PROGRAM);
         
-        
-
         //Instead of deciding when to reload, why not decide when not to?
         //1) When it's a specific program but the existing program in session is 
         // the same

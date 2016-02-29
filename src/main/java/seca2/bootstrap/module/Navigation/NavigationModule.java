@@ -24,6 +24,7 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import segurl.filter.SegURLResolver;
 
 /**
  * Builds the navigation structure for the user.
@@ -55,6 +56,10 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         contextPath = (contextPath == null) ? "" : contextPath;
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
+        
+        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+            return true;
+        }
         
         UserType userType = sessionContainer.getUserType();
         

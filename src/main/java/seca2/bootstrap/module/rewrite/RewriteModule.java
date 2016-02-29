@@ -49,10 +49,22 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
+        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+        String programPath = request.getServletContext().getInitParameter(defaults.PROGRAM_PATH);
+        String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
+        //Servlet paths can only be the above 2 values. Any other values are not considered servletPaths.
+        String availableServletPath = "";
+        if(servletPath.equalsIgnoreCase(loginPath) || servletPath.equalsIgnoreCase(programPath))
+            availableServletPath = servletPath;
+        
+        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, availableServletPath);
+        //Replace the one set in UserModule because UserModule shouldn't know the servletPaths, RewriteModule should know instead.
+        userRequestContainer.setPathParser(newParser); 
+        
         //No actual viewId is known before this module, this module processes all viewId mappings
         /*if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
             return true;*/
-        String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
+        //String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
         //LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot);
         //LogicalPathParser newParser = new LogicalPathParser(pathInfo,globalViewRoot);
         //userRequestContainer.setPathParser(newParser);
@@ -61,7 +73,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
             return true;
         
         //1. Resolve program name
-        //String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));
+        //String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));//This one returns "/login" as the program name! That was the issue.
         String program = userRequestContainer.getPathParser().getProgram();
         
         //2. Inject it into ControlContainer
@@ -77,8 +89,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         //of program, then forward to "/program/index.xhtml"
         //The program name will be passed by UserRequestContainer
         ///SegMail/autoemail -> /SegMail/program/autoemail/
-        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
-        String programPath = request.getServletContext().getInitParameter(defaults.PROGRAM_PATH);
+        
         if(servletPath == null || "/".equals(servletPath)
                 || !servletPath.equalsIgnoreCase(loginPath)){
             //Default servletPath
