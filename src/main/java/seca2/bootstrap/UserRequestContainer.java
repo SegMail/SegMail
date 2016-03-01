@@ -6,6 +6,10 @@
 package seca2.bootstrap;
 
 import eds.component.link.LogicalPathParser;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
@@ -32,6 +36,9 @@ public class UserRequestContainer {
     private StackTraceElement[] errorStackTrace;
     
     private LogicalPathParser pathParser;
+    
+    private Map<String,String[]> pogramParamsNamed;
+    private List<String> programParamsOrdered;
 
     public String getProgramName() {
         return programName;
@@ -96,6 +103,20 @@ public class UserRequestContainer {
     public void setPathParser(LogicalPathParser pathParser) {
         this.pathParser = pathParser;
     }
-    
-    
+
+    public Map<String, String[]> getPogramParamsNamed() {
+        return pogramParamsNamed;
+    }
+
+    public void setPogramParamsNamed(Map<String, String[]> pogramParamsNamed) {
+        this.pogramParamsNamed = pogramParamsNamed;
+    }
+
+    public List<String> getProgramParamsOrdered() {
+        return programParamsOrdered;
+    }
+
+    public void setProgramParamsOrdered(List<String> programParamsOrdered) {
+        this.programParamsOrdered = programParamsOrdered;
+    }
 }

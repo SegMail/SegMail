@@ -26,13 +26,13 @@ public enum RunMode {
     }
     
     public static RunMode getRunMode(String runMode){
-        if(runMode.toUpperCase().equals(RunMode.INSTALL))
+        if(runMode.toUpperCase().equals(RunMode.INSTALL.toString()))
             return RunMode.INSTALL;
         
-        if(runMode.toUpperCase().equals(RunMode.NORMAL))
+        if(runMode.toUpperCase().equals(RunMode.NORMAL.toString()))
             return RunMode.NORMAL;
         
-        if(runMode.toUpperCase().equals(RunMode.WEB))
+        if(runMode.toUpperCase().equals(RunMode.WEB.toString()))
             return RunMode.WEB;
         
         return RunMode.NORMAL; //Default

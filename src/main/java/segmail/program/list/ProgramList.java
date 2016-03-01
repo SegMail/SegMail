@@ -10,10 +10,9 @@ import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import seca2.program.Program;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.AutoConfirmEmail;
@@ -32,10 +31,7 @@ import segmail.entity.subscription.email.AutoresponderEmail;
  */
 @Named("ProgramList")
 @SessionScoped
-public class ProgramList implements Serializable {
-    
-    
-    @Inject private UserRequestContainer reqContainer;
+public class ProgramList extends Program implements Serializable {
     
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
@@ -67,7 +63,8 @@ public class ProgramList implements Serializable {
     public ProgramList(){
     }
     
-    @PostConstruct
+    //@PostConstruct
+    @Override
     public void init(){
         
     }
@@ -220,6 +217,11 @@ public class ProgramList implements Serializable {
 
     public void setSubscriberTable(Map<Long, Map<String, String>> subscriberTable) {
         this.subscriberTable = subscriberTable;
+    }
+
+    @Override
+    public void initProgramParams() {
+        
     }
 
     

@@ -13,6 +13,7 @@ import javax.enterprise.context.SessionScoped;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import seca2.bootstrap.module.Navigation.MenuItemContainer;
@@ -38,8 +39,6 @@ public class UserSessionContainer implements Serializable {
     private Layout currentLayout;
     
     private List<MenuItemContainer> menu;
-    
-    
     
     @PostConstruct
     public void init(){

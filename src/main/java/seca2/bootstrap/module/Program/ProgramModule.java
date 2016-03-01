@@ -119,6 +119,10 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
         sessionContainer.setCurrentProgram(program);
         requestContainer.setViewLocation(program.getVIEW_ROOT());
+        
+        //Set params
+        requestContainer.setProgramParamsOrdered(requestContainer.getPathParser().getOrderedParams());
+        //requestContainer.setPogramParamsNamed(request.getParameterMap());
         //Must return true no matter what, else FacesServlet will not get called
         return true;
     }
@@ -192,10 +196,11 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         
         return newProgram;
     }
+    
 
     @Override
     protected boolean bypassDuringInstall() {
-        return false; //To change body of generated methods, choose Tools | Templates.
+        return true; //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

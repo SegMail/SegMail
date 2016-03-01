@@ -82,7 +82,7 @@ public class InstallationModule extends BootstrapModule implements Serializable 
     protected List<DispatcherType> getDispatchTypes() {
         List<DispatcherType> dispatchTypes = new ArrayList<DispatcherType>();
         dispatchTypes.add(DispatcherType.REQUEST);
-        dispatchTypes.add(DispatcherType.FORWARD);
+        //dispatchTypes.add(DispatcherType.FORWARD);
 
         return dispatchTypes;
     }

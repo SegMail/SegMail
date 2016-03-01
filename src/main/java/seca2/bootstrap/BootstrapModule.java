@@ -230,7 +230,7 @@ public abstract class BootstrapModule implements Filter {
             HttpServletResponse res = (HttpServletResponse) response;
             HttpSession session = req.getSession(false);
 
-            boolean install = Boolean.parseBoolean(req.getServletContext().getInitParameter(defaults.INSTALL));
+            //boolean install = Boolean.parseBoolean(req.getServletContext().getInitParameter(defaults.INSTALL));
             String runModeString = req.getServletContext().getInitParameter(defaults.RUN_MODE);
             RunMode runMode = RunMode.getRunMode(runModeString);
             
