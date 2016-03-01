@@ -5,18 +5,31 @@
         http://jboss.org/schema/arquillian
         http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
 
-	<container qualifier="glassfish-embedded" default="true">
+	<container qualifier="glassfish-embedded">
 		<configuration>
 			<property name="resourcesXml">
                 src/test/resources/glassfish-resources.xml
             </property>
+			<property name="bindHttpPort">8182</property>
 		</configuration>
 	</container>
+	
+	<container qualifier="glassfish-managed" default="true" >
+		<configuration>
+			<property name="glassFishHome">/opt/glassfish4/</property>
+			<property name="adminHost">localhost</property>
+			<property name="adminPort">4848</property>
+			<property name="adminUser">admin</property>
+			<property name="adminPassword">qoqmlm88</property>
+			<property name="allowConnectingToRunningServer">true</property>
+		</configuration>
+	</container>
+	
 	<extension qualifier="persistence">
 		<property name="defaultDataSource">jdbc/segmail_test</property>
 		<property name="defaultCleanupPhase">AFTER</property>
 		<property name="defaultCleanupStrategy">USED_TABLES_ONLY</property>
-		 <property name="defaultTransactionMode">COMMIT</property>
+		<property name="defaultTransactionMode">COMMIT</property>
 	</extension>
 	<extension qualifier="persistence-dbunit">
 		<property name="defaultDataSetFormat">YAML</property>
@@ -32,5 +45,19 @@
 		<property name="sqlStatementDelimiter">NEW_LINE</property>
 		<property name="sqlDialect">mysql</property>
 	</extension>
+
+	<extension qualifier="webdriver">
+		<property name="browser">firefox</property>
+	</extension>
+
+	<extension qualifier="graphene">
+		<property name="waitAjax">5</property>
+		<property name="waitGui">5</property>
+		<property name="waitModel">10</property>
+	</extension>
+
+	<engine>
+		<property name="deploymentExportPath">target/deployments</property>
+	</engine>
 
 </arquillian>

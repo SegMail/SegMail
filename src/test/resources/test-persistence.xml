@@ -21,9 +21,9 @@
             <!--<property name="hibernate.c3p0.min_size" value="5"/>
             <property name="hibernate.c3p0.max_size" value="20"/>
             <property name="hibernate.c3p0.timeout" value="30"/>
-            <property name="hibernate.c3p0.max_statements" value="100"/>-->
+            <property name="hibernate.c3p0.max_statements" value="100"/>
             
-            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/>-->
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.connection.autocommit" value="false"/>
             <!--<property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create" />-->

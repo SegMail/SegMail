@@ -44,7 +44,11 @@ import java.util.Collections;
 @Stateless
 public class NavigationService implements Serializable {
 
-    @EJB private UserService userService;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@EJB private UserService userService;
     @EJB private GenericObjectService objectService;
     
     @PersistenceContext(name="HIBERNATE")

@@ -22,34 +22,20 @@ import org.jboss.arquillian.transaction.api.annotation.Transactional;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
+import groups.GlassFishEmbedded;
 
 @RunWith(Arquillian.class)
 public class UserServiceTest {
 
 	@EJB
 	private UserService userService;
-
-	// static EntityManager entityManager;
-	//
-	// @BeforeClass
-	// public static void initEntityManger() {
-	//// EntityManagerFactory emf =
-	// Persistence.createEntityManagerFactory("HIBERNATE");
-	////
-	//// entityManager = emf.createEntityManager();
-	//// emf.close();
-	// }
-	//
-	// @AfterClass
-	// public static void closeEntityManager() {
-	// entityManager.close();
-	// }
 
 	@Deployment
 	public static JavaArchive createTestArchive() {
@@ -60,6 +46,7 @@ public class UserServiceTest {
 	}
 
 	@Test(expected = UserTypeException.class)
+	@Category(GlassFishEmbedded.class)
 	public void testCreateUserTypeUserTypeException() throws DBConnectionException, UserTypeException {
 		userService.createUserType(null, "test descr");
 	}
@@ -68,6 +55,7 @@ public class UserServiceTest {
 	@ApplyScriptBefore("scripts/UserTypeCleanUP.sql")
 	@Cleanup(phase = TestExecutionPhase.NONE)
 	@Transactional(value = TransactionMode.DISABLED)
+	@Category(GlassFishEmbedded.class)
 	public void testDBCon() throws DBConnectionException, UserTypeException, NotSupportedException, SystemException {
 		String userTypeNameExpected = "user type name test";
 		String userTypeDescriptionExpected = "user type descr test";
@@ -89,6 +77,7 @@ public class UserServiceTest {
 	@Test
 	@Cleanup(phase = TestExecutionPhase.NONE)
 	@Transactional(value=TransactionMode.DISABLED)
+	@Category(GlassFishEmbedded.class)
 	public void testGetSingleUserTypeByName() {
 
 		String expectedDescription = null;

@@ -15,6 +15,7 @@ import org.jboss.arquillian.transaction.api.annotation.Transactional;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import eds.component.GenericObjectService;
@@ -22,6 +23,8 @@ import eds.component.data.DBConnectionException;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserType;
+import groups.GlassFishEmbedded;
+import groups.GlassFishManaged;
 @RunWith(Arquillian.class)
 public class UserServiceTestIntegration {
 	
@@ -40,6 +43,7 @@ public class UserServiceTestIntegration {
 	@ApplyScriptAfter("scripts/IC1CleanUP.sql")
 	@Cleanup(phase=TestExecutionPhase.NONE)
 	@Transactional(value=TransactionMode.DISABLED)
+	@Category(GlassFishEmbedded.class)
 	public void testIC1() throws DBConnectionException, UserTypeException, UserRegistrationException, UserAccountLockedException, UserLoginException{
 		String expectedUserTypeName="expectedUserType";
 		String expectedUserTypeDescription="expectedUserTypeDescription";
@@ -51,7 +55,6 @@ public class UserServiceTestIntegration {
 		userService.registerUserByUserTypeId(expectedUserTypeId, expectedUserName, expectedUserPassword);
 		User user=userService.login(expectedUserName, expectedUserPassword);
 		assertNotNull(user);
-		EntityManager em=userService.getEm();
 		
 	}
 }
