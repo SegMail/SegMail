@@ -4,7 +4,7 @@
 	xsi:schemaLocation="
         http://jboss.org/schema/arquillian
         http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
-
+	
 	<container qualifier="glassfish-embedded">
 		<configuration>
 			<property name="resourcesXml">
@@ -31,6 +31,7 @@
 		<property name="defaultCleanupStrategy">USED_TABLES_ONLY</property>
 		<property name="defaultTransactionMode">COMMIT</property>
 	</extension>
+	
 	<extension qualifier="persistence-dbunit">
 		<property name="defaultDataSetFormat">YAML</property>
 		<property name="schema">segmail_test</property>
@@ -41,6 +42,7 @@
 		<property name="useIdentityInsert">true</property>
 		<property name="excludePoi">true</property>
 	</extension>
+	
 	<extension qualifier="persistence-script">
 		<property name="sqlStatementDelimiter">NEW_LINE</property>
 		<property name="sqlDialect">mysql</property>
