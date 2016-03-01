@@ -1,3 +1,4 @@
+
     
 DELETE segmail.USER, segmail.USERACCOUNT  FROM segmail.USERACCOUNT INNER JOIN segmail.USER
 WHERE
