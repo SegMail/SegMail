@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.User;
 
+import eds.component.link.LogicalPathParser;
 import seca2.bootstrap.UserSessionContainer;
 import java.io.Serializable;
 import javax.ejb.EJB;
@@ -24,9 +25,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import seca2.bootstrap.DefaultValues;
 import seca2.bootstrap.UserRequestContainer;
-import segurl.filter.SegURLResolver;
 
 /**
  *
@@ -36,7 +35,7 @@ import segurl.filter.SegURLResolver;
 public class UserModule extends BootstrapModule implements Serializable {
     
     @EJB private UserService userService; 
-    @Inject DefaultValues defaults;
+    
     /**
      * Should we inject or should we put it in InputContext?
      * 
@@ -45,26 +44,27 @@ public class UserModule extends BootstrapModule implements Serializable {
     @Inject private UserRequestContainer requestContainer;
     @Inject private UserSessionContainer userContainer;
     
-    public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
-    public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
+    //public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
+    //public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
     
-    public final String LOGIN_PATH = "/login";
+    //public final String LOGIN_PATH = "/login";
     
-    public final String BYPASS = "SETUP";
+    //public final String BYPASS = "SETUP";
     
 
     @Override
     protected boolean inService() {
         return true;
     }
+    
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
-
+        
         //If system in installation mode
-        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
         if(install)
-            return true;
+            return true;*/
         
         String contextPath = ((HttpServletRequest)request).getContextPath();
         String servletPath = ((HttpServletRequest)request).getServletPath();
@@ -75,15 +75,30 @@ public class UserModule extends BootstrapModule implements Serializable {
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
+        //Initialize the LogicalPathParser
+        //This parser is totally separated from the RewriteModule's parser, because UserModule is supposed to be 
+        //independent of other modules.
+        String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
+        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, servletPath);
+        /**
+         * Cannot work, because sometimes your URL doesn't contain your servletPath, which is either
+         * /program or /login (based on Servlet's config pattern in web.xml), so your programName will
+         * be in your servletPath.
+         * 
+         */
+        //LogicalPathParser newParser = new LogicalPathParser(pathInfo,globalViewRoot);
+        requestContainer.setPathParser(newParser);
+        
         //During postback of the form submission, the servlet path will be /login
         //and if the xhtml values are not set, the form methods will not be processed.
         //it has nothing to do with URL rewriting
         //Regardless pass or fail, just populate first, the next module should correct it
-        requestContainer.setViewLocation(LOGIN_PAGE); //I'm not sure what will happen here, since we have already fowarded the request to this page below
-        requestContainer.setTemplateLocation(LOGIN_PAGE_TEMPLATE);
+        requestContainer.setViewLocation(defaults.LOGIN_PAGE); //I'm not sure what will happen here, since we have already fowarded the request to this page below
+        requestContainer.setTemplateLocation(defaults.LOGIN_PAGE_TEMPLATE);
         
         //If on login page, forward the request to viewId index.xhtml
-        if(servletPath.equalsIgnoreCase(LOGIN_PATH)){
+        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+        if(servletPath.equalsIgnoreCase(loginPath)){ //
             return true;
         }
         
@@ -98,16 +113,16 @@ public class UserModule extends BootstrapModule implements Serializable {
         }
         
         //If request is for a file resource
-        if(SegURLResolver.getResolver().containsFile(servletPath))
+        if(newParser.containsFileResource())
             return true;
         //If the request has servlet path /program or /login, it would match to FacesServlet from
         //web.xml config and parsed as Faces request.
-        if(SegURLResolver.getResolver().containsFile(pathInfo))//Separate out for debugging purposes
-            return true;
+        //if(SegURLResolver.getResolver().containsFile(pathInfo))//Separate out for debugging purposes
+        //    return true;
                 
         //For everything else not discovered, don't continue the filterchain
-        //userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(pathInfo));
-        userContainer.setLastProgram(SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo)));
+        String lastProgram = newParser.getProgram();
+        userContainer.setLastProgram(lastProgram);
         return false;
     }
 
@@ -152,10 +167,13 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected void ifFail(ServletRequest request, ServletResponse response) {
         try {
             //If it's a file request, don't do anything
-            if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+            /*if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
+                return;*/
+            if(requestContainer.getPathParser().containsFileResource())
                 return;
             
-            ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+LOGIN_PATH);
+            String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+            ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+loginPath);//No trailing slash before and now so why it doesn't work now?
             //((HttpServletRequest)request).getRequestDispatcher("/login").forward(request, response);
             
         } catch (Exception ex) {
@@ -167,4 +185,20 @@ public class UserModule extends BootstrapModule implements Serializable {
     protected void ifException(ServletRequest request, ServletResponse response) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    protected boolean bypassDuringInstall() {
+        return true;
+    }
+
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+    
+    @Override
+    protected boolean bypassDuringWeb() {
+        return true;
+    }
+    
 }

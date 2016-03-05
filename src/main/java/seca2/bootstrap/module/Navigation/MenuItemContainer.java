@@ -7,6 +7,7 @@
 package seca2.bootstrap.module.Navigation;
 
 import eds.entity.navigation.MenuItem;
+import java.util.Objects;
 import segurl.filter.SegURLResolver;
 
 /**
@@ -67,5 +68,28 @@ public class MenuItemContainer {
         return (SegURLResolver.getResolver().resolveProgramName(this.menuItem.getMENU_ITEM_URL())
                 .equalsIgnoreCase(programName));
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 89 * hash + Objects.hashCode(this.menuItem);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MenuItemContainer other = (MenuItemContainer) obj;
+        if (!Objects.equals(this.menuItem, other.menuItem)) {
+            return false;
+        }
+        return true;
+    }
+    
     
 }

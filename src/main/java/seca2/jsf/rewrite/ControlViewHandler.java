@@ -5,10 +5,12 @@
  */
 package seca2.jsf.rewrite;
 
+import eds.component.link.LogicalPathParser;
 import javax.faces.application.ViewHandler;
 import javax.faces.application.ViewHandlerWrapper;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 
 /**
@@ -19,6 +21,7 @@ public class ControlViewHandler extends ViewHandlerWrapper {
 
     private ViewHandler wrapped;
     
+    @Inject protected DefaultKeys defaults;
     @Inject UserRequestContainer reqContainer;
 
     public ControlViewHandler(ViewHandler wrapped) {
@@ -40,14 +43,18 @@ public class ControlViewHandler extends ViewHandlerWrapper {
         String servletPath = context.getExternalContext().getRequestServletPath();
         String pathInfo = context.getExternalContext().getRequestPathInfo();
         
-        if(pathInfo.endsWith("index.xhtml")){
-            pathInfo = pathInfo.replace("index.xhtml", "");
+        String globalViewRoot = context.getExternalContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
+        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, servletPath);
+        
+        if(pathInfo.endsWith(globalViewRoot)){
+            pathInfo = pathInfo.replace(globalViewRoot, "");
         }
         
         pathInfo = (reqContainer.getProgramName() == null) ? 
                 pathInfo : "/".concat(reqContainer.getProgramName());
             
-        return contextPath.concat("").concat(pathInfo); 
+        //return contextPath.concat("").concat(pathInfo); 
+        return contextPath.concat(servletPath).concat(pathInfo); 
     }
 
     @Override

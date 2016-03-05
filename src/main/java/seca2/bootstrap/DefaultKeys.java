@@ -15,7 +15,9 @@ import javax.faces.context.FacesContext;
  * 
  * @author LeeKiatHaw
  */
-public class DefaultValues {
+public class DefaultKeys {
+    
+    
     
     public final String ERROR_PAGE = "/programs/error/error_page.xhtml";
     public final String ERROR_PAGE_TEMPLATE = "/programs/error/template/error-page-layout.xhtml";
@@ -31,7 +33,23 @@ public class DefaultValues {
      * A flag to indicate if the application is in the installation mode. Some of 
      * the BootstrapModules would be turned off in this mode.
      */
-    public final String INSTALL = "SETUP";
+    public final String INSTALL = "INSTALL";
+    
+    /**
+     * A flag to indicate which mode the application is running on. Reference to 
+     * the RunMode enumeration.
+     */
+    public final String RUN_MODE = "RUN_MODE";
+    
+    /**
+     * The servlet path for login page
+     */
+    public final String LOGIN_PATH = "LOGIN_PATH";
+    
+    /**
+     * The servlet path for programs
+     */
+    public final String PROGRAM_PATH = "PROGRAM_PATH";
     
     /**
      * The name of the installation program.
@@ -57,6 +75,8 @@ public class DefaultValues {
      * The global default template location.
      */
     public final String DEFAULT_TEMPLATE_LOCATION = "DEFAULT_TEMPLATE_LOCATION";
+    
+    public final String GLOBAL_VIEWROOT = "GLOBAL_VIEWROOT";
     
     private String DEFAULT_TEMPLATE;
     

@@ -29,9 +29,24 @@
     
     <!--non-JSF values-->
     
-    <context-param>
-        <param-name>SETUP</param-name>
+    <!--<context-param>
+        <param-name>INSTALL</param-name>
         <param-value>tru</param-value>
+    </context-param>-->
+    
+    <context-param>
+        <param-name>RUN_MODE</param-name>
+        <param-value>normal</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>LOGIN_PATH</param-name>
+        <param-value>/login</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>PROGRAM_PATH</param-name>
+        <param-value>/program</param-value>
     </context-param>
     
     <context-param>
@@ -50,11 +65,17 @@
     </context-param>
     
     <context-param>
+        <param-name>GLOBAL_VIEWROOT</param-name>
+        <param-value>index.xhtml</param-value>
+    </context-param>
+    
+    
+    <!--This is here for development purpose only. Once the installer is setup, this will no longer be required-->
+    <context-param>
         <param-name>GLOBAL_DEFAULT_PROGRAM</param-name>
         <param-value>test</param-value>
     </context-param>
     
-    <!--This is here for development purpose only. Once the installer is setup, this will no longer be required-->
     <context-param>
         <param-name>GLOBAL_DEFAULT_VIEWROOT</param-name>
         <param-value>/programs/test/layout.xhtml</param-value>

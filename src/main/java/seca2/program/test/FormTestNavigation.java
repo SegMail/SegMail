@@ -17,15 +17,12 @@ import javax.inject.Named;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.navigation.AssignMenuItemAccessException;
 import eds.component.navigation.CreateMenuItemException;
 import eds.component.navigation.NavigationService;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
 import eds.entity.user.UserType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -85,9 +82,6 @@ public class FormTestNavigation implements Serializable{
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(CreateMenuItemException crmex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Create menu exception.", crmex.getMessage());
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,

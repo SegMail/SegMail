@@ -27,6 +27,7 @@ import org.joda.time.DateTime;
 import eds.component.DBService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.HibernateHelper;
 import eds.component.data.IncompleteDataException;
 import eds.entity.user.APIAccount;
@@ -38,6 +39,7 @@ import eds.entity.user.UserPreferenceSet;
 import eds.entity.user.UserPreferenceSet_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
+import eds.entity.user.User_;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 
@@ -69,7 +71,7 @@ public class UserService extends DBService {
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public UserType createUserType(String userTypeName, String description) 
+    public UserType createUserType(String userTypeName, String description, boolean portalAccess, boolean wsAccess) 
             throws IncompleteDataException, EntityExistsException
     {
         try {
@@ -86,6 +88,8 @@ public class UserService extends DBService {
             //Instantiate the UserType object
             UserType userType = new UserType();
             userType.setUSERTYPENAME(userTypeName);
+            userType.setPORTAL_ACCESS(portalAccess);
+            userType.setWS_ACCESS(wsAccess);
 
             objectService.getEm().persist(userType);
             
@@ -229,7 +233,7 @@ public class UserService extends DBService {
     }
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<UserType> getUserTypeByName(String userTypeName) throws DBConnectionException {
+    public List<UserType> getUserTypeByName(String userTypeName) {
 
         try {
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -767,12 +771,13 @@ public class UserService extends DBService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String generateAPIKey(long userid){
+    public String generateAPIKey(long userid) 
+            throws EntityNotFoundException{
         try{
             //Get user object first
             User user = this.getUserById(userid);
             if(user == null)
-                throw new Exception("User ID "+userid+" not found!");
+                throw new EntityNotFoundException(User.class,userid);
             
             
             return null;
@@ -781,8 +786,35 @@ public class UserService extends DBService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        } catch (Exception ex) {
-            throw new EJBException(ex);
+        } 
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<UserAccount> getWebServiceUserAccounts() {
+        try {
+            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+            CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
+            Root<UserAccount> fromUserAccount = criteria.from(UserAccount.class);
+            Root<User> fromUser = criteria.from(User.class);
+            Root<UserType> fromUserType = criteria.from(UserType.class);
+            
+            criteria.select(fromUserAccount).distinct(true); // SELECT *
+            criteria.where(builder.and(
+                    builder.isTrue(fromUserType.get(UserType_.WS_ACCESS)),
+                    builder.equal(fromUserType.get(UserType_.OBJECTID), fromUser.get(User_.USERTYPE)),
+                    builder.equal(fromUserAccount.get(UserAccount_.OWNER), fromUser.get(User_.OBJECTID))
+            ));
+            
+            List<UserAccount> results = objectService.getEm().createQuery(criteria)
+                    .getResultList();
+            
+            return results;
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
         }
     }
 }

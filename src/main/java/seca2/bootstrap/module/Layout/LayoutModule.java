@@ -20,7 +20,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
-import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
@@ -35,16 +35,16 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
     
-    @Inject DefaultValues defaults;
+    @Inject DefaultKeys defaults;
     
     @EJB private LayoutService layoutService;
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
         //If system in installation mode
-        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
+        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
         if(install)
-            return true;
+            return true;*/
         
         //Bypass if it's a file request
         if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
@@ -97,7 +97,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     protected boolean inService() {
         return true;
     }
-
+    
     @Override
     protected String urlPattern() {
         return "/program/*";
@@ -122,5 +122,19 @@ public class LayoutModule extends BootstrapModule implements Serializable {
         
     }
 
+    @Override
+    protected boolean bypassDuringInstall() {
+        return true;
+    }
 
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+
+
+    @Override
+    protected boolean bypassDuringWeb() {
+        return false;
+    }
 }
