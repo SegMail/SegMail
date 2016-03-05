@@ -8,8 +8,12 @@ package segmail.program.landing;
 import eds.entity.user.UserAccount;
 import java.util.List;
 import java.util.Map;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
 import segmail.entity.landing.ServerInstance;
 
@@ -24,6 +28,7 @@ public class ProgramLanding extends Program {
     private List<ServerInstance> servers;
     private List<UserAccount> userAccounts;
     private ServerInstance serverEditing;
+    private String name;
     private String address;
     private long userId;
     
@@ -99,7 +104,13 @@ public class ProgramLanding extends Program {
     public void setUserAccounts(List<UserAccount> userAccounts) {
         this.userAccounts = userAccounts;
     }
-    
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     
 }

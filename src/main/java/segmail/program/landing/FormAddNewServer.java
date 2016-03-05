@@ -5,9 +5,13 @@
  */
 package segmail.program.landing;
 
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -18,6 +22,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.landing.LandingService;
 
 /**
  *
@@ -30,6 +35,9 @@ public class FormAddNewServer {
     @Inject private ProgramLanding program;
     
     @EJB private UserService userService;
+    @EJB private LandingService landingService;
+    
+    private final String formName = "FormAddNewServer";
     
     @PostConstruct
     public void init() {
@@ -41,9 +49,15 @@ public class FormAddNewServer {
     
     public void addServer() {
         try {
-            
+            landingService.addServerInstance(program.getName(), program.getAddress(), program.getUserId());
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
+            program.refresh();
         } catch (EJBException ex) { 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
     
@@ -79,4 +93,11 @@ public class FormAddNewServer {
         program.setUserAccounts(userAccounts);
     }
     
+    public String getName() {
+        return program.getName();
+    }
+
+    public void setName(String name) {
+        program.setName(name);
+    }
 }

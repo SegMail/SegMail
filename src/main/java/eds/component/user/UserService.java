@@ -798,10 +798,12 @@ public class UserService extends DBService {
             Root<User> fromUser = criteria.from(User.class);
             Root<UserType> fromUserType = criteria.from(UserType.class);
             
-            criteria.select(fromUserAccount); // SELECT *
-            criteria.where(builder.isTrue(fromUserType.get(UserType_.WS_ACCESS))); 
-            criteria.where(builder.equal(fromUserType.get(UserType_.OBJECTID), fromUser.get(User_.USERTYPE)));
-            criteria.where(builder.equal(fromUserAccount.get(UserAccount_.OWNER), fromUser.get(User_.OBJECTID)));
+            criteria.select(fromUserAccount).distinct(true); // SELECT *
+            criteria.where(builder.and(
+                    builder.isTrue(fromUserType.get(UserType_.WS_ACCESS)),
+                    builder.equal(fromUserType.get(UserType_.OBJECTID), fromUser.get(User_.USERTYPE)),
+                    builder.equal(fromUserAccount.get(UserAccount_.OWNER), fromUser.get(User_.OBJECTID))
+            ));
             
             List<UserAccount> results = objectService.getEm().createQuery(criteria)
                     .getResultList();

@@ -17,7 +17,16 @@ import javax.persistence.Table;
 @Table(name="SERVER_INSTANCE")
 public class ServerInstance extends EnterpriseObject {
     
+    private String NAME;
     private String ADDRESS;
+
+    public String getNAME() {
+        return NAME;
+    }
+
+    public void setNAME(String NAME) {
+        this.NAME = NAME;
+    }
 
     public String getADDRESS() {
         return ADDRESS;
@@ -39,7 +48,7 @@ public class ServerInstance extends EnterpriseObject {
 
     @Override
     public String alias() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.NAME;
     }
     
 }

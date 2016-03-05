@@ -15,7 +15,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         X
                     </button>
-                    <h4 id="popup_title" class="modal-title"></h4>
+                    <h4 id="popup_title" class="modal-title">Add new landing page server</h4>
                 </div>
 
                 <div class="modal-body">
@@ -25,13 +25,33 @@
                     </div>
                     <div class="form-group">
                         <label>
+                            Name
+                        </label>
+                        <span class="help-block">
+                            Call it something
+                        </span>
+                        <input type="text" class="form-control" id="address"
+                               jsf:value="#{FormAddNewServer.name}"
+                               />
+                    </div>
+                    <div class="form-group">
+                        <label>
                             Address
                         </label>
+                        <span class="help-block">
+                            The IP or URL
+                        </span>
                         <input type="text" class="form-control" id="address"
                                jsf:value="#{FormAddNewServer.address}"
                                />
                     </div>
                     <div class="form-group">
+                        <label>
+                            Webservice user account
+                        </label>
+                        <span class="help-block">
+                            You will use the credentials of this user account from your landing server
+                        </span>
                         <h:selectOneMenu styleClass="form-control" style=""
                                          value="#{FormAddNewServer.userId}">
                             <f:selectItems value="#{FormAddNewServer.userAccounts}" var="account" 
@@ -47,12 +67,9 @@
 
                     <p:commandButton id="add_new_server_button" styleClass="btn btn-success" 
                                      value="Add Server" 
-                                     update="FormAddNewServer_messenger"
-                                     oncomplete="
-                                     popup.popup();
-                                     "
+                                     update="@form"
+                                     process="@form"
                                      actionListener="#{FormAddNewServer.addServer()}"
-                                     onstart="reapply_textarea('body_add')"
                                      >
 
                     </p:commandButton>
