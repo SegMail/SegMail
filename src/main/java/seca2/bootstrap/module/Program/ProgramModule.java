@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import seca2.bootstrap.DefaultValues;
+import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segurl.filter.SegURLResolver;
@@ -50,7 +50,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
-    @Inject DefaultValues defaults;
+    @Inject DefaultKeys defaults;
 
     @EJB ProgramService programService;
 
@@ -73,10 +73,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
      */
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
-        //If system in installation mode
-        boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
-        if(install)
-            return true;
+
         /**
          * Bypass if it's a file request
          * Cannot, because /program/index.xhtml is also a file.
@@ -84,9 +81,12 @@ public class ProgramModule extends BootstrapModule implements Serializable {
          * 1) enhance SeqURLResolver to recognize /index.xhtml or
          * 2) hardcode for now...
          */
-        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
             return true;
-        }
+        }*/
+        if(requestContainer.getPathParser().containsFileResource())
+            return true;
+        
         
         long userTypeId = (sessionContainer.getUserType() == null) ? 
                 -1 : sessionContainer.getUserType().getOBJECTID();
@@ -98,8 +98,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         if(programName == null || programName.isEmpty()) 
             programName = request.getServletContext().getInitParameter(defaults.GLOBAL_DEFAULT_PROGRAM);
         
-        
-
         //Instead of deciding when to reload, why not decide when not to?
         //1) When it's a specific program but the existing program in session is 
         // the same
@@ -121,6 +119,10 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
         sessionContainer.setCurrentProgram(program);
         requestContainer.setViewLocation(program.getVIEW_ROOT());
+        
+        //Set params
+        requestContainer.setProgramParamsOrdered(requestContainer.getPathParser().getOrderedParams());
+        //requestContainer.setPogramParamsNamed(request.getParameterMap());
         //Must return true no matter what, else FacesServlet will not get called
         return true;
     }
@@ -188,11 +190,26 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //If it's a found public program
         if(newProgram == null){
             Program publicProgram = programService.getSingleProgramByName(programName);
-            if(publicProgram != null && publicProgram.isPUBLIC())
+            if(publicProgram != null && publicProgram.isIS_PUBLIC())
                 newProgram = publicProgram;
         }
         
         return newProgram;
     }
+    
 
+    @Override
+    protected boolean bypassDuringInstall() {
+        return true; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+
+    @Override
+    protected boolean bypassDuringWeb() {
+        return false;
+    }
 }

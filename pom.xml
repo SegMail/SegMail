@@ -118,11 +118,11 @@
         </dependency>
         
         <!--For Arquillian unit/integration tests-->
-        <dependency>
+        <!--<dependency>
             <groupId>org.jboss.arquillian</groupId>
             <artifactId>arquillian-bom</artifactId>
             <version>1.1.10.Final</version>
-            <scope>import</scope>
+            <scope>test</scope>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -141,7 +141,8 @@
             <groupId>org.glassfish.extras</groupId>
             <artifactId>glassfish-embedded-all</artifactId>
             <version>3.1.1</version>
-        </dependency>
+            <scope>test</scope>
+        </dependency>-->
         <!--For Arquillian unit/integration tests-->
         
         <dependency>

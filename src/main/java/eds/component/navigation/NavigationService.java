@@ -23,7 +23,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;
@@ -56,20 +58,28 @@ public class NavigationService implements Serializable {
      * @param name
      * @param requestUrl
      * @param xhtml
+     * @param prependHTMLTags
+     * @param isPublic
      * @param parentMenuItemId
      * @return
+     * @throws eds.component.data.IncompleteDataException
+     * @throws eds.component.data.EntityExistsException
      * @throws CreateMenuItemException
      * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public MenuItem createMenuItem(String name, String requestUrl, long parentMenuItemId, String prependHTMLTags, boolean isPublic)
-            throws CreateMenuItemException, DBConnectionException {
+    public MenuItem createMenuItem(String name, String requestUrl, long parentMenuItemId, String prependHTMLTags, boolean isPublic) 
+            throws IncompleteDataException, EntityExistsException {
         
         try {
             if(name == null || name.length() <= 0)
-                throw new CreateMenuItemException("MenuItem name cannot be empty!");
+                throw new IncompleteDataException("MenuItem name cannot be empty!");
             if(requestUrl == null || requestUrl.length() <= 0)
-                throw new CreateMenuItemException("MenuItem URL cannot be empty!");
+                throw new IncompleteDataException("MenuItem URL cannot be empty!");
+            
+            List<MenuItem> existingMenuItems = getAllMenuItemsByName(name);
+            if(existingMenuItems != null && !existingMenuItems.isEmpty())
+                throw new EntityExistsException(existingMenuItems.get(0));
             
             //get parent MenuItem
             MenuItem parentMenuItem = em.find(MenuItem.class, parentMenuItemId);
@@ -98,10 +108,8 @@ public class NavigationService implements Serializable {
                 //throw new DBConnectionException(pex.getCause().getMessage());
                 throw new DBConnectionException();
             }
-            throw new CreateMenuItemException(pex.getMessage());
-        } catch (Exception ex) {
-            throw new CreateMenuItemException(ex.getMessage());
-        }
+            throw pex;
+        } 
 
         
     }

@@ -64,7 +64,21 @@ public class SubscriptionModule extends BootstrapModule implements Serializable 
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+    }
+
+    @Override
+    protected boolean bypassDuringInstall() {
+        return true;
+    }
+
+    @Override
+    protected boolean bypassDuringNormal() {
+        return true;
     }
     
+    @Override
+    protected boolean bypassDuringWeb() {
+        return true;
+    }
 }

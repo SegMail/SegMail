@@ -24,6 +24,7 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import segurl.filter.SegURLResolver;
 
 /**
  * Builds the navigation structure for the user.
@@ -56,6 +57,12 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
+        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+            return true;
+        }*/
+        if (requestContainer.getPathParser().containsFileResource())
+            return true;
+        
         UserType userType = sessionContainer.getUserType();
         
         //For all other programs which changes menu items assignment, just nullify menu attribute of the sessionContainer
@@ -73,14 +80,16 @@ public class NavigationModule extends BootstrapModule implements Serializable {
                 MenuItemContainer container = new MenuItemContainer();
                 container.setMenuItem(menuItem);
                 container.setContextPath(contextPath);
-                menuItemContainers.add(container);
+                if(!menuItemContainers.contains(container)) //Don't add duplicates
+                    menuItemContainers.add(container);
             }
             //All all public menuitems
             for(MenuItem menuItem : publicMenuItems){
                 MenuItemContainer container = new MenuItemContainer();
                 container.setMenuItem(menuItem);
                 container.setContextPath(contextPath);
-                menuItemContainers.add(container);
+                if(!menuItemContainers.contains(container)) //Public menuitems might be added twice
+                    menuItemContainers.add(container);
             }
             
             sessionContainer.setMenu(menuItemContainers);
@@ -137,6 +146,21 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         
+    }
+
+    @Override
+    protected boolean bypassDuringInstall() {
+        return false; //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    protected boolean bypassDuringNormal() {
+        return false;
+    }
+    
+    @Override
+    protected boolean bypassDuringWeb() {
+        return false;
     }
 
 }

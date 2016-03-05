@@ -17,6 +17,8 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityExistsException;
+import eds.component.data.IncompleteDataException;
 import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
@@ -25,6 +27,8 @@ import eds.component.user.UserRegistrationException;
 import eds.component.user.UserService;
 import eds.component.user.UserTypeException;
 import eds.entity.user.UserType;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -41,6 +45,8 @@ public class FormTestUser implements Serializable {
     //Create UserType
     private String userTypeName;
     private String description;
+    private boolean portalAccess;
+    private boolean wsAccess;
     
     private final String createUsertypeFormName = "createUsertypeForm";
     
@@ -74,17 +80,15 @@ public class FormTestUser implements Serializable {
     
     public void createUserType(){
         try{
-            userService.createUserType(userTypeName, description);
+            userService.createUserType(userTypeName,description,portalAccess,wsAccess);
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "Usertype "+userTypeName+" created!", null);
-        } 
-        catch (UserTypeException utex) {
-            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, utex.getClass().getSimpleName(), utex.getMessage());
-        } 
+        }
         catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } 
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (EntityExistsException ex) {
+            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
     
@@ -235,6 +239,22 @@ public class FormTestUser implements Serializable {
 
     public List<UserType> getAllUserTypes() {
         return this.programTest.getAllUserTypes();
+    }
+
+    public boolean isPortalAccess() {
+        return portalAccess;
+    }
+
+    public void setPortalAccess(boolean portalAccess) {
+        this.portalAccess = portalAccess;
+    }
+
+    public boolean isWsAccess() {
+        return wsAccess;
+    }
+
+    public void setWsAccess(boolean wsAccess) {
+        this.wsAccess = wsAccess;
     }
     
     public void createUserWithType(String usertypename, String username, String password){

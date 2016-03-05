@@ -9,7 +9,6 @@ package eds.entity.user;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
