@@ -24,10 +24,13 @@ public abstract class Program implements Serializable {
     @PostConstruct
     public void init() {
         initProgramParams();
+        initProgram();
     }
     
     /**
      * 
      */
     public abstract void initProgramParams();
+    
+    public abstract void initProgram();
 }

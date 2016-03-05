@@ -76,8 +76,11 @@ public class FormTestEverything {
     
     private UploadedFile uploadedFile;
     
-    private final String USERTYPES_TAG = "USERTYPES";
     private final String USERTYPE_TAG = "USERTYPE";
+    private final String USERTYPE_NAME_TAG = "NAME";
+    private final String USERTYPE_DESCRIPTION_TAG = "DESCRIPTION";
+    private final String USERTYPE_PORTAL_ACCESS_TAG = "PORTAL_ACCESS";
+    private final String USERTYPE_WS_ACCESS_TAG = "WS_ACCESS";
     
     private final String USERS_TAG = "USERS";
     private final String USER_TAG = "USER";
@@ -415,12 +418,16 @@ public class FormTestEverything {
             for(int n=0; n<usertypes.getLength(); n++){
                 Node nNode = usertypes.item(n);
                 Element element = (Element) nNode;
-                //if(element.getNodeName().compareTo(USERTYPE_TAG) != 0)
-                //    throw new RuntimeException("Wrong tag <"+element.getNodeName()+"> should be <"+USERTYPE_TAG+">");
                 
-                String usertypeName = element.getTextContent();
+                String usertypeName = element.getElementsByTagName(USERTYPE_NAME_TAG).item(0).getTextContent();
+                String description = element.getElementsByTagName(USERTYPE_DESCRIPTION_TAG).item(0).getTextContent();
+                boolean portalAccess = Boolean.parseBoolean(element.getElementsByTagName(USERTYPE_PORTAL_ACCESS_TAG).item(0).getTextContent());
+                boolean wsAccess = Boolean.parseBoolean(element.getElementsByTagName(USERTYPE_WS_ACCESS_TAG).item(0).getTextContent());
                 
                 this.formTestUser.setUserTypeName(usertypeName);
+                this.formTestUser.setDescription(description);
+                this.formTestUser.setPortalAccess(portalAccess);
+                this.formTestUser.setWsAccess(wsAccess);
                 this.formTestUser.createUserType();
             }
             

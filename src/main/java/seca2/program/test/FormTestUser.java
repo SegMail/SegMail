@@ -45,6 +45,8 @@ public class FormTestUser implements Serializable {
     //Create UserType
     private String userTypeName;
     private String description;
+    private boolean portalAccess;
+    private boolean wsAccess;
     
     private final String createUsertypeFormName = "createUsertypeForm";
     
@@ -78,7 +80,7 @@ public class FormTestUser implements Serializable {
     
     public void createUserType(){
         try{
-            userService.createUserType(userTypeName, description);
+            userService.createUserType(userTypeName,description,portalAccess,wsAccess);
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "Usertype "+userTypeName+" created!", null);
         }
         catch (DBConnectionException ex) {
@@ -237,6 +239,22 @@ public class FormTestUser implements Serializable {
 
     public List<UserType> getAllUserTypes() {
         return this.programTest.getAllUserTypes();
+    }
+
+    public boolean isPortalAccess() {
+        return portalAccess;
+    }
+
+    public void setPortalAccess(boolean portalAccess) {
+        this.portalAccess = portalAccess;
+    }
+
+    public boolean isWsAccess() {
+        return wsAccess;
+    }
+
+    public void setWsAccess(boolean wsAccess) {
+        this.wsAccess = wsAccess;
     }
     
     public void createUserWithType(String usertypename, String username, String password){

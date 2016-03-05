@@ -26,6 +26,7 @@ public class UserType extends EnterpriseObject {
     
     /**
      * Not in use yet
+     * [03.03.2016] Time to use!
      */
     private boolean PORTAL_ACCESS;
     private boolean WS_ACCESS;

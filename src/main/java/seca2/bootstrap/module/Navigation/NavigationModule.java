@@ -57,9 +57,11 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
-        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
             return true;
-        }
+        }*/
+        if (requestContainer.getPathParser().containsFileResource())
+            return true;
         
         UserType userType = sessionContainer.getUserType();
         
@@ -78,14 +80,16 @@ public class NavigationModule extends BootstrapModule implements Serializable {
                 MenuItemContainer container = new MenuItemContainer();
                 container.setMenuItem(menuItem);
                 container.setContextPath(contextPath);
-                menuItemContainers.add(container);
+                if(!menuItemContainers.contains(container)) //Don't add duplicates
+                    menuItemContainers.add(container);
             }
             //All all public menuitems
             for(MenuItem menuItem : publicMenuItems){
                 MenuItemContainer container = new MenuItemContainer();
                 container.setMenuItem(menuItem);
                 container.setContextPath(contextPath);
-                menuItemContainers.add(container);
+                if(!menuItemContainers.contains(container)) //Public menuitems might be added twice
+                    menuItemContainers.add(container);
             }
             
             sessionContainer.setMenu(menuItemContainers);

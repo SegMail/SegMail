@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+
+        <ui:define name="main-program-panel">
+            <c:choose >
+                <c:when test="#{UserSessionContainer.loggedIn}">
+                    <div class="row"><!--Page message-->
+                        <div class="col-md-12">
+                            <form jsf:id="ProgramSubscribe">
+                                <s2:messenger for="ProgramSubscribe" showDetail="true" showSummary="true" closable="true" />
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="block">
+                                <div class="block-content">
+                                    <h2><strong>Servers</strong></h2>
+
+                                    <p>
+                                        Add and manage the servers that are processing your offline landing pages. These
+                                        servers require a UserAccount associated with them so that they are able to call
+                                        webservices of the enterprise servers.
+                                    </p>
+                                    <div class="form-group">
+                                        <a class="btn btn-success" href="#add_new_server_panel" data-toggle="modal"
+                                           onclick="
+                                                   popup.init('popup_title', 'Add new server', 'email_type', 'CONFIRMATION');
+                                                   popup.popup();"
+                                           >
+
+                                            Add new offline server
+                                        </a>
+                                    </div>
+                                    <ui:include src="server_list_panel.xhtml"></ui:include>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="add_new_server_panel">
+                        <ui:include src="add_new_server_panel.xhtml"></ui:include>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    This is the offline subscribe page
+                </c:otherwise>
+
+            </c:choose>
+
+
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribe/js/template_popup.js" />
+
+        </ui:define>
+
+    </ui:composition>
+</html>
+
