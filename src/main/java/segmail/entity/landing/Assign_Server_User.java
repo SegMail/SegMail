@@ -16,9 +16,9 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="ASSIGN_SERVER_USER")
-public class AssignServerUser extends EnterpriseRelationship<ServerInstance,User> {
+public class Assign_Server_User extends EnterpriseRelationship<ServerInstance,User> {
 
-    public AssignServerUser(ServerInstance newInstance, User user) {
+    public Assign_Server_User(ServerInstance newInstance, User user) {
         this.setSOURCE(newInstance);
         this.setTARGET(user);
     }

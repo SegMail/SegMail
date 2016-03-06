@@ -20,7 +20,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.PersistenceException;
 import org.hibernate.exception.GenericJDBCException;
-import segmail.entity.landing.AssignServerUser;
+import segmail.entity.landing.Assign_Server_User;
 import segmail.entity.landing.ServerInstance;
 
 /**
@@ -79,7 +79,7 @@ public class LandingService {
             
             updateService.getEm().persist(newInstance);
             
-            AssignServerUser assignment = new AssignServerUser(newInstance,user);
+            Assign_Server_User assignment = new Assign_Server_User(newInstance,user);
             
             updateService.getEm().persist(assignment);
             

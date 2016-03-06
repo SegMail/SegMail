@@ -1,5 +1,7 @@
 var SUMMERNOTE_HEIGHT = 300;
 
+var CONFIRMATION_PLACEHOLDER = '[confirm]';
+
 var popup = (function() {
 
     var title_id;
@@ -26,8 +28,55 @@ var popup = (function() {
             document.getElementById(this.type_id).value = TYPE;
             
             //Re-render the summernote text editor
-            $('textarea.editor').summernote({height: SUMMERNOTE_HEIGHT});
-            
+            //In addition, add our custom mail-merge buttons
+            $('textarea.editor').summernote({
+                /*height: SUMMERNOTE_HEIGHT,
+                oninit: function() {
+                    var confirmButton 
+                            = '<button id="insertConfirmButton" type="button" class="btn btn-default btn-sm btn-small" title="Insert confirmation link" data-event="something" tabindex="-1" onclick="popup.test()">[confirm]</button>';
+                    var insertGroup 
+                            = '<div class="note-file btn-group">' + confirmButton + '</div>';
+                    $(insertGroup).appendTo($('.note-toolbar'));
+                    $('#insertConfirmButton').tooltip({placement: 'bottom'});
+                    $('#insertConfirmButton').click(function(event) {
+                        //var text = $('.note-editable').children('p').text();
+                        alert("text");
+                    });
+                }*/
+                height: SUMMERNOTE_HEIGHT,
+    focus: false,
+    toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['font', ['strikethrough']],
+            ['fontsize', ['fontsize']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['height', ['height']],
+            ['view', ['fullscreen', 'codeview']],
+        ],
+    oninit: function() {
+        // Add "open" - "save" buttons
+        var noteBtn = '<button id="makeSnote" type="button" class="btn btn-default btn-sm btn-small" title="Identify a music note" data-event="something" tabindex="-1"><i class="fa fa-music"></i></button>';            
+        var fileGroup = '<div class="note-file btn-group">' + noteBtn + '</div>';
+        $(fileGroup).appendTo($('.note-toolbar'));
+        // Button tooltips
+        $('#makeSnote').tooltip({container: 'body', placement: 'bottom'});
+        // Button events
+        $('#makeSnote').click(function(event) {
+            var highlight = window.getSelection(),  
+            spn = '<span class="snote" style="color:blue;">' + highlight + '</span>',
+            text = $('.note-editable').children('p').text(),
+            range = highlight.getRangeAt(0),
+            startText = text.substring(0, range.startOffset), 
+            endText = text.substring(range.endOffset, text.length);
+
+            $('.note-editable').html(startText + spn + endText);
+        });
+     }
+            });
+        },
+        
+        test : function() {
+            alert("test");
         },
         
         clear : function() {
@@ -39,8 +88,6 @@ var popup = (function() {
 });
 
 var popup = new popup();
-
-
 
 /**
  * http://stackoverflow.com/questions/7043840/jsf-2-how-show-different-ajax-status-in-same-input/7044332#7044332
@@ -72,7 +119,3 @@ function edit(data){
             break;
     }
 };
-
-//$(document).ready(function () {
-//    popup.clear();
-//});

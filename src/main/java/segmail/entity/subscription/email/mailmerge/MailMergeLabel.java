@@ -9,18 +9,25 @@ package segmail.entity.subscription.email.mailmerge;
  *
  * @author LeeKiatHaw
  */
-public enum MERGE_COMMAND {
-    UNSUBSCRIBE("UNSUBSCRIBE"),
-    CONFIRM("CONFIRM");
+
+public enum MailMergeLabel {
+    CONFIRM("CONFIRM","[!confirm]"),
+    UNSUBSCRIBE("UNSUBSCRIBE","[!unsubscribe]");
     
     final String name;
+    final String label;
     
-    private MERGE_COMMAND(String name){
+    private MailMergeLabel(String name, String label){
         this.name = name;
+        this.label = label;
+    }
+    
+    public String label() {
+        return this.label;
     }
 
     @Override
     public String toString() {
-        return this.name;
+        return this.name; //To change body of generated methods, choose Tools | Templates.
     }
 }
