@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
 
@@ -32,8 +33,8 @@ import segmail.entity.subscription.email.AutoWelcomeEmail;
 @SessionScoped
 public class ProgramWelcomeEmail implements Serializable {
     
-    @EJB
-    private SubscriptionService subscriptionService;
+    @EJB 
+    private AutoresponderService autoresponderService;
     @EJB
     private UserService userService;
     @EJB
@@ -73,7 +74,7 @@ public class ProgramWelcomeEmail implements Serializable {
     public void initializeAllConfirmationEmails() {
         try {
             
-            this.setConfirmationTemplates(subscriptionService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
+            this.setConfirmationTemplates(autoresponderService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -85,7 +86,7 @@ public class ProgramWelcomeEmail implements Serializable {
     public void initializeAllWelcomeEmails() {
         try {
             
-            this.setWelcomeTemplates(subscriptionService.getAvailableWelcomeEmailForClient(clientFacade.getClient().getOBJECTID()));
+            this.setWelcomeTemplates(autoresponderService.getAvailableWelcomeEmailForClient(clientFacade.getClient().getOBJECTID()));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");

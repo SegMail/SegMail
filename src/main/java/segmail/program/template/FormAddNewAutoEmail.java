@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.email.AutoEmailTypeFactory;
 
 /**
@@ -30,7 +31,7 @@ import segmail.entity.subscription.email.AutoEmailTypeFactory;
 @RequestScoped
 public class FormAddNewAutoEmail {
     
-    @EJB private SubscriptionService subscriptionService;
+    @EJB private AutoresponderService autoresponderService;
     @EJB private UserService userService;
     
     @Inject private ProgramWelcomeEmail program;
@@ -54,7 +55,7 @@ public class FormAddNewAutoEmail {
         try {
             // Create the new template
             // Get the client associated with the user and assign it
-            AutoresponderEmail newTemplate = subscriptionService.createAndAssignAutoEmail(subject, body, type);
+            AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(subject, body, type);
             
             //Refresh the list of email templates on the page
             //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit

@@ -59,6 +59,7 @@ public class MailMergeService {
      * Generates the confirmation link, which has an expiry date.
      * 
      * @param emailBody
+     * @param landingServerAddress
      * @param landingServer
      * @param email
      * @param listId

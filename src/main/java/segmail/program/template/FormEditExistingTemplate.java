@@ -25,6 +25,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 
 /**
  *
@@ -34,7 +35,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @RequestScoped
 public class FormEditExistingTemplate {
     
-    @EJB private SubscriptionService subscriptionService;
+    @EJB private AutoresponderService autoresponderService;
     @EJB private GenericObjectService objectService;
     //@EJB private UserService userService;
     
@@ -69,7 +70,7 @@ public class FormEditExistingTemplate {
     
     public void saveTemplateAndContinue(){
         try {
-            AutoresponderEmail newTemplate = subscriptionService.saveAutoEmail(program.getEditingTemplate());
+            AutoresponderEmail newTemplate = autoresponderService.saveAutoEmail(program.getEditingTemplate());
             
             //redirect to itself after setting list editing
             //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -96,7 +97,7 @@ public class FormEditExistingTemplate {
     
     public void saveTemplateAndClose(){
         try {
-            subscriptionService.saveAutoEmail(program.getEditingTemplate());
+            autoresponderService.saveAutoEmail(program.getEditingTemplate());
             
             refresh();
             
@@ -121,7 +122,7 @@ public class FormEditExistingTemplate {
     
     public void deleteTemplate(){
         try {
-            subscriptionService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
+            autoresponderService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
             refresh();
             

@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
@@ -35,7 +36,7 @@ public class FormListEmail {
     @Inject private ProgramList program;
     @Inject private ClientContainer clientContainer;
 
-    @EJB private SubscriptionService subscriptionService;
+    @EJB private AutoresponderService autoresponderService;
     @EJB private GenericObjectService objectService;
 
     private final String formName = "form_list_email";
@@ -62,7 +63,7 @@ public class FormListEmail {
 
     public void loadAvailableConfirmationEmails() {
         try {
-            List<AutoConfirmEmail> confirmEmails = subscriptionService.getAvailableConfirmationEmailForClient(
+            List<AutoConfirmEmail> confirmEmails = autoresponderService.getAvailableConfirmationEmailForClient(
                     clientContainer.getClient().getOBJECTID());
             program.setConfirmationEmails(confirmEmails);
 
@@ -73,7 +74,7 @@ public class FormListEmail {
 
     public void loadAvailableWelcomeEmails() {
         try {
-            List<AutoWelcomeEmail> welcomeEmails = subscriptionService.getAvailableWelcomeEmailForClient(
+            List<AutoWelcomeEmail> welcomeEmails = autoresponderService.getAvailableWelcomeEmailForClient(
                     clientContainer.getClient().getOBJECTID());
             program.setWelcomeEmails(welcomeEmails);
 
@@ -124,14 +125,14 @@ public class FormListEmail {
             
             //Nothing is selected
             if (selectedConfirmEmailId <= 0) {
-                subscriptionService.removeAllAssignedConfirmationEmailFromList(editingListId);
+                autoresponderService.removeAllAssignedConfirmationEmailFromList(editingListId);
                 FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Confirmation email unassigned. ", "You need to assign a confirmation email to start receiving signups.");
                 this.resetConfirmationEmailPanel();
                 return;
             }
             
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Confirmation email assigned", null);
-            Assign_AutoConfirmEmail_List newAssign = subscriptionService.assignConfirmationEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
+            Assign_AutoConfirmEmail_List newAssign = autoresponderService.assignConfirmationEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
             program.setSelectedConfirmationEmail(newAssign.getSOURCE());
 
         } catch (EntityNotFoundException ex) {
@@ -148,13 +149,13 @@ public class FormListEmail {
 
             //Nothing is selected
             if (selectedWelcomeEmailId <= 0) {
-                subscriptionService.removeAllAssignedWelcomeEmailFromList(editingListId);
+                autoresponderService.removeAllAssignedWelcomeEmailFromList(editingListId);
                 FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Welcome email unassigned. ", "You need to assign a confirmation email to start receiving signups.");
                 this.resetConfirmationEmailPanel();
                 return;
             }
 
-            Assign_AutoWelcomeEmail_List newAssign = subscriptionService.assignWelcomeEmailToList(program.getSelectedWelcomeEmailId(), program.getListEditing().getOBJECTID());
+            Assign_AutoWelcomeEmail_List newAssign = autoresponderService.assignWelcomeEmailToList(program.getSelectedWelcomeEmailId(), program.getListEditing().getOBJECTID());
             program.setSelectedWelcomeEmail(newAssign.getSOURCE());
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Welcome email assigned", null);
 
