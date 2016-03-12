@@ -26,7 +26,7 @@ import eds.entity.user.UserType;
 import groups.GlassFishEmbedded;
 import groups.GlassFishManaged;
 @RunWith(Arquillian.class)
-public class UserServiceTestIntegration {
+public class UserServiceIntegrationTest {
 	
 	@EJB
 	private UserService userService;

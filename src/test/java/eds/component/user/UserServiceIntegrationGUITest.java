@@ -30,7 +30,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import groups.GlassFishManaged;
 
 @RunWith(Arquillian.class)
-public class UserServiceTestIntegrationGUI {
+public class UserServiceIntegrationGUITest {
 
 	private static final By USERNAME_FIELD = By.id("form-user-login:login-username");
 	private static final By PASSWORD_FIELD = By.id("form-user-login:login-password");
@@ -81,7 +81,6 @@ public class UserServiceTestIntegrationGUI {
 
 		// add configuration
 				.addAsResource("test-persistence.xml", "META-INF/persistence.xml")
-				.addAsManifestResource("glassfish-resources.xml")
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/faces-config.xml"))
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/ejb-jar.xml"))
 				.addAsWebInfResource(new File("src/main/webapp/WEB-INF/beans.xml"))
@@ -149,7 +148,7 @@ public class UserServiceTestIntegrationGUI {
 		driver.findElement(USER_TYPE_BUTTON_CREATE).click();
 
 		wait.until(ExpectedConditions.elementToBeClickable(USER_CREATE_BUTTON));
-
+		Thread.sleep(700);
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		js.executeScript(jqueryScript);
 		driver.findElement(USER_CREATE_NAME_INPUT).sendKeys(userNameNew);
@@ -158,8 +157,9 @@ public class UserServiceTestIntegrationGUI {
 		driver.findElement(USER_CREATE_BUTTON).click();
 		wait.until(ExpectedConditions.elementToBeClickable(USER_LOGIN_BUTTON));
 		driver.findElement(USER_LOGIN_NAME_INPUT).sendKeys(userNameNew);
-		Thread.sleep(3000);
+		Thread.sleep(700);
 		driver.findElement(USER_LOGIN_PASSWORD_INPUT).sendKeys(passwordNew);
+		Thread.sleep(700);
 		driver.findElement(USER_LOGIN_BUTTON).click();
 		waitGui().withTimeout(15, TimeUnit.SECONDS).until().element(LOGGED_IN).is().visible();
 		assertEquals("Login successful!", driver.findElement(LOGGED_IN).getText());

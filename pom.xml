@@ -153,8 +153,6 @@
 		</dependency>
 
 
-
-
 		<!--For Arquillian unit/integration tests -->
 
 		<dependency>
@@ -208,7 +206,6 @@
 	</dependencyManagement>
 
 	<build>
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -270,8 +267,9 @@
 				<configuration>
 					<systemPropertyVariables>
 						<arquillian.launch>glassfish-embedded</arquillian.launch>
-						<groups>groups.GlassFishEmbedded</groups>
+						
 					</systemPropertyVariables>
+					<groups>groups.GlassFishEmbedded</groups>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -280,6 +278,9 @@
 
 		<profile>
 			<id>arq-glassfish-embedded</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
@@ -294,11 +295,31 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
+			<build>
+				<testResources>
+					<testResource>
+						<directory>src/test/resources</directory>
+					</testResource>
+				</testResources>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.19.1</version>
+						<configuration>
+							<systemPropertyVariables>
+								<arquillian.launch>glassfish-embedded</arquillian.launch>
+							</systemPropertyVariables>
+							<groups>groups.GlassFishEmbedded</groups>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
-			<id>glassfish-managed</id>
+			<id>integration</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<dependencies>
 				<dependency>
@@ -341,11 +362,12 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.19.1</version>
 						<configuration>
 							<systemPropertyVariables>
 								<arquillian.launch>glassfish-managed</arquillian.launch>
-								<groups>groups.GlassFishManaged</groups>
 							</systemPropertyVariables>
+							<groups>groups.GlassFishManaged</groups>
 						</configuration>
 					</plugin>
 				</plugins>
