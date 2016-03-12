@@ -79,9 +79,8 @@
                 </div><!-- page navigation wrapper -->
 
                 <div class="page-content">
-                    <div class="container">
+                    <div class="container" style="height:100%;">
                         <div class="page-toolbar">
-
                             <c:if test="#{not empty UserSessionContainer.currentProgram }" >
                                 <div class="page-toolbar-block">
                                     <div class="page-toolbar-title">#{UserSessionContainer.currentProgram.DISPLAY_TITLE}</div>
@@ -101,19 +100,14 @@
                                     </form>
                                 </div>
                             </c:if>
-
-
                             <ul class="breadcrumb">
                                 <li><a href="#">Dashboard</a></li>
                                 <li><a href="#">UI Elements</a></li>
                                 <li class="active">Blocks &amp; Panels</li>
                             </ul>                 
-
-                        </div>
-                        <div class="col-md-12 col-xs-12">
-                            <s2:messenger for="ProgramTest" showDetail="true" showSummary="true" />
                         </div>
                         <ui:insert name="main-program-panel" />
+                        
                     </div>
 
                 </div><!-- page content wrapper -->

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+
+        <ui:define name="main-program-panel">
+            <c:choose >
+                <c:when test="#{UserSessionContainer.loggedIn}">
+                    <div class="jumbotron" style="text-align: center;">
+                        <h1 style="margin-top: 30px;">This page is not accessible when logged in.</h1>
+                        <p>
+                            <a class="btn btn-primary" href="#add_list_popup" data-toggle="modal">
+                                The confirm program is meant for offline landing page servers to process
+                                the confirmation of a subscription between a subscriber and subscription list.
+                                <br/>
+                                 If you have wandered into this page by accident, you can click back on your 
+                                 browser to go back to where you came from, or you can click <a href="/#{UserSessionContainer.lastProgram}">here</a>.
+                                 <br />
+                                 Wait! Since you're here, here's a picture of a cat for being so inquisitive:
+                            </a>
+                        </p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    
+                </c:otherwise>
+
+            </c:choose>
+
+
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribe/js/template_popup.js" />
+
+        </ui:define>
+
+    </ui:composition>
+</html>
+

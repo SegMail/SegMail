@@ -629,10 +629,9 @@ public class SubscriptionService {
             if(assignedConfirmEmail == null)
                 throw new IncompleteDataException("Please assign a Confirmation email before adding subscribers.");
             
-            //Get the Landing server
             
             //Construct the Email object and parse all mailmerge functions using MailMergeService
-            //String confirmationLink = mailMergeService.generateConfirmationLink(assignedConfirmEmail.getBODY(), ??, email, listId);
+            String newEmailBody = mailMergeService.generateConfirmationLink(assignedConfirmEmail.getBODY(), email, listId);
             
             //Send the email using MailService
             

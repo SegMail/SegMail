@@ -93,5 +93,32 @@ public class LandingService {
         }
     }
     
+    /**
+     * This is a generator method that produces the next server instance based
+     * on a LandingServerGenerationStrategy.
+     * 
+     * @param strategy
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy) throws IncompleteDataException {
+        try {
+            //Currently there's no strategy, just take the first one.
+            //This is when the user can set their own landing servers
+            //List<ServerInstance> servers = objectService.getAllSourceObjectsFromTarget(userId, Assign_Server_User.class, ServerInstance.class);
+            //Only the system admin can set landing servers, so no point retrieving by assignment
+            List<ServerInstance> servers = objectService.getAllEnterpriseObjects(ServerInstance.class);
+            if(servers == null || servers.isEmpty())
+                throw new IncompleteDataException("No Servers found, please contact your administrators to set a valid ServerInstance first.");
+            
+            return servers.get(0);
+            
+        } catch (PersistenceException pex) {
+            if (pex.getCause() instanceof GenericJDBCException) {
+                throw new DBConnectionException(pex.getCause().getMessage());
+            }
+            throw new EJBException(pex);
+        }
+    }
     
 }

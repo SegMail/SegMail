@@ -7,6 +7,7 @@ package segmail.component.subscription.mailmerge;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.data.IncompleteDataException;
 import eds.entity.transaction.EnterpriseTransaction;
 import eds.entity.transaction.EnterpriseTransactionParam;
 import java.util.List;
@@ -14,6 +15,8 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import segmail.component.landing.LandingServerGenerationStrategy;
+import segmail.component.landing.LandingService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
@@ -33,6 +36,7 @@ public class MailMergeService {
     @EJB private UpdateObjectService updateService;
     
     @EJB private SubscriptionService subscriptionService;
+    @EJB private LandingService landingService;
     
     /**
      * 
@@ -56,21 +60,21 @@ public class MailMergeService {
      * I can't think of any good way to create a logical generator that can be
      * configurable in the frontend. So we will just hard code everything first.
      * <br>
-     * Generates the confirmation link, which has an expiry date.
+     * Generates the body content with the proper confirmation link, which has 
+     * an expiry date.
      * 
      * @param emailBody
-     * @param landingServerAddress
-     * @param landingServer
      * @param email
      * @param listId
      * @return 
+     * @throws eds.component.data.IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String generateConfirmationLink(
             String emailBody, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
-            String landingServerAddress, 
+            //String landingServerAddress, 
             String email,
-            long listId) {
+            long listId) throws IncompleteDataException {
         //1. Create a transaction with expiry date
         EnterpriseTransaction trans = new EnterpriseTransaction();
         updateService.getEm().persist(trans);
@@ -87,9 +91,11 @@ public class MailMergeService {
         listParam.setPARAM_KEY(DEFAULT_KEY_FOR_LIST);
         listParam.setPARAM_VALUE(Long.toString(listId));
         updateService.getEm().persist(listParam);
+        //Might want to use guid instead.
         
         //3. Return the link with program name "confirm" and the generated transaction ID
-        String confirmLink = landingServerAddress.concat("/").concat(Long.toString(trans.getTRANSACTION_ID()));
+        ServerInstance landingServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
+        String confirmLink = landingServer.getADDRESS().concat("/").concat(Long.toString(trans.getTRANSACTION_ID()));
         
         String newEmailBody = emailBody.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
         
