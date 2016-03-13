@@ -5,15 +5,6 @@
         http://jboss.org/schema/arquillian
         http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
 	
-	<container qualifier="glassfish-embedded">
-		<configuration>
-			<property name="resourcesXml">
-                src/test/resources/glassfish-resources.xml
-            </property>
-			<property name="bindHttpPort">8182</property>
-		</configuration>
-	</container>
-	
 	<container qualifier="glassfish-managed" default="true" >
 		<configuration>
 			<property name="glassFishHome">/opt/glassfish4/</property>

@@ -1,7 +1,7 @@
 package eds.component.user;
 
-import static org.junit.Assert.assertEquals;
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
@@ -19,15 +19,12 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import groups.GlassFishManaged;
 
 @RunWith(Arquillian.class)
 public class UserServiceIntegrationGUITest {
@@ -62,6 +59,7 @@ public class UserServiceIntegrationGUITest {
 
 		File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importCompileAndRuntimeDependencies().resolve()
 				.withMavenCentralRepo(false).withTransitivity().asFile();
+		File[] libs2 = Maven.resolver().loadPomFromFile("pom.xml").resolve("junit:junit").withTransitivity().as(File.class);
 		List<File> libsList = new ArrayList(Arrays.asList(libs));
 
 		List<String> exclusionList = Arrays.asList(
@@ -78,6 +76,7 @@ public class UserServiceIntegrationGUITest {
 						"seca2.program", "seca2.template", "segmail.bootstrap.module.subscription",
 						"segmail.component.subscription", "segmail.entity.subscription", "segmail.program",
 						"talent.component", "talent.entity", "talent.program")
+				.addClasses(WebArchive.class)
 
 		// add configuration
 				.addAsResource("test-persistence.xml", "META-INF/persistence.xml")
@@ -95,9 +94,9 @@ public class UserServiceIntegrationGUITest {
 				.setWebXML(new File("src/main/webapp/WEB-INF/web.xml"));
 
 		for (File file : libsList.toArray(new File[libsList.size()])) {
-			System.out.println("FILE ADDED : " + file);
 			war.addAsLibrary(file);
 		}
+		war.addAsLibraries(libs2);
 
 		addFiles(war, new File("src/main/webapp/programs/autoemail"));
 		addFiles(war, new File("src/main/webapp/programs/chartjs"));
@@ -123,7 +122,6 @@ public class UserServiceIntegrationGUITest {
 
 	@Test
 	@ApplyScriptBefore("IntegraionGUIUserCleanUp.sql")
-	@Category(GlassFishManaged.class)
 	public void login() throws InterruptedException {
 		WebDriverWait wait = new WebDriverWait(driver, 5);
 
