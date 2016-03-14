@@ -146,4 +146,6 @@
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>-->
     
+    <!--AWS credentials-->
+    
 </web-app>

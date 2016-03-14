@@ -62,10 +62,10 @@ public class LayoutModule extends BootstrapModule implements Serializable {
          * delegated to the program forms to explicitly reload the layout object.
          * Performance vs correctness.
          */
-        List<Layout> layouts = layoutService.getLayoutsByUser(sessionContainer.getUser());
+        List<Layout> layouts = layoutService.getLayoutsByProgram(requestContainer.getProgramName());
         
         if(layouts == null || layouts.isEmpty())
-            layouts = layoutService.getLayoutsByProgram(requestContainer.getProgramName());
+            layouts = layoutService.getLayoutsByUser(sessionContainer.getUser());
         
         if(layouts == null || layouts.isEmpty()) {
             String defaultTemplateLocation = request.getServletContext().getInitParameter(defaults.DEFAULT_TEMPLATE_LOCATION);

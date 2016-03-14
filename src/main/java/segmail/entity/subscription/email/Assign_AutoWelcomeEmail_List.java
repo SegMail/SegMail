@@ -14,8 +14,8 @@ import segmail.entity.subscription.SubscriptionList;
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="ASSIGN_AUTO_WELCOME_EMAIL_LIST")
+//@Entity
+//@Table(name="ASSIGN_AUTO_WELCOME_EMAIL_LIST")
 public class Assign_AutoWelcomeEmail_List extends EnterpriseRelationship<AutoWelcomeEmail,SubscriptionList> {
 
     @Override

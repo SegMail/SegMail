@@ -14,8 +14,8 @@ import segmail.entity.subscription.SubscriptionList;
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="ASSIGN_AUTO_CONFIRM_EMAIL_LIST")
+//@Entity
+//@Table(name="ASSIGN_AUTO_CONFIRM_EMAIL_LIST")
 public class Assign_AutoConfirmEmail_List extends EnterpriseRelationship<AutoConfirmEmail,SubscriptionList> { //Assign_AutoresponderEmail_List<AutoConfirmEmail> {
 
     @Override

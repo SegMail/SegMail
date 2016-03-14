@@ -15,12 +15,12 @@ import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.CONFIR
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="AUTO_CONFIRM_EMAIL")
-@DiscriminatorValue("AutoConfirmEmail")
+//@Entity
+//@Table(name="AUTO_CONFIRM_EMAIL")
+//@DiscriminatorValue("AutoConfirmEmail")
 public class AutoConfirmEmail extends AutoresponderEmail{
 
-    @Override
+    //@Override
     public AutoEmailTypeFactory.TYPE type() {
         return CONFIRMATION;
     }

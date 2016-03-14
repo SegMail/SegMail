@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.template;
+package segmail.program.autoresponder;
 
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
@@ -39,7 +39,7 @@ public class FormEditExistingTemplate {
     @EJB private GenericObjectService objectService;
     //@EJB private UserService userService;
     
-    @Inject private ProgramWelcomeEmail program;
+    @Inject private ProgramAutoresponder program;
     
     @Inject private UserSessionContainer userContainer;
     @Inject private UserRequestContainer requestContainer;
@@ -147,11 +147,11 @@ public class FormEditExistingTemplate {
         }
     }
 
-    public ProgramWelcomeEmail getProgram() {
+    public ProgramAutoresponder getProgram() {
         return program;
     }
 
-    public void setProgram(ProgramWelcomeEmail program) {
+    public void setProgram(ProgramAutoresponder program) {
         this.program = program;
     }
     

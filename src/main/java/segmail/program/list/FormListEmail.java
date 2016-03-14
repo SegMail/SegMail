@@ -20,10 +20,13 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
 import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
+import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
+import segmail.entity.subscription.email.AutoresponderEmail;
 
 /**
  *
@@ -63,8 +66,10 @@ public class FormListEmail {
 
     public void loadAvailableConfirmationEmails() {
         try {
-            List<AutoConfirmEmail> confirmEmails = autoresponderService.getAvailableConfirmationEmailForClient(
-                    clientContainer.getClient().getOBJECTID());
+            List<AutoresponderEmail> confirmEmails = 
+                    autoresponderService.getAvailableAutoEmailsForClient(
+                            clientContainer.getClient().getOBJECTID(), 
+                            AUTO_EMAIL_TYPE.CONFIRMATION);
             program.setConfirmationEmails(confirmEmails);
 
         } catch (EJBException ex) {
@@ -74,8 +79,10 @@ public class FormListEmail {
 
     public void loadAvailableWelcomeEmails() {
         try {
-            List<AutoWelcomeEmail> welcomeEmails = autoresponderService.getAvailableWelcomeEmailForClient(
-                    clientContainer.getClient().getOBJECTID());
+            List<AutoresponderEmail> welcomeEmails = 
+                    autoresponderService.getAvailableAutoEmailsForClient(
+                        clientContainer.getClient().getOBJECTID(),
+                        AUTO_EMAIL_TYPE.WELCOME);
             program.setWelcomeEmails(welcomeEmails);
 
         } catch (EJBException ex) {
@@ -89,12 +96,14 @@ public class FormListEmail {
                 return;
             }
             //If there is already a confirmation email assigned, load it
-            List<AutoConfirmEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(program.getListEditing().getOBJECTID(),
-                    Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);
+            /*List<AutoConfirmEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(program.getListEditing().getOBJECTID(),
+                    Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);*/
+            List<AutoresponderEmail> assignedConfirmEmails = autoresponderService.getAssignedAutoEmailsForList(
+                    program.getListEditing().getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
             
             program.setSelectedConfirmationEmail(
-                    (assignedAutoEmails == null || assignedAutoEmails.isEmpty())?
-                            null : assignedAutoEmails.get(0));
+                    (assignedConfirmEmails == null || assignedConfirmEmails.isEmpty())?
+                            null : assignedConfirmEmails.get(0));
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
@@ -106,12 +115,14 @@ public class FormListEmail {
                 return;
             }
             //If there is already a confirmation email assigned, load it
-            List<AutoWelcomeEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(program.getListEditing().getOBJECTID(),
-                    Assign_AutoWelcomeEmail_List.class, AutoWelcomeEmail.class);
+            //List<AutoWelcomeEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(program.getListEditing().getOBJECTID(),
+            //        Assign_AutoWelcomeEmail_List.class, AutoWelcomeEmail.class);
+            List<AutoresponderEmail> assignedWelcomeEmails = autoresponderService.getAssignedAutoEmailsForList(
+                    program.getListEditing().getOBJECTID(), AUTO_EMAIL_TYPE.WELCOME);
             
             program.setSelectedWelcomeEmail(
-                    (assignedAutoEmails == null || assignedAutoEmails.isEmpty()) ?
-                            null : assignedAutoEmails.get(0)
+                    (assignedWelcomeEmails == null || assignedWelcomeEmails.isEmpty()) ?
+                            null : assignedWelcomeEmails.get(0)
             );
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
@@ -123,22 +134,25 @@ public class FormListEmail {
             long selectedConfirmEmailId = program.getSelectedConfirmationEmailId();
             long editingListId = program.getListEditing().getOBJECTID();
             
+            //Remove all assigned Confirmation emails first
+            autoresponderService.removeAllAssignedConfirmationEmailFromList(editingListId);
+            
             //Nothing is selected
             if (selectedConfirmEmailId <= 0) {
-                autoresponderService.removeAllAssignedConfirmationEmailFromList(editingListId);
-                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Confirmation email unassigned. ", "You need to assign a confirmation email to start receiving signups.");
+                //autoresponderService.removeAllAssignedConfirmationEmailFromList(editingListId);
+                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Confirmation email is not assigned. ", "You need to assign a confirmation email to start receiving signups.");
                 this.resetConfirmationEmailPanel();
                 return;
             }
             
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Confirmation email assigned", null);
-            Assign_AutoConfirmEmail_List newAssign = autoresponderService.assignConfirmationEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
+            Assign_AutoresponderEmail_List newAssign = autoresponderService.assignAutoEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Confirmation email assigned", "");
             program.setSelectedConfirmationEmail(newAssign.getSOURCE());
 
         } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName()+": "+ex.getMessage(), "Please contact your system administrator.");
         }
     }
 
@@ -147,22 +161,25 @@ public class FormListEmail {
             long selectedWelcomeEmailId = program.getSelectedWelcomeEmailId();
             long editingListId = program.getListEditing().getOBJECTID();
 
+            //Remove all assigned Welcome emails first
+            autoresponderService.removeAllAssignedWelcomeEmailFromList(editingListId);
+            
             //Nothing is selected
             if (selectedWelcomeEmailId <= 0) {
-                autoresponderService.removeAllAssignedWelcomeEmailFromList(editingListId);
-                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Welcome email unassigned. ", "You need to assign a confirmation email to start receiving signups.");
+                //autoresponderService.removeAllAssignedWelcomeEmailFromList(editingListId);
+                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Welcome email is not assigned. ", "You need to assign a confirmation email to start receiving signups.");
                 this.resetConfirmationEmailPanel();
                 return;
             }
 
-            Assign_AutoWelcomeEmail_List newAssign = autoresponderService.assignWelcomeEmailToList(program.getSelectedWelcomeEmailId(), program.getListEditing().getOBJECTID());
+            Assign_AutoresponderEmail_List newAssign = autoresponderService.assignAutoEmailToList(program.getSelectedWelcomeEmailId(), program.getListEditing().getOBJECTID());
             program.setSelectedWelcomeEmail(newAssign.getSOURCE());
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Welcome email assigned", null);
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Welcome email assigned", "");
 
         } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName()+": "+ex.getMessage(), "Please contact your system administrator.");
         }
     }
 

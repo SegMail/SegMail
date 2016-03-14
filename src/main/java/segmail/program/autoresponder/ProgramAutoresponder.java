@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.template;
+package segmail.program.autoresponder;
 
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
-import segmail.component.subscription.SubscriptionService;
 import eds.component.user.UserService;
 import segmail.entity.subscription.email.AutoresponderEmail;
 import eds.entity.user.UserType;
@@ -22,6 +21,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.email.AutoConfirmEmail;
 import segmail.entity.subscription.email.AutoWelcomeEmail;
 
@@ -31,7 +31,7 @@ import segmail.entity.subscription.email.AutoWelcomeEmail;
  */
 @Named("ProgramWelcomeEmail")
 @SessionScoped
-public class ProgramWelcomeEmail implements Serializable {
+public class ProgramAutoresponder implements Serializable {
     
     @EJB 
     private AutoresponderService autoresponderService;
@@ -46,9 +46,9 @@ public class ProgramWelcomeEmail implements Serializable {
     
     @Inject private ClientFacade clientFacade;
     
-    private List<AutoConfirmEmail> confirmationTemplates;
+    private List<AutoresponderEmail> confirmationTemplates;
     
-    private List<AutoWelcomeEmail> welcomeTemplates;
+    private List<AutoresponderEmail> welcomeTemplates;
     
     private List<UserType> allUserTypes;
     
@@ -74,7 +74,8 @@ public class ProgramWelcomeEmail implements Serializable {
     public void initializeAllConfirmationEmails() {
         try {
             
-            this.setConfirmationTemplates(autoresponderService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
+            //this.setConfirmationTemplates(autoresponderService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
+            this.setConfirmationTemplates(autoresponderService.getAvailableAutoEmailsForClient(clientFacade.getClient().getOBJECTID(),AUTO_EMAIL_TYPE.CONFIRMATION));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -86,7 +87,8 @@ public class ProgramWelcomeEmail implements Serializable {
     public void initializeAllWelcomeEmails() {
         try {
             
-            this.setWelcomeTemplates(autoresponderService.getAvailableWelcomeEmailForClient(clientFacade.getClient().getOBJECTID()));
+            //this.setWelcomeTemplates(autoresponderService.getAvailableWelcomeEmailForClient(clientFacade.getClient().getOBJECTID()));
+            this.setWelcomeTemplates(autoresponderService.getAvailableAutoEmailsForClient(clientFacade.getClient().getOBJECTID(),AUTO_EMAIL_TYPE.WELCOME));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
@@ -111,11 +113,11 @@ public class ProgramWelcomeEmail implements Serializable {
         this.initializeAllWelcomeEmails();
     }
 
-    public List<AutoConfirmEmail> getConfirmationTemplates() {
+    public List<AutoresponderEmail> getConfirmationTemplates() {
         return confirmationTemplates;
     }
 
-    public void setConfirmationTemplates(List<AutoConfirmEmail> confirmationTemplates) {
+    public void setConfirmationTemplates(List<AutoresponderEmail> confirmationTemplates) {
         this.confirmationTemplates = confirmationTemplates;
     }
 
@@ -127,11 +129,11 @@ public class ProgramWelcomeEmail implements Serializable {
         this.allUserTypes = allUserTypes;
     }
 
-    public List<AutoWelcomeEmail> getWelcomeTemplates() {
+    public List<AutoresponderEmail> getWelcomeTemplates() {
         return welcomeTemplates;
     }
 
-    public void setWelcomeTemplates(List<AutoWelcomeEmail> welcomeTemplates) {
+    public void setWelcomeTemplates(List<AutoresponderEmail> welcomeTemplates) {
         this.welcomeTemplates = welcomeTemplates;
     }
 

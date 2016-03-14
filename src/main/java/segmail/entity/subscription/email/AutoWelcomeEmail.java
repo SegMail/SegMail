@@ -15,12 +15,12 @@ import static segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE.WELCOM
  *
  * @author LeeKiatHaw
  */
-@Entity
-@Table(name="AUTO_WELCOME_EMAIL")
-@DiscriminatorValue("AutoWelcomeEmail")
+//@Entity
+//@Table(name="AUTO_WELCOME_EMAIL")
+//@DiscriminatorValue("AutoWelcomeEmail")
 public class AutoWelcomeEmail extends AutoresponderEmail{
 
-    @Override
+    //@Override
     public TYPE type() {
         return WELCOME;
     }

@@ -18,6 +18,9 @@ import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
 import eds.component.data.DataValidationException;
 import eds.component.mail.MailService;
+import eds.entity.data.EnterpriseRelationship_;
+import eds.entity.mail.Email;
+import eds.entity.mail.EmailLegacy;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -53,6 +56,8 @@ import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
+import segmail.entity.subscription.SubscriberOwnership;
+import segmail.entity.subscription.SubscriberOwnership_;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
 import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
@@ -246,7 +251,8 @@ public class SubscriptionService {
             if(list == null)
                 throw new EntityNotFoundException(SubscriptionList.class,listId);
             
-            // Find if there is already an existing SubscriberAccount with the email
+            // Check if the values provided for the subscriber is valid for the list
+            // Check if mandatory fields are not filled in
             String email = "";
             List<SubscriptionListField> fields = getFieldsForSubscriptionList(listId);
             for(SubscriptionListField field : fields ){
@@ -264,7 +270,9 @@ public class SubscriptionService {
                 throw new DataValidationException("Email address is not valid.");
             
             // Check if the account exist, if not, create a new one
-            List<SubscriberAccount> existingAccs = objectService.getEnterpriseObjectsByName(email, SubscriberAccount.class);
+            // Check if account exist with the same client only
+            //List<SubscriberAccount> existingAccs = objectService.getEnterpriseObjectsByName(email, SubscriberAccount.class);
+            List<SubscriberAccount> existingAccs = this.getExistingSubscribersForClient(email,clientFacade.getClient().getOBJECTID());
             // Assume that email account is new
             SubscriberAccount newOrExistingAcc = new SubscriberAccount();
             newOrExistingAcc.setEMAIL(email);
@@ -275,7 +283,7 @@ public class SubscriptionService {
             //Update the subscriber account first by merging
             //Even if it exist, it is required to merge it to manage it later
             newOrExistingAcc = updateService.getEm().merge(newOrExistingAcc);
-            updateService.getEm().flush();
+            //updateService.getEm().flush();
             
             //Retrieve all existing fields for SubscriberAccount
             List<SubscriberFieldValue> existingFieldValues = objectService.getEnterpriseData(newOrExistingAcc.getOBJECTID(), SubscriberFieldValue.class);
@@ -319,6 +327,9 @@ public class SubscriptionService {
             //Update the count of the list
             list.setCOUNT(list.getCOUNT()+1);
             list = updateService.getEm().merge(list);
+            
+            //Send confirmation email
+            sendConfirmationEmail(email, listId);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -463,7 +474,7 @@ public class SubscriptionService {
             }
 
             //Check the SNO order
-            //Cannot be 1 as 1 is always Email
+            //Cannot be 1 as 1 is always EmailLegacy
             validateListField(newField);
 
             //Reorder the SNO for the entire list
@@ -618,8 +629,14 @@ public class SubscriptionService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void sendConfirmationEmail(String email, long listId) 
-            throws IncompleteDataException{
+            throws IncompleteDataException, EntityNotFoundException{
         try {
+            //Retrieve "Send as" from the list
+            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+            if(list == null)
+                throw new EntityNotFoundException(SubscriptionList.class,listId);
+            String sendAs = list.getSEND_AS_EMAIL();
+                    
             //Retrieve the autoemail from list using AutoresponderService
             List<AutoConfirmEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(
                     listId,Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);
@@ -630,11 +647,22 @@ public class SubscriptionService {
                 throw new IncompleteDataException("Please assign a Confirmation email before adding subscribers.");
             
             
-            //Construct the Email object and parse all mailmerge functions using MailMergeService
-            String newEmailBody = mailMergeService.generateConfirmationLink(assignedConfirmEmail.getBODY(), email, listId);
+            //Construct the EmailLegacy object and parse all mailmerge functions using MailMergeService
+            String newEmailBody = assignedConfirmEmail.getBODY();
+            newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, email, listId);
+            newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
             
             //Send the email using MailService
+            List<String> to = new ArrayList<>();
+            to.add(email);
+            Email confirmEmail = new Email();
+            confirmEmail.setFROM(list.getSEND_AS_EMAIL());
+            confirmEmail.setTO(to);
+            confirmEmail.setBODY(newEmailBody);
+            confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
             
+            mailService.sendEmail(confirmEmail, true);
+            mailService.sendEmail2(confirmEmail);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
@@ -642,5 +670,29 @@ public class SubscriptionService {
             }
             throw new EJBException(pex);
         }
+    }
+
+    
+    public List<SubscriberAccount> getExistingSubscribersForClient(String email, long clientId) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
+        
+        Root<SubscriberAccount> fromSubscAcc = query.from(SubscriberAccount.class);
+        Root<SubscriberOwnership> fromSubscOwnership = query.from(SubscriberOwnership.class);
+        
+        query.select(fromSubscAcc);
+        query.where(builder.and(
+                builder.equal(fromSubscAcc.get(SubscriberAccount_.EMAIL), email),
+                builder.equal(
+                        fromSubscAcc.get(SubscriberAccount_.OBJECTID), 
+                        fromSubscOwnership.get(SubscriberOwnership_.SOURCE)
+                ),
+                builder.equal(fromSubscOwnership.get(SubscriberOwnership_.TARGET), clientId)
+        ));
+        
+        List<SubscriberAccount> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
     }
 }

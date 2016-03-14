@@ -3,11 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.template;
+package segmail.program.autoresponder;
 
 import eds.component.client.ClientFacade;
-import segmail.component.subscription.SubscriptionService;
+import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import segmail.entity.subscription.email.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -21,6 +27,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.email.AutoEmailTypeFactory;
 
 /**
@@ -34,7 +41,7 @@ public class FormAddNewAutoEmail {
     @EJB private AutoresponderService autoresponderService;
     @EJB private UserService userService;
     
-    @Inject private ProgramWelcomeEmail program;
+    @Inject private ProgramAutoresponder program;
     @Inject private ClientFacade clientFacade;
     @Inject private UserRequestContainer reqContainer;
     
@@ -42,7 +49,8 @@ public class FormAddNewAutoEmail {
     
     private String body;
     
-    private AutoEmailTypeFactory.TYPE type;
+    //private AutoEmailTypeFactory.TYPE type;
+    private AUTO_EMAIL_TYPE type;
     
     private final String formName = "add_new_auto_email_form";
     
@@ -66,11 +74,24 @@ public class FormAddNewAutoEmail {
             //ec.redirect(programContainer.getCurrentURL());
             ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
             
-        } catch (EJBException ex) { //Transaction did not go through
+        } catch (EntityExistsException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "There is already an email with this subject, please re-enter a different subject.", null);
+        } catch (IOException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "Please contact administrator.");
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (RelationshipExistsException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "There is already an email created and assigned to your account.", 
+                    "Please click the refresh button on the top right hand corner to see if it's already there. "
+                            + "Autoresponder emails are distinguished by their type and subject title."
+                            + "If this problem persist, please contact your administrator. ");
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Oops..but this shouldn't happen.", 
+                    "Please raise an issue to our administrator, we will try to resolve it shortly!");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, 
+                    ex.getClass().getSimpleName()+": "+ex.getMessage(), "Please raise an issue to our administrator, we will try to resolve it shortly!");
         }
     }
 
@@ -90,13 +111,21 @@ public class FormAddNewAutoEmail {
         this.body = body;
     }
 
+    /*
     public AutoEmailTypeFactory.TYPE getType() {
         return type;
     }
 
     public void setType(AutoEmailTypeFactory.TYPE type) {
         this.type = type;
+    }*/
+
+    public AUTO_EMAIL_TYPE getType() {
+        return type;
     }
 
+    public void setType(AUTO_EMAIL_TYPE type) {
+        this.type = type;
+    }
     
 }

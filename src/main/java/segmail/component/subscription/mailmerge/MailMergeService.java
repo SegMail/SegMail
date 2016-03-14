@@ -63,15 +63,15 @@ public class MailMergeService {
      * Generates the body content with the proper confirmation link, which has 
      * an expiry date.
      * 
-     * @param emailBody
+     * @param text
      * @param email
      * @param listId
      * @return 
      * @throws eds.component.data.IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String generateConfirmationLink(
-            String emailBody, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
+    public String parseConfirmationLink(
+            String text, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
             //String landingServerAddress, 
             String email,
             long listId) throws IncompleteDataException {
@@ -97,8 +97,32 @@ public class MailMergeService {
         ServerInstance landingServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
         String confirmLink = landingServer.getADDRESS().concat("/").concat(Long.toString(trans.getTRANSACTION_ID()));
         
-        String newEmailBody = emailBody.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
+        String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
         
         return newEmailBody;
+    }
+    
+    /**
+     * Not implemented yet.
+     * 
+     * @param text
+     * @param listId
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String parseListAttributes(String text, long listId){
+        return text;
+    }
+    
+    /**
+     * Not implemented yet.
+     * 
+     * @param text
+     * @param listId
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String parseUnsubscribeLink(String text, long listId){
+        return text;
     }
 }

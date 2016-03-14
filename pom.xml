@@ -144,7 +144,12 @@
             <scope>test</scope>
         </dependency>-->
         <!--For Arquillian unit/integration tests-->
-        
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.5.4</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>

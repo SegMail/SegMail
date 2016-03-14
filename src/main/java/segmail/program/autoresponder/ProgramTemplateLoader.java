@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.template;
+package segmail.program.autoresponder;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -35,7 +35,7 @@ public class ProgramTemplateLoader {
 
     // Parent program bean
     @Inject
-    private ProgramWelcomeEmail program;
+    private ProgramAutoresponder program;
 
     private final String formName = "ProgramTemplateLoader";
 
@@ -61,11 +61,11 @@ public class ProgramTemplateLoader {
         return formName;
     }
 
-    public ProgramWelcomeEmail getProgram() {
+    public ProgramAutoresponder getProgram() {
         return program;
     }
 
-    public void setProgram(ProgramWelcomeEmail program) {
+    public void setProgram(ProgramAutoresponder program) {
         this.program = program;
     }
 
