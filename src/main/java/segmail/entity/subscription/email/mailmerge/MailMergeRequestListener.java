@@ -6,6 +6,7 @@
 package segmail.entity.subscription.email.mailmerge;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import org.joda.time.DateTime;
@@ -21,6 +22,11 @@ public class MailMergeRequestListener {
     @PrePersist
     public void PrePersist(EnterpriseTransaction trans) {
         this.recordExpiry(trans);
+    }
+    
+    @PostPersist
+    public void PostPersist(EnterpriseTransaction trans) {
+        
     }
     
     @PreUpdate

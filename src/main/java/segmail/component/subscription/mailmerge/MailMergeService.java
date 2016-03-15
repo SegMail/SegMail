@@ -8,7 +8,7 @@ package segmail.component.subscription.mailmerge;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
-import eds.entity.transaction.EnterpriseTransaction;
+import eds.component.transaction.TransactionService;
 import eds.entity.transaction.EnterpriseTransactionParam;
 import java.util.List;
 import javax.ejb.EJB;
@@ -20,7 +20,6 @@ import segmail.component.landing.LandingService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
-import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.email.mailmerge.MailMergeLabel;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
@@ -35,6 +34,7 @@ public class MailMergeService {
     
     @EJB private GenericObjectService objectService;
     @EJB private UpdateObjectService updateService;
+    @EJB private TransactionService transService;
     
     @EJB private SubscriptionService subscriptionService;
     @EJB private LandingService landingService;
@@ -77,6 +77,9 @@ public class MailMergeService {
             String email,
             long listId) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
+        if(!text.contains(MailMergeLabel.CONFIRM.label()))
+            return text;
+        
         //1. Create a transaction with expiry date 
         MailMergeRequest trans = new MailMergeRequest();
         trans.setPROGRAM("confirm");
@@ -96,9 +99,9 @@ public class MailMergeService {
         updateService.getEm().persist(listParam);
         //Might want to use guid instead.
         
-        //3. Return the link with program name "confirm" and the generated transaction ID
+        //3. Return the link with program name "confirm" and the generated transaction ID 
         ServerInstance landingServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
-        String confirmLink = landingServer.getADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(Long.toString(trans.getTRANSACTION_ID()));
+        String confirmLink = landingServer.getADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
         
         String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
         

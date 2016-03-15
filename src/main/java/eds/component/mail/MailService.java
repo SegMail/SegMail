@@ -69,14 +69,17 @@ public class MailService {
             throws InvalidEmailException {
         try {
             // Get the sender, subject and body from email
-            String FROM = email.getSENDER();
+            String FROM_ADDRESS = email.getSENDER_ADDRESS();
+            String FROM_NAME = email.getSENDER_NAME();
             String SUBJECT = email.getSUBJECT();
             String BODY = email.getBODY();
             Set<String> TO = email.getRECIPIENTS();
+            String FROM = (FROM_NAME == null) ? FROM_ADDRESS: FROM_NAME+" <"+FROM_ADDRESS+">";
+            Set<String> REPLY_TO = email.getREPLY_TO_ADDRESSES();
             
             // Validate all email addresses before sending
-            if(!EmailValidator.getInstance().isValid(FROM))
-                throw new InvalidEmailException("FROM address "+FROM+" is not valid.");
+            if(!EmailValidator.getInstance().isValid(FROM_ADDRESS))
+                throw new InvalidEmailException("FROM address "+FROM_ADDRESS+" is not valid.");
             for(String to : TO) {
                 if(!EmailValidator.getInstance().isValid(to))
                     throw new InvalidEmailException("TO address "+to+" is not valid.");
@@ -90,7 +93,11 @@ public class MailService {
             Message message = new Message().withBody(body).withSubject(textSubject);
 
             Destination destination = new Destination().withToAddresses(TO);
-            SendEmailRequest request = new SendEmailRequest().withSource(FROM).withDestination(destination).withMessage(message);
+            SendEmailRequest request = new SendEmailRequest()
+                    .withSource(FROM)
+                    .withReplyToAddresses(REPLY_TO)
+                    .withDestination(destination)
+                    .withMessage(message);
 
             // You will need to have AWS_ACCESS_KEY_ID and AWS_SECRET_KEY in your1111 
             // web.xml environmental variables
@@ -126,7 +133,7 @@ public class MailService {
                 throw new IncompleteDataException("Emails must have a body.");
             if(email.getSUBJECT()== null || email.getSUBJECT().isEmpty())
                 throw new IncompleteDataException("Emails must have a subject.");
-            if(email.getSENDER()== null || email.getSENDER().isEmpty())
+            if(email.getSENDER_ADDRESS()== null || email.getSENDER_ADDRESS().isEmpty())
                 throw new IncompleteDataException("Emails must have a sender.");
             
             // Create a Properties object to contain connection configuration information.
@@ -146,7 +153,7 @@ public class MailService {
 
             // Create a message with the specified information. 
             MimeMessage msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(email.getSENDER()));
+            msg.setFrom(new InternetAddress(email.getSENDER_ADDRESS()));
             for (String recipient : email.getRECIPIENTS()) {
                 msg.setRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(recipient));
             }
@@ -162,8 +169,8 @@ public class MailService {
             // Connect to Amazon SES using the SMTP username and password you specified above.
             transport.connect(
                     DEFAULT_SMTP_ENDPOINT, 
-                    "AKIAJTKYJQNZIH3A3IIA",
-                    "Avp01btUrjEwOx0/3wZrtTwYJOP8QrUtQ2vATIy59AXJ");
+                    awsCredentials.getAWSAccessKeyId(),
+                    awsCredentials.getAWSSecretKey());
 
             // Send the email.
             transport.sendMessage(msg, msg.getAllRecipients());

@@ -7,11 +7,9 @@ package eds.entity.mail;
 
 import eds.entity.transaction.EnterpriseTransaction;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -26,9 +24,13 @@ public class Email extends EnterpriseTransaction {
     
     private String BODY;
     
-    private String SENDER;
+    private String SENDER_ADDRESS;
+    
+    private String SENDER_NAME;
     
     private Set<String> RECIPIENTS = new HashSet();
+    
+    private Set<String> REPLY_TO_ADDRESSES = new HashSet();
 
     public String getSUBJECT() {
         return SUBJECT;
@@ -38,12 +40,12 @@ public class Email extends EnterpriseTransaction {
         this.SUBJECT = SUBJECT;
     }
 
-    public String getSENDER() {
-        return SENDER;
+    public String getSENDER_ADDRESS() {
+        return SENDER_ADDRESS;
     }
 
-    public void setSENDER(String SENDER) {
-        this.SENDER = SENDER;
+    public void setSENDER_ADDRESS(String SENDER_ADDRESS) {
+        this.SENDER_ADDRESS = SENDER_ADDRESS;
     }
 
     @ElementCollection
@@ -66,4 +68,23 @@ public class Email extends EnterpriseTransaction {
     public void addRecipient(String TO) {
         this.RECIPIENTS.add(TO);
     }
+
+    public String getSENDER_NAME() {
+        return SENDER_NAME;
+    }
+
+    public void setSENDER_NAME(String SENDER_NAME) {
+        this.SENDER_NAME = SENDER_NAME;
+    }
+
+    @ElementCollection
+    public Set<String> getREPLY_TO_ADDRESSES() {
+        return REPLY_TO_ADDRESSES;
+    }
+
+    public void setREPLY_TO_ADDRESSES(Set<String> REPLY_TO_ADDRESSES) {
+        this.REPLY_TO_ADDRESSES = REPLY_TO_ADDRESSES;
+    }
+
+    
 }

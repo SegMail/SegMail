@@ -325,7 +325,7 @@ public class SubscriptionService {
             updateService.getEm().persist(newSubscr);
             
             //Update the count of the list
-            list.setCOUNT(list.getCOUNT()+1);
+            list.setSUBSCRIBER_COUNT(list.getSUBSCRIBER_COUNT()+1);
             list = updateService.getEm().merge(list);
             
             //Send confirmation email
@@ -633,8 +633,11 @@ public class SubscriptionService {
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
             if(list == null)
                 throw new EntityNotFoundException(SubscriptionList.class,listId);
+            
             String sendAs = list.getSEND_AS_EMAIL();
-                    
+            if(sendAs == null || sendAs.isEmpty())
+                throw new IncompleteDataException("Please set \"Send As\" address before sending confirmation emails.");
+            
             //Retrieve the autoemail from list using AutoresponderService
             //List<AutoresponderEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(
             //        listId,Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);
@@ -653,7 +656,8 @@ public class SubscriptionService {
             //Send the email using MailService
             
             Email confirmEmail = new Email();
-            confirmEmail.setSENDER(list.getSEND_AS_EMAIL());
+            confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
+            confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
             confirmEmail.setBODY(newEmailBody);
             confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
             confirmEmail.addRecipient(email);
