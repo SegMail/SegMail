@@ -22,6 +22,7 @@ import segmail.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.email.mailmerge.MailMergeLabel;
+import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
 /**
  *
@@ -75,8 +76,10 @@ public class MailMergeService {
             //String landingServerAddress, 
             String email,
             long listId) throws IncompleteDataException {
-        //1. Create a transaction with expiry date
-        EnterpriseTransaction trans = new EnterpriseTransaction();
+        //!!! do this only if there is a link to generate!
+        //1. Create a transaction with expiry date 
+        MailMergeRequest trans = new MailMergeRequest();
+        trans.setPROGRAM("confirm");
         updateService.getEm().persist(trans);
         
         //2. Create the transaction parameters
@@ -95,7 +98,7 @@ public class MailMergeService {
         
         //3. Return the link with program name "confirm" and the generated transaction ID
         ServerInstance landingServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
-        String confirmLink = landingServer.getADDRESS().concat("/").concat(Long.toString(trans.getTRANSACTION_ID()));
+        String confirmLink = landingServer.getADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(Long.toString(trans.getTRANSACTION_ID()));
         
         String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
         

@@ -14,9 +14,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.email.AutoConfirmEmail;
-import segmail.entity.subscription.email.AutoWelcomeEmail;
-import segmail.entity.subscription.email.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -34,6 +32,9 @@ public class ProgramList extends Program implements Serializable {
     
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
+    
+    //For controlling the tabs
+    private Map<String,Boolean> showActiveTabs;
     
     //For subscribers
     private Map<Long,Map<String,String>> subscriberTable;
@@ -216,6 +217,14 @@ public class ProgramList extends Program implements Serializable {
 
     public void setSubscriberTable(Map<Long, Map<String, String>> subscriberTable) {
         this.subscriberTable = subscriberTable;
+    }
+
+    public Map<String, Boolean> getShowActiveTabs() {
+        return showActiveTabs;
+    }
+
+    public void setShowActiveTabs(Map<String, Boolean> showActiveTabs) {
+        this.showActiveTabs = showActiveTabs;
     }
 
     @Override

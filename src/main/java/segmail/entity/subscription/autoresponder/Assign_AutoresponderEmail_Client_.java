@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.email;
+package segmail.entity.subscription.autoresponder;
 
 import eds.entity.data.EnterpriseRelationship_;
 import javax.persistence.metamodel.StaticMetamodel;
@@ -13,6 +13,6 @@ import javax.persistence.metamodel.StaticMetamodel;
  * @author LeeKiatHaw
  */
 @StaticMetamodel(Assign_AutoresponderEmail_Client.class)
-public class Assign_AutoresponderEmail_List_ extends EnterpriseRelationship_{
+public class Assign_AutoresponderEmail_Client_ extends EnterpriseRelationship_{
     
 }

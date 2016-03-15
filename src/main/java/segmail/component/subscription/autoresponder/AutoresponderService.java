@@ -14,7 +14,6 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
-import eds.entity.data.EnterpriseRelationship_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -29,18 +28,13 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.SubscriptionList;
-import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
-import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
-import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
-import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client;
-import segmail.entity.subscription.email.Assign_AutoresponderEmail_Client_;
-import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
-import segmail.entity.subscription.email.Assign_AutoresponderEmail_List_;
-import segmail.entity.subscription.email.AutoConfirmEmail;
-import segmail.entity.subscription.email.AutoEmailTypeFactory;
-import segmail.entity.subscription.email.AutoWelcomeEmail;
-import segmail.entity.subscription.email.AutoresponderEmail;
-import segmail.entity.subscription.email.AutoresponderEmail_;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_Client;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_Client_;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List_;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail_;
 
 /**
  *
@@ -91,23 +85,6 @@ public class AutoresponderService {
     }
 
     /**
-     * Get all available Welcome emails assigned to a Client.
-     *
-     * @param clientid
-     * @return
-     */
-    /*public List<AutoWelcomeEmail> getAvailableWelcomeEmailForClient(long clientid) {
-     try {
-     List<AutoWelcomeEmail> results = objectService.getAllSourceObjectsFromTarget(clientid, Assign_AutoresponderEmail_Client.class, AutoWelcomeEmail.class);
-     return results;
-     } catch (PersistenceException pex) {
-     if (pex.getCause() instanceof GenericJDBCException) {
-     throw new DBConnectionException(pex.getCause().getMessage());
-     }
-     throw new EJBException(pex);
-     }
-     }*/
-    /**
      * Client method - saves the email
      *
      * @param autoEmail
@@ -137,39 +114,7 @@ public class AutoresponderService {
             throw new EJBException(pex);
         }
     }
-
-    /**
-     * Assigns a ConfirmationEmail to a Subscriptionlist
-     *
-     * @param confirmationEmailId
-     * @param listId
-     * @return
-     * @throws EntityNotFoundException
-     */
-    public Assign_AutoConfirmEmail_List assignConfirmationEmailToList(long confirmationEmailId, long listId) throws EntityNotFoundException {
-        try {
-            AutoConfirmEmail confirmationEmail = objectService.getEnterpriseObjectById(confirmationEmailId, AutoConfirmEmail.class);
-            if (confirmationEmail == null) {
-                throw new EntityNotFoundException(AutoConfirmEmail.class, confirmationEmailId);
-            }
-            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-            if (list == null) {
-                throw new EntityNotFoundException(SubscriptionList.class, listId);
-            }
-            Assign_AutoConfirmEmail_List newAssignment = new Assign_AutoConfirmEmail_List();
-            newAssignment.setSOURCE(confirmationEmail);
-            newAssignment.setTARGET(list);
-            updateService.deleteRelationshipByTarget(listId, Assign_AutoConfirmEmail_List.class);
-            objectService.getEm().persist(newAssignment);
-            return newAssignment;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
-    }
-
+    
     /**
      * Assigns an AutoresponderEmail to a Client.
      *
@@ -310,24 +255,7 @@ public class AutoresponderService {
         }
     }
 
-    /**
-     * Get all available Confirmation emails assigned to a Client.
-     *
-     * @param clientid
-     * @return
-     */
-    /*public List<AutoConfirmEmail> getAvailableConfirmationEmailForClient(long clientid) {
-     try {
-     List<AutoConfirmEmail> results = objectService.getAllSourceObjectsFromTarget(clientid, Assign_AutoresponderEmail_Client.class, AutoConfirmEmail.class);
-     return results;
-            
-     } catch (PersistenceException pex) {
-     if (pex.getCause() instanceof GenericJDBCException) {
-     throw new DBConnectionException(pex.getCause().getMessage());
-     }
-     throw new EJBException(pex);
-     }
-     }*/
+    
     public void removeAllAssignedWelcomeEmailFromList(long listId) {
         try {
             List<Assign_AutoresponderEmail_List> existingAssignments = this.getAssignedAutoEmailsAssignmentsForList(listId, AUTO_EMAIL_TYPE.WELCOME);
@@ -382,39 +310,7 @@ public class AutoresponderService {
             throw new EJBException(pex);
         }
     }
-
-    /**
-     * Assigns a WelcomeEmail to a Subscriptionlist.
-     *
-     * @param welcomeEmailId
-     * @param listId
-     * @return
-     * @throws EntityNotFoundException
-     */
-    public Assign_AutoWelcomeEmail_List assignWelcomeEmailToList(long welcomeEmailId, long listId) throws EntityNotFoundException {
-        try {
-            AutoWelcomeEmail welcomeEmail = objectService.getEnterpriseObjectById(welcomeEmailId, AutoWelcomeEmail.class);
-            if (welcomeEmail == null) {
-                throw new EntityNotFoundException(AutoWelcomeEmail.class, welcomeEmailId);
-            }
-            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-            if (list == null) {
-                throw new EntityNotFoundException(SubscriptionList.class, listId);
-            }
-            Assign_AutoWelcomeEmail_List newAssignment = new Assign_AutoWelcomeEmail_List();
-            newAssignment.setSOURCE(welcomeEmail);
-            newAssignment.setTARGET(list);
-            this.removeAllAssignedWelcomeEmailFromList(listId);
-            objectService.getEm().persist(newAssignment);
-            return newAssignment;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
-    }
-
+    
     /**
      * Creates a new AutoresponderEmail and assigns it to the ClientFacade in
      * context. If no ClientFacade is available in context, then an

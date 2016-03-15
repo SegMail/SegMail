@@ -7,7 +7,6 @@ package segmail.program.list;
 
 import eds.component.GenericObjectService;
 import eds.component.data.EntityNotFoundException;
-import segmail.component.subscription.SubscriptionService;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -20,13 +19,9 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.autoresponder.AutoresponderService;
-import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
-import segmail.entity.subscription.email.Assign_AutoConfirmEmail_List;
-import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
-import segmail.entity.subscription.email.Assign_AutoresponderEmail_List;
-import segmail.entity.subscription.email.AutoConfirmEmail;
-import segmail.entity.subscription.email.AutoWelcomeEmail;
-import segmail.entity.subscription.email.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /**
  *
@@ -96,8 +91,6 @@ public class FormListEmail {
                 return;
             }
             //If there is already a confirmation email assigned, load it
-            /*List<AutoConfirmEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(program.getListEditing().getOBJECTID(),
-                    Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);*/
             List<AutoresponderEmail> assignedConfirmEmails = autoresponderService.getAssignedAutoEmailsForList(
                     program.getListEditing().getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
             

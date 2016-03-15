@@ -109,6 +109,17 @@
         <env-entry-value>USER_ATTRIBUTES</env-entry-value>
     </env-entry>
     
+    <!--AWS credentials-->
+    <env-entry>
+        <env-entry-name>AWS_ACCESS_KEY_ID</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>AKIAJLE37WT3UJIL3VEQ</env-entry-value>
+    </env-entry>
+    <env-entry>
+        <env-entry-name>AWS_SECRET_ACCESS_KEY</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>ToqHHbIcO8UEgJoolf5czBxm9bMmNay8GTspA50z</env-entry-value>
+    </env-entry>
     
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>

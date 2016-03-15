@@ -12,12 +12,9 @@ import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import segmail.entity.subscription.email.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -27,8 +24,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.autoresponder.AutoresponderService;
-import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
-import segmail.entity.subscription.email.AutoEmailTypeFactory;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
 /**
  *

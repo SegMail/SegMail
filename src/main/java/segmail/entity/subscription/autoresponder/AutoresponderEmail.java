@@ -3,17 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.email;
+package segmail.entity.subscription.autoresponder;
 
 import eds.entity.data.EnterpriseObject;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
 
 /**
  * A template is actually different from the actual email sent. It has to exist

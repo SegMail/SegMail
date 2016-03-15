@@ -12,7 +12,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.entity.data.EnterpriseObject;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.subscription.email.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;

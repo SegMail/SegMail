@@ -9,7 +9,7 @@ import eds.component.client.ClientFacade;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
-import segmail.entity.subscription.email.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import eds.entity.user.UserType;
 import java.io.Serializable;
 import java.util.List;
@@ -21,9 +21,7 @@ import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.autoresponder.AutoresponderService;
-import segmail.entity.subscription.email.AUTO_EMAIL_TYPE;
-import segmail.entity.subscription.email.AutoConfirmEmail;
-import segmail.entity.subscription.email.AutoWelcomeEmail;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
 /**
  *

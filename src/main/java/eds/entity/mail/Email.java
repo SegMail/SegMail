@@ -6,21 +6,29 @@
 package eds.entity.mail;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
  */
+@Entity
+@Table(name="EMAIL")
 public class Email extends EnterpriseTransaction {
     
     private String SUBJECT;
     
     private String BODY;
     
-    private String FROM;
+    private String SENDER;
     
-    private List<String> TO;
+    private Set<String> RECIPIENTS = new HashSet();
 
     public String getSUBJECT() {
         return SUBJECT;
@@ -30,20 +38,21 @@ public class Email extends EnterpriseTransaction {
         this.SUBJECT = SUBJECT;
     }
 
-    public String getFROM() {
-        return FROM;
+    public String getSENDER() {
+        return SENDER;
     }
 
-    public void setFROM(String FROM) {
-        this.FROM = FROM;
+    public void setSENDER(String SENDER) {
+        this.SENDER = SENDER;
     }
 
-    public List<String> getTO() {
-        return TO;
+    @ElementCollection
+    public Set<String> getRECIPIENTS() {
+        return RECIPIENTS;
     }
 
-    public void setTO(List<String> TO) {
-        this.TO = TO;
+    public void setRECIPIENTS(Set<String> RECIPIENTS) {
+        this.RECIPIENTS = RECIPIENTS;
     }
 
     public String getBODY() {
@@ -54,5 +63,7 @@ public class Email extends EnterpriseTransaction {
         this.BODY = BODY;
     }
     
-    
+    public void addRecipient(String TO) {
+        this.RECIPIENTS.add(TO);
+    }
 }
