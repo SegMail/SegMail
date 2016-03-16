@@ -14,9 +14,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.email.AutoConfirmEmail;
-import segmail.entity.subscription.email.AutoWelcomeEmail;
-import segmail.entity.subscription.email.AutoresponderEmail;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -35,6 +33,9 @@ public class ProgramList extends Program implements Serializable {
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
     
+    //For controlling the tabs
+    private Map<String,Boolean> showActiveTabs;
+    
     //For subscribers
     private Map<Long,Map<String,String>> subscriberTable;
     private SubscriberAccount subscriber;
@@ -42,11 +43,11 @@ public class ProgramList extends Program implements Serializable {
     private int page = 1; //For data-dripping purpose
     
     //For the confirmation emails
-    private List<AutoConfirmEmail> confirmationEmails;
+    private List<AutoresponderEmail> confirmationEmails;
     private AutoresponderEmail selectedConfirmationEmail;
     private long selectedConfirmationEmailId;
     //For the welcome emails
-    private List<AutoWelcomeEmail> welcomeEmails;
+    private List<AutoresponderEmail> welcomeEmails;
     private AutoresponderEmail selectedWelcomeEmail;
     private long selectedWelcomeEmailId;
     
@@ -92,11 +93,11 @@ public class ProgramList extends Program implements Serializable {
         this.allLists = allLists;
     }
 
-    public List<AutoConfirmEmail> getConfirmationEmails() {
+    public List<AutoresponderEmail> getConfirmationEmails() {
         return confirmationEmails;
     }
 
-    public void setConfirmationEmails(List<AutoConfirmEmail> confirmationEmails) {
+    public void setConfirmationEmails(List<AutoresponderEmail> confirmationEmails) {
         this.confirmationEmails = confirmationEmails;
     }
 
@@ -104,7 +105,7 @@ public class ProgramList extends Program implements Serializable {
         return selectedConfirmationEmail;
     }
 
-    public void setSelectedConfirmationEmail(AutoConfirmEmail selectedConfirmationEmail) {
+    public void setSelectedConfirmationEmail(AutoresponderEmail selectedConfirmationEmail) {
         this.selectedConfirmationEmail = selectedConfirmationEmail;
         this.setSelectedConfirmationEmailId(
                 (selectedConfirmationEmail == null) ? -1 :
@@ -123,11 +124,11 @@ public class ProgramList extends Program implements Serializable {
         this.selectedConfirmationEmailId = selectedConfirmationEmailId;
     }
 
-    public List<AutoWelcomeEmail> getWelcomeEmails() {
+    public List<AutoresponderEmail> getWelcomeEmails() {
         return welcomeEmails;
     }
 
-    public void setWelcomeEmails(List<AutoWelcomeEmail> welcomeEmails) {
+    public void setWelcomeEmails(List<AutoresponderEmail> welcomeEmails) {
         this.welcomeEmails = welcomeEmails;
     }
 
@@ -135,7 +136,7 @@ public class ProgramList extends Program implements Serializable {
         return selectedWelcomeEmail;
     }
 
-    public void setSelectedWelcomeEmail(AutoWelcomeEmail selectedWelcomeEmail) {
+    public void setSelectedWelcomeEmail(AutoresponderEmail selectedWelcomeEmail) {
         this.selectedWelcomeEmail = selectedWelcomeEmail;
         this.setSelectedWelcomeEmailId(
                 (selectedWelcomeEmail == null) ? -1 : 
@@ -216,6 +217,14 @@ public class ProgramList extends Program implements Serializable {
 
     public void setSubscriberTable(Map<Long, Map<String, String>> subscriberTable) {
         this.subscriberTable = subscriberTable;
+    }
+
+    public Map<String, Boolean> getShowActiveTabs() {
+        return showActiveTabs;
+    }
+
+    public void setShowActiveTabs(Map<String, Boolean> showActiveTabs) {
+        this.showActiveTabs = showActiveTabs;
     }
 
     @Override

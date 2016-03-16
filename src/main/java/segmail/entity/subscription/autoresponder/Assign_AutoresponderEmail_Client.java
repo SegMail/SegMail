@@ -3,20 +3,27 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.email;
+package segmail.entity.subscription.autoresponder;
 
+import eds.entity.client.Client;
 import eds.entity.data.EnterpriseRelationship;
+import eds.entity.user.UserType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import segmail.entity.subscription.SubscriptionList;
 
 /**
- *
+ * This class was supposed to be extended by subclasses but then we realize it 
+ * was really a hassle to create new relationship classes so we just stick with this.
+ * Also, when you create templates, you create all types of templates in one
+ * place. As a user, you need to pull all templates from the database ignoring
+ * its type.
+ * 
  * @author LeeKiatHaw
+ * @param <E>
  */
 @Entity
-@Table(name="ASSIGN_AUTO_WELCOME_EMAIL_LIST")
-public class Assign_AutoWelcomeEmail_List extends EnterpriseRelationship<AutoWelcomeEmail,SubscriptionList> {
+@Table(name="ASSIGN_AUTORESPONDEREMAIL_CLIENT")
+public class Assign_AutoresponderEmail_Client<E extends AutoresponderEmail> extends EnterpriseRelationship<E,Client> {
 
     @Override
     public void randInit() {
@@ -27,5 +34,5 @@ public class Assign_AutoWelcomeEmail_List extends EnterpriseRelationship<AutoWel
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

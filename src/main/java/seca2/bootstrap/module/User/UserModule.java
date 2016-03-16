@@ -78,8 +78,14 @@ public class UserModule extends BootstrapModule implements Serializable {
         //Initialize the LogicalPathParser
         //This parser is totally separated from the RewriteModule's parser, because UserModule is supposed to be 
         //independent of other modules.
+        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+        String programPath = request.getServletContext().getInitParameter(defaults.PROGRAM_PATH);
         String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
-        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, servletPath);
+        
+        String availableServletPath = "";
+        if(servletPath.equalsIgnoreCase(loginPath) || servletPath.equalsIgnoreCase(programPath))
+            availableServletPath = servletPath;
+        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, availableServletPath);
         /**
          * Cannot work, because sometimes your URL doesn't contain your servletPath, which is either
          * /program or /login (based on Servlet's config pattern in web.xml), so your programName will
@@ -97,7 +103,7 @@ public class UserModule extends BootstrapModule implements Serializable {
         requestContainer.setTemplateLocation(defaults.LOGIN_PAGE_TEMPLATE);
         
         //If on login page, forward the request to viewId index.xhtml
-        String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
+        //String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
         if(servletPath.equalsIgnoreCase(loginPath)){ //
             return true;
         }

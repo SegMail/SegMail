@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.email;
+package segmail.entity.subscription.autoresponder;
 
 import eds.entity.data.EnterpriseObject_;
 import javax.persistence.metamodel.SingularAttribute;
@@ -16,6 +16,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(AutoresponderEmail.class)
 public class AutoresponderEmail_ extends EnterpriseObject_ {
 
+    public static volatile SingularAttribute<AutoresponderEmail,String> TYPE;
     public static volatile SingularAttribute<AutoresponderEmail,String> SUBJECT;
     public static volatile SingularAttribute<AutoresponderEmail,String> BODY;
 }

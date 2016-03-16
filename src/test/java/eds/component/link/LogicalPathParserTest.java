@@ -200,4 +200,13 @@ public class LogicalPathParserTest {
         assertTrue(servletPath.containsFileResource());
     }
     
+    @Test
+    public void testComplexFilename1() {
+        LogicalPathParser servletPath = new LogicalPathParser(
+                "/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js",
+                DEFAULT_VIEW_ID,
+                "");
+        
+        assertTrue(servletPath.containsFileResource());
+    }
 }

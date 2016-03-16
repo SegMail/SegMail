@@ -3,17 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.email;
+package segmail.entity.subscription.autoresponder;
 
 import eds.entity.data.EnterpriseObject;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
 
 /**
  * A template is actually different from the actual email sent. It has to exist
@@ -29,8 +26,8 @@ import segmail.entity.subscription.email.AutoEmailTypeFactory.TYPE;
  */
 @Entity
 @Table(name="AUTORESPONDER_EMAIL")
-@DiscriminatorValue("AutoresponderEmail")
-public abstract class AutoresponderEmail extends EnterpriseObject {
+//@DiscriminatorValue("AutoresponderEmail")
+public class AutoresponderEmail extends EnterpriseObject {
     
     /**
     public enum EMAIL_TYPE {
@@ -41,9 +38,23 @@ public abstract class AutoresponderEmail extends EnterpriseObject {
     
     protected EMAIL_TYPE TYPE;*/
     
+    protected String TYPE;
+    
     protected String SUBJECT;
     
     protected String BODY;
+    
+    public String getTYPE() {
+        return TYPE;
+    }
+
+    public void setTYPE(String TYPE) {
+        this.TYPE = TYPE;
+    }
+    
+    public void setTYPE(AUTO_EMAIL_TYPE TYPE) {
+        this.TYPE = TYPE.name();
+    }
 
     public String getSUBJECT() {
         return SUBJECT;
@@ -60,7 +71,7 @@ public abstract class AutoresponderEmail extends EnterpriseObject {
      * @return TYPE
      */
     //@Transient
-    public abstract TYPE type();
+    //public abstract TYPE type();
 
     //@Lob //Causing a java.lang.AbstractMethodError
     @Column(columnDefinition="MEDIUMTEXT")

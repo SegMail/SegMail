@@ -9,6 +9,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.mail.InvalidEmailException;
 import java.util.List;
 import java.util.Map;
 import segmail.component.subscription.SubscriptionService;
@@ -97,9 +98,6 @@ public class FormListSubscriber {
             //How to redirect to List editing panel?
             program.refresh();
             
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
@@ -108,9 +106,11 @@ public class FormListSubscriber {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Subscriber already exist in this list", "");
-        } catch (Exception ex) {
+        } catch (InvalidEmailException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "You will need to set a \"Send as (Email)\" address in \"Settings\" before you can start adding subscribers!", "");
+        } /*catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
+        }*/
     }
 
     public SubscriberAccount getSubscriber() {

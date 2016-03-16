@@ -3,24 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.email;
+package segmail.entity.subscription;
 
+import eds.entity.client.Client;
 import eds.entity.data.EnterpriseRelationship;
-import javax.persistence.DiscriminatorColumn;
-import segmail.entity.subscription.SubscriptionList;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
- * @param <E>
- * @param <SubscriptionList>
  */
 @Entity
-@Table(name="ASSIGN_AUTORESPONDER_EMAIL_LIST")
-//@DiscriminatorColumn(name="Assign_AutoresponderEmail_List")
-public abstract class Assign_AutoresponderEmail_List<E extends AutoresponderEmail> extends EnterpriseRelationship<E,SubscriptionList> {
+@Table(name="SUBSCRIBER_OWNERSHIP")
+public class SubscriberOwnership extends EnterpriseRelationship<SubscriberAccount,Client>{
 
     @Override
     public void randInit() {
@@ -31,5 +27,5 @@ public abstract class Assign_AutoresponderEmail_List<E extends AutoresponderEmai
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
 }

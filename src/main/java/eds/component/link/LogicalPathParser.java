@@ -156,7 +156,7 @@ public final class LogicalPathParser {
         
         for(int i=0; i<splitElement.length; i++){
             String programElement = splitElement[i];
-            if(!programElement.matches(".*[a-zA-Z]+.*")) //If any of its elements doesn't contain a letter, it is not a file
+            if(!programElement.matches(".*[a-zA-Z0-9]+.*")) //If any of its elements doesn't contain a letter or number, it is not a file
                 return false;
         }
         

@@ -1,5 +1,7 @@
 var SUMMERNOTE_HEIGHT = 300;
 
+var CONFIRMATION_PLACEHOLDER = '[confirm]';
+
 var popup = (function() {
 
     var title_id;
@@ -26,8 +28,22 @@ var popup = (function() {
             document.getElementById(this.type_id).value = TYPE;
             
             //Re-render the summernote text editor
-            $('textarea.editor').summernote({height: SUMMERNOTE_HEIGHT});
-            
+            //In addition, add our custom mail-merge buttons
+            $('textarea.editor').summernote({
+                height: SUMMERNOTE_HEIGHT,
+                oninit: function() {
+                    var confirmButton 
+                            = '<button id="insertConfirmButton" type="button" class="btn btn-default btn-sm btn-small" title="Insert confirmation link" data-event="something" tabindex="-1" onclick="popup.test()">[confirm]</button>';
+                    var insertGroup 
+                            = '<div class="note-file btn-group">' + confirmButton + '</div>';
+                    $(insertGroup).appendTo($('.note-toolbar'));
+                    $('#insertConfirmButton').tooltip({placement: 'bottom'});
+                    $('#insertConfirmButton').click(function(event) {
+                        //var text = $('.note-editable').children('p').text();
+                        alert("text");
+                    });
+                }
+            });
         },
         
         clear : function() {
@@ -39,8 +55,6 @@ var popup = (function() {
 });
 
 var popup = new popup();
-
-
 
 /**
  * http://stackoverflow.com/questions/7043840/jsf-2-how-show-different-ajax-status-in-same-input/7044332#7044332
@@ -72,7 +86,3 @@ function edit(data){
             break;
     }
 };
-
-//$(document).ready(function () {
-//    popup.clear();
-//});

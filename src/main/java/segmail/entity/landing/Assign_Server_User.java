@@ -18,9 +18,12 @@ import javax.persistence.Table;
 @Table(name="ASSIGN_SERVER_USER")
 public class Assign_Server_User extends EnterpriseRelationship<ServerInstance,User> {
 
+<<<<<<< HEAD:src/main/java/segmail/entity/landing/Assign_Server_User.java
     public Assign_Server_User() {
     }
 
+=======
+>>>>>>> mail-merge:src/main/java/segmail/entity/landing/Assign_Server_User.java
     public Assign_Server_User(ServerInstance newInstance, User user) {
         this.setSOURCE(newInstance);
         this.setTARGET(user);

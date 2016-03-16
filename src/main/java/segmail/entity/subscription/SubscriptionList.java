@@ -19,13 +19,51 @@ import javax.persistence.Table;
 //@DiscriminatorColumn(name="SUBSCRIPTION_LIST")
 public class SubscriptionList extends EnterpriseObject {// implements MailSender {
     
+    /**
+     * Private name viewable only by the list owners
+     */
     private String LIST_NAME;
+    
+    /**
+     * The email displayed in the From field when viewed by the recipient.
+     */
     private String SEND_AS_EMAIL;
+    
+    /**
+     * The name displayed in the From field when viewed by the recipient.
+     */
     private String SEND_AS_NAME;
+    
+    /**
+     * Indicates if the list requires double opt-in method of confirming subscribers.
+     * It is by default TRUE.
+     */
     private boolean DOUBLE_OPTIN;
+    
+    /**
+     * Indicates if the list is stored in a remote location instead of in the 
+     * local server.
+     */
     private boolean REMOTE;
-    private int COUNT;
-    //private ListType TYPE;
+    
+    /**
+     * Current number of subscribers by subscription.
+     */
+    private int SUBSCRIBER_COUNT;
+    
+    /**
+     * The address the recipient is sending to when they click "Reply" in the 
+     * email.
+     */
+    private String REPLY_TO_ADDRESS;
+    
+    /**
+     * The email address that bounces are returned to. 
+     * 
+     * We will not use this at the moment, but SES own bounce handling instead:
+     * https://sesblog.amazon.com/post/TxJE1JNZ6T9JXK/Handling-Bounces-and-Complaints
+     */
+    //private String RETURN_PATH;
 
     public SubscriptionList() {
         this.REMOTE = true; //Default value
@@ -90,71 +128,20 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
         this.REMOTE = REMOTE;
     }
 
-    public int getCOUNT() {
-        return COUNT;
+    public int getSUBSCRIBER_COUNT() {
+        return SUBSCRIBER_COUNT;
     }
 
-    public void setCOUNT(int COUNT) {
-        this.COUNT = COUNT;
+    public void setSUBSCRIBER_COUNT(int SUBSCRIBER_COUNT) {
+        this.SUBSCRIBER_COUNT = SUBSCRIBER_COUNT;
+    }
+
+    public String getREPLY_TO_ADDRESS() {
+        return REPLY_TO_ADDRESS;
+    }
+
+    public void setREPLY_TO_ADDRESS(String REPLY_TO_ADDRESS) {
+        this.REPLY_TO_ADDRESS = REPLY_TO_ADDRESS;
     }
     
-    
-    
-    
-
-    /**
-    @ManyToOne(targetEntity=ListType.class,optional=false)
-    public ListType getTYPE() {
-        return TYPE;
-    }
-
-    public void setTYPE(ListType TYPE) {
-        this.TYPE = TYPE;
-    }
-    
-    @Override
-    public String getAddress() {
-        return this.SEND_AS_EMAIL;
-    }
-
-    @Override
-    public Document createDocument(Map<String, Object> ideas) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String getSignature() {
-        return this.SEND_AS_EMAIL;
-    }
-
-    @Override
-    public String getName() {
-        return this.SEND_AS_NAME;
-    }
-    
-    @Override
-    public long getAuthorId() {
-        return this.OBJECTID;
-    }
-    
-    @Override
-    public void setAddress(String address) {
-        this.SEND_AS_EMAIL = address;
-    }
-
-    @Override
-    public void setAuthorId(long id) {
-        this.OBJECTID = id;
-    }
-
-    @Override
-    public void setSignature(String signature) {
-        this.SEND_AS_EMAIL = signature;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.SEND_AS_NAME = name;
-    }
-*/
 }
