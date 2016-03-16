@@ -8,6 +8,7 @@ package segmail.component.landing;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
@@ -20,8 +21,9 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.PersistenceException;
 import org.hibernate.exception.GenericJDBCException;
-import segmail.entity.landing.AssignServerUser;
+import segmail.entity.landing.Assign_Server_User;
 import segmail.entity.landing.ServerInstance;
+import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 
 /**
  *
@@ -29,11 +31,14 @@ import segmail.entity.landing.ServerInstance;
  */
 @Stateless
 public class LandingService {
-    
-    @EJB private GenericObjectService objectService;
-    @EJB private UserService userService;
-    @EJB private UpdateObjectService updateService;
-    
+
+    @EJB
+    private GenericObjectService objectService;
+    @EJB
+    private UserService userService;
+    @EJB
+    private UpdateObjectService updateService;
+
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<ServerInstance> getServerInstances() {
         try {
@@ -45,7 +50,7 @@ public class LandingService {
             throw new EJBException(pex);
         }
     }
-    
+
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ServerInstance getServerInstance(long serverId) {
         try {
@@ -57,34 +62,51 @@ public class LandingService {
             throw new EJBException(pex);
         }
     }
-    
+
+    /**
+     * 
+     * @param name
+     * @param address
+     * @param userId
+     * @return
+     * @throws EntityNotFoundException if userId is not found.
+     * @throws IncompleteDataException if name or address are not provided.
+     * @throws EntityExistsException if there is already a ServerInstance with the same name.
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ServerInstance addServerInstance(String name, String address, long userId) 
-            throws EntityNotFoundException, IncompleteDataException {
+    public ServerInstance addServerInstance(String name, String address, long userId)
+            throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
         try {
-            if(name == null || name.isEmpty())
+            if (name == null || name.isEmpty()) {
                 throw new IncompleteDataException("Name must not be empty.");
+            }
             
-            if(address == null || address.isEmpty())
+            List<ServerInstance> existingServers = objectService.getEnterpriseObjectsByName(name,ServerInstance.class);
+            if (existingServers != null && !existingServers.isEmpty())
+                throw new EntityExistsException(existingServers.get(0));
+
+            if (address == null || address.isEmpty()) {
                 throw new IncompleteDataException("You cannot add a server without an address!");
-            
+            }
+
             User user = userService.getUserById(userId);
-            if(user == null)
+            if (user == null) {
                 throw new EntityNotFoundException(ServerInstance.class, userId);
-            
+            }
+
             //Create new serverInstance
             ServerInstance newInstance = new ServerInstance();
             newInstance.setADDRESS(address);
             newInstance.setNAME(name);
-            
+
             updateService.getEm().persist(newInstance);
-            
-            AssignServerUser assignment = new AssignServerUser(newInstance,user);
-            
+
+            Assign_Server_User assignment = new Assign_Server_User(newInstance, user);
+
             updateService.getEm().persist(assignment);
-            
+
             return newInstance;
-            
+
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
@@ -92,6 +114,69 @@ public class LandingService {
             throw new EJBException(pex);
         }
     }
+
+    /**
+     * Assume only 1 assignment at the moment.
+     *
+     * @param serverId
+     * @return
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Assign_Server_User getServerUserAssignment(long serverId) {
+        List<Assign_Server_User> assignments = objectService.getRelationshipsForSourceObject(serverId, Assign_Server_User.class);
+
+        return (assignments == null || assignments.isEmpty()) ? null : assignments.get(0);
+    }
+
+    /**
+     * Deletes all existing assignment and re-assign to the only one provided.
+     * Only 1 user can be assigned to a server.
+     *
+     * @param userId
+     * @param serverId
+     * @return
+     * @throws eds.component.data.EntityNotFoundException
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Assign_Server_User assignUserToServer(long userId, long serverId) 
+            throws EntityNotFoundException {
+        List<Assign_Server_User> assignments = objectService.getRelationshipsForSourceObject(serverId, Assign_Server_User.class);
+        
+        for (Assign_Server_User assignment : assignments) {
+            updateService.getEm().remove(
+                    updateService.getEm().contains(assignment)
+                            ? assignment : updateService.getEm().merge(assignment));
+        }
+        
+        User user = objectService.getEnterpriseObjectById(userId, User.class);
+        if(user == null)
+            throw new EntityNotFoundException(User.class,userId);
+        
+        ServerInstance server = objectService.getEnterpriseObjectById(serverId, ServerInstance.class);
+        if(server == null)
+            throw new EntityNotFoundException(ServerInstance.class,serverId);
+        
+        Assign_Server_User newAssignment = new Assign_Server_User(server,user);
+        updateService.getEm().persist(newAssignment);
+        
+        return newAssignment;
+    }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void saveServer(ServerInstance server){
+        updateService.getEm().merge(server);
+    }
     
+    /**
+     * Deletes the server and all its assignments:
+     * - Assign_Server_User
+     * 
+     * @param serverId 
+     * @throws eds.component.data.EntityNotFoundException if the serverId is not found
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void deleteServer(long serverId) 
+            throws EntityNotFoundException{
+        updateService.deleteObjectDataAndRelationships(serverId);
+    }
 }

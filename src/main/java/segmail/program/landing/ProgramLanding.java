@@ -5,16 +5,19 @@
  */
 package segmail.program.landing;
 
+import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
 import java.util.List;
 import java.util.Map;
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
+import segmail.entity.landing.Assign_Server_User;
 import segmail.entity.landing.ServerInstance;
 
 /**
@@ -25,12 +28,21 @@ public class ProgramLanding extends Program {
     
     @Inject private UserRequestContainer requestContainer;
     
-    private List<ServerInstance> servers;
+    @EJB private UserService userService;
+    
+    //Shared variables
     private List<UserAccount> userAccounts;
-    private ServerInstance serverEditing;
+    private List<ServerInstance> servers;
+    
+    //Add new form
     private String name;
     private String address;
-    private long userId;
+    private long userIdNew;
+    
+    //Edit existing form
+    private ServerInstance serverEditing;
+    private Assign_Server_User assignment;
+    private long userIdExisting;
     
     @Override
     public void initProgramParams() {
@@ -62,7 +74,18 @@ public class ProgramLanding extends Program {
 
     @Override
     public void initProgram() {
-        
+        FacesContext fc = FacesContext.getCurrentInstance();
+        if (!fc.isPostback()) {
+            initUserAccounts();
+        }
+    }
+    
+    public void initUserAccounts() {
+        try {
+            setUserAccounts(userService.getWebServiceUserAccounts());
+        } catch (EJBException ex) { 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+        }
     }
 
     public List<ServerInstance> getServers() {
@@ -89,12 +112,12 @@ public class ProgramLanding extends Program {
         this.address = address;
     }
 
-    public long getUserId() {
-        return userId;
+    public long getUserIdNew() {
+        return userIdNew;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setUserIdNew(long userIdNew) {
+        this.userIdNew = userIdNew;
     }
 
     public List<UserAccount> getUserAccounts() {
@@ -112,5 +135,27 @@ public class ProgramLanding extends Program {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Assign_Server_User getAssignment() {
+        return assignment;
+    }
+
+    public void setAssignment(Assign_Server_User assignment) {
+        this.assignment = assignment;
+    }
+
+    public long getUserIdExisting() {
+        return userIdExisting;
+    }
+
+    public void setUserIdExisting(long userIdExisting) {
+        this.userIdExisting = userIdExisting;
+    }
+
+    @Override
+    public void clearVariables() {
+        
+    }
+    
     
 }

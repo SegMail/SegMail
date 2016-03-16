@@ -46,9 +46,11 @@ public class FormServerList {
         }
     }
     
-    public void loadServer(long serverId) {
+    public void loadServerAndUserAccount(long serverId) {
         try {
             program.setServerEditing(landingService.getServerInstance(serverId));
+            program.setAssignment(landingService.getServerUserAssignment(serverId));
+            program.setUserIdExisting(program.getAssignment().getTARGET().getOBJECTID());
         } catch (EJBException ex) { //Transaction did not go through
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         }
