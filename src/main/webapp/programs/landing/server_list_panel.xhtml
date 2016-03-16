@@ -12,14 +12,14 @@
 
         <!--<a href="#" class="list-group-item">Default</a>-->
         <c:forEach items="#{FormServerList.serverList}" var="server">
-            <form jsf:id="server_panel_popup_#{server.OBJECTID}" name="server_#{server.OBJECTID}">
-                <a href="#server_panel_popup" class="list-group-item" data-toggle="modal"
+            <form jsf:id="edit_existing_server_panel_#{server.OBJECTID}" name="server_#{server.OBJECTID}">
+                <a href="#edit_existing_server_panel" class="list-group-item" data-toggle="modal"
                    >
-                    <f:ajax render="FormServerList"  event="click"
-                            listener="#{FormServerList.loadServer(server.OBJECTID)}"
-                            onevent="edit"
+                    <f:ajax render=":FormEditExistingServer"  event="click"
+                            listener="#{FormServerList.loadServerAndUserAccount(server.OBJECTID)}"
+                            
                             />
-                    #{server.ADDRESS}
+                    <strong>#{server.NAME}</strong> -  #{server.ADDRESS}
                 </a>
             </form>
 

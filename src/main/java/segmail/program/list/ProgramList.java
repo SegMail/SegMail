@@ -228,5 +228,10 @@ public class ProgramList extends Program implements Serializable {
         
     }
 
+    @Override
+    public void clearVariables() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     
 }

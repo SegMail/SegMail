@@ -5,6 +5,7 @@
  */
 package segmail.program.landing;
 
+import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
@@ -34,7 +35,6 @@ public class FormAddNewServer {
     
     @Inject private ProgramLanding program;
     
-    @EJB private UserService userService;
     @EJB private LandingService landingService;
     
     private final String formName = "FormAddNewServer";
@@ -43,29 +43,23 @@ public class FormAddNewServer {
     public void init() {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
-            initUserAccounts();
+            initNewServerForm();
         }
     }
     
     public void addServer() {
         try {
-            landingService.addServerInstance(program.getName(), program.getAddress(), program.getUserId());
+            landingService.addServerInstance(program.getName(), program.getAddress(), program.getUserIdNew());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
             program.refresh();
         } catch (EJBException ex) { 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-    
-    public void initUserAccounts() {
-        try {
-            program.setUserAccounts(userService.getWebServiceUserAccounts());
-        } catch (EJBException ex) { 
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+        } catch (EntityExistsException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Please choose a different server name.", "");
         }
     }
     
@@ -78,11 +72,11 @@ public class FormAddNewServer {
     }
     
     public long getUserId() {
-        return program.getUserId();
+        return program.getUserIdNew();
     }
     
     public void setUserId(long userId) {
-        program.setUserId(userId);
+        program.setUserIdNew(userId);
     }
     
     public List<UserAccount> getUserAccounts() {
@@ -99,5 +93,11 @@ public class FormAddNewServer {
 
     public void setName(String name) {
         program.setName(name);
+    }
+
+    private void initNewServerForm() {
+        this.setName("");
+        this.setAddress("");
+        this.setUserId(-1);
     }
 }
