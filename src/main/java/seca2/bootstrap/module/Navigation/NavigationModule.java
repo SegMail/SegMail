@@ -68,6 +68,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         //For all other programs which changes menu items assignment, just nullify menu attribute of the sessionContainer
         
         String currentProgram = requestContainer.getProgramName();
+        List<MenuItemContainer> existingMenuItems = sessionContainer.getMenu();//debug
         if(sessionContainer.getMenu() == null ){
             List<MenuItem> privateMenuItems = ((userType == null) ? (new ArrayList<MenuItem>()) :
                     navigationService.getAllMenuItemsForUsertype(userType.getOBJECTID()));

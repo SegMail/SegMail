@@ -11,7 +11,7 @@ package seca2.bootstrap;
  */
 public enum RunMode {
     INSTALL("INSTALL"),
-    NORMAL("NORMAL"),
+    ERP("ERP"),
     WEB("WEB");
     
     final String name;
@@ -29,13 +29,13 @@ public enum RunMode {
         if(runMode.toUpperCase().equals(RunMode.INSTALL.toString()))
             return RunMode.INSTALL;
         
-        if(runMode.toUpperCase().equals(RunMode.NORMAL.toString()))
-            return RunMode.NORMAL;
+        if(runMode.toUpperCase().equals(RunMode.ERP.toString()))
+            return RunMode.ERP;
         
         if(runMode.toUpperCase().equals(RunMode.WEB.toString()))
             return RunMode.WEB;
         
-        return RunMode.NORMAL; //Default
+        return RunMode.ERP; //Default
     }
     
 }

@@ -36,7 +36,7 @@
     
     <context-param>
         <param-name>RUN_MODE</param-name>
-        <param-value>normal</param-value>
+        <param-value>web</param-value>
     </context-param>
     
     <context-param>

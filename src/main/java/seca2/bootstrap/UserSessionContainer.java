@@ -38,7 +38,7 @@ public class UserSessionContainer implements Serializable {
     private Program currentProgram;
     private Layout currentLayout;
     
-    private List<MenuItemContainer> menu;
+    private List<MenuItemContainer> menu; //Shoukd it be a session object?
     
     @PostConstruct
     public void init(){

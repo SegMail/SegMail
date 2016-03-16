@@ -27,5 +27,10 @@ public class ProgramConfirmSubscription extends Program {
     public void initProgram() {
         
     }
+
+    @Override
+    public void clearVariables() {
+        
+    }
     
 }

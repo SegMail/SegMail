@@ -236,7 +236,7 @@ public abstract class BootstrapModule implements Filter {
             
             if(
                     (runMode.equals(RunMode.INSTALL) && this.bypassDuringInstall()) || 
-                    (runMode.equals(RunMode.NORMAL) && this.bypassDuringNormal()) ||
+                    (runMode.equals(RunMode.ERP) && this.bypassDuringNormal()) ||
                     (runMode.equals(RunMode.WEB) && this.bypassDuringWeb()) ||
                     this.execute(req, res)){
                 chain.doFilter(request, response);

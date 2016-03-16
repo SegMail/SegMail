@@ -23,7 +23,6 @@ import javax.persistence.PersistenceException;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.landing.Assign_Server_User;
 import segmail.entity.landing.ServerInstance;
-import segmail.entity.subscription.email.Assign_AutoWelcomeEmail_List;
 
 /**
  *
@@ -100,15 +99,9 @@ public class LandingService {
             newInstance.setNAME(name);
 
             updateService.getEm().persist(newInstance);
-<<<<<<< HEAD
-
-            Assign_Server_User assignment = new Assign_Server_User(newInstance, user);
-
-=======
             
             Assign_Server_User assignment = new Assign_Server_User(newInstance,user);
             
->>>>>>> mail-merge
             updateService.getEm().persist(assignment);
 
             return newInstance;
@@ -168,11 +161,10 @@ public class LandingService {
         return newAssignment;
     }
     
-<<<<<<< HEAD
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveServer(ServerInstance server){
         updateService.getEm().merge(server);
-=======
+    }
     /**
      * This is a generator method that produces the next server instance based
      * on a LandingServerGenerationStrategy.
@@ -199,7 +191,6 @@ public class LandingService {
             }
             throw new EJBException(pex);
         }
->>>>>>> mail-merge
     }
     
     /**
