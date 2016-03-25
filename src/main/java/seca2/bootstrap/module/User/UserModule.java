@@ -5,7 +5,7 @@
  */
 package seca2.bootstrap.module.User;
 
-import eds.component.link.LogicalPathParser;
+import seca2.bootstrap.module.Path.LogicalPathParser;
 import seca2.bootstrap.UserSessionContainer;
 import java.io.Serializable;
 import javax.ejb.EJB;
@@ -44,31 +44,20 @@ public class UserModule extends BootstrapModule implements Serializable {
     @Inject private UserRequestContainer requestContainer;
     @Inject private UserSessionContainer userContainer;
     
-    //public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
-    //public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
-    
-    //public final String LOGIN_PATH = "/login";
-    
-    //public final String BYPASS = "SETUP";
-    
-
     @Override
     protected boolean inService() {
         return true;
     }
-    
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
         
-        //If system in installation mode
-        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
-        if(install)
-            return true;*/
+        HttpServletRequest req = (HttpServletRequest)request;
+        HttpServletResponse res = (HttpServletResponse)response;
         
-        String contextPath = ((HttpServletRequest)request).getContextPath();
-        String servletPath = ((HttpServletRequest)request).getServletPath();
-        String pathInfo = ((HttpServletRequest)request).getPathInfo();
+        String contextPath = req.getContextPath();
+        String servletPath = req.getServletPath();
+        String pathInfo = req.getPathInfo();
         
         //IMO, a bug in the 3 above methods
         contextPath = (contextPath == null) ? "" : contextPath;
@@ -79,21 +68,6 @@ public class UserModule extends BootstrapModule implements Serializable {
         //This parser is totally separated from the RewriteModule's parser, because UserModule is supposed to be 
         //independent of other modules.
         String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
-        String programPath = request.getServletContext().getInitParameter(defaults.PROGRAM_PATH);
-        String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
-        
-        String availableServletPath = "";
-        if(servletPath.equalsIgnoreCase(loginPath) || servletPath.equalsIgnoreCase(programPath))
-            availableServletPath = servletPath;
-        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, availableServletPath);
-        /**
-         * Cannot work, because sometimes your URL doesn't contain your servletPath, which is either
-         * /program or /login (based on Servlet's config pattern in web.xml), so your programName will
-         * be in your servletPath.
-         * 
-         */
-        //LogicalPathParser newParser = new LogicalPathParser(pathInfo,globalViewRoot);
-        requestContainer.setPathParser(newParser);
         
         //During postback of the form submission, the servlet path will be /login
         //and if the xhtml values are not set, the form methods will not be processed.
@@ -104,9 +78,13 @@ public class UserModule extends BootstrapModule implements Serializable {
         
         //If on login page, forward the request to viewId index.xhtml
         //String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
-        if(servletPath.equalsIgnoreCase(loginPath)){ //
+        if(servletPath.equalsIgnoreCase(loginPath)){ 
             return true;
         }
+        
+        //Authenticate a webservice call
+        if(requestContainer.isWebservice() && attemptAuthentication(request, response))
+            return true;
         
         //For all other requests, if the user session is logged in, let other modules decide the view
         if(!(
@@ -119,23 +97,20 @@ public class UserModule extends BootstrapModule implements Serializable {
         }
         
         //If request is for a file resource
-        if(newParser.containsFileResource())
+        if(requestContainer.getPathParser().containsFileResource())
             return true;
-        //If the request has servlet path /program or /login, it would match to FacesServlet from
-        //web.xml config and parsed as Faces request.
-        //if(SegURLResolver.getResolver().containsFile(pathInfo))//Separate out for debugging purposes
-        //    return true;
                 
         //For everything else not discovered, don't continue the filterchain
-        String lastProgram = newParser.getProgram();
+        String lastProgram = requestContainer.getPathParser().getProgram();
         userContainer.setLastProgram(lastProgram);
+        
         return false;
     }
 
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE + 1;
+        return Integer.MIN_VALUE + 200;
     }
     
     @Override
@@ -172,9 +147,6 @@ public class UserModule extends BootstrapModule implements Serializable {
     @Override
     protected void ifFail(ServletRequest request, ServletResponse response) {
         try {
-            //If it's a file request, don't do anything
-            /*if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
-                return;*/
             if(requestContainer.getPathParser().containsFileResource())
                 return;
             
@@ -189,7 +161,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected void ifException(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
@@ -207,4 +179,8 @@ public class UserModule extends BootstrapModule implements Serializable {
         return true;
     }
     
+    private boolean attemptAuthentication(ServletRequest request, ServletResponse response){
+        
+        return true;
+    }
 }

@@ -16,6 +16,8 @@ import seca2.program.Program;
 @Named("ProgramConfirmSubscription")
 public class ProgramConfirmSubscription extends Program {
     
+    private int result;
+    
     
 
     @Override
@@ -31,6 +33,14 @@ public class ProgramConfirmSubscription extends Program {
     @Override
     public void clearVariables() {
         
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    public void setResult(int result) {
+        this.result = result;
     }
     
 }

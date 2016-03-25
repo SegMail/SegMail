@@ -52,6 +52,11 @@ public class DefaultKeys {
     public final String PROGRAM_PATH = "PROGRAM_PATH";
     
     /**
+     * The servlet path for webservice calls
+     */
+    public final String WEBSERVICE_PATH = "WEBSERVICE_PATH";
+    
+    /**
      * The name of the installation program.
      */
     public final String INSTALLATION_PROGRAM_NAME = "INSTALLATION_PROGRAM_NAME";

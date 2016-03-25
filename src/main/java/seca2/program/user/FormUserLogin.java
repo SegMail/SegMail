@@ -84,8 +84,6 @@ public class FormUserLogin {
                 //we need an adaptor pattern for redirection!
                 //this should be in the navigation module
                 
-                String URI = ((HttpServletRequest)ec.getRequest()).getRequestURI();//debug
-                System.out.println(URI);
             } else {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }

@@ -36,7 +36,7 @@
     
     <context-param>
         <param-name>RUN_MODE</param-name>
-        <param-value>web</param-value>
+        <param-value>erp</param-value>
     </context-param>
     
     <context-param>
@@ -47,6 +47,11 @@
     <context-param>
         <param-name>PROGRAM_PATH</param-name>
         <param-value>/program</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>WEBSERVICE_PATH</param-name>
+        <param-value>/ws</param-value>
     </context-param>
     
     <context-param>
@@ -61,7 +66,7 @@
     
     <context-param>
         <param-name>INSTALLATION_TEMPLATE_LOCATION</param-name>
-        <param-value>/templates/mytemplate/template-layout.xhtml</param-value>
+        <param-value>/templates/flatui-erp/template-layout.xhtml</param-value>
     </context-param>
     
     <context-param>
@@ -84,7 +89,7 @@
     
     <context-param>
         <param-name>DEFAULT_TEMPLATE_LOCATION</param-name>
-        <param-value>/templates/beprobootstrap/template-layout.xhtml</param-value>
+        <param-value>/templates/flatui-web/template-layout.xhtml</param-value>
         <!--<param-value>/templates/mytemplate/template-layout.xhtml</param-value>-->
     </context-param>
         
@@ -135,9 +140,19 @@
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/program/*</url-pattern>
-        <!--<url-pattern>/login</url-pattern>-->
         <url-pattern>/login/*</url-pattern>
     </servlet-mapping>
+    
+    <!--<servlet>
+        <servlet-name>WS Servlet</servlet-name>
+        <servlet-class>segmail.program.subscribe.confirm.ConfirmWSServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WS Servlet</servlet-name>
+        <url-pattern>/ws/*</url-pattern>
+    </servlet-mapping>-->
+    
     <session-config>
         <session-timeout>
             3

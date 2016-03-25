@@ -5,7 +5,7 @@
  */
 package seca2.jsf.rewrite;
 
-import eds.component.link.LogicalPathParser;
+import seca2.bootstrap.module.Path.LogicalPathParser;
 import javax.faces.application.ViewHandler;
 import javax.faces.application.ViewHandlerWrapper;
 import javax.faces.context.FacesContext;

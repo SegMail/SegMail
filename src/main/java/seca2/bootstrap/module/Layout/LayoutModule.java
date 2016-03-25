@@ -90,7 +90,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE+4;
+        return Integer.MIN_VALUE+500;
     }
 
     @Override

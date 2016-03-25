@@ -73,7 +73,8 @@ public class ProgramAutoresponder implements Serializable {
         try {
             
             //this.setConfirmationTemplates(autoresponderService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
-            this.setConfirmationTemplates(autoresponderService.getAvailableAutoEmailsForClient(clientFacade.getClient().getOBJECTID(),AUTO_EMAIL_TYPE.CONFIRMATION));
+            System.out.println(autoresponderService.getClass().getSimpleName())
+;            this.setConfirmationTemplates(autoresponderService.getAvailableAutoEmailsForClient(clientFacade.getClient().getOBJECTID(),AUTO_EMAIL_TYPE.CONFIRMATION));
 
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");

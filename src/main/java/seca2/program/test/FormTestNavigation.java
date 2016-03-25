@@ -85,8 +85,8 @@ public class FormTestNavigation implements Serializable{
         }
         catch(Exception ex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
+                    ex.getClass().getSimpleName(), 
+                    ex.getMessage());
         }
     }
     
