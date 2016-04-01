@@ -17,8 +17,10 @@ import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
 import eds.component.config.GenericConfigService;
 import eds.component.data.DataValidationException;
+import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
+import eds.entity.data.EnterpriseObject_;
 import eds.entity.mail.Email;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
@@ -46,7 +48,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
-import segmail.component.landing.LandingService;
+import seca2.component.landing.LandingService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.ListType;
@@ -59,6 +61,7 @@ import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.SubscriberOwnership_;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
+import segmail.entity.subscription.SubscriptionList_;
 import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
@@ -72,6 +75,7 @@ import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
+    public static final String DEFAULT_KEY_FOR_LIST = "LIST";
 
     /**
      * Generic services
@@ -729,5 +733,42 @@ public class SubscriptionService {
         this.updateService.getEm().persist(assign);
         
         return newOrExistingAcc;
+    }
+    
+    public List<Subscription> getSubscriptions(String subscriberEmail, long listId){
+        CriteriaBuilder builder = this.objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
+        Root<SubscriberAccount> fromSubscriber = query.from(SubscriberAccount.class);
+        Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
+        Root<Subscription> fromSubscription = query.from(Subscription.class);
+        
+        query.select(fromSubscription);
+        query.where(builder.and(
+                builder.equal(fromSubscriber.get(SubscriberAccount_.EMAIL), subscriberEmail),
+                builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
+                builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID))
+        ));
+        
+        List<Subscription> results = this.objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Subscription confirmSubscriber(String subscriberEmail, long listId) throws RelationshipNotFoundException{
+        List<Subscription> subscriptions = getSubscriptions(subscriberEmail,listId);
+        
+        if(subscriptions == null || subscriptions.isEmpty())
+            throw new RelationshipNotFoundException("The email "+subscriberEmail+" or list ID "+listId+" was not found.");
+        
+        //Subscriptions should be unique, so only 1 result is expected
+        Subscription subsc = subscriptions.get(0);
+        subsc.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
+        
+        this.updateService.getEm().merge(subsc);
+        
+        return subsc;
+        
     }
 }

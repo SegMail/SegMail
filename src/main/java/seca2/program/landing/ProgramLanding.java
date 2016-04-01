@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.landing;
+package seca2.program.landing;
 
 import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
@@ -17,8 +17,8 @@ import javax.inject.Inject;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
-import segmail.entity.landing.Assign_Server_User;
-import segmail.entity.landing.ServerInstance;
+import seca2.entity.landing.Assign_Server_User;
+import seca2.entity.landing.ServerInstance;
 
 /**
  *
@@ -36,7 +36,7 @@ public class ProgramLanding extends Program {
     
     //Add new form
     private String name;
-    private String address;
+    private String hostname;
     private long userIdNew;
     
     //Edit existing form
@@ -104,12 +104,12 @@ public class ProgramLanding extends Program {
         this.serverEditing = serverEditing;
     }
 
-    public String getAddress() {
-        return address;
+    public String getHostname() {
+        return hostname;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     public long getUserIdNew() {

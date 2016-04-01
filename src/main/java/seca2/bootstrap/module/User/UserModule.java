@@ -5,7 +5,8 @@
  */
 package seca2.bootstrap.module.User;
 
-import seca2.bootstrap.module.Path.LogicalPathParser;
+import eds.component.user.UserAccountLockedException;
+import eds.component.user.UserLoginException;
 import seca2.bootstrap.UserSessionContainer;
 import java.io.Serializable;
 import javax.ejb.EJB;
@@ -50,7 +51,8 @@ public class UserModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+    protected boolean execute(ServletRequest request, ServletResponse response) 
+            throws ServletException, IOException, UserLoginException, UserAccountLockedException {
         
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
@@ -83,8 +85,11 @@ public class UserModule extends BootstrapModule implements Serializable {
         }
         
         //Authenticate a webservice call
-        if(requestContainer.isWebservice() && attemptAuthentication(request, response))
+        if(requestContainer.isWebservice()){
+            //authenticateWSCall(request, response);
             return true;
+        }
+            
         
         //For all other requests, if the user session is logged in, let other modules decide the view
         if(!(
@@ -152,7 +157,6 @@ public class UserModule extends BootstrapModule implements Serializable {
             
             String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
             ((HttpServletResponse)response).sendRedirect(((HttpServletRequest)request).getContextPath()+loginPath);//No trailing slash before and now so why it doesn't work now?
-            //((HttpServletRequest)request).getRequestDispatcher("/login").forward(request, response);
             
         } catch (Exception ex) {
             Logger.getLogger(UserModule.class.getName()).log(Level.SEVERE, null, ex);
@@ -160,8 +164,9 @@ public class UserModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
-        
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
+        HttpServletResponse res = (HttpServletResponse)response;
+        res.addHeader("AUTHENTICATION_RESULT", ex.getClass()+": "+ex.getMessage());
     }
 
     @Override
@@ -179,7 +184,34 @@ public class UserModule extends BootstrapModule implements Serializable {
         return true;
     }
     
-    private boolean attemptAuthentication(ServletRequest request, ServletResponse response){
+    
+
+    /**
+     * This method is a HTTP-based solution, not a SOAP one. If the authentication
+     * fails, UserModule should subtly throw an exception and the client should
+     * interpret it implicitly that the login has failed. A more explicity way 
+     * should be to use SOAP Handlers, which I have not yet made it work. If 
+     * we were to use SOAP Handlers, UserModule will not need to even authenticate
+     * WS SOAP requests in the first place.
+     * 
+     * @param request
+     * @param response
+     * @return 
+     */
+    private boolean authenticateWSCall(ServletRequest request, ServletResponse response) 
+            throws UserLoginException, UserAccountLockedException{
+        
+        HttpServletRequest req = (HttpServletRequest)request;
+        
+        String queryString = req.getQueryString();
+        if("wsdl".equals(queryString)) //Because there is an interface call and a implementation call,
+            //That's why using fitlers to authenticate SOAP messages is not good.
+            return true;
+        
+        String username = req.getHeader("username");
+        String password = req.getHeader("password");
+        
+        userService.login(username, password);
         
         return true;
     }

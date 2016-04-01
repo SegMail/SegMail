@@ -110,6 +110,7 @@ public abstract class BootstrapModule implements Filter {
      * 
      * @param request
      * @param response 
+     * @throws java.lang.Exception 
      */
     protected abstract void ifFail(
             ServletRequest request, 
@@ -117,13 +118,15 @@ public abstract class BootstrapModule implements Filter {
     
     /**
      * What happens if an exception is encountered during request processing.
+     * <br>
+     * This was designed mainly for browser requests. It doesn't work well with 
+     * webservice calls.
      * 
      * @param request
      * @param response 
      */
     protected abstract void ifException(
-            ServletRequest request, 
-            ServletResponse response);
+            ServletRequest request, ServletResponse response, Exception ex);
     
     /**
      * What happens if the request is for a file resource.
@@ -229,7 +232,6 @@ public abstract class BootstrapModule implements Filter {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse res = (HttpServletResponse) response;
 
-            //boolean install = Boolean.parseBoolean(req.getServletContext().getInitParameter(defaults.INSTALL));
             String runModeString = req.getServletContext().getInitParameter(defaults.RUN_MODE);
             RunMode runMode = RunMode.getRunMode(runModeString);
             
@@ -245,7 +247,7 @@ public abstract class BootstrapModule implements Filter {
             this.ifFail(request, response);
             
         } catch (Exception ex) {
-            this.ifException(request, response);
+            this.ifException(request, response, null);
         }
     }
 

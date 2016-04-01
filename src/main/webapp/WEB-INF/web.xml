@@ -36,7 +36,7 @@
     
     <context-param>
         <param-name>RUN_MODE</param-name>
-        <param-value>erp</param-value>
+        <param-value>web</param-value>
     </context-param>
     
     <context-param>
@@ -161,10 +161,10 @@
     <!--<welcome-file-list>
         <welcome-file>program/index.xhtml</welcome-file>
     </welcome-file-list>-->
-    <!--<context-param>
+    <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-        <param-value>client</param-value>--> <!--when u store at client side, session object will not be auto created-->
-    <!--</context-param>-->
+        <param-value>client</param-value> <!--when u store at client side, session object will not be auto created-->
+    </context-param>
     <!--<filter-mapping>
         <filter-name>Primefaces Fileupload Filter</filter-name>
         <servlet-name>facesServlet</servlet-name>

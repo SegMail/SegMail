@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
     <system systemId="http://localhost:8080/SegMail/ws/ChartJSService?wsdl" uri="wsdl/localhost_8080/SegMail/ws/ChartJSService.wsdl.xml"/>
+    <system systemId="http://localhost:8080/SegMail/WSConfirmSubscriptionImplService?wsdl" uri="wsdl/localhost_8080/SegMail/WSConfirmSubscriptionImplService.wsdl"/>
+    <system systemId="http://lees-mbp.home:28081/SegMailERP/WSConfirmSubscription?wsdl" uri="wsdl/lees-mbp.home_28081/SegMailERP/WSConfirmSubscription.wsdl"/>
+    <system systemId="http://lees-mbp.home:28081/SegMailERP/WSConfirmSubscription?xsd=1" uri="wsdl/lees-mbp.home_28081/SegMailERP/login.xml"/>
+    <system systemId="http://localhost:8080/SegMail/WSConfirmSubscription?wsdl" uri="wsdl/localhost_8080/SegMail/WSConfirmSubscription.wsdl"/>
+    <system systemId="http://localhost:8080/SegMail/WSConfirmSubscription?xsd=1" uri="wsdl/localhost_8080/SegMail/login.xml"/>
+    <system systemId="file:/Users/LeeKiatHaw/SegMail/src/wsdl/localhost_8080/SegMail/WSConfirmSubscriptionImplService.wsdl" uri="wsdl/WSConfirmSubscriptionImplService.wsdl"/>
 </catalog>

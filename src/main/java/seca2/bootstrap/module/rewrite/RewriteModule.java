@@ -38,6 +38,10 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+        //Webservice calls will not be processed by the JSF servlet, 
+        //but the @WebService implementation instead.
+        if(userRequestContainer.isWebservice())
+            return true;
         
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
@@ -60,7 +64,6 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         if(userRequestContainer.getPathParser().containsFileResource())
             return true;
        
-        
         //1. Resolve program name
         String program = userRequestContainer.getPathParser().getProgram();
         
@@ -79,9 +82,6 @@ public class RewriteModule extends BootstrapModule implements Serializable {
             //Default servletPath
             servletPath = programPath;
         }
-        
-        if(userRequestContainer.isWebservice())
-            return true;
         
         //forward don't need contextpath because it's done at the server side
         req.getRequestDispatcher(servletPath.concat(forwardViewId)).forward(req, res);
@@ -129,7 +129,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
         
     }
 

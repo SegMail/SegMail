@@ -3,16 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.component.landing;
+package seca2.component.landing;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -20,9 +23,14 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.PersistenceException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
-import segmail.entity.landing.Assign_Server_User;
-import segmail.entity.landing.ServerInstance;
+import seca2.entity.landing.Assign_Server_User;
+import seca2.entity.landing.Assign_Server_User_;
+import seca2.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerInstance_;
 
 /**
  *
@@ -65,16 +73,16 @@ public class LandingService {
     /**
      * 
      * @param name
-     * @param address
+     * @param hostname
      * @param userId
      * @return
      * @throws EntityNotFoundException if userId is not found.
-     * @throws IncompleteDataException if name or address are not provided.
+     * @throws IncompleteDataException if name or hostname are not provided.
      * @throws EntityExistsException if there is already a ServerInstance with the same name.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ServerInstance addServerInstance(String name, String address, long userId)
-            throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
+    public ServerInstance addServerInstance(String name, String hostname, long userId)
+            throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException {
         try {
             if (name == null || name.isEmpty()) {
                 throw new IncompleteDataException("Name must not be empty.");
@@ -84,7 +92,7 @@ public class LandingService {
             if (existingServers != null && !existingServers.isEmpty())
                 throw new EntityExistsException(existingServers.get(0));
 
-            if (address == null || address.isEmpty()) {
+            if (hostname == null || hostname.isEmpty()) {
                 throw new IncompleteDataException("You cannot add a server without an address!");
             }
 
@@ -95,9 +103,11 @@ public class LandingService {
 
             //Create new serverInstance
             ServerInstance newInstance = new ServerInstance();
-            newInstance.setADDRESS(address);
+            newInstance.setHOSTNAME(hostname);
             newInstance.setNAME(name);
 
+            this.validateServer(newInstance);
+            
             updateService.getEm().persist(newInstance);
             
             Assign_Server_User assignment = new Assign_Server_User(newInstance,user);
@@ -161,8 +171,16 @@ public class LandingService {
         return newAssignment;
     }
     
+    /**
+     * Update method for ServerInstance. Validates first with validateServer().
+     * 
+     * @param server
+     * @throws DataValidationException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveServer(ServerInstance server){
+    public void saveServer(ServerInstance server) 
+            throws DataValidationException{
+        this.validateServer(server);
         updateService.getEm().merge(server);
     }
     /**
@@ -204,5 +222,56 @@ public class LandingService {
     public void deleteServer(long serverId) 
             throws EntityNotFoundException{
         updateService.deleteObjectDataAndRelationships(serverId);
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public User getUserFromServerAddress(String ipAddress) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<User> query = builder.createQuery(User.class);
+        
+        Root<ServerInstance> fromServer = query.from(ServerInstance.class);
+        Root<Assign_Server_User> fromAssign = query.from(Assign_Server_User.class);
+        Root<User> fromUser = query.from(User.class);
+        
+        query.select(fromUser).where(builder.and(builder.equal(fromServer.get(ServerInstance_.IP_ADDRESS), ipAddress),
+                        builder.equal(
+                                fromServer.get(ServerInstance_.OBJECTID), 
+                                fromAssign.get(Assign_Server_User_.SOURCE))
+                )
+        );
+        
+        List<User> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return (results != null && !results.isEmpty()) ? results.get(0) : null;
+    }
+    
+    /**
+     * 
+     * @param server
+     * @throws DataValidationException 
+     */
+    public void resolveAndUpdateIP(ServerInstance server) throws DataValidationException {
+        try {
+            String hostname = server.getHOSTNAME();
+            InetAddress address = InetAddress.getByName(hostname);
+            
+            server.setIP_ADDRESS(address.getHostAddress());
+            
+        } catch (UnknownHostException ex) {
+            /*Logger.getLogger(ServerIPResolverListener.class.getName()).log(Level.SEVERE, null, ex);
+            server.setADDRESS("");*/
+            throw new DataValidationException("IP address cannot be resolved: "+ex.getMessage());
+        } 
+    }
+    
+    /**
+     * Chain of validations for server. 
+     * 
+     * @param server
+     * @throws DataValidationException 
+     */
+    public void validateServer(ServerInstance server) throws DataValidationException {
+        resolveAndUpdateIP(server);
     }
 }

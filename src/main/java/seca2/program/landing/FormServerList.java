@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.landing;
+package seca2.program.landing;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -15,8 +15,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.component.landing.LandingService;
-import segmail.entity.landing.ServerInstance;
+import seca2.component.landing.LandingService;
+import seca2.entity.landing.ServerInstance;
 
 /**
  *

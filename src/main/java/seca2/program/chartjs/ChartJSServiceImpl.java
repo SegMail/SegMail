@@ -6,19 +6,27 @@
 
 package seca2.program.chartjs;
 
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @WebService(endpointInterface = "seca2.program.chartjs.ChartJSService")
-@HandlerChain(file="ws-handlers.xml")
+@HandlerChain(file = "/handlers-server.xml")
 public class ChartJSServiceImpl implements ChartJSService {
 
+    @Resource
+    WebServiceContext wsctx;
+    
     /**
      * Web service operation
      * @param firstNum
@@ -29,6 +37,26 @@ public class ChartJSServiceImpl implements ChartJSService {
     public int add(int firstNum, int secondNum) {
         //TODO write your implementation code here:
         System.out.println("add method called!");
+        
+        MessageContext mctx = wsctx.getMessageContext();
+        Map http_headers = (Map) mctx.get(MessageContext.HTTP_REQUEST_HEADERS);
+        
+        List userList = (List) http_headers.get("Username");
+        List passList = (List) http_headers.get("Password");
+        
+        String username = "";
+        String password = "";
+        
+        if(userList!=null){
+        	//get username
+        	username = userList.get(0).toString();
+        }
+        	
+        if(passList!=null){
+        	//get password
+        	password = passList.get(0).toString();
+        }
+        
         return firstNum + secondNum;
     }
     

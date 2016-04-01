@@ -15,10 +15,10 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import segmail.component.landing.LandingServerGenerationStrategy;
-import segmail.component.landing.LandingService;
+import seca2.component.landing.LandingServerGenerationStrategy;
+import seca2.component.landing.LandingService;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.email.mailmerge.MailMergeLabel;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
@@ -30,7 +30,6 @@ import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 @Stateless
 public class MailMergeService {
     
-    public static final String DEFAULT_KEY_FOR_LIST = "LIST";
     
     @EJB private GenericObjectService objectService;
     @EJB private UpdateObjectService updateService;
@@ -94,14 +93,14 @@ public class MailMergeService {
         
         EnterpriseTransactionParam listParam = new EnterpriseTransactionParam();
         listParam.setOWNER(trans);
-        listParam.setPARAM_KEY(DEFAULT_KEY_FOR_LIST);
+        listParam.setPARAM_KEY(SubscriptionService.DEFAULT_KEY_FOR_LIST);
         listParam.setPARAM_VALUE(Long.toString(listId));
         updateService.getEm().persist(listParam);
         //Might want to use guid instead.
         
         //3. Return the link with program name "confirm" and the generated transaction ID 
         ServerInstance landingServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
-        String confirmLink = landingServer.getADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
+        String confirmLink = landingServer.getIP_ADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
         
         String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
         

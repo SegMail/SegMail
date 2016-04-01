@@ -3,24 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice;
+package seca2.bootstrap.module.Webservice.server;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.UserRequestContainer;
@@ -51,7 +44,7 @@ public class WebserviceModule extends BootstrapModule {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
 
     }
 
@@ -102,25 +95,30 @@ public class WebserviceModule extends BootstrapModule {
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         
-        MessageFactory msgFactory = MessageFactory.newInstance();
-        SOAPMessage message = msgFactory.createMessage();
-        SOAPPart soapPart = message.getSOAPPart();
-        SOAPHeader soapHeader = message.getSOAPHeader();        
+        boolean queryStringIsWSDL = checkQueryString(req);
+        boolean contentTypeIsSOAPXML = checkContentType(req);
         
-        Map<String, String> map = new HashMap<String, String>();
-        
-        Enumeration headerNames = req.getHeaderNames(); while
-        (headerNames.hasMoreElements()) { String key = (String)
-        headerNames.nextElement(); String value = req.getHeader(key);
-        map.put(key, value); }
-        
-        
-        //Check query string
+        return queryStringIsWSDL || contentTypeIsSOAPXML;
+    }
+    
+    private boolean checkQueryString(HttpServletRequest req) {
         String queryString = req.getQueryString();
-        //if(queryString != null && queryString.startsWith("wsdl"))
-            return true;
         
-        //return false;
+        return (queryString != null && 
+                    (
+                        queryString.startsWith("wsdl") ||
+                        queryString.startsWith("tester")
+                    )
+                );
+    }
+    
+    private boolean checkContentType(HttpServletRequest req) {
+        String contentType = req.getContentType();
+        
+        return
+                contentType != null &&
+                (contentType.toUpperCase().contains("TEXT/XML") || 
+                contentType.toUpperCase().contains("SOAP"));
     }
 
 }

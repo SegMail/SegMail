@@ -3,27 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.landing;
+package seca2.program.landing;
 
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.component.landing.LandingService;
+import seca2.component.landing.LandingService;
 
 /**
  *
@@ -49,7 +46,7 @@ public class FormAddNewServer {
     
     public void addServer() {
         try {
-            landingService.addServerInstance(program.getName(), program.getAddress(), program.getUserIdNew());
+            landingService.addServerInstance(program.getName(), program.getHostname(), program.getUserIdNew());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
             program.refresh();
         } catch (EJBException ex) { 
@@ -60,15 +57,17 @@ public class FormAddNewServer {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EntityExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Please choose a different server name.", "");
+        } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
     
-    public String getAddress() {
-        return program.getAddress();
+    public String getHostname() {
+        return program.getHostname();
     }
     
-    public void setAddress(String address) {
-        program.setAddress(address);
+    public void setHostname(String hostname) {
+        program.setHostname(hostname);
     }
     
     public long getUserId() {
@@ -97,7 +96,7 @@ public class FormAddNewServer {
 
     private void initNewServerForm() {
         this.setName("");
-        this.setAddress("");
+        this.setHostname("");
         this.setUserId(-1);
     }
 }

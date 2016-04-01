@@ -16,9 +16,9 @@ import seca2.program.Program;
 @Named("ProgramConfirmSubscription")
 public class ProgramConfirmSubscription extends Program {
     
-    private int result;
+    private String listName;
     
-    
+    private String requestKey;
 
     @Override
     public void initProgramParams() {
@@ -35,12 +35,21 @@ public class ProgramConfirmSubscription extends Program {
         
     }
 
-    public int getResult() {
-        return result;
+    public String getListName() {
+        return listName;
     }
 
-    public void setResult(int result) {
-        this.result = result;
+    public void setListName(String listName) {
+        this.listName = listName;
     }
+
+    public String getRequestKey() {
+        return requestKey;
+    }
+
+    public void setRequestKey(String requestKey) {
+        this.requestKey = requestKey;
+    }
+    
     
 }

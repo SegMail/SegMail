@@ -59,12 +59,12 @@ public class PathModule extends BootstrapModule {
 
     @Override
     protected void ifFail(ServletRequest request, ServletResponse response) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
+        
     }
 
     @Override

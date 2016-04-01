@@ -36,22 +36,24 @@
                     </div>
                     <div class="form-group">
                         <label>
-                            Address
+                            Hostname
                         </label>
                         <span class="help-block">
-                            The IP or URL
+                            The hostname of the server. IP address will be resolved automatically so don't sweat it.
                         </span>
-                        <input type="text" class="form-control" id="address"
-                               jsf:value="#{FormAddNewServer.address}"
+
+                        <input type="text" class="form-control" id="hostname"
+                               jsf:value="#{FormAddNewServer.hostname}"
                                />
                     </div>
                     <div class="form-group">
                         <label>
                             Webservice user account
+                            <span class="help-block">
+                                You will use the credentials of this user account from your landing server
+                            </span>
                         </label>
-                        <span class="help-block">
-                            You will use the credentials of this user account from your landing server
-                        </span>
+
                         <h:selectOneMenu styleClass="form-control" style=""
                                          value="#{FormAddNewServer.userId}">
                             <f:selectItems value="#{FormAddNewServer.userAccounts}" var="account" 

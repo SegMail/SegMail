@@ -48,7 +48,7 @@ public class TestBootstrapModule extends BootstrapModule {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
         
     }
 
