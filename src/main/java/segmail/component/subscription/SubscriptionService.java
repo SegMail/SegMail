@@ -756,7 +756,8 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Subscription confirmSubscriber(String subscriberEmail, long listId) throws RelationshipNotFoundException{
+    public Subscription confirmSubscriber(String subscriberEmail, long listId) 
+            throws RelationshipNotFoundException{
         List<Subscription> subscriptions = getSubscriptions(subscriberEmail,listId);
         
         if(subscriptions == null || subscriptions.isEmpty())

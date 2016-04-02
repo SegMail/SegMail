@@ -5,21 +5,15 @@
  */
 package segmail.program.subscribe.confirm;
 
-import eds.component.data.RelationshipNotFoundException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.component.landing.LandingService;
-import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionImplService;
-import segmail.program.subscribe.confirm.client.WSConfirmSubscription;
 
 /**
  *
@@ -59,7 +53,7 @@ public class FormConfirmSubcription {
 
     public void callWS() {
 
-        try {
+        //try {
             //try {
             //QName qname = new QName("http://confirm.subscribe.program.seca2/", "WSConfirmSubscriptionImplService");
             //ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
@@ -87,14 +81,6 @@ public class FormConfirmSubcription {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getFault().getFaultString(), "");
             }*/
             
-            WSConfirmSubscriptionImplService client = new WSConfirmSubscriptionImplService();
-            WSConfirmSubscription clientService = client.getWSConfirmSubscriptionImplPort();
-            String results = clientService.confirm(program.getRequestKey());
-            
-            this.setListName(results);
-        } catch (RelationshipNotFoundException ex) {
-            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     public String getListName() {
