@@ -5,7 +5,10 @@
  */
 package segmail.program.subscribe.confirm;
 
+import eds.component.data.RelationshipNotFoundException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -14,6 +17,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.component.landing.LandingService;
+import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionService;
+import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 
 /**
  *
@@ -53,34 +58,26 @@ public class FormConfirmSubcription {
 
     public void callWS() {
 
-        //try {
-            //try {
-            //QName qname = new QName("http://confirm.subscribe.program.seca2/", "WSConfirmSubscriptionImplService");
-            //ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
-            /*String urlText = ERP_SERVER_URL.concat("/WSConfirmSubscriptionImplService?wsdl");
-            URL url = new URL(urlText);
-
-            Service service = Service.create(url, qname);
-            WSConfirmSubscription confirmWS = service.getPort(WSConfirmSubscription.class);
-
-            Map<String, Object> req_ctx = ((BindingProvider) confirmWS).getRequestContext();
-            req_ctx.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, urlText);
-
-            Map<String, List<String>> headers = new HashMap<String, List<String>>();
-            headers.put("Username", Collections.singletonList("sws"));
-            headers.put("Password", Collections.singletonList("sws"));
-            req_ctx.put(MessageContext.HTTP_REQUEST_HEADERS, headers);
-
-            String result = confirmWS.confirm("fsfsgsrgwas");
-
-            program.setResult(result);*/
+        try {
             
-            /*} catch (MalformedURLException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-            } catch (SOAPFaultException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getFault().getFaultString(), "");
-            }*/
+            WSConfirmSubscriptionService client = new WSConfirmSubscriptionService();
+            WSConfirmSubscriptionInterface clientService = client.getWSConfirmSubscriptionImplPort();
+            String results = clientService.confirm("Test");
             
+            this.setListName(results);
+                    
+            /*ChartJSServiceImplService client = new ChartJSServiceImplService();
+            ChartJSService clientService = client.getChartJSServiceImplPort();
+            
+            int results = clientService.add(1, 1);
+            
+            this.setListName(Integer.toString(results));*/
+            
+        } catch (RelationshipNotFoundException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.out);
+        }
     }
 
     public String getListName() {

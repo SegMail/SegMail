@@ -248,6 +248,7 @@ public abstract class BootstrapModule implements Filter {
             
         } catch (Exception ex) {
             this.ifException(request, response, null);
+            ex.printStackTrace(System.out);
         }
     }
 

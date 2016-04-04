@@ -13,7 +13,9 @@ import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
+import eds.entity.data.EnterpriseObject_;
 import eds.entity.user.User;
+import eds.entity.user.User_;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -81,7 +83,7 @@ public class LandingService {
      * @throws EntityExistsException if there is already a ServerInstance with the same name.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ServerInstance addServerInstance(String name, String hostname, long userId)
+    public ServerInstance addServerInstance(String name, String hostname, long userId, ServerNodeType type)
             throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException {
         try {
             if (name == null || name.isEmpty()) {
@@ -105,6 +107,7 @@ public class LandingService {
             ServerInstance newInstance = new ServerInstance();
             newInstance.setHOSTNAME(hostname);
             newInstance.setNAME(name);
+            newInstance.setSERVER_NODE_TYPE(type.value);
 
             this.validateServer(newInstance);
             
@@ -236,7 +239,10 @@ public class LandingService {
         query.select(fromUser).where(builder.and(builder.equal(fromServer.get(ServerInstance_.IP_ADDRESS), ipAddress),
                         builder.equal(
                                 fromServer.get(ServerInstance_.OBJECTID), 
-                                fromAssign.get(Assign_Server_User_.SOURCE))
+                                fromAssign.get(Assign_Server_User_.SOURCE)),
+                        builder.equal(
+                                fromAssign.get(Assign_Server_User_.TARGET),
+                                fromUser.get(User_.OBJECTID))
                 )
         );
         
@@ -273,5 +279,9 @@ public class LandingService {
      */
     public void validateServer(ServerInstance server) throws DataValidationException {
         resolveAndUpdateIP(server);
+    }
+    
+    public void getThisServerNodeType() {
+        
     }
 }

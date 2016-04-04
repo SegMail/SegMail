@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
 
 /**
  *
@@ -46,7 +47,7 @@ public class FormAddNewServer {
     
     public void addServer() {
         try {
-            landingService.addServerInstance(program.getName(), program.getHostname(), program.getUserIdNew());
+            landingService.addServerInstance(program.getName(), program.getHostname(), program.getUserIdNew(), ServerNodeType.WEB);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
             program.refresh();
         } catch (EJBException ex) { 

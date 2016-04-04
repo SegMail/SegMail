@@ -9,17 +9,9 @@ import eds.component.user.UserAccountLockedException;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
-import javax.xml.namespace.QName;
-import javax.xml.ws.handler.MessageContext;
-import javax.xml.ws.handler.soap.SOAPHandler;
-import javax.xml.ws.handler.soap.SOAPMessageContext;
 import seca2.component.landing.LandingService;
 
 /**
@@ -61,4 +53,6 @@ public class WebserviceService {
         }
 
     }
+    
+    
 }

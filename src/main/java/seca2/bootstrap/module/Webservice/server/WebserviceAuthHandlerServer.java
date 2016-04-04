@@ -75,10 +75,16 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
             SOAPMessage message = context.getMessage();
             SOAPHeader header = message.getSOAPHeader();
             
+            /**
+            * Raised a bug: https://github.com/SegMail/SegMail/issues/53
+            * We will fix this namespace issue after the launch, for the future SegERP. 
+            */
             QName headerUsername = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.USERNAME);
-            String username = header.getAttributeValue(headerUsername);
+            //String username = header.getAttributeValue(headerUsername);
+            String username = header.getAttribute(WebserviceSOAPKeys.USERNAME);
             QName headerPassword = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.PASSWORD);
-            String password = header.getAttributeValue(headerPassword);
+            //String password = header.getAttributeValue(headerPassword);
+            String password = header.getAttribute(WebserviceSOAPKeys.PASSWORD);
 
             //Get the host of the application
             //More reliable to get from HTTP header than manually set it in SOAP header

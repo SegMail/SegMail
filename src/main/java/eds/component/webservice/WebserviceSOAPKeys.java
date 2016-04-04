@@ -11,7 +11,7 @@ package eds.component.webservice;
  */
 public class WebserviceSOAPKeys {
 
-    public static String NAMESPACE = "NS";
+    public static String NAMESPACE = "http://webservice.component.segerp/";
 
     
     public static String USERNAME = "miqhri4jtmfnkjtbh";

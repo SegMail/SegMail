@@ -107,7 +107,8 @@ public class WebserviceModule extends BootstrapModule {
         return (queryString != null && 
                     (
                         queryString.startsWith("wsdl") ||
-                        queryString.startsWith("tester")
+                        queryString.startsWith("tester") ||
+                        queryString.startsWith("xsd")
                     )
                 );
     }

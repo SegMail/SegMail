@@ -9,6 +9,7 @@ import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import seca2.component.landing.ServerNodeType;
 
 /**
  *
@@ -35,6 +36,8 @@ public class ServerInstance extends EnterpriseObject {
      * The hostname of that the IP address is mapped to
      */
     private String HOSTNAME;
+    
+    private String SERVER_NODE_TYPE;
 
     public String getNAME() {
         return NAME;
@@ -58,6 +61,18 @@ public class ServerInstance extends EnterpriseObject {
 
     public void setHOSTNAME(String HOSTNAME) {
         this.HOSTNAME = HOSTNAME;
+    }
+
+    public String getSERVER_NODE_TYPE() {
+        return SERVER_NODE_TYPE;
+    }
+
+    public void setSERVER_NODE_TYPE(String SERVER_NODE_TYPE) {
+        this.SERVER_NODE_TYPE = SERVER_NODE_TYPE;
+    }
+    
+    public void setSERVER_NODE_TYPE(ServerNodeType SERVER_NODE_TYPE) {
+        this.SERVER_NODE_TYPE = SERVER_NODE_TYPE.name();
     }
 
     @Override

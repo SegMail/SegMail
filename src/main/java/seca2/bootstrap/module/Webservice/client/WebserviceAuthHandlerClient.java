@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
+import javax.xml.soap.Name;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
@@ -23,7 +24,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
  *
  * @author LeeKiatHaw
  */
-public class WebserviceHandlerClient implements SOAPHandler<SOAPMessageContext>{
+public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageContext>{
 
     private String username = "sws";
     private String password = "sws";
@@ -43,7 +44,7 @@ public class WebserviceHandlerClient implements SOAPHandler<SOAPMessageContext>{
             return true;
             
         } catch (SOAPException ex) {
-            Logger.getLogger(WebserviceHandlerClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WebserviceAuthHandlerClient.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }

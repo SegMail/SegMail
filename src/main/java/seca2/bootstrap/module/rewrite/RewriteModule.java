@@ -61,11 +61,14 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         
         //No actual viewId is known before this module, this module processes all viewId mappings
         //Check if the request is for a file resource. If yes, return true to continue the filter chain.
-        if(userRequestContainer.getPathParser().containsFileResource())
+        if(userRequestContainer.getPathParser() != null 
+                && userRequestContainer.getPathParser().containsFileResource())
             return true;
        
         //1. Resolve program name
-        String program = userRequestContainer.getPathParser().getProgram();
+        String program = (userRequestContainer.getPathParser() != null ) ? 
+                userRequestContainer.getPathParser().getProgram() :
+                "";
         
         //2. Inject it into ControlContainer
         userRequestContainer.setProgramName(program);

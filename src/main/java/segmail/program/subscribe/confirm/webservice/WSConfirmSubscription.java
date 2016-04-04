@@ -5,13 +5,14 @@
  */
 package segmail.program.subscribe.confirm.webservice;
 
+import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.transaction.TransactionService;
 import eds.entity.transaction.EnterpriseTransactionParam;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
-import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
@@ -20,8 +21,11 @@ import segmail.entity.subscription.Subscription;
  *
  * @author LeeKiatHaw
  */
-@WebService(serviceName = "WSConfirmSubscription")
-public class WSConfirmSubscription {
+@WebService(
+        serviceName = "WSConfirmSubscription",
+        endpointInterface = "segmail.program.subscribe.confirm.webservice.WSConfirmSubscription")
+@HandlerChain(file="handlers-server.xml")
+public class WSConfirmSubscription implements WSConfirmSubscriptionInterface  {
     
     @EJB SubscriptionService subService;
     @EJB TransactionService transService;
@@ -32,7 +36,7 @@ public class WSConfirmSubscription {
      * @return 
      * @throws eds.component.data.RelationshipNotFoundException
      */
-    @WebMethod(operationName = "confirm")
+    @Override
     public String confirm(@WebParam(name = "key") String key) 
             throws RelationshipNotFoundException {
         

@@ -79,7 +79,7 @@ public class PathModule extends BootstrapModule {
 
     @Override
     protected boolean bypassDuringInstall() {
-        return true;
+        return false;
     }
 
     @Override
