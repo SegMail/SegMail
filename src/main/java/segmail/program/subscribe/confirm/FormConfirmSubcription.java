@@ -65,16 +65,7 @@ public class FormConfirmSubcription {
             String results = clientService.confirm("Test");
             
             this.setListName(results);
-                    
-            /*ChartJSServiceImplService client = new ChartJSServiceImplService();
-            ChartJSService clientService = client.getChartJSServiceImplPort();
             
-            int results = clientService.add(1, 1);
-            
-            this.setListName(Integer.toString(results));*/
-            
-        } catch (RelationshipNotFoundException ex) {
-            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             ex.printStackTrace(System.out);
         }

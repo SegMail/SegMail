@@ -49,16 +49,35 @@
                     <div class="form-group">
                         <label>
                             Webservice user account
-                            <span class="help-block">
-                                You will use the credentials of this user account from your landing server
-                            </span>
+
                         </label>
+                        <span class="help-block">
+                            You will use the credentials of this user account from your landing server
+                        </span>
 
                         <h:selectOneMenu styleClass="form-control" style=""
                                          value="#{FormAddNewServer.userId}">
                             <f:selectItems value="#{FormAddNewServer.userAccounts}" var="account" 
                                            itemLabel="#{account.USERNAME}"
                                            itemValue="#{account.OWNER.OBJECTID}">
+                            </f:selectItems>
+
+                        </h:selectOneMenu>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Server node type
+
+                        </label>
+                        <span class="help-block">
+                            Is this an ERP or WEB node?
+                        </span>
+
+                        <h:selectOneMenu styleClass="form-control" style=""
+                                         value="#{FormAddNewServer.serverNodeType}">
+                            <f:selectItems value="#{FormAddNewServer.types}" var="type" 
+                                           itemLabel="#{type}"
+                                           itemValue="#{type}">
                             </f:selectItems>
 
                         </h:selectOneMenu>

@@ -24,16 +24,13 @@ import javax.jws.soap.SOAPBinding.Style;
 @SOAPBinding(style = Style.RPC)
 public interface WSConfirmSubscriptionInterface {
 
-
     /**
      * 
      * @param key
      * @return
      *     returns java.lang.String
-     * @throws eds.component.data.RelationshipNotFoundException
      */
     @WebMethod
-    public String confirm(@WebParam(name = "key") String key) 
-            throws RelationshipNotFoundException;
+    public String confirm(@WebParam(name = "key") String key);
 
 }

@@ -17,6 +17,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
@@ -99,7 +100,10 @@ public class MailMergeService {
         //Might want to use guid instead.
         
         //3. Return the link with program name "confirm" and the generated transaction ID 
-        ServerInstance landingServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN);
+        ServerInstance landingServer = 
+                landingService.getNextServerInstance(
+                        LandingServerGenerationStrategy.ROUND_ROBIN,
+                        ServerNodeType.WEB);
         String confirmLink = landingServer.getIP_ADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
         
         String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);

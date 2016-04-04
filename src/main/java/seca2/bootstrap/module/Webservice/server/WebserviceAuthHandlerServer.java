@@ -52,6 +52,12 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
         } catch (SOAPException ex) {
             Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.SEVERE, null, ex);
             return false;
+        } catch (UserAccountLockedException ex) {
+            Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        } catch (UserLoginException ex) {
+            Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
         }
     }
 
@@ -65,8 +71,9 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
 
     }
 
-    private boolean authenticateWS(SOAPMessageContext context) throws SOAPException {
-        try {
+    private boolean authenticateWS(SOAPMessageContext context) 
+            throws SOAPException, UserAccountLockedException, UserLoginException {
+        //try {
             HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
 
             //String username = req.getHeader(WebserviceSOAPKeys.USERNAME);
@@ -94,14 +101,14 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
 
             return true;
 
-        } catch (UserAccountLockedException ex) {
+        /*} catch (UserAccountLockedException ex) {
             setSOAPFault(ex, context);
             return false;
 
         } catch (UserLoginException ex) {
             setSOAPFault(ex, context);
             return false;
-        } 
+        } */
     }
 
     private SOAPFault setSOAPFault(Exception ex, SOAPMessageContext context) throws SOAPException {

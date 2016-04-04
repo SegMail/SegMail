@@ -192,9 +192,11 @@ public class LandingService {
      * 
      * @param strategy
      * @return 
+     * @throws eds.component.data.IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy) throws IncompleteDataException {
+    public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy, ServerNodeType type) 
+            throws IncompleteDataException {
         try {
             //Currently there's no strategy, just take the first one.
             //This is when the user can set their own landing servers
@@ -204,7 +206,12 @@ public class LandingService {
             if(servers == null || servers.isEmpty())
                 throw new IncompleteDataException("No Servers found, please contact your administrators to set a valid ServerInstance first.");
             
-            return servers.get(0);
+            for(ServerInstance server : servers){
+                if(type.value.equals(server.getSERVER_NODE_TYPE()))
+                    return server;
+            }
+            
+            return null;
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

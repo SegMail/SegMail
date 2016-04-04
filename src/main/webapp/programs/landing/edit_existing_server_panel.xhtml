@@ -58,6 +58,23 @@
 
                                 </h:selectOneMenu>
                             </div>
+                            <div class="form-group">
+                                <label>
+                                    Server node type
+
+                                </label>
+                                <span class="help-block">
+                                    Is this an ERP or WEB node?
+                                </span>
+                                <h:selectOneMenu styleClass="form-control" style=""
+                                                 value="#{FormEditExistingServer.serverEditing.SERVER_NODE_TYPE}">
+                                    <f:selectItems value="#{FormEditExistingServer.types}" var="type" 
+                                                   itemLabel="#{type}"
+                                                   itemValue="#{type}">
+                                    </f:selectItems>
+
+                                </h:selectOneMenu>
+                            </div>
 
                         </div>
                         <div class="modal-footer">

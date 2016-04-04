@@ -15,6 +15,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.component.landing.ServerNodeType;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
 import seca2.entity.landing.Assign_Server_User;
@@ -33,11 +34,13 @@ public class ProgramLanding extends Program {
     //Shared variables
     private List<UserAccount> userAccounts;
     private List<ServerInstance> servers;
+    private List<String> types = ServerNodeType.getNodeTypesString();
     
     //Add new form
     private String name;
     private String hostname;
     private long userIdNew;
+    private String serverNodeType;
     
     //Edit existing form
     private ServerInstance serverEditing;
@@ -150,6 +153,22 @@ public class ProgramLanding extends Program {
 
     public void setUserIdExisting(long userIdExisting) {
         this.userIdExisting = userIdExisting;
+    }
+
+    public String getServerNodeType() {
+        return serverNodeType;
+    }
+
+    public void setServerNodeType(String serverNodeType) {
+        this.serverNodeType = serverNodeType;
+    }
+
+    public List<String> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
     }
 
     @Override

@@ -10,6 +10,8 @@ import eds.component.data.RelationshipNotFoundException;
 import eds.component.transaction.TransactionService;
 import eds.entity.transaction.EnterpriseTransactionParam;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
@@ -33,26 +35,29 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface  {
     /**
      * This is a sample web service operation
      * @param key
-     * @return 
-     * @throws eds.component.data.RelationshipNotFoundException
+     * @return
      */
     @Override
     public String confirm(@WebParam(name = "key") String key) 
-            throws RelationshipNotFoundException {
+             {
         
-        List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
-        
-        String email = "";
-        long listId = -1;
-        
-        for(EnterpriseTransactionParam p : params) {
-            if(p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME))
-                email = p.getPARAM_VALUE();
-            if(p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST))
-                listId = Long.parseLong(p.getPARAM_VALUE());
+        try {
+            List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
+            
+            String email = "";
+            long listId = -1;
+            
+            for(EnterpriseTransactionParam p : params) {
+                if(p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME))
+                    email = p.getPARAM_VALUE();
+                if(p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST))
+                    listId = Long.parseLong(p.getPARAM_VALUE());
+            }
+            
+            Subscription confirmedSubsc = subService.confirmSubscriber(key, listId);
+            return confirmedSubsc.getTARGET().getLIST_NAME();
+        } catch (RelationshipNotFoundException ex) {
+            throw new RuntimeException("Confirmation failed.",ex);
         }
-        
-        Subscription confirmedSubsc = subService.confirmSubscriber(key, listId);
-        return confirmedSubsc.getTARGET().getLIST_NAME();
     }
 }

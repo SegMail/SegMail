@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
 
@@ -107,5 +108,21 @@ public class FormEditExistingServer {
 
     public void setUserAccounts(List<UserAccount> userAccounts) {
         program.setUserAccounts(userAccounts);
+    }
+    
+    public String getServerNodeType() {
+        return program.getServerNodeType();
+    }
+
+    public void setServerNodeType(String serverNodeType) {
+        program.setServerNodeType(serverNodeType);
+    }
+    
+    public List<String> getTypes() {
+        return program.getTypes();
+    }
+
+    public void setTypes(List<String> types) {
+        program.setTypes(types);
     }
 }

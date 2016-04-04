@@ -47,7 +47,7 @@ public class FormAddNewServer {
     
     public void addServer() {
         try {
-            landingService.addServerInstance(program.getName(), program.getHostname(), program.getUserIdNew(), ServerNodeType.WEB);
+            landingService.addServerInstance(program.getName(), program.getHostname(), program.getUserIdNew(), ServerNodeType.getNodeType(program.getServerNodeType()));
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
             program.refresh();
         } catch (EJBException ex) { 
@@ -93,6 +93,22 @@ public class FormAddNewServer {
 
     public void setName(String name) {
         program.setName(name);
+    }
+    
+    public String getServerNodeType() {
+        return program.getServerNodeType();
+    }
+
+    public void setServerNodeType(String serverNodeType) {
+        program.setServerNodeType(serverNodeType);
+    }
+    
+    public List<String> getTypes() {
+        return program.getTypes();
+    }
+
+    public void setTypes(List<String> types) {
+        program.setTypes(types);
     }
 
     private void initNewServerForm() {

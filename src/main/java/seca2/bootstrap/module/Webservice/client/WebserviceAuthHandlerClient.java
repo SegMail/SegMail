@@ -27,7 +27,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageContext>{
 
     private String username = "sws";
-    private String password = "sws";
+    private String password = "sws1";
     
     @Override
     public Set<QName> getHeaders() {

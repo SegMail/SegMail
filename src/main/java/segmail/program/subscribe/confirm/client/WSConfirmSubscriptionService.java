@@ -46,7 +46,8 @@ public class WSConfirmSubscriptionService
         URL url = null;
         WebServiceException e = null;
         try {
-            url = new URL("http://localhost:8080/SegMail/WSConfirmSubscription?wsdl");
+            //url = new URL("http://localhost:8080/SegMail/WSConfirmSubscription?wsdl");
+            url = new URL("http://localhost:28081/SegMailERP/WSConfirmSubscription?wsdl");
         } catch (MalformedURLException ex) {
             e = new WebServiceException(ex);
         }
