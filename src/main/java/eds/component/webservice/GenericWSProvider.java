@@ -1,14 +1,11 @@
 
 package eds.component.webservice;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import javax.jws.HandlerChain;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
-import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
-import javax.xml.ws.WebServiceException;
 import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
 
 
@@ -19,9 +16,7 @@ import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient//(name = "GenericWSProvider", //This WS client's own name, not the endpoint name
-        //targetNamespace = "http://webservice.confirm.subscribe.program.segmail/", 
-        //wsdlLocation = "http://localhost:28081/SegMailERP/WSConfirmSubscription?wsdl") //Endpoing url
+@WebServiceClient//Doesn't do anything except for wsgen and wsimport
 @HandlerChain(file="handlers-client.xml")
 public class GenericWSProvider<WS extends GenericWSInterface>
     extends Service
@@ -57,11 +52,7 @@ public class GenericWSProvider<WS extends GenericWSInterface>
      * @return
      *     returns WSConfirmSubscriptionImpl
      */
-    //@WebEndpoint(name = "WSConfirmSubscriptionPort")
     public <WS extends GenericWSInterface> WS getWSPort(Class<WS> ws) {
-        /*return super.getPort(new QName("http://webservice.confirm.subscribe.program.segmail/", 
-                        "WSConfirmSubscriptionPort"), 
-                WSConfirmSubscriptionInterface.class);*/
         return super.getPort(this.portName,ws);
     }
 

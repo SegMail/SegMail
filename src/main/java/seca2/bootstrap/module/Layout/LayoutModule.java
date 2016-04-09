@@ -41,18 +41,17 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
-        //If system in installation mode
-        /*boolean install = Boolean.parseBoolean(request.getServletContext().getInitParameter(defaults.INSTALL));
-        if(install)
-            return true;*/
         
         //Bypass if it's a file request
-        if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
+        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
             return true;
-        }
+        }*/
+        if(requestContainer.getPathParser().containsFileResource())
+            return true;
         
         if(requestContainer.isError()){
-            requestContainer.setTemplateLocation(defaults.ERROR_PAGE_TEMPLATE);
+            String errorTemplate = request.getServletContext().getInitParameter(defaults.ERROR_TEMPLATE_LOCATION);
+            requestContainer.setTemplateLocation(errorTemplate);
             return true;
         }
         

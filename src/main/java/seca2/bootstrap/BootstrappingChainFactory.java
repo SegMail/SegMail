@@ -8,7 +8,6 @@ package seca2.bootstrap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Instance;
@@ -101,43 +100,6 @@ public class BootstrappingChainFactory implements Serializable {
         Collections.sort(moduleList, new BootstrapModuleComparator());
         
         return moduleList;
-    }
-    
-    
-    /**
-     * Returns the head of a BootstrapChain
-     * @param moduleList
-     * @return 
-     */
-    public BootstrapModule constructBoostrapChain(List<BootstrapModule> moduleList){
-        /**
-         * Impt! moduleList must be sorted here, if not the next step will return
-         * a chain in the wrong order.
-         */
-        Collections.sort(moduleList, new BootstrapModuleComparator());
-        
-        /**
-         * Traverse through the sorted moduleList and build up the chain. Start 
-         * by getting the first BootstrapModule, strap on a null object, go to 
-         * the next BootstrapModule and strap on to the previous one. 
-         */
-        Iterator<BootstrapModule> i = moduleList.iterator();
-        BootstrapModule firstHead = null;
-        BootstrapModule tempHead = null;
-        while(i.hasNext()){
-            BootstrapModule nextHead = i.next();
-            if(firstHead == null){
-                firstHead = nextHead;
-                tempHead = nextHead;
-            }
-            else{
-                tempHead.strapNext(nextHead);
-                tempHead = nextHead;
-            }   
-            
-        }
-        
-        return firstHead;
     }
     
     public BootstrapModule getModuleByName(String name){

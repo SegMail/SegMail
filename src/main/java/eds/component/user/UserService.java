@@ -105,11 +105,11 @@ public class UserService extends DBService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public User createUser(long userTypeId) 
-            throws UserCreationException, DBConnectionException{
+            throws DBConnectionException, EntityNotFoundException{
         try{
             UserType type = this.getUserTypeById(userTypeId);
             if(type == null)
-                throw new UserCreationException("UserType Id "+userTypeId+" not found.");
+                throw new EntityNotFoundException(UserType.class,userTypeId);
             
             User user = new User();
             user.setUSERTYPE(type);
@@ -123,26 +123,25 @@ public class UserService extends DBService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public UserAccount registerUserByUserTypeId(long userTypeId, String username, String password)
-        throws UserRegistrationException, DBConnectionException{
+        throws EntityNotFoundException, IncompleteDataException, EntityExistsException{
         try{
             //Check if username is null
             if(username == null || username.isEmpty())
-                throw new UserRegistrationException("Username cannot be empty.");
+                throw new IncompleteDataException("Username cannot be empty.");
             
             //Check if password is null
             if(password == null || password.isEmpty())
-                throw new UserRegistrationException("Password cannot be empty.");
+                throw new IncompleteDataException("Password cannot be empty.");
             
             //Check if username has been used
-            if(this.checkUsernameExist(username))
-                throw new UserRegistrationException("Username "+username+" already exist.");
+            User existingUser = this.getUserByUsername(username);
+            if(existingUser != null)
+                throw new EntityExistsException(existingUser);
             
             //Create a new User object first
             User newUser = this.createUser(userTypeId);
@@ -168,13 +167,8 @@ public class UserService extends DBService {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
-            
             throw pex;
-        } catch (UserCreationException ucex){
-            throw new UserRegistrationException(ucex.getLocalizedMessage());
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -665,14 +659,14 @@ public class UserService extends DBService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setProfilePicLocationForUserid(long userid, String profilePicLocation)
-            throws UserNotFoundException, DBConnectionException{
+            throws EntityNotFoundException{
         
         try{
             //Get the useraccount object
             UserAccount userAccount = this.getUserAccountById(userid);
             
             if(userAccount == null)
-                throw new UserNotFoundException(userid);
+                throw new EntityNotFoundException(User.class,userid);
             
             userAccount.setPROFILE_PIC_URL(profilePicLocation);
             
@@ -683,21 +677,19 @@ public class UserService extends DBService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
         }
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setProfilePicLocationForUsername(String username, String profilePicLocation)
-            throws UserNotFoundException, DBConnectionException{
+    public void setProfilePicLocationForUsername(String username, String profilePicLocation) 
+            throws EntityNotFoundException {
         
         try{
             //Get the useraccount object
             UserAccount userAccount = this.getUserAccountByUsername(username);
             
             if(userAccount == null)
-                throw new UserNotFoundException(username);
+                throw new EntityNotFoundException(username);
             
             userAccount.setPROFILE_PIC_URL(profilePicLocation);
             
@@ -708,9 +700,7 @@ public class UserService extends DBService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
 

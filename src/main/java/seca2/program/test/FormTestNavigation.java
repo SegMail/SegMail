@@ -17,7 +17,6 @@ import javax.inject.Named;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.navigation.CreateMenuItemException;
 import eds.component.navigation.NavigationService;
 import eds.component.user.UserService;
 import eds.entity.navigation.MenuItem;

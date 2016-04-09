@@ -79,9 +79,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
          * 1) enhance SeqURLResolver to recognize /index.xhtml or
          * 2) hardcode for now...
          */
-        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
-            return true;
-        }*/
         if(requestContainer.getPathParser().containsFileResource())
             return true;
         
@@ -110,7 +107,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //If no matching program is found and no default program, stop processing and 
         //show the error page
         if (program == null) {
-            requestContainer.setViewLocation(defaults.ERROR_PAGE);
+            String errorViewRoot = request.getServletContext().getInitParameter(defaults.ERROR_VIEWROOT);
+            requestContainer.setViewLocation(errorViewRoot);
             requestContainer.setErrorMessage(this.getName()+": No programs found");
             requestContainer.setError(true);
             return true;

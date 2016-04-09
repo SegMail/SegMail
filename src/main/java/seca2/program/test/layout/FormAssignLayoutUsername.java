@@ -6,7 +6,6 @@
 package seca2.program.test.layout;
 
 import eds.component.data.DBConnectionException;
-import eds.component.layout.LayoutAssignmentException;
 import eds.component.layout.LayoutService;
 import eds.component.user.UserService;
 import eds.entity.layout.Layout;
@@ -50,7 +49,7 @@ public class FormAssignLayoutUsername extends Form {
         try{
             UserAccount userAccount = this.userService.getUserAccountByUsername(username);
             if(userAccount == null)
-                throw new LayoutAssignmentException("User "+username+" does not exist!");
+                throw new RuntimeException("User "+username+" does not exist!");
             User user = (User) userAccount.getOWNER();
             //this.layoutService.assignLayoutToUser(layoutId, user.getOBJECTID()); //the wrong IDs were passed in, should we pass in objects instead?
             this.layoutService.assignLayoutToUser(user.getOBJECTID(), layoutId);
@@ -58,9 +57,7 @@ public class FormAssignLayoutUsername extends Form {
             FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_FATAL, "Layout successfully assigned.",null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database! ", "Please contact admin.");
-        } catch (LayoutAssignmentException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName()+": ", ex.getMessage());
-        } catch (Exception ex) {
+        }  catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName()+": ", ex.getMessage());
         }
     }

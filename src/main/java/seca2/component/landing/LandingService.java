@@ -13,7 +13,6 @@ import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
-import eds.entity.data.EnterpriseObject_;
 import eds.entity.user.User;
 import eds.entity.user.User_;
 import java.net.InetAddress;
@@ -291,8 +290,6 @@ public class LandingService {
             server.setIP_ADDRESS(address.getHostAddress());
             
         } catch (UnknownHostException ex) {
-            /*Logger.getLogger(ServerIPResolverListener.class.getName()).log(Level.SEVERE, null, ex);
-            server.setADDRESS("");*/
             throw new DataValidationException("IP address cannot be resolved: "+ex.getMessage());
         } 
     }

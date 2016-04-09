@@ -5,12 +5,7 @@
  */
 package talent.entity.organization;
 
-import eds.entity.client.Client;
 import eds.entity.client.ClientResourceAssignment;
-import eds.entity.data.EnterpriseData;
-import eds.entity.data.EnterpriseRelationship;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 /**
  *

@@ -20,8 +20,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="PROGRAM")
-//@TableGenerator(name="PROGRAM_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
-@EntityListeners(ProgramListener.class)
 public class Program extends EnterpriseObject{
     
     private String PROGRAM_NAME;

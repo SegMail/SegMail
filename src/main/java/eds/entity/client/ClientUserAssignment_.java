@@ -12,7 +12,7 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(ClientResourceAssignment.class)
-public class ClientResourceAssignment_ extends EnterpriseRelationship_{
+@StaticMetamodel(ClientUserAssignment.class)
+public class ClientUserAssignment_ extends EnterpriseRelationship_{
 
 }

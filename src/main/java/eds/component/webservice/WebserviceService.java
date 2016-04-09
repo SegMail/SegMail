@@ -31,6 +31,8 @@ import seca2.entity.landing.ServerInstance;
 @Stateless
 public class WebserviceService {
 
+    public static final String PORT_APPEND = "Port";
+    public static final String WSDL_APPEND = "?wsdl";
     @EJB
     UserService userService;
     @EJB
@@ -73,7 +75,7 @@ public class WebserviceService {
         ServerInstance endpointServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
         String endpointURL = endpointServer.getURI();
         //Append endpoint name to url
-        endpointURL = endpointURL.concat("/").concat(endpointName).concat("?wsdl");
+        endpointURL = endpointURL.concat("/").concat(endpointName).concat(WSDL_APPEND);
         
         return endpointURL;
     }
@@ -84,7 +86,7 @@ public class WebserviceService {
         String endpointURL = getNextWSEndpointURL(endpointName);
         URL wsdlLocaton = new URL(endpointURL);
         QName serviceName = new QName(namespace, endpointName);
-        QName portName = new QName(namespace, endpointName.concat("Port"));
+        QName portName = new QName(namespace, endpointName.concat(PORT_APPEND));
         
         
         GenericWSProvider wsProvider = new GenericWSProvider(wsdlLocaton,serviceName,portName);

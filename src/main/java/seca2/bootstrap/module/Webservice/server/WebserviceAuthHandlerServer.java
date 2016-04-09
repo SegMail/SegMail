@@ -71,44 +71,35 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
 
     }
 
-    private boolean authenticateWS(SOAPMessageContext context) 
+    private boolean authenticateWS(SOAPMessageContext context)
             throws SOAPException, UserAccountLockedException, UserLoginException {
-        //try {
-            HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
+
+        HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
 
             //String username = req.getHeader(WebserviceSOAPKeys.USERNAME);
-            //String password = req.getHeader(WebserviceSOAPKeys.PASSWORD);
-            
-            SOAPMessage message = context.getMessage();
-            SOAPHeader header = message.getSOAPHeader();
-            
-            /**
-            * Raised a bug: https://github.com/SegMail/SegMail/issues/53
-            * We will fix this namespace issue after the launch, for the future SegERP. 
-            */
-            QName headerUsername = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.USERNAME);
-            //String username = header.getAttributeValue(headerUsername);
-            String username = header.getAttribute(WebserviceSOAPKeys.USERNAME);
-            QName headerPassword = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.PASSWORD);
-            //String password = header.getAttributeValue(headerPassword);
-            String password = header.getAttribute(WebserviceSOAPKeys.PASSWORD);
+        //String password = req.getHeader(WebserviceSOAPKeys.PASSWORD);
+        SOAPMessage message = context.getMessage();
+        SOAPHeader header = message.getSOAPHeader();
+
+        /**
+         * Raised a bug: https://github.com/SegMail/SegMail/issues/53 We will
+         * fix this namespace issue after the launch, for the future SegERP.
+         */
+            //QName headerUsername = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.USERNAME);
+        //String username = header.getAttributeValue(headerUsername);
+        String username = header.getAttribute(WebserviceSOAPKeys.USERNAME);
+            //QName headerPassword = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.PASSWORD);
+        //String password = header.getAttributeValue(headerPassword);
+        String password = header.getAttribute(WebserviceSOAPKeys.PASSWORD);
 
             //Get the host of the application
-            //More reliable to get from HTTP header than manually set it in SOAP header
-            String ip = req.getRemoteAddr();
+        //More reliable to get from HTTP header than manually set it in SOAP header
+        String ip = req.getRemoteAddr();
 
-            wsService.authenticateApplication(username, password, ip);
+        wsService.authenticateApplication(username, password, ip);
 
-            return true;
+        return true;
 
-        /*} catch (UserAccountLockedException ex) {
-            setSOAPFault(ex, context);
-            return false;
-
-        } catch (UserLoginException ex) {
-            setSOAPFault(ex, context);
-            return false;
-        } */
     }
 
     private SOAPFault setSOAPFault(Exception ex, SOAPMessageContext context) throws SOAPException {

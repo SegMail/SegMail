@@ -7,7 +7,10 @@ package eds.component.client;
 
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
-import eds.component.data.MissingOwnerException;
+import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.entity.client.ClientUserAssignment;
@@ -124,17 +127,17 @@ public class ClientService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void registerClientType(String clienttypename, String clienttypedesc)
-        throws DBConnectionException, ClientTypeRegistrationException{
+        throws DBConnectionException, EntityExistsException, IncompleteDataException{
         
         try{
             //Validate the inputted clienttypename
             if(clienttypename == null || clienttypename.isEmpty())
-                throw new ClientTypeRegistrationException("Client type name cannot be empty!");
+                throw new IncompleteDataException("Client type name cannot be empty!");
             
             //Validate if client type already exist
             ClientType existingClientType = this.getClientTypeByName(clienttypename);
             if(existingClientType != null)
-                throw new ClientTypeRegistrationException("Client type "+clienttypename+" already exists!");
+                throw new EntityExistsException(existingClientType);
             
             ClientType newClientType = new ClientType();
             newClientType.setCLIENT_TYPE_NAME(clienttypename);
@@ -147,27 +150,25 @@ public class ClientService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void registerClient(long clienttypeid, String clientname)
-        throws DBConnectionException, ClientRegistrationException{
+        throws IncompleteDataException, EntityExistsException, EntityNotFoundException{
         try{
             if(clientname == null || clientname.isEmpty())
-                throw new ClientRegistrationException("Client name cannot be empty.");
+                throw new IncompleteDataException("Client name cannot be empty.");
             
             Client existingClient = this.getClientByClientname(clientname);
             
             if(existingClient != null)
-                throw new ClientRegistrationException("Client "+clientname+" already exist.");
+                throw new EntityExistsException(existingClient);
             
             ClientType clientType = this.getClientTypeById(clienttypeid);
             
             if(clientType == null)
-                throw new ClientRegistrationException("ClientType "+clienttypeid+" doesn't exist.");
+                throw new EntityNotFoundException(ClientType.class,clienttypeid);
             
             Client newClient = new Client();
             newClient.setCLIENT_NAME(clientname);
@@ -180,34 +181,32 @@ public class ClientService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ClientUserAssignment registerClientForUser(User user, long clienttypeid)
-        throws DBConnectionException, ClientRegistrationException{
+        throws DBConnectionException, IncompleteDataException, EntityNotFoundException, EntityExistsException, RelationshipExistsException{
         try{
             
             if(user == null)
-                throw new ClientRegistrationException("User does not exist.");
+                throw new IncompleteDataException("User not provided.");
             
             ClientType clientType = this.getClientTypeById(clienttypeid);
             
             if(clientType == null)
-                throw new ClientRegistrationException("Client type "+clienttypeid+" doesn not exist.");
+                throw new EntityNotFoundException(ClientType.class,clienttypeid);
             
             Client existingClient = this.getClientByClientname(user.alias());
             
             if(existingClient != null)
-                throw new ClientRegistrationException("Client "+existingClient.alias()+" already exist.");
+                throw new EntityExistsException(existingClient);
             
             List<ClientUserAssignment> existingAssignments = 
                     this.genericEnterpriseObjectService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientUserAssignment.class);
             
             if(existingAssignments != null && existingAssignments.size() > 0)
-                throw new ClientRegistrationException("Object is already assigned to a client.");
+                throw new RelationshipExistsException(existingAssignments.get(0));
             
             //Create the client object
             Client newClient = new Client();
@@ -228,9 +227,7 @@ public class ClientService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        } 
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)

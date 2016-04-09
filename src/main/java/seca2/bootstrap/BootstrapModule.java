@@ -17,7 +17,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * A bootstrap module mimics a Servlet filter or a Struts interceptor - the 
@@ -46,52 +45,6 @@ public abstract class BootstrapModule implements Filter {
     @Inject protected DefaultKeys defaults;
     
     public static String FACES_CONTEXT = "context";
-    
-    private BootstrapModule next;
-    /**
-     * This is injected during runtime and it should be order-independent, ie. 
-     * each module only loads it and use it in their own way, it does not matter
-     * which module processed these 2 instances first, and the results should be 
-     * the same. Eg. If UserModule executes before program module, and the user 
-     * is not loggedin, it should redirect the user to the login page. If the 
-     * program module executes first, it would process only request starting with
-     * "/program/" and bypass the request to user module, which would then still
-     * redirect the user to the login page. 
-     */
-    //@Inject private BootstrapInput bootstrapInput;
-    //@Inject private BootstrapOutput bootstrapOutput;
-    
-    /**
-     * As with http://www.javaworld.com/article/2072857/java-web-development/the-chain-of-responsibility-pattern-s-pitfalls-and-improvements.html
-     * this is a non-classic CoR implementation where the base class decides to 
-     * trigger the next responsibility in the chain.
-     * 
-     * @param inputContext
-     * @param outputContext 
-     */
-    /*public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
-        System.out.println("BootstrapModule "+this.getClass().getSimpleName()+" started.");
-        
-        boolean toContinue = (this.active() ? this.execute(inputContext, outputContext) : true );
-        
-        if(next != null && toContinue)
-            next.start(inputContext, outputContext);
-        
-        if(!toContinue)
-            System.out.println("Bootstrap processing stopped at "+this.getClass().getSimpleName()+".");
-    }*/
-    
-    public void strapNext(BootstrapModule next){
-        this.next = next;
-    }
-    
-    public void strapNextAtLastPos(BootstrapModule next){
-        BootstrapModule thisPos = this;
-        while(thisPos.next != null){
-            thisPos = thisPos.next;
-        }
-        thisPos.strapNext(next);
-    }
     
     /**
      * Execute the control logic of this module.
@@ -213,8 +166,6 @@ public abstract class BootstrapModule implements Filter {
      * Each module can determine at runtime what is the URL pattern they are
      * required to process.
      * 
-     * @param request
-     * @param response
      * @return 
      */
     protected abstract String urlPattern();

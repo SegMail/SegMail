@@ -6,7 +6,6 @@
 package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseObject;
-import eds.entity.mail.MailRecipient;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -16,7 +15,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIBER_ACCOUNT")
-public class SubscriberAccount extends EnterpriseObject {//implements MailRecipient {
+public class SubscriberAccount extends EnterpriseObject {
 
     private String EMAIL;
 

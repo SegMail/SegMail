@@ -27,16 +27,6 @@ import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 @RequestScoped
 @Named("FormConfirmSubcription")
 public class FormConfirmSubcription {
-
-    private final String WEB_SERVICE_ENDPOINT = "/SegMail/ChartJSService";
-    private final String WEB_SERVICE_METHOD = "outstandingLoanOverTime";
-    private final String WEB_SERVICE_NAMESPACE_QUALIFIER = "ns2";
-    private final String WEB_SERVICE_QNAME = "http://chartjs.program.seca2/";
-    private final String WEB_SERVICE_LOCAL_PART = "ChartJSService";
-
-    //Hardcoded
-    private final String ERP_SERVER_URL = "http://localhost:8080/SegMail";
-    //private final String ERP_SERVER_URL = "http://lees-macbook-pro.local:28081/SegMailERP";
     
     @Inject UserRequestContainer reqContainer;
     
@@ -59,14 +49,10 @@ public class FormConfirmSubcription {
     public void callWS() {
 
         try {
-            //URL wsdlLocaton = new URL("http://localhost:28081/SegMailERP/WSConfirmSubscription?wsdl");
-            //QName serviceName = new QName("http://webservice.confirm.subscribe.program.segmail/", "WSConfirmSubscription");
-            //QName portName = new QName("http://webservice.confirm.subscribe.program.segmail/", 
-            //            "WSConfirmSubscriptionPort");
             String namespace = "http://webservice.confirm.subscribe.program.segmail/";
             String endpointName = "WSConfirmSubscription";
             WSConfirmSubscriptionInterface clientService = wsService.getWSProvider(endpointName, namespace, WSConfirmSubscriptionInterface.class);
-            String results = clientService.confirm("Test");
+            String results = clientService.confirm(program.getRequestKey());
             
             this.setListName(results);
             

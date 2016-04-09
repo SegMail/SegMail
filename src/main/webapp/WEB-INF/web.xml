@@ -36,7 +36,7 @@
     
     <context-param>
         <param-name>RUN_MODE</param-name>
-        <param-value>web</param-value>
+        <param-value>erp</param-value>
     </context-param>
     
     <context-param>
@@ -52,6 +52,16 @@
     <context-param>
         <param-name>WEBSERVICE_PATH</param-name>
         <param-value>/ws</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>ERROR_VIEWROOT</param-name>
+        <param-value>/programs/error/error_page.xhtml</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>ERROR_TEMPLATE_LOCATION</param-name>
+        <param-value>/programs/error/template/error-page-layout.xhtml</param-value>
     </context-param>
     
     <context-param>
