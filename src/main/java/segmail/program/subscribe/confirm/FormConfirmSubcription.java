@@ -5,19 +5,19 @@
  */
 package segmail.program.subscribe.confirm;
 
-import eds.component.data.RelationshipNotFoundException;
+import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.xml.namespace.QName;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.component.landing.LandingService;
-import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionService;
+import eds.component.webservice.GenericWSProvider;
+import eds.component.webservice.WebserviceService;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 
 /**
@@ -39,9 +39,9 @@ public class FormConfirmSubcription {
     //private final String ERP_SERVER_URL = "http://lees-macbook-pro.local:28081/SegMailERP";
     
     @Inject UserRequestContainer reqContainer;
-
+    
     @EJB
-    private LandingService landingService;
+    private WebserviceService wsService;
 
     @Inject
     private ProgramConfirmSubscription program;
@@ -59,9 +59,13 @@ public class FormConfirmSubcription {
     public void callWS() {
 
         try {
-            
-            WSConfirmSubscriptionService client = new WSConfirmSubscriptionService();
-            WSConfirmSubscriptionInterface clientService = client.getWSConfirmSubscriptionImplPort();
+            //URL wsdlLocaton = new URL("http://localhost:28081/SegMailERP/WSConfirmSubscription?wsdl");
+            //QName serviceName = new QName("http://webservice.confirm.subscribe.program.segmail/", "WSConfirmSubscription");
+            //QName portName = new QName("http://webservice.confirm.subscribe.program.segmail/", 
+            //            "WSConfirmSubscriptionPort");
+            String namespace = "http://webservice.confirm.subscribe.program.segmail/";
+            String endpointName = "WSConfirmSubscription";
+            WSConfirmSubscriptionInterface clientService = wsService.getWSProvider(endpointName, namespace, WSConfirmSubscriptionInterface.class);
             String results = clientService.confirm("Test");
             
             this.setListName(results);

@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
-import javax.xml.soap.Name;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
@@ -27,7 +26,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageContext>{
 
     private String username = "sws";
-    private String password = "sws1";
+    private String password = "sws";
     
     @Override
     public Set<QName> getHeaders() {

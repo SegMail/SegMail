@@ -33,11 +33,29 @@ public class ServerInstance extends EnterpriseObject {
     private String IP_ADDRESS;
     
     /**
+     * The accessible port of the server instance
+     */
+    private int PORT;
+    
+    /**
+     * The actual URI of the server location
+     */
+    private String URI;
+    
+    /**
      * The hostname of that the IP address is mapped to
      */
     private String HOSTNAME;
     
+    /**
+     * The path of the URL
+     */
+    private String Path;
+    
+    
     private String SERVER_NODE_TYPE;
+    
+    
 
     public String getNAME() {
         return NAME;
@@ -74,6 +92,32 @@ public class ServerInstance extends EnterpriseObject {
     public void setSERVER_NODE_TYPE(ServerNodeType SERVER_NODE_TYPE) {
         this.SERVER_NODE_TYPE = SERVER_NODE_TYPE.name();
     }
+
+    public String getURI() {
+        return URI;
+    }
+
+    public void setURI(String URI) {
+        this.URI = URI;
+    }
+
+    public int getPORT() {
+        return PORT;
+    }
+
+    public void setPORT(int PORT) {
+        this.PORT = PORT;
+    }
+
+    public String getPath() {
+        return Path;
+    }
+
+    public void setPath(String Path) {
+        this.Path = Path;
+    }
+    
+    
 
     @Override
     public void randInit() {

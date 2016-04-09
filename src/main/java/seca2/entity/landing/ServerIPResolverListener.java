@@ -7,11 +7,14 @@ package seca2.entity.landing;
 
 import eds.component.data.DataValidationException;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import seca2.component.landing.LandingService;
 
 /**
  *
@@ -19,27 +22,17 @@ import javax.persistence.PreUpdate;
  */
 public class ServerIPResolverListener {
     
+    @EJB
+    private LandingService landingService; //Injection still doesn't work!
+    
     @PrePersist
-    public void prePersist(ServerInstance server) throws DataValidationException {
-        resolveAndUpdateIP(server);
+    public void prePersist(ServerInstance server) throws DataValidationException, URISyntaxException {
+        //landingService.resolveAndUpdateIPHostnamePath(server);
     }
     
     @PreUpdate
-    public void preUpdate(ServerInstance server) throws DataValidationException {
-        resolveAndUpdateIP(server);
+    public void preUpdate(ServerInstance server) throws DataValidationException, URISyntaxException {
+        //landingService.resolveAndUpdateIPHostnamePath(server);
     }
     
-    public void resolveAndUpdateIP(ServerInstance server) throws DataValidationException {
-        try {
-            String hostname = server.getHOSTNAME();
-            InetAddress address = InetAddress.getByName(hostname);
-            
-            server.setIP_ADDRESS(address.getHostAddress());
-            
-        } catch (UnknownHostException ex) {
-            /*Logger.getLogger(ServerIPResolverListener.class.getName()).log(Level.SEVERE, null, ex);
-            server.setADDRESS("");*/
-            throw new DataValidationException("IP address is not resolved: "+ex.getMessage());
-        } 
-    }
 }

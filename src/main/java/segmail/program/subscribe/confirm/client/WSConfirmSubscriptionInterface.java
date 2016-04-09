@@ -7,6 +7,7 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
+import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
 
 
 /**
@@ -21,8 +22,7 @@ import javax.jws.soap.SOAPBinding.Style;
 @WebService(
         name = "WSConfirmSubscription", 
         targetNamespace = "http://webservice.confirm.subscribe.program.segmail/")
-@SOAPBinding(style = Style.RPC)
-public interface WSConfirmSubscriptionInterface {
+public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
 
     /**
      * 

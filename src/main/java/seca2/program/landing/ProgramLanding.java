@@ -38,7 +38,7 @@ public class ProgramLanding extends Program {
     
     //Add new form
     private String name;
-    private String hostname;
+    private String uri;
     private long userIdNew;
     private String serverNodeType;
     
@@ -107,12 +107,12 @@ public class ProgramLanding extends Program {
         this.serverEditing = serverEditing;
     }
 
-    public String getHostname() {
-        return hostname;
+    public String getUri() {
+        return uri;
     }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public long getUserIdNew() {

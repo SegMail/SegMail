@@ -17,6 +17,8 @@ import eds.entity.data.EnterpriseObject_;
 import eds.entity.user.User;
 import eds.entity.user.User_;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.List;
 import javax.ejb.EJB;
@@ -28,6 +30,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.hibernate.exception.GenericJDBCException;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.Assign_Server_User_;
@@ -75,16 +78,16 @@ public class LandingService {
     /**
      * 
      * @param name
-     * @param hostname
+     * @param uri
      * @param userId
      * @return
      * @throws EntityNotFoundException if userId is not found.
-     * @throws IncompleteDataException if name or hostname are not provided.
+     * @throws IncompleteDataException if name or uri are not provided.
      * @throws EntityExistsException if there is already a ServerInstance with the same name.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ServerInstance addServerInstance(String name, String hostname, long userId, ServerNodeType type)
-            throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException {
+    public ServerInstance addServerInstance(String name, String uri, long userId, ServerNodeType type)
+            throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException, URISyntaxException {
         try {
             if (name == null || name.isEmpty()) {
                 throw new IncompleteDataException("Name must not be empty.");
@@ -94,7 +97,7 @@ public class LandingService {
             if (existingServers != null && !existingServers.isEmpty())
                 throw new EntityExistsException(existingServers.get(0));
 
-            if (hostname == null || hostname.isEmpty()) {
+            if (uri == null || uri.isEmpty()) {
                 throw new IncompleteDataException("You cannot add a server without an address!");
             }
 
@@ -105,7 +108,7 @@ public class LandingService {
 
             //Create new serverInstance
             ServerInstance newInstance = new ServerInstance();
-            newInstance.setHOSTNAME(hostname);
+            newInstance.setURI(uri);
             newInstance.setNAME(name);
             newInstance.setSERVER_NODE_TYPE(type.value);
 
@@ -182,7 +185,7 @@ public class LandingService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveServer(ServerInstance server) 
-            throws DataValidationException{
+            throws DataValidationException, URISyntaxException{
         this.validateServer(server);
         updateService.getEm().merge(server);
     }
@@ -191,6 +194,7 @@ public class LandingService {
      * on a LandingServerGenerationStrategy.
      * 
      * @param strategy
+     * @param type
      * @return 
      * @throws eds.component.data.IncompleteDataException 
      */
@@ -264,11 +268,26 @@ public class LandingService {
      * @param server
      * @throws DataValidationException 
      */
-    public void resolveAndUpdateIP(ServerInstance server) throws DataValidationException {
+    public void resolveAndUpdateIPHostnamePath(ServerInstance server) 
+            throws DataValidationException, URISyntaxException {
         try {
-            String hostname = server.getHOSTNAME();
-            InetAddress address = InetAddress.getByName(hostname);
+            //Everything comes from URI
+            String uriString = server.getURI();
+            if(uriString == null || uriString.isEmpty())
+                throw new DataValidationException("URI cannot be empty.");
             
+            URI uri = new URI(uriString);
+            
+            String path = uri.getPath();
+            server.setPath(path);
+            
+            String hostname = uri.getHost();
+            server.setHOSTNAME(hostname);
+            
+            int port = uri.getPort();
+            server.setPORT(port);
+            
+            InetAddress address = InetAddress.getByName(hostname);
             server.setIP_ADDRESS(address.getHostAddress());
             
         } catch (UnknownHostException ex) {
@@ -278,14 +297,44 @@ public class LandingService {
         } 
     }
     
+    public void validateURL(ServerInstance server) throws DataValidationException {
+        String[] schemes = {"http","https"}; 
+        UrlValidator urlValidator = new UrlValidator(schemes,UrlValidator.ALLOW_LOCAL_URLS);
+        String url = server.getURI();
+        
+        if(url == null || url.isEmpty())
+                throw new DataValidationException("URL cannot be empty.");
+        
+        //remove trailing slash
+        if(url.endsWith("/") && url.length() >= 3)
+            url = url.substring(0, url.length()-2);
+        
+        //If the URL doesn't start with any of the schemes, prepend default http://
+        boolean match = false;
+        for (String scheme : schemes){
+            if(url.startsWith(scheme))
+                match = true;
+        }
+        if(!match){
+            url = schemes[0] + "://" + url;
+        }
+        
+        server.setURI(url);
+        
+        if(!urlValidator.isValid(url))
+            throw new DataValidationException("Invalid URL: "+server.getURI());
+    }
+    
     /**
      * Chain of validations for server. 
      * 
      * @param server
      * @throws DataValidationException 
      */
-    public void validateServer(ServerInstance server) throws DataValidationException {
-        resolveAndUpdateIP(server);
+    public void validateServer(ServerInstance server) 
+            throws DataValidationException, URISyntaxException {
+        validateURL(server);
+        resolveAndUpdateIPHostnamePath(server);
     }
     
     public void getThisServerNodeType() {

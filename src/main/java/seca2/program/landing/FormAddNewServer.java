@@ -9,8 +9,13 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import eds.component.user.UserService;
+import eds.entity.user.User;
 import eds.entity.user.UserAccount;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -34,6 +39,7 @@ public class FormAddNewServer {
     @Inject private ProgramLanding program;
     
     @EJB private LandingService landingService;
+    @EJB private UserService userService;
     
     private final String formName = "FormAddNewServer";
     
@@ -47,7 +53,7 @@ public class FormAddNewServer {
     
     public void addServer() {
         try {
-            landingService.addServerInstance(program.getName(), program.getHostname(), program.getUserIdNew(), ServerNodeType.getNodeType(program.getServerNodeType()));
+            landingService.addServerInstance(program.getName(), program.getUri(), program.getUserIdNew(), ServerNodeType.getNodeType(program.getServerNodeType()));
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
             program.refresh();
         } catch (EJBException ex) { 
@@ -60,15 +66,17 @@ public class FormAddNewServer {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Please choose a different server name.", "");
         } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (URISyntaxException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
     
-    public String getHostname() {
-        return program.getHostname();
+    public String getUri() {
+        return program.getUri();
     }
     
-    public void setHostname(String hostname) {
-        program.setHostname(hostname);
+    public void setUri(String hostname) {
+        program.setUri(hostname);
     }
     
     public long getUserId() {
@@ -77,6 +85,11 @@ public class FormAddNewServer {
     
     public void setUserId(long userId) {
         program.setUserIdNew(userId);
+    }
+    
+    public void setUserId(String username) {
+        User user = userService.getUserByUsername(username);
+        setUserId(user.getOBJECTID());
     }
     
     public List<UserAccount> getUserAccounts() {
@@ -113,7 +126,7 @@ public class FormAddNewServer {
 
     private void initNewServerForm() {
         this.setName("");
-        this.setHostname("");
+        this.setUri("");
         this.setUserId(-1);
     }
 }

@@ -56,13 +56,6 @@ public class FormServerList {
         }
     }
     
-    public void addServer() {
-        try {
-            
-        } catch (EJBException ex) { //Transaction did not go through
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
-        }
-    }
     
     public List<ServerInstance> getServerList(){
         return program.getServers();
