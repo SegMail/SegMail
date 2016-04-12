@@ -42,7 +42,7 @@ public class WebserviceService {
     public User authenticateApplication(String username, String password, String ipAddress)
             throws UserAccountLockedException, UserLoginException {
 
-        try {
+        //try {
             //try to authenticate first
             User authenticatedUser = userService.login(username, password);
 
@@ -53,15 +53,18 @@ public class WebserviceService {
             if (authenticatedUser == null
                     || wsLinkedAccount == null
                     || !authenticatedUser.equals(wsLinkedAccount)) {
-                throw new UserLoginException("");
+                throw new UserLoginException("Unmatched webservice and user accounts.");
             }
+            
+            if (!wsLinkedAccount.getUSERTYPE().isWS_ACCESS())
+                throw new UserLoginException("User account has no webservice access.");
 
             return authenticatedUser;
 
-        } catch (UserLoginException ex) {
+        /*} catch (UserLoginException ex) {
             //Catch it and change it to our message
             throw new UserLoginException("Webservice authentication failed.");
-        }
+        }*/
 
     }
     

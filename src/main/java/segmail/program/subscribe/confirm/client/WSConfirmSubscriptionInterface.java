@@ -8,6 +8,8 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
+import segmail.program.subscribe.confirm.webservice.TransactionProcessedException;
+import segmail.program.subscribe.confirm.webservice.UnwantedAccessException;
 
 
 /**
@@ -29,8 +31,11 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      * @param key
      * @return
      *     returns java.lang.String
+     * @throws segmail.program.subscribe.confirm.webservice.TransactionProcessedException
+     * @throws segmail.program.subscribe.confirm.webservice.UnwantedAccessException
      */
     @WebMethod
-    public String confirm(@WebParam(name = "key") String key);
+    public String confirm(@WebParam(name = "key") String key)
+            throws TransactionProcessedException, UnwantedAccessException;
 
 }

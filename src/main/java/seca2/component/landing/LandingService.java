@@ -237,6 +237,7 @@ public class LandingService {
         updateService.deleteObjectDataAndRelationships(serverId);
     }
     
+    //Wrong return param - should return a list or use "Contains"
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public User getUserFromServerAddress(String ipAddress) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -304,7 +305,7 @@ public class LandingService {
         
         //remove trailing slash
         if(url.endsWith("/") && url.length() >= 3)
-            url = url.substring(0, url.length()-2);
+            url = url.substring(0, url.length()-1);
         
         //If the URL doesn't start with any of the schemes, prepend default http://
         boolean match = false;

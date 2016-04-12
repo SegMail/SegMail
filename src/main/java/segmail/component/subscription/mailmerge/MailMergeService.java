@@ -107,7 +107,7 @@ public class MailMergeService {
         if(landingServer == null)
             throw new IncompleteDataException("Please contact app administrator to set a landing server.");
         
-        String confirmLink = landingServer.getIP_ADDRESS().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
+        String confirmLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
         
         String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
         

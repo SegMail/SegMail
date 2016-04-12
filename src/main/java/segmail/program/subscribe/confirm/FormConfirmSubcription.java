@@ -5,7 +5,7 @@
  */
 package segmail.program.subscribe.confirm;
 
-import java.net.URL;
+import eds.component.data.IncompleteDataException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -13,12 +13,15 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.xml.namespace.QName;
 import seca2.bootstrap.UserRequestContainer;
-import seca2.component.landing.LandingService;
-import eds.component.webservice.GenericWSProvider;
 import eds.component.webservice.WebserviceService;
+import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import segmail.program.subscribe.confirm.client.UnwantedAccessException_Exception;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
+import segmail.program.subscribe.confirm.webservice.TransactionProcessedException;
+import segmail.program.subscribe.confirm.webservice.UnwantedAccessException;
 
 /**
  *
@@ -52,10 +55,23 @@ public class FormConfirmSubcription {
             String namespace = "http://webservice.confirm.subscribe.program.segmail/";
             String endpointName = "WSConfirmSubscription";
             WSConfirmSubscriptionInterface clientService = wsService.getWSProvider(endpointName, namespace, WSConfirmSubscriptionInterface.class);
-            String results = clientService.confirm(program.getRequestKey());
+            String key = program.getRequestKey();
+            String results = clientService.confirm(key);
             
             this.setListName(results);
             
+        } catch (UnwantedAccessException ex) {
+            //show users a Landing Page to sign up for our
+            //services.
+            ex.printStackTrace(System.out);
+        } catch (TransactionProcessedException ex) {
+            //Tell users that their subscription has already
+            //been processed and they should be receiving their welcome email soon
+            ex.printStackTrace(System.out);
+        } catch (IncompleteDataException ex) {
+            ex.printStackTrace(System.out);
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace(System.out);
         } catch (Exception ex) {
             ex.printStackTrace(System.out);
         }

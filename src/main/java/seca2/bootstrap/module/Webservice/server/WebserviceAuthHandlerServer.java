@@ -9,11 +9,13 @@ import eds.component.user.UserAccountLockedException;
 import eds.component.user.UserLoginException;
 import eds.component.webservice.WebserviceSOAPKeys;
 import eds.component.webservice.WebserviceService;
+import eds.entity.user.User;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
@@ -25,6 +27,8 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.UserSessionContainer;
 
 /**
  *
@@ -34,6 +38,8 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
 
     @EJB
     WebserviceService wsService;
+    
+    @Inject UserSessionContainer sessionContainer;
 
     @Override
     public Set<QName> getHeaders() {
@@ -44,8 +50,10 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
     public boolean handleMessage(SOAPMessageContext context) {
         try {
             System.out.println("Server handler called");
+            
 
-            boolean success = authenticateWS(context);
+            boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+            boolean success = (outbound) ? true : authenticateWS(context);
 
             return success;
 
@@ -96,7 +104,9 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
         //More reliable to get from HTTP header than manually set it in SOAP header
         String ip = req.getRemoteAddr();
 
-        wsService.authenticateApplication(username, password, ip);
+        User authenticatedUser = wsService.authenticateApplication(username, password, ip);
+        sessionContainer.setUser(authenticatedUser);
+        
 
         return true;
 
