@@ -21,6 +21,7 @@ import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MailMergeLabel;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
@@ -82,7 +83,9 @@ public class MailMergeService {
         
         //1. Create a transaction with expiry date 
         MailMergeRequest trans = new MailMergeRequest();
-        trans.setPROGRAM("confirm");
+        //trans.setPROGRAM("confirm"); //replace with enum?
+        trans.setPROGRAM(MailMergeLabel.CONFIRM.name().toLowerCase());
+        trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
         updateService.getEm().persist(trans);
         
         //2. Create the transaction parameters

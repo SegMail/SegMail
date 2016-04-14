@@ -30,4 +30,14 @@ public enum MailMergeLabel {
     public String toString() {
         return this.name; //To change body of generated methods, choose Tools | Templates.
     }
+    
+    public static MailMergeLabel getMailMergeLabel(String name){
+        if(CONFIRM.label.equals(name))
+            return CONFIRM;
+        
+        if(UNSUBSCRIBE.label.equals(name))
+            return UNSUBSCRIBE;
+        
+        return CONFIRM;//default
+    }
 }

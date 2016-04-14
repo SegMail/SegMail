@@ -16,6 +16,13 @@ import seca2.program.Program;
 @Named("ProgramConfirmSubscription")
 public class ProgramConfirmSubscription extends Program {
     
+    private final String SUCCESS = "SUCCESS";
+    private final String LANDING = "LANDING";
+    private final String PROCESSED = "PROCESSED";
+    private final String ERROR = "ERROR";
+    
+    private String currentPage;
+    
     private String listName;
     
     private String requestKey;
@@ -27,7 +34,7 @@ public class ProgramConfirmSubscription extends Program {
 
     @Override
     public void initProgram() {
-        
+        currentPage = "SUCCESS";
     }
 
     @Override
@@ -50,6 +57,31 @@ public class ProgramConfirmSubscription extends Program {
     public void setRequestKey(String requestKey) {
         this.requestKey = requestKey;
     }
+
+    public String getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(String currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public String getSUCCESS() {
+        return SUCCESS;
+    }
+
+    public String getLANDING() {
+        return LANDING;
+    }
+
+    public String getPROCESSED() {
+        return PROCESSED;
+    }
+
+    public String getERROR() {
+        return ERROR;
+    }
+    
     
     
 }

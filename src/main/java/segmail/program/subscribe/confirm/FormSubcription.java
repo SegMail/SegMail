@@ -16,20 +16,17 @@ import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import eds.component.webservice.WebserviceService;
 import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import segmail.program.subscribe.confirm.client.UnwantedAccessException_Exception;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
-import segmail.program.subscribe.confirm.webservice.TransactionProcessedException;
-import segmail.program.subscribe.confirm.webservice.UnwantedAccessException;
+import eds.component.webservice.TransactionProcessedException;
+import eds.component.webservice.UnwantedAccessException;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @RequestScoped
-@Named("FormConfirmSubcription")
-public class FormConfirmSubcription {
+@Named("FormSubcription")
+public class FormSubcription {
     
     @Inject UserRequestContainer reqContainer;
     
@@ -44,36 +41,49 @@ public class FormConfirmSubcription {
         FacesContext fc = FacesContext.getCurrentInstance();
         if(!fc.isPostback()){
             extractParams(reqContainer);
-            callWS();
+            callConfirmWS();
         }
         
     }
 
-    public void callWS() {
+    public void callConfirmWS() {
 
         try {
+            String key = program.getRequestKey();
+            if(key == null || key.isEmpty())
+                throw new UnwantedAccessException();
+            
             String namespace = "http://webservice.confirm.subscribe.program.segmail/";
             String endpointName = "WSConfirmSubscription";
             WSConfirmSubscriptionInterface clientService = wsService.getWSProvider(endpointName, namespace, WSConfirmSubscriptionInterface.class);
-            String key = program.getRequestKey();
+            
             String results = clientService.confirm(key);
             
             this.setListName(results);
+            program.setCurrentPage(program.getSUCCESS());
             
         } catch (UnwantedAccessException ex) {
+            //Can check if key is empty
             //show users a Landing Page to sign up for our
             //services.
-            ex.printStackTrace(System.out);
+            //ex.printStackTrace(System.out);
+            program.setCurrentPage(program.getLANDING());
+            //alternatively, we can forward them to a landing page.
         } catch (TransactionProcessedException ex) {
             //Tell users that their subscription has already
             //been processed and they should be receiving their welcome email soon
-            ex.printStackTrace(System.out);
+            //ex.printStackTrace(System.out);
+            program.setCurrentPage(program.getPROCESSED());
+            
         } catch (IncompleteDataException ex) {
             ex.printStackTrace(System.out);
+            program.setCurrentPage(program.getERROR());
         } catch (MalformedURLException ex) {
             ex.printStackTrace(System.out);
+            program.setCurrentPage(program.getERROR());
         } catch (Exception ex) {
             ex.printStackTrace(System.out);
+            program.setCurrentPage(program.getERROR());
         }
     }
 
@@ -92,5 +102,13 @@ public class FormConfirmSubcription {
         
         String reqKey = params.get(0);
         program.setRequestKey(reqKey);
+    }
+    
+    public String getCurrentPage() {
+        return program.getCurrentPage();
+    }
+
+    public void setCurrentPage(String currentPage) {
+        program.setCurrentPage(currentPage);
     }
 }

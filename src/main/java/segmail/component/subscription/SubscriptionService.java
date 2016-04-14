@@ -772,4 +772,8 @@ public class SubscriptionService {
         return subsc;
         
     }
+
+    public Subscription unsubscribeSubscriber(String email, long listId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

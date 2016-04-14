@@ -29,27 +29,61 @@
                         </p>
                     </div>
                 </c:when>
-                <c:otherwise>
+                <c:when test="#{FormSubcription.currentPage == ProgramConfirmSubscription.SUCCESS}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <h4>You have been subscribed to the list:<br/>
-                            <small>Segmail test mailing</small></h4>
+                            <h4>You have been subscribed to the list:</h4>
+                            <p class="lead">#{FormSubcription.listName}</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p>Clicked the confirmation link by mistake?<br/>
-                            <a href="#">Click here</a> to unsubscribe immediately.</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
-                            <p>Web service result: #{FormConfirmSubcription.listName}</p>
+                            <p>You should be receiving a welcome email shortly.</p>
                         </div>
                     </div>
                     
-                </c:otherwise>
+                </c:when>
+                <c:when test="#{FormSubcription.currentPage == ProgramConfirmSubscription.PROCESSED}">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <h4>Your subscription has been processed</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <p>You should be receiving a welcome email shortly.</p>
+                        </div>
+                    </div>
+                    
+                </c:when>
+                <c:when test="#{FormSubcription.currentPage == ProgramConfirmSubscription.LANDING}">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <h4>This is the landing page</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <p></p>
+                        </div>
+                    </div>
+                    
+                </c:when>
+                <c:when test="#{FormSubcription.currentPage == ProgramConfirmSubscription.ERROR}">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <h4>Error</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <p>Please notify your administrators.</p>
+                        </div>
+                    </div>
+                    
+                </c:when>
 
+                
             </c:choose>
 
 
