@@ -19,6 +19,9 @@ import javax.persistence.Table;
 @Table(name="SUBSCRIPTION")
 public class Subscription extends EnterpriseRelationship<SubscriberAccount,SubscriptionList> {
 
+    private String CONFIRMATION_KEY;
+    private String UNSUBSCRIBE_KEY;
+    
     public Subscription() {
     }
     
@@ -35,6 +38,23 @@ public class Subscription extends EnterpriseRelationship<SubscriberAccount,Subsc
     public void setSTATUS(SUBSCRIPTION_STATUS STATUS){
         this.STATUS = STATUS.name();
     }
+
+    public String getCONFIRMATION_KEY() {
+        return CONFIRMATION_KEY;
+    }
+
+    public void setCONFIRMATION_KEY(String CONFIRMATION_KEY) {
+        this.CONFIRMATION_KEY = CONFIRMATION_KEY;
+    }
+
+    public String getUNSUBSCRIBE_KEY() {
+        return UNSUBSCRIBE_KEY;
+    }
+
+    public void setUNSUBSCRIBE_KEY(String UNSUBSCRIBE_KEY) {
+        this.UNSUBSCRIBE_KEY = UNSUBSCRIBE_KEY;
+    }
+    
     
     
     @Override

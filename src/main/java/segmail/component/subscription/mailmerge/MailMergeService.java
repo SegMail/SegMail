@@ -9,10 +9,7 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
-import eds.entity.transaction.EnterpriseTransactionParam;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -70,8 +67,8 @@ public class MailMergeService {
      * an expiry date.
      *
      * @param text
+     * @param confirmationKey
      * @param email
-     * @param listId
      * @return
      * @throws eds.component.data.IncompleteDataException
      */
@@ -79,22 +76,27 @@ public class MailMergeService {
     public String parseConfirmationLink(
             String text, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
             //String landingServerAddress, 
-            String email,
-            long listId) throws IncompleteDataException {
+            //String email,
+            //long listId
+            String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
         if (!text.contains(MailMergeLabel.CONFIRM.label())) {
             return text;
         }
 
         //1. Create a transaction with expiry date 
-        MailMergeRequest trans = new MailMergeRequest();
-        //trans.setPROGRAM("confirm"); //replace with enum?
-        trans.setPROGRAM(MailMergeLabel.CONFIRM.name().toLowerCase());
-        trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
-        updateService.getEm().persist(trans);
+        MailMergeRequest trans = transService.getTransactionByKey(confirmationKey, MailMergeRequest.class);
+        if(trans == null) {
+            trans = new MailMergeRequest();
+            trans.setPROGRAM(MailMergeLabel.CONFIRM.name().toLowerCase());
+            trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
+            trans.setTRANSACTION_KEY(confirmationKey); //More like an override
+            updateService.getEm().persist(trans);
+        }
+        // Get the subscription's confirmation key
 
         //2. Create the transaction parameters
-        EnterpriseTransactionParam subscriberParam = new EnterpriseTransactionParam();
+        /*EnterpriseTransactionParam subscriberParam = new EnterpriseTransactionParam();
         subscriberParam.setOWNER(trans);
         subscriberParam.setPARAM_KEY(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME);
         subscriberParam.setPARAM_VALUE(email);
@@ -106,6 +108,7 @@ public class MailMergeService {
         listParam.setPARAM_VALUE(Long.toString(listId));
         updateService.getEm().persist(listParam);
         //Might want to use guid instead.
+        */
 
         //3. Return the link with program name "confirm" and the generated transaction ID 
         ServerInstance landingServer

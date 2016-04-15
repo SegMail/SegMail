@@ -6,20 +6,17 @@
 package segmail.program.subscribe.unsubscribe.webservice;
 
 import javax.jws.HandlerChain;
-import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import javax.xml.ws.RequestWrapper;
-import javax.xml.ws.ResponseWrapper;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@WebService(
-        serviceName = "WSUnsubscribe",
-        endpointInterface = "segmail.program.subscribe.unsubscribe.webservice.WSUnsubscribe")
-@HandlerChain(file = "handlers-server.xml")
+//@WebService(
+//        serviceName = "WSUnsubscribe",
+//        endpointInterface = "segmail.program.subscribe.unsubscribe.webservice.WSUnsubscribe")
+//@HandlerChain(file = "handlers-server.xml")
 public class WSUnsubscribe {
 
 

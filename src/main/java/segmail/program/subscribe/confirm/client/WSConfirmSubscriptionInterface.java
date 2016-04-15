@@ -21,7 +21,7 @@ import eds.component.webservice.UnwantedAccessException;
  */
 @WebService(
         name = "WSConfirmSubscription", 
-        targetNamespace = "http://client.confirm.subscribe.program.segmail/")
+        targetNamespace = "http://webservice.confirm.subscribe.program.segmail/")
 public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
 
     /**
@@ -35,6 +35,6 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      */
     @WebMethod
     public String confirm(@WebParam(name = "key") String key)
-            throws TransactionProcessedException, UnwantedAccessException, ExpiredTransactionException;
+            throws TransactionProcessedException, UnwantedAccessException;
             
 }

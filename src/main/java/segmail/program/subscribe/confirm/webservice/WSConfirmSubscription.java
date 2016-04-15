@@ -73,9 +73,9 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
                 throw new UnwantedAccessException("Key is not provided.");
             }
 
-            //MailMergeRequest trans;// = transService.getTransactionByKey(key, MailMergeRequest.class);
+            MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
 
-            List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
+            /*List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
 
             if (params == null || params.isEmpty()) {
                 throw new RuntimeException("Transaction parameters missing.");
@@ -84,7 +84,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             MailMergeRequest trans = (MailMergeRequest) params.get(0).getOWNER();
             if (trans == null) {
                 throw new RuntimeException("Transaction key not found.");
-            }
+            }*/
             
             if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
                 throw new TransactionProcessedException();
@@ -94,7 +94,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             //if(expiry.isBeforeNow())
             //    throw new ExpiredTransactionException();
 
-            String email = "";
+            /*String email = "";
             long listId = -1;
 
             for (EnterpriseTransactionParam p : params) {
@@ -104,9 +104,9 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
                 if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST)) {
                     listId = Long.parseLong(p.getPARAM_VALUE());
                 }
-            }
+            }*/
 
-            Subscription confirmedSubsc = subService.confirmSubscriber(email, listId);
+            Subscription confirmedSubsc = subService.confirmSubscriber(key);
 
             int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name());
 
@@ -120,6 +120,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
         }
     }
 
+    /*
     public String process(String function, String key)
             throws UnwantedAccessException, TransactionProcessedException {
         if (key == null || key.isEmpty()) {
@@ -179,4 +180,5 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
 
         return listname;
     }
+    */
 }
