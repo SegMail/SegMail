@@ -1,6 +1,7 @@
 
 package segmail.program.subscribe.confirm.client;
 
+import eds.component.webservice.ExpiredTransactionException;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -20,7 +21,7 @@ import eds.component.webservice.UnwantedAccessException;
  */
 @WebService(
         name = "WSConfirmSubscription", 
-        targetNamespace = "http://webservice.confirm.subscribe.program.segmail/")
+        targetNamespace = "http://client.confirm.subscribe.program.segmail/")
 public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
 
     /**
@@ -30,9 +31,10 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      *     returns java.lang.String
      * @throws eds.component.webservice.TransactionProcessedException
      * @throws eds.component.webservice.UnwantedAccessException
+     * @throws eds.component.webservice.ExpiredTransactionException
      */
     @WebMethod
     public String confirm(@WebParam(name = "key") String key)
-            throws TransactionProcessedException, UnwantedAccessException;
+            throws TransactionProcessedException, UnwantedAccessException, ExpiredTransactionException;
             
 }

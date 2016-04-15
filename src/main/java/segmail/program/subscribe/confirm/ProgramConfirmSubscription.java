@@ -19,6 +19,7 @@ public class ProgramConfirmSubscription extends Program {
     private final String SUCCESS = "SUCCESS";
     private final String LANDING = "LANDING";
     private final String PROCESSED = "PROCESSED";
+    private final String EXPIRED = "EXPIRED";
     private final String ERROR = "ERROR";
     
     private String currentPage;
@@ -34,7 +35,7 @@ public class ProgramConfirmSubscription extends Program {
 
     @Override
     public void initProgram() {
-        currentPage = "SUCCESS";
+        currentPage = this.getERROR();
     }
 
     @Override
@@ -80,6 +81,10 @@ public class ProgramConfirmSubscription extends Program {
 
     public String getERROR() {
         return ERROR;
+    }
+
+    public String getEXPIRED() {
+        return EXPIRED;
     }
     
     

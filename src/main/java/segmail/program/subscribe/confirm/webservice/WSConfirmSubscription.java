@@ -73,21 +73,26 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
                 throw new UnwantedAccessException("Key is not provided.");
             }
 
-            MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
-
-            if (trans == null) {
-                throw new RuntimeException("Transaction key not found.");
-            }
-
-            if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
-                throw new TransactionProcessedException();
-            }
+            //MailMergeRequest trans;// = transService.getTransactionByKey(key, MailMergeRequest.class);
 
             List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
 
             if (params == null || params.isEmpty()) {
                 throw new RuntimeException("Transaction parameters missing.");
             }
+            
+            MailMergeRequest trans = (MailMergeRequest) params.get(0).getOWNER();
+            if (trans == null) {
+                throw new RuntimeException("Transaction key not found.");
+            }
+            
+            if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
+                throw new TransactionProcessedException();
+            }
+            //Let's not do this first, too much trouble. Wait for enhancements!
+            //DateTime expiry = new DateTime(trans.getEXPIRY_DATETIME());
+            //if(expiry.isBeforeNow())
+            //    throw new ExpiredTransactionException();
 
             String email = "";
             long listId = -1;

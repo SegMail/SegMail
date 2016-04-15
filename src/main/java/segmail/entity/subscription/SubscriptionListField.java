@@ -8,7 +8,6 @@ package segmail.entity.subscription;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 /**
  *
@@ -100,7 +99,8 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
 
     @Override
     public Object generateKey() {
-        return getOWNER().getOBJECT_NAME().replace(" ", "")
+        return //getOWNER().getOBJECT_NAME().replace(" ", "")
+                "listfield"
                 .concat(
                         String.format("%010d", getOWNER().getOBJECTID())
                                 .concat(String.format("%05d", getSNO()))

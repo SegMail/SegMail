@@ -6,6 +6,7 @@
 package segmail.program.subscribe.confirm;
 
 import eds.component.data.IncompleteDataException;
+import eds.component.webservice.ExpiredTransactionException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -19,14 +20,16 @@ import java.net.MalformedURLException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @RequestScoped
-@Named("FormSubcription")
-public class FormSubcription {
+@Named("FormConfirmSubcription")
+public class FormConfirmSubcription {
     
     @Inject UserRequestContainer reqContainer;
     
@@ -75,6 +78,8 @@ public class FormSubcription {
             //ex.printStackTrace(System.out);
             program.setCurrentPage(program.getPROCESSED());
             
+        } catch (ExpiredTransactionException ex) {
+            program.setCurrentPage(program.getEXPIRED());
         } catch (IncompleteDataException ex) {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
