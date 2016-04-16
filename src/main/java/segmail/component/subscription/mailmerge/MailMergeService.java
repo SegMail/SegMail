@@ -147,18 +147,40 @@ public class MailMergeService {
      *
      *
      * @param text
-     * @param listId
+     * @param unsubscribeKey
      * @return
+     * @throws eds.component.data.IncompleteDataException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String parseUnsubscribeLink(String text, String email, long listId) {
+    public String parseUnsubscribeLink(String text, String unsubscribeKey) throws IncompleteDataException {
 
         if (!text.contains(MailMergeLabel.UNSUBSCRIBE.label())) {
             return text;
         }
         
+        // Check if key exists
+        MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
+        if(trans == null) {
+            trans = new MailMergeRequest();
+            trans.setPROGRAM(MailMergeLabel.UNSUBSCRIBE.name().toLowerCase());
+            trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
+            trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
+            updateService.getEm().persist(trans);
+        }
         
+        ServerInstance landingServer
+                = landingService.getNextServerInstance(
+                        LandingServerGenerationStrategy.ROUND_ROBIN,
+                        ServerNodeType.WEB);
+        if (landingServer == null) {
+            throw new IncompleteDataException("Please contact app administrator to set a landing server.");
+        }
 
-        return text;
+        String unsubLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
+
+        String newEmailBody = text.replace(MailMergeLabel.UNSUBSCRIBE.label(), unsubLink);
+
+        return newEmailBody;
+
     }
 }

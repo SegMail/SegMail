@@ -664,6 +664,7 @@ public class SubscriptionService {
             String newEmailBody = assignedConfirmEmail.getBODY();
             newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
             //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
+            newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
             
             //Send the email using MailService
             

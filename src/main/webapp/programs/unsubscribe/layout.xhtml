@@ -18,8 +18,8 @@
                         <h1 style="margin-top: 30px;">This page is not accessible when logged in.</h1>
                         <p>
                             <a class="btn btn-primary" href="#add_list_popup" data-toggle="modal">
-                                The confirm program is meant for offline landing page servers to process
-                                the confirmation of a subscription between a subscriber and subscription list.
+                                The unsubscribe program is meant for offline landing page servers to process
+                                an un-subscription between a subscriber and subscription list.
                                 <br/>
                                  If you have wandered into this page by accident, you can click back on your 
                                  browser to go back to where you came from, or you can click <a href="/#{UserSessionContainer.lastProgram}">here</a>.
@@ -29,36 +29,36 @@
                         </p>
                     </div>
                 </c:when>
-                <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.SUCCESS}">
+                <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.SUCCESS}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <h4>You have been subscribed to the list:</h4>
+                            <h4>You have been removed from the list:</h4>
                             <p class="lead" style="color: #26b99a; margin-left: 20px">
-                                #{FormConfirmSubcription.listName}
+                                #{FormUnsubscribe.listName}
                             </p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p>You should be receiving a welcome email shortly.</p>
+                            <p>You will not be receiving any more emails.</p>
                         </div>
                     </div>
                     
                 </c:when>
-                <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.PROCESSED}">
+                <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.PROCESSED}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <h4>Your subscription has already been processed</h4>
+                            <h4>Your email has already been removed from our database</h4>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p>You should be receiving a welcome email shortly.</p>
+                            <p>You will not be receiving any more emails.</p>
                         </div>
                     </div>
                     
                 </c:when>
-                <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.LANDING}">
+                <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.LANDING}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
                             <h4>This is the landing page</h4>
@@ -71,7 +71,7 @@
                     </div>
                     
                 </c:when>
-                <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.EXPIRED}">
+                <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.EXPIRED}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
                             <h4>The link that you have clicked on has already expired</h4>
@@ -79,12 +79,12 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p>Click here to request a new confirmation email: </p>
+                            <p>Click here to request a new email: </p>
                         </div>
                     </div>
                     
                 </c:when>
-                <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.ERROR}">
+                <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.ERROR}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
                             <h4>The application has encountered an error.</h4>

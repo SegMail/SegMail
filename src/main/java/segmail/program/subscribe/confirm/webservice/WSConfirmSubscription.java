@@ -10,8 +10,6 @@ import eds.component.webservice.UnwantedAccessException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.transaction.TransactionService;
-import eds.entity.transaction.EnterpriseTransactionParam;
-import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -21,7 +19,6 @@ import javax.jws.WebParam;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
-import segmail.entity.subscription.email.mailmerge.MailMergeLabel;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
 /**
