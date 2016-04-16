@@ -5,7 +5,7 @@
  */
 package seca2.bootstrap;
 
-import eds.component.link.LogicalPathParser;
+import seca2.bootstrap.module.Path.LogicalPathParser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +39,9 @@ public class UserRequestContainer {
     
     private Map<String,String[]> pogramParamsNamed;
     private List<String> programParamsOrdered;
+    
+    //Test webservice
+    private boolean webservice;
 
     public String getProgramName() {
         return programName;
@@ -119,4 +122,14 @@ public class UserRequestContainer {
     public void setProgramParamsOrdered(List<String> programParamsOrdered) {
         this.programParamsOrdered = programParamsOrdered;
     }
+
+    public boolean isWebservice() {
+        return webservice;
+    }
+
+    public void setWebservice(boolean webservice) {
+        this.webservice = webservice;
+    }
+    
+    
 }

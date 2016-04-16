@@ -17,11 +17,8 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="ASSIGN_CLIENT_LIST")
-public class Assign_Client_List extends EnterpriseRelationship<Client,SubscriptionList> {//ClientResourceAssignment<Client,SubscriptionList>{
+public class Assign_Client_List extends EnterpriseRelationship<Client,SubscriptionList> {
     
-    //private boolean ABLE_TO_EDIT;
-    //private boolean ABLE_TO_ADD;
-    //private boolean ABLE_TO_REMOVE;
     
     @Override
     public void randInit() {

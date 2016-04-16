@@ -223,16 +223,6 @@ public class NavigationService implements Serializable {
     public List<MenuItem> getAllMenuItems() throws DBConnectionException {
         
         try {
-            /*CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
-            Root<MenuItem> sourceEntity = criteria.from(MenuItem.class);
-            criteria.select(sourceEntity);
-
-            List<MenuItem> results = em.createQuery(criteria)
-                    //.setFirstResult(0)
-                    //.setMaxResults(GlobalValues.MAX_RESULT_SIZE_DB) //not necessary yet!
-                    .getResultList();
-            */
             List<MenuItem> results = this.objectService.getAllEnterpriseObjects(MenuItem.class);
             Collections.sort(results, new MenuItemComparator());
             

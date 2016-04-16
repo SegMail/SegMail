@@ -1,15 +1,3 @@
-/**
- * This is the most important class in the entire application!!! It is a 
- * core that dispatches, load and manage key components of the application.
- * <ul>
- * <li>User Management</li>
- * <li>Program Management</li>
- * <li>Presentation Management</li>
- * </ul>
- * It is important that these parts operate independently of each other and they
- * can be changed/enhanced without having to change the others.
- * 
- */
 
 package seca2.bootstrap;
 
@@ -24,17 +12,18 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 /**
- *
+ * This is the most important class in the entire application!!! It is a 
+ * core that dispatches, load and manage key components of the application. Eg.:
+ * <ul>
+ * <li>User Management</li>
+ * <li>Program Management</li>
+ * <li>Presentation Management</li>
+ * </ul>
+ * It is important that these parts operate independently of each other as much 
+ * as possible and they can be changed/enhanced without having to change the others.
+ * 
  * @author vincent.a.lee
  */
-//@URLMappings(mappings={
-//    @URLMapping(id="home", pattern="/",viewId="/program/index.xhtml"),
-//    @URLMapping(id="program", pattern="/program/#{bootstrap.program}/",viewId="/program/index.xhtml"),
-//    @URLMapping(id="install", pattern="/install/",viewId="/program/programs/install/install.xhtml")
-//})
-//@URLBeanName("bootstrap")
-//@Named("bootstrap")
-//@RequestScoped
 @WebListener
 public class Bootstrap implements Serializable, ServletContextListener {
     
@@ -63,6 +52,4 @@ public class Bootstrap implements Serializable, ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         
     }
-
-
 }

@@ -50,7 +50,7 @@ public class ClientModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

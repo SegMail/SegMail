@@ -5,7 +5,7 @@
  */
 package seca2.bootstrap.module.rewrite;
 
-import eds.component.link.LogicalPathParser;
+import seca2.bootstrap.module.Path.LogicalPathParser;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
-import segurl.filter.SegURLResolver;
 
 /**
  * This is the "BIOS" module that will resolve the very first program request 
@@ -39,8 +38,14 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+        //Webservice calls will not be processed by the JSF servlet, 
+        //but the @WebService implementation instead.
+        if(userRequestContainer.isWebservice())
+            return true;
+        
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
+        
         String contextPath = req.getContextPath();
         String servletPath = req.getServletPath();
         String pathInfo = req.getPathInfo();
@@ -51,37 +56,23 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         
         String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);
         String programPath = request.getServletContext().getInitParameter(defaults.PROGRAM_PATH);
+        String webservicePath = request.getServletContext().getInitParameter(defaults.WEBSERVICE_PATH);
         String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
-        //Servlet paths can only be the above 2 values. Any other values are not considered servletPaths.
-        String availableServletPath = "";
-        if(servletPath.equalsIgnoreCase(loginPath) || servletPath.equalsIgnoreCase(programPath))
-            availableServletPath = servletPath;
-        
-        LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot, availableServletPath);
-        //Replace the one set in UserModule because UserModule shouldn't know the servletPaths, RewriteModule should know instead.
-        userRequestContainer.setPathParser(newParser); 
         
         //No actual viewId is known before this module, this module processes all viewId mappings
-        /*if(SegURLResolver.getResolver().containsFile(((HttpServletRequest)request).getRequestURI()))
-            return true;*/
-        //String globalViewRoot = request.getServletContext().getInitParameter(defaults.GLOBAL_VIEWROOT);
-        //LogicalPathParser newParser = new LogicalPathParser(servletPath.concat(pathInfo),globalViewRoot);
-        //LogicalPathParser newParser = new LogicalPathParser(pathInfo,globalViewRoot);
-        //userRequestContainer.setPathParser(newParser);
-        //No need the above initialization, UserModule has already done it
-        if(userRequestContainer.getPathParser().containsFileResource())
+        //Check if the request is for a file resource. If yes, return true to continue the filter chain.
+        if(userRequestContainer.getPathParser() != null 
+                && userRequestContainer.getPathParser().containsFileResource())
             return true;
-        
+       
         //1. Resolve program name
-        //String program = SegURLResolver.getResolver().resolveProgramName(servletPath.concat(pathInfo));//This one returns "/login" as the program name! That was the issue.
-        String program = userRequestContainer.getPathParser().getProgram();
+        String program = (userRequestContainer.getPathParser() != null ) ? 
+                userRequestContainer.getPathParser().getProgram() :
+                "";
         
         //2. Inject it into ControlContainer
         userRequestContainer.setProgramName(program);
         String forwardViewId = "/".concat(globalViewRoot);
-        
-        //The mapping!
-        //Can be outsourced to a service
         
         //everything comes down to checking servlet path
         //If the request is to the "/" path or it is not for "/login",
@@ -89,7 +80,6 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         //of program, then forward to "/program/index.xhtml"
         //The program name will be passed by UserRequestContainer
         ///SegMail/autoemail -> /SegMail/program/autoemail/
-        
         if(servletPath == null || "/".equals(servletPath)
                 || !servletPath.equalsIgnoreCase(loginPath)){
             //Default servletPath
@@ -97,7 +87,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
         }
         
         //forward don't need contextpath because it's done at the server side
-        ((HttpServletRequest)request).getRequestDispatcher(servletPath.concat(forwardViewId)).forward(request, response);
+        req.getRequestDispatcher(servletPath.concat(forwardViewId)).forward(req, res);
         
         return false; //No need to do anything after forwarding
     }
@@ -109,7 +99,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE + 2;
+        return Integer.MIN_VALUE + 300;
     }
 
     @Override
@@ -142,7 +132,7 @@ public class RewriteModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
         
     }
 

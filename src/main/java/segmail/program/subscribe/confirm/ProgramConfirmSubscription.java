@@ -16,7 +16,17 @@ import seca2.program.Program;
 @Named("ProgramConfirmSubscription")
 public class ProgramConfirmSubscription extends Program {
     
+    private final String SUCCESS = "SUCCESS";
+    private final String LANDING = "LANDING";
+    private final String PROCESSED = "PROCESSED";
+    private final String EXPIRED = "EXPIRED";
+    private final String ERROR = "ERROR";
     
+    private String currentPage;
+    
+    private String listName;
+    
+    private String requestKey;
 
     @Override
     public void initProgramParams() {
@@ -25,12 +35,58 @@ public class ProgramConfirmSubscription extends Program {
 
     @Override
     public void initProgram() {
-        
+        currentPage = this.getERROR();
     }
 
     @Override
     public void clearVariables() {
         
     }
+
+    public String getListName() {
+        return listName;
+    }
+
+    public void setListName(String listName) {
+        this.listName = listName;
+    }
+
+    public String getRequestKey() {
+        return requestKey;
+    }
+
+    public void setRequestKey(String requestKey) {
+        this.requestKey = requestKey;
+    }
+
+    public String getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(String currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public String getSUCCESS() {
+        return SUCCESS;
+    }
+
+    public String getLANDING() {
+        return LANDING;
+    }
+
+    public String getPROCESSED() {
+        return PROCESSED;
+    }
+
+    public String getERROR() {
+        return ERROR;
+    }
+
+    public String getEXPIRED() {
+        return EXPIRED;
+    }
+    
+    
     
 }

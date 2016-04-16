@@ -15,6 +15,4 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(ClientResourceAssignment.class)
 public class ClientResourceAssignment_ extends EnterpriseRelationship_{
 
-    //public static volatile SingularAttribute<ClientResourceAssignment,
-    
 }

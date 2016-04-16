@@ -103,17 +103,15 @@ public class MailService {
             // web.xml environmental variables
             AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
             client.setEndpoint(DEFAULT_HTTPS_ENDPOINT);
+            
+            client.sendEmail(request);
             // Log the email that was sent, if the logging flag was set
             // Log it before sending, because once sent out but something happens to this update
             // then it would not be correct.
             if (logging) {
                 updateService.getEm().persist(email);
-            }   
+            }
             
-            // There is no way for me to set the region!
-            client.sendEmail(request);
-
-
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());

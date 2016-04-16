@@ -14,11 +14,14 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import seca2.bootstrap.module.Path.LogicalPathParser;
 
 /**
  *
@@ -37,6 +40,7 @@ public class InstallationModule extends BootstrapModule implements Serializable 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
 
+        //========================================================================================
         //1) Check if the database has been initialized by calling a few DB services
         //2) If app is considered installed, return true to continue the chain processing
         //3) If app is not installed, display the installation page.
@@ -50,7 +54,7 @@ public class InstallationModule extends BootstrapModule implements Serializable 
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE; //How to inject this value from web.xml?
+        return Integer.MIN_VALUE + 100; //How to inject this value from web.xml?
     }
 
     @Override
@@ -88,8 +92,8 @@ public class InstallationModule extends BootstrapModule implements Serializable 
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
+        
     }
 
     @Override

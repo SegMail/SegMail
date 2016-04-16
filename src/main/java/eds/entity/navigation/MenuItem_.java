@@ -10,7 +10,6 @@ import eds.entity.data.EnterpriseObject_;
 import eds.entity.navigation.MenuItem.TARGET_TYPE;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
-import eds.entity.program.Program;
 
 /**
  *

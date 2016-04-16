@@ -18,9 +18,15 @@ import javax.faces.context.FacesContext;
 public class DefaultKeys {
     
     
+    /**
+     * 
+     */
+    public final String ERROR_VIEWROOT = "ERROR_VIEWROOT";
     
-    public final String ERROR_PAGE = "/programs/error/error_page.xhtml";
-    public final String ERROR_PAGE_TEMPLATE = "/programs/error/template/error-page-layout.xhtml";
+    /**
+     * 
+     */
+    public final String ERROR_TEMPLATE_LOCATION = "ERROR_TEMPLATE_LOCATION";
     
     public final String LOGIN_PAGE = "/programs/user/login_page.xhtml";
     public final String LOGIN_PAGE_TEMPLATE = "/programs/user/templates/mylogintemplate/template-layout.xhtml";
@@ -28,12 +34,6 @@ public class DefaultKeys {
     public final String DEFAULT_HOME = "/programs/test/layout.xhtml";
     
     private final String DEFAULT_TEMPLATE_NAME = "DEFAULT_TEMPLATE_LOCATION";
-    
-    /**
-     * A flag to indicate if the application is in the installation mode. Some of 
-     * the BootstrapModules would be turned off in this mode.
-     */
-    public final String INSTALL = "INSTALL";
     
     /**
      * A flag to indicate which mode the application is running on. Reference to 
@@ -50,6 +50,11 @@ public class DefaultKeys {
      * The servlet path for programs
      */
     public final String PROGRAM_PATH = "PROGRAM_PATH";
+    
+    /**
+     * The servlet path for webservice calls
+     */
+    public final String WEBSERVICE_PATH = "WEBSERVICE_PATH";
     
     /**
      * The name of the installation program.

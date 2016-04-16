@@ -7,8 +7,6 @@ package seca2.program.test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
@@ -25,6 +23,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import seca2.program.landing.FormAddNewServer;
 import seca2.program.test.client.FormRegisterClientForUsername;
 import seca2.program.test.client.FormRegisterClientType;
 import seca2.program.test.layout.FormAssignLayoutProgram;
@@ -592,6 +591,24 @@ public class FormTestEverything {
                 
             }
             
+            // Create landing servers 
+            NodeList landingServers = doc.getElementsByTagName(LANDING_SERVER_TAG);
+            
+            for(int n=0; n<landingServers.getLength(); n++){
+                Node nNode = landingServers.item(n);
+                Element element = (Element) nNode;
+                String servername = element.getElementsByTagName(LANDING_SERVER_NAME_TAG).item(0).getTextContent();
+                formAddNewServer.setName(servername);
+                String uri = element.getElementsByTagName(LANDING_SERVER_HOSTNAME_TAG).item(0).getTextContent();
+                formAddNewServer.setUri(uri);
+                String nodetype = element.getElementsByTagName(LANDING_SERVER_TYPE_TAG).item(0).getTextContent();
+                formAddNewServer.setServerNodeType(servername);
+                String username = element.getElementsByTagName(LANDING_SERVER_USERNAME_TAG).item(0).getTextContent();
+                formAddNewServer.setUserId(username);
+                
+                formAddNewServer.addServer();
+            }
+            
         } catch (ParserConfigurationException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "XML parse error", ex.getMessage());
         } catch (SAXException ex) {
@@ -600,6 +617,14 @@ public class FormTestEverything {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "File read error", ex.getMessage());
         } 
     }
+    
+    @Inject private FormAddNewServer formAddNewServer;
+    
+    private final String LANDING_SERVER_TAG = "LANDING_SERVER";
+    private final String LANDING_SERVER_NAME_TAG = "LANDING_SERVER_NAME";
+    private final String LANDING_SERVER_HOSTNAME_TAG = "LANDING_SERVER_HOSTNAME";
+    private final String LANDING_SERVER_TYPE_TAG = "LANDING_SERVER_TYPE";
+    private final String LANDING_SERVER_USERNAME_TAG = "LANDING_SERVER_USERNAME";
 
     public Part getFile() {
         return file;

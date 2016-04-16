@@ -6,7 +6,6 @@
 package seca2.program.test.layout;
 
 import eds.component.data.DBConnectionException;
-import eds.component.layout.LayoutAssignmentException;
 import eds.component.layout.LayoutService;
 import eds.component.program.ProgramService;
 import eds.entity.layout.Layout;

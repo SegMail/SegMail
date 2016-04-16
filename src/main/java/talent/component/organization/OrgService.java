@@ -5,14 +5,11 @@
  */
 package talent.component.organization;
 
-import GraphAPI.EntityGraph;
-import GraphAPI.Node;
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.entity.client.Client;
-import eds.entity.client.ClientResourceAssignment;
 import eds.entity.data.EnterpriseRelationship;
 import java.util.ArrayList;
 import java.util.List;

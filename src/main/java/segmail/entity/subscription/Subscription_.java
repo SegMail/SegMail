@@ -18,4 +18,6 @@ public class Subscription_ extends EnterpriseRelationship_ {
     //public static volatile SingularAttribute<EnterpriseRelationship,? extends EnterpriseObject> SOURCE;
     //public static volatile SingularAttribute<EnterpriseRelationship,? extends EnterpriseObject> TARGET;
     public static volatile SingularAttribute<Subscription,String> STATUS;
+    public static volatile SingularAttribute<Subscription,String> CONFIRMATION_KEY;
+    public static volatile SingularAttribute<Subscription,String> UNSUBSCRIBE_KEY;
 }

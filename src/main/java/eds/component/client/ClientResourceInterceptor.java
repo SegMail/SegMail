@@ -9,7 +9,6 @@ import eds.entity.client.ClientResource;
 import eds.entity.data.EnterpriseObject;
 import javax.ejb.EJB;
 import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 
 /**

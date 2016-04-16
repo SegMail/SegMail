@@ -8,6 +8,7 @@ package eds.entity.mail;
 import eds.entity.transaction.EnterpriseTransaction;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -57,6 +58,7 @@ public class Email extends EnterpriseTransaction {
         this.RECIPIENTS = RECIPIENTS;
     }
 
+    @Column(columnDefinition="MEDIUMTEXT")
     public String getBODY() {
         return BODY;
     }

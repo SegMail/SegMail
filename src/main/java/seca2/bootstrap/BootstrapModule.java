@@ -17,7 +17,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * A bootstrap module mimics a Servlet filter or a Struts interceptor - the 
@@ -47,52 +46,6 @@ public abstract class BootstrapModule implements Filter {
     
     public static String FACES_CONTEXT = "context";
     
-    private BootstrapModule next;
-    /**
-     * This is injected during runtime and it should be order-independent, ie. 
-     * each module only loads it and use it in their own way, it does not matter
-     * which module processed these 2 instances first, and the results should be 
-     * the same. Eg. If UserModule executes before program module, and the user 
-     * is not loggedin, it should redirect the user to the login page. If the 
-     * program module executes first, it would process only request starting with
-     * "/program/" and bypass the request to user module, which would then still
-     * redirect the user to the login page. 
-     */
-    //@Inject private BootstrapInput bootstrapInput;
-    //@Inject private BootstrapOutput bootstrapOutput;
-    
-    /**
-     * As with http://www.javaworld.com/article/2072857/java-web-development/the-chain-of-responsibility-pattern-s-pitfalls-and-improvements.html
-     * this is a non-classic CoR implementation where the base class decides to 
-     * trigger the next responsibility in the chain.
-     * 
-     * @param inputContext
-     * @param outputContext 
-     */
-    /*public void start(BootstrapInput inputContext, BootstrapOutput outputContext){
-        System.out.println("BootstrapModule "+this.getClass().getSimpleName()+" started.");
-        
-        boolean toContinue = (this.active() ? this.execute(inputContext, outputContext) : true );
-        
-        if(next != null && toContinue)
-            next.start(inputContext, outputContext);
-        
-        if(!toContinue)
-            System.out.println("Bootstrap processing stopped at "+this.getClass().getSimpleName()+".");
-    }*/
-    
-    public void strapNext(BootstrapModule next){
-        this.next = next;
-    }
-    
-    public void strapNextAtLastPos(BootstrapModule next){
-        BootstrapModule thisPos = this;
-        while(thisPos.next != null){
-            thisPos = thisPos.next;
-        }
-        thisPos.strapNext(next);
-    }
-    
     /**
      * Execute the control logic of this module.
      * 
@@ -110,6 +63,7 @@ public abstract class BootstrapModule implements Filter {
      * 
      * @param request
      * @param response 
+     * @throws java.lang.Exception 
      */
     protected abstract void ifFail(
             ServletRequest request, 
@@ -117,13 +71,15 @@ public abstract class BootstrapModule implements Filter {
     
     /**
      * What happens if an exception is encountered during request processing.
+     * <br>
+     * This was designed mainly for browser requests. It doesn't work well with 
+     * webservice calls.
      * 
      * @param request
      * @param response 
      */
     protected abstract void ifException(
-            ServletRequest request, 
-            ServletResponse response);
+            ServletRequest request, ServletResponse response, Exception ex);
     
     /**
      * What happens if the request is for a file resource.
@@ -210,8 +166,6 @@ public abstract class BootstrapModule implements Filter {
      * Each module can determine at runtime what is the URL pattern they are
      * required to process.
      * 
-     * @param request
-     * @param response
      * @return 
      */
     protected abstract String urlPattern();
@@ -228,9 +182,7 @@ public abstract class BootstrapModule implements Filter {
         try {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse res = (HttpServletResponse) response;
-            HttpSession session = req.getSession(false);
 
-            //boolean install = Boolean.parseBoolean(req.getServletContext().getInitParameter(defaults.INSTALL));
             String runModeString = req.getServletContext().getInitParameter(defaults.RUN_MODE);
             RunMode runMode = RunMode.getRunMode(runModeString);
             
@@ -246,7 +198,8 @@ public abstract class BootstrapModule implements Filter {
             this.ifFail(request, response);
             
         } catch (Exception ex) {
-            this.ifException(request, response);
+            this.ifException(request, response, null);
+            ex.printStackTrace(System.out);
         }
     }
 

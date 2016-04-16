@@ -6,9 +6,7 @@
 package eds.entity.client;
 
 import eds.entity.data.EnterpriseObject;
-import eds.entity.program.ProgramListener;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**
@@ -17,7 +15,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="CLIENTTYPE")
-@EntityListeners(ClientTypeListener.class)
 public class ClientType extends EnterpriseObject {
     
     private String CLIENT_TYPE_NAME;

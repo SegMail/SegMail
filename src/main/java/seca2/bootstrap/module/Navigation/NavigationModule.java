@@ -111,13 +111,13 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE+5;
+        return Integer.MIN_VALUE+600;
     }
 
     @Override

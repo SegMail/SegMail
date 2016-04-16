@@ -22,13 +22,8 @@ import eds.component.data.IncompleteDataException;
 import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
-import eds.component.user.UserNotFoundException;
-import eds.component.user.UserRegistrationException;
 import eds.component.user.UserService;
-import eds.component.user.UserTypeException;
 import eds.entity.user.UserType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -99,8 +94,6 @@ public class FormTestUser implements Serializable {
             
         } catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (UserRegistrationException ex) {
-            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, ex.getLocalizedMessage(), "Please contact admin.");
         } catch(Exception ex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
                     ex.getCause().getClass().getSimpleName(), //why? i forgot why...
@@ -143,9 +136,6 @@ public class FormTestUser implements Serializable {
     public void setProfilePicLocation(){
         try{
             userService.setProfilePicLocationForUsername(this.usernameProfilePic, this.profilePicLocation);
-        }
-        catch(UserNotFoundException usnfex){
-            FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, "Username "+usnfex.getUsername()+" does not exist!", "Please contact admin.");
         }
         catch(DBConnectionException dbex){
             FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");

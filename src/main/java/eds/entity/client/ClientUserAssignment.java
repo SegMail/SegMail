@@ -5,7 +5,6 @@
  */
 package eds.entity.client;
 
-import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseRelationship;
 import eds.entity.user.User;
 import javax.persistence.Entity;

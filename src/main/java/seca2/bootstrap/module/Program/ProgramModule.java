@@ -19,11 +19,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
-import segurl.filter.SegURLResolver;
 
 /**
  * A Program in SegERP is a single end-point interface of the system, or a "page"
@@ -81,12 +79,12 @@ public class ProgramModule extends BootstrapModule implements Serializable {
          * 1) enhance SeqURLResolver to recognize /index.xhtml or
          * 2) hardcode for now...
          */
-        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
-            return true;
-        }*/
         if(requestContainer.getPathParser().containsFileResource())
             return true;
         
+        //If it is a webservice call, bypass processing
+        if(requestContainer.isWebservice())
+            return true;
         
         long userTypeId = (sessionContainer.getUserType() == null) ? 
                 -1 : sessionContainer.getUserType().getOBJECTID();
@@ -109,7 +107,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //If no matching program is found and no default program, stop processing and 
         //show the error page
         if (program == null) {
-            requestContainer.setViewLocation(defaults.ERROR_PAGE);
+            String errorViewRoot = request.getServletContext().getInitParameter(defaults.ERROR_VIEWROOT);
+            requestContainer.setViewLocation(errorViewRoot);
             requestContainer.setErrorMessage(this.getName()+": No programs found");
             requestContainer.setError(true);
             return true;
@@ -133,13 +132,13 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     }
 
     @Override
-    protected void ifException(ServletRequest request, ServletResponse response) {
+    protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
 
     }
 
     @Override
     protected int executionSequence() {
-        return Integer.MIN_VALUE + 3;
+        return Integer.MIN_VALUE + 400;
     }
 
     @Override

@@ -6,11 +6,8 @@
 package seca2.program.test.client;
 
 import eds.component.GenericObjectService;
-import eds.component.client.ClientRegistrationException;
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
-import eds.entity.client.Client;
-import eds.entity.data.EnterpriseObject;
 import eds.entity.client.ClientType;
 import eds.entity.user.User;
 import java.util.List;
@@ -56,8 +53,6 @@ public class FormRegisterClientForUsername {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Client registered for user successfully.", null);
         } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        } catch (ClientRegistrationException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }

@@ -5,6 +5,7 @@
  */
 package eds.component.link;
 
+import seca2.bootstrap.module.Path.LogicalPathParser;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
