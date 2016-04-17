@@ -5,6 +5,7 @@
  */
 package segmail.program.list;
 
+import eds.component.batch.BatchProcesingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -12,6 +13,8 @@ import eds.component.data.RelationshipExistsException;
 import eds.component.mail.InvalidEmailException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
@@ -106,8 +109,9 @@ public class FormListSubscriber {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Subscriber already exist in this list", "");
-        } catch (InvalidEmailException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "You will need to set a \"Send as (Email)\" address in \"Settings\" before you can start adding subscribers!", "");
+        } catch (BatchProcesingException ex) {
+            ex.printStackTrace(System.out);
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Something wrong with the sending of emails", "Please contact your system admin.");
         } /*catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }*/
