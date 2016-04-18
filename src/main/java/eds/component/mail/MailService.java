@@ -16,9 +16,15 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.IncompleteDataException;
+import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
+import eds.entity.mail.Email_;
+import eds.entity.transaction.EnterpriseTransaction_;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -30,6 +36,9 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.PersistenceException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 
@@ -64,8 +73,8 @@ public class MailService {
      * @param logging If logging is turned on, the email will be logged.
      * @throws eds.component.mail.InvalidEmailException
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void sendEmailByAWS(Email email, boolean logging) 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void sendEmailNow(Email email, boolean logging) 
             throws InvalidEmailException {
         try {
             // Get the sender, subject and body from email
@@ -108,8 +117,9 @@ public class MailService {
             // Log the email that was sent, if the logging flag was set
             // Log it before sending, because once sent out but something happens to this update
             // then it would not be correct.
+            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.SENT);
             if (logging) {
-                updateService.getEm().persist(email);
+                updateService.getEm().merge(email);
             }
             
         } catch (PersistenceException pex) {
@@ -201,4 +211,36 @@ public class MailService {
         return "";
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void queueEmail(Email email) {
+        email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
+        updateService.getEm().persist(email);
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void processEmailQueue() {
+        // Get all queued email sorted by their DATE_CHANGED
+        CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Email> query = builder.createQuery(Email.class);
+        Root<Email> fromEmail = query.from(Email.class);
+        
+        query.select(fromEmail);
+        query.where(builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.QUEUED.label));
+        query.orderBy(builder.asc(fromEmail.get(Email_.DATETIME_CHANGED)));
+        
+        List<Email> results = updateService.getEm().createQuery(query)
+                .setFirstResult(0)
+                .setMaxResults(UPDATE_BATCH_SIZE)
+                .getResultList();
+        
+        for(Email email : results ) {
+            try {
+                this.sendEmailNow(email, true);
+            } catch (InvalidEmailException ex) {
+                Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
+                updateService.getEm().merge(email);
+            }
+        }
+    }
 }

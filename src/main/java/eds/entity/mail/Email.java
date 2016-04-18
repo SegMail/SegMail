@@ -88,5 +88,7 @@ public class Email extends EnterpriseTransaction {
         this.REPLY_TO_ADDRESSES = REPLY_TO_ADDRESSES;
     }
 
-    
+    public void PROCESSING_STATUS(EMAIL_PROCESSING_STATUS status){
+        this.setPROCESSING_STATUS(status.label);
+    }
 }

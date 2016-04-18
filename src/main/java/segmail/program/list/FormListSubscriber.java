@@ -10,11 +10,8 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.mail.InvalidEmailException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import javax.annotation.PostConstruct;
@@ -97,7 +94,7 @@ public class FormListSubscriber {
             }
 
             subService.subscribe(program.getListEditingId(), this.getFieldValues());
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Subscriber added!", null);
+            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Subscriber added! A welcome email will be sent to the subscriber soon.", null);
             //How to redirect to List editing panel?
             program.refresh();
             

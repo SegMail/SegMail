@@ -25,7 +25,6 @@ import eds.component.encryption.EncryptionType;
 import eds.component.mail.MailService;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.mail.Email;
-import java.io.IOException;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -679,8 +678,9 @@ public class SubscriptionService {
             confirmEmail.addRecipient(sub.getSOURCE().getEMAIL());
             
             //mailService.sendEmailByAWS(confirmEmail, true);
-            BatchJobStep step = batchService.createJobStep("MailService", "sendEmailByAWS", new Object[] {confirmEmail,true});
-            batchService.executeJobStep(step);
+            //BatchJobStep step = batchService.createJobStep("MailService", "sendEmailNow", new Object[] {confirmEmail,true});
+            //batchService.executeJobStep(step);
+            mailService.queueEmail(confirmEmail);
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
