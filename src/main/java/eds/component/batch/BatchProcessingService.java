@@ -8,13 +8,19 @@ import eds.entity.batch.BatchJobStepParam;
 import eds.entity.mail.Email;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -103,13 +109,36 @@ public class BatchProcessingService {
                 if (param.getSERIALIZED_OBJECT() != null && !param.getSERIALIZED_OBJECT().isEmpty()) {
                     Object obj = param.SERIALIZED_OBJECT();
                     Class clazz = obj.getClass();
-                    
+                    params[i] = obj;
+                    continue;
+                }
+                params[i] = param.getSTRING_VALUE();
+            }
+            
+            Object ejb = InitialContext.doLookup("java:module/"+batchJobStep.getSERVICE_NAME());
+            System.out.println(ejb.getClass().getName());
+            
+            Method[] methodArray = ejb.getClass().getMethods();
+            for(int i=0; i<methodArray.length; i++){
+                if(batchJobStep.getSERVICE_METHOD().equals(methodArray[i].getName())){
+                    Method method = methodArray[i];
+                    method.invoke(ejb, params);
                 }
             }
+            
         } catch (ClassNotFoundException ex) {
             throw new BatchProcesingException("Batch processing failed:", ex);
         } catch (IOException ex) {
             throw new BatchProcesingException("Batch processing failed:", ex);
+        } catch (NamingException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace(System.out);
         }
     }
 
