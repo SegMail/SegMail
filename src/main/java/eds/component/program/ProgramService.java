@@ -281,6 +281,7 @@ public class ProgramService implements Serializable {
      * and checks if the given userTypeId is authorized. If it is, return the 
      * program, else returns the default program assigned to the user.
      * 
+     * Else do not return the default program for the user.
      * 
      * @param programName
      * @param userTypeId

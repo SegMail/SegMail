@@ -10,8 +10,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
+import javax.naming.InitialContext;
+import javax.servlet.ServletContext;
 
 /**
  *
@@ -42,6 +45,7 @@ public class UserRequestContainer {
     
     //Test webservice
     private boolean webservice;
+    
 
     public String getProgramName() {
         return programName;

@@ -3,22 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.mail;
+package seca2.entity.landing;
 
 /**
  *
  * @author LeeKiatHaw
  */
-public enum EMAIL_PROCESSING_STATUS {
-    HOLD("HOLD"),
-    QUEUED("QUEUED"),
-    SENT("SENT"),
-    ERROR("ERROR");
+public enum ServerJNDIResourceType {
+    EJB("EJB"),
+    JMS_CONNECTION("JMS_CONNECTION");
     
     public final String label;
     
-    private EMAIL_PROCESSING_STATUS(String label){
+    private ServerJNDIResourceType(String label){
         this.label = label;
     }
+
+    @Override
+    public String toString() {
+        return label;
+    }
+    
     
 }

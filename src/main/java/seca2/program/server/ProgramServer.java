@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.landing;
+package seca2.program.server;
 
 import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
@@ -25,7 +25,7 @@ import seca2.entity.landing.ServerInstance;
  *
  * @author LeeKiatHaw
  */
-public class ProgramLanding extends Program {
+public class ProgramServer extends Program {
     
     @Inject private UserRequestContainer requestContainer;
     
@@ -47,24 +47,13 @@ public class ProgramLanding extends Program {
     private Assign_Server_User assignment;
     private long userIdExisting;
     
+    //Edit full form Tabs
+    private String tab;
+    private boolean showEditingPanel;
+    
     @Override
     public void initProgramParams() {
-        Map<String,String[]> namedParams = this.reqContainer.getPogramParamsNamed();
-        List<String> orderedParams = this.reqContainer.getProgramParamsOrdered();
-        
-        //Assume that param 1 is the program command
-        String command = (orderedParams != null && !orderedParams.isEmpty()) ? orderedParams.get(0).toString().toUpperCase() : "";
-        
-        if(command.equals("CONFIRM")) {
-            confirmSubscription();
-            return;
-        }
-        
-        if(command.equals("UNSUBSCRIBE")) {
-            unsubscribe();
-            return;
-        }
-        
+        this.setShowEditingPanel(false);
     }
     
     public void confirmSubscription() {
@@ -163,12 +152,28 @@ public class ProgramLanding extends Program {
         this.serverNodeType = serverNodeType;
     }
 
+    public String getTab() {
+        return tab;
+    }
+
+    public void setTab(String tab) {
+        this.tab = tab;
+    }
+
     public List<String> getTypes() {
         return types;
     }
 
     public void setTypes(List<String> types) {
         this.types = types;
+    }
+
+    public boolean isShowEditingPanel() {
+        return showEditingPanel;
+    }
+
+    public void setShowEditingPanel(boolean showEditingPanel) {
+        this.showEditingPanel = showEditingPanel;
     }
 
     @Override

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="FormEditServerFull" >
+        <!--<div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    Edit 
+                    <span id="server_type"></span>
+                    Server 
+                    <span id="server_name"></span>
+                </h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="nav-tabs-vertical">
+                    <ul class="nav nav-tabs">
+                        <li>
+                            <a href="#" data-toggle="tab">Overview</a>
+                        </li>
+                        <li>
+                            <a href="#" data-toggle="tab">Basic Settings</a>
+                        </li>
+                        <li>
+                            <a href="#" data-toggle="tab">Resources</a>
+                        </li>
+                    </ul>
+
+                    <div class="block-content tab-content">
+                        <div class="tab-pane active">
+                            <ui:include src="edit_panels/overview.xhtml"></ui:include>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+        <div class="modal-dialog" style="width:100%">
+            <div class="modal-content nav-tabs-vertical" jsf:rendered="#{FormEditExistingServer.renderEditingPanel()}">
+                <div class="block-head">
+                    <div class="block-title">
+                        Edit 
+                        <span id="server_type"></span>
+                        Server 
+                        <span id="server_name"></span>
+                    </div>
+                </div>
+                <div class="tabs">
+                    <ul class="nav nav-tabs">
+                        <li>
+                            <a href="#" data-toggle="tab">
+                                Overview
+                                <f:ajax event="click" render=":edit_panel"
+                                        listener="#{FormServerList.loadServer(server.OBJECTID)}">
+                                    
+                                </f:ajax>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" data-toggle="tab">Basic Settings</a>
+                        </li>
+                        <li>
+                            <a href="#" data-toggle="tab">Resources</a>
+                        </li>
+                    </ul>
+
+                    <div jsf:id="edit_panel" class="block-content tab-content">
+                        <div class="tab-pane active">
+                            <ui:include src="edit_panels/overview.xhtml"></ui:include>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p:blockUI block="FormEditServerFull" 
+                   trigger="@all"
+                   >
+            <p id="spinner"></p>
+        </p:blockUI>
+    </form>
+</html>

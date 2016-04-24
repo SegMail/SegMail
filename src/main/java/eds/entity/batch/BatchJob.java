@@ -5,16 +5,15 @@
  */
 package eds.entity.batch;
 
+import eds.component.batch.BatchProcesingException;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
@@ -33,6 +32,13 @@ public class BatchJob implements Serializable {
     private List<BatchJobStep> STEPS = new ArrayList<>();
     
     private String STATUS;
+    
+    /**
+     * Over-simplification of BatchJobSchedule
+     */
+    private java.sql.Timestamp SCHEDULED_TIME;
+    private java.sql.Timestamp START_TIME;
+    private java.sql.Timestamp END_TIME;
 
     @OneToMany(mappedBy="BATCH_JOB") //Required, if not you'll end up with another table
     /*@JoinColumn(name="BATCH_JOB",
@@ -62,9 +68,40 @@ public class BatchJob implements Serializable {
     public void setSTATUS(String STATUS) {
         this.STATUS = STATUS;
     }
+
+    public Timestamp getSCHEDULED_TIME() {
+        return SCHEDULED_TIME;
+    }
+
+    public void setSCHEDULED_TIME(Timestamp SCHEDULED_TIME) {
+        this.SCHEDULED_TIME = SCHEDULED_TIME;
+    }
+
+    public Timestamp getSTART_TIME() {
+        return START_TIME;
+    }
+
+    public void setSTART_TIME(Timestamp START_TIME) {
+        this.START_TIME = START_TIME;
+    }
+
+    public Timestamp getEND_TIME() {
+        return END_TIME;
+    }
+
+    public void setEND_TIME(Timestamp END_TIME) {
+        this.END_TIME = END_TIME;
+    }
+    
+    
     
     public void addSTEP(BatchJobStep step) {
         STEPS.add(step);
     }
     
+    public void execute() throws BatchProcesingException{
+        for (BatchJobStep step : getSTEPS()){
+            step.execute();
+        }
+    }
 }

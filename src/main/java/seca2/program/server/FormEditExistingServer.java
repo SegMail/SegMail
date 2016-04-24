@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.landing;
+package seca2.program.server;
 
 import eds.component.data.EntityNotFoundException;
 import eds.entity.user.UserAccount;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -18,7 +16,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
 
@@ -30,7 +27,7 @@ import seca2.entity.landing.ServerInstance;
 @Named("FormEditExistingServer")
 public class FormEditExistingServer {
     
-    @Inject ProgramLanding program;
+    @Inject ProgramServer program;
     
     @EJB LandingService landingService;
     
@@ -124,5 +121,9 @@ public class FormEditExistingServer {
 
     public void setTypes(List<String> types) {
         program.setTypes(types);
+    }
+    
+    public boolean renderEditingPanel(){
+        return program.isShowEditingPanel();
     }
 }

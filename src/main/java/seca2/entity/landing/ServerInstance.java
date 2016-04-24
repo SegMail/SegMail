@@ -50,10 +50,11 @@ public class ServerInstance extends EnterpriseObject {
     /**
      * The path of the URL
      */
-    private String Path;
+    private String PATH;
     
     
     private String SERVER_NODE_TYPE;
+    
     
     
 
@@ -109,12 +110,12 @@ public class ServerInstance extends EnterpriseObject {
         this.PORT = PORT;
     }
 
-    public String getPath() {
-        return Path;
+    public String getPATH() {
+        return PATH;
     }
 
-    public void setPath(String Path) {
-        this.Path = Path;
+    public void setPATH(String PATH) {
+        this.PATH = PATH;
     }
     
     

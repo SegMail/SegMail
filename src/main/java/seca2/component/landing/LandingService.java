@@ -195,7 +195,7 @@ public class LandingService {
      * @param strategy
      * @param type
      * @return 
-     * @throws eds.component.data.IncompleteDataException 
+     * @throws eds.component.data.IncompleteDataException if no servers are found
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy, ServerNodeType type) 
@@ -279,7 +279,7 @@ public class LandingService {
             URI uri = new URI(uriString);
             
             String path = uri.getPath();
-            server.setPath(path);
+            server.setPATH(path);
             
             String hostname = uri.getHost();
             server.setHOSTNAME(hostname);

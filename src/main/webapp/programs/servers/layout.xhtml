@@ -14,9 +14,38 @@
         <ui:define name="main-program-panel">
             <div class="row"><!--Page message-->
                 <div class="col-md-12">
-                    <form jsf:id="ProgramSubscribe">
-                        <s2:messenger for="ProgramSubscribe" showDetail="true" showSummary="true" closable="true" />
+                    <form jsf:id="ProgramServer">
+                        <s2:messenger for="ProgramServer" showDetail="true" showSummary="true" closable="true" />
                     </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="block nb">
+                        <div class="block-head">
+                            <h2>Your Servers</h2>
+                            <ul class="buttons">
+                                <li>
+                                    
+                                </li>
+                                <li>
+                                    <a href="#" data-toggle="modal">
+                                        <span class="fa fa-power-off"></span>
+                                    </a>
+                                    
+                                </li>
+                                <li>
+                                    <a href="#add_new_server_panel" data-toggle="modal"
+                                       >
+                                        <span class="fa fa-plus"></span>
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                        <ui:include src="all_server_panel.xhtml" ></ui:include>
+                    </div>
                 </div>
             </div>
 
@@ -57,12 +86,15 @@
             <div class="modal fade" id="edit_existing_server_panel">
                 <ui:include src="edit_existing_server_panel.xhtml"></ui:include>
             </div>
+            <div jsf:id="edit_server_full_panel" class="modal fade" id="edit_server_full_panel">
+                <ui:include src="edit_server_full_panel.xhtml"></ui:include>
+            </div>
 
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
-            <script type="text/javascript" src="#{request.contextPath}/programs/servers/js/template_popup.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/servers/js/server_popup.js" />
 
         </ui:define>
 

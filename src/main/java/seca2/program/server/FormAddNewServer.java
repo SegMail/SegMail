@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.landing;
+package seca2.program.server;
 
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
@@ -36,7 +36,7 @@ import seca2.component.landing.ServerNodeType;
 @RequestScoped
 public class FormAddNewServer {
     
-    @Inject private ProgramLanding program;
+    @Inject private ProgramServer program;
     
     @EJB private LandingService landingService;
     @EJB private UserService userService;

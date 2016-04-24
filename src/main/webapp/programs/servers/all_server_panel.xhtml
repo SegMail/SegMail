@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <div class="block-content list nbfc">
+        
+            <c:forEach items="#{FormServerList.serverList}" var="server">
+                <form jsf:id="server_list_item_#{server.OBJECTID}" name="#{server.NAME}_#{server.SERVER_NODE_TYPE}">
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-container list-item-container-small">
+                            <span class="label label-success">Active</span>
+                        </div>
+                        <div class="list-item-container" style="width:200px;">   
+                            <h4>#{server.NAME}</h4>
+                            <p class="text-muted">
+                                #{server.URI}
+                            </p>
+                        </div>
+                        <div class="list-item-container">
+                            <h4>#{server.SERVER_NODE_TYPE}</h4>
+                            <p class="text-muted">
+                                #{server.IP_ADDRESS}
+                            </p>
+                        </div>
+                        <div class="list-item-right">
+                            <div>
+                                <a href="#edit_server_full_panel" class="btn btn-primary list-item-trigger"
+                                   
+                                   data-toggle="modal">
+                                    <f:ajax event="click" render="FormEditServerFull"
+                                            listener="#{FormServerList.loadServer(server.OBJECTID)}"
+                                            onevent="edit"
+                                            />
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                    </form>
+            </c:forEach>
+        
+    </div>
+
+
+</html>
