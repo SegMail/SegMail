@@ -9,13 +9,13 @@ package seca2.entity.landing;
  *
  * @author LeeKiatHaw
  */
-public enum ServerJNDIResourceType {
+public enum ServerResourceType {
     EJB("EJB"),
     JMS_CONNECTION("JMS_CONNECTION");
     
     public final String label;
     
-    private ServerJNDIResourceType(String label){
+    private ServerResourceType(String label){
         this.label = label;
     }
 

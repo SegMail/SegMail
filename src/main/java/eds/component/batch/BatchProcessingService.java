@@ -60,66 +60,6 @@ public class BatchProcessingService {
     @EJB
     LandingService landingService;
 
-    /**
-     * Schedule a single step job.
-     *
-     * @param serviceName Full class name, with package, of the EJB class eg.
-     * eds.component.data.ObjectService
-     * @param serviceMethod
-     * @param params
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobStep createJobStep(String serviceName, String serviceMethod, Object[] params)
-            throws BatchProcesingException {
-
-        try {
-            BatchJob newBatchJob = new BatchJob();
-            updateService.getEm().persist(newBatchJob);
-
-            BatchJobStep newBatchJobStep = new BatchJobStep();
-            newBatchJobStep.setBATCH_JOB(newBatchJob);
-            newBatchJobStep.setSERVICE_NAME(serviceName);
-            newBatchJobStep.setSERVICE_METHOD(serviceMethod);
-            updateService.getEm().persist(newBatchJobStep);
-
-            //Do a basic level checking of the parameters by using reflection
-            //Use the POJO class, no EJB methods
-            Class[] parameterTypes = new Class[params.length];
-            for (int i = 0; i < params.length; i++) {
-                parameterTypes[i] = params[i].getClass();
-            }
-
-            //Method method = Class.forName(serviceName).getMethod(serviceName, parameterTypes);
-            for (int i = 0; i < params.length; i++) {
-                BatchJobStepParam newParam = new BatchJobStepParam();
-                newParam.setSNO(i);
-                newParam.setBATCH_JOB_STEP(newBatchJobStep);
-                updateService.getEm().persist(newParam);
-
-                newBatchJobStep.addPARAMS(newParam);
-
-                Object obj = params[i];
-                Class clazz = obj.getClass();
-                //If parameter is serializable, serialize it and store it
-                if (Serializable.class.isAssignableFrom(clazz)) {
-                    Serializable s = (Serializable) obj;
-
-                    newParam.setSERIALIZED_OBJECT(s);
-                    continue;
-                }
-                newParam.setSTRING_VALUE(obj.toString());
-            }
-            newBatchJob.addSTEP(newBatchJobStep);
-
-            updateService.getEm().flush();//Just to test rollback
-
-            return newBatchJobStep;
-        } catch (SecurityException ex) {
-            throw new BatchProcesingException("Batch processing failed:", ex);
-        } catch (IOException ex) {
-            throw new BatchProcesingException("Batch processing failed:", ex);
-        }
-    }
 
     public void executeJobStep(BatchJobStep batchJobStep) throws BatchProcesingException {
         try {
@@ -184,6 +124,7 @@ public class BatchProcessingService {
             ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
             
             try {
+                //http://stackoverflow.com/questions/17276176/client-for-remote-jms-queue
                 Properties env = new Properties( );
                 env.put(InitialContext.PROVIDER_URL, "ldap://"+server.getHOSTNAME()+":"+server.getPORT());
                 
@@ -238,6 +179,7 @@ public class BatchProcessingService {
                 
     }
 
+    /*
     public static void main(String[] args) throws NoSuchMethodException, ClassNotFoundException, IOException, BatchProcesingException {
         BatchProcessingService bpService = new BatchProcessingService();
         MailService mailService = new MailService();
@@ -248,11 +190,11 @@ public class BatchProcessingService {
 
         Object[] params = {email, true};
 
-        BatchJobStep step = bpService.createJobStep(mailService.getClass().getName(), "sendEmailByAWS", params);
+        BatchJobStep step = bpService.createJobStep(mailService.getClass().getName(), "sendEmailByAWS", params, this);
 
         for (BatchJobStepParam param : step.getPARAMS()) {
             System.out.println("String value: " + param.getSTRING_VALUE());
             System.out.println("Serialized value: " + param.getSERIALIZED_OBJECT());
         }
-    }
+    }*/
 }

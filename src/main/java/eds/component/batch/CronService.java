@@ -6,6 +6,8 @@
 package eds.component.batch;
 
 import eds.component.data.IncompleteDataException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -32,6 +34,19 @@ public class CronService {
             batchService.processBatchJobQueue(nowTS);
         } catch (IncompleteDataException ex) {
             Logger.getLogger(CronService.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace(System.out);
+        }
+    }
+    
+    @Schedule(second="*/10", minute = "*", hour = "*")
+    public void init(){
+        try {
+            InetAddress localhost = InetAddress.getLocalHost();
+            System.out.println("This is hostname: "+localhost.getHostName());
+            System.out.println("This is host address: "+localhost.getHostAddress());
+            System.out.println("This is canonical hostname: "+localhost.getCanonicalHostName());
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             ex.printStackTrace(System.out);
         }
     }

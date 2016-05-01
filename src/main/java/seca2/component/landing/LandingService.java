@@ -12,6 +12,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import eds.component.data.MissingOwnerException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
 import eds.entity.user.User_;
@@ -35,6 +36,9 @@ import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.Assign_Server_User_;
 import seca2.entity.landing.ServerInstance;
 import seca2.entity.landing.ServerInstance_;
+import seca2.entity.landing.ServerResource;
+import seca2.entity.landing.ServerResourceType;
+import seca2.entity.landing.ServerResource_;
 
 /**
  *
@@ -42,6 +46,8 @@ import seca2.entity.landing.ServerInstance_;
  */
 @Stateless
 public class LandingService {
+    
+    public final String SERVER_NAME = "SERVER_NAME";
 
     @EJB
     private GenericObjectService objectService;
@@ -73,6 +79,22 @@ public class LandingService {
             throw new EJBException(pex);
         }
     }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<ServerInstance> getServerInstances(ServerNodeType type){
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<ServerInstance> query = builder.createQuery(ServerInstance.class);
+        Root<ServerInstance> fromServer = query.from(ServerInstance.class);
+        
+        query.select(fromServer);
+        query.where(builder.equal(fromServer.get(ServerInstance_.SERVER_NODE_TYPE), type.value));
+        
+        List<ServerInstance> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
 
     /**
      * 
@@ -337,5 +359,68 @@ public class LandingService {
     
     public void getThisServerNodeType() {
         
+    }
+    
+    
+    /**
+     * Assuming that every server can only have 1 resource.
+     * 
+     * @param resource
+     * @return
+     * @throws MissingOwnerException 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ServerResource updateOrAddResourceForServer(ServerResource resource) throws MissingOwnerException{
+        if(resource.getOWNER() == null)
+            throw new MissingOwnerException(resource);
+        
+        //List<ServerResource> existingResources = this.getServerResource(
+        //        resource.getOWNER().getOBJECTID(), ServerResourceType.valueOf(resource.getRESOURCE_TYPE()));
+        ServerResource existing = objectService.getEnterpriseDataForObject(resource.getOWNER().getOBJECTID(), resource.getSTART_DATE(), resource.getEND_DATE(), resource.getSNO(), ServerResource.class);
+        if(existing != null) {
+            return updateService.getEm().merge(resource);
+        }
+        
+        updateService.getEm().persist(resource);
+        return resource;
+    }
+    
+    public List<ServerResource> getServerResource(long serverId, ServerResourceType type){
+        CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
+        CriteriaQuery<ServerResource> query = builder.createQuery(ServerResource.class);
+        Root<ServerResource> fromServer = query.from(ServerResource.class);
+        
+        query.select(fromServer);
+        query.where(builder.and(
+                builder.equal(fromServer.get(ServerResource_.OWNER), serverId),
+                builder.equal(fromServer.get(ServerResource_.RESOURCE_TYPE), type.label)
+        ));
+        
+        List<ServerResource> results = updateService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    /**
+     * If the server does not have an existing JMS connection, return a fresh new
+     * one.
+     * @param serverId
+     * @return 
+     */
+    public ServerResource getServerJMSConnection(long serverId) {
+        List<ServerResource> results = getServerResource(serverId,ServerResourceType.JMS_CONNECTION);
+        if(results == null || results.isEmpty()){
+            ServerResource newJMSConn = new ServerResource();
+            newJMSConn.setRESOURCE_TYPE(ServerResourceType.JMS_CONNECTION);
+            
+            return newJMSConn;
+        }
+        
+        return results.get(0); //Assume there's only 1
+    }
+    
+    public String getOwnServerName(){
+        return System.getProperty(SERVER_NAME);
     }
 }

@@ -41,41 +41,50 @@
                 </div>
             </div>
         </div>-->
-        <div class="modal-dialog" style="width:100%">
+        <div class="modal-dialog" style="">
             <div class="modal-content nav-tabs-vertical" jsf:rendered="#{FormEditExistingServer.renderEditingPanel()}">
-                <div class="block-head">
-                    <div class="block-title">
-                        Edit 
-                        <span id="server_type"></span>
-                        Server 
-                        <span id="server_name"></span>
-                    </div>
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Server</h4>
                 </div>
                 <div class="tabs">
                     <ul class="nav nav-tabs">
                         <li>
-                            <a href="#" data-toggle="tab">
+                            <a href="#overview" data-toggle="tab">
                                 Overview
-                                <f:ajax event="click" render=":edit_panel"
-                                        listener="#{FormServerList.loadServer(server.OBJECTID)}">
-                                    
-                                </f:ajax>
                             </a>
                         </li>
                         <li>
-                            <a href="#" data-toggle="tab">Basic Settings</a>
+                            <a href="#basic_settings" data-toggle="tab">
+                                Basic Settings
+                            </a>
                         </li>
                         <li>
                             <a href="#" data-toggle="tab">Resources</a>
                         </li>
                     </ul>
 
-                    <div jsf:id="edit_panel" class="block-content tab-content">
-                        <div class="tab-pane active">
-                            <ui:include src="edit_panels/overview.xhtml"></ui:include>
+                    <div jsf:id="edit_panel" class="tab-content" >
+                        <div id="overview" class="tab-pane active">
+                            <div class="block-content">
+                                <ui:include src="edit_panels/overview.xhtml" 
+                                            rendered="${FormEditExistingServer.tab eq 'overview'}">
+                                </ui:include>
+                            </div>
+
+                        </div>
+                        <div id="basic_settings" class="tab-pane">
+                            <div class="block-content">
+
+                                <ui:include src="edit_panels/basic_settings.xhtml"
+                                            rendered="${FormEditExistingServer.tab eq 'basic_settings'}">
+                                </ui:include>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                
             </div>
         </div>
         <p:blockUI block="FormEditServerFull" 

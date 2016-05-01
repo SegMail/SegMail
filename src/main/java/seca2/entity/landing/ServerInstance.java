@@ -55,8 +55,6 @@ public class ServerInstance extends EnterpriseObject {
     
     private String SERVER_NODE_TYPE;
     
-    
-    
 
     public String getNAME() {
         return NAME;

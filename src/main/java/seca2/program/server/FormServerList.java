@@ -17,6 +17,8 @@ import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerResource;
+import seca2.entity.landing.ServerResourceType;
 
 /**
  *
@@ -59,7 +61,8 @@ public class FormServerList {
     public void loadServer(long serverId) {
         try {
             program.setServerEditing(landingService.getServerInstance(serverId));
-            program.setShowEditingPanel(true);
+            program.setJMSConnection(landingService.getServerJMSConnection(serverId));
+            //program.setShowEditingPanel(true);
         } catch (EJBException ex) { //Transaction did not go through
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         }
@@ -77,4 +80,6 @@ public class FormServerList {
     public void setServerEditing(ServerInstance serverEditing) {
         program.setServerEditing(serverEditing);
     }
+    
+    
 }

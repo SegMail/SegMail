@@ -18,6 +18,8 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerResource;
+import seca2.entity.landing.ServerResourceType;
 
 /**
  *
@@ -36,10 +38,17 @@ public class FormEditExistingServer {
         
     }
     
-    public void saveTemplateAndContinue(){
+    public void saveServerAndContinue(){
         try {
+            //Save server info
             landingService.saveServer(this.getServerEditing());
+            //Save server to user relationship
             landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
+            //Save JMS Connection resource
+            ServerResource jmsResource = this.getJMSConnection();
+            jmsResource.setOWNER(getServerEditing());
+            landingService.updateOrAddResourceForServer(jmsResource);
+            
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -48,8 +57,15 @@ public class FormEditExistingServer {
     
     public void saveTemplateAndClose(){
         try {
+            //Save server info
             landingService.saveServer(this.getServerEditing());
+            //Save server to user relationship
             landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
+            //Save JMS Connection resource
+            ServerResource jmsResource = this.getJMSConnection();
+            jmsResource.setOWNER(getServerEditing());
+            jmsResource.setRESOURCE_TYPE(ServerResourceType.JMS_CONNECTION);
+            landingService.updateOrAddResourceForServer(jmsResource);
             
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
             program.refresh();
@@ -125,5 +141,30 @@ public class FormEditExistingServer {
     
     public boolean renderEditingPanel(){
         return program.isShowEditingPanel();
+    }
+    
+    public String getTab() {
+        return program.getTab();
+    }
+
+    public void setTab(String tab) {
+        program.setTab(tab);
+    }
+    
+    public String getTabPath(){
+        String tab = getTab();
+        return (tab == null || tab.isEmpty()) ? "" : "edit_panels/"+tab+".xhtml";
+    }
+    
+    public void changeTab(String newTab){
+        this.setTab(newTab);
+    }
+    
+    public ServerResource getJMSConnection() {
+        return program.getJMSConnection();
+    }
+
+    public void setJMSConnection(ServerResource JMSConnection) {
+        program.setJMSConnection(JMSConnection);
     }
 }

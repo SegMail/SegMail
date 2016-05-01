@@ -15,13 +15,15 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SERVER_RESOURCE")
-public class ServerJNDIResource extends EnterpriseData<ServerInstance> {
+public class ServerResource extends EnterpriseData<ServerInstance> {
 
     private String RESOURCE_TYPE;
     
-    private String RESOURCE_KEY;
+    private String RESOURCE_NAME;
     
-    private String RESOURCE_VALUE;
+    private String JNDI_NAME;
+    
+    //List of params for additional properties
 
     public String getRESOURCE_TYPE() {
         return RESOURCE_TYPE;
@@ -30,21 +32,25 @@ public class ServerJNDIResource extends EnterpriseData<ServerInstance> {
     public void setRESOURCE_TYPE(String RESOURCE_TYPE) {
         this.RESOURCE_TYPE = RESOURCE_TYPE;
     }
-
-    public String getRESOURCE_KEY() {
-        return RESOURCE_KEY;
+    
+    public void setRESOURCE_TYPE(ServerResourceType RESOURCE_TYPE) {
+        this.RESOURCE_TYPE = RESOURCE_TYPE.label;
     }
 
-    public void setRESOURCE_KEY(String RESOURCE_KEY) {
-        this.RESOURCE_KEY = RESOURCE_KEY;
+    public String getRESOURCE_NAME() {
+        return RESOURCE_NAME;
     }
 
-    public String getRESOURCE_VALUE() {
-        return RESOURCE_VALUE;
+    public void setRESOURCE_NAME(String RESOURCE_NAME) {
+        this.RESOURCE_NAME = RESOURCE_NAME;
     }
 
-    public void setRESOURCE_VALUE(String RESOURCE_VALUE) {
-        this.RESOURCE_VALUE = RESOURCE_VALUE;
+    public String getJNDI_NAME() {
+        return JNDI_NAME;
+    }
+
+    public void setJNDI_NAME(String JNDI_NAME) {
+        this.JNDI_NAME = JNDI_NAME;
     }
     
     

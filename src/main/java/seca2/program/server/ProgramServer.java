@@ -20,6 +20,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerResource;
 
 /**
  *
@@ -46,6 +47,7 @@ public class ProgramServer extends Program {
     private ServerInstance serverEditing;
     private Assign_Server_User assignment;
     private long userIdExisting;
+    private ServerResource JMSConnection;
     
     //Edit full form Tabs
     private String tab;
@@ -174,6 +176,14 @@ public class ProgramServer extends Program {
 
     public void setShowEditingPanel(boolean showEditingPanel) {
         this.showEditingPanel = showEditingPanel;
+    }
+
+    public ServerResource getJMSConnection() {
+        return JMSConnection;
+    }
+
+    public void setJMSConnection(ServerResource JMSConnection) {
+        this.JMSConnection = JMSConnection;
     }
 
     @Override

@@ -27,18 +27,42 @@
                         <div class="block-head">
                             <h2>Batch jobs</h2>
                             <ul class="buttons">
-                                <li><span class="fa fa-plus"></span></li>
+                                <li>
+                                    <a href="#" title="Stop all batch jobs">
+                                        <span class="fa fa-stop-circle"></span>
+                                    </a>
+                                    
+                                </li>
+                                <li>
+                                    <a href="#" class="block-refresh" title="Refresh">
+                                        <span class="fa fa-refresh"></span>
+                                    </a>
+                                    
+                                </li>
+                                <li>
+                                    <a href="#add_new_batch_job_panel" data-toggle="modal"
+                                       title="Add new batch job"
+                                       >
+                                        <span class="fa fa-plus"></span>
+                                    </a>
+                                </li>
+                                
                             </ul>
                         </div>
+                        <ui:include src="all_batch_job_panel.xhtml" ></ui:include>
                     </div>
                 </div>
+            </div>
+            
+            <div class="modal fade" id="add_new_batch_job_panel">
+                <ui:include src="add_new_batch_job_panel.xhtml"></ui:include>
             </div>
             
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
-            <script type="text/javascript" src="#{request.contextPath}/programs/servers/js/template_popup.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batchjob_popup.js" />
 
         </ui:define>
 
