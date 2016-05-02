@@ -5,15 +5,14 @@
  */
 package seca2.bootstrap;
 
+import eds.entity.audit.ActiveUser;
 import eds.entity.layout.Layout;
-import eds.entity.navigation.MenuItem;
 import eds.entity.program.Program;
 import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import seca2.bootstrap.module.Navigation.MenuItemContainer;
@@ -24,7 +23,7 @@ import seca2.bootstrap.module.Navigation.MenuItemContainer;
  */
 @Named("UserSessionContainer")
 @SessionScoped
-public class UserSessionContainer implements Serializable {
+public class UserSessionContainer implements Serializable, ActiveUser {
     
     private User user;
     private UserType userType;
@@ -90,9 +89,10 @@ public class UserSessionContainer implements Serializable {
         this.sessionId = sessionId;
     }
 
+    @Override
     public String getUsername() {
         
-        return (user != null) ? user.getOBJECT_NAME() : "";
+        return (user != null) ? user.getOBJECT_NAME(): "";
     }
     
     public String getUsertypeName() {

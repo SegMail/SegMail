@@ -12,7 +12,7 @@
                     >
 
         <ui:define name="main-program-panel">
-            
+
             <div class="row"><!--Page message-->
                 <div class="col-md-12">
                     <form jsf:id="ProgramBatch">
@@ -20,24 +20,54 @@
                     </form>
                 </div>
             </div>
-            
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="block nb">
+                        <div class="block-head">
+                            <h2>Filtering Criteria</h2>
+                        </div>
+                        <div class="block-content controls">
+                            <div class="row-form">
+                                <div class="col-md-4">
+                                    <strong>Date range:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    <div id="reportrange2" class="dtrange">
+                                    <span></span>
+                                    <b class="caret"></b>
+                                </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-12">
-                    <div class="block nb">
+                    <div class="block nb" jsf:id="all_batch_job_block">
                         <div class="block-head">
                             <h2>Batch jobs</h2>
                             <ul class="buttons">
+                                <form jsf:id="all_batch_job_controls">
                                 <li>
                                     <a href="#" title="Stop all batch jobs">
                                         <span class="fa fa-stop-circle"></span>
                                     </a>
-                                    
+
                                 </li>
                                 <li>
-                                    <a href="#" class="block-refresh" title="Refresh">
+                                    <a href="#" class="" title="Refresh" 
+                                       >
+                                        <f:ajax event="click" render=":all_batch_job_block"
+                                                listener="#{FormJobList.loadBatchJobs()}"
+                                                onevent="refresh"
+                                                    />
                                         <span class="fa fa-refresh"></span>
                                     </a>
-                                    
+
                                 </li>
                                 <li>
                                     <a href="#add_new_batch_job_panel" data-toggle="modal"
@@ -46,24 +76,31 @@
                                         <span class="fa fa-plus"></span>
                                     </a>
                                 </li>
-                                
+                                    </form>
+
                             </ul>
                         </div>
                         <ui:include src="all_batch_job_panel.xhtml" ></ui:include>
                     </div>
                 </div>
             </div>
-            
+
             <div class="modal fade" id="add_new_batch_job_panel">
                 <ui:include src="add_new_batch_job_panel.xhtml"></ui:include>
             </div>
-            
+
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/moment.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/daterangepicker.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery-ui-timepicker-addon.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batchjob_popup.js" />
-
+            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/daterangepicker.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/ajax_loader.js" />
+            
+                
         </ui:define>
 
     </ui:composition>

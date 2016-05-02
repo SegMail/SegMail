@@ -9,6 +9,7 @@ import eds.component.batch.BatchProcesingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.component.data.EntityNotFoundException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -17,6 +18,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.joda.time.DateTime;
 import seca2.entity.landing.ServerInstance;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -35,7 +37,7 @@ public class FormAddJob {
     private String serviceName;
     private String serviceMethod;
     private long serverId;
-    private Timestamp scheduledDateTime;
+    private Date scheduledDateTime;
     
     @PostConstruct
     public void init(){
@@ -46,7 +48,10 @@ public class FormAddJob {
     
     public void addBatchJob(){
         try {
-            schedulingService.createJobStep(serviceName, serviceMethod, null, -1, serverId);
+            DateTime dt = null;
+            if(dt != null)
+                dt = new DateTime(scheduledDateTime);
+            schedulingService.createJobStep(serviceName, serviceMethod, null, -1, serverId,dt);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job added!", "");
             program.refresh();
         } catch (BatchProcesingException ex) {
@@ -88,12 +93,14 @@ public class FormAddJob {
         program.setServers(servers);
     }
 
-    public Timestamp getScheduledDateTime() {
+    public Date getScheduledDateTime() {
         return scheduledDateTime;
     }
 
-    public void setScheduledDateTime(Timestamp scheduledDateTime) {
+    public void setScheduledDateTime(Date scheduledDateTime) {
         this.scheduledDateTime = scheduledDateTime;
     }
+
+    
     
 }

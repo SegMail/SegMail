@@ -5,6 +5,7 @@
  */
 package eds.entity.batch;
 
+import eds.entity.transaction.EnterpriseTransaction_;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -19,7 +20,11 @@ public class BatchJob_ {
     public static volatile SingularAttribute<BatchJob,Long> BATCH_JOB_ID;
     public static volatile ListAttribute<BatchJob,BatchJobStep> STEPS;
     public static volatile SingularAttribute<BatchJob,String> STATUS;
+    public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> DATETIME_CREATED;
+    public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> DATETIME_CHANGED;
     public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> SCHEDULED_TIME;
     public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> START_TIME;
     public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> END_TIME;
+    public static volatile SingularAttribute<BatchJob,String> CREATED_BY;
+    public static volatile SingularAttribute<BatchJob,String> CHANGED_BY;
 }

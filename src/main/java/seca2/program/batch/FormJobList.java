@@ -31,7 +31,7 @@ public class FormJobList {
     @PostConstruct
     public void init(){
         if(!FacesContext.getCurrentInstance().isPostback()) {
-            
+            loadBatchJobs();
         }
     }
     
@@ -52,6 +52,6 @@ public class FormJobList {
     }
     
     public void loadBatchJobs(){
-        
+        program.loadBatchJobs();
     }
 }

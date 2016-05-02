@@ -6,12 +6,14 @@
 package eds.entity.batch;
 
 import eds.component.batch.BatchProcesingException;
+import eds.entity.transaction.EnterpriseTransaction;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -30,6 +32,9 @@ import seca2.entity.landing.ServerInstance;
 @Entity
 @Table(name="BATCH_JOB")
 @TableGenerator(name="BATCH_JOB_SEQ",initialValue=1,allocationSize=100,table="SEQUENCE")
+@EntityListeners({
+    BatchJobListener.class
+})
 public class BatchJob implements Serializable {
     
     private long BATCH_JOB_ID;
@@ -43,9 +48,14 @@ public class BatchJob implements Serializable {
     /**
      * Over-simplification of BatchJobSchedule
      */
+    private java.sql.Timestamp DATETIME_CREATED;
+    private java.sql.Timestamp DATETIME_CHANGED;
     private java.sql.Timestamp SCHEDULED_TIME;
     private java.sql.Timestamp START_TIME;
     private java.sql.Timestamp END_TIME;
+    
+    private String CREATED_BY;
+    private String CHANGED_BY;
 
     @OneToMany(mappedBy="BATCH_JOB") //Required, if not you'll end up with another table
     /*@JoinColumn(name="BATCH_JOB",
@@ -76,10 +86,6 @@ public class BatchJob implements Serializable {
         this.STATUS = STATUS;
     }
     
-    public void setSTATUS(BATCH_JOB_STATUS STATUS) {
-        this.STATUS = STATUS.label;
-    }
-
     public Timestamp getSCHEDULED_TIME() {
         return SCHEDULED_TIME;
     }
@@ -115,7 +121,38 @@ public class BatchJob implements Serializable {
     public void setSERVER(ServerInstance SERVER) {
         this.SERVER = SERVER;
     }
-    
+
+    public Timestamp getDATETIME_CREATED() {
+        return DATETIME_CREATED;
+    }
+
+    public void setDATETIME_CREATED(Timestamp DATETIME_CREATED) {
+        this.DATETIME_CREATED = DATETIME_CREATED;
+    }
+
+    public Timestamp getDATETIME_CHANGED() {
+        return DATETIME_CHANGED;
+    }
+
+    public void setDATETIME_CHANGED(Timestamp DATETIME_CHANGED) {
+        this.DATETIME_CHANGED = DATETIME_CHANGED;
+    }
+
+    public String getCREATED_BY() {
+        return CREATED_BY;
+    }
+
+    public void setCREATED_BY(String CREATED_BY) {
+        this.CREATED_BY = CREATED_BY;
+    }
+
+    public String getCHANGED_BY() {
+        return CHANGED_BY;
+    }
+
+    public void setCHANGED_BY(String CHANGED_BY) {
+        this.CHANGED_BY = CHANGED_BY;
+    }
     
     
     public void addSTEP(BatchJobStep step) {

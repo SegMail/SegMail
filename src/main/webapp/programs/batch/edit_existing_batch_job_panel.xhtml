@@ -8,14 +8,14 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="FormAddJob">
+    <form jsf:id="FormEditJob" >
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         X
                     </button>
-                    <h4 id="popup_title" class="modal-title">Add new batch job</h4>
+                    <h4 id="popup_title" class="modal-title">Edit batch job</h4>
                 </div>
 
                 <div class="modal-body">
@@ -31,7 +31,8 @@
                             Name of the business service module
                         </span>
                         <input type="text" class="form-control" id="serviceName"
-                               jsf:value="#{FormAddJob.serviceName}"
+                               readonly=""
+                               jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_NAME}"
                                />
                     </div>
                     <div class="form-group">
@@ -43,7 +44,7 @@
                         </span>
 
                         <input type="text" class="form-control" id="hostname"
-                               jsf:value="#{FormAddJob.serviceMethod}"
+                               jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_METHOD}"
                                />
                     </div>
                     <div class="form-group">
@@ -54,7 +55,7 @@
                             Date and time that you want to start the batch job
                         </span>
                         <input class="form-control datetimepicker" 
-                               jsf:value="#{FormAddJob.scheduledDateTime}" />
+                               jsf:value="#{FormEditJob.editingBatchJob.SCHEDULED_TIME}" />
                     </div>
                     <div class="form-group">
                         <label>
@@ -66,8 +67,8 @@
                         </span>
 
                         <h:selectOneMenu styleClass="form-control" style=""
-                                         value="#{FormAddJob.serverId}">
-                            <f:selectItems value="#{FormAddJob.servers}" var="server" 
+                                         value="#{FormEditJob.editingBatchJob.SERVER.OBJECTID}">
+                            <f:selectItems value="#{FormEditJob.servers}" var="server" 
                                            itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
                                            itemValue="#{server.OBJECTID}">
                             </f:selectItems>
@@ -82,7 +83,7 @@
                                      value="Add Batch Job" 
                                      update="@form"
                                      process="@form"
-                                     actionListener="#{FormAddJob.addBatchJob()}"
+                                     actionListener="#{FormEditJob.updateBatchJob()}"
                                      >
 
                     </p:commandButton>

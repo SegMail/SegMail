@@ -5,13 +5,10 @@
  */
 package eds.component.batch;
 
-import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_STATUS;
 import eds.entity.batch.BatchJob;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;

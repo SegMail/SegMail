@@ -38,7 +38,7 @@ public class CronService {
         }
     }
     
-    @Schedule(second="*/10", minute = "*", hour = "*")
+    //@Schedule(second="*/10", minute = "*", hour = "*")
     public void init(){
         try {
             InetAddress localhost = InetAddress.getLocalHost();

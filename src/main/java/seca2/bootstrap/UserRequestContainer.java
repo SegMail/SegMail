@@ -6,15 +6,10 @@
 package seca2.bootstrap;
 
 import seca2.bootstrap.module.Path.LogicalPathParser;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
-import javax.naming.InitialContext;
-import javax.servlet.ServletContext;
 
 /**
  *

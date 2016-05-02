@@ -9,11 +9,15 @@ import eds.component.batch.BatchProcessingService;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BATCH_JOB_STATUS;
 import eds.entity.batch.BatchJob;
+import eds.entity.batch.BatchJobStep;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
+import org.joda.time.DateTime;
 import seca2.component.landing.LandingService;
 import static seca2.component.landing.ServerNodeType.ERP;
 import seca2.entity.landing.ServerInstance;
@@ -28,8 +32,12 @@ public class ProgramBatch extends Program {
     private List<BatchJob> batchJobs;
     private List<ServerInstance> servers;
     private Map<String,String> batchJobStatusMapping;
+    
+    private BatchJob editingBatchJob;
+    private BatchJobStep firstAndOnlyStep;
 
     @EJB LandingService landingService;
+    @EJB BatchSchedulingService batchScheduleService;
     @EJB BatchProcessingService batchProcessingService;
 
     @Override
@@ -50,6 +58,7 @@ public class ProgramBatch extends Program {
         batchJobStatusMapping.put(BATCH_JOB_STATUS.IN_PROCESS.label, "info");
         batchJobStatusMapping.put(BATCH_JOB_STATUS.COMPLETED.label, "success");
         batchJobStatusMapping.put(BATCH_JOB_STATUS.FAILED.label, "danger");
+        
     }
     
     public List<BatchJob> getBatchJobs() {
@@ -81,5 +90,29 @@ public class ProgramBatch extends Program {
     }
     
     public void loadBatchJobs(){
+        DateTime lowDateTime = new DateTime(1800,1,1,0,0,0,0);
+        Timestamp lowTS = new Timestamp(lowDateTime.getMillis());
+        DateTime highDateTime = new DateTime(9999,12,31,0,0,0,0);
+        Timestamp highTS = new Timestamp(highDateTime.getMillis());
+        
+        setBatchJobs(batchScheduleService.getBatchJobs(lowTS, highTS, null));
     }
+
+    public BatchJob getEditingBatchJob() {
+        return editingBatchJob;
+    }
+
+    public void setEditingBatchJob(BatchJob editingBatchJob) {
+        this.editingBatchJob = editingBatchJob;
+    }
+
+    public BatchJobStep getFirstAndOnlyStep() {
+        return firstAndOnlyStep;
+    }
+
+    public void setFirstAndOnlyStep(BatchJobStep firstAndOnlyStep) {
+        this.firstAndOnlyStep = firstAndOnlyStep;
+    }
+    
+    
 }
