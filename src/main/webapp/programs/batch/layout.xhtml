@@ -28,18 +28,22 @@
                             <h2>Filtering Criteria</h2>
                         </div>
                         <div class="block-content controls">
-                            <div class="row-form">
-                                <div class="col-md-4">
-                                    <strong>Date range:</strong>
+                            <form jsf:id="batch_job_date_range_panel">
+                                <div class="row-form">
+                                    <div class="col-md-4">
+                                        <strong>Date range:</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div id="reportrange2" class="dtrange">
+                                            <span>
+                                                
+                                            </span>
+                                            <b class="caret"></b>
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div class="col-md-8">
-                                    <div id="reportrange2" class="dtrange">
-                                    <span></span>
-                                    <b class="caret"></b>
-                                </div>
-                                </div>
-                                
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -52,31 +56,31 @@
                             <h2>Batch jobs</h2>
                             <ul class="buttons">
                                 <form jsf:id="all_batch_job_controls">
-                                <li>
-                                    <a href="#" title="Stop all batch jobs">
-                                        <span class="fa fa-stop-circle"></span>
-                                    </a>
+                                    <li>
+                                        <a href="#" title="Stop all batch jobs">
+                                            <span class="fa fa-stop-circle"></span>
+                                        </a>
 
-                                </li>
-                                <li>
-                                    <a href="#" class="" title="Refresh" 
-                                       >
-                                        <f:ajax event="click" render=":all_batch_job_block"
-                                                listener="#{FormJobList.loadBatchJobs()}"
-                                                onevent="refresh"
+                                    </li>
+                                    <li>
+                                        <a jsf:id="refresh_batch_jobs" href="#" class="" title="Refresh" 
+                                           >
+                                            <f:ajax event="click" render=":all_batch_job_block"
+                                                    listener="#{FormJobList.loadBatchJobs()}"
+                                                    onevent="refresh"
                                                     />
-                                        <span class="fa fa-refresh"></span>
-                                    </a>
+                                            <span class="fa fa-refresh"></span>
+                                        </a>
 
-                                </li>
-                                <li>
-                                    <a href="#add_new_batch_job_panel" data-toggle="modal"
-                                       title="Add new batch job"
-                                       >
-                                        <span class="fa fa-plus"></span>
-                                    </a>
-                                </li>
-                                    </form>
+                                    </li>
+                                    <li>
+                                        <a href="#add_new_batch_job_panel" data-toggle="modal"
+                                           title="Add new batch job"
+                                           >
+                                            <span class="fa fa-plus"></span>
+                                        </a>
+                                    </li>
+                                </form>
 
                             </ul>
                         </div>
@@ -97,10 +101,10 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/daterangepicker.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery-ui-timepicker-addon.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batchjob_popup.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/daterangepicker.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/ajax_loader.js" />
-            
-                
+            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batch_job_date_range.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/refresh_batch_job_list.js" />
+
+
         </ui:define>
 
     </ui:composition>
