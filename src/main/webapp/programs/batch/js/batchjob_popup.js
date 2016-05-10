@@ -49,7 +49,7 @@ var popup = new popup();
  * @param {type} data
  * @returns {undefined}
  */
-function edit(data){
+function refresh(data){
     var inputElement = data.source; // The HTML DOM input element.
     var ajaxStatus = data.status; // Can be "begin", "success" and "complete"
     var name = data.source.name.split("_");
@@ -64,14 +64,8 @@ function edit(data){
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            //Set the title and type of template
-            popup.init('server_name', name[0], 'server_type', name[1]);
-            //Re-setup the title and type
-            popup.popup(); 
+            $('.datetimepicker').datetimepicker();
             break;
     }
 };
 
-//$(document).ready(function () {
-//    popup.clear();
-//});

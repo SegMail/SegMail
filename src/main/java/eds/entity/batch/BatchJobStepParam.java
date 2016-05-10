@@ -56,7 +56,7 @@ public class BatchJobStepParam implements Serializable {
                 CascadeType.MERGE,
                 CascadeType.REFRESH
             })
-    @JoinColumns({
+    /*@JoinColumns({
         @JoinColumn(
                 name="BATCH_JOB",
                 referencedColumnName="BATCH_JOB"
@@ -65,7 +65,7 @@ public class BatchJobStepParam implements Serializable {
                 name="BATCH_JOB_STEP_NO",
                 referencedColumnName="STEP_NO"
         )
-    })
+    })*/
     public BatchJobStep getBATCH_JOB_STEP() {
         return BATCH_JOB_STEP;
     }

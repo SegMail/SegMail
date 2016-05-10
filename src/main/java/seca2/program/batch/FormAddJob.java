@@ -5,11 +5,10 @@
  */
 package seca2.program.batch;
 
-import eds.component.batch.BatchProcesingException;
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.component.data.EntityNotFoundException;
-import java.sql.Timestamp;
-import java.util.Date;
+import eds.component.data.IncompleteDataException;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -18,7 +17,6 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.joda.time.DateTime;
 import seca2.entity.landing.ServerInstance;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -34,10 +32,11 @@ public class FormAddJob {
     @EJB BatchSchedulingService schedulingService;
     
     //Form data
+    private String batchJobName;
     private String serviceName;
     private String serviceMethod;
     private long serverId;
-    private Date scheduledDateTime;
+    private String cronExpression;
     
     @PostConstruct
     public void init(){
@@ -48,15 +47,16 @@ public class FormAddJob {
     
     public void addBatchJob(){
         try {
-            DateTime dt = null;
-            if(dt != null)
-                dt = new DateTime(scheduledDateTime);
-            schedulingService.createJobStep(serviceName, serviceMethod, null, -1, serverId,dt);
+            schedulingService.createSingleStepJob(batchJobName, serviceName, serviceMethod, null, serverId, cronExpression);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job added!", "");
             program.refresh();
-        } catch (BatchProcesingException ex) {
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (BatchProcessingException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
@@ -93,12 +93,20 @@ public class FormAddJob {
         program.setServers(servers);
     }
 
-    public Date getScheduledDateTime() {
-        return scheduledDateTime;
+    public String getCronExpression() {
+        return cronExpression;
     }
 
-    public void setScheduledDateTime(Date scheduledDateTime) {
-        this.scheduledDateTime = scheduledDateTime;
+    public void setCronExpression(String cronExpression) {
+        this.cronExpression = cronExpression;
+    }
+
+    public String getBatchJobName() {
+        return batchJobName;
+    }
+
+    public void setBatchJobName(String batchJobName) {
+        this.batchJobName = batchJobName;
     }
 
     

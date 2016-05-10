@@ -12,17 +12,17 @@ import javax.ejb.ApplicationException;
  * @author LeeKiatHaw
  */
 @ApplicationException(rollback = true)
-public class BatchProcesingException extends Exception {
+public class BatchJobRunValidationException extends Exception {
 
-    public BatchProcesingException() {
+    public BatchJobRunValidationException() {
     }
 
-    public BatchProcesingException(String message) {
+    public BatchJobRunValidationException(String message) {
         super(message);
     }
 
-    public BatchProcesingException(String message, Throwable cause) {
-        super(message, cause);
+    public BatchJobRunValidationException(Throwable cause) {
+        super(cause);
     }
     
 }

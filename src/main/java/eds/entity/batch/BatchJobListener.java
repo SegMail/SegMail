@@ -5,8 +5,6 @@
  */
 package eds.entity.batch;
 
-import eds.component.encryption.EncryptionService;
-import eds.component.encryption.EncryptionType;
 import eds.entity.audit.ActiveUser;
 import javax.inject.Inject;
 import javax.persistence.PostPersist;
@@ -27,6 +25,7 @@ public class BatchJobListener {
     public void PrePersist(BatchJob job) {
         this.recordCreated(job);
         this.recordDatetimeChanged(job);
+        //this.labelStepNo(job);
     }
     
     @PostPersist
@@ -38,6 +37,7 @@ public class BatchJobListener {
     public void PreUpdate(BatchJob job) {
         this.recordCreated(job);
         this.recordDatetimeChanged(job);
+        //this.labelStepNo(job);
     }
     
     @PostUpdate
@@ -65,5 +65,13 @@ public class BatchJobListener {
             job.setCREATED_BY(user.getUsername());
     }
     
-    
+    /**
+     * Given a List of BatchJobSteps, label SNO 
+     * @param job 
+     */
+    public void labelStepNo(BatchJob job){
+        for(int i=0; i<job.getSTEPS().size(); i++){
+            //job.getSTEPS().get(i).setSTEP_NO(i);
+        }
+    }
 }

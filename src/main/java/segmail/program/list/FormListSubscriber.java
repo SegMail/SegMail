@@ -5,7 +5,7 @@
  */
 package segmail.program.list;
 
-import eds.component.batch.BatchProcesingException;
+import eds.component.batch.BatchProcessingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -106,7 +106,7 @@ public class FormListSubscriber {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Subscriber already exist in this list", "");
-        } catch (BatchProcesingException ex) {
+        } catch (BatchProcessingException ex) {
             ex.printStackTrace(System.out);
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Something wrong with the sending of emails", "Please contact your system admin.");
         } /*catch (Exception ex) {

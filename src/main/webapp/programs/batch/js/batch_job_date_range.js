@@ -15,39 +15,50 @@ $(document).ready(function () {
                 $(".dtrange").daterangepicker({
                     timePicker: true,
                     ranges: {
-                        'Today': [moment(), moment()],
-                        'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
-                        'Last 7 Days': [moment().subtract('days', 6), moment()],
-                        'Last 30 Days': [moment().subtract('days', 29), moment()],
-                        'This Month': [moment().startOf('month'), moment().endOf('month')],
-                        'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                        'Today': [moment().hours(0).minutes(0).seconds(0), moment().hours(23).minutes(59).seconds(59)],
+                        'Yesterday': [moment().subtract('days', 1).hours(0).minutes(0).seconds(0), moment().subtract('days', 1).hours(23).minutes(59).seconds(59)],
+                        'Last 7 Days': [moment().subtract('days', 6).hours(0).minutes(0).seconds(0), moment().hours(23).minutes(59).seconds(59)],
+                        'Last 30 Days': [moment().subtract('days', 29).hours(0).minutes(0).seconds(0), moment().hours(23).minutes(59).seconds(59)],
+                        'This Month': [moment().startOf('month').hours(0).minutes(0).seconds(0), moment().endOf('month').hours(23).minutes(59).seconds(59)],
+                        'Last Month': [moment().subtract('month', 1).startOf('month').hours(0).minutes(0).seconds(0), moment().subtract('month', 1).endOf('month').hours(23).minutes(59).seconds(59)]
                     },
                     opens: 'right',
                     startDate: moment().subtract('days', 29),
                     endDate: moment()
                 },
                 function (start, end, event) {
-                    $('#reportrange2 span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                    $('#reportrange2 span').html(start.format('D MMMM YYYY, HH:mm:ss') + ' - ' + end.format('D MMMM YYYY, HH:mm:ss'));
                     block_refresh($('#all_batch_job_block'));
+                    //$('#range').val(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
                     //$.post('/SegMail/program/batch',$('#all_batch_job_controls').serialize());
                     jsf.ajax.request(
                         $("#all_batch_job_controls"),
                         event,
                         {
+                            
                             'all_batch_job_controls' : 'all_batch_job_controls',
                             'javax.faces.source' : 'all_batch_job_controls',
                             'javax.faces.partial.event' : 'click',
-                            'javax.faces.partial.execute' : 'all_batch_job_controls all_batch_job_controls',
+                            'javax.faces.partial.execute' : 'batch_job_date_range_panel all_batch_job_controls',
                             'javax.faces.partial.render' : 'all_batch_job_block',
                             'javax.faces.behavior.event' : 'click',
-                            'javax.faces.partial.ajax' : 'true'}
+                            'javax.faces.partial.ajax' : 'true',
+                            'all_batch_job_controls:start' : start.format('D MMMM YYYY, HH:mm:ss'),
+                            'all_batch_job_controls:end' : end.format('D MMMM YYYY, HH:mm:ss')
+                        }
                     );
                     
                     //block_refresh($('#all_batch_job_block'));//No need, because already rendered.
                 }
 
                 );
-                $("#reportrange2 span").html(moment().subtract('days', 29).format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
+                /*$("#reportrange2 span").html(
+                        moment().subtract('days', 29).hours(0).minutes(0).seconds(0)
+                            .format('D MMMM YYYY, HH:mm:ss') 
+                        + ' - ' + 
+                        moment().hours(23).minutes(59).seconds(59)
+                            .format('D MMMM YYYY, HH:mm:ss'));*/
+                $("#reportrange2 span").html('Please select a date range');
 
             }
             /* eof daterangepicker */

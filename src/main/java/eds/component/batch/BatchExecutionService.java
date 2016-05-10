@@ -6,7 +6,7 @@
 package eds.component.batch;
 
 import eds.component.UpdateObjectService;
-import eds.entity.batch.BATCH_JOB_STATUS;
+import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJob;
 import java.util.concurrent.Future;
 import javax.ejb.AsyncResult;
@@ -27,22 +27,22 @@ public class BatchExecutionService {
     
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Future<BATCH_JOB_STATUS> executeJob(BatchJob job){
+    public Future<BATCH_JOB_RUN_STATUS> executeJob(BatchJob job){
         updService.getEm().refresh(job);
-        job.setSTATUS(BATCH_JOB_STATUS.IN_PROCESS.label);
+        job.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
         updService.getEm().flush();
         
         try {
             job.execute();
-            job.setSTATUS(BATCH_JOB_STATUS.COMPLETED.label);
-        } catch (BatchProcesingException ex) {
+            job.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
+        } catch (BatchProcessingException ex) {
             //Write job log
-            job.setSTATUS(BATCH_JOB_STATUS.FAILED.label);
+            job.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
             
         } finally {
             updService.getEm().flush();
         }
         
-        return new AsyncResult<BATCH_JOB_STATUS>(BATCH_JOB_STATUS.valueOf(job.getSTATUS()));
+        return new AsyncResult<BATCH_JOB_RUN_STATUS>(BATCH_JOB_RUN_STATUS.valueOf(job.getSTATUS()));
     }
 }

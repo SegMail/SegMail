@@ -7,17 +7,18 @@ package seca2.program.batch;
 
 import eds.component.batch.BatchProcessingService;
 import eds.component.batch.BatchSchedulingService;
-import eds.entity.batch.BATCH_JOB_STATUS;
+import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJob;
+import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
-import javax.faces.context.FacesContext;
-import javax.inject.Named;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import seca2.component.landing.LandingService;
 import static seca2.component.landing.ServerNodeType.ERP;
 import seca2.entity.landing.ServerInstance;
@@ -29,12 +30,18 @@ import seca2.program.Program;
  */
 public class ProgramBatch extends Program {
     
-    private List<BatchJob> batchJobs;
+    private List<BatchJobRun> batchJobRuns;
     private List<ServerInstance> servers;
     private Map<String,String> batchJobStatusMapping;
+    private String startString;
+    private String endString;
     
-    private BatchJob editingBatchJob;
-    private BatchJobStep firstAndOnlyStep;
+    //private BatchJob editingBatchJob;
+    private boolean editable;
+    private BatchJobRun editingBatchJobRun;
+    private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
+    private String scheduleDateTimeString;
+    private final String SCHEDULE_DATE_STRING_FORMAT = "dd/MM/YYYY HH:mm";
 
     @EJB LandingService landingService;
     @EJB BatchSchedulingService batchScheduleService;
@@ -53,20 +60,20 @@ public class ProgramBatch extends Program {
     @Override
     public void initProgram() {
         batchJobStatusMapping = new HashMap<String,String>();
-        batchJobStatusMapping.put(BATCH_JOB_STATUS.WAITING.label, "default");
-        batchJobStatusMapping.put(BATCH_JOB_STATUS.SCHEDULED.label, "primary");
-        batchJobStatusMapping.put(BATCH_JOB_STATUS.IN_PROCESS.label, "info");
-        batchJobStatusMapping.put(BATCH_JOB_STATUS.COMPLETED.label, "success");
-        batchJobStatusMapping.put(BATCH_JOB_STATUS.FAILED.label, "danger");
+        batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.WAITING.label, "default");
+        batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.SCHEDULED.label, "primary");
+        batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.IN_PROCESS.label, "info");
+        batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.COMPLETED.label, "success");
+        batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.FAILED.label, "danger");
         
     }
-    
-    public List<BatchJob> getBatchJobs() {
-        return batchJobs;
+
+    public List<BatchJobRun> getBatchJobRuns() {
+        return batchJobRuns;
     }
 
-    public void setBatchJobs(List<BatchJob> batchJobs) {
-        this.batchJobs = batchJobs;
+    public void setBatchJobRuns(List<BatchJobRun> batchJobRuns) {
+        this.batchJobRuns = batchJobRuns;
     }
 
     public Map<String, String> getBatchJobStatusMapping() {
@@ -90,20 +97,43 @@ public class ProgramBatch extends Program {
     }
     
     public void loadBatchJobs(){
-        DateTime lowDateTime = new DateTime(1800,1,1,0,0,0,0);
+        
+        if(startString == null || startString.isEmpty() 
+                || endString == null || endString.isEmpty())
+            return;
+        
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM YYYY, HH:mm:ss");
+        
+        DateTime lowDateTime = formatter.parseDateTime(startString);
         Timestamp lowTS = new Timestamp(lowDateTime.getMillis());
-        DateTime highDateTime = new DateTime(9999,12,31,0,0,0,0);
+        DateTime highDateTime = formatter.parseDateTime(endString);
         Timestamp highTS = new Timestamp(highDateTime.getMillis());
         
-        setBatchJobs(batchScheduleService.getBatchJobs(lowTS, highTS, null));
+        this.setBatchJobRuns(batchScheduleService.getBatchRuns(lowTS, highTS, null));
     }
 
-    public BatchJob getEditingBatchJob() {
-        return editingBatchJob;
+    public BatchJobRun getEditingBatchJobRun() {
+        return editingBatchJobRun;
     }
 
-    public void setEditingBatchJob(BatchJob editingBatchJob) {
-        this.editingBatchJob = editingBatchJob;
+    public void setEditingBatchJobRun(BatchJobRun editingBatchJobRun) {
+        this.editingBatchJobRun = editingBatchJobRun;
+    }
+
+    public String getStartString() {
+        return startString;
+    }
+
+    public void setStartString(String startString) {
+        this.startString = startString;
+    }
+
+    public String getEndString() {
+        return endString;
+    }
+
+    public void setEndString(String endString) {
+        this.endString = endString;
     }
 
     public BatchJobStep getFirstAndOnlyStep() {
@@ -113,6 +143,42 @@ public class ProgramBatch extends Program {
     public void setFirstAndOnlyStep(BatchJobStep firstAndOnlyStep) {
         this.firstAndOnlyStep = firstAndOnlyStep;
     }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+    }
     
     
+    
+    public String timestampToString(Timestamp ts) {
+        if(ts == null)
+            //ts = new Timestamp((new DateTime()).getMillis()); //Set today
+            return "";
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(SCHEDULE_DATE_STRING_FORMAT);
+        String dateTimeString = formatter.print(ts.getTime());
+        return dateTimeString;
+    }
+
+    public Timestamp stringToTimestamp(String dateTimeString) {
+        if(dateTimeString == null || dateTimeString.isEmpty())
+            return null;
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(SCHEDULE_DATE_STRING_FORMAT);
+        DateTime dt = formatter.parseDateTime(dateTimeString);
+        Timestamp scheduledTS = new Timestamp(dt.getMillis());
+        return scheduledTS;
+    }
+
+    public void updateEditable() {
+        switch(BATCH_JOB_RUN_STATUS.valueOf(getEditingBatchJobRun().getSTATUS())){
+            case WAITING    :   setEditable(true); break;
+            case SCHEDULED  :   setEditable(true); break;
+            case IN_PROCESS :   setEditable(false); break;
+            case COMPLETED  :   setEditable(false); break;
+            case FAILED     :   setEditable(false); break;
+        }
+    }
 }

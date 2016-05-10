@@ -5,12 +5,12 @@
  */
 package eds.entity.batch;
 
-import eds.component.batch.BatchProcesingException;
-import eds.entity.transaction.EnterpriseTransaction;
+import eds.component.batch.BatchProcessingException;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -21,6 +21,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import seca2.entity.landing.ServerInstance;
@@ -31,7 +32,7 @@ import seca2.entity.landing.ServerInstance;
  */
 @Entity
 @Table(name="BATCH_JOB")
-@TableGenerator(name="BATCH_JOB_SEQ",initialValue=1,allocationSize=100,table="SEQUENCE")
+@TableGenerator(name="BATCH_JOB_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
 @EntityListeners({
     BatchJobListener.class
 })
@@ -39,28 +40,46 @@ public class BatchJob implements Serializable {
     
     private long BATCH_JOB_ID;
     
+    private String BATCH_JOB_NAME;
+    
+    /**
+     * The steps within a batch job. Each step is an EJB service method with a 
+     * set of parameters.
+     */
     private List<BatchJobStep> STEPS = new ArrayList<>();
+    
+    /**
+     * The triggers that will fire the next run. A batch job can have many triggers
+     * and each one can fire off their individual runs, which should be independent 
+     * of each other.
+     */
+    private List<BatchJobTrigger> TRIGGERS = new ArrayList<>();
+    
+    /**
+     * The instantiated runs of the batch job. Each run should be independent of 
+     * each other regardless of schedule and execution content. 
+     */
+    //private List<BatchJobRun> RUNS = new ArrayList<>();
     
     private String STATUS;
     
     private ServerInstance SERVER;
     
     /**
-     * Over-simplification of BatchJobSchedule
+     * Over-simplification of BatchJobTrigger
      */
     private java.sql.Timestamp DATETIME_CREATED;
     private java.sql.Timestamp DATETIME_CHANGED;
-    private java.sql.Timestamp SCHEDULED_TIME;
-    private java.sql.Timestamp START_TIME;
-    private java.sql.Timestamp END_TIME;
+    //private java.sql.Timestamp SCHEDULED_TIME;
+    //private java.sql.Timestamp START_TIME;
+    //private java.sql.Timestamp END_TIME;
     
     private String CREATED_BY;
     private String CHANGED_BY;
+    
 
     @OneToMany(mappedBy="BATCH_JOB") //Required, if not you'll end up with another table
-    /*@JoinColumn(name="BATCH_JOB",
-            referencedColumnName="BATCH_JOB_ID",
-            foreignKey=@ForeignKey(name="BATCH_JOB"))*/
+    @OrderColumn
     public List<BatchJobStep> getSTEPS() {
         return STEPS;
     }
@@ -82,11 +101,16 @@ public class BatchJob implements Serializable {
         return STATUS;
     }
 
+    /**
+     * Set local scope to allow BatchJobLifecycleManager to modify only.
+     * 
+     * @param STATUS 
+     */
     public void setSTATUS(String STATUS) {
         this.STATUS = STATUS;
     }
     
-    public Timestamp getSCHEDULED_TIME() {
+    /*public Timestamp getSCHEDULED_TIME() {
         return SCHEDULED_TIME;
     }
 
@@ -108,7 +132,7 @@ public class BatchJob implements Serializable {
 
     public void setEND_TIME(Timestamp END_TIME) {
         this.END_TIME = END_TIME;
-    }
+    }*/
 
     @ManyToOne
     @JoinColumn(name="SERVER",
@@ -153,13 +177,42 @@ public class BatchJob implements Serializable {
     public void setCHANGED_BY(String CHANGED_BY) {
         this.CHANGED_BY = CHANGED_BY;
     }
+
+    @OneToMany(mappedBy="BATCH_JOB")
+    @OrderColumn
+    public List<BatchJobTrigger> getTRIGGERS() {
+        return TRIGGERS;
+    }
+
+    public void setTRIGGERS(List<BatchJobTrigger> TRIGGERS) {
+        this.TRIGGERS = TRIGGERS;
+    }
+
+    public String getBATCH_JOB_NAME() {
+        return BATCH_JOB_NAME;
+    }
+
+    public void setBATCH_JOB_NAME(String BATCH_JOB_NAME) {
+        this.BATCH_JOB_NAME = BATCH_JOB_NAME;
+    }
     
-    
+    /**
+     * There's no remove yet because we want to keep things simple - each BatchJob
+     * only has 1 BatchJobStep at the moment.
+     * 
+     * @param step 
+     */
     public void addSTEP(BatchJobStep step) {
+        if(!STEPS.isEmpty())
+            STEPS.clear(); //Just clear everything. Keep things simple.
         STEPS.add(step);
     }
     
-    public void execute() throws BatchProcesingException{
+    /**
+     * 
+     * @throws BatchProcessingException 
+     */
+    public void execute() throws BatchProcessingException{
         for (BatchJobStep step : getSTEPS()){
             step.execute();
         }

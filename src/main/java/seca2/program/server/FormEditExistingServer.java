@@ -20,6 +20,7 @@ import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
 import seca2.entity.landing.ServerResource;
 import seca2.entity.landing.ServerResourceType;
+import seca2.program.FormEdit;
 
 /**
  *
@@ -27,7 +28,7 @@ import seca2.entity.landing.ServerResourceType;
  */
 @RequestScoped
 @Named("FormEditExistingServer")
-public class FormEditExistingServer {
+public class FormEditExistingServer implements FormEdit {
     
     @Inject ProgramServer program;
     
@@ -38,24 +39,8 @@ public class FormEditExistingServer {
         
     }
     
-    public void saveServerAndContinue(){
-        try {
-            //Save server info
-            landingService.saveServer(this.getServerEditing());
-            //Save server to user relationship
-            landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
-            //Save JMS Connection resource
-            ServerResource jmsResource = this.getJMSConnection();
-            jmsResource.setOWNER(getServerEditing());
-            landingService.updateOrAddResourceForServer(jmsResource);
-            
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
-    }
-    
-    public void saveTemplateAndClose(){
+    @Override
+    public void saveAndContinue(){
         try {
             //Save server info
             landingService.saveServer(this.getServerEditing());
@@ -67,24 +52,30 @@ public class FormEditExistingServer {
             jmsResource.setRESOURCE_TYPE(ServerResourceType.JMS_CONNECTION);
             landingService.updateOrAddResourceForServer(jmsResource);
             
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
-            program.refresh();
-            
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
     
+    @Override
+    public void saveAndClose(){
+        saveAndContinue();
+        closeWithoutSaving();
+    }
+    
+    @Override
     public void closeWithoutSaving(){
         program.refresh();
     }
     
-    public void deleteTemplate(){
+    @Override
+    public void delete(){
         try {
             landingService.deleteServer(this.getServerEditing().getOBJECTID());
             
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server deleted.", "");
-            program.refresh();
+            closeWithoutSaving();
             
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

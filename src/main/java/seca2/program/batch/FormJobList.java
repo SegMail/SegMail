@@ -6,13 +6,12 @@
 package seca2.program.batch;
 
 import eds.component.batch.BatchSchedulingService;
-import eds.entity.batch.BatchJob;
+import eds.entity.batch.BatchJobRun;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,12 +34,12 @@ public class FormJobList {
         }
     }
     
-    public List<BatchJob> getBatchJobs() {
-        return program.getBatchJobs();
+    public List<BatchJobRun> getBatchJobRuns() {
+        return program.getBatchJobRuns();
     }
 
-    public void setBatchJobs(List<BatchJob> batchJobs) {
-        program.setBatchJobs(batchJobs);
+    public void setBatchJobRuns(List<BatchJobRun> batchJobRuns) {
+        program.setBatchJobRuns(batchJobRuns);
     }
     
     public Map<String, String> getBatchJobStatusMapping() {
@@ -53,5 +52,21 @@ public class FormJobList {
     
     public void loadBatchJobs(){
         program.loadBatchJobs();
+    }
+    
+    public String getStartString() {
+        return program.getStartString();
+    }
+
+    public void setStartString(String startString) {
+        program.setStartString(startString);
+    }
+
+    public String getEndString() {
+        return program.getEndString();
+    }
+
+    public void setEndString(String endString) {
+        program.setEndString(endString);
     }
 }

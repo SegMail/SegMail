@@ -10,7 +10,7 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <div class="block-content list nbfc">
         <c:choose>
-            <c:when test="#{FormJobList.batchJobs eq null or FormJobList.batchJobs.size() le 0}">
+            <c:when test="#{FormJobList.batchJobRuns eq null or FormJobList.batchJobRuns.size() le 0}">
             <div style="text-align: center">
                 <h2>There are no batch jobs running at the moment.</h2>
             </div>
@@ -19,8 +19,8 @@
         </c:choose>
         
 
-        <c:forEach items="#{FormJobList.batchJobs}" var="job">
-            <form jsf:id="job_list_item_#{job.BATCH_JOB_ID}" name="#{job.BATCH_JOB_ID}">
+        <c:forEach items="#{FormJobList.batchJobRuns}" var="job">
+            <form jsf:id="job_list_item_#{job.BATCH_JOB.BATCH_JOB_ID}" name="#{job.BATCH_JOB.BATCH_JOB_ID}">
                 <div class="list-item">
                     <div class="list-item-content">
                         <div class="list-item-container list-item-container-small">
@@ -30,10 +30,16 @@
                             </span>
                             </p>
                             <p class="list-item-date">
-                                #{(job.BATCH_JOB_ID >= 100000) ? 'ID' : 'Job ID'}: 
-                                #{job.BATCH_JOB_ID}
+                                #{(job.BATCH_JOB.BATCH_JOB_ID >= 100000) ? 'ID' : 'Job ID'}: 
+                                #{job.BATCH_JOB.BATCH_JOB_ID}
                             </p>
                             
+                        </div>
+                        <div class="list-item-container" style="">   
+                            <h4>#{job.BATCH_JOB.BATCH_JOB_NAME}</h4>
+                            <p class="text-muted">
+                                
+                            </p>
                         </div>
                         <div class="list-item-container" style="width:200px;">   
                             <h4>Scheduled to run after:</h4>
@@ -43,21 +49,29 @@
                             </p>
                         </div>
                         <div class="list-item-container">
-                            <h4>#{server.SERVER_NODE_TYPE}</h4>
+                            <h4>#{job.SERVER.SERVER_NODE_TYPE}</h4>
                             <p class="text-muted">
-                                #{server.IP_ADDRESS}
+                                #{job.SERVER.NAME} [#{job.SERVER.IP_ADDRESS}]
                             </p>
                         </div>
                         <div class="list-item-right">
                             <div>
-                                <a href="#edit_existing_batch_job_panel" class="btn btn-primary list-item-trigger"
-
+                                <a href="#edit_existing_batch_job_run_panel" class="btn btn-primary"
+                                   
                                    data-toggle="modal">
-                                    <f:ajax event="click" render="FormEditExistingBatchJob"
-                                            listener="#{FormEditJob.loadBatchJob(job.BATCH_JOB_ID)}"
-
+                                    <f:ajax event="click" render="FormEditJobRun"
+                                            listener="#{FormEditJobRun.loadBatchJobRun(job.RUN_KEY)}"
+                                            onevent="refresh"
                                             />
                                     <i class="fa fa-pencil"></i>
+                                </a>
+                                <a href="#edit_existing_batch_job_panel" class="btn btn-success list-item-trigger"
+
+                                   data-toggle="modal">
+                                    <f:ajax event="click" render="FormEditJob"
+                                            listener="#{FormEditJob.loadBatchJob(job.BATCH_JOB.BATCH_JOB_ID)}"
+                                            />
+                                    <i class="fa fa-pencil-square"></i>
                                 </a>
                             </div>
                         </div>
@@ -68,6 +82,6 @@
         </c:forEach>
 
     </div>
-
+    <ui:include src="javascript.xhtml" />
 
 </html>

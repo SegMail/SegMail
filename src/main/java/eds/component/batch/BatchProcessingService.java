@@ -2,15 +2,12 @@ package eds.component.batch;
 
 import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
-import eds.component.mail.MailService;
-import eds.entity.batch.BATCH_JOB_STATUS;
+import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStepParam;
 import eds.entity.batch.BatchJob_;
-import eds.entity.mail.Email;
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -29,7 +26,6 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -61,7 +57,7 @@ public class BatchProcessingService {
     LandingService landingService;
 
 
-    public void executeJobStep(BatchJobStep batchJobStep) throws BatchProcesingException {
+    public void executeJobStep(BatchJobStep batchJobStep) throws BatchProcessingException {
         try {
             int numParams = batchJobStep.getPARAMS().size();
             Object[] params = new Object[numParams];
@@ -90,9 +86,9 @@ public class BatchProcessingService {
             }
             
         } catch (ClassNotFoundException ex) {
-            throw new BatchProcesingException("Batch processing failed:", ex);
+            throw new BatchProcessingException("Batch processing failed:", ex);
         } catch (IOException ex) {
-            throw new BatchProcesingException("Batch processing failed:", ex);
+            throw new BatchProcessingException("Batch processing failed:", ex);
         } catch (NamingException ex) {
             Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
@@ -162,12 +158,11 @@ public class BatchProcessingService {
         Root<BatchJob> fromBatchJob = query.from(BatchJob.class);
         
         query.select(fromBatchJob);
-        query.where(builder.and(
-                builder.equal(fromBatchJob.get(BatchJob_.STATUS),BATCH_JOB_STATUS.SCHEDULED.label)),
-                builder.lessThanOrEqualTo(fromBatchJob.get(BatchJob_.SCHEDULED_TIME), scheduleTime)
+        query.where(builder.and(builder.equal(fromBatchJob.get(BatchJob_.STATUS),BATCH_JOB_RUN_STATUS.SCHEDULED.label))//,
+                //builder.lessThanOrEqualTo(fromBatchJob.get(BatchJob_.SCHEDULED_TIME), scheduleTime)
         );
         
-        query.orderBy(builder.asc(fromBatchJob.get(BatchJob_.SCHEDULED_TIME)));
+        //query.orderBy(builder.asc(fromBatchJob.get(BatchJob_.SCHEDULED_TIME)));
         
         List<BatchJob> results = updateService.getEm().createQuery(query)
                 .setFirstResult(0)
@@ -180,7 +175,7 @@ public class BatchProcessingService {
     }
 
     /*
-    public static void main(String[] args) throws NoSuchMethodException, ClassNotFoundException, IOException, BatchProcesingException {
+    public static void main(String[] args) throws NoSuchMethodException, ClassNotFoundException, IOException, BatchProcessingException {
         BatchProcessingService bpService = new BatchProcessingService();
         MailService mailService = new MailService();
 

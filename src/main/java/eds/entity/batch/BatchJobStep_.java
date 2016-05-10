@@ -18,7 +18,6 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class BatchJobStep_ {
     
     public static volatile SingularAttribute<BatchJobStep,BatchJob> BATCH_JOB;
-    public static volatile SingularAttribute<BatchJobStep,Integer> STEP_NO;
     public static volatile SingularAttribute<BatchJobStep,String> SERVICE_NAME;
     public static volatile SingularAttribute<BatchJobStep,String> SERVICE_METHOD;
     public static volatile ListAttribute<BatchJobStep,BatchJobStepParam> PARAMS;

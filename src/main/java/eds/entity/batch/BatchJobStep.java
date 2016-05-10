@@ -5,7 +5,7 @@
  */
 package eds.entity.batch;
 
-import eds.component.batch.BatchProcesingException;
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchProcessingService;
 import java.io.IOException;
 import java.io.Serializable;
@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.CascadeType;
+import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Id;
@@ -36,7 +37,7 @@ public class BatchJobStep implements Serializable {
 
     private BatchJob BATCH_JOB;
 
-    private int STEP_NO;
+    //private int STEP_NO;
 
     private String SERVICE_NAME;
 
@@ -61,24 +62,24 @@ public class BatchJobStep implements Serializable {
         this.PARAMS = PARAMS;
     }
 
-    @Id
+    /*@Id
     public int getSTEP_NO() {
         return STEP_NO;
     }
 
     public void setSTEP_NO(int STEP_NO) {
         this.STEP_NO = STEP_NO;
-    }
+    }*/
 
     @Id
     @ManyToOne(cascade = {
-        CascadeType.PERSIST,
+        //CascadeType.PERSIST,
         CascadeType.MERGE,
         CascadeType.REFRESH
     })
     @JoinColumn(name = "BATCH_JOB",
             referencedColumnName = "BATCH_JOB_ID",
-            foreignKey = @ForeignKey(name = "BATCH_JOB"))
+            foreignKey = @ForeignKey(name = "BATCH_JOB",value=NO_CONSTRAINT))
     public BatchJob getBATCH_JOB() {
         return BATCH_JOB;
     }
@@ -99,7 +100,7 @@ public class BatchJobStep implements Serializable {
         this.PARAMS.add(param);
     }
 
-    public void execute() throws BatchProcesingException {
+    public void execute() throws BatchProcessingException {
         try {
             int numParams = getPARAMS().size();
             Object[] params = new Object[numParams];
@@ -127,9 +128,9 @@ public class BatchJobStep implements Serializable {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            throw new BatchProcesingException("Batch processing failed:", ex);
+            throw new BatchProcessingException("Batch processing failed:", ex);
         } catch (IOException ex) {
-            throw new BatchProcesingException("Batch processing failed:", ex);
+            throw new BatchProcessingException("Batch processing failed:", ex);
         } catch (NamingException ex) {
             Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {

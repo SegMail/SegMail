@@ -7,7 +7,7 @@ package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
-import eds.component.batch.BatchProcesingException;
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchProcessingService;
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientResourceInterceptor;
@@ -248,7 +248,7 @@ public class SubscriptionService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void subscribe(long listId, Map<String,Object> values) 
-            throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException, BatchProcesingException {
+            throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException, BatchProcessingException {
         try {
             // Find the list object
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
@@ -638,7 +638,7 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException, BatchProcesingException 
+    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException, BatchProcessingException 
             {
         try {
             //Retrieve "Send as" from the list
