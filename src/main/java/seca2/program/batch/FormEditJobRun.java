@@ -33,7 +33,7 @@ public class FormEditJobRun implements FormEdit{
     @EJB BatchSchedulingService batchScheduleService;
 
     public void loadBatchJobRun(String runKey){
-        List<BatchJobRun> results = batchScheduleService.getJobRunsByKey(runKey);
+            List<BatchJobRun> results = batchScheduleService.getJobRunsByKey(runKey);
         if(results != null && !results.isEmpty())
             program.setEditingBatchJobRun(results.get(0));
     }

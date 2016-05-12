@@ -60,7 +60,7 @@ public class BatchJobRunListener {
     
 
     private void generateTransactionKey(BatchJobRun run) {
-        if(run.getRUN_KEY() != null && !run.getRUN_BY().isEmpty())
+        if(run.getRUN_KEY() != null && !run.getRUN_KEY().isEmpty())
             return;
         long batchJobId = run.getBATCH_JOB().getBATCH_JOB_ID();
         long ts = run.getDATETIME_CREATED().getTime();

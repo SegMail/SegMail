@@ -8,7 +8,6 @@ package seca2.program.batch;
 import eds.component.batch.BatchProcessingService;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
-import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import java.sql.Timestamp;
@@ -41,7 +40,10 @@ public class ProgramBatch extends Program {
     private BatchJobRun editingBatchJobRun;
     private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
     private String scheduleDateTimeString;
-    private final String SCHEDULE_DATE_STRING_FORMAT = "dd/MM/YYYY HH:mm";
+    private final String SCHEDULE_JAVA_DATE_STRING_FORMAT = "yyyy-MM-dd";
+    private final String SCHEDULE_JAVA_TIME_STRING_FORMAT = "HH:mm";
+    private final String SCHEDULE_JS_DATE_STRING_FORMAT = "yy-mm-dd";
+    private final String SCHEDULE_JS_TIME_STRING_FORMAT = "HH:mm";
 
     @EJB LandingService landingService;
     @EJB BatchSchedulingService batchScheduleService;
@@ -151,6 +153,22 @@ public class ProgramBatch extends Program {
     public void setEditable(boolean editable) {
         this.editable = editable;
     }
+
+    public String getSCHEDULE_JAVA_DATE_STRING_FORMAT() {
+        return SCHEDULE_JAVA_DATE_STRING_FORMAT;
+    }
+
+    public String getSCHEDULE_JAVA_TIME_STRING_FORMAT() {
+        return SCHEDULE_JAVA_TIME_STRING_FORMAT;
+    }
+
+    public String getSCHEDULE_JS_DATE_STRING_FORMAT() {
+        return SCHEDULE_JS_DATE_STRING_FORMAT;
+    }
+
+    public String getSCHEDULE_JS_TIME_STRING_FORMAT() {
+        return SCHEDULE_JS_TIME_STRING_FORMAT;
+    }
     
     
     
@@ -158,7 +176,7 @@ public class ProgramBatch extends Program {
         if(ts == null)
             //ts = new Timestamp((new DateTime()).getMillis()); //Set today
             return "";
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(SCHEDULE_DATE_STRING_FORMAT);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(SCHEDULE_JAVA_DATE_STRING_FORMAT+" "+SCHEDULE_JAVA_TIME_STRING_FORMAT);
         String dateTimeString = formatter.print(ts.getTime());
         return dateTimeString;
     }
@@ -166,7 +184,7 @@ public class ProgramBatch extends Program {
     public Timestamp stringToTimestamp(String dateTimeString) {
         if(dateTimeString == null || dateTimeString.isEmpty())
             return null;
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(SCHEDULE_DATE_STRING_FORMAT);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(SCHEDULE_JAVA_DATE_STRING_FORMAT+" "+SCHEDULE_JAVA_TIME_STRING_FORMAT);
         DateTime dt = formatter.parseDateTime(dateTimeString);
         Timestamp scheduledTS = new Timestamp(dt.getMillis());
         return scheduledTS;

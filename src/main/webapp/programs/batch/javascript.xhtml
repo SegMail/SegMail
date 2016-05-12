@@ -49,10 +49,10 @@
                         });
                         var startString = '#{FormJobList.startString}';
                         var endString = '#{FormJobList.endString}';
-                        if(startString === '' || endString === '') {
+                        if (startString === '' || endString === '') {
                             $("#reportrange2 span").html('Please select a date range');
                         } else {
-                            $("#reportrange2 span").html(startString+' - '+endString);
+                            $("#reportrange2 span").html(startString + ' - ' + endString);
                         }
                     }
                     /* eof daterangepicker */
@@ -61,31 +61,34 @@
             }
             gDemos.init();
             $('.datetimepicker').datetimepicker({
-                timeFormat : '#{ProgramBatch.SCHEDULE_DATE_STRING_FORMAT}'
+                dateFormat: '#{FormJobList.SCHEDULE_JS_DATE_STRING_FORMAT}',
+                timeFormat: '#{FormJobList.SCHEDULE_JS_TIME_STRING_FORMAT}'
             });
 
         });
-        
-        function refresh(data){
-    var inputElement = data.source; // The HTML DOM input element.
-    var ajaxStatus = data.status; // Can be "begin", "success" and "complete"
-    var name = data.source.name.split("_");
-    
-    switch (ajaxStatus) {
-        case "begin": // This is called right before ajax request is been sent.
-            
-            break;
 
-        case "complete": // This is called right after ajax response is received.
-            
-            break;
+        function refresh(data) {
+            var inputElement = data.source; // The HTML DOM input element.
+            var ajaxStatus = data.status; // Can be "begin", "success" and "complete"
+            var name = data.source.name.split("_");
 
-        case "success": // This is called when ajax response is successfully processed.
-            $('.datetimepicker').datetimepicker({
-                timeFormat : '#{ProgramBatch.SCHEDULE_DATE_STRING_FORMAT}'
-            });
-            break;
-    }
-};
+            switch (ajaxStatus) {
+                case "begin": // This is called right before ajax request is been sent.
+
+                    break;
+
+                case "complete": // This is called right after ajax response is received.
+
+                    break;
+
+                case "success": // This is called when ajax response is successfully processed.
+                    $('.datetimepicker').datetimepicker({
+                        dateFormat: '#{FormJobList.SCHEDULE_JS_DATE_STRING_FORMAT}',
+                        timeFormat: '#{FormJobList.SCHEDULE_JS_TIME_STRING_FORMAT}'
+                    });
+                    break;
+            }
+        }
+        ;
     </script>
 </html>

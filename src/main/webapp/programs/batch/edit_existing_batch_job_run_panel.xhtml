@@ -68,6 +68,7 @@
                             <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
                                              value="Save &amp; continue"
                                              actionListener="#{FormEditJobRun.saveAndContinue()}"
+                                             oncomplete="refresh"
                                              update="@form"
                                              >
                             </p:commandButton>
@@ -109,6 +110,7 @@
                 </div>
                 <p:blockUI block="FormEditJobRun" 
                            trigger="
+                            
                             FormEditJobRun:save_continue_button,
                             FormEditJobRun:save_close_button,
                             FormEditJobRun:close_button,

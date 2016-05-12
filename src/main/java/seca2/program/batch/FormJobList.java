@@ -69,4 +69,20 @@ public class FormJobList {
     public void setEndString(String endString) {
         program.setEndString(endString);
     }
+    
+    public String getSCHEDULE_JAVA_DATE_STRING_FORMAT() {
+        return program.getSCHEDULE_JAVA_DATE_STRING_FORMAT();
+    }
+    
+    public String getSCHEDULE_JAVA_TIME_STRING_FORMAT() {
+        return program.getSCHEDULE_JAVA_TIME_STRING_FORMAT();
+    }
+    
+    public String getSCHEDULE_JS_DATE_STRING_FORMAT() {
+        return program.getSCHEDULE_JS_DATE_STRING_FORMAT();
+    }
+
+    public String getSCHEDULE_JS_TIME_STRING_FORMAT() {
+        return program.getSCHEDULE_JAVA_TIME_STRING_FORMAT();
+    }
 }
