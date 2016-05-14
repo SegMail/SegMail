@@ -5,11 +5,10 @@
  */
 package seca2.program.batch;
 
-import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
-import java.sql.Timestamp;
+import eds.entity.batch.BatchJobTrigger;
 import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -33,6 +32,7 @@ public class FormEditJob implements FormEdit{
      */
     public void loadBatchJob(long batchJobId){
         //To load BatchJob, we will need to also load BatchJobRun as editable is dependent on it
+        
     }
 
     @Override
@@ -47,7 +47,8 @@ public class FormEditJob implements FormEdit{
 
     @Override
     public void closeWithoutSaving() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        program.clearVariables(); //Important!
+        program.refresh();
     }
 
     @Override
@@ -77,6 +78,14 @@ public class FormEditJob implements FormEdit{
 
     public void setFirstAndOnlyStep(BatchJobStep firstAndOnlyStep) {
         program.setFirstAndOnlyStep(firstAndOnlyStep);
+    }
+    
+    public BatchJobTrigger getFirstAndOnlyTrigger() {
+        return program.getFirstAndOnlyTrigger();
+    }
+
+    public void setFirstAndOnlyTrigger(BatchJobTrigger firstAndOnlyTrigger) {
+        program.setFirstAndOnlyTrigger(firstAndOnlyTrigger);
     }
     
     public boolean isEditable() {

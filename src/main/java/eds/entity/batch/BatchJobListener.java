@@ -65,13 +65,4 @@ public class BatchJobListener {
             job.setCREATED_BY(user.getUsername());
     }
     
-    /**
-     * Given a List of BatchJobSteps, label SNO 
-     * @param job 
-     */
-    public void labelStepNo(BatchJob job){
-        for(int i=0; i<job.getSTEPS().size(); i++){
-            //job.getSTEPS().get(i).setSTEP_NO(i);
-        }
-    }
 }

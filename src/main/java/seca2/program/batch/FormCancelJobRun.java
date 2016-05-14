@@ -9,73 +9,63 @@ import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import java.sql.Timestamp;
-import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.entity.landing.ServerInstance;
+import org.joda.time.DateTime;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEdit;
 
 /**
- *
+ * FormDelete
  * @author LeeKiatHaw
  */
 @RequestScoped
-@Named("FormEditJobRun")
-public class FormEditJobRun implements FormEdit{
+@Named("FormCancelJobRun")
+public class FormCancelJobRun implements FormEdit{
     
     @Inject ProgramBatch program;
     
-    @EJB BatchSchedulingService batchScheduleService;
-
-    public void loadBatchJobRun(String runKey){
-        program.loadBatchJobRun(runKey);
-    }
+    private String key;
     
+    @EJB BatchSchedulingService scheduleService;
+
     @Override
     public void saveAndContinue() {
-        try {
-            batchScheduleService.updateBatchJobRun(program.getEditingBatchJobRun());
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void saveAndClose() {
-        saveAndContinue();
-        closeWithoutSaving();
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void closeWithoutSaving() {
-        program.clearVariables(); //Important!
         program.refresh();
     }
 
-    /**
-     * This is cancelling or stopping a batch job run.
-     * Not used anymore. Batch Job runs should not be deleted.
-     */
     @Override
     public void delete() {
         try {
-            batchScheduleService.deleteBatchJobRun(program.getEditingBatchJobRun().getRUN_KEY());
+            scheduleService.cancelBatchJobRun(getEditingBatchJobRun().getRUN_KEY());
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
+            closeWithoutSaving();
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
-    }
-    
-    public List<ServerInstance> getServers() {
-        return program.getServers();
+        
     }
 
-    public void setServers(List<ServerInstance> servers) {
-        program.setServers(servers);
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
     
     public BatchJobRun getEditingBatchJobRun() {
@@ -94,14 +84,6 @@ public class FormEditJobRun implements FormEdit{
         program.getEditingBatchJobRun().setBATCH_JOB(editingBatchJob);
     }
     
-    public boolean isEditable() {
-        return program.isEditable();
-    }
-
-    public void setEditable(boolean editable) {
-        program.setEditable(editable);
-    }
-    
     public String getScheduledTime() {
         if(getEditingBatchJobRun() == null)
             return "";
@@ -115,5 +97,19 @@ public class FormEditJobRun implements FormEdit{
         Timestamp ts = program.stringToTimestamp(timeString);
         this.getEditingBatchJobRun().setSCHEDULED_TIME(ts);
         
+    }
+    
+    public String getNextRunTime() {
+        if(getEditingBatchJob() == null)
+            return "";
+        DateTime now = DateTime.now();
+        String cronExp = program.getFirstAndOnlyTrigger().getCRON_EXPRESSION();
+        DateTime next = scheduleService.getNextExecutionTimeCron(cronExp, now, scheduleService.STANDARD_CRON_TYPE);
+        
+        return next.toString(program.getSCHEDULE_JAVA_DATE_STRING_FORMAT()+" "+program.getSCHEDULE_JAVA_TIME_STRING_FORMAT());
+    }
+    
+    public void loadBatchJobRun(String runKey){
+        program.loadBatchJobRun(runKey);
     }
 }

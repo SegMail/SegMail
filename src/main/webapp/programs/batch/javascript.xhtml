@@ -60,35 +60,14 @@
                 }
             }
             gDemos.init();
-            $('.datetimepicker').datetimepicker({
-                dateFormat: '#{FormJobList.SCHEDULE_JS_DATE_STRING_FORMAT}',
-                timeFormat: '#{FormJobList.SCHEDULE_JS_TIME_STRING_FORMAT}'
-            });
+            /*$('.datetimepicker').datetimepicker({
+                
+            });*/
 
         });
+        
+        
 
-        function refresh(data) {
-            var inputElement = data.source; // The HTML DOM input element.
-            var ajaxStatus = data.status; // Can be "begin", "success" and "complete"
-            var name = data.source.name.split("_");
-
-            switch (ajaxStatus) {
-                case "begin": // This is called right before ajax request is been sent.
-
-                    break;
-
-                case "complete": // This is called right after ajax response is received.
-
-                    break;
-
-                case "success": // This is called when ajax response is successfully processed.
-                    $('.datetimepicker').datetimepicker({
-                        dateFormat: '#{FormJobList.SCHEDULE_JS_DATE_STRING_FORMAT}',
-                        timeFormat: '#{FormJobList.SCHEDULE_JS_TIME_STRING_FORMAT}'
-                    });
-                    break;
-            }
-        }
-        ;
+        
     </script>
 </html>

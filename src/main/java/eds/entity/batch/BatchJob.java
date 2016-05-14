@@ -78,8 +78,9 @@ public class BatchJob implements Serializable {
     private String CHANGED_BY;
     
 
-    @OneToMany(mappedBy="BATCH_JOB") //Required, if not you'll end up with another table
-    @OrderColumn
+    @OneToMany
+    @JoinColumn(name="BATCH_JOB") //Required, if not you'll end up with another table
+    @OrderColumn(name="STEP_ORDER")
     public List<BatchJobStep> getSTEPS() {
         return STEPS;
     }
@@ -178,8 +179,9 @@ public class BatchJob implements Serializable {
         this.CHANGED_BY = CHANGED_BY;
     }
 
-    @OneToMany(mappedBy="BATCH_JOB")
-    @OrderColumn
+    @OneToMany
+    @JoinColumn(name="BATCH_JOB")
+    @OrderColumn(name="TRIGGER_ORDER")
     public List<BatchJobTrigger> getTRIGGERS() {
         return TRIGGERS;
     }

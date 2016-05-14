@@ -37,6 +37,7 @@ public class BatchJobRun implements Serializable {
     private java.sql.Timestamp SCHEDULED_TIME;
     private java.sql.Timestamp START_TIME;
     private java.sql.Timestamp END_TIME;
+    private java.sql.Timestamp CANCEL_TIME;
     
     private String CREATED_BY;
     private String RUN_BY;
@@ -145,6 +146,14 @@ public class BatchJobRun implements Serializable {
 
     public void setCREATED_BY(String CREATED_BY) {
         this.CREATED_BY = CREATED_BY;
+    }
+
+    public Timestamp getCANCEL_TIME() {
+        return CANCEL_TIME;
+    }
+
+    public void setCANCEL_TIME(Timestamp CANCEL_TIME) {
+        this.CANCEL_TIME = CANCEL_TIME;
     }
     
     

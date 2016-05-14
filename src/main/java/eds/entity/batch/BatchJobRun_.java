@@ -22,6 +22,7 @@ public class BatchJobRun_ {
     public static volatile SingularAttribute<BatchJobRun, java.sql.Timestamp> SCHEDULED_TIME;
     public static volatile SingularAttribute<BatchJobRun, java.sql.Timestamp> START_TIME;
     public static volatile SingularAttribute<BatchJobRun, java.sql.Timestamp> END_TIME;
+    public static volatile SingularAttribute<BatchJobRun, java.sql.Timestamp> CANCEL_TIME;
     public static volatile SingularAttribute<BatchJobRun, String> CREATED_BY;
     public static volatile SingularAttribute<BatchJobRun, String> RUN_BY;
     public static volatile SingularAttribute<BatchJobRun, String> STATUS;

@@ -75,7 +75,7 @@
                                            >
                                             <f:ajax event="click" render=":all_batch_job_block"
                                                     listener="#{FormJobList.loadBatchJobs()}"
-                                                    onevent="refresh"
+                                                    onevent="refresh_list"
                                                     />
                                             <span class="fa fa-refresh"></span>
                                         </a>
@@ -108,7 +108,10 @@
             <div class="modal fade" id="edit_existing_batch_job_panel">
                 <ui:include src="edit_existing_batch_job_panel.xhtml"></ui:include>
             </div>
-
+            
+            <div class="modal fade" id="cancel_this_run_panel">
+                <ui:include src="cancel_this_run_panel.xhtml"></ui:include>
+            </div>
 
         </ui:define>
 
@@ -119,7 +122,7 @@
             <!--<script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batchjob_popup.js" />-->
             <!--<script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batch_job_date_range.js" />-->
             <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/refresh_batch_job_list.js" />
-            
+            <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.1/i18n/jquery-ui-timepicker-addon-i18n.js"/>-->
         </ui:define>
 
     </ui:composition>

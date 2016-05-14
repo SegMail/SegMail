@@ -8,8 +8,10 @@ package seca2.program.batch;
 import eds.component.batch.BatchProcessingService;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
+import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
+import eds.entity.batch.BatchJobTrigger;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ public class ProgramBatch extends Program {
     private boolean editable;
     private BatchJobRun editingBatchJobRun;
     private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
+    private BatchJobTrigger firstAndOnlyTrigger; //Must be initialized in loadBatchJob()
     private String scheduleDateTimeString;
     private final String SCHEDULE_JAVA_DATE_STRING_FORMAT = "yyyy-MM-dd";
     private final String SCHEDULE_JAVA_TIME_STRING_FORMAT = "HH:mm";
@@ -51,7 +54,9 @@ public class ProgramBatch extends Program {
 
     @Override
     public void clearVariables() {
-        
+        setEditingBatchJobRun(null);
+        setFirstAndOnlyStep(null);
+        setFirstAndOnlyTrigger(null);
     }
 
     @Override
@@ -146,6 +151,14 @@ public class ProgramBatch extends Program {
         this.firstAndOnlyStep = firstAndOnlyStep;
     }
 
+    public BatchJobTrigger getFirstAndOnlyTrigger() {
+        return firstAndOnlyTrigger;
+    }
+
+    public void setFirstAndOnlyTrigger(BatchJobTrigger firstAndOnlyTrigger) {
+        this.firstAndOnlyTrigger = firstAndOnlyTrigger;
+    }
+
     public boolean isEditable() {
         return editable;
     }
@@ -198,5 +211,24 @@ public class ProgramBatch extends Program {
             case COMPLETED  :   setEditable(false); break;
             case FAILED     :   setEditable(false); break;
         }
+    }
+    
+    public void loadBatchJobRun(String runKey){
+        List<BatchJobRun> results = batchScheduleService.getJobRunsByKey(runKey);
+        if(results == null || results.isEmpty())
+            return;
+        setEditingBatchJobRun(results.get(0));
+        
+        //Load trigger and step
+        BatchJob bj = getEditingBatchJobRun().getBATCH_JOB();
+        
+        List<BatchJobTrigger> triggers = batchScheduleService.loadBatchJobTriggers(bj);
+        List<BatchJobStep> steps = batchScheduleService.loadBatchJobSteps(bj);
+        
+        if(triggers != null && !triggers.isEmpty())
+            this.setFirstAndOnlyTrigger(triggers.get(0));
+        
+        if(steps != null && !steps.isEmpty())
+            this.setFirstAndOnlyStep(steps.get(0));
     }
 }

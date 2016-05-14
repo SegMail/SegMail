@@ -35,14 +35,12 @@
                             </p>
                             
                         </div>
-                        <div class="list-item-container" style="">   
-                            <h4>#{job.BATCH_JOB.BATCH_JOB_NAME}</h4>
-                            <p class="text-muted">
-                                
-                            </p>
-                        </div>
-                        <div class="list-item-container" style="width:200px;">   
-                            <h4>Scheduled to run after:</h4>
+                        <div class="list-item-container" style="width: 200px;">   
+                            <h4>
+                                #{(job.BATCH_JOB.BATCH_JOB_NAME eq null or job.BATCH_JOB.BATCH_JOB_NAME.isEmpty()) ? 
+                                   '--No name--' :  job.BATCH_JOB.BATCH_JOB_NAME}
+                            </h4>
+                            
                             <p class="text-muted">
                                 <i class="fa fa-clock-o"></i>
                                 #{job.SCHEDULED_TIME}
@@ -56,17 +54,31 @@
                         </div>
                         <div class="list-item-right">
                             <div>
-                                <a href="#edit_existing_batch_job_run_panel" class="btn btn-primary"
-                                   
+                                <a href="#cancel_this_run_panel" class="btn btn-warning" style="margin-right: 3px;"
+                                   title="Cancel this run" onclick="$('#batch_run_key').val('#{job.RUN_KEY}')"
                                    data-toggle="modal">
-                                    <f:ajax id="loadBatchJobRun" event="click" render="FormEditJobRun"
+                                    <f:ajax event="click" render="FormCancelJobRun"
+                                            listener="#{FormCancelJobRun.loadBatchJobRun(job.RUN_KEY)}"
+                                            execute="FormCancelJobRun"
+                                            />
+                                    <i class="fa fa-stop-circle-o"></i>
+                                </a>
+                                <a href="#" class="btn btn-danger" style="margin-right: 3px;"
+                                   title="Cancel this and all future runs"
+                                   data-toggle="modal">
+                                    <i class="fa fa-stop-circle"></i>
+                                </a>
+                                <a href="#edit_existing_batch_job_run_panel" class="btn btn-primary" style="margin-right: 3px;"
+                                   title="Edit batch job run" 
+                                   data-toggle="modal">
+                                    <f:ajax event="click" render="FormEditJobRun"
                                             listener="#{FormEditJobRun.loadBatchJobRun(job.RUN_KEY)}"
-                                            onevent="refresh"
+                                            onevent="refresh_edit_box"
                                             />
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="#edit_existing_batch_job_panel" class="btn btn-success list-item-trigger"
-
+                                <a href="#edit_existing_batch_job_panel" class="btn btn-success list-item-trigger" style="margin-right: 3px;"
+                                   title="Edit batch job"
                                    data-toggle="modal">
                                     <f:ajax event="click" render="FormEditJob"
                                             listener="#{FormEditJob.loadBatchJob(job.BATCH_JOB.BATCH_JOB_ID)}"

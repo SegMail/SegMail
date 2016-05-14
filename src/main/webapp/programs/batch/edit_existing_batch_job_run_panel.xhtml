@@ -68,7 +68,7 @@
                             <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
                                              value="Save &amp; continue"
                                              actionListener="#{FormEditJobRun.saveAndContinue()}"
-                                             oncomplete="refresh"
+                                             oncomplete="refresh_edit_box"
                                              update="@form"
                                              >
                             </p:commandButton>
@@ -83,26 +83,35 @@
                                              actionListener="#{FormEditJobRun.closeWithoutSaving()}"
                                              >
                             </p:commandButton>
-                            <p:commandButton id="delete_button"  styleClass="btn btn-danger"
+                            <!--<p:commandButton id="delete_button"  styleClass="btn btn-danger"
                                              value="Cancel Run"
                                              onclick="$('.delete-container').toggle()">
 
-                            </p:commandButton>
+                            </p:commandButton>-->
 
                         </div>
                     </div>
                     <div class="delete-container" data-role="delete" style="display: none;">
                         <div class="modal-body">
                             <h2>Are you sure you want to cancel this batch job run?</h2>
+                            <p>
+                                You can choose to cancel only this run and continue the 
+                                next run, or cancel this run and any future runs.
+                            </p>
                         </div>
                         <div class="modal-footer">
-                            <p:commandButton id="delete_confirm_button" styleClass="btn btn-danger" 
-                                             value="Yes"
+                            <p:commandButton id="delete_confirm_this_run_button" styleClass="btn btn-danger" 
+                                             value="Cancel this run only"
+                                             actionListener="#{FormEditJobRun.delete()}"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="delete_confirm_all_run_button" styleClass="btn btn-danger" 
+                                             value="Cancel this run and future runs"
                                              actionListener="#{FormEditJobRun.delete()}"
                                              >
                             </p:commandButton>
                             <p:commandButton id="cancel_delete_button"  styleClass="btn btn-default"
-                                             value="No"
+                                             value="Return to previous screen"
                                              onclick="$('.delete-container').toggle()">
                             </p:commandButton>
                         </div>
@@ -110,11 +119,9 @@
                 </div>
                 <p:blockUI block="FormEditJobRun" 
                            trigger="
-                            
                             FormEditJobRun:save_continue_button,
                             FormEditJobRun:save_close_button,
-                            FormEditJobRun:close_button,
-                            FormEditJobRun:delete_confirm_button
+                            FormEditJobRun:close_button
                            "
                            >
                     <p id="spinner"></p>

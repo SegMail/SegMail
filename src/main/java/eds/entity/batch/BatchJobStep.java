@@ -23,8 +23,10 @@ import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 /**
@@ -37,7 +39,7 @@ public class BatchJobStep implements Serializable {
 
     private BatchJob BATCH_JOB;
 
-    //private int STEP_NO;
+    private int STEP_ORDER;
 
     private String SERVICE_NAME;
 
@@ -53,7 +55,12 @@ public class BatchJobStep implements Serializable {
         this.SERVICE_NAME = SERVICE_NAME;
     }
 
-    @OneToMany(mappedBy = "BATCH_JOB_STEP")
+    @OneToMany
+    @JoinColumns({
+        @JoinColumn(name="BATCH_JOB_STEP"),
+        @JoinColumn(name="BATCH_JOB_STEP_ORDER")
+            })
+    @OrderColumn(name="PARAM_ORDER")
     public List<BatchJobStepParam> getPARAMS() {
         return PARAMS;
     }
@@ -62,14 +69,6 @@ public class BatchJobStep implements Serializable {
         this.PARAMS = PARAMS;
     }
 
-    /*@Id
-    public int getSTEP_NO() {
-        return STEP_NO;
-    }
-
-    public void setSTEP_NO(int STEP_NO) {
-        this.STEP_NO = STEP_NO;
-    }*/
 
     @Id
     @ManyToOne(cascade = {
@@ -82,6 +81,15 @@ public class BatchJobStep implements Serializable {
             foreignKey = @ForeignKey(name = "BATCH_JOB",value=NO_CONSTRAINT))
     public BatchJob getBATCH_JOB() {
         return BATCH_JOB;
+    }
+
+    @Id
+    public int getSTEP_ORDER() {
+        return STEP_ORDER;
+    }
+
+    public void setSTEP_ORDER(int STEP_ORDER) {
+        this.STEP_ORDER = STEP_ORDER;
     }
 
     public void setBATCH_JOB(BatchJob BATCH_JOB) {

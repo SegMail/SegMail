@@ -28,6 +28,8 @@ public class BatchJobTrigger implements Serializable {
     private String TRIGGER_STATUS;
     
     private String CRON_EXPRESSION;
+    
+    private int TRIGGER_ORDER;
 
     @Id
     @ManyToOne(cascade = {
@@ -43,6 +45,15 @@ public class BatchJobTrigger implements Serializable {
 
     public void setBATCH_JOB(BatchJob BATCH_JOB) {
         this.BATCH_JOB = BATCH_JOB;
+    }
+
+    @Id
+    public int getTRIGGER_ORDER() {
+        return TRIGGER_ORDER;
+    }
+
+    public void setTRIGGER_ORDER(int TRIGGER_ORDER) {
+        this.TRIGGER_ORDER = TRIGGER_ORDER;
     }
 
     public String getCRON_EXPRESSION() {

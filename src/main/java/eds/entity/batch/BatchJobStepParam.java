@@ -41,7 +41,7 @@ import javax.persistence.Table;
 public class BatchJobStepParam implements Serializable {
 
     private BatchJobStep BATCH_JOB_STEP;
-    private int SNO;
+    private int PARAM_ORDER;
 
     /**
      * Using Serializable interface to export POJOs into the database.
@@ -75,12 +75,12 @@ public class BatchJobStepParam implements Serializable {
     }
 
     @Id
-    public int getSNO() {
-        return SNO;
+    public int getPARAM_ORDER() {
+        return PARAM_ORDER;
     }
 
-    public void setSNO(int SNO) {
-        this.SNO = SNO;
+    public void setPARAM_ORDER(int PARAM_ORDER) {
+        this.PARAM_ORDER = PARAM_ORDER;
     }
 
     @Column(columnDefinition = "BLOB")
