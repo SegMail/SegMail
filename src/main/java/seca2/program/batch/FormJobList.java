@@ -7,6 +7,7 @@ package seca2.program.batch;
 
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJobRun;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -15,6 +16,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -84,5 +86,11 @@ public class FormJobList {
 
     public String getSCHEDULE_JS_TIME_STRING_FORMAT() {
         return program.getSCHEDULE_JAVA_TIME_STRING_FORMAT();
+    }
+    
+    public String getRunTime(Timestamp start) {
+        DateTime now = DateTime.now();
+        long seconds = (now.getMillis() - start.getTime())/1000;
+        return Long.toString(seconds);
     }
 }

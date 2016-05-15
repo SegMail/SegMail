@@ -5,10 +5,13 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import java.sql.Timestamp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -52,9 +55,13 @@ public class FormCancelJobRun implements FormEdit{
     public void delete() {
         try {
             scheduleService.cancelBatchJobRun(getEditingBatchJobRun().getRUN_KEY());
+            DateTime current = program.getCurrentRunDateTime();
+            scheduleService.triggerNextBatchJobRun(current,program.getFirstAndOnlyTrigger());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
             closeWithoutSaving();
         } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (BatchProcessingException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
         
@@ -100,11 +107,12 @@ public class FormCancelJobRun implements FormEdit{
     }
     
     public String getNextRunTime() {
-        if(getEditingBatchJob() == null)
+        if(getEditingBatchJobRun() == null)
             return "";
-        DateTime now = DateTime.now();
+        DateTime current = program.getCurrentRunDateTime();
+        
         String cronExp = program.getFirstAndOnlyTrigger().getCRON_EXPRESSION();
-        DateTime next = scheduleService.getNextExecutionTimeCron(cronExp, now, scheduleService.STANDARD_CRON_TYPE);
+        DateTime next = scheduleService.getNextExecutionTimeCron(cronExp, current, scheduleService.STANDARD_CRON_TYPE);
         
         return next.toString(program.getSCHEDULE_JAVA_DATE_STRING_FORMAT()+" "+program.getSCHEDULE_JAVA_TIME_STRING_FORMAT());
     }

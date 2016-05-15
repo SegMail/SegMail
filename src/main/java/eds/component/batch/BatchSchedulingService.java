@@ -184,7 +184,7 @@ public class BatchSchedulingService {
             BatchJobTrigger newTrigger = this.createJobTrigger(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
 
             //Trigger next run
-            BatchJobRun newRun = triggerNextBatchJobRun(newTrigger);
+            BatchJobRun newRun = triggerNextBatchJobRun(DateTime.now(), newTrigger);
 
             return newRun;
 
@@ -218,40 +218,31 @@ public class BatchSchedulingService {
         Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
 
         List<Predicate> orCriteria = new ArrayList<>();
-        //if status = null or WAITING
-        //retrieve all WAITING
-
-        //OR
-        //if status not WAITING
-        //retrieve start and end
-        //AND
-        //if status != null
-        //AND all with status
-        if (status == null 
-                || BATCH_JOB_RUN_STATUS.WAITING.label.equals(status)) {
-            orCriteria.add(builder.equal(fromRun.get(BatchJobRun_.STATUS), BATCH_JOB_RUN_STATUS.WAITING.label));
-        }
-        
-        if (status == null 
-                || BATCH_JOB_RUN_STATUS.SCHEDULED.label.equals(status)) {
-            orCriteria.add(builder.equal(fromRun.get(BatchJobRun_.STATUS), BATCH_JOB_RUN_STATUS.SCHEDULED.label));
-        }
-
         List<Predicate> andCriteria = new ArrayList<>();
-        if (status != null) {
-            andCriteria.add(builder.equal(fromRun.get(BatchJobRun_.STATUS), status.label));
-        }
-        if (!BATCH_JOB_RUN_STATUS.WAITING.label.equals(status)) {
-            andCriteria.add(builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end));
-            andCriteria.add(builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.END_TIME), start));
-        }
-
+        
+        //For runs with start dates and end dates
         orCriteria.add(
                 builder.and(
-                        andCriteria.toArray(new Predicate[]{})));
-
+                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), end),
+                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.END_TIME), start)
+                )
+        );
+        
+        //For runs with no end time
+        orCriteria.add(
+                builder.and(
+                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), end),
+                        builder.isNull(fromRun.get(BatchJobRun_.END_TIME))
+                )
+        );
+        
+        if(status != null)
+            andCriteria.add(builder.equal(fromRun.get(BatchJobRun_.STATUS), status.label));
+        
+        andCriteria.add(builder.or(orCriteria.toArray(new Predicate[]{})));
+        
         query.select(fromRun);
-        query.where(builder.or(orCriteria.toArray(new Predicate[]{})));
+        query.where(builder.or(andCriteria.toArray(new Predicate[]{})));
 
         List<BatchJobRun> results = objectService.getEm().createQuery(query)
                 .getResultList();
@@ -297,7 +288,7 @@ public class BatchSchedulingService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public BatchJobRun triggerNextBatchJobRun(BatchJobTrigger trigger) throws BatchProcessingException {
+    public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJobTrigger trigger) throws BatchProcessingException {
         BatchJobRun newRun = new BatchJobRun();
         newRun.setBATCH_JOB(trigger.getBATCH_JOB());
         newRun.setSERVER(trigger.getBATCH_JOB().getSERVER());
@@ -319,8 +310,8 @@ public class BatchSchedulingService {
         }
 
         //Get the next execution time
-        DateTime now = DateTime.now();
-        DateTime nextExecution = this.getNextExecutionTimeCron(cronExpression, now,STANDARD_CRON_TYPE);
+        //DateTime now = DateTime.now();
+        DateTime nextExecution = this.getNextExecutionTimeCron(cronExpression, now, STANDARD_CRON_TYPE);
         newRun.setSCHEDULED_TIME(nextExecution);
         newRun.setSTATUS(BATCH_JOB_RUN_STATUS.SCHEDULED.label);
         

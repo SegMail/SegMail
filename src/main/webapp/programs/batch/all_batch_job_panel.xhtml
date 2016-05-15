@@ -20,7 +20,7 @@
         
 
         <c:forEach items="#{FormJobList.batchJobRuns}" var="job">
-            <form jsf:id="job_list_item_#{job.BATCH_JOB.BATCH_JOB_ID}" name="job_list_item_#{job.BATCH_JOB.BATCH_JOB_ID}">
+            <form jsf:id="job_list_item_#{job.RUN_KEY}" name="job_list_item_#{job.RUN_KEY}">
                 <div class="list-item">
                     <div class="list-item-content">
                         <div class="list-item-container list-item-container-small">
@@ -47,10 +47,23 @@
                             </p>
                         </div>
                         <div class="list-item-container">
-                            <h4>#{job.SERVER.SERVER_NODE_TYPE}</h4>
-                            <p class="text-muted">
-                                #{job.SERVER.NAME} [#{job.SERVER.IP_ADDRESS}]
-                            </p>
+                            <h4 class="">
+                                <c:choose>
+                                    <c:when test="#{job.CANCEL_TIME != null}">
+                                        Cancelled on #{job.CANCEL_TIME}
+                                    </c:when>
+                                    <c:when test="#{job.END_TIME != null}">
+                                        Ran for #{(job.END_TIME.getTime() - job.START_TIME.getTime())/1000} seconds
+                                    </c:when>
+                                    <c:when test="#{job.START_TIME != null}">
+                                        Running for #{FormJobList.getRunTime(job.START_TIME)} seconds
+                                    </c:when>
+                                    <c:otherwise>
+                                        
+                                    </c:otherwise>
+                                </c:choose>
+                                
+                            </h4>
                         </div>
                         <div class="list-item-right">
                             <div>

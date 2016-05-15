@@ -71,8 +71,8 @@ public class ProgramBatch extends Program {
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.SCHEDULED.label, "primary");
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.IN_PROCESS.label, "info");
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.COMPLETED.label, "success");
+        batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.CANCELLED.label, "warning");
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.FAILED.label, "danger");
-        
     }
 
     public List<BatchJobRun> getBatchJobRuns() {
@@ -183,7 +183,14 @@ public class ProgramBatch extends Program {
         return SCHEDULE_JS_TIME_STRING_FORMAT;
     }
     
-    
+    public DateTime getCurrentRunDateTime() {
+        if(getEditingBatchJobRun() == null)
+            return null;
+        Timestamp ts = getEditingBatchJobRun().getSCHEDULED_TIME();
+        DateTime dt = new DateTime(ts.getTime());
+        
+        return dt;
+    }
     
     public String timestampToString(Timestamp ts) {
         if(ts == null)
