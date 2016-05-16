@@ -7,6 +7,7 @@ package eds.entity.batch;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import javax.persistence.CascadeType;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -54,7 +55,10 @@ public class BatchJobRun implements Serializable {
     private ServerInstance SERVER;
 
     @Id
-    @ManyToOne
+    @ManyToOne(cascade={
+        CascadeType.MERGE,
+        CascadeType.REFRESH
+    })
     @JoinColumn(name = "BATCH_JOB",
             referencedColumnName = "BATCH_JOB_ID",
             foreignKey = @ForeignKey(name = "BATCH_JOB",value=NO_CONSTRAINT))

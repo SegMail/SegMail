@@ -24,7 +24,9 @@ import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRun_;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStepParam;
+import eds.entity.batch.BatchJobStep_;
 import eds.entity.batch.BatchJobTrigger;
+import eds.entity.batch.BatchJobTrigger_;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -119,9 +121,6 @@ public class BatchSchedulingService {
             }
             newParam.setSTRING_VALUE(obj.toString());
         }
-
-        newBatchJob.addSTEP(newBatchJobStep);
-
         return newBatchJobStep;
     }
 
@@ -259,7 +258,7 @@ public class BatchSchedulingService {
     /**
      * Should check if batch job is in process and throw an exception.
      *
-     * @param job
+     * @param jobRun
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -362,7 +361,7 @@ public class BatchSchedulingService {
      * batch job run to decide if the execution should halt.
      * 
      * @param key 
-     * @throws eds.component.batch.BatchProcessingException 
+     * @return  
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int cancelBatchJobRun(String key) {
@@ -381,57 +380,6 @@ public class BatchSchedulingService {
                 .executeUpdate();
         
         return result;
-    }
-
-    /**
-     *
-     * @param run
-     * @throws BatchJobRunValidationException
-     */
-    private void validateBatchJobRun(BatchJobRun run) throws BatchJobRunValidationException {
-        /**
-         * This is a serious programming error.
-         */
-        if (run.getBATCH_JOB() == null) {
-            throw new RuntimeException("Batch Job Run is not linked to a Batch Job");
-        }
-
-        /**
-         *
-         */
-        switch (BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS())) {
-            case WAITING:
-                if (run.getSCHEDULED_TIME() != null) {
-                    throw new BatchJobRunValidationException("If a batch job has scheuled time, it has be in status " + BATCH_JOB_RUN_STATUS.WAITING.label);
-                }
-                break;
-            case SCHEDULED:
-                if (run.getSCHEDULED_TIME() == null) {
-                    throw new BatchJobRunValidationException("If a batch job has no scheuled time, it cannot be in status " + BATCH_JOB_RUN_STATUS.SCHEDULED.label);
-                }
-                break;
-            case IN_PROCESS:
-                if (run.getSTART_TIME() == null) {
-                    throw new BatchJobRunValidationException("If a batch job is in " + BATCH_JOB_RUN_STATUS.IN_PROCESS.label + " status, it has to have a start time.");
-                }
-                break;
-            case COMPLETED:
-                if (run.getEND_TIME() == null) {
-                    throw new BatchJobRunValidationException("If a batch job is in " + BATCH_JOB_RUN_STATUS.COMPLETED.label + " status, it has to have an end time.");
-                }
-                break;
-            case FAILED:   //if(run.getEND_TIME() == null)
-                //    throw new BatchJobRunValidationException("If a batch job is in "+BATCH_JOB_RUN_STATUS.COMPLETED.label+" status, it has to have an end time.");
-                break;
-            case CANCELLED:
-                if (run.getEND_TIME() == null) {
-                    throw new BatchJobRunValidationException("If a batch job is in " + BATCH_JOB_RUN_STATUS.CANCELLED.label + " status, it has to have an end time.");
-                }
-                break;
-            default:
-                break;
-
-        }
     }
 
     /**
@@ -496,17 +444,61 @@ public class BatchSchedulingService {
         return nextExecution;
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<BatchJobTrigger> loadBatchJobTriggers(BatchJob job) {
-        BatchJob managedJob = objectService.getEm().merge(job);
-        managedJob.getTRIGGERS().size();
-        return managedJob.getTRIGGERS();
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<BatchJobTrigger> loadBatchJobTriggers(long batchJobId) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<BatchJobTrigger> query = builder.createQuery(BatchJobTrigger.class);
+        Root<BatchJobTrigger> fromTrigger = query.from(BatchJobTrigger.class);
+        
+        query.select(fromTrigger);
+        query.where(builder.equal(fromTrigger.get(BatchJobTrigger_.BATCH_JOB), batchJobId));
+        
+        List<BatchJobTrigger> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<BatchJobStep> loadBatchJobSteps(BatchJob job) {
-        BatchJob managedJob = objectService.getEm().merge(job);
-        managedJob.getSTEPS().size();
-        return managedJob.getSTEPS();
+    public List<BatchJobStep> loadBatchJobSteps(long batchJobId) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<BatchJobStep> query = builder.createQuery(BatchJobStep.class);
+        Root<BatchJobStep> fromSteps = query.from(BatchJobStep.class);
+        
+        query.select(fromSteps);
+        query.where(builder.equal(fromSteps.get(BatchJobStep_.BATCH_JOB), batchJobId));
+        
+        List<BatchJobStep> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJobTrigger updateBatchJobTrigger(BatchJobTrigger trigger){
+        //Do checks
+        //Get latest TRIGGER_ORDER
+        BatchJobTrigger mergedTrigger = updateService.getEm().merge(trigger);
+        
+        if(trigger.getBATCH_JOB() == null) //Shouldn't happen, if the above statement was successfully executed
+            throw new RuntimeException("No batch job trigger should be created without a BatchJob object.");
+        
+        List<BatchJobTrigger> allTriggers = loadBatchJobTriggers(trigger.getBATCH_JOB().getBATCH_JOB_ID());
+        //Assume that it is retrieved with the intended order
+        //"Refresh" the indexes
+        //mergedTrigger should be part of this list
+        for(int i=0; i<allTriggers.size(); i++) {
+            BatchJobTrigger t = allTriggers.get(i);
+            t.setTRIGGER_ORDER(i);
+            t = updateService.getEm().merge(t);
+        }
+        
+        return mergedTrigger;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJobStep updateBatchJobStep(BatchJobStep step){
+        //Do checks
+        return updateService.getEm().merge(step);       
     }
 }

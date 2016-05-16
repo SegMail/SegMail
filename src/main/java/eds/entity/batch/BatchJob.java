@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
@@ -46,14 +47,14 @@ public class BatchJob implements Serializable {
      * The steps within a batch job. Each step is an EJB service method with a 
      * set of parameters.
      */
-    private List<BatchJobStep> STEPS = new ArrayList<>();
+    //private List<BatchJobStep> STEPS = new ArrayList<>();
     
     /**
      * The triggers that will fire the next run. A batch job can have many triggers
      * and each one can fire off their individual runs, which should be independent 
      * of each other.
      */
-    private List<BatchJobTrigger> TRIGGERS = new ArrayList<>();
+    //private List<BatchJobTrigger> TRIGGERS = new ArrayList<>();
     
     /**
      * The instantiated runs of the batch job. Each run should be independent of 
@@ -78,7 +79,9 @@ public class BatchJob implements Serializable {
     private String CHANGED_BY;
     
 
-    @OneToMany
+    /*@OneToMany(cascade={
+        CascadeType.MERGE
+    })
     @JoinColumn(name="BATCH_JOB") //Required, if not you'll end up with another table
     @OrderColumn(name="STEP_ORDER")
     public List<BatchJobStep> getSTEPS() {
@@ -87,7 +90,7 @@ public class BatchJob implements Serializable {
 
     public void setSTEPS(List<BatchJobStep> STEPS) {
         this.STEPS = STEPS;
-    }
+    }*/
 
     @Id @GeneratedValue(generator="BATCH_JOB_SEQ",strategy=GenerationType.TABLE) 
     public long getBATCH_JOB_ID() {
@@ -179,7 +182,10 @@ public class BatchJob implements Serializable {
         this.CHANGED_BY = CHANGED_BY;
     }
 
-    @OneToMany
+    /*@OneToMany(cascade={
+        CascadeType.MERGE,
+        CascadeType.REFRESH
+    })
     @JoinColumn(name="BATCH_JOB")
     @OrderColumn(name="TRIGGER_ORDER")
     public List<BatchJobTrigger> getTRIGGERS() {
@@ -188,7 +194,7 @@ public class BatchJob implements Serializable {
 
     public void setTRIGGERS(List<BatchJobTrigger> TRIGGERS) {
         this.TRIGGERS = TRIGGERS;
-    }
+    }*/
 
     public String getBATCH_JOB_NAME() {
         return BATCH_JOB_NAME;
@@ -204,19 +210,19 @@ public class BatchJob implements Serializable {
      * 
      * @param step 
      */
-    public void addSTEP(BatchJobStep step) {
+    /*public void addSTEP(BatchJobStep step) {
         if(!STEPS.isEmpty())
             STEPS.clear(); //Just clear everything. Keep things simple.
         STEPS.add(step);
-    }
+    }*/
     
     /**
      * 
      * @throws BatchProcessingException 
      */
-    public void execute() throws BatchProcessingException{
+    /*public void execute() throws BatchProcessingException{
         for (BatchJobStep step : getSTEPS()){
             step.execute();
         }
-    }
+    }*/
 }

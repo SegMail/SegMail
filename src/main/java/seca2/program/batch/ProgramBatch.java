@@ -42,11 +42,11 @@ public class ProgramBatch extends Program {
     private BatchJobRun editingBatchJobRun;
     private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
     private BatchJobTrigger firstAndOnlyTrigger; //Must be initialized in loadBatchJob()
-    private String scheduleDateTimeString;
     private final String SCHEDULE_JAVA_DATE_STRING_FORMAT = "yyyy-MM-dd";
     private final String SCHEDULE_JAVA_TIME_STRING_FORMAT = "HH:mm";
     private final String SCHEDULE_JS_DATE_STRING_FORMAT = "yy-mm-dd";
     private final String SCHEDULE_JS_TIME_STRING_FORMAT = "HH:mm";
+    
 
     @EJB LandingService landingService;
     @EJB BatchSchedulingService batchScheduleService;
@@ -209,6 +209,21 @@ public class ProgramBatch extends Program {
         Timestamp scheduledTS = new Timestamp(dt.getMillis());
         return scheduledTS;
     }
+    
+    public String getScheduledTime() {
+        if(getEditingBatchJobRun() == null)
+            return "";
+        String timeString = timestampToString(getEditingBatchJobRun().getSCHEDULED_TIME());
+        return timeString;
+    }
+    
+    public void setScheduledTime(String timeString) {
+        if(getEditingBatchJobRun() == null)
+            return;
+        Timestamp ts = stringToTimestamp(timeString);
+        this.getEditingBatchJobRun().setSCHEDULED_TIME(ts);
+        
+    }
 
     public void updateEditable() {
         switch(BATCH_JOB_RUN_STATUS.valueOf(getEditingBatchJobRun().getSTATUS())){
@@ -229,8 +244,8 @@ public class ProgramBatch extends Program {
         //Load trigger and step
         BatchJob bj = getEditingBatchJobRun().getBATCH_JOB();
         
-        List<BatchJobTrigger> triggers = batchScheduleService.loadBatchJobTriggers(bj);
-        List<BatchJobStep> steps = batchScheduleService.loadBatchJobSteps(bj);
+        List<BatchJobTrigger> triggers = batchScheduleService.loadBatchJobTriggers(bj.getBATCH_JOB_ID());
+        List<BatchJobStep> steps = batchScheduleService.loadBatchJobSteps(bj.getBATCH_JOB_ID());
         
         if(triggers != null && !triggers.isEmpty())
             this.setFirstAndOnlyTrigger(triggers.get(0));

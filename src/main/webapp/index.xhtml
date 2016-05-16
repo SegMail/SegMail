@@ -6,12 +6,6 @@
       xmlns:p="http://primefaces.org/ui">
     
     <f:view contentType="text/html">
-        <!--This is the old bootstrap method-->
-        <!--<ui:include src="bootstrap.output['program-location']}" /> program management-->
-        <!--<ui:include src="bootstrap.output['user-module-login-block']}" />user management-->
-        <!--<ui:include src="bootstrap.output['error-module-block']}" />error management-->
-        
-        <!--This is the new bootstrap method [2014.11.16]-->
         <ui:include src="#{UserRequestContainer.viewLocation}" />
     </f:view>
 </html>

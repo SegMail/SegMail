@@ -5,15 +5,20 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobTrigger;
 import java.util.List;
+import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.entity.landing.ServerInstance;
+import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEdit;
 
 /**
@@ -26,23 +31,30 @@ public class FormEditJob implements FormEdit{
     
     @Inject ProgramBatch program;
     
+    @EJB BatchSchedulingService batchScheduleService;
+    
     /**
      * 
-     * @param batchJobId 
+     * @param runKey 
      */
-    public void loadBatchJob(long batchJobId){
-        //To load BatchJob, we will need to also load BatchJobRun as editable is dependent on it
-        
+    public void loadBatchJobRun(String runKey){
+        program.loadBatchJobRun(runKey);
     }
 
     @Override
     public void saveAndContinue() {
-        
+        try {
+            batchScheduleService.updateBatchJobRun(program.getEditingBatchJobRun());
+            batchScheduleService.updateBatchJobTrigger(program.getFirstAndOnlyTrigger());
+        } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        }
     }
 
     @Override
     public void saveAndClose() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        saveAndContinue();
+        closeWithoutSaving();
     }
 
     @Override

@@ -25,7 +25,7 @@ public class BatchExecutionService {
     
     @EJB UpdateObjectService updService;
     
-    @Asynchronous
+    /*@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Future<BATCH_JOB_RUN_STATUS> executeJob(BatchJob job){
         updService.getEm().refresh(job);
@@ -44,5 +44,5 @@ public class BatchExecutionService {
         }
         
         return new AsyncResult<BATCH_JOB_RUN_STATUS>(BATCH_JOB_RUN_STATUS.valueOf(job.getSTATUS()));
-    }
+    }*/
 }

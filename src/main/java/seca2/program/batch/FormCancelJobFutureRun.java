@@ -5,28 +5,23 @@
  */
 package seca2.program.batch;
 
-import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
-import java.sql.Timestamp;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
-import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.joda.time.DateTime;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEdit;
 
 /**
- * FormDelete
+ *
  * @author LeeKiatHaw
  */
-@RequestScoped
-@Named("FormCancelJobRun")
-public class FormCancelJobRun implements FormEdit{
+@Named("FormCancelJobFutureRun")
+public class FormCancelJobFutureRun implements FormEdit {
     
     @Inject ProgramBatch program;
     
@@ -52,16 +47,13 @@ public class FormCancelJobRun implements FormEdit{
     public void delete() {
         try {
             scheduleService.cancelBatchJobRun(getEditingBatchJobRun().getRUN_KEY());
-            DateTime current = program.getCurrentRunDateTime();
-            scheduleService.triggerNextBatchJobRun(current,program.getFirstAndOnlyTrigger());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
+            //DateTime current = program.getCurrentRunDateTime();
+            ///scheduleService.triggerNextBatchJobRun(current,program.getFirstAndOnlyTrigger());
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "All batch job runs have been cancelled.", "");
             closeWithoutSaving();
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (BatchProcessingException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
-        
+        } 
     }
     
     public BatchJobRun getEditingBatchJobRun() {
@@ -87,17 +79,6 @@ public class FormCancelJobRun implements FormEdit{
     public void setScheduledTime(String timeString) {
         program.setScheduledTime(timeString);
         
-    }
-    
-    public String getNextRunTime() {
-        if(getEditingBatchJobRun() == null)
-            return "";
-        DateTime current = program.getCurrentRunDateTime();
-        
-        String cronExp = program.getFirstAndOnlyTrigger().getCRON_EXPRESSION();
-        DateTime next = scheduleService.getNextExecutionTimeCron(cronExp, current, scheduleService.STANDARD_CRON_TYPE);
-        
-        return next.toString(program.getSCHEDULE_JAVA_DATE_STRING_FORMAT()+" "+program.getSCHEDULE_JAVA_TIME_STRING_FORMAT());
     }
     
     public void loadBatchJobRun(String runKey){

@@ -67,21 +67,31 @@
                         </div>
                         <div class="list-item-right">
                             <div>
-                                <a href="#cancel_this_run_panel" class="btn btn-warning" style="margin-right: 3px;"
+                                <a id="cancel_run_#{job.RUN_KEY}"
+                                   href="#cancel_this_run_panel" class="btn btn-warning" 
+                                   style="margin-right: 3px; #{(job.STATUS.toString() ne 'CANCELLED') ? '' : 'display:none;' }"
                                    title="Cancel this run" onclick="$('#batch_run_key').val('#{job.RUN_KEY}')"
                                    data-toggle="modal">
                                     <f:ajax event="click" render="FormCancelJobRun"
                                             listener="#{FormCancelJobRun.loadBatchJobRun(job.RUN_KEY)}"
-                                            execute="FormCancelJobRun"
+                                            
                                             />
                                     <i class="fa fa-stop-circle-o"></i>
                                 </a>
-                                <a href="#" class="btn btn-danger" style="margin-right: 3px;"
+                                <a id="cancel_all_future_#{job.RUN_KEY}"
+                                   href="#cancel_all_future_run_panel" class="btn btn-danger" 
+                                   style="margin-right: 3px; #{(job.STATUS.toString() ne 'CANCELLED') ? '' : 'display:none;' }"
                                    title="Cancel this and all future runs"
                                    data-toggle="modal">
+                                    <f:ajax event="click" render="FormCancelJobFutureRun"
+                                            listener="#{FormCancelJobFutureRun.loadBatchJobRun(job.RUN_KEY)}"
+                                            
+                                            />
                                     <i class="fa fa-stop-circle"></i>
                                 </a>
-                                <a href="#edit_existing_batch_job_run_panel" class="btn btn-primary" style="margin-right: 3px;"
+                                <a id="edit_run_#{job.RUN_KEY}"
+                                   href="#edit_existing_batch_job_run_panel" class="btn btn-primary" 
+                                   style="margin-right: 3px; #{(job.STATUS.toString() ne 'CANCELLED') ? '' : 'display:none;' }"
                                    title="Edit batch job run" 
                                    data-toggle="modal">
                                     <f:ajax event="click" render="FormEditJobRun"
@@ -90,11 +100,14 @@
                                             />
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a href="#edit_existing_batch_job_panel" class="btn btn-success list-item-trigger" style="margin-right: 3px;"
+                                <a 
+                                   href="#edit_existing_batch_job_panel" class="btn btn-success list-item-trigger" 
+                                   style="margin-right: 3px;"
                                    title="Edit batch job"
                                    data-toggle="modal">
-                                    <f:ajax event="click" render="FormEditJob"
-                                            listener="#{FormEditJob.loadBatchJob(job.BATCH_JOB.BATCH_JOB_ID)}"
+                                    <f:ajax id="edit_job_#{job.RUN_KEY}" event="click" render="FormEditJob"
+                                            listener="#{FormEditJob.loadBatchJobRun(job.RUN_KEY)}"
+                                            execute="FormEditJob"
                                             />
                                     <i class="fa fa-pencil-square"></i>
                                 </a>

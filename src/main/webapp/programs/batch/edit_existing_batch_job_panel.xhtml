@@ -26,6 +26,17 @@
                             </div>
                             <div class="form-group">
                                 <label>
+                                    Batch Job name:
+                                </label>
+                                <span class="help-block">
+                                    Name of the batch job
+                                </span>
+                                <input type="text" class="form-control" id="serviceName"
+                                       jsf:value="#{FormEditJob.editingBatchJob.BATCH_JOB_NAME}"
+                                       />
+                            </div>
+                            <div class="form-group">
+                                <label>
                                     Service name:
                                 </label>
                                 <span class="help-block">
@@ -34,7 +45,7 @@
 
                                 <input type="text" class="form-control" id="serviceName" 
                                        jsf:readonly="#{FormEditJob.editable}"
-                                       jsf:value="#{FormEditJob.firstAndOnlyStep}"
+                                       jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_NAME}"
                                        />
                             </div>
                             <div class="form-group">
@@ -100,11 +111,11 @@
                                              actionListener="#{FormEditJob.closeWithoutSaving()}"
                                              >
                             </p:commandButton>
-                            <p:commandButton id="delete_button"  styleClass="btn btn-danger"
+                            <!--<p:commandButton id="delete_button"  styleClass="btn btn-danger"
                                              value="Delete"
                                              onclick="$('.delete-container').toggle()">
 
-                            </p:commandButton>
+                            </p:commandButton>-->
 
                         </div>
                     </div>
