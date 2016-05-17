@@ -105,7 +105,7 @@
                                    style="margin-right: 3px;"
                                    title="Edit batch job"
                                    data-toggle="modal">
-                                    <f:ajax id="edit_job_#{job.RUN_KEY}" event="click" render="FormEditJob"
+                                    <f:ajax  id="edit_job_#{job.RUN_KEY}" event="click" render="FormEditJob"
                                             listener="#{FormEditJob.loadBatchJobRun(job.RUN_KEY)}"
                                             execute="FormEditJob"
                                             />
