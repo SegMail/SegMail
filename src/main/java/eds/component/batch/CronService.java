@@ -27,15 +27,10 @@ public class CronService {
 
     //@Schedule(second="*/10", minute = "*", hour = "*")
     public void cron() {
-        try {
-            System.out.println("Thread " + Thread.currentThread().getId() + " running."); //debug
-            DateTime now = new DateTime();
-            java.sql.Timestamp nowTS = new java.sql.Timestamp(now.getMillis());
-            batchService.processBatchJobQueue(nowTS);
-        } catch (IncompleteDataException ex) {
-            Logger.getLogger(CronService.class.getName()).log(Level.SEVERE, null, ex);
-            ex.printStackTrace(System.out);
-        }
+        System.out.println("Thread " + Thread.currentThread().getId() + " running.");
+        DateTime now = new DateTime();
+        java.sql.Timestamp nowTS = new java.sql.Timestamp(now.getMillis());
+        
     }
     
     //@Schedule(second="*/10", minute = "*", hour = "*")

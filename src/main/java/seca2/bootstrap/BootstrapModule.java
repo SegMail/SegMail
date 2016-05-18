@@ -183,8 +183,10 @@ public abstract class BootstrapModule implements Filter {
             HttpServletRequest req = (HttpServletRequest) request;
             HttpServletResponse res = (HttpServletResponse) response;
 
-            String runModeString = req.getServletContext().getInitParameter(defaults.RUN_MODE);
-            RunMode runMode = RunMode.getRunMode(runModeString);
+            String runModeString = req.getServletContext().getInitParameter(defaults.RUN_MODE); //Priority comes from web.xml, which is local
+            if(runModeString == null || runModeString.isEmpty())
+                runModeString = System.getProperty(defaults.RUN_MODE);
+            RunMode runMode = RunMode.valueOf(runModeString);
             
             if(
                     (runMode.equals(RunMode.INSTALL) && this.bypassDuringInstall()) || 

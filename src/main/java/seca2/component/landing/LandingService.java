@@ -47,7 +47,7 @@ import seca2.entity.landing.ServerResource_;
 @Stateless
 public class LandingService {
     
-    public final String SERVER_NAME = "SERVER_NAME";
+    public final String SERVER_NAME = "LandingService.SERVER_NAME";
 
     @EJB
     private GenericObjectService objectService;
@@ -114,9 +114,9 @@ public class LandingService {
                 throw new IncompleteDataException("Name must not be empty.");
             }
             
-            List<ServerInstance> existingServers = objectService.getEnterpriseObjectsByName(name,ServerInstance.class);
-            if (existingServers != null && !existingServers.isEmpty())
-                throw new EntityExistsException(existingServers.get(0));
+            //List<ServerInstance> existingServers = objectService.getEnterpriseObjectsByName(name,ServerInstance.class);
+            //if (existingServers != null && !existingServers.isEmpty())
+            //    throw new EntityExistsException(existingServers.get(0));
 
             if (uri == null || uri.isEmpty()) {
                 throw new IncompleteDataException("You cannot add a server without an address!");
@@ -206,7 +206,7 @@ public class LandingService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveServer(ServerInstance server) 
-            throws DataValidationException, URISyntaxException{
+            throws DataValidationException, URISyntaxException, EntityExistsException{
         this.validateServer(server);
         updateService.getEm().merge(server);
     }
@@ -347,18 +347,31 @@ public class LandingService {
     
     /**
      * Chain of validations for server. 
+     * - validateURL
+     * - resolveAndUpdateIPHostnamePath
+     * - checkDuplicate
      * 
      * @param server
      * @throws DataValidationException 
+     * @throws java.net.URISyntaxException 
+     * @throws eds.component.data.EntityExistsException 
      */
     public void validateServer(ServerInstance server) 
-            throws DataValidationException, URISyntaxException {
+            throws DataValidationException, URISyntaxException, EntityExistsException {
         validateURL(server);
         resolveAndUpdateIPHostnamePath(server);
+        checkDuplicatedServerName(server.getNAME());
     }
     
-    public void getThisServerNodeType() {
-        
+    /**
+     * 
+     * @param serverName 
+     * @throws eds.component.data.EntityExistsException 
+     */
+    public void checkDuplicatedServerName(String serverName) throws EntityExistsException {
+        List<ServerInstance> server = objectService.getEnterpriseObjectsByName(serverName,ServerInstance.class);
+        if(server != null && !server.isEmpty())
+            throw new EntityExistsException(server.get(0));
     }
     
     
@@ -422,5 +435,13 @@ public class LandingService {
     
     public String getOwnServerName(){
         return System.getProperty(SERVER_NAME);
+    }
+    
+    public ServerInstance getOwnServerInstance() {
+        List<ServerInstance> servers = objectService.getEnterpriseObjectsByName(this.getOwnServerName(), ServerInstance.class);
+        if(servers == null || servers.isEmpty())
+            return null;
+        
+        return servers.get(0);
     }
 }

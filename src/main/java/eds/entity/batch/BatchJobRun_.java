@@ -27,4 +27,5 @@ public class BatchJobRun_ {
     public static volatile SingularAttribute<BatchJobRun, String> RUN_BY;
     public static volatile SingularAttribute<BatchJobRun, String> STATUS;
     public static volatile SingularAttribute<BatchJobRun, ServerInstance> SERVER;
+    public static volatile SingularAttribute<BatchJobRun, String> SERVER_NAME;
 }

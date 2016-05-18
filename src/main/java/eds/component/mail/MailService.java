@@ -243,4 +243,12 @@ public class MailService {
             }
         }
     }
+    
+    public void printMail1() {
+        System.out.println("MailService.printMail1()");
+    }
+    
+    public void printMail2() {
+        System.out.println("MailService.printMail2()");
+    }
 }

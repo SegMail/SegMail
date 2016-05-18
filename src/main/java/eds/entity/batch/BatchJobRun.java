@@ -53,6 +53,8 @@ public class BatchJobRun implements Serializable {
      * it should read A but all future runs will read B.
      */
     private ServerInstance SERVER;
+    
+    private String SERVER_NAME;
 
     @Id
     @ManyToOne(cascade={
@@ -158,6 +160,14 @@ public class BatchJobRun implements Serializable {
 
     public void setCANCEL_TIME(Timestamp CANCEL_TIME) {
         this.CANCEL_TIME = CANCEL_TIME;
+    }
+
+    public String getSERVER_NAME() {
+        return SERVER_NAME;
+    }
+
+    public void setSERVER_NAME(String SERVER_NAME) {
+        this.SERVER_NAME = SERVER_NAME;
     }
     
     

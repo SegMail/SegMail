@@ -18,7 +18,8 @@ import seca2.component.landing.ServerNodeType;
 @Entity
 @Table(name="SERVER_INSTANCE")
 @EntityListeners({
-    ServerIPResolverListener.class
+    ServerIPResolverListener.class,
+    ServerInstanceListener.class
 })
 public class ServerInstance extends EnterpriseObject {
     

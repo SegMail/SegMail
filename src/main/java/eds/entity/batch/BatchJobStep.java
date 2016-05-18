@@ -57,10 +57,10 @@ public class BatchJobStep implements Serializable {
 
     @OneToMany
     @JoinColumns({
-        @JoinColumn(name="BATCH_JOB_STEP"),
-        @JoinColumn(name="BATCH_JOB_STEP_ORDER")
-            })
-    @OrderColumn(name="PARAM_ORDER")
+        @JoinColumn(name = "BATCH_JOB_STEP"),
+        @JoinColumn(name = "BATCH_JOB_STEP_ORDER")
+    })
+    @OrderColumn(name = "PARAM_ORDER")
     public List<BatchJobStepParam> getPARAMS() {
         return PARAMS;
     }
@@ -68,7 +68,6 @@ public class BatchJobStep implements Serializable {
     public void setPARAMS(List<BatchJobStepParam> PARAMS) {
         this.PARAMS = PARAMS;
     }
-
 
     @Id
     @ManyToOne(cascade = {
@@ -78,7 +77,7 @@ public class BatchJobStep implements Serializable {
     })
     @JoinColumn(name = "BATCH_JOB",
             referencedColumnName = "BATCH_JOB_ID",
-            foreignKey = @ForeignKey(name = "BATCH_JOB",value=NO_CONSTRAINT))
+            foreignKey = @ForeignKey(name = "BATCH_JOB", value = NO_CONSTRAINT))
     public BatchJob getBATCH_JOB() {
         return BATCH_JOB;
     }
@@ -108,46 +107,38 @@ public class BatchJobStep implements Serializable {
         this.PARAMS.add(param);
     }
 
-    public void execute() throws BatchProcessingException {
-        try {
-            int numParams = getPARAMS().size();
-            Object[] params = new Object[numParams];
+    public void execute() 
+            throws 
+            IOException, 
+            ClassNotFoundException, 
+            NamingException, 
+            IllegalAccessException, 
+            InvocationTargetException {
+        int numParams = getPARAMS().size();
+        Object[] params = new Object[numParams];
 
-            for (int i = 0; i < numParams; i++) {
-                BatchJobStepParam param = getPARAMS().get(i);
+        for (int i = 0; i < numParams; i++) {
+            BatchJobStepParam param = getPARAMS().get(i);
 
-                if (param.getSERIALIZED_OBJECT() != null && !param.getSERIALIZED_OBJECT().isEmpty()) {
-                    Object obj = param.SERIALIZED_OBJECT();
-                    Class clazz = obj.getClass();
-                    params[i] = obj;
-                    continue;
-                }
-                params[i] = param.getSTRING_VALUE();
+            if (param.getSERIALIZED_OBJECT() != null && !param.getSERIALIZED_OBJECT().isEmpty()) {
+                Object obj = param.SERIALIZED_OBJECT();
+                Class clazz = obj.getClass();
+                params[i] = obj;
+                continue;
             }
+            params[i] = param.getSTRING_VALUE();
+        }
 
-            Object ejb = InitialContext.doLookup("java:module/" + getSERVICE_NAME());
-            System.out.println(ejb.getClass().getName());
+        Object ejb = InitialContext.doLookup("java:module/" + getSERVICE_NAME());
+        System.out.println(ejb.getClass().getName());
 
-            Method[] methodArray = ejb.getClass().getMethods();
-            for (int i = 0; i < methodArray.length; i++) {
-                if (getSERVICE_METHOD().equals(methodArray[i].getName())) {
-                    Method method = methodArray[i];
-                    method.invoke(ejb, params);
-                }
+        Method[] methodArray = ejb.getClass().getMethods();
+        for (int i = 0; i < methodArray.length; i++) {
+            if (getSERVICE_METHOD().equals(methodArray[i].getName())) {
+                Method method = methodArray[i];
+                method.invoke(ejb, params);
+                break;
             }
-        } catch (ClassNotFoundException ex) {
-            throw new BatchProcessingException("Batch processing failed:", ex);
-        } catch (IOException ex) {
-            throw new BatchProcessingException("Batch processing failed:", ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-            ex.printStackTrace(System.out);
         }
     }
 }
