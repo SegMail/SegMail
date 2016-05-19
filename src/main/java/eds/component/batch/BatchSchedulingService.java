@@ -219,19 +219,36 @@ public class BatchSchedulingService {
         List<Predicate> orCriteria = new ArrayList<>();
         List<Predicate> andCriteria = new ArrayList<>();
         
-        //For runs with start dates and end dates
+        //For runs with date created only
         orCriteria.add(
                 builder.and(
                         builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), end),
+                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), start)
+                )
+        );
+        
+        //For runs with start dates and end dates
+        orCriteria.add(
+                builder.and(
+                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end),
                         builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.END_TIME), start)
                 )
         );
         
-        //For runs with no end time
+        //For runs with start dates only
         orCriteria.add(
                 builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), end),
+                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end),
+                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), start),
                         builder.isNull(fromRun.get(BatchJobRun_.END_TIME))
+                )
+        );
+        
+        //For runs with cancel dates
+        orCriteria.add(
+                builder.and(
+                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.CANCEL_TIME), end),
+                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.CANCEL_TIME), start)
                 )
         );
         
@@ -266,6 +283,12 @@ public class BatchSchedulingService {
         updateBatchJobRunStatus(jobRun);
         return updateService.getEm().merge(jobRun);
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJob updateBatchJob(BatchJob job) {
+        
+        return updateService.getEm().merge(job);
+    }
 
     /**
      *
@@ -288,6 +311,8 @@ public class BatchSchedulingService {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJobTrigger trigger) throws BatchProcessingException {
+        if(trigger == null)
+            return null;
         BatchJobRun newRun = new BatchJobRun();
         newRun.setBATCH_JOB(trigger.getBATCH_JOB());
         newRun.setSERVER(trigger.getBATCH_JOB().getSERVER());

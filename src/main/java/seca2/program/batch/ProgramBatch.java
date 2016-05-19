@@ -13,6 +13,8 @@ import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobTrigger;
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +119,7 @@ public class ProgramBatch extends Program {
         Timestamp highTS = new Timestamp(highDateTime.getMillis());
         
         this.setBatchJobRuns(batchScheduleService.getBatchRuns(lowTS, highTS, null));
+        
     }
 
     public BatchJobRun getEditingBatchJobRun() {

@@ -44,8 +44,10 @@ public class FormEditJob implements FormEdit{
     @Override
     public void saveAndContinue() {
         try {
-            batchScheduleService.updateBatchJobRun(program.getEditingBatchJobRun());
-            batchScheduleService.updateBatchJobTrigger(program.getFirstAndOnlyTrigger());
+            batchScheduleService.updateBatchJobRun(getEditingBatchJobRun());
+            batchScheduleService.updateBatchJobTrigger(getFirstAndOnlyTrigger());
+            batchScheduleService.updateBatchJobStep(getFirstAndOnlyStep());
+            //batchScheduleService.updateBatchJob(getEditingBatchJob()); //All the above methods are cascaded to their owners
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }

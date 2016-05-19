@@ -8,26 +8,22 @@ package eds.component.batch;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
-import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStep_;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import eds.entity.batch.BatchJobTrigger;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.naming.NamingException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -40,17 +36,30 @@ public class BatchExecutionService {
     GenericObjectService objService;
     @EJB
     UpdateObjectService updService;
+    @EJB
+    BatchSchedulingService scheduleService; 
 
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Future<BATCH_JOB_RUN_STATUS> executeJob(BatchJobRun job) {
         try {
-            setInProcess(job);
+            job.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
+            updService.getEm().merge(job);
+            updService.getEm().flush();
             List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
             for (BatchJobStep step : steps) {
                 step.execute();
             }
             job.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
+            
+            //Trigger the next run
+            DateTime now = DateTime.now();
+            List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(job.getBATCH_JOB().getBATCH_JOB_ID());
+            //Should be loosely coupled procedure, no exceptions thrown
+            if(triggers != null || !triggers.isEmpty()) {
+                scheduleService.triggerNextBatchJobRun(now, triggers.get(0));
+            }
+            
         } catch (Throwable ex) {
             job.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
             
