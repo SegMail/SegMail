@@ -259,6 +259,14 @@ public class BatchSchedulingService {
         
         query.select(fromRun);
         query.where(builder.or(andCriteria.toArray(new Predicate[]{})));
+        
+        query.orderBy(
+                builder.desc(fromRun.get(BatchJobRun_.START_TIME)),
+                builder.desc(fromRun.get(BatchJobRun_.END_TIME)),
+                builder.desc(fromRun.get(BatchJobRun_.CANCEL_TIME)),
+                builder.desc(fromRun.get(BatchJobRun_.DATETIME_CREATED))
+                
+                );
 
         List<BatchJobRun> results = objectService.getEm().createQuery(query)
                 .getResultList();

@@ -229,16 +229,24 @@ public class ProgramBatch extends Program {
     }
 
     public void updateEditable() {
-        switch(BATCH_JOB_RUN_STATUS.valueOf(getEditingBatchJobRun().getSTATUS())){
+        switch(BATCH_JOB_RUN_STATUS.valueOf(BATCH_JOB_RUN_STATUS.class,getEditingBatchJobRun().getSTATUS())){
             case WAITING    :   setEditable(true); break;
             case SCHEDULED  :   setEditable(true); break;
             case IN_PROCESS :   setEditable(false); break;
             case COMPLETED  :   setEditable(false); break;
             case FAILED     :   setEditable(false); break;
+            case CANCELLED  :   setEditable(false); break;
         }
     }
     
     public void loadBatchJobRun(String runKey){
+        /**
+         * https://github.com/SegMail/SegMail/issues/57
+         * This problem is inherent in JSF but can be prevented.
+         */
+        if(getEditingBatchJobRun() != null && runKey.equals(getEditingBatchJobRun().getRUN_KEY()))
+            return;
+        
         List<BatchJobRun> results = batchScheduleService.getJobRunsByKey(runKey);
         if(results == null || results.isEmpty())
             return;
@@ -255,5 +263,19 @@ public class ProgramBatch extends Program {
         
         if(steps != null && !steps.isEmpty())
             this.setFirstAndOnlyStep(steps.get(0));
+        
+        updateEditable();
+    }
+    
+    private class JobComparator implements Comparator<BatchJobRun> {
+
+        @Override
+        public int compare(BatchJobRun o1, BatchJobRun o2) {
+            //Compare time scheduled, cancellation
+            
+            //Compare start and end time
+            return -1;
+        }
+        
     }
 }

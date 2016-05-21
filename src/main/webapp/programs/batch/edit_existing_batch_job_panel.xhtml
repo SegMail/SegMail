@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="FormEditJob">
+    <form jsf:id="FormEditJob" jsf:disabled="#{!FormEditJob.editable}">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -33,6 +33,7 @@
                                 </span>
                                 <input type="text" class="form-control" id="serviceName"
                                        jsf:value="#{FormEditJob.editingBatchJob.BATCH_JOB_NAME}"
+                                       jsf:readonly="#{!FormEditJob.editable}"
                                        />
                             </div>
                             <div class="form-group">
@@ -44,7 +45,7 @@
                                 </span>
 
                                 <input type="text" class="form-control" id="serviceName" 
-                                       jsf:readonly="#{FormEditJob.editable}"
+                                       jsf:readonly="#{!FormEditJob.editable}"
                                        jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_NAME}"
                                        />
                             </div>
@@ -57,7 +58,7 @@
                                 </span>
 
                                 <input type="text" class="form-control" id="hostname"
-                                       jsf:readonly="#{FormEditJob.editable}"
+                                       jsf:readonly="#{!FormEditJob.editable}"
                                        jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_METHOD}"
                                        />
                             </div>
@@ -69,6 +70,7 @@
                                     Refer to <a target="_blank" href="http://www.nncron.ru/help/EN/working/cron-format.htm">this</a> on how to write a Cron expression.
                                 </span>
                                 <input type="text" class="form-control" id="cron" 
+                                       jsf:readonly="#{!FormEditJob.editable}"
                                        jsf:value="#{FormEditJob.firstAndOnlyTrigger.CRON_EXPRESSION}" />
                             </div>
                             <div class="form-group">
@@ -81,8 +83,9 @@
                                 </span>
 
                                 <h:selectOneMenu styleClass="form-control" style=""
+                                                 readonly="#{!FormEditJob.editable}"
                                                  value="#{FormEditJob.editingBatchJob.SERVER.OBJECTID}"
-                                                 readonly="#{FormEditJob.editable}">
+                                                 >
                                     <f:selectItems value="#{FormEditJob.servers}" var="server" 
                                                    itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
                                                    itemValue="#{server.OBJECTID}">
@@ -95,13 +98,16 @@
 
                         <div class="modal-footer">
                             <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
-                                             value="Save &amp; continue"
+                                             value="Save &amp; continue" 
+                                             
+                                             rendered="#{FormEditJob.editable}"
                                              actionListener="#{FormEditJob.saveAndContinue()}"
                                              update="@form"
                                              >
                             </p:commandButton>
                             <p:commandButton id="save_close_button" styleClass="btn btn-primary" 
                                              value="Save &amp; close" 
+                                             rendered="#{FormEditJob.editable}"
                                              actionListener="#{FormEditJob.saveAndClose()}"
                                              update="@form"
                                              >

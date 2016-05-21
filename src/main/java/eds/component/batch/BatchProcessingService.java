@@ -46,12 +46,6 @@ public class BatchProcessingService {
     public static final String PROCESS_JOB_MODE = "BatchProcessingService.PROCESS_JOB_MODE";
 
     private boolean reported;
-    
-    private boolean localProcessJobMode;
-    
-    private int localMaxJobsPerCron;
-    
-    private String errorMessage;
 
     @EJB
     UpdateObjectService updateService;
@@ -65,7 +59,6 @@ public class BatchProcessingService {
     @PostConstruct
     public void init() {
         reported = false;
-        errorMessage = "";
         
     }
 
@@ -190,7 +183,6 @@ public class BatchProcessingService {
             DateTime now = DateTime.now();
             this.processBatchJobQueue(now);
             reported = false;
-            errorMessage = "";
             
         } catch (BatchProcessingException ex) {
             if (!reported) {
@@ -210,7 +202,6 @@ public class BatchProcessingService {
         String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
         if (maxJobString == null || maxJobString.isEmpty()) {
             //System.setProperty(PROCESS_JOB_MODE, "false");
-            localProcessJobMode = false;
             //Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
             //errorMessage = "Sytem property " + MAX_JOBS_PER_CRON + " is not set";
             return -1;
