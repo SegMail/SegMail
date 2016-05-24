@@ -44,6 +44,7 @@ public class ProgramBatch extends Program {
     private BatchJobRun editingBatchJobRun;
     private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
     private BatchJobTrigger firstAndOnlyTrigger; //Must be initialized in loadBatchJob()
+    private long selectedServerId; //Must be set explicitly
     private final String SCHEDULE_JAVA_DATE_STRING_FORMAT = "yyyy-MM-dd";
     private final String SCHEDULE_JAVA_TIME_STRING_FORMAT = "HH:mm";
     private final String SCHEDULE_JS_DATE_STRING_FORMAT = "yy-mm-dd";
@@ -278,4 +279,14 @@ public class ProgramBatch extends Program {
         }
         
     }
+
+    public long getSelectedServerId() {
+        return selectedServerId;
+    }
+
+    public void setSelectedServerId(long selectedServerId) {
+        this.selectedServerId = selectedServerId;
+    }
+    
+    
 }

@@ -5,6 +5,7 @@
  */
 package eds.component.mail;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
 import com.amazonaws.services.simpleemail.model.Body;
@@ -20,11 +21,13 @@ import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import eds.entity.transaction.EnterpriseTransaction_;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -41,6 +44,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -71,12 +75,23 @@ public class MailService {
      *
      * @param email The data structure representing an email.
      * @param logging If logging is turned on, the email will be logged.
-     * @throws eds.component.mail.InvalidEmailException
      */
+    @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void sendEmailNow(Email email, boolean logging) 
-            throws InvalidEmailException {
+    public void sendEmailNow(Email email, boolean logging) {
         try {
+            /**
+             * Update the status first, because there is a higher chance of error during sending than 
+             * during updating, hence by updating first, we ensure that a sending error will
+             * rollback the transaction and leave the status as QUEUE rather than successfully send 
+             * out an email and leave the status as QUEUE because of a JPA update error.
+             */
+            if(logging) {
+                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.SENT);
+                updateService.getEm().merge(email);
+                updateService.getEm().flush();
+            }
+            
             // Get the sender, subject and body from email
             String FROM_ADDRESS = email.getSENDER_ADDRESS();
             String FROM_NAME = email.getSENDER_NAME();
@@ -114,19 +129,20 @@ public class MailService {
             client.setEndpoint(DEFAULT_HTTPS_ENDPOINT);
             
             client.sendEmail(request);
-            // Log the email that was sent, if the logging flag was set
-            // Log it before sending, because once sent out but something happens to this update
-            // then it would not be correct.
-            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.SENT);
+            
+        } catch (InvalidEmailException | IllegalArgumentException ex) {
+            
+            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
+        } catch (AmazonClientException ex) {
+            
+            //Retry
+            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
+            email.setRETRIES(email.getRETRIES()+1);
+        } finally {
             if (logging) {
                 updateService.getEm().merge(email);
+                updateService.getEm().flush(); //Redundant
             }
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
         }
     }
 
@@ -193,10 +209,6 @@ public class MailService {
         }
     }
 
-    public void createSMTPConnection() {
-
-    }
-
     /**
      *
      * @param emailContent
@@ -212,36 +224,51 @@ public class MailService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void queueEmail(Email email) {
+    public void queueEmail(Email email, DateTime scheduledTime) {
         email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
+        email.setSCHEDULED_DATETIME(new Timestamp(scheduledTime.getMillis()));
         updateService.getEm().persist(email);
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void processEmailQueue() {
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<Email> getNextNEmailsInQueue(DateTime processTime, int nextNEmails) {
+        Timestamp nowTS = new Timestamp(processTime.getMillis());
         // Get all queued email sorted by their DATE_CHANGED
         CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
         CriteriaQuery<Email> query = builder.createQuery(Email.class);
         Root<Email> fromEmail = query.from(Email.class);
         
         query.select(fromEmail);
-        query.where(builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.QUEUED.label));
+        query.where(
+                builder.and(
+                    builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.QUEUED.label),
+                    builder.lessThanOrEqualTo(fromEmail.get(Email_.SCHEDULED_DATETIME), nowTS)
+                )
+        );
         query.orderBy(builder.asc(fromEmail.get(Email_.DATETIME_CHANGED)));
         
         List<Email> results = updateService.getEm().createQuery(query)
                 .setFirstResult(0)
-                .setMaxResults(UPDATE_BATCH_SIZE)
+                .setMaxResults(nextNEmails)
                 .getResultList();
         
-        for(Email email : results ) {
-            try {
-                this.sendEmailNow(email, true);
-            } catch (InvalidEmailException ex) {
-                Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
-                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
-                updateService.getEm().merge(email);
-            }
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void processEmailQueue(DateTime processTime) {
+        
+        List<Email> emails = this.getNextNEmailsInQueue(processTime,UPDATE_BATCH_SIZE);
+        
+        for(Email email : emails ) {
+            sendEmailNow(email, true);
         }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void processEmailQueueNow() {
+        DateTime now = DateTime.now();
+        processEmailQueue(now);
     }
     
     public void printMail1() {

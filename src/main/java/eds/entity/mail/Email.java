@@ -32,6 +32,8 @@ public class Email extends EnterpriseTransaction {
     private Set<String> RECIPIENTS = new HashSet();
     
     private Set<String> REPLY_TO_ADDRESSES = new HashSet();
+    
+    private int RETRIES;
 
     public String getSUBJECT() {
         return SUBJECT;
@@ -91,4 +93,14 @@ public class Email extends EnterpriseTransaction {
     public void PROCESSING_STATUS(EMAIL_PROCESSING_STATUS status){
         this.setPROCESSING_STATUS(status.label);
     }
+
+    public int getRETRIES() {
+        return RETRIES;
+    }
+
+    public void setRETRIES(int RETRIES) {
+        this.RETRIES = RETRIES;
+    }
+    
+    
 }

@@ -5,11 +5,15 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
+import eds.component.data.EntityNotFoundException;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -40,7 +44,14 @@ public class FormEditJobRun implements FormEdit{
     public void saveAndContinue() {
         try {
             batchScheduleService.updateBatchJobRun(program.getEditingBatchJobRun());
+            assignServerIdToRun();
+            
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch Job Run updated", "");
         } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (BatchProcessingException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
@@ -115,5 +126,19 @@ public class FormEditJobRun implements FormEdit{
         Timestamp ts = program.stringToTimestamp(timeString);
         this.getEditingBatchJobRun().setSCHEDULED_TIME(ts);
         
+    }
+    
+    public long getSelectedServerId() {
+        return program.getSelectedServerId();
+    }
+
+    public void setSelectedServerId(long selectedServerId) {
+        program.setSelectedServerId(selectedServerId);
+    }
+    
+    public void assignServerIdToRun() throws EntityNotFoundException, BatchProcessingException {
+        BatchJobRun run = this.getEditingBatchJobRun();
+        long serverId = this.getSelectedServerId();
+        batchScheduleService.assignServerToBatchJobRun(run.getRUN_KEY(), serverId);
     }
 }

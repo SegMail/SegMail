@@ -49,6 +49,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
+import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.ListType;
@@ -680,7 +681,7 @@ public class SubscriptionService {
             //mailService.sendEmailByAWS(confirmEmail, true);
             //BatchJobStep step = batchService.createJobStep("MailService", "sendEmailNow", new Object[] {confirmEmail,true});
             //batchService.executeJobStep(step);
-            mailService.queueEmail(confirmEmail);
+            mailService.queueEmail(confirmEmail, DateTime.now());
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

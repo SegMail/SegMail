@@ -7,7 +7,8 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <form jsf:id="FormEditJob" jsf:disabled="#{!FormEditJob.editable}">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -31,9 +32,9 @@
                                 <span class="help-block">
                                     Name of the batch job
                                 </span>
-                                <input type="text" class="form-control" id="serviceName"
-                                       jsf:value="#{FormEditJob.editingBatchJob.BATCH_JOB_NAME}"
-                                       jsf:readonly="#{!FormEditJob.editable}"
+                                <h:inputText class="form-control" id="batchJobName"
+                                       value="#{FormEditJob.editingBatchJob.BATCH_JOB_NAME}"
+                                       disabled="#{!FormEditJob.editable}"
                                        />
                             </div>
                             <div class="form-group">
@@ -44,9 +45,9 @@
                                     Name of the business service module
                                 </span>
 
-                                <input type="text" class="form-control" id="serviceName" 
-                                       jsf:readonly="#{!FormEditJob.editable}"
-                                       jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_NAME}"
+                                <h:inputText class="form-control" id="serviceName" 
+                                       disabled="#{!FormEditJob.editable}"
+                                       value="#{FormEditJob.firstAndOnlyStep.SERVICE_NAME}"
                                        />
                             </div>
                             <div class="form-group">
@@ -57,9 +58,9 @@
                                     Name of the business service module method
                                 </span>
 
-                                <input type="text" class="form-control" id="hostname"
-                                       jsf:readonly="#{!FormEditJob.editable}"
-                                       jsf:value="#{FormEditJob.firstAndOnlyStep.SERVICE_METHOD}"
+                                <h:inputText class="form-control" id="hostname"
+                                       disabled="#{!FormEditJob.editable}"
+                                       value="#{FormEditJob.firstAndOnlyStep.SERVICE_METHOD}"
                                        />
                             </div>
                             <div class="form-group">
@@ -69,9 +70,9 @@
                                 <span class="help-block">
                                     Refer to <a target="_blank" href="http://www.nncron.ru/help/EN/working/cron-format.htm">this</a> on how to write a Cron expression.
                                 </span>
-                                <input type="text" class="form-control" id="cron" 
-                                       jsf:readonly="#{!FormEditJob.editable}"
-                                       jsf:value="#{FormEditJob.firstAndOnlyTrigger.CRON_EXPRESSION}" />
+                                <h:inputText class="form-control" id="cron" 
+                                       disabled="#{!FormEditJob.editable}"
+                                       value="#{FormEditJob.firstAndOnlyTrigger.CRON_EXPRESSION}" />
                             </div>
                             <div class="form-group">
                                 <label>
@@ -83,7 +84,7 @@
                                 </span>
 
                                 <h:selectOneMenu styleClass="form-control" style=""
-                                                 readonly="#{!FormEditJob.editable}"
+                                                 disabled="#{!FormEditJob.editable}"
                                                  value="#{FormEditJob.editingBatchJob.SERVER.OBJECTID}"
                                                  >
                                     <f:selectItems value="#{FormEditJob.servers}" var="server" 

@@ -27,6 +27,7 @@ import eds.entity.batch.BatchJobStepParam;
 import eds.entity.batch.BatchJobStep_;
 import eds.entity.batch.BatchJobTrigger;
 import eds.entity.batch.BatchJobTrigger_;
+import eds.entity.batch.BatchJob_;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -533,5 +534,56 @@ public class BatchSchedulingService {
     public BatchJobStep updateBatchJobStep(BatchJobStep step){
         //Do checks
         return updateService.getEm().merge(step);       
+    }
+    
+    /**
+     * 
+     * @param batchJobId
+     * @param serverId
+     * @return
+     * @throws EntityNotFoundException
+     * @throws BatchProcessingException 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void assignServerToBatchJob(long batchJobId, long serverId) throws EntityNotFoundException, BatchProcessingException {
+        ServerInstance server = landingService.getServerInstance(serverId);
+        if(server == null)
+            throw new EntityNotFoundException(ServerInstance.class,serverId);
+        
+        /*BatchJob job = this.getBatchJobById(batchJobId);
+        if(job == null)
+            throw new BatchProcessingException("Batch job ID "+batchJobId+" not found.");
+        
+        job.setSERVER(server);
+        updateService.getEm().merge(job);*/
+        CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
+        CriteriaUpdate<BatchJob> update = builder.createCriteriaUpdate(BatchJob.class);
+        Root<BatchJob> fromBatchJob = update.from(BatchJob.class);
+        
+        update.set(fromBatchJob.get(BatchJob_.SERVER), server);
+        update.where(builder.equal(fromBatchJob.get(BatchJob_.BATCH_JOB_ID), batchJobId));
+        
+        int results = updateService.getEm().createQuery(update)
+                .executeUpdate();
+        
+        if(results <= 0)
+            throw new BatchProcessingException("No batch jobs updated.");
+        
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void assignServerToBatchJobRun(String runKey, long serverId) throws EntityNotFoundException, BatchProcessingException {
+        ServerInstance server = landingService.getServerInstance(serverId);
+        if(server == null)
+            throw new EntityNotFoundException(ServerInstance.class,serverId);
+        
+        List<BatchJobRun> runs = this.getJobRunsByKey(runKey);
+        if(runs == null || runs.isEmpty())
+            throw new BatchProcessingException("Batch job run key "+runKey+" not found.");
+        
+        BatchJobRun run = runs.get(0);
+        run.setSERVER(server);
+        updateService.getEm().merge(run);
+        
     }
 }

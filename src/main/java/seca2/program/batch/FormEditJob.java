@@ -5,12 +5,16 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
+import eds.component.data.EntityNotFoundException;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobTrigger;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -40,15 +44,24 @@ public class FormEditJob implements FormEdit{
     public void loadBatchJobRun(String runKey){
         program.loadBatchJobRun(runKey);
     }
+    
+    
 
     @Override
     public void saveAndContinue() {
         try {
-            batchScheduleService.updateBatchJobRun(getEditingBatchJobRun());
+            batchScheduleService.updateBatchJobRun(getEditingBatchJobRun()); 
             batchScheduleService.updateBatchJobTrigger(getFirstAndOnlyTrigger());
             batchScheduleService.updateBatchJobStep(getFirstAndOnlyStep());
             //batchScheduleService.updateBatchJob(getEditingBatchJob()); //All the above methods are cascaded to their owners
+            assignServerToBatchJob(); //Server cannot 
+            
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch Job updated", "");
         } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (BatchProcessingException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
@@ -118,4 +131,17 @@ public class FormEditJob implements FormEdit{
         program.setServers(servers);
     }
     
+    public long getSelectedServerId() {
+        return program.getSelectedServerId();
+    }
+
+    public void setSelectedServerId(long selectedServerId) {
+        program.setSelectedServerId(selectedServerId);
+    }
+    
+    public void assignServerToBatchJob() throws EntityNotFoundException, BatchProcessingException {
+        long serverId = getSelectedServerId();
+        batchScheduleService.assignServerToBatchJob(this.getEditingBatchJob().getBATCH_JOB_ID(), serverId);
+        
+    }
 }

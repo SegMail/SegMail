@@ -261,7 +261,7 @@ public class LandingService {
     
     //Wrong return param - should return a list or use "Contains"
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public User getUserFromServerAddress(String ipAddress) {
+    public User getUserFromServerName(String serverName) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<User> query = builder.createQuery(User.class);
         
@@ -269,7 +269,7 @@ public class LandingService {
         Root<Assign_Server_User> fromAssign = query.from(Assign_Server_User.class);
         Root<User> fromUser = query.from(User.class);
         
-        query.select(fromUser).where(builder.and(builder.equal(fromServer.get(ServerInstance_.IP_ADDRESS), ipAddress),
+        query.select(fromUser).where(builder.and(builder.equal(fromServer.get(ServerInstance_.NAME), serverName),
                         builder.equal(
                                 fromServer.get(ServerInstance_.OBJECTID), 
                                 fromAssign.get(Assign_Server_User_.SOURCE)),
@@ -360,18 +360,22 @@ public class LandingService {
             throws DataValidationException, URISyntaxException, EntityExistsException {
         validateURL(server);
         resolveAndUpdateIPHostnamePath(server);
-        checkDuplicatedServerName(server.getNAME());
+        checkDuplicatedServerName(server);
     }
     
     /**
      * 
-     * @param serverName 
+     * @param server
      * @throws eds.component.data.EntityExistsException 
      */
-    public void checkDuplicatedServerName(String serverName) throws EntityExistsException {
-        List<ServerInstance> server = objectService.getEnterpriseObjectsByName(serverName,ServerInstance.class);
-        if(server != null && !server.isEmpty())
-            throw new EntityExistsException(server.get(0));
+    public void checkDuplicatedServerName(ServerInstance server) throws EntityExistsException {
+        List<ServerInstance> servers = objectService.getEnterpriseObjectsByName(server.getNAME(),ServerInstance.class);
+        if(servers != null) {
+            for(ServerInstance s : servers) {
+                if(s.getOBJECTID() != server.getOBJECTID())
+                    throw new EntityExistsException(s);
+            }
+        }
     }
     
     
