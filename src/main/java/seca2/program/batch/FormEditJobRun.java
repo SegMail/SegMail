@@ -128,17 +128,25 @@ public class FormEditJobRun implements FormEdit{
         
     }
     
-    public long getSelectedServerId() {
-        return program.getSelectedServerId();
+    public long getSelectedServerIdBatchJob() {
+        return program.getSelectedServerIdBatchJob();
     }
 
-    public void setSelectedServerId(long selectedServerId) {
-        program.setSelectedServerId(selectedServerId);
+    public void setSelectedServerIdBatchJob(long selectedServerId) {
+        program.setSelectedServerIdBatchJob(selectedServerId);
     }
     
     public void assignServerIdToRun() throws EntityNotFoundException, BatchProcessingException {
         BatchJobRun run = this.getEditingBatchJobRun();
-        long serverId = this.getSelectedServerId();
+        long serverId = this.getSelectedServerIdBatchJobRun();
         batchScheduleService.assignServerToBatchJobRun(run.getRUN_KEY(), serverId);
+    }
+    
+    public long getSelectedServerIdBatchJobRun() {
+        return program.getSelectedServerIdBatchJobRun();
+    }
+
+    public void setSelectedServerIdBatchJobRun(long selectedServerIdBatchJobRun) {
+        program.setSelectedServerIdBatchJobRun(selectedServerIdBatchJobRun);
     }
 }

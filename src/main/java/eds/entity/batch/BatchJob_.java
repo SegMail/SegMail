@@ -25,4 +25,5 @@ public class BatchJob_ {
     public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> DATETIME_CHANGED;
     public static volatile SingularAttribute<BatchJob,String> CREATED_BY;
     public static volatile SingularAttribute<BatchJob,String> CHANGED_BY;
+    public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> LAST_RUN;
 }

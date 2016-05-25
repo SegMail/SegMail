@@ -48,50 +48,51 @@
                             </p>
                         </div>
                         <div class="list-item-container">
-                            <h4 class="">
-                                <c:choose>
-                                    <c:when test="#{job.CANCEL_TIME != null}">
+
+                            <c:choose>
+                                <c:when test="#{job.CANCEL_TIME != null}">
+                                    <h4 class="">
                                         Cancelled on #{job.CANCEL_TIME}
-                                    </c:when>
-                                    <c:otherwise>
-
-                                    </c:otherwise>
-                                </c:choose>
-
-                            </h4>
-                            <p class="text-muted">
-                                <i class="fa fa-clock-o"></i>
-                                <c:choose>
-                                    <c:when test="#{job.END_TIME != null}">
-                                        Ran for #{(job.END_TIME.getTime() - job.START_TIME.getTime())/1000} seconds
-                                    </c:when>
-                                    <c:when test="#{job.START_TIME != null}">
+                                    </h4>
+                                </c:when>
+                                <c:when test="#{job.END_TIME != null}">
+                                    <h4>
+                                        <i class="fa fa-clock-o"></i>
+                                        Ran for #{(job.END_TIME.getTime() - job.START_TIME.getTime())/1000.0} seconds
+                                    </h4>
+                                </c:when>
+                                <c:when test="#{job.START_TIME != null}">
+                                    <h4 class="text-muted">
+                                        <i class="fa fa-clock-o"></i>
                                         Running for #{FormJobList.getRunTime(job.START_TIME)} seconds
-                                    </c:when>
-                                </c:choose>
-                            </p>
+                                    </h4>
+                                </c:when>
+                                <c:otherwise>
+
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                         <div class="list-item-right">
                             <div>
                                 <h:commandLink
-                                   pass:href="#cancel_this_run_panel" 
-                                   styleClass="btn btn-warning list-item-trigger" 
-                                   style="margin-right: 3px;" 
-                                   rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
-                                   title="Cancel this run" 
-                                   pass:data-toggle="modal">
+                                    pass:href="#cancel_this_run_panel" 
+                                    styleClass="btn btn-warning list-item-trigger" 
+                                    style="margin-right: 3px;" 
+                                    rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
+                                    title="Cancel this run" 
+                                    pass:data-toggle="modal">
                                     <f:ajax id="cancel_this_run_#{job.RUN_KEY}" event="click" render="FormCancelJobRun"
                                             listener="#{FormCancelJobRun.loadBatchJobRun(job.RUN_KEY)}"
 
                                             />
                                     <i class="fa fa-stop-circle-o"></i>
-                                    </h:commandLink>
+                                </h:commandLink>
                                 <h:commandLink
-                                   pass:href="#cancel_all_future_run_panel" styleClass="btn btn-danger list-item-trigger" 
-                                   style="margin-right: 3px;" 
-                                   rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
-                                   title="Cancel this and all future runs"
-                                   pass:data-toggle="modal">
+                                    pass:href="#cancel_all_future_run_panel" styleClass="btn btn-danger list-item-trigger" 
+                                    style="margin-right: 3px;" 
+                                    rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
+                                    title="Cancel this and all future runs"
+                                    pass:data-toggle="modal">
                                     <f:ajax id="cancel_all_runs_#{job.RUN_KEY}" event="click" render="FormCancelJobFutureRun"
                                             listener="#{FormCancelJobFutureRun.loadBatchJobRun(job.RUN_KEY)}"
 
@@ -99,11 +100,11 @@
                                     <i class="fa fa-stop-circle"></i>
                                 </h:commandLink>
                                 <h:commandLink 
-                                   pass:href="#edit_existing_batch_job_run_panel" styleClass="btn btn-primary list-item-trigger" 
-                                   style="margin-right: 3px;" 
-                                   rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
-                                   title="Edit batch job run" 
-                                   pass:data-toggle="modal">
+                                    pass:href="#edit_existing_batch_job_run_panel" styleClass="btn btn-primary list-item-trigger" 
+                                    style="margin-right: 3px;" 
+                                    rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
+                                    title="Edit batch job run" 
+                                    pass:data-toggle="modal">
                                     <f:ajax event="click" render="FormEditJobRun"
                                             listener="#{FormEditJobRun.loadBatchJobRun(job.RUN_KEY)}"
                                             onevent="refresh_edit_box"

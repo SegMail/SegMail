@@ -44,7 +44,8 @@ public class ProgramBatch extends Program {
     private BatchJobRun editingBatchJobRun;
     private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
     private BatchJobTrigger firstAndOnlyTrigger; //Must be initialized in loadBatchJob()
-    private long selectedServerId; //Must be set explicitly
+    private long selectedServerIdBatchJob; //Must be set explicitly
+    private long selectedServerIdBatchJobRun; //Must be set explicitly
     private final String SCHEDULE_JAVA_DATE_STRING_FORMAT = "yyyy-MM-dd";
     private final String SCHEDULE_JAVA_TIME_STRING_FORMAT = "HH:mm";
     private final String SCHEDULE_JS_DATE_STRING_FORMAT = "yy-mm-dd";
@@ -265,6 +266,9 @@ public class ProgramBatch extends Program {
         if(steps != null && !steps.isEmpty())
             this.setFirstAndOnlyStep(steps.get(0));
         
+        this.setSelectedServerIdBatchJob(this.getEditingBatchJobRun().getBATCH_JOB().getSERVER().getOBJECTID());
+        this.setSelectedServerIdBatchJobRun(getEditingBatchJobRun().getSERVER().getOBJECTID());
+        
         updateEditable();
     }
     
@@ -280,12 +284,20 @@ public class ProgramBatch extends Program {
         
     }
 
-    public long getSelectedServerId() {
-        return selectedServerId;
+    public long getSelectedServerIdBatchJob() {
+        return selectedServerIdBatchJob;
     }
 
-    public void setSelectedServerId(long selectedServerId) {
-        this.selectedServerId = selectedServerId;
+    public void setSelectedServerIdBatchJob(long selectedServerIdBatchJob) {
+        this.selectedServerIdBatchJob = selectedServerIdBatchJob;
+    }
+
+    public long getSelectedServerIdBatchJobRun() {
+        return selectedServerIdBatchJobRun;
+    }
+
+    public void setSelectedServerIdBatchJobRun(long selectedServerIdBatchJobRun) {
+        this.selectedServerIdBatchJobRun = selectedServerIdBatchJobRun;
     }
     
     

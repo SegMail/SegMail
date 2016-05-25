@@ -131,16 +131,16 @@ public class FormEditJob implements FormEdit{
         program.setServers(servers);
     }
     
-    public long getSelectedServerId() {
-        return program.getSelectedServerId();
+    public long getSelectedServerIdBatchJob() {
+        return program.getSelectedServerIdBatchJob();
     }
 
-    public void setSelectedServerId(long selectedServerId) {
-        program.setSelectedServerId(selectedServerId);
+    public void setSelectedServerIdBatchJob(long selectedServerId) {
+        program.setSelectedServerIdBatchJob(selectedServerId);
     }
     
     public void assignServerToBatchJob() throws EntityNotFoundException, BatchProcessingException {
-        long serverId = getSelectedServerId();
+        long serverId = getSelectedServerIdBatchJob();
         batchScheduleService.assignServerToBatchJob(this.getEditingBatchJob().getBATCH_JOB_ID(), serverId);
         
     }

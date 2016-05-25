@@ -78,6 +78,8 @@ public class BatchJob implements Serializable {
     private String CREATED_BY;
     private String CHANGED_BY;
     
+    private java.sql.Timestamp LAST_RUN;
+    
 
     /*@OneToMany(cascade={
         CascadeType.MERGE
@@ -203,6 +205,15 @@ public class BatchJob implements Serializable {
     public void setBATCH_JOB_NAME(String BATCH_JOB_NAME) {
         this.BATCH_JOB_NAME = BATCH_JOB_NAME;
     }
+
+    public Timestamp getLAST_RUN() {
+        return LAST_RUN;
+    }
+
+    public void setLAST_RUN(Timestamp LAST_RUN) {
+        this.LAST_RUN = LAST_RUN;
+    }
+    
     
     /**
      * There's no remove yet because we want to keep things simple - each BatchJob

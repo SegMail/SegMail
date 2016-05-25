@@ -85,7 +85,7 @@
 
                                 <h:selectOneMenu styleClass="form-control" style=""
                                                  disabled="#{!FormEditJob.editable}"
-                                                 value="#{FormEditJob.editingBatchJob.SERVER.OBJECTID}"
+                                                 value="#{FormEditJob.selectedServerIdBatchJob}"
                                                  >
                                     <f:selectItems value="#{FormEditJob.servers}" var="server" 
                                                    itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
@@ -146,7 +146,11 @@
                         </div>
                     </div>
                 </div>
-                <p:blockUI block="FormAddJob" trigger="FormAddJob:add_new_job_button"
+                <p:blockUI block="FormEditJob" trigger="
+                           FormEditJob:save_continue_button,
+                           FormEditJob:save_close_button,
+                           FormEditJob:close_button
+                           "
                            >
                     <p id="spinner"></p>
                 </p:blockUI>

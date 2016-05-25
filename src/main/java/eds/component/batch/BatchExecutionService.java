@@ -12,6 +12,7 @@ import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStep_;
 import eds.entity.batch.BatchJobTrigger;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.Future;
 import javax.ejb.AsyncResult;
@@ -23,6 +24,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.jboss.logging.Logger;
 import org.joda.time.DateTime;
 
 /**
@@ -43,24 +45,32 @@ public class BatchExecutionService {
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Future<BATCH_JOB_RUN_STATUS> executeJob(BatchJobRun job) {
         try {
+            DateTime start = DateTime.now();
             job.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
+            job.setSTART_TIME(new Timestamp(start.getMillis()));
+            job.getBATCH_JOB().setLAST_RUN(new Timestamp(start.getMillis()));
             updService.getEm().merge(job);
             updService.getEm().flush();
             List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
             for (BatchJobStep step : steps) {
                 step.execute();
             }
+            //Record completion info
             job.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
+            DateTime end = DateTime.now();
+            job.setEND_TIME(new Timestamp(end.getMillis()));
             
             //Trigger the next run
             DateTime now = DateTime.now();
             List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(job.getBATCH_JOB().getBATCH_JOB_ID());
             //Should be loosely coupled procedure, no exceptions thrown
             if(triggers != null || !triggers.isEmpty()) {
+                Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
                 scheduleService.triggerNextBatchJobRun(now, triggers.get(0));
             }
             
         } catch (Throwable ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
             job.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
             
         } finally {

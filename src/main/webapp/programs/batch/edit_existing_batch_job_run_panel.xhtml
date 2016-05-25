@@ -54,7 +54,7 @@
                                 </span>
 
                                 <h:selectOneMenu styleClass="form-control" style=""
-                                                 value="#{FormEditJobRun.editingBatchJobRun.SERVER.OBJECTID}"
+                                                 value="#{FormEditJobRun.selectedServerIdBatchJobRun}"
                                                  disabled="#{!FormEditJobRun.editable}">
                                     <f:selectItems value="#{FormEditJobRun.servers}" var="server" 
                                                    itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
