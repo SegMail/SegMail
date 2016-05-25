@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+        <ui:define name="main-program-panel">
+
+            <div class="row"><!--For the message-->
+                <div class="col-md-12">
+                    <form jsf:id="ProgramCampaign">
+                        <s2:messenger for="ProgramCampaign" showDetail="true" showSummary="true" closable="true" />
+                    </form>
+                </div>
+            </div>
+            
+            <div id="stats_panel"> <!--stats widget-->
+                
+            </div>
+            
+            <c:choose>
+                <c:when test="#{FormProgramModeSwitch.editCampaignMode}"> <!--Individual Campaign mode-->
+                    <h2>This is for editing individual campaign</h2>
+                </c:when>
+                <c:otherwise><!--List Campaign mode-->
+                    <h2>This is the list of campaign</h2>
+                </c:otherwise>
+            </c:choose>
+            
+            <div id="transactions_panel"> <!--Transaction widget-->
+                
+            </div>
+        </ui:define>
+
+        <ui:define name="scripts-bottom" id="scripts-bottom">
+            <!--<script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/template_popup.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/validation.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/summernote_hack.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/delete_confirmation.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>-->
+        </ui:define>
+
+    </ui:composition>
+</html>
+
