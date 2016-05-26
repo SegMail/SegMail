@@ -18,7 +18,8 @@ import seca2.component.landing.ServerNodeType;
 @Entity
 @Table(name="SERVER_INSTANCE")
 @EntityListeners({
-    ServerIPResolverListener.class
+    ServerIPResolverListener.class,
+    ServerInstanceListener.class
 })
 public class ServerInstance extends EnterpriseObject {
     
@@ -50,11 +51,10 @@ public class ServerInstance extends EnterpriseObject {
     /**
      * The path of the URL
      */
-    private String Path;
+    private String PATH;
     
     
     private String SERVER_NODE_TYPE;
-    
     
 
     public String getNAME() {
@@ -109,12 +109,12 @@ public class ServerInstance extends EnterpriseObject {
         this.PORT = PORT;
     }
 
-    public String getPath() {
-        return Path;
+    public String getPATH() {
+        return PATH;
     }
 
-    public void setPath(String Path) {
-        this.Path = Path;
+    public void setPATH(String PATH) {
+        this.PATH = PATH;
     }
     
     

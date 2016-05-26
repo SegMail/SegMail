@@ -87,7 +87,7 @@
                                     <div class="page-toolbar-subtitle">#{UserSessionContainer.currentProgram.DISPLAY_DESCRIPTION}</div>
                                 </div>
                                 <div class="page-toolbar-block pull-right">
-                                    <form jsf:id="refresh">
+                                    <form jsf:id="FormToolbarRight">
                                         <ui:insert name="toolbar-right"></ui:insert>
                                         <div class="widget-info widget-from">
                                             <button class="btn btn-default tipb"
@@ -121,33 +121,34 @@
         <link href="#{request.contextPath}/templates/beprobootstrap/css/styles.css" rel="stylesheet" type="text/css" id="theme"/>
         <!--[if lt IE 10]><link rel="stylesheet" type="text/css" href="css/ie.css"/><![endif]-->
 
-        <!--Use PF's own Jquery library instead
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery.min.js"></script>-->
+        <!--Use PF's own Jquery library instead--><!--no we are moving away from PF-->
+        <!--Minimum required for the template-->
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery-ui.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap/bootstrap.min.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/mcustomscrollbar/jquery.mCustomScrollbar.min.js"></script>        
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/mcustomscrollbar/jquery.mCustomScrollbar.min.js"></script>   
+        
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins.js"></script>        
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/actions.js"></script> 
+        <!--Minimum required for the template-->
 
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/sparkline/jquery.sparkline.min.js"></script>        
         <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false&amp;libraries=places"></script>-->
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/fancybox/jquery.fancybox.pack.js"></script>                
 
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/d3.v3.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/rickshaw.min.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js"></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/excanvas.min.js'></script>    
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js'></script>    
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.stack.js'></script>    
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.pie.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.resize.js'></script>          
-
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/knob/jquery.knob.js'></script>
-
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/moment.min.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/daterangepicker.js"></script> 
-
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-europe-mill-en.js'></script>
-
+        <div jsf:rendered="false"><!--don't know for what yet-->
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/d3.v3.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/rickshaw.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js"></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/excanvas.min.js'></script>    
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js'></script>    
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.stack.js'></script>    
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.pie.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.resize.js'></script>         
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/knob/jquery.knob.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/jvectormap/jquery-jvectormap-europe-mill-en.js'></script>
+        </div>
 
 
 <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery-validation/additional-methods.min.js"></script>
@@ -159,7 +160,7 @@
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery-validation/additional-methods.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/icheck/jquery.icheck.min.js"></script>
 
-        <!--For fileuploader-->
+        <!--For fileuploader--><div jsf:rendered="false">
         <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.js'></script>
         <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.gears.js'></script>
         <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.silverlight.js'></script>
@@ -171,7 +172,7 @@
         <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/imgareaselect/jquery.imgareaselect.min.js'></script>
         <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/filetree/jqueryFileTree.js"></script>
         <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/dropzone/dropzone.js"></script>
-        <!--For fileuploader-->
+        <!--For fileuploader--></div>
 
         <!--For editable forms-->
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/bootstrap-editable.min.js"></script>  
@@ -181,13 +182,13 @@
 
         <!--for a bug fix in Mojarra 2.2--><script src="#{request.contextPath}/fix_f_ajax.js" type="text/javascript" />
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" />
-        <h:outputScript library="primefaces" name="jquery/jquery.js" target="head"/><!--must be included, if not when there are no PF components on the page, JQuery would not be automatically loaded-->
-
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins.js"></script>        
-        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/demo.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/maps.js"></script>        
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/charts.js"></script>
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/actions.js"></script>--> 
+        <!--<h:outputScript library="primefaces" name="jquery/jquery.js" target="head"/>must be included, if not when there are no PF components on the page, JQuery would not be automatically loaded-->
+        <!--<h:outputScript library="primefaces" name="jquery/jquery-plugins.js" target="head"/>-->
+        
+        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/demo.js"></script>-->
+        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/maps.js"></script>        
+        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/charts.js"></script>-->
+        
 
         <script src="#{request.contextPath}/templates/common/js/bootstrap-select.js"></script>
         <ui:insert name="scripts-bottom"></ui:insert>

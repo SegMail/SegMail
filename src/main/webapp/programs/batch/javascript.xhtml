@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <script type="text/javascript">
+        $(document).ready(function () {
+            gDemos = {
+                init: function () {
+
+                    if ($(".dtrange").length > 0) {
+                        $(".dtrange").daterangepicker({
+                            timePicker: true,
+                            ranges: {
+                                'Today': [moment().hours(0).minutes(0).seconds(0), moment().hours(23).minutes(59).seconds(59)],
+                                'Yesterday': [moment().subtract('days', 1).hours(0).minutes(0).seconds(0), moment().subtract('days', 1).hours(23).minutes(59).seconds(59)],
+                                'Last 7 Days': [moment().subtract('days', 6).hours(0).minutes(0).seconds(0), moment().hours(23).minutes(59).seconds(59)],
+                                'Last 30 Days': [moment().subtract('days', 29).hours(0).minutes(0).seconds(0), moment().hours(23).minutes(59).seconds(59)],
+                                'This Month': [moment().startOf('month').hours(0).minutes(0).seconds(0), moment().endOf('month').hours(23).minutes(59).seconds(59)],
+                                'Last Month': [moment().subtract('month', 1).startOf('month').hours(0).minutes(0).seconds(0), moment().subtract('month', 1).endOf('month').hours(23).minutes(59).seconds(59)]
+                            },
+                            opens: 'right',
+                            startDate: moment().subtract('days', 29),
+                            endDate: moment()
+                        },
+                        function (start, end, event) {
+                            $('#reportrange2 span').html(start.format('D MMMM YYYY, HH:mm:ss') + ' - ' + end.format('D MMMM YYYY, HH:mm:ss'));
+                            block_refresh($('#all_batch_job_block'));
+                            jsf.ajax.request(
+                                    $("#all_batch_job_controls"),
+                                    event,
+                                    {
+                                        'all_batch_job_controls': 'all_batch_job_controls',
+                                        'javax.faces.source': 'all_batch_job_controls',
+                                        'javax.faces.partial.event': 'click',
+                                        'javax.faces.partial.execute': 'batch_job_date_range_panel all_batch_job_controls',
+                                        'javax.faces.partial.render': 'all_batch_job_block',
+                                        'javax.faces.behavior.event': 'click',
+                                        'javax.faces.partial.ajax': 'true',
+                                        'all_batch_job_controls:start': start.format('D MMMM YYYY, HH:mm:ss'),
+                                        'all_batch_job_controls:end': end.format('D MMMM YYYY, HH:mm:ss')
+                                    }
+                            );
+                        });
+                        var startString = '#{FormJobList.startString}';
+                        var endString = '#{FormJobList.endString}';
+                        if (startString === '' || endString === '') {
+                            $("#reportrange2 span").html('Please select a date range');
+                        } else {
+                            $("#reportrange2 span").html(startString + ' - ' + endString);
+                        }
+                    }
+                    /* eof daterangepicker */
+
+                }
+            }
+            gDemos.init();
+            /*$('.datetimepicker').datetimepicker({
+                
+            });*/
+
+        });
+        
+        
+
+        
+    </script>
+</html>

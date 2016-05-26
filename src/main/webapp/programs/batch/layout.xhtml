@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+
+        <ui:define name="main-program-panel">
+
+            <div class="row"><!--Page message-->
+                <div class="col-md-12">
+                    <form jsf:id="ProgramBatch">
+                        <s2:messenger for="ProgramBatch" showDetail="true" showSummary="true" closable="true" />
+                    </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="block nb">
+                        <div class="block-head">
+                            <h2>Date Range</h2>
+                        </div>
+                        <div class="block-content controls">
+                                <div class="row-form">
+                                    <div class="col-md-12">
+                                        <div id="reportrange2" class="dtrange">
+                                            <span></span>
+                                            <b class="caret"></b>
+                                        </div>
+                                    </div>
+
+                                </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="block nb">
+                        <div class="block-head">
+                            <h2>Status</h2>
+                        </div>
+                        <div class="block-content controls">
+                            <!--Build it next time!-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="block nb" jsf:id="all_batch_job_block">
+                        <div class="block-head">
+                            <h2>Batch jobs</h2>
+                            <ul class="buttons">
+                                <form jsf:id="all_batch_job_controls">
+                                    <li>
+                                        <a href="#" title="Stop all batch jobs">
+                                            <span class="fa fa-stop-circle"></span>
+                                        </a>
+
+                                    </li>
+                                    <li>
+                                        <input type="hidden" id="start" jsf:value="#{FormPeriodFilter.startString}"
+                                               name="start"/>
+                                        <input type="hidden" id="end" jsf:value="#{FormPeriodFilter.endString}"
+                                               name="end"/>
+                                        
+                                        <a jsf:id="refresh_batch_jobs" href="#" class="" title="Refresh" 
+                                           >
+                                            <f:ajax event="click" render=":all_batch_job_block"
+                                                    listener="#{FormJobList.loadBatchJobs()}"
+                                                    onevent="refresh_list"
+                                                    />
+                                            <span class="fa fa-refresh"></span>
+                                        </a>
+
+                                    </li>
+                                    <li>
+                                        <a href="#add_new_batch_job_panel" data-toggle="modal"
+                                           title="Add new batch job"
+                                           >
+                                            <span class="fa fa-plus"></span>
+                                        </a>
+                                    </li>
+                                </form>
+
+                            </ul>
+                        </div>
+                        <ui:include src="all_batch_job_panel.xhtml" ></ui:include>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="add_new_batch_job_panel">
+                <ui:include src="add_new_batch_job_panel.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="edit_existing_batch_job_run_panel">
+                <ui:include src="edit_existing_batch_job_run_panel.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="edit_existing_batch_job_panel">
+                <ui:include src="edit_existing_batch_job_panel.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="cancel_this_run_panel">
+                <ui:include src="cancel_this_run_panel.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="cancel_all_future_run_panel">
+                <ui:include src="cancel_all_future_run_panel.xhtml"></ui:include>
+            </div>
+
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/moment.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/daterangepicker/daterangepicker.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery-ui-timepicker-addon.js" />
+            <!--<script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batchjob_popup.js" />-->
+            <!--<script type="text/javascript" src="#{request.contextPath}/programs/batch/js/batch_job_date_range.js" />-->
+            <script type="text/javascript" src="#{request.contextPath}/programs/batch/js/refresh_batch_job_list.js" />
+            <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.6.1/i18n/jquery-ui-timepicker-addon-i18n.js"/>-->
+        </ui:define>
+
+    </ui:composition>
+</html>
+

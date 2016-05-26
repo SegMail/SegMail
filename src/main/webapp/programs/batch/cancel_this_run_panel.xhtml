@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="FormCancelJobRun">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 id="popup_title" class="modal-title">Are you sure you want to cancel this run?</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <s2:messenger id="FormCancelJobRun_Messenger" for="FormCancelJobRun" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <p>
+                        All futures run will continue to be scheduled. 
+                    </p>
+                    <p>
+                        Batch job name: <strong>#{FormCancelJobRun.editingBatchJob.BATCH_JOB_NAME}</strong>
+                    </p>
+                    <p>
+                        Current run time: <strong>#{FormCancelJobRun.scheduledTime}</strong>
+                    </p>
+                    <p>
+                        Next run time: <strong>#{FormCancelJobRun.nextRunTime}</strong>
+                    </p>
+                </div>
+                <div class="modal-footer">
+
+                    <p:commandButton id="cancel_job_run_button" styleClass="btn btn-danger" 
+                                     value="Confirm Cancel" 
+                                     update="@form"
+                                     actionListener="#{FormCancelJobRun.delete()}"
+                                     >
+
+                    </p:commandButton>
+                    <p:commandButton id="close_button" styleClass="btn btn-default" 
+                                     value="Close" 
+                                     actionListener="#{FormCancelJobRun.closeWithoutSaving()}"
+                                     >
+
+                    </p:commandButton>
+                                     
+                </div>
+                <p:blockUI block="FormCancelJobRun" trigger="FormCancelJobRun:cancel_job_run_button"
+                           >
+                    <p id="spinner"></p>
+                </p:blockUI>
+
+            </div>
+        </div>
+    </form>
+
+</html>

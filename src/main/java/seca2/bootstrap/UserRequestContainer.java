@@ -6,8 +6,6 @@
 package seca2.bootstrap;
 
 import seca2.bootstrap.module.Path.LogicalPathParser;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.RequestScoped;
@@ -42,6 +40,7 @@ public class UserRequestContainer {
     
     //Test webservice
     private boolean webservice;
+    
 
     public String getProgramName() {
         return programName;
