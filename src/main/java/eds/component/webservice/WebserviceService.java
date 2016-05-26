@@ -39,7 +39,7 @@ public class WebserviceService {
     LandingService landingService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public User authenticateApplication(String username, String password, String ipAddress)
+    public User authenticateApplication(String username, String password, String serverName)
             throws UserAccountLockedException, UserLoginException {
 
         //try {
@@ -47,7 +47,8 @@ public class WebserviceService {
             User authenticatedUser = userService.login(username, password);
 
             //retrieve the user account linked to the ipAddress address
-            User wsLinkedAccount = landingService.getUserFromServerAddress(ipAddress);
+            //User wsLinkedAccount = landingService.getUserFromServerAddress(ipAddress);
+            User wsLinkedAccount = landingService.getUserFromServerName(serverName);
 
             //If either one is null or both are not the same, throw UserLoginException
             if (authenticatedUser == null

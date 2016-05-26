@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormEditJobRun">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 id="popup_title" class="modal-title">Edit batch job run</h4>
+                </div>
+                <div id="delete-template-1" class="delete-confirm-container">
+                    <div class="delete-container" data-role="main">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <s2:messenger id="FormEditJobRun_Messenger" for="FormEditJobRun" showDetail="true" showSummary="true"
+                                              class="form-group"></s2:messenger>
+                            </div>
+                            <div>
+                            <p>
+                                A batch job run is an instance of a batch job. Here, you can only modify a batch job 
+                                run's <strong>scheduled time</strong> and the <strong>server</strong> it executes on. To modify the batch job name and 
+                                steps, you need to modify the batch job itself.
+                            </p>
+                                </div>
+                            <div class="form-group">
+                                <label>
+                                    Scheduled date and time:
+                                </label>
+                                <span class="help-block">
+                                    Date and time that you want to start the batch job
+                                </span>
+                                <h:inputText class="form-control datetimepicker"
+                                       value="#{FormEditJobRun.scheduledTime}"
+                                       disabled="#{!FormEditJobRun.editable}"
+                                       pass:name="time"/>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Assign to server:
+
+                                </label>
+                                <span class="help-block">
+                                    The server which will execute this batch job
+                                </span>
+
+                                <h:selectOneMenu styleClass="form-control" style=""
+                                                 value="#{FormEditJobRun.selectedServerIdBatchJobRun}"
+                                                 disabled="#{!FormEditJobRun.editable}">
+                                    <f:selectItems value="#{FormEditJobRun.servers}" var="server" 
+                                                   itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
+                                                   itemValue="#{server.OBJECTID}">
+                                    </f:selectItems>
+
+                                </h:selectOneMenu>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
+                                             value="Save &amp; continue" 
+                                             rendered="#{FormEditJobRun.editable}"
+                                             actionListener="#{FormEditJobRun.saveAndContinue()}"
+                                             oncomplete="refresh_edit_box"
+                                             update="@form"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="save_close_button" styleClass="btn btn-primary" 
+                                             value="Save &amp; close" 
+                                             rendered="#{FormEditJobRun.editable}"
+                                             actionListener="#{FormEditJobRun.saveAndClose()}"
+                                             update="@form"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="close_button" styleClass="btn btn-default" 
+                                             value="Close" 
+                                             actionListener="#{FormEditJobRun.closeWithoutSaving()}"
+                                             >
+                            </p:commandButton>
+                            <!--<p:commandButton id="delete_button"  styleClass="btn btn-danger"
+                                             value="Cancel Run"
+                                             onclick="$('.delete-container').toggle()">
+
+                            </p:commandButton>-->
+
+                        </div>
+                    </div>
+                    <div class="delete-container" data-role="delete" style="display: none;">
+                        <div class="modal-body">
+                            <h2>Are you sure you want to cancel this batch job run?</h2>
+                            <p>
+                                You can choose to cancel only this run and continue the 
+                                next run, or cancel this run and any future runs.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <p:commandButton id="delete_confirm_this_run_button" styleClass="btn btn-danger" 
+                                             value="Cancel this run only"
+                                             actionListener="#{FormEditJobRun.delete()}"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="delete_confirm_all_run_button" styleClass="btn btn-danger" 
+                                             value="Cancel this run and future runs"
+                                             actionListener="#{FormEditJobRun.delete()}"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="cancel_delete_button"  styleClass="btn btn-default"
+                                             value="Return to previous screen"
+                                             onclick="$('.delete-container').toggle()">
+                            </p:commandButton>
+                        </div>
+                    </div>
+                </div>
+                <p:blockUI block="FormEditJobRun" 
+                           trigger="
+                            FormEditJobRun:save_continue_button,
+                            FormEditJobRun:save_close_button,
+                            FormEditJobRun:close_button
+                           "
+                           >
+                    <p id="spinner"></p>
+                </p:blockUI>
+
+            </div>
+        </div>
+    </form>
+</html>

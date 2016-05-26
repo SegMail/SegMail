@@ -17,7 +17,6 @@ import javax.faces.context.FacesContext;
  */
 public class DefaultKeys {
     
-    
     /**
      * 
      */

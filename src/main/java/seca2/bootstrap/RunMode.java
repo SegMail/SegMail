@@ -25,17 +25,4 @@ public enum RunMode {
         return this.name; //To change body of generated methods, choose Tools | Templates.
     }
     
-    public static RunMode getRunMode(String runMode){
-        if(runMode.toUpperCase().equals(RunMode.INSTALL.toString()))
-            return RunMode.INSTALL;
-        
-        if(runMode.toUpperCase().equals(RunMode.ERP.toString()))
-            return RunMode.ERP;
-        
-        if(runMode.toUpperCase().equals(RunMode.WEB.toString()))
-            return RunMode.WEB;
-        
-        return RunMode.ERP; //Default
-    }
-    
 }

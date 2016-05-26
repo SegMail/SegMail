@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormEditJob" jsf:disabled="#{!FormEditJob.editable}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 id="popup_title" class="modal-title">Edit batch job</h4>
+                </div>
+                <div id="delete-template-1" class="delete-confirm-container">
+                    <div class="delete-container" data-role="main">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <s2:messenger id="FormEditJob_Messenger" for="FormEditJob" showDetail="true" showSummary="true"
+                                              class="form-group"></s2:messenger>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Batch Job name:
+                                </label>
+                                <span class="help-block">
+                                    Name of the batch job
+                                </span>
+                                <h:inputText class="form-control" id="batchJobName"
+                                       value="#{FormEditJob.editingBatchJob.BATCH_JOB_NAME}"
+                                       disabled="#{!FormEditJob.editable}"
+                                       />
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Service name:
+                                </label>
+                                <span class="help-block">
+                                    Name of the business service module
+                                </span>
+
+                                <h:inputText class="form-control" id="serviceName" 
+                                       disabled="#{!FormEditJob.editable}"
+                                       value="#{FormEditJob.firstAndOnlyStep.SERVICE_NAME}"
+                                       />
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Service method:
+                                </label>
+                                <span class="help-block">
+                                    Name of the business service module method
+                                </span>
+
+                                <h:inputText class="form-control" id="hostname"
+                                       disabled="#{!FormEditJob.editable}"
+                                       value="#{FormEditJob.firstAndOnlyStep.SERVICE_METHOD}"
+                                       />
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Cron expression:
+                                </label>
+                                <span class="help-block">
+                                    Refer to <a target="_blank" href="http://www.nncron.ru/help/EN/working/cron-format.htm">this</a> on how to write a Cron expression.
+                                </span>
+                                <h:inputText class="form-control" id="cron" 
+                                       disabled="#{!FormEditJob.editable}"
+                                       value="#{FormEditJob.firstAndOnlyTrigger.CRON_EXPRESSION}" />
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    Assign to server:
+
+                                </label>
+                                <span class="help-block">
+                                    The server which will execute this batch job
+                                </span>
+
+                                <h:selectOneMenu styleClass="form-control" style=""
+                                                 disabled="#{!FormEditJob.editable}"
+                                                 value="#{FormEditJob.selectedServerIdBatchJob}"
+                                                 >
+                                    <f:selectItems value="#{FormEditJob.servers}" var="server" 
+                                                   itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
+                                                   itemValue="#{server.OBJECTID}">
+                                    </f:selectItems>
+
+                                </h:selectOneMenu>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
+                                             value="Save &amp; continue" 
+                                             
+                                             rendered="#{FormEditJob.editable}"
+                                             actionListener="#{FormEditJob.saveAndContinue()}"
+                                             update="@form"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="save_close_button" styleClass="btn btn-primary" 
+                                             value="Save &amp; close" 
+                                             rendered="#{FormEditJob.editable}"
+                                             actionListener="#{FormEditJob.saveAndClose()}"
+                                             update="@form"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="close_button" styleClass="btn btn-default" 
+                                             value="Close" 
+                                             actionListener="#{FormEditJob.closeWithoutSaving()}"
+                                             >
+                            </p:commandButton>
+                            <!--<p:commandButton id="delete_button"  styleClass="btn btn-danger"
+                                             value="Delete"
+                                             onclick="$('.delete-container').toggle()">
+
+                            </p:commandButton>-->
+
+                        </div>
+                    </div>
+                    <div class="delete-container" data-role="delete" style="display: none;">
+                        <div class="modal-body">
+                            <h2>Are you sure you want to delete this batch job?</h2>
+                            <p>
+                                This will also delete all future runs.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <p:commandButton id="delete_confirm_button" styleClass="btn btn-danger" 
+                                             value="Confirm delete"
+                                             actionListener="#{FormEditJob.delete()}"
+                                             >
+                            </p:commandButton>
+                            <p:commandButton id="cancel_delete_button"  styleClass="btn btn-default"
+                                             value="Cancel"
+                                             onclick="$('.delete-container').toggle()">
+                            </p:commandButton>
+                        </div>
+                    </div>
+                </div>
+                <p:blockUI block="FormEditJob" trigger="
+                           FormEditJob:save_continue_button,
+                           FormEditJob:save_close_button,
+                           FormEditJob:close_button
+                           "
+                           >
+                    <p id="spinner"></p>
+                </p:blockUI>
+
+            </div>
+        </div>
+    </form>
+
+</html>

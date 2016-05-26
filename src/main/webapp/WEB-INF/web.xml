@@ -34,10 +34,10 @@
         <param-value>tru</param-value>
     </context-param>-->
     
-    <context-param>
+    <!--<context-param>
         <param-name>RUN_MODE</param-name>
         <param-value>erp</param-value>
-    </context-param>
+    </context-param>-->
     
     <context-param>
         <param-name>LOGIN_PATH</param-name>

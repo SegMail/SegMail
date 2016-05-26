@@ -1,3 +1,10 @@
+/**
+ * This file exist to override the horrendous primefaces styling. I have to use
+ * primefaces in the first place because it is the easiest shit for a beginner.
+ * After 2 years, it's time to move on. One day we will be free of PF.
+ *
+ */
+
 /*For ui-block*/
 div.ui-widget-overlay {
     background-color: rgba(0,0,0,0.5);
@@ -90,4 +97,8 @@ table.ui-fileupload-files {
 
 .ui-fileupload-files .ui-fileupload-cancel span.ui-button-text{
     
+}
+
+.ui-datepicker-div .ui-timepicker-div dl dd {
+    margin: 0 0 5px 0;
 }
