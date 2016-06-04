@@ -88,8 +88,9 @@
                                 </div>
                                 <div class="page-toolbar-block pull-right">
                                     <form jsf:id="FormToolbarRight">
-                                        <ui:insert name="toolbar-right"></ui:insert>
+                                        
                                         <div class="widget-info widget-from">
+                                            <ui:insert name="toolbar-right"></ui:insert>
                                             <button class="btn btn-default tipb"
                                                     data-original-title="If you've just updated something and don't see it yet, click here."
                                                     jsf:actionListener="#{FormToolbarRight.refresh()}">

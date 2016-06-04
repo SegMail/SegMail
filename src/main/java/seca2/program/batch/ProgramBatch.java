@@ -64,7 +64,7 @@ public class ProgramBatch extends Program {
     }
 
     @Override
-    public void initProgramParams() {
+    public void initRequestParams() {
         
     }
 

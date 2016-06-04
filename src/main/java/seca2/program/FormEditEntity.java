@@ -15,7 +15,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
  *
  * @author LeeKiatHaw
  */
-public interface FormEdit {
+public interface FormEditEntity {
     
     public void saveAndContinue();
     

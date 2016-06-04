@@ -55,7 +55,8 @@ public class ControlViewHandler extends ViewHandlerWrapper {
         
         //Add request parameters
         for(String param : reqContainer.getPathParser().getOrderedParams()) {
-            pathInfo.concat("/"+param);
+            if(param != null && !param.isEmpty())
+                pathInfo = pathInfo.concat("/"+param);
         }
             
         //return contextPath.concat("").concat(pathInfo); 

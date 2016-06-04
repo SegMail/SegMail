@@ -7,7 +7,8 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
         <ui:define name="main-program-panel">
@@ -19,32 +20,46 @@
                     </form>
                 </div>
             </div>
-            
+
             <div id="stats_panel"> <!--stats widget-->
-                
+
             </div>
-            
+
             <c:choose>
                 <c:when test="#{FormProgramModeSwitch.editCampaignMode}"> <!--Individual Campaign mode-->
-                    <h2>This is for editing individual campaign</h2>
+                    <ui:include src="edit_campaign.xhtml"></ui:include>
                 </c:when>
                 <c:otherwise><!--List Campaign mode-->
-                    <h2>This is the list of campaign</h2>
+                    <ui:include src="campaign_list_panel.xhtml" ></ui:include>
                 </c:otherwise>
             </c:choose>
-            
+
             <div id="transactions_panel"> <!--Transaction widget-->
-                
+                <form jsf:id="form">
+                    THis is the form
+                </form>
+            </div>
+            <div class="modal fade" id="create_new_campaign">
+                <ui:include src="create_new_campaign.xhtml"></ui:include>
+            </div>
+            <!--<div jsf:rendered="#{FormEditCampaign.editingCampaign ne null}" class="modal fade" id="edit_campaign">
+                <ui:include src="edit_campaign.xhtml"></ui:include>
+            </div>-->
+            <div class="modal fade" id="create_new_activity">
+                <ui:include src="create_new_activity.xhtml"></ui:include>
+            </div>
+            <div class="modal fade" id="edit_campaign_activity">
+                <ui:include src="edit_campaign_activity.xhtml"></ui:include>
             </div>
         </ui:define>
 
         <ui:define name="scripts-bottom" id="scripts-bottom">
-            <!--<script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/template_popup.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/validation.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/summernote_hack.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/delete_confirmation.js" />
-            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>-->
+
         </ui:define>
+
+        <ui:define name="toolbar-right">
+            <ui:include src="edit_campaign_controls.xhtml" rendered="#{FormEditCampaign.editingCampaign ne null}" />
+        </ui:define>    
 
     </ui:composition>
 </html>

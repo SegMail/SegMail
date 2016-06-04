@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+
+    <form jsf:id="FormBasicSettings">
+        <div class="row-form">
+            <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
+                          class="form-group"></s2:messenger>
+        </div>
+
+        <div class="row-form">
+            <label>
+                Campaign name:
+            </label>
+            <span class="help-block">
+                Name of your campaign
+            </span>
+            <input type="text" class="form-control" id="serviceName"
+                   jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_NAME}"
+                   />
+        </div>
+
+        <div class="row-form">
+            <label>
+                Campaign goals:
+            </label>
+            <span class="help-block">
+                Briefly list down the goals of this campaign
+            </span>
+            <textarea class="form-control" id="campaignGoals"
+                      jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_GOALS}"
+                      />
+        </div>
+
+    </form>
+</html>

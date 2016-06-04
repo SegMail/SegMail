@@ -32,6 +32,24 @@ public class Program extends EnterpriseObject{
     
     private Boolean IS_PUBLIC; //http://stackoverflow.com/a/10648207/5765606
     
+    public Program() {
+        super();
+    }
+    
+    /**
+     * Copy constructor
+     * @param program 
+     */
+    public Program(Program program) {
+        this.PROGRAM_NAME = program.PROGRAM_NAME;
+        this.VIEW_DIRECTORY = program.VIEW_DIRECTORY;
+        this.VIEW_ROOT = program.VIEW_ROOT;
+        this.BEAN_DIRECTORY = program.BEAN_DIRECTORY;
+        this.DISPLAY_TITLE = program.DISPLAY_TITLE;
+        this.DISPLAY_DESCRIPTION = program.DISPLAY_DESCRIPTION;
+        this.IS_PUBLIC = program.IS_PUBLIC;
+    }
+    
     public String getPROGRAM_NAME() {
         return PROGRAM_NAME;
     }

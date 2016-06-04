@@ -228,7 +228,7 @@ public class ProgramList extends Program implements Serializable {
     }
 
     @Override
-    public void initProgramParams() {
+    public void initRequestParams() {
         
     }
 

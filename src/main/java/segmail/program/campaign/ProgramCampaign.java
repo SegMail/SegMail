@@ -25,20 +25,21 @@ public class ProgramCampaign extends Program{
     private long editingCampaignId;
     private Campaign editingCampaign;
     
+    private List<Campaign> allCampaigns;
+    
     @Override
     public void clearVariables() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
-    public void initProgramParams() {
-        initEditCampaignMode(); //On first load
-        loadCampaign();
+    public void initRequestParams() {
+        //loadCampaign(); do this in forms
     }
 
     @Override
     public void initProgram() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //initEditCampaignMode(); //On first load do this in Forms
     }
 
     
@@ -65,25 +66,14 @@ public class ProgramCampaign extends Program{
     public void setEditingCampaign(Campaign editingCampaign) {
         this.editingCampaign = editingCampaign;
     }
-    
-    public void initEditCampaignMode() {
-        //Initialize the campaign ID, if exist and decide whether to load the campaign or not.
-        
-        if(this.getEditingCampaignId() > 0) {
-            this.setEditCampaignMode(true);
-            return;
-        }
-        
-        this.setEditCampaignMode(false);
+
+    public List<Campaign> getAllCampaigns() {
+        return allCampaigns;
+    }
+
+    public void setAllCampaigns(List<Campaign> allCampaigns) {
+        this.allCampaigns = allCampaigns;
     }
     
-    public void loadCampaign() {
-        List<String> params = reqContainer.getProgramParamsOrdered();
-        if(params != null && !params.isEmpty())
-            this.setEditingCampaignId(Long.parseLong(params.get(0)));
-        Campaign editingCampaign = campaignService.getCampaign(editingCampaignId);
-        setEditingCampaign(editingCampaign);
-        
-    }
     
 }

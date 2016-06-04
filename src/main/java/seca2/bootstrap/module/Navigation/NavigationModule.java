@@ -151,7 +151,15 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean bypassDuringInstall() {
-        return false; //To change body of generated methods, choose Tools | Templates.
+        //return false; 
+        /*
+         * Because after installation, when you change mode to ERP, upon logging 
+         * in it will be noted that you have already instantiate menuitems and 
+         * not reload it again as you will still be in the same session. In 
+         * general, it is best not to load any EnterpriseObject in BootstrapModules
+         * during installation.
+         */
+        return true;
     }
 
     @Override

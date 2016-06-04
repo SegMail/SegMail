@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <div class="row">
+        <form jsf:id="FormEditCampaign">
+            <div class="col-md-12">
+                <s2:messenger id="FormEditCampaign_Messenger" for="FormEditCampaign" showDetail="true" showSummary="true"
+                              class="form-group"></s2:messenger>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-md-9">
+            <div class="block">
+
+                <ui:include src="campaign_activities.xhtml" />
+            </div>
+
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="block nb">
+                <div class="block-head">
+                    <h2>Basic Settings</h2>
+                </div>
+                <div class="block-content">
+                    <ui:include src="basic_settings.xhtml" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+
+</html>

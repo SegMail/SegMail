@@ -28,7 +28,7 @@ public abstract class Program implements Serializable {
     @PostConstruct
     public void init() {
         clearVariables();
-        initProgramParams();
+        initRequestParams();
         initProgram();
     }
     
@@ -37,7 +37,7 @@ public abstract class Program implements Serializable {
      */
     public abstract void clearVariables();
     
-    public abstract void initProgramParams();
+    public abstract void initRequestParams();
     
     public abstract void initProgram();
     

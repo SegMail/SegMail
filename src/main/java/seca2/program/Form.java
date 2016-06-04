@@ -7,12 +7,14 @@ package seca2.program;
 
 import java.io.Serializable;
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
 
 /**
  * A template for the backing beans for JSF/HTML forms
  * 
  * @author LeeKiatHaw
  */
+@RequestScoped
 public abstract class Form implements Serializable {
     
     protected String FORM_NAME;

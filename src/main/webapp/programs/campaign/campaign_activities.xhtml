@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormCampaignActivities">
+        <!--<div class="block-head">
+            <h2>Activities</h2>
+        </div>-->
+        <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
+                      class="form-group"></s2:messenger>
+
+        <div class="block-content">
+            <h2 class="pull-left">Campaign Activites</h2>
+            <div class="pull-right">
+                
+                <a href="#create_new_activity" 
+                   class="btn btn-default nm" data-toggle="modal">
+                    <span class="fa fa-plus"></span>
+                </a>
+                <button type="button" class="btn btn-default nm">
+                    <span class="fa fa-refresh">
+                        
+                    </span>
+                </button>
+            </div>
+        </div>
+        <div class="block-content np">
+            <table class="table table-hover">
+                <tbody>
+                    <tr>
+                        <th>Status</th>
+                        <th>Date Sent/Scheduled</th>
+                        <th>Subject</th>
+                        <th>Clickthrough %</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="group group-green"></span>
+                            Completed
+                        </td>
+                        <td>3rd June</td>
+                        <td>Welcome to Segmail</td>
+                        <td>4.55%</td>
+                        <td>
+                            <div>
+                                <a href="#edit_campaign_activity"
+
+                                   style="margin-right: 3px;"
+                                   class="btn btn-success list-item-trigger"
+                                   title="Edit Activity"
+                                   >
+                                    <i class="fa fa-pencil-square"></i>
+                                </a>
+                                 <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+
+                                   style="margin-right: 3px;"
+                                   class="btn btn-danger list-item-trigger"
+                                   title="Edit Campaign"
+                                   >
+                                    <i class="fa fa-stop-circle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="group group-red"></span>
+                            Stopped
+                        </td>
+                        <td>3rd June</td>
+                        <td>Some features and tips</td>
+                        <td>3.21%</td>
+                        <td>
+                            <div>
+                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+
+                                   style="margin-right: 3px;"
+                                   class="btn btn-success list-item-trigger"
+                                   title="Edit Campaign"
+                                   >
+                                    <i class="fa fa-pencil-square"></i>
+                                </a>
+                                 <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+
+                                   style="margin-right: 3px;"
+                                   class="btn btn-danger list-item-trigger"
+                                   title="Edit Campaign"
+                                   >
+                                    <i class="fa fa-pencil-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="group group-blue"></span>
+                            In progress
+                        </td>
+                        <td>3rd June</td>
+                        <td>Some features and tips</td>
+                        <td>3.21%</td>
+                        <td>
+                            <div>
+                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+
+                                   style="margin-right: 3px;"
+                                   class="btn btn-success list-item-trigger"
+                                   title="Edit Campaign"
+                                   >
+                                    <i class="fa fa-pencil-square"></i>
+                                </a>
+                                 <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+
+                                   style="margin-right: 3px;"
+                                   class="btn btn-danger list-item-trigger"
+                                   title="Edit Campaign"
+                                   >
+                                    <i class="fa fa-pencil-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="block-footer">
+            <div class="pull-left">
+                
+            </div>
+            <div class="pull-right">
+
+            </div>
+        </div>
+    </form>
+    
+</html>

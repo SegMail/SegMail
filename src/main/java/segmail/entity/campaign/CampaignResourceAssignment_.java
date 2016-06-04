@@ -3,16 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.subscription.autoresponder;
+package segmail.entity.campaign;
 
+import eds.entity.data.EnterpriseObject;
+import eds.entity.data.EnterpriseRelationship;
 import eds.entity.data.EnterpriseRelationship_;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.metamodel.StaticMetamodel;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(Assign_AutoresponderEmail_List.class)
-public class Assign_AutoresponderEmail_List_ extends EnterpriseRelationship_{
-    
+@StaticMetamodel(CampaignActivity.class)
+public class CampaignResourceAssignment_ extends EnterpriseRelationship_ {
+
 }
