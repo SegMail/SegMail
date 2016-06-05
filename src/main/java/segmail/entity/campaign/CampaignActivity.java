@@ -12,7 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /**
- *
+ * Can more than 1 Campaign share the same activity???
+ * 
  * @author LeeKiatHaw
  */
 @Entity
@@ -24,6 +25,8 @@ public class CampaignActivity extends EnterpriseObject {
     private String ACTIVITY_TYPE;
     
     private String ACTIVITY_GOALS;
+    
+    private String ACTIVITY_CONTENT;
     
     private String STATUS;
     
@@ -98,6 +101,17 @@ public class CampaignActivity extends EnterpriseObject {
     public void setACTIVITY_GOALS(String ACTIVITY_GOALS) {
         this.ACTIVITY_GOALS = ACTIVITY_GOALS;
     }
+
+    @Column(columnDefinition="MEDIUMTEXT")
+    public String getACTIVITY_CONTENT() {
+        return ACTIVITY_CONTENT;
+    }
+
+    public void setACTIVITY_CONTENT(String ACTIVITY_CONTENT) {
+        this.ACTIVITY_CONTENT = ACTIVITY_CONTENT;
+    }
+    
+    
 
     @Override
     public void randInit() {

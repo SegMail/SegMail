@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Named;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -31,6 +33,8 @@ import seca2.program.Program;
  *
  * @author LeeKiatHaw
  */
+@SessionScoped
+@Named("ProgramBatch")
 public class ProgramBatch extends Program {
     
     private List<BatchJobRun> batchJobRuns;

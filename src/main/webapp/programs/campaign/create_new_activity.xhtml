@@ -39,7 +39,7 @@
                     </button>
                 </div>
             </div>
-            <div id="email_activity" data-role="delete" style="display: none;">
+            <div id="email_activity" class="refresh" data-role="delete" style="display: none;">
                 <form jsf:id="FormCreateNewEmailActivity">
                     <div class="modal-body">
                         <div class="form-group">
@@ -48,10 +48,10 @@
                         </div>
                         <div class="form-group">
                             <label>
-                               Enter a name for this email:
+                               Enter a title for this email:
                             </label>
                             <span class="help-block">
-                               This is not the subject of the email, just a name for identification.
+                               This will be the subject of the email, but can be changed later.
                             </span>
                             <input type="text" class="form-control" id="campaignName"
                                    jsf:value="#{FormCreateNewEmailActivity.activityName}"
@@ -62,7 +62,7 @@
                                 Briefly list down the goals of this campaign:
                             </label>
                             <span class="help-block">
-                                (Optional)
+                                [Optional] This is to help you remember, not the content of the email.
                             </span>
                             <textarea class="form-control" id="campaignGoals"
                                       jsf:value="#{FormCreateNewEmailActivity.activityGoals}"
@@ -70,12 +70,16 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button onclick="block_refresh($('#email_activity'));
-                                return false;" 
+                        <h:commandLink
                                 class="btn btn-success">
+                            <f:ajax event="click" onevent="refresh_list"
+                                    render="@form :ProgramCampaign"
+                                    execute="@form"
+                                    listener="#{FormCreateNewEmailActivity.createNew()}"
+                                    ></f:ajax>
                             <span class="fa fa-floppy-o"></span>
                             Create
-                        </button>
+                        </h:commandLink>
                         <button class="btn btn-default"
                                 onclick="$('#email_activity').toggle();
                                         $('.delete-container').toggle();
@@ -84,6 +88,7 @@
                         </button>
 
                     </div>
+                    
                 </form>
             </div>
             <div id="social_media_activity" data-role="delete" style="display: none;">

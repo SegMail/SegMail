@@ -13,20 +13,20 @@
         <!--<div class="block-head">
             <h2>Activities</h2>
         </div>-->
-        <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
+        <s2:messenger id="FormCampaignActivities_Messenger" for="FormCampaignActivities" showDetail="true" showSummary="true"
                       class="form-group"></s2:messenger>
 
         <div class="block-content">
             <h2 class="pull-left">Campaign Activites</h2>
             <div class="pull-right">
-                
+
                 <a href="#create_new_activity" 
                    class="btn btn-default nm" data-toggle="modal">
                     <span class="fa fa-plus"></span>
                 </a>
                 <button type="button" class="btn btn-default nm">
                     <span class="fa fa-refresh">
-                        
+
                     </span>
                 </button>
             </div>
@@ -36,11 +36,48 @@
                 <tbody>
                     <tr>
                         <th>Status</th>
-                        <th>Date Sent/Scheduled</th>
+                        <th>Date Created</th>
                         <th>Subject</th>
                         <th>Clickthrough %</th>
                         <th></th>
                     </tr>
+                    <c:forEach items="#{FormCampaignActivities.allActivities}" var="activity" >
+                        <tr>
+                            <td>
+                                <span class="group group-#{FormCampaignActivities.activityStatusMapping.get(activity.STATUS)}">
+                                </span>
+                                #{FormCampaignActivities.toReadableActivityStatus(activity.STATUS)}
+                            </td>
+                            <td>
+                                #{activity.DATE_CREATED}
+                            </td>
+                            <td>
+                                #{activity.ACTIVITY_NAME}
+                            </td>
+                            <td>
+                                4.55% (fake)
+                            </td>
+                            <td>
+                                <div>
+                                    <h:commandLink 
+                                       pass:href="#edit_campaign_activity"
+                                       pass:data-toggle="modal"
+                                       style="margin-right: 3px;"
+                                       styleClass="btn btn-success list-item-trigger"
+                                       title="Edit Activity"
+                                       >
+                                        <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
+                                                render="FormEditEmailActivity"
+                                                onevent="refresh_summernote"
+                                                >
+                                        </f:ajax>
+                                        <i class="fa fa-pencil-square"></i>
+                                    </h:commandLink>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </c:forEach>
                     <tr>
                         <td>
                             <span class="group group-green"></span>
@@ -59,7 +96,7 @@
                                    >
                                     <i class="fa fa-pencil-square"></i>
                                 </a>
-                                 <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
 
                                    style="margin-right: 3px;"
                                    class="btn btn-danger list-item-trigger"
@@ -88,7 +125,7 @@
                                    >
                                     <i class="fa fa-pencil-square"></i>
                                 </a>
-                                 <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
 
                                    style="margin-right: 3px;"
                                    class="btn btn-danger list-item-trigger"
@@ -117,7 +154,7 @@
                                    >
                                     <i class="fa fa-pencil-square"></i>
                                 </a>
-                                 <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
+                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
 
                                    style="margin-right: 3px;"
                                    class="btn btn-danger list-item-trigger"
@@ -134,12 +171,12 @@
         </div>
         <div class="block-footer">
             <div class="pull-left">
-                
+
             </div>
             <div class="pull-right">
 
             </div>
         </div>
     </form>
-    
+
 </html>

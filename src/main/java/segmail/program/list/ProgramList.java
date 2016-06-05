@@ -151,7 +151,7 @@ public class ProgramList extends Program implements Serializable {
         this.selectedWelcomeEmailId = selectedWelcomeEmailId;
     }
     
-    public void refresh(){
+    /*public void refresh(){
         try {
             //redirect to itself after setting list editing
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -161,7 +161,7 @@ public class ProgramList extends Program implements Serializable {
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
-    }
+    }*/
 
     public List<SubscriptionListField> getFieldList() {
         return fieldList;

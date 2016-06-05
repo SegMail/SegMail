@@ -12,10 +12,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.UserRequestContainer;
-import seca2.bootstrap.UserSessionContainer;
 import seca2.bootstrap.module.Client.ClientContainer;
-import seca2.program.Form;
 import seca2.program.FormListEntity;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.Campaign;
@@ -28,7 +25,7 @@ import segmail.entity.campaign.Campaign;
 @Named("FormCampaignListPanel")
 public class FormCampaignListPanel implements FormListEntity {
     
-    private final int MAX_GOAL_LENGTH = 50;
+    private final int MAX_GOAL_LENGTH = 30;
 
     @EJB CampaignService campaignService;
     

@@ -5,18 +5,25 @@
  */
 package segmail.program.campaign;
 
+import eds.entity.batch.BATCH_JOB_RUN_STATUS;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import seca2.program.Program;
 import segmail.component.campaign.CampaignService;
+import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Campaign;
+import segmail.entity.campaign.CampaignActivity;
 
 /**
  *
  * @author Administrator
  */
 @Named("ProgramCampaign")
+@SessionScoped
 public class ProgramCampaign extends Program{
     
     @EJB CampaignService campaignService;
@@ -26,6 +33,11 @@ public class ProgramCampaign extends Program{
     private Campaign editingCampaign;
     
     private List<Campaign> allCampaigns;
+    
+    private List<CampaignActivity> allActivities;
+    private Map<String,String> activityStatusMapping;
+    
+    private CampaignActivity editingActivity;
     
     @Override
     public void clearVariables() {
@@ -40,6 +52,11 @@ public class ProgramCampaign extends Program{
     @Override
     public void initProgram() {
         //initEditCampaignMode(); //On first load do this in Forms
+        activityStatusMapping = new HashMap<String,String>();
+        activityStatusMapping.put(ACTIVITY_STATUS.NEW.name, "primary");
+        activityStatusMapping.put(ACTIVITY_STATUS.STARTED.name, "info");
+        activityStatusMapping.put(ACTIVITY_STATUS.COMPLETED.name, "success");
+        activityStatusMapping.put(ACTIVITY_STATUS.STOPPED.name, "default");
     }
 
     
@@ -74,6 +91,31 @@ public class ProgramCampaign extends Program{
     public void setAllCampaigns(List<Campaign> allCampaigns) {
         this.allCampaigns = allCampaigns;
     }
+
+    public List<CampaignActivity> getAllActivities() {
+        return allActivities;
+    }
+
+    public void setAllActivities(List<CampaignActivity> allActivities) {
+        this.allActivities = allActivities;
+    }
+
+    public Map<String, String> getActivityStatusMapping() {
+        return activityStatusMapping;
+    }
+
+    public void setActivityStatusMapping(Map<String, String> activityStatusMapping) {
+        this.activityStatusMapping = activityStatusMapping;
+    }
+
+    public CampaignActivity getEditingActivity() {
+        return editingActivity;
+    }
+
+    public void setEditingActivity(CampaignActivity editingActivity) {
+        this.editingActivity = editingActivity;
+    }
+    
     
     
 }

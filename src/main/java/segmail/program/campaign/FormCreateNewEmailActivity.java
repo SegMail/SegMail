@@ -5,6 +5,7 @@
  */
 package segmail.program.campaign;
 
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,10 +53,12 @@ public class FormCreateNewEmailActivity implements FormCreateEntity {
     @Override
     public void createNew() {
         try {
-            campaignService.createCampaignActivity(activityName, activityGoals, ACTIVITY_TYPE.EMAIL);
+            campaignService.createCampaignActivity(program.getEditingCampaignId(),activityName, activityGoals, ACTIVITY_TYPE.EMAIL);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Activity created. You can edit your activity now.", "");
             program.refresh();
         } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
