@@ -31,11 +31,17 @@ function preview() {
 
     $('#content').next().find('.note-editable').each(function () {
 
+        var height = $('#editor-form').height();
         $('#preview').html($(this).html());
         var maxWidth = largestWidth('#preview');
-        var scale = $('#preview').width() / maxWidth;
+        var scaleX = $('#preview').width() / maxWidth;
+        if(scaleX > 1)
+            scaleX = 1/scaleX;
+        var scaleY = $('#preview').height() / height;
+        if(scaleY > 1)
+            scaleY = 1/scaleY;
         $('#preview').css({
-            transform: 'scale(' + scale + ')',
+            transform: 'scale(' + scaleX + ','+scaleY+')',
             'transform-origin': '0 0 0'
         });
     });
@@ -58,24 +64,49 @@ function highlightAndCreateLinks() {
 
     var index = 1;
     var prevPos = 0;
+    var positions = [];
+    //Clear the preview pane first
+    $('#links').empty();
+    
     $('#preview').find('a').each(function () {
         //console.log($(this).attr('href'));
         var offset = $(this).offset().top - $('#preview').offset().top;
-        console.log($(this).attr('href')+'(offset:'+offset+')');
+        //console.log($(this).attr('href')+'(offset:'+offset+')');
         
+        positions.push(offset);
+        
+        var marginTop = Math.max(offset - prevPos - $('#links div').last().height(),0);
         //Add new element to links pane
         $('#links').append(
                 "<div style='margin-top: "
-                +(offset - prevPos)
-                +"px;'>"
-                +"<span class='badge badge-primary'>"
-                +(index++)
-                +"</span> "
-                +$(this).text()
-                +"</div>"
+                + marginTop
+                + "px;'>"
+                + "<span class='badge badge-primary'>"
+                + (index++)
+                + "</span> "
+                + $(this).text()
+                + "</div>"
                 );
-        prevPos = offset;
+        //factor in the height for offset
+        var prevHeight = $('#links div').last().height();
+        prevPos = offset;// - 
+        
     });
+    //Reorganize their position, or factor in their height during creation
+    
+}
+
+/**
+ * This algorithm must produce an evenly distributed list of items based on their 
+ * position offset in posArray.
+ * 
+ * @param {type} posArray
+ * @returns {undefined}
+ */
+function rearrangeDivs(posArray) {
+    for(var i=0; i<posArray.length; i++) {
+        
+    }
 }
 
 function largestWidth(selector) {
