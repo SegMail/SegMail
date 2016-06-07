@@ -34,12 +34,8 @@ function preview() {
         var height = $('#editor-form').height();
         $('#preview').html($(this).html());
         var maxWidth = largestWidth('#preview');
-        var scaleX = $('#preview').width() / maxWidth;
-        if(scaleX > 1)
-            scaleX = 1/scaleX;
-        var scaleY = $('#preview').height() / height;
-        if(scaleY > 1)
-            scaleY = 1/scaleY;
+        var scaleX = Math.min($('#preview').width() / maxWidth,1);
+        var scaleY = Math.min($('#preview').height() / height,1);
         $('#preview').css({
             transform: 'scale(' + scaleX + ','+scaleY+')',
             'transform-origin': '0 0 0'

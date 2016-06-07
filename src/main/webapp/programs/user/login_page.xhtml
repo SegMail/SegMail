@@ -41,32 +41,38 @@
             </nav>
         </ui:define>
         <ui:define name="login-block">
-            <div class="login" style="margin-bottom: 0px;"> <!--hack to cover the whole screen with the canvas colour-->
-                <div class="login-screen">
+            <div class="login" > <!--hack to cover the whole screen with the canvas colour-->
+                <div class="login-screen block">
                     <div class="login-icon">
-                        <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/images/login/icon.png"/>
+                        <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/css/images/login/icon.png"/>
                         <h4>Login to <small>Segmail</small></h4>
                     </div>
-                    <div class="login-form col-lg-8">
-                        <form jsf:id="form-user-login" class="login-form">
+                    <div class="login-form">
+                        <form jsf:id="form-user-login">
                             <div class="form-group">
-                                <h:inputText id="login-username" class="form-control login-field"
-                                             value="#{FormUserLogin.username}" title="test-tooltip"
-                                             maxlength="20"/>
-                                <p:watermark for="login-username" value="Username" />
-                                <p:tooltip for="login-username" styleClass="tooltip fade bottom in"
-                                           showEvent="focus" hideEvent="blur" />
+                                <input type="text" id="login-username"
+                                       class="form-control login-field"
+                                       jsf:value="#{FormUserLogin.username}"
+                                       placeholder="Enter your username" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
                                 
                             </div>
                             <div class="form-group">
-                                <h:inputSecret id="login-password" class="form-control login-field"
-                                               value="#{FormUserLogin.password}" maxlength="20"
-                                               />
-                                <p:watermark for="login-password" value="Password" />
-                                <label class="login-field-icon fui-user" for="login-password"></label>
+                                <input type="password" id="login-password"
+                                       class="form-control login-field"
+                                       jsf:value="#{FormUserLogin.password}"
+                                       placeholder="Password" />
+                                <label class="login-field-icon fui-lock" for="login-password"></label>
                             </div>
-                            <p:commandButton id="login-button" styleClass="btn btn-lg btn-primary btn-block"
+                            <h:commandLink styleClass="btn btn-lg btn-primary btn-block"
+                               >
+                                <f:ajax listener="#{FormUserLogin.login()}"
+                                        render="@form" execute="@form"
+                                        event="click"
+                                        ></f:ajax>
+                                   Log in
+                            </h:commandLink>
+                            <!--<p:commandButton id="login-button" styleClass="btn btn-lg btn-primary btn-block"
                                              value="Log in" action="#{FormUserLogin.login()}"
                                              update="@form" process="@form"/>
                             <h:commandLink styleClass="login-link" value="Lost your password?" />
@@ -75,7 +81,7 @@
 
                             <p:blockUI id="loginFormBlock" block="form-user-login" trigger="form-user-login:login-button">
                                 <p id="spinner">Please wait while we do what we do best.</p>
-                            </p:blockUI>
+                            </p:blockUI>-->
                         </form>
                     </div>
                 </div>
