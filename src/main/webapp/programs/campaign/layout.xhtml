@@ -63,7 +63,11 @@
 
         <ui:define name="toolbar-right">
             <ui:include src="edit_campaign_controls.xhtml" rendered="#{FormEditCampaign.editingCampaign ne null}" />
-        </ui:define>    
+        </ui:define>
+        
+        <ui:define name="head">
+            <script type="text/css" src="#{request.contextPath}/programs/campaign/css/bounce.css" />
+        </ui:define>
 
     </ui:composition>
 </html>

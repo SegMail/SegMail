@@ -1,5 +1,5 @@
 var SUMMERNOTE_HEIGHT = 280;
-
+var PREVIEW_HEIGHT = 477;
 
 /**
  * To submit a JSF partial request using pure JS, you need to:
@@ -35,24 +35,14 @@ function preview() {
         $('#preview').html($(this).html());
         var maxWidth = largestWidth('#preview');
         var scaleX = Math.min($('#preview').width() / maxWidth,1);
-        var scaleY = Math.min($('#preview').height() / height,1);
+        var scaleY = Math.min(PREVIEW_HEIGHT / $('#preview').height(),1);
         $('#preview').css({
             transform: 'scale(' + scaleX + ','+scaleY+')',
             'transform-origin': '0 0 0'
         });
+        //Transform the container as well, or the whole modal will remain long
+        $('#preview-form').height(scaleY*$('#preview').height());
     });
-    /*var realTextboxParent = document.getElementById('content').nextSibling;
-     for (var i=0; i<realTextboxParent.childNodes.length; i++){
-     var child = realTextboxParent.childNodes[i];
-     if(child.className === 'note-editable'){
-     var scale = $('#preview').innerWidth() / child
-     $('#preview').html(child.innerHTML).css({
-     transform : 'scale('+scale+')',
-     'transform-origin' : '0 0 0'
-     });
-     break;
-     }
-     }*/
 
 }
 
@@ -76,7 +66,9 @@ function highlightAndCreateLinks() {
         $('#links').append(
                 "<div style='margin-top: "
                 + marginTop
-                + "px;'>"
+                + "px;' "
+                + "class='css-bounce' "
+                +">"
                 + "<span class='badge badge-primary'>"
                 + (index++)
                 + "</span> "
