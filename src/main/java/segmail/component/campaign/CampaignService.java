@@ -127,14 +127,14 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivity createCampaignActivity(long campaignId, String name, String goals, ACTIVITY_TYPE type) throws IncompleteDataException, EntityNotFoundException {
-        if(name == null || name.isEmpty())
-            throw new IncompleteDataException("Campaign activities must have a name.");
         
         CampaignActivity newActivity = new CampaignActivity();
         newActivity.setACTIVITY_NAME(name);
         newActivity.setACTIVITY_GOALS(goals);
         newActivity.setACTIVITY_TYPE(type.name());
         newActivity.setSTATUS(ACTIVITY_STATUS.NEW.name);
+        
+        validateCampaignActivity(newActivity);
         
         objService.getEm().persist(newActivity);
         
@@ -195,4 +195,16 @@ public class CampaignService {
         return objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivity updateCampaignActivity(CampaignActivity activity) 
+            throws IncompleteDataException {
+        validateCampaignActivity(activity);
+        return objService.getEm().merge(activity);
+    }
+    
+    public void validateCampaignActivity(CampaignActivity activity) 
+            throws IncompleteDataException {
+        if(activity.getACTIVITY_NAME() == null || activity.getACTIVITY_NAME().isEmpty())
+            throw new IncompleteDataException("Campaign activities must have a name.");
+    }
 }

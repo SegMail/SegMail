@@ -68,7 +68,7 @@
                                        >
                                         <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
                                                 render="FormEditEmailActivity"
-                                                onevent="refresh_summernote"
+                                                onevent="load_activity"
                                                 >
                                         </f:ajax>
                                         <i class="fa fa-pencil-square"></i>
@@ -78,93 +78,6 @@
                         </tr>
 
                     </c:forEach>
-                    <tr>
-                        <td>
-                            <span class="group group-green"></span>
-                            Completed
-                        </td>
-                        <td>3rd June</td>
-                        <td>Welcome to Segmail</td>
-                        <td>4.55%</td>
-                        <td>
-                            <div>
-                                <a href="#edit_campaign_activity"
-
-                                   style="margin-right: 3px;"
-                                   class="btn btn-success list-item-trigger"
-                                   title="Edit Activity"
-                                   >
-                                    <i class="fa fa-pencil-square"></i>
-                                </a>
-                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
-
-                                   style="margin-right: 3px;"
-                                   class="btn btn-danger list-item-trigger"
-                                   title="Edit Campaign"
-                                   >
-                                    <i class="fa fa-stop-circle"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="group group-red"></span>
-                            Stopped
-                        </td>
-                        <td>3rd June</td>
-                        <td>Some features and tips</td>
-                        <td>3.21%</td>
-                        <td>
-                            <div>
-                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
-
-                                   style="margin-right: 3px;"
-                                   class="btn btn-success list-item-trigger"
-                                   title="Edit Campaign"
-                                   >
-                                    <i class="fa fa-pencil-square"></i>
-                                </a>
-                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
-
-                                   style="margin-right: 3px;"
-                                   class="btn btn-danger list-item-trigger"
-                                   title="Edit Campaign"
-                                   >
-                                    <i class="fa fa-pencil-square"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <span class="group group-blue"></span>
-                            In progress
-                        </td>
-                        <td>3rd June</td>
-                        <td>Some features and tips</td>
-                        <td>3.21%</td>
-                        <td>
-                            <div>
-                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
-
-                                   style="margin-right: 3px;"
-                                   class="btn btn-success list-item-trigger"
-                                   title="Edit Campaign"
-                                   >
-                                    <i class="fa fa-pencil-square"></i>
-                                </a>
-                                <a href="#{request.contextPath}/campaign/#{campaign.OBJECTID}"
-
-                                   style="margin-right: 3px;"
-                                   class="btn btn-danger list-item-trigger"
-                                   title="Edit Campaign"
-                                   >
-                                    <i class="fa fa-pencil-square"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
 
                 </tbody>
             </table>

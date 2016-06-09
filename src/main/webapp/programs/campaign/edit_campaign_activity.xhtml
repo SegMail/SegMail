@@ -10,10 +10,8 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <form jsf:id="FormEditEmailActivity">
-        
-        
         <div class="modal-content">
-            <div class="">
+            <div class="block">
                 <div class="modal-header">
                     <h4 class="modal-title">Edit Email Activity</h4>
                 </div>
@@ -63,18 +61,35 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <a class="btn btn-success"
-                               onclick="preview();
-                                            highlightAndCreateLinks();
-                                            return false;">
-                                Save &amp; continue
-                            </a>
-                            <button class="btn btn-primary">
-                                Save &amp; close
-                            </button>
-                            <button class="btn btn-default">
-                                Close
-                            </button>
+                            <h:commandButton styleClass="btn btn-success"
+                                           value="Save &amp; continue"
+                                           onclick="reapply_textarea('content')"
+                                >
+                                <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
+                                        event="click"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                            </h:commandButton>
+                            <h:commandButton styleClass="btn btn-primary"
+                                           value="Save &amp; close"
+                                           onclick="reapply_textarea('content')"
+                                           >
+                                <f:ajax listener="#{FormEditEmailActivity.saveAndClose()}"
+                                        event="click"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                            </h:commandButton>
+                            <h:commandButton styleClass="btn btn-default"
+                                           value="Close"
+                                           >
+                                <f:ajax listener="#{FormEditEmailActivity.closeWithoutSaving()}"
+                                        event="click"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                            </h:commandButton>
                             <button class="btn btn-danger"
                                     onclick="$('.delete-container').toggle()">
                                 Delete

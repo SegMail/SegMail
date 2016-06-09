@@ -1,3 +1,12 @@
+/**
+ * This is a very important piece of code that must be applied in all pages with
+ * summernote editors. It copies the content of the editor back into the original
+ * textarea so that our JSF renderer can apply the contents back into the backing
+ * beans.
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function reapply_textarea(id){
     var realTextboxParent = document.getElementById(id).nextSibling;
     var realContent;
