@@ -10,15 +10,18 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <form jsf:id="FormEditEmailActivity">
-        <div class="modal-content">
+        <div class="modal-content" style="overflow-y: hidden;">
             <div class="block">
                 <div class="modal-header">
-                    <h4 class="modal-title">Edit Email Activity</h4>
+                    <h4 class="modal-title">
+                        #{FormEditEmailActivity.canEdit() ? "Edit " : "Track "}
+                        Email Activity
+                    </h4>
                 </div>
                 <div id="delete-template-1" class="delete-confirm-container">
                     <div class="delete-container" data-role="main">
                         <div class="modal-body">
-                            <div class="row">
+                            <div class="row" style="margin-bottom: 12px;">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <s2:messenger id="FormEditEmailActivity_messenger" for="FormEditEmailActivity" showDetail="true" showSummary="true"
@@ -27,7 +30,7 @@
                                 </div>
 
                             </div>
-                            <div class="row">
+                            <div jsf:rendered="#{FormEditEmailActivity.canEdit()}"  class="row">
                                 <div id="editor-form" class="col-md-6">
                                     <div class="form-group">
                                         <label>
@@ -40,31 +43,51 @@
                                         </input>
                                     </div>
                                     <div class="form-group">
-                                        <label>
-                                            Message:
-                                        </label>
                                         <textarea id="content" class="editor"
                                                   jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
                                         </textarea>
                                     </div>
-                                </div>
-                                <div id="preview-form" class="col-md-3"><!--preview pane-->
-                                    <div id="preview">
-
+                                    <div class="form-group">
+                                        <input type="number" style="" class="form-control"
+                                               jsf:value="#{FormEditEmailActivity.editingSchedule.SEND_IN_BATCH}"
+                                               placeholder="Send in batchs of (blank or 0: send all in one batch)"
+                                               >
+                                        </input>
                                     </div>
-                                </div>
-                                <div id="links-form" class="col-md-3"><!--links pane-->
-                                    <div id="links">
+                                    <div class="form-group">
+                                        <h:selectOneMenu
+                                            styleClass="select2" style="width:100%;"
+                                            value="#{FormEditEmailActivity.editingSchedule.EVERY_HOUR}"
+                                                         >
+                                            <f:selectItem itemValue="6" itemLabel="Every 6 hours"></f:selectItem>
+                                            <f:selectItem itemValue="12" itemLabel="Every 12 hours"></f:selectItem>
+                                            <f:selectItem itemValue="24" itemLabel="Every 24 hours"></f:selectItem>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="form-group">
                                         
                                     </div>
                                 </div>
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                    <div id="preview-form" class="col-md-6 col-sm-6 col-xs-6"><!--preview pane-->
+                                        <div id="preview">
+
+                                        </div>
+                                    </div>
+                                    <div id="links-form" class="col-md-6 col-sm-6 col-xs-6"><!--links pane-->
+                                        <div id="links">
+
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                         <div class="modal-footer">
                             <h:commandButton styleClass="btn btn-success"
-                                           value="Save &amp; continue"
-                                           onclick="reapply_textarea('content')"
-                                >
+                                             value="Save &amp; continue"
+                                             onclick="reapply_textarea('content')"
+                                             >
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
                                         event="click"
                                         onevent="saveAndContinue"
@@ -72,9 +95,9 @@
                                 </f:ajax>
                             </h:commandButton>
                             <h:commandButton styleClass="btn btn-primary"
-                                           value="Save &amp; close"
-                                           onclick="reapply_textarea('content')"
-                                           >
+                                             value="Save &amp; close"
+                                             onclick="reapply_textarea('content')"
+                                             >
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndClose()}"
                                         event="click"
                                         onevent="saveAndContinue"
@@ -82,8 +105,8 @@
                                 </f:ajax>
                             </h:commandButton>
                             <h:commandButton styleClass="btn btn-default"
-                                           value="Close"
-                                           >
+                                             value="Close"
+                                             >
                                 <f:ajax listener="#{FormEditEmailActivity.closeWithoutSaving()}"
                                         event="click"
                                         onevent="saveAndContinue"
@@ -91,21 +114,28 @@
                                 </f:ajax>
                             </h:commandButton>
                             <button class="btn btn-danger"
-                                    onclick="$('.delete-container').toggle()">
+                                    onclick="$('.delete-container').toggle();
+                                            return false;">
                                 Delete
                             </button>
                         </div>
                     </div>
                     <div class="delete-container" data-role="delete" style="display: none;">
                         <div class="modal-body">
-                            <h2>Are you sure you want to delete this template?</h2>
+                            <h2>Are you sure you want to delete this activity?</h2>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn btn-danger">
+                            <button jsf:id="delete_button"
+                                    class="btn btn-danger">
+                                <f:ajax event="click" listener="#{FormEditEmailActivity.delete()}"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
                                 Confirm delete
                             </button>
                             <button class="btn btn-default"
-                                    onclick="$('.delete-container').toggle()">
+                                    onclick="$('.delete-container').toggle();
+                                            return false;">
                                 Cancel
                             </button>
                         </div>

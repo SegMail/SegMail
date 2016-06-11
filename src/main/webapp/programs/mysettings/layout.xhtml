@@ -10,7 +10,6 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
-
         <ui:define name="main-program-panel">
             <div class="row">
                 <div class="col-md-6 col-xs-12">
@@ -65,7 +64,7 @@
                                     </button>
                                 </div>
                                 <div class="pull-right">
-                                    <p:commandButton id="update_contact_button" styleClass="btn btn-success"
+                                    <p:commandButton styleClass="btn btn-success"
                                                      actionListener="#{ContactDetailsForm.update()}" value="Update"
                                                      update="contact_form_message" 
                                                      onclick="$('#contact_details_form').validationEngine('validate')"
@@ -73,6 +72,17 @@
                                                      >
                                         
                                     </p:commandButton>
+                                    <button jsf:id="update_contact_button" class="btn btn-success"
+                                            onclick="$('#contact_details_form').validationEngine('validate');">
+                                        <f:ajax listener="#{ContactDetailsForm.update()}"
+                                                event="click" onevent="updateSettings"
+                                                render="@form"
+                                                execute="@form">
+                                        </f:ajax>
+                                        <i class="fa fa-floppy-o"></i>
+                                        Update
+                                    </button>
+                                            
                                 </div>
                             </div>
                             <p:blockUI block="contact_details_form" trigger="contact_details_form:update_contact_button"
@@ -100,7 +110,7 @@
         </ui:define>
 
         <ui:define name="scripts-bottom">
-            
+            <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/mysettings.js" />
 
         </ui:define>
 

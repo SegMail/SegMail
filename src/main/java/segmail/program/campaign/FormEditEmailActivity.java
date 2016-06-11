@@ -5,9 +5,8 @@
  */
 package segmail.program.campaign;
 
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -16,7 +15,10 @@ import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
 import segmail.component.campaign.CampaignService;
+import segmail.entity.campaign.ACTIVITY_STATUS;
+import static segmail.entity.campaign.ACTIVITY_STATUS.NEW;
 import segmail.entity.campaign.CampaignActivity;
+import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -25,11 +27,21 @@ import segmail.entity.campaign.CampaignActivity;
 @RequestScoped
 @Named("FormEditEmailActivity")
 public class FormEditEmailActivity implements FormEditEntity {
-    
-    @Inject ProgramCampaign program;
-    
-    @EJB CampaignService campaignService;
 
+    @Inject
+    ProgramCampaign program;
+
+    @EJB
+    CampaignService campaignService;
+    
+    public CampaignActivitySchedule getEditingSchedule() {
+        return program.getEditingSchedule();
+    }
+
+    public void setEditingSchedule(CampaignActivitySchedule editingSchedule) {
+        program.setEditingSchedule(editingSchedule);
+    }
+    
     public CampaignActivity getEditingActivity() {
         return program.getEditingActivity();
     }
@@ -37,15 +49,17 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void setEditingActivity(CampaignActivity editingActivity) {
         program.setEditingActivity(editingActivity);
     }
-    
+
     @Override
     public void saveAndContinue() {
         try {
+            
             campaignService.updateCampaignActivity(getEditingActivity());
+            campaignService.updateCampaignActivitySchedule(this.getEditingSchedule());
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
+        } 
     }
 
     @Override
@@ -61,7 +75,30 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     @Override
     public void delete() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            campaignService.deleteCampaignActivity(getEditingActivity().getOBJECTID());
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity deleted.", "");
+            closeWithoutSaving();
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        }
     }
-    
+
+    public boolean canEdit() {
+        if(getEditingActivity() == null)
+            return false;
+        switch (ACTIVITY_STATUS.valueOf(getEditingActivity().getSTATUS())) {
+            case NEW:
+                return true;
+            case STARTED:
+                return false;
+            case COMPLETED:
+                return false;
+            case STOPPED:
+                return false;
+            default:
+                return false;
+        }
+    }
+
 }

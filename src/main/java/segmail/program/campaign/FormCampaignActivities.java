@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.CampaignActivity;
+import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -76,5 +77,8 @@ public class FormCampaignActivities {
     public void loadActivity(long activityId) {
         CampaignActivity act = campaignService.getCampaignActivity(activityId);
         program.setEditingActivity(act);
+        
+        CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
+        program.setEditingSchedule(schedule);
     }
 }

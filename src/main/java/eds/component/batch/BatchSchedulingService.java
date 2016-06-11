@@ -5,12 +5,12 @@
  */
 package eds.component.batch;
 
+import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinition;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
-import com.cronutils.validator.CronValidator;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.EntityNotFoundException;
@@ -133,13 +133,16 @@ public class BatchSchedulingService {
         if (newBatchJob == null) {
             throw new BatchProcessingException("Batch job with ID " + batchJobId + " not found.");
         }
-        CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(STANDARD_CRON_TYPE);
+        
+        /*CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(STANDARD_CRON_TYPE);
         CronValidator cronValid = new CronValidator(cronDef);
 
         //If cronExpression is provided but invalid, throw an exception
         if (cronExpression != null && !cronExpression.isEmpty() && !cronValid.isValid(cronExpression)) {
             throw new BatchProcessingException("Invalid cronExpression \"" + cronExpression + "\"");
-        }
+        }*/
+        //Validation method, throw runtime exception if invalids
+        Cron validCron = this.getValidCronExp(cronExpression, STANDARD_CRON_TYPE);
 
         BatchJobTrigger newTrigger = new BatchJobTrigger();
         newTrigger.setBATCH_JOB(newBatchJob);
@@ -336,11 +339,12 @@ public class BatchSchedulingService {
         }
 
         //Validate the cron expression
-        CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(STANDARD_CRON_TYPE);
+        //No need as 4.1.0 onwards will use Cron.validate()
+        /*CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(STANDARD_CRON_TYPE);
         CronValidator cronValid = new CronValidator(cronDef);
         if (!cronValid.isValid(cronExpression)) {
             throw new BatchProcessingException("BatchJob " + trigger.getBATCH_JOB().getBATCH_JOB_NAME() + " has invalid cronExpression \"" + cronExpression + "\"");
-        }
+        }*/
 
         //Get the next execution time
         //DateTime now = DateTime.now();
@@ -470,9 +474,7 @@ public class BatchSchedulingService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public DateTime getNextExecutionTimeCron(String cronExpression, DateTime now, CronType cronType){
         //Get the next execution time
-        CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(cronType);
-        CronParser parser = new CronParser(cronDef);
-        ExecutionTime executionTime = ExecutionTime.forCron(parser.parse(cronExpression));
+        ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
         DateTime nextExecution = executionTime.nextExecution(now);
         
         return nextExecution;
@@ -584,6 +586,13 @@ public class BatchSchedulingService {
         BatchJobRun run = runs.get(0);
         run.setSERVER(server);
         updateService.getEm().merge(run);
+        
+    }
+    
+    public Cron getValidCronExp(String cronExp,CronType cronType) {
+        CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(cronType);
+        CronParser parser = new CronParser(cronDef);
+        return parser.parse(cronExp).validate();
         
     }
 }

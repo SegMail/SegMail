@@ -1,5 +1,5 @@
-var SUMMERNOTE_HEIGHT = 280;
-var PREVIEW_HEIGHT = 450;
+var SUMMERNOTE_HEIGHT = 250;
+var PREVIEW_HEIGHT = 400;
 
 /**
  * To submit a JSF partial request using pure JS, you need to:
@@ -198,6 +198,29 @@ function load_activity(data) {
 function create_new_activity(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".refresh");
+    //var ajaxloader = document.getElementById("ajaxloader");
+    
+
+    switch (ajaxstatus) {
+        case "begin": // This is called right before ajax request is been sent.
+            //ajaxloader.style.display = 'block';
+            block_refresh(block);
+            break;
+
+        case "complete": // This is called right after ajax response is received.
+            block_refresh(block);
+            
+            break;
+
+        case "success": // This is called when ajax response is successfully processed.
+            
+            break;
+    }
+};
+
+function saveBasicSettings(data) {
+    var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
+    var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
     
 

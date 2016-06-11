@@ -1,5 +1,5 @@
 .css-bounce {
-	/*font-size: .8em;
+	font-size: .8em;
 	text-align: center;
 	padding: 10px;
 	background-color: #111;
@@ -7,7 +7,7 @@
 	box-shadow:	0px 1px 3px 0px rgba(0, 0, 0, .3);
 	text-transform: uppercase;
 	position: relative;
-	font-weight: bold;*/
+	font-weight: bold;
 	
 	-webkit-animation: bounce 800ms ease-out;
 	-moz-animation: bounce 800ms ease-out;

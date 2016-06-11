@@ -34,50 +34,69 @@
         <div class="block-content np">
             <table class="table table-hover">
                 <tbody>
-                    <tr>
-                        <th>Status</th>
-                        <th>Date Created</th>
-                        <th>Subject</th>
-                        <th>Clickthrough %</th>
-                        <th></th>
-                    </tr>
-                    <c:forEach items="#{FormCampaignActivities.allActivities}" var="activity" >
-                        <tr>
-                            <td>
-                                <span class="group group-#{FormCampaignActivities.activityStatusMapping.get(activity.STATUS)}">
-                                </span>
-                                #{FormCampaignActivities.toReadableActivityStatus(activity.STATUS)}
-                            </td>
-                            <td>
-                                #{activity.DATE_CREATED}
-                            </td>
-                            <td>
-                                #{activity.ACTIVITY_NAME}
-                            </td>
-                            <td>
-                                4.55% (fake)
-                            </td>
-                            <td>
-                                <div>
-                                    <h:commandLink 
-                                       pass:href="#edit_campaign_activity"
-                                       pass:data-toggle="modal"
-                                       style="margin-right: 3px;"
-                                       styleClass="btn btn-success list-item-trigger"
-                                       title="Edit Activity"
-                                       >
-                                        <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
-                                                render="FormEditEmailActivity"
-                                                onevent="load_activity"
+                    <c:choose>
+                        <c:when test="#{FormCampaignActivities.allActivities.size() gt 0}">
+                            <tr>
+                                <th>Status</th>
+                                <th>Date Created</th>
+                                <th>Subject</th>
+                                <th>Clickthrough %</th>
+                                <th></th>
+                            </tr>
+                            <c:forEach items="#{FormCampaignActivities.allActivities}" var="activity" >
+                                <tr>
+                                    <td>
+                                        <span class="group group-#{FormCampaignActivities.activityStatusMapping.get(activity.STATUS)}">
+                                        </span>
+                                        #{FormCampaignActivities.toReadableActivityStatus(activity.STATUS)}
+                                    </td>
+                                    <td>
+                                        #{activity.DATE_CREATED}
+                                    </td>
+                                    <td>
+                                        #{activity.ACTIVITY_NAME}
+                                    </td>
+                                    <td>
+                                        4.55% (fake)
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <button
+                                                jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
+                                                href="#edit_campaign_activity"
+                                                data-toggle="modal"
+                                                style="margin-right: 3px;"
+                                                class="btn btn-success list-item-trigger"
+                                                title="Edit Activity"
                                                 >
-                                        </f:ajax>
-                                        <i class="fa fa-pencil-square"></i>
-                                    </h:commandLink>
-                                </div>
-                            </td>
-                        </tr>
+                                                <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
+                                                        render="FormEditEmailActivity"
+                                                        onevent="load_activity"
+                                                        >
+                                                </f:ajax>
+                                                <i class="fa fa-pencil-square"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                    </c:forEach>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <tr>
+                                <td style="text-align:center; padding: 30px 0">
+                                    <h2>
+                                        There are no activities in this campaign. 
+                                    </h2>
+                                    <a href="#create_new_activity" 
+                                       class="btn btn-success nm" data-toggle="modal">
+                                        Create one now
+                                    </a>
+                                </td>
+                            </tr>
+                        </c:otherwise>
+                    </c:choose>
+
 
                 </tbody>
             </table>

@@ -11,34 +11,52 @@
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
 
     <form jsf:id="FormBasicSettings">
-        <div class="row-form">
-            <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
-                          class="form-group"></s2:messenger>
-        </div>
+        <div class="block-content">
+            <div class="row-form">
+                <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
+                              class="form-group"></s2:messenger>
+            </div>
 
-        <div class="row-form">
-            <label>
-                Campaign name:
-            </label>
-            <span class="help-block">
-                Name of your campaign
-            </span>
-            <input type="text" class="form-control" id="serviceName"
-                   jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_NAME}"
-                   />
-        </div>
+            <div class="form-group">
+                <label>
+                    Campaign name:
+                </label>
+                <input type="text" class="form-control validate[required]" id="serviceName"
+                       jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_NAME}"
+                       />
+            </div>
 
-        <div class="row-form">
-            <label>
-                Campaign goals:
-            </label>
-            <span class="help-block">
-                Briefly list down the goals of this campaign
-            </span>
-            <textarea class="form-control" id="campaignGoals"
-                      jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_GOALS}"
-                      />
+            <div class="form-group">
+                <label>
+                    Campaign goals:
+                </label>
+                <textarea class="form-control" id="campaignGoals"
+                          rows="10"
+                          style="resize: none;"
+                          jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_GOALS}"
+                          />
+            </div>
         </div>
-
+        <div class="block-footer">
+            <div class="pull-left">
+                <button class="btn btn-default"
+                        onclick="document.getElementById('FormBasicSettings').reset();
+                                return false;">
+                    I screwed up. Help!
+                </button>
+            </div>
+            <div class="pull-right">
+                <h:commandButton styleClass="btn btn-primary"
+                                 value="Update"
+                                 
+                                 >
+                    <f:ajax listener="#{FormBasicSettings.saveAndContinue()}"
+                            event="click"
+                            onevent="saveBasicSettings"
+                            render="@form :PageToolbar" execute="@form">
+                    </f:ajax>
+                </h:commandButton>
+            </div>
+        </div>
     </form>
 </html>

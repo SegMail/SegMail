@@ -5,7 +5,14 @@
  */
 package segmail.component.campaign;
 
+import com.cronutils.builder.CronBuilder;
+import com.cronutils.model.Cron;
+import com.cronutils.model.CronType;
+import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.model.field.expression.FieldExpressionFactory;
+import static com.cronutils.model.field.expression.FieldExpressionFactory.always;
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
@@ -16,7 +23,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
+import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
@@ -24,7 +31,7 @@ import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Client;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityContent;
+import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -36,6 +43,7 @@ public class CampaignService {
     @Inject ClientContainer clientContainer;
     
     @EJB GenericObjectService objService;
+    @EJB UpdateObjectService updService;
     
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -125,6 +133,18 @@ public class CampaignService {
         
     }
     
+    /**
+     * Creates a CampaignActivity, assigns it to the Campaign with campaignId,
+     * and creates an default CampaignActivitySchedule.
+     * 
+     * @param campaignId
+     * @param name
+     * @param goals
+     * @param type
+     * @return
+     * @throws IncompleteDataException
+     * @throws EntityNotFoundException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivity createCampaignActivity(long campaignId, String name, String goals, ACTIVITY_TYPE type) throws IncompleteDataException, EntityNotFoundException {
         
@@ -149,6 +169,10 @@ public class CampaignService {
         newAssign.setTARGET(newActivity);
         
         objService.getEm().persist(newAssign);
+        
+        //Have to create schedule here or else if the creation fails, this object
+        //will not be rolled back
+        createActivitySchedule(newActivity.getOBJECTID(), 0, 0);
         
         return newActivity;
     }
@@ -206,5 +230,42 @@ public class CampaignService {
             throws IncompleteDataException {
         if(activity.getACTIVITY_NAME() == null || activity.getACTIVITY_NAME().isEmpty())
             throw new IncompleteDataException("Campaign activities must have a name.");
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int deleteCampaignActivity(long campaignActivityId) throws EntityNotFoundException {
+        int deleted = updService.deleteObjectDataAndRelationships(campaignActivityId);
+        return deleted;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivitySchedule createActivitySchedule(long activityId, int everyNHours, long sendInBatch) throws EntityNotFoundException {
+        CampaignActivity activity = this.getCampaignActivity(activityId);
+        
+        if(activity == null)
+            throw new EntityNotFoundException(CampaignActivity.class,activityId);
+        
+        CampaignActivitySchedule schedule = new CampaignActivitySchedule();
+        schedule.generateCronExp();
+        schedule.setOWNER(activity);
+        schedule.setSEND_IN_BATCH(sendInBatch);
+        
+        objService.getEm().persist(schedule);
+        
+        return schedule;
+    }
+
+    public CampaignActivitySchedule getCampaignActivitySchedule(long activityId) {
+        List<CampaignActivitySchedule> results = objService.getEnterpriseData(activityId, CampaignActivitySchedule.class);
+        if(results == null || results.isEmpty())
+            return null;
+        return results.get(0);
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivitySchedule updateCampaignActivitySchedule(CampaignActivitySchedule schedule) {
+        schedule.generateCronExp();
+        
+        return objService.getEm().merge(schedule);
     }
 }

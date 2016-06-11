@@ -8,6 +8,12 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
-    xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-          
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <h:panelGroup layout="block" rendered="#{FormProgramModeSwitch.editCampaignMode}">
+        <a  href="#{request.contextPath}/campaign"
+            class="btn btn-primary"
+            >
+            Back
+        </a>
+    </h:panelGroup>
 </html>

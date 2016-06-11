@@ -17,6 +17,7 @@ import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
+import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -38,6 +39,7 @@ public class ProgramCampaign extends Program{
     private Map<String,String> activityStatusMapping;
     
     private CampaignActivity editingActivity;
+    private CampaignActivitySchedule editingSchedule;
     
     @Override
     public void clearVariables() {
@@ -114,6 +116,14 @@ public class ProgramCampaign extends Program{
 
     public void setEditingActivity(CampaignActivity editingActivity) {
         this.editingActivity = editingActivity;
+    }
+
+    public CampaignActivitySchedule getEditingSchedule() {
+        return editingSchedule;
+    }
+
+    public void setEditingSchedule(CampaignActivitySchedule editingSchedule) {
+        this.editingSchedule = editingSchedule;
     }
     
     

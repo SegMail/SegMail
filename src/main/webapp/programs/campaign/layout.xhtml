@@ -36,7 +36,7 @@
 
             <div id="transactions_panel"> <!--Transaction widget-->
                 <form jsf:id="form">
-                    THis is the form
+                    
                 </form>
             </div>
             <div class="modal fade" id="create_new_campaign">
@@ -48,7 +48,7 @@
             <div class="modal fade" id="create_new_activity">
                 <ui:include src="create_new_activity.xhtml"></ui:include>
             </div>
-            <div class="modal fade" id="edit_campaign_activity">
+            <div class="modal fade" id="edit_campaign_activity" >
                 <ui:include src="edit_campaign_activity.xhtml" ></ui:include>
             </div>
         </ui:define>
@@ -57,11 +57,11 @@
             <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/campaign.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/custom/summernote_hack.js" />
-            
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/select2/select2.min.js"></script>
         </ui:define>
 
-        <ui:define name="toolbar-right">
-            <ui:include src="edit_campaign_controls.xhtml" rendered="#{FormEditCampaign.editingCampaign ne null}" />
+        <ui:define name="toolbar-right"  >
+            <ui:include src="edit_campaign_controls.xhtml"/>
         </ui:define>
         
         <ui:define name="head">

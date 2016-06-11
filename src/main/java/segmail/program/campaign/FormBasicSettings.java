@@ -42,7 +42,7 @@ public class FormBasicSettings implements FormEditEntity {
     public void saveAndContinue() {
         try {
             campaignService.updateCampaign(this.getEditingCampaign());
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign updated!", "");
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign updated!", "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
