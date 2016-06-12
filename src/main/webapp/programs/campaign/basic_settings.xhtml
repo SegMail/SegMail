@@ -14,7 +14,8 @@
         <div class="block-content">
             <div class="row-form">
                 <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
-                              class="form-group"></s2:messenger>
+                              class="form-group"
+                              ></s2:messenger>
             </div>
 
             <div class="form-group">
@@ -46,16 +47,16 @@
                 </button>
             </div>
             <div class="pull-right">
-                <h:commandButton styleClass="btn btn-primary"
-                                 value="Update"
-                                 
+                <button jsf:id="saveBasicSettings" class="btn btn-primary"                                 
                                  >
                     <f:ajax listener="#{FormBasicSettings.saveAndContinue()}"
                             event="click"
                             onevent="saveBasicSettings"
                             render="@form :PageToolbar" execute="@form">
                     </f:ajax>
-                </h:commandButton>
+                    <i class="fa fa-floppy-o"></i>
+                    Update
+                </button>
             </div>
         </div>
     </form>
