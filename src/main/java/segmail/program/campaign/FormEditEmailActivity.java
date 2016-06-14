@@ -100,5 +100,9 @@ public class FormEditEmailActivity implements FormEditEntity {
                 return false;
         }
     }
+    
+    public void send() {
+        
+    }
 
 }

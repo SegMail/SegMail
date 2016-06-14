@@ -5,7 +5,6 @@
  */
 package segmail.program.campaign;
 
-import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.subscription.SubscriptionList;
 
 /**
  *
@@ -40,6 +40,9 @@ public class ProgramCampaign extends Program{
     
     private CampaignActivity editingActivity;
     private CampaignActivitySchedule editingSchedule;
+    
+    private List<SubscriptionList> ownedLists;
+    private List<Long> assignedLists;
     
     @Override
     public void clearVariables() {
@@ -124,6 +127,22 @@ public class ProgramCampaign extends Program{
 
     public void setEditingSchedule(CampaignActivitySchedule editingSchedule) {
         this.editingSchedule = editingSchedule;
+    }
+
+    public List<SubscriptionList> getOwnedLists() {
+        return ownedLists;
+    }
+
+    public void setOwnedLists(List<SubscriptionList> ownedLists) {
+        this.ownedLists = ownedLists;
+    }
+
+    public List<Long> getAssignedLists() {
+        return assignedLists;
+    }
+
+    public void setAssignedLists(List<Long> assignedLists) {
+        this.assignedLists = assignedLists;
     }
     
     

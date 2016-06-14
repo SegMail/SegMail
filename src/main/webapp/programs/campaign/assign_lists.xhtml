@@ -9,49 +9,38 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-
-    <form jsf:id="FormBasicSettings">
+    <form jsf:id="FormAssignLists">
         <div class="block-content">
             <div class="form-group">
-                <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
-                              class="form-control"
+                <s2:messenger id="FormAssignLists_Messenger" for="FormAssignLists" showDetail="true" showSummary="true"
+                              class="form-group"
                               ></s2:messenger>
             </div>
 
             <div class="form-group">
-                <label>
-                    Campaign name:
-                </label>
-                <input type="text" class="form-control validate[required]" id="serviceName"
-                       jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_NAME}"
-                       />
-            </div>
-
-            <div class="form-group">
-                <label>
-                    Campaign goals:
-                </label>
-                <textarea class="form-control" id="campaignGoals"
-                          rows="10"
-                          style="resize: none;"
-                          jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_GOALS}"
-                          />
+                <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                     value="#{FormAssignLists.assignedLists}"
+                    >
+                    <f:selectItems value="#{FormAssignLists.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                   itemValue="#{list.OBJECTID}">
+                    </f:selectItems>
+                </h:selectManyListbox>
             </div>
         </div>
         <div class="block-footer">
             <div class="pull-left">
                 <button class="btn btn-default"
-                        onclick="document.getElementById('FormBasicSettings').reset();
+                        onclick="document.getElementById('FormAssignLists').reset();
                                 return false;">
                     I screwed up. Help!
                 </button>
             </div>
             <div class="pull-right">
-                <button jsf:id="saveBasicSettings" class="btn btn-primary"                                 
+                <button jsf:id="saveAssignLists" class="btn btn-primary"                                 
                                  >
-                    <f:ajax listener="#{FormBasicSettings.saveAndContinue()}"
+                    <f:ajax listener="#{FormAssignLists.saveAndContinue()}"
                             event="click"
-                            onevent="saveBasicSettings"
+                            onevent="saveAssignLists"
                             render="@form :PageToolbar" execute="@form">
                     </f:ajax>
                     <i class="fa fa-floppy-o"></i>

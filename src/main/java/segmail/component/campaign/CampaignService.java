@@ -5,12 +5,6 @@
  */
 package segmail.component.campaign;
 
-import com.cronutils.builder.CronBuilder;
-import com.cronutils.model.Cron;
-import com.cronutils.model.CronType;
-import com.cronutils.model.definition.CronDefinitionBuilder;
-import com.cronutils.model.field.expression.FieldExpressionFactory;
-import static com.cronutils.model.field.expression.FieldExpressionFactory.always;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.EntityNotFoundException;
@@ -23,7 +17,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
@@ -267,5 +260,20 @@ public class CampaignService {
         schedule.generateCronExp();
         
         return objService.getEm().merge(schedule);
+    }
+    
+    /**
+     * This is it. The real thing.
+     * 
+     * 1) Update the status of the email activity to STARTED.
+     * 2) Create a sending schedule. This will trigger the process to load up the mail queue so that 
+     * EmailService can send them out asynchronously. The process to trigger this process is also 
+     * executed asynchronously.
+     * 
+     * @param emailActivity 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void startSendingCampaignEmail(CampaignActivity emailActivity) {
+        
     }
 }

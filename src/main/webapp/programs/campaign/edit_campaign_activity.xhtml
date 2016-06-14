@@ -12,23 +12,21 @@
     <form jsf:id="FormEditEmailActivity">
         <div class="modal-content" style="overflow-y: hidden;">
             <div class="block">
-                <div class="modal-header">
-                    <h4 class="modal-title">
-                        #{FormEditEmailActivity.canEdit() ? "Edit " : "Track "}
-                        Email Activity
-                    </h4>
-                </div>
                 <div id="delete-template-1" class="delete-confirm-container">
-                    <div class="delete-container" data-role="main">
+                    <div class="delete-container send-container" data-role="main">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                Edit Email Activity
+                            </h4>
+                        </div>
                         <div class="modal-body">
-                            <div class="row" style="margin-bottom: 12px;">
+                            <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <s2:messenger id="FormEditEmailActivity_messenger" for="FormEditEmailActivity" showDetail="true" showSummary="true"
-                                                      class="form-group"></s2:messenger>
+                                                      class="form-control"></s2:messenger>
                                     </div>
                                 </div>
-
                             </div>
                             <div jsf:rendered="#{FormEditEmailActivity.canEdit()}"  class="row">
                                 <div id="editor-form" class="col-md-6">
@@ -47,25 +45,33 @@
                                                   jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
                                         </textarea>
                                     </div>
-                                    <div class="form-group">
-                                        <input type="number" style="" class="form-control"
-                                               jsf:value="#{FormEditEmailActivity.editingSchedule.SEND_IN_BATCH}"
-                                               placeholder="Send in batchs of (blank or 0: send all in one batch)"
-                                               >
-                                        </input>
-                                    </div>
-                                    <div class="form-group">
-                                        <h:selectOneMenu
-                                            styleClass="select2" style="width:100%;"
-                                            value="#{FormEditEmailActivity.editingSchedule.EVERY_HOUR}"
-                                                         >
-                                            <f:selectItem itemValue="6" itemLabel="Every 6 hours"></f:selectItem>
-                                            <f:selectItem itemValue="12" itemLabel="Every 12 hours"></f:selectItem>
-                                            <f:selectItem itemValue="24" itemLabel="Every 24 hours"></f:selectItem>
-                                        </h:selectOneMenu>
-                                    </div>
-                                    <div class="form-group">
-                                        
+                                    <div class="controls">
+                                        <div class="row-form">
+                                            <div class="col-md-3">
+                                                <strong>Send in batchs of:</strong>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input id="sendInBatch" type="number" style="" class="form-control"
+                                                       onchange="setSendInBatch('sendInBatch')"
+                                                       jsf:value="#{FormEditEmailActivity.editingSchedule.SEND_IN_BATCH}"
+                                                       placeholder="blank or 0 = send all"
+                                                       >
+                                                </input>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <h:selectOneMenu style="width: 100%;"
+                                                                     styleClass="select2"
+                                                                     value="#{FormEditEmailActivity.editingSchedule.EVERY_HOUR}"
+                                                                     >
+                                                        <f:selectItem itemValue="6" itemLabel="Every 6 hours"></f:selectItem>
+                                                        <f:selectItem itemValue="12" itemLabel="Every 12 hours"></f:selectItem>
+                                                        <f:selectItem itemValue="24" itemLabel="Every 24 hours"></f:selectItem>
+                                                    </h:selectOneMenu>
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-sm-12 col-xs-12">
@@ -104,6 +110,16 @@
                                         render="@form" execute="@form">
                                 </f:ajax>
                             </h:commandButton>
+                            <button class="btn btn-danger"
+                                    onclick="$('.delete-container').toggle('slow');
+                                        return false;">
+                                Delete
+                            </button>
+                            <button class="btn btn-warning"
+                                    onclick="$('.send-container').toggle('slow');
+                                        return false;">
+                                Send
+                            </button>
                             <h:commandButton styleClass="btn btn-default"
                                              value="Close"
                                              >
@@ -113,16 +129,20 @@
                                         render="@form" execute="@form">
                                 </f:ajax>
                             </h:commandButton>
-                            <button class="btn btn-danger"
-                                    onclick="$('.delete-container').toggle();
-                                            return false;">
-                                Delete
-                            </button>
                         </div>
                     </div>
                     <div class="delete-container" data-role="delete" style="display: none;">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                Are you sure you want to delete this email activity?
+                            </h4>
+                        </div>
                         <div class="modal-body">
-                            <h2>Are you sure you want to delete this activity?</h2>
+                            <p>
+                                You will lose all information in this email activity. 
+                                That includes your send logs and conversion rates.
+                            </p>
+                            <a href="#">Learn how to archive your old activities.</a>
                         </div>
                         <div class="modal-footer">
                             <button jsf:id="delete_button"
@@ -134,8 +154,36 @@
                                 Confirm delete
                             </button>
                             <button class="btn btn-default"
-                                    onclick="$('.delete-container').toggle();
-                                            return false;">
+                                    onclick="$('.delete-container').toggle('slow');
+                                        return false;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="send-container" data-role="send" style="display:none;">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                Are you sure you want to start sending out this email?
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                This email will be received by your targeted list subscribers.
+                                You can see the conversion rates shortly once the sending starts.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button jsf:id="send_button"
+                                    class="btn btn-warning">
+                                <f:ajax event="click" 
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                                Confirm send
+                            </button>
+                            <button class="btn btn-default"
+                                    onclick="$('.send-container').toggle('slow');
+                                        return false;">
                                 Cancel
                             </button>
                         </div>

@@ -1,4 +1,4 @@
-var SUMMERNOTE_HEIGHT = 250;
+var SUMMERNOTE_HEIGHT = 290;
 var PREVIEW_HEIGHT = 400;
 
 /**
@@ -23,7 +23,18 @@ function load_activity(activityId, event) {
 
 function refresh_summernote() {
     $('textarea.editor').summernote({
-        height: SUMMERNOTE_HEIGHT
+        height: SUMMERNOTE_HEIGHT,
+        
+        toolbar: [
+            ['style',['style']],
+            ['font', ['bold', 'italic', 'underline']],
+            //['font', ['fontname']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture']],
+            ['view',['codeview']]
+        ]
     });
     // Observe a specific DOM element:
     observeDOM(document.getElementsByClassName('note-editable')[0], function () {
@@ -31,6 +42,10 @@ function refresh_summernote() {
         preview();
         highlightAndCreateLinks();
     });
+}
+
+function refresh_select2() {
+    $('.select2').select2();
 }
 
 function preview() {
@@ -163,6 +178,8 @@ function saveAndContinue(data) {
         case "success": // This is called when ajax response is successfully processed.
             block_refresh(block);
             refresh_summernote();
+            refresh_select2();
+            setSendInBatch('sendInBatch');
             preview();
             highlightAndCreateLinks();
             break;
@@ -189,6 +206,8 @@ function load_activity(data) {
         case "success": // This is called when ajax response is successfully processed.
             block_refresh(block);
             refresh_summernote();
+            refresh_select2();
+            setSendInBatch('sendInBatch');
             preview();
             highlightAndCreateLinks();
             break;
@@ -208,12 +227,11 @@ function create_new_activity(data) {
             break;
 
         case "complete": // This is called right after ajax response is received.
-            block_refresh(block);
             
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            
+            block_refresh(block);
             break;
     }
 };
@@ -240,3 +258,11 @@ function saveBasicSettings(data) {
             break;
     }
 };
+
+function setSendInBatch(id) {
+    var value = document.getElementById(id).value;
+    if(value <= 0 )
+        document.getElementById(id).value = null;
+}
+
+

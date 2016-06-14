@@ -82,9 +82,14 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
                 .withDoM(FieldExpressionFactory.always())
                 .withDoW(FieldExpressionFactory.always())
                 .withHour(
-                        (getEVERY_HOUR()>0) ? 
-                                FieldExpressionFactory.every(getEVERY_HOUR())
-                                : FieldExpressionFactory.always())
+                        (getEVERY_HOUR()-1 > 0) ? 
+                                (
+                                        (getEVERY_HOUR() < 24) ? 
+                                                FieldExpressionFactory.every(getEVERY_HOUR()) : 
+                                                FieldExpressionFactory.on(time.getHourOfDay())
+                                        )
+                                : FieldExpressionFactory.always()
+                )
                 .withMinute(FieldExpressionFactory.on(time.getMinuteOfHour()))
                 //.withSecond(FieldExpressionFactory.always()) //Unix has no seconds
                 .instance();
