@@ -11,20 +11,31 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseRelationship_;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import seca2.bootstrap.module.Client.ClientContainer;
+import segmail.component.subscription.SubscriptionService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Client;
+import segmail.entity.campaign.Assign_Campaign_List;
+import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.subscription.SubscriptionList;
 
 /**
  *
@@ -37,7 +48,7 @@ public class CampaignService {
     
     @EJB GenericObjectService objService;
     @EJB UpdateObjectService updService;
-    
+    @EJB SubscriptionService subService;
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Campaign getCampaign(long campaignId) {
@@ -255,11 +266,53 @@ public class CampaignService {
         return results.get(0);
     }
     
+    public List<SubscriptionList> getTargetedLists(long campaignId) {
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaignId, Assign_Campaign_List.class, SubscriptionList.class);
+        return targetLists;
+    }
+    
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivitySchedule updateCampaignActivitySchedule(CampaignActivitySchedule schedule) {
         schedule.generateCronExp();
         
         return objService.getEm().merge(schedule);
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) throws EntityNotFoundException {
+        //Get all available lists for client and make sure client is authorized. (1 SQL query)
+        List<SubscriptionList> toBeAssigned = new ArrayList<>();
+        List<SubscriptionList> availableLists = subService.getAllListForClient(clientContainer.getClient().getOBJECTID());
+        for(Long inList : targetLists) {
+            boolean found = false;
+            for(SubscriptionList availList : availableLists) {
+                if(inList.equals(availList.getOBJECTID())) {
+                    toBeAssigned.add(availList); //To be updated to the DB later.
+                    found = true;
+                }
+                    
+            }
+            if(!found)
+                throw new EntityNotFoundException(SubscriptionList.class,inList);
+        }
+        
+        //Get Campaign object (1 SQL query)
+        Campaign campaign = this.getCampaign(campaignId);
+        
+        //Delete all existing (1 SQL query)
+        int results = updService.deleteRelationshipBySource(campaignId, Assign_Campaign_List.class);
+        
+        //Create all new (1 SQL query?)
+        List<Assign_Campaign_List> newAssigns = new ArrayList<>();
+        for(SubscriptionList targetList : toBeAssigned) {
+            Assign_Campaign_List newAssign = new Assign_Campaign_List();
+            newAssign.setSOURCE(campaign);
+            newAssign.setTARGET(targetList);
+            
+            newAssigns.add(newAssign);
+            updService.getEm().persist(newAssign);
+        }
+        return newAssigns;
     }
     
     /**

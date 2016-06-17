@@ -42,7 +42,8 @@ public class ProgramCampaign extends Program{
     private CampaignActivitySchedule editingSchedule;
     
     private List<SubscriptionList> ownedLists;
-    private List<Long> assignedLists;
+    private List<SubscriptionList> targetLists;
+    private List<String> selectedLists; //JSF selectMany component will store it as String.
     
     @Override
     public void clearVariables() {
@@ -137,12 +138,20 @@ public class ProgramCampaign extends Program{
         this.ownedLists = ownedLists;
     }
 
-    public List<Long> getAssignedLists() {
-        return assignedLists;
+    public List<String> getSelectedLists() {
+        return selectedLists;
     }
 
-    public void setAssignedLists(List<Long> assignedLists) {
-        this.assignedLists = assignedLists;
+    public void setSelectedLists(List<String> selectedLists) {
+        this.selectedLists = selectedLists;
+    }
+
+    public List<SubscriptionList> getTargetLists() {
+        return targetLists;
+    }
+
+    public void setTargetLists(List<SubscriptionList> targetLists) {
+        this.targetLists = targetLists;
     }
     
     

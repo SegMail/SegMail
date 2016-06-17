@@ -5,15 +5,23 @@
  */
 package segmail.program.campaign;
 
+import eds.component.data.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
+import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
+import segmail.component.campaign.CampaignService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriptionList;
 
@@ -29,11 +37,13 @@ public class FormAssignLists implements FormEditEntity {
     @Inject ClientContainer clientContainer;
     
     @EJB SubscriptionService subService;
+    @EJB CampaignService campService;
     
     @PostConstruct
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()) {
-            loadLists();
+            loadOwnLists();
+            loadTargetLists();
         }
     }
     
@@ -45,22 +55,53 @@ public class FormAssignLists implements FormEditEntity {
         program.setOwnedLists(ownedLists);
     }
     
-    public List<Long> getAssignedLists() {
-        return program.getAssignedLists();
+    public List<String> getAssignedLists() {
+        return program.getSelectedLists();
     }
 
-    public void setAssignedLists(List<Long> assignedLists) {
-        program.setAssignedLists(assignedLists);
+    public void setAssignedLists(List<String> assignedLists) {
+        program.setSelectedLists(assignedLists);
     }
     
-    public void loadLists() {
+    public List<SubscriptionList> getTargetLists() {
+        return program.getTargetLists();
+    }
+
+    public void setTargetLists(List<SubscriptionList> targetLists) {
+        program.setTargetLists(targetLists);
+    }
+    
+    public void loadOwnLists() {
         List<SubscriptionList> ownedList = subService.getAllListForClient(clientContainer.getClient().getOBJECTID());
         setOwnedLists(ownedList);
+    }
+    
+    public void loadTargetLists() {
+        List<SubscriptionList> targetList = campService.getTargetedLists(program.getEditingCampaignId());
+        setTargetLists(targetList);
+        List<String> targetListsIds = new ArrayList<>();
+        for(SubscriptionList list : targetList) {
+            targetListsIds.add(Long.toString(list.getOBJECTID()));
+        }
+        setAssignedLists(targetListsIds);
     }
 
     @Override
     public void saveAndContinue() {
-        
+        try {
+            //need to convert the list of String to Long
+            List<Long> convertedIds = new ArrayList<>();
+            for(String idString : program.getSelectedLists()) {
+                Long idLong = Long.parseLong(idString);
+                convertedIds.add(idLong);
+            }
+            campService.assignTargetListToCampaign(convertedIds, program.getEditingCampaignId());
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Target lists updated", "");
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        }
     }
 
     @Override

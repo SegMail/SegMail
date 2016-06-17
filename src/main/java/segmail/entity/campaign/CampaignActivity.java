@@ -6,10 +6,19 @@
 package segmail.entity.campaign;
 
 import eds.entity.data.EnterpriseObject;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  * Can more than 1 Campaign share the same activity???
@@ -128,4 +137,28 @@ public class CampaignActivity extends EnterpriseObject {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    public static void main(String[] args) throws JAXBException {
+        XMLEncoder encoder =
+           new XMLEncoder(
+              new BufferedOutputStream(
+                System.out));
+        CampaignActivity ca = new CampaignActivity();
+        ca.setACTIVITY_CONTENT("fingirng");
+        encoder.writeObject(ca);
+        encoder.close();
+        
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+"<java version=\"1.8.0_20\" class=\"java.beans.XMLDecoder\">\n" +
+" <object class=\"segmail.entity.campaign.CampaignActivity\">\n" +
+"  <void property=\"ACTIVITY_CONTENT\">\n" +
+"   <string>fingirng</string>\n" +
+"  </void>\n" +
+" </object>\n" +
+"</java>";
+         XMLDecoder decoder =
+            new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
+         CampaignActivity ca2 = (CampaignActivity) decoder.readObject();
+         decoder.close();
+         System.out.println(ca2.ACTIVITY_CONTENT);
+    }
 }

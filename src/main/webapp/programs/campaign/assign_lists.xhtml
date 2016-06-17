@@ -9,7 +9,7 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <form jsf:id="FormAssignLists">
+    <!--<form jsf:id="FormAssignLists">-->
         <div class="block-content">
             <div class="form-group">
                 <s2:messenger id="FormAssignLists_Messenger" for="FormAssignLists" showDetail="true" showSummary="true"
@@ -19,7 +19,7 @@
 
             <div class="form-group">
                 <h:selectManyListbox styleClass="select2" style="width: 100%;"
-                                     value="#{FormAssignLists.assignedLists}"
+                                     value="#{FormAssignLists.assignedLists}" 
                     >
                     <f:selectItems value="#{FormAssignLists.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
                                    itemValue="#{list.OBJECTID}">
@@ -28,13 +28,6 @@
             </div>
         </div>
         <div class="block-footer">
-            <div class="pull-left">
-                <button class="btn btn-default"
-                        onclick="document.getElementById('FormAssignLists').reset();
-                                return false;">
-                    I screwed up. Help!
-                </button>
-            </div>
             <div class="pull-right">
                 <button jsf:id="saveAssignLists" class="btn btn-primary"                                 
                                  >
@@ -48,5 +41,5 @@
                 </button>
             </div>
         </div>
-    </form>
+    <!--</form>-->
 </html>
