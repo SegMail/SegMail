@@ -8,6 +8,7 @@ package segmail.program.list;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -22,6 +23,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.SubscriptionListFieldComparator;
 
 /**
  *
@@ -52,15 +54,16 @@ public class FormListFieldSet {
 
     public void save() {
         updateExistingFields();
-        addNewField();
         //Don't do page refresh, just update the field list
         loadListFields();
+        addNewField();
+        
     }
 
     public void initNewEmptyField() {
         try {
             int initSNO = (getFieldList() == null) ? 1 : getFieldList().size();
-            this.setNewField(new SubscriptionListField(initSNO + 1, false, "", FIELD_TYPE.TEXT, ""));
+            this.setNewField(new SubscriptionListField(program.getListEditing(),initSNO + 1, false, "", FIELD_TYPE.TEXT, ""));
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
@@ -75,6 +78,7 @@ public class FormListFieldSet {
                 return;
             }
             List<SubscriptionListField> fieldList = subscriptionService.getFieldsForSubscriptionList(listId);
+            
             this.program.setFieldList(fieldList);
 
         } catch (EJBException ex) {
@@ -91,9 +95,10 @@ public class FormListFieldSet {
             if (newField.getFIELD_NAME() == null || newField.getFIELD_NAME().isEmpty()) {
                 return;
             }
-
             newField = subscriptionService.addFieldForSubscriptionList(currentList, newField);
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "New field added.", null);
+            
+            loadListFields();
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "New field "+newField.getFIELD_NAME()+" added.", null);
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (DataValidationException ex) {

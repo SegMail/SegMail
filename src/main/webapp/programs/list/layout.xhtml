@@ -109,11 +109,21 @@
             <div class="modal fade" id="add_subscriber_popup">
                 <ui:include src="add_new_subscriber.xhtml"></ui:include>
             </div>
+            <div class="modal fade" id="import_subscriber_popup">
+                <ui:include src="import_subscriber_popup.xhtml"></ui:include>
+            </div>
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jasny-bootstrap/js/jasny-bootstrap.min.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/list/js/list.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/client-line-navigator-master/file-navigator.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/client-line-navigator-master/line-navigator.js" />
+        </ui:define>
+        
+        <ui:define name="head">
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/common/js/jasny-bootstrap/css/jasny-bootstrap.min.css" />
         </ui:define>
 
     </ui:composition>

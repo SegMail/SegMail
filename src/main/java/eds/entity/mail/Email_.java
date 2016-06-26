@@ -5,10 +5,9 @@
  */
 package eds.entity.mail;
 
+import eds.entity.data.EnterpriseObject;
 import eds.entity.transaction.EnterpriseTransaction_;
-import java.util.HashSet;
-import java.util.Set;
-import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
@@ -26,4 +25,5 @@ public class Email_ extends EnterpriseTransaction_ {
     public static volatile SetAttribute<Email,String> RECIPIENTS;
     public static volatile SetAttribute<Email,String> REPLY_TO_ADDRESSES;
     public static volatile SetAttribute<Email,Integer> RETRIES;
+    
 }

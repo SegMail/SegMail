@@ -96,11 +96,11 @@
                                              >
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
                                         event="click"
-                                        onevent="saveAndContinue"
+                                        onevent="load_activity"
                                         render="@form" execute="@form">
                                 </f:ajax>
                             </h:commandButton>
-                            <h:commandButton styleClass="btn btn-primary"
+                            <h:commandButton styleClass="btn btn-default"
                                              value="Save &amp; close"
                                              onclick="reapply_textarea('content')"
                                              >
@@ -115,20 +115,6 @@
                                         return false;">
                                 Delete
                             </button>
-                            <button class="btn btn-warning"
-                                    onclick="$('.send-container').toggle('slow');
-                                        return false;">
-                                Send
-                            </button>
-                            <h:commandButton styleClass="btn btn-default"
-                                             value="Close"
-                                             >
-                                <f:ajax listener="#{FormEditEmailActivity.closeWithoutSaving()}"
-                                        event="click"
-                                        onevent="saveAndContinue"
-                                        render="@form" execute="@form">
-                                </f:ajax>
-                            </h:commandButton>
                         </div>
                     </div>
                     <div class="delete-container" data-role="delete" style="display: none;">
@@ -171,13 +157,17 @@
                                 This email will be received by your targeted list subscribers.
                                 You can see the conversion rates shortly once the sending starts.
                             </p>
+                            <div class="form-group">
+                                <s2:messenger id="FormEditEmailActivity_messenger2" for="FormEditEmailActivity" showDetail="true" showSummary="true"
+                                                      class="form-control"></s2:messenger>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button jsf:id="send_button"
-                                    class="btn btn-warning">
-                                <f:ajax event="click" 
+                                    class="btn btn-warning"><!--should the sending form be another modal pop instead?-->
+                                <f:ajax event="click" listener="#{FormEditEmailActivity.sendAndClose()}"
                                         onevent="saveAndContinue"
-                                        render="@form" execute="@form">
+                                        render="FormEditEmailActivity_messenger2" execute="@form">
                                 </f:ajax>
                                 Confirm send
                             </button>

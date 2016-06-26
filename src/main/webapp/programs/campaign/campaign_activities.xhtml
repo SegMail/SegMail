@@ -10,9 +10,6 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <form jsf:id="FormCampaignActivities">
-        <!--<div class="block-head">
-            <h2>Activities</h2>
-        </div>-->
         <s2:messenger id="FormCampaignActivities_Messenger" for="FormCampaignActivities" showDetail="true" showSummary="true"
                       class="form-group"></s2:messenger>
 
@@ -60,7 +57,7 @@
                                         4.55% (fake)
                                     </td>
                                     <td>
-                                        <div>
+                                        <div class="pull-right">
                                             <button
                                                 jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
                                                 href="#edit_campaign_activity"
@@ -75,6 +72,21 @@
                                                         >
                                                 </f:ajax>
                                                 <i class="fa fa-pencil-square"></i>
+                                            </button>
+                                            <button
+                                                jsf:id="execute_campaign_activity_button_#{activity.OBJECTID}"
+                                                href="#execute_campaign_activity"
+                                                data-toggle="modal"
+                                                style="margin-right: 3px;"
+                                                class="btn btn-warning list-item-trigger"
+                                                title="Execute Activity"
+                                                >
+                                                <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
+                                                        render="FormExecuteCampaignActivity"
+                                                        onevent="executeAndClose"
+                                                        >
+                                                </f:ajax>
+                                                <i class="fa fa-send"></i>
                                             </button>
                                         </div>
                                     </td>

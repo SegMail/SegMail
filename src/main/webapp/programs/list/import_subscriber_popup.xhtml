@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormImportSubscriber" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Import Subscribers</h4>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="form-group" style="margin-bottom: 5px;">
+                        <s2:messenger id="FormImportSubscriber_messenger" for="FormImportSubscriber" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Upload a file
+                        </label>
+                        <div id="uploader">
+                            <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                <div class="form-control" data-trigger="fileinput">
+                                    <i class="glyphicon glyphicon-file fileinput-exists"></i> 
+                                    <span class="fileinput-filename"></span>
+                                </div>
+                                <span class="input-group-addon btn btn-default btn-file">
+                                    <span class="fileinput-new">Select file</span>
+                                    <span class="fileinput-exists">Change</span>
+                                    <input id="fileUploaded" type="file" /></span>
+                                <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="field_selector" class="form-group">
+                        <c:forEach items="#{FormImportSubscriber.listFields}" var="field">
+                            <div class="form-group">
+                                <label>#{field.FIELD_NAME}: </label>
+                                <div class="form-group">
+                                    <h:selectOneMenu pass:id="#{field.FIELD_NAME}" style="width: 100%;"
+                                                     styleClass="select2"
+                                                     value="#{FormImportSubscriber.listFieldMapping[field.SNO]}"
+                                                     >
+                                        
+                                    </h:selectOneMenu>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+                <p:blockUI block="add_new_sub_form" trigger="add_new_sub_form:add_subscriber_button"
+                           >
+                    <p id="spinner"></p>
+                </p:blockUI>
+
+            </div>
+        </div>
+
+    </form>
+</html>

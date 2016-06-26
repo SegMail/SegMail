@@ -181,7 +181,7 @@ public class SubscriptionService {
             updateService.getEm().persist(listAssignment);
 
             // Create the default fieldsets and assign it to newList
-            SubscriptionListField fieldEmail = new SubscriptionListField(1, true, DEFAULT_EMAIL_FIELD_NAME, FIELD_TYPE.EMAIL, "Email of your subscriber.");
+            SubscriptionListField fieldEmail = new SubscriptionListField(newList,1, true, DEFAULT_EMAIL_FIELD_NAME, FIELD_TYPE.EMAIL, "Email of your subscriber.");
             fieldEmail.setOWNER(newList);
 
             updateService.getEm().persist(fieldEmail);
@@ -443,7 +443,8 @@ public class SubscriptionService {
     public List<SubscriptionListField> getFieldsForSubscriptionList(long listId) {
         try {
             List<SubscriptionListField> allFieldList = this.objectService.getEnterpriseData(listId, SubscriptionListField.class);
-
+            Collections.sort(allFieldList, new SubscriptionListFieldComparator()); //Doesn't include new field yet
+            
             return allFieldList;
 
         } catch (PersistenceException pex) {
@@ -489,21 +490,43 @@ public class SubscriptionService {
             validateListField(newField);
 
             //Reorder the SNO for the entire list
-            //If the new field added has the same SNO as an existing field, then insert it infront of the existing field
-            List<SubscriptionListField> existingFields = getFieldsForSubscriptionList(listId); //All managed?
-            Collections.sort(existingFields, new SubscriptionListFieldComparator()); //Doesn't include new field yet
-            for (int i = existingFields.size(); i > 0; i--) {
-                SubscriptionListField field = updateService.getEm().merge(existingFields.get(i - 1));
-                
-                if (newField.getSNO() <= field.getSNO()) {
-                    field.setSNO(i + 1);
-                } else {
+            //Retrieve all existingFields
+            //Organize into 2 lists: insert and delete
+            //If a field needs to change its index, put it in the delete query and insert query
+            //For the new field, only put it in the insert query
+            
+            List<SubscriptionListField> existingFields = getFieldsForSubscriptionList(listId);
+            List<SubscriptionListField> insertThese = new ArrayList<>();
+            List<SubscriptionListField> deleteThese = new ArrayList<>();
+            
+            existingFields.add(newField);
+            for(int i = 1; i<=existingFields.size(); i++) {
+                SubscriptionListField field = existingFields.get(i-1);
+                if(field.equals(newField)){
+                    field.setOWNER(list);
                     field.setSNO(i);
+                    insertThese.add(field);
+                    continue;
                 }
-                //updateService.getEm().merge(field); //Assuming the entity is already managed
+                
+                if(field.getSNO() != i){
+                    deleteThese.add(field);
+                    SubscriptionListField cloneField = new 
+                        SubscriptionListField(list, i, field.isMANDATORY(), field.getFIELD_NAME(), FIELD_TYPE.valueOf(field.getTYPE()), field.getDESCRIPTION());
+                    insertThese.add(cloneField);
+                }
             }
-            newField.setOWNER(list);
-            updateService.getEm().persist(newField);
+            //Delete first
+            for(SubscriptionListField deleteField : deleteThese){
+                updateService.getEm().remove(
+                        updateService.getEm().contains(deleteField) ? 
+                                deleteField : updateService.getEm().merge(deleteField));
+            }
+            //Insert later
+            for(SubscriptionListField insertField : insertThese){
+                updateService.getEm().persist(insertField);
+            }
+            
             return newField;
 
         } catch (PersistenceException pex) {

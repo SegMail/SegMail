@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormExecuteCampaignActivity">
+        <div class="modal-dialog">
+            <div class="modal-content" style="overflow-y: hidden;">
+                <div class="block">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            X
+                        </button>
+                        <h4 class="modal-title">
+                            Are you sure you want to start sending out this email?
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            This email will be received by your targeted list subscribers.
+                            You can see the conversion rates shortly once the sending starts.
+                        </p>
+                        <div class="form-group">
+                            <s2:messenger id="FormExecuteCampaignActivity_messenger" for="FormExecuteCampaignActivity" showDetail="true" showSummary="true"
+                                          class="form-control"></s2:messenger>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button jsf:id="execute_button"
+                                class="btn btn-warning"><!--should the sending form be another modal pop instead?-->
+                            <f:ajax event="click" listener="#{FormExecuteCampaignActivity.executeAndClose()}"
+                                    onevent="executeAndClose"
+                                    render="@form" execute="@form">
+                            </f:ajax>
+                            Confirm send
+                        </button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

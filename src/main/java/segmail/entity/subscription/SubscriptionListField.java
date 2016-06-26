@@ -27,7 +27,8 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     public SubscriptionListField() {
     }
 
-    public SubscriptionListField(int order, boolean MANDATORY, String FIELD_NAME, FIELD_TYPE TYPE, String DESCRIPTION) {
+    public SubscriptionListField(SubscriptionList OWNER, int order, boolean MANDATORY, String FIELD_NAME, FIELD_TYPE TYPE, String DESCRIPTION) {
+        this.OWNER = OWNER;
         this.FIELD_NAME = FIELD_NAME;
         this.MANDATORY = MANDATORY;
         this.TYPE = TYPE.name();
