@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.landing;
+package seca2.program.server;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -17,6 +17,8 @@ import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerResource;
+import seca2.entity.landing.ServerResourceType;
 
 /**
  *
@@ -26,7 +28,7 @@ import seca2.entity.landing.ServerInstance;
 @Named("FormServerList")
 public class FormServerList {
     
-    @Inject private ProgramLanding program;
+    @Inject private ProgramServer program;
     
     @EJB LandingService landingService;
     
@@ -56,8 +58,28 @@ public class FormServerList {
         }
     }
     
+    public void loadServer(long serverId) {
+        try {
+            program.setServerEditing(landingService.getServerInstance(serverId));
+            program.setJMSConnection(landingService.getServerJMSConnection(serverId));
+            //program.setShowEditingPanel(true);
+        } catch (EJBException ex) { //Transaction did not go through
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+        }
+    }
+    
     
     public List<ServerInstance> getServerList(){
         return program.getServers();
     }
+    
+    public ServerInstance getServerEditing() {
+        return program.getServerEditing();
+    }
+
+    public void setServerEditing(ServerInstance serverEditing) {
+        program.setServerEditing(serverEditing);
+    }
+    
+    
 }

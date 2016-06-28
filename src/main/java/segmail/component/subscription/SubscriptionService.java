@@ -7,6 +7,8 @@ package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.batch.BatchProcessingException;
+import eds.component.batch.BatchProcessingService;
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientResourceInterceptor;
 import eds.component.data.DBConnectionException;
@@ -20,8 +22,8 @@ import eds.component.data.DataValidationException;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.encryption.EncryptionService;
 import eds.component.encryption.EncryptionType;
-import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
+import eds.entity.batch.BatchJobStep;
 import eds.entity.mail.Email;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
@@ -47,7 +49,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
-import seca2.component.landing.LandingService;
+import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.ListType;
@@ -86,7 +88,8 @@ public class SubscriptionService {
     /**
      * External services
      */
-    @EJB private LandingService landingService;
+    //@EJB private LandingService landingService;
+    @EJB private BatchProcessingService batchService;
     
     /**
      * Delegate services
@@ -246,7 +249,7 @@ public class SubscriptionService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void subscribe(long listId, Map<String,Object> values) 
-            throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException, InvalidEmailException {
+            throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException, BatchProcessingException {
         try {
             // Find the list object
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
@@ -636,8 +639,8 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void sendConfirmationEmail(Subscription sub) 
-            throws IncompleteDataException, EntityNotFoundException, InvalidEmailException{
+    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException, BatchProcessingException 
+            {
         try {
             //Retrieve "Send as" from the list
             /*SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
@@ -664,6 +667,7 @@ public class SubscriptionService {
             String newEmailBody = assignedConfirmEmail.getBODY();
             newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
             //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
+            newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
             
             //Send the email using MailService
             
@@ -674,8 +678,10 @@ public class SubscriptionService {
             confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
             confirmEmail.addRecipient(sub.getSOURCE().getEMAIL());
             
-            mailService.sendEmailByAWS(confirmEmail, true);
-            //mailService.sendEmailBySMTP(confirmEmail);
+            //mailService.sendEmailByAWS(confirmEmail, true);
+            //BatchJobStep step = batchService.createJobStep("MailService", "sendEmailNow", new Object[] {confirmEmail,true});
+            //batchService.executeJobStep(step);
+            mailService.queueEmail(confirmEmail, DateTime.now());
             
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {

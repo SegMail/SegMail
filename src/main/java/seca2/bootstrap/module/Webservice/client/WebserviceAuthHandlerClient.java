@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
@@ -18,6 +19,7 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
+import seca2.component.landing.LandingService;
 
 /**
  *
@@ -25,8 +27,16 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
  */
 public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageContext>{
 
-    private String username = "sws";
-    private String password = "sws";
+    /**
+     * You cannot store these here!
+     */
+    //private String username = "sws";
+    //private String password = "sws";
+    
+    public static final String USERNAME_KEY = "WebserviceAuthHandlerClient.WS_CLIENT_USERNAME";
+    public static final String PASSWORD_KEY = "WebserviceAuthHandlerClient.WS_PASSWORD_KEY";
+    
+    @EJB LandingService landingService = new LandingService(); //No EJB context here!!! WTF!!!
     
     @Override
     public Set<QName> getHeaders() {
@@ -73,9 +83,14 @@ public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageConte
         SOAPHeader header = message.getSOAPHeader();
         
         QName headerUsername = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.USERNAME);
+        String username = System.getProperty(USERNAME_KEY);
         header.addAttribute(headerUsername, username);
         QName headerPassword = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.PASSWORD);
+        String password = System.getProperty(PASSWORD_KEY);
         header.addAttribute(headerPassword, password);
+        QName serverName = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.SERVER_NAME);
+        String server = landingService.getOwnServerName();
+        header.addAttribute(serverName, server);
         
         message.saveChanges();
     }

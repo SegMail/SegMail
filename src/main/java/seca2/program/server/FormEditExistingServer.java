@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.landing;
+package seca2.program.server;
 
 import eds.component.data.EntityNotFoundException;
 import eds.entity.user.UserAccount;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -18,9 +16,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
+import seca2.entity.landing.ServerResource;
+import seca2.entity.landing.ServerResourceType;
+import seca2.program.FormEdit;
 
 /**
  *
@@ -28,9 +28,9 @@ import seca2.entity.landing.ServerInstance;
  */
 @RequestScoped
 @Named("FormEditExistingServer")
-public class FormEditExistingServer {
+public class FormEditExistingServer implements FormEdit {
     
-    @Inject ProgramLanding program;
+    @Inject ProgramServer program;
     
     @EJB LandingService landingService;
     
@@ -39,39 +39,43 @@ public class FormEditExistingServer {
         
     }
     
-    public void saveTemplateAndContinue(){
+    @Override
+    public void saveAndContinue(){
         try {
+            //Save server info
             landingService.saveServer(this.getServerEditing());
+            //Save server to user relationship
             landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
+            //Save JMS Connection resource
+            ServerResource jmsResource = this.getJMSConnection();
+            jmsResource.setOWNER(getServerEditing());
+            jmsResource.setRESOURCE_TYPE(ServerResourceType.JMS_CONNECTION);
+            landingService.updateOrAddResourceForServer(jmsResource);
+            
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
     
-    public void saveTemplateAndClose(){
-        try {
-            landingService.saveServer(this.getServerEditing());
-            landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
-            
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
-            program.refresh();
-            
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
+    @Override
+    public void saveAndClose(){
+        saveAndContinue();
+        closeWithoutSaving();
     }
     
+    @Override
     public void closeWithoutSaving(){
         program.refresh();
     }
     
-    public void deleteTemplate(){
+    @Override
+    public void delete(){
         try {
             landingService.deleteServer(this.getServerEditing().getOBJECTID());
             
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server deleted.", "");
-            program.refresh();
+            closeWithoutSaving();
             
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -124,5 +128,34 @@ public class FormEditExistingServer {
 
     public void setTypes(List<String> types) {
         program.setTypes(types);
+    }
+    
+    public boolean renderEditingPanel(){
+        return program.isShowEditingPanel();
+    }
+    
+    public String getTab() {
+        return program.getTab();
+    }
+
+    public void setTab(String tab) {
+        program.setTab(tab);
+    }
+    
+    public String getTabPath(){
+        String tab = getTab();
+        return (tab == null || tab.isEmpty()) ? "" : "edit_panels/"+tab+".xhtml";
+    }
+    
+    public void changeTab(String newTab){
+        this.setTab(newTab);
+    }
+    
+    public ServerResource getJMSConnection() {
+        return program.getJMSConnection();
+    }
+
+    public void setJMSConnection(ServerResource JMSConnection) {
+        program.setJMSConnection(JMSConnection);
     }
 }

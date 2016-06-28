@@ -16,5 +16,6 @@ public class WebserviceSOAPKeys {
     
     public static String USERNAME = "miqhri4jtmfnkjtbh";
     public static String PASSWORD = "newjkgmkesghramdfewkgr";
+    public static String SERVER_NAME = "jcrkwngu5fmkfbr";
     
 }

@@ -99,12 +99,14 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
             //QName headerPassword = new QName(WebserviceSOAPKeys.NAMESPACE,WebserviceSOAPKeys.PASSWORD);
         //String password = header.getAttributeValue(headerPassword);
         String password = header.getAttribute(WebserviceSOAPKeys.PASSWORD);
+        
+        String server = header.getAttribute(WebserviceSOAPKeys.SERVER_NAME);
 
             //Get the host of the application
         //More reliable to get from HTTP header than manually set it in SOAP header
         String ip = req.getRemoteAddr();
 
-        User authenticatedUser = wsService.authenticateApplication(username, password, ip);
+        User authenticatedUser = wsService.authenticateApplication(username, password, server);
         sessionContainer.setUser(authenticatedUser);
         
 

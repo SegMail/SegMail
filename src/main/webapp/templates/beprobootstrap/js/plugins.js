@@ -356,7 +356,7 @@ function gPlugins(container){
     gDatepicker.init(container);
     gMDatepicker.init(container);
     gTimepicker.init(container);
-    gDateTimepicker.init(container);
+    //gDateTimepicker.init(container);
     gAccordion.init(container);
     gTip.init(container);
     gPopover.init(container);

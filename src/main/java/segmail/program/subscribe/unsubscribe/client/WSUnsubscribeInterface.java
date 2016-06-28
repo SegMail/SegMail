@@ -14,10 +14,10 @@ import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
  *
  * @author LeeKiatHaw
  */
-//@WebService(
-//        name = "WSUnsubscribe", 
-//        targetNamespace = "http://client.unsubscribe.subscribe.program.segmail/")
-public interface WSUnsubscribeInterface {//extends GenericWSInterface {
+@WebService(
+        name = "WSUnsubscribe", 
+        targetNamespace = "http://webservice.unsubscribe.subscribe.program.segmail/")
+public interface WSUnsubscribeInterface extends GenericWSInterface {
     
     @WebMethod
     public String unsubscribe(@WebParam(name = "key") String key);

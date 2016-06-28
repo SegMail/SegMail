@@ -17,4 +17,9 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class ServerInstance_ extends EnterpriseObject_ {
     public static volatile SingularAttribute<ServerInstance,String> NAME;
     public static volatile SingularAttribute<ServerInstance,String> IP_ADDRESS;
+    public static volatile SingularAttribute<ServerInstance,Integer> PORT;
+    public static volatile SingularAttribute<ServerInstance,String> URI;
+    public static volatile SingularAttribute<ServerInstance,String> HOSTNAME;
+    public static volatile SingularAttribute<ServerInstance,String> PATH;
+    public static volatile SingularAttribute<ServerInstance,String> SERVER_NODE_TYPE;
 }

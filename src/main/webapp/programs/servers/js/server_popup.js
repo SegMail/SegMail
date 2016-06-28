@@ -22,8 +22,7 @@ var popup = (function() {
             document.getElementById(this.title_id).innerHTML = this.title;
             //document.getElementById(title_id).value = title;
 
-            var TYPE = this.type.toUpperCase();
-            document.getElementById(this.type_id).value = TYPE;
+            document.getElementById(this.type_id).innerHTML = this.type.toUpperCase();
             
             //Re-render the summernote text editor
             //$('textarea.editor').summernote({height: SUMMERNOTE_HEIGHT});
@@ -66,7 +65,7 @@ function edit(data){
 
         case "success": // This is called when ajax response is successfully processed.
             //Set the title and type of template
-            popup.init('popup_title_edit', 'Edit '+name[0]+' template', 'template_id', name[1]);
+            popup.init('server_name', name[0], 'server_type', name[1]);
             //Re-setup the title and type
             popup.popup(); 
             break;

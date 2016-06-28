@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="FormAddJob">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 id="popup_title" class="modal-title">Add new batch job</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <s2:messenger id="FormAddJob_Messenger" for="FormAddJob" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Batch Job name:
+                        </label>
+                        <span class="help-block">
+                            Name of the batch job
+                        </span>
+                        <input type="text" class="form-control" id="serviceName"
+                               jsf:value="#{FormAddJob.batchJobName}"
+                               />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Service name:
+                        </label>
+                        <span class="help-block">
+                            Name of the business service module
+                        </span>
+                        <input type="text" class="form-control" id="serviceName"
+                               jsf:value="#{FormAddJob.serviceName}"
+                               />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Service method:
+                        </label>
+                        <span class="help-block">
+                            Name of the business service module method
+                        </span>
+
+                        <input type="text" class="form-control" id="hostname"
+                               jsf:value="#{FormAddJob.serviceMethod}"
+                               />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Cron expression:
+                        </label>
+                        <span class="help-block">
+                            Refer to <a target="_blank" href="http://www.nncron.ru/help/EN/working/cron-format.htm">this</a> on how to write a Cron expression.
+                        </span>
+                        <input type="text" class="form-control" id="cron" 
+                               jsf:value="#{FormAddJob.cronExpression}" />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Assign to server:
+
+                        </label>
+                        <span class="help-block">
+                            The server which will execute this batch job
+                        </span>
+
+                        <h:selectOneMenu styleClass="form-control" style=""
+                                         value="#{FormAddJob.serverId}">
+                            <f:selectItems value="#{FormAddJob.servers}" var="server" 
+                                           itemLabel="#{server.NAME} #{server.IP_ADDRESS}"
+                                           itemValue="#{server.OBJECTID}">
+                            </f:selectItems>
+
+                        </h:selectOneMenu>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+
+                    <p:commandButton id="add_new_job_button" styleClass="btn btn-success" 
+                                     value="Add Batch Job" 
+                                     update="@form"
+                                     process="@form"
+                                     actionListener="#{FormAddJob.addBatchJob()}"
+                                     >
+
+                    </p:commandButton>
+                                     
+                </div>
+                <p:blockUI block="FormAddJob" trigger="FormAddJob:add_new_job_button"
+                           >
+                    <p id="spinner"></p>
+                </p:blockUI>
+
+            </div>
+        </div>
+    </form>
+
+</html>
