@@ -3,6 +3,7 @@ package segmail.program.list;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.SessionScoped;
@@ -55,6 +56,8 @@ public class ProgramList extends Program implements Serializable {
     private List<SubscriptionListField> fieldList;
     private SubscriptionListField newField;
     
+    //For import
+    private Map<Integer,String> listFieldMapping = new HashMap<>();
     
     private final String formName = "ProgramList";
     
@@ -226,6 +229,16 @@ public class ProgramList extends Program implements Serializable {
     public void setShowActiveTabs(Map<String, Boolean> showActiveTabs) {
         this.showActiveTabs = showActiveTabs;
     }
+
+    public Map<Integer, String> getListFieldMapping() {
+        return listFieldMapping;
+    }
+
+    public void setListFieldMapping(Map<Integer, String> listFieldMapping) {
+        this.listFieldMapping = listFieldMapping;
+    }
+    
+    
 
     @Override
     public void initRequestParams() {

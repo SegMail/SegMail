@@ -343,30 +343,20 @@ public class CampaignService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void startSendingCampaignEmail(CampaignActivity emailActivity) throws EntityNotFoundException, IncompleteDataException, BatchProcessingException {
         
-        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(emailActivity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class);
-        if(campaigns == null || campaigns.isEmpty())
-            throw new EntityNotFoundException(Campaign.class,emailActivity.getOBJECTID());
-        Campaign campaign = campaigns.get(0);
+        //Using OBJECT_IDs of the Subscribers, divide them into the preferred batch number stated in CampaignActivitySchedule.SEND_IN_BATCH
+        //This method cannot be here, create another scheduler EJB
         
-        //Should we write a method in GenericObjectService to retreive IDs only?
-        List<SubscriptionList> lists = getTargetedLists(campaign.getOBJECTID());
-        List<Long> listIds = new ArrayList<>();
-        for(SubscriptionList list : lists) {
-            listIds.add(list.getOBJECTID());
-        }
         
-        List<CampaignActivitySchedule> activitySchedule = objService.getEnterpriseData(emailActivity.getOBJECTID(), CampaignActivitySchedule.class);
-        if(activitySchedule == null || activitySchedule.isEmpty())
-            activitySchedule.add(this.createActivitySchedule(emailActivity.getOBJECTID(), 0, 0)); //If not found, create a new schedule
+        //Schedule the batch jobs
         
         //Create a batch job that will execute this exeSchedule until it gets done.
-        batchScheduleService.createSingleStepJob(
+        /*batchScheduleService.createSingleStepJob(
                 "Sending campaign email \""+emailActivity.getACTIVITY_NAME()+"\"", 
                 "CampaignExecutionService", "executeCampaignActivity", 
                 new Object[]{emailActivity.getOBJECTID()}, 
                 landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID()       , 
                 activitySchedule.get(0).getCRON_EXPRESSION());
-        
+        */
         //That's all folks! Let's see the magic happening all by itself.
     }
     
