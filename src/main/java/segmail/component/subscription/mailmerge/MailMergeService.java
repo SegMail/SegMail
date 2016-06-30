@@ -30,6 +30,8 @@ import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
  */
 @Stateless
 public class MailMergeService {
+    
+    public static final String UNSUBSCRIBE_PROGRAM_NAME = "unsubscribe";
 
     @EJB
     private GenericObjectService objectService;
@@ -144,6 +146,7 @@ public class MailMergeService {
      * - For unsubscription key, we use a more consistent one:
      * [email]+[salt]+[listId]+[salt] so that we can check if it exists before
      * - Let's use the subscriber's ID (the one assigned to the client)
+     * - Don't store another transaction because this is not a time-limited transaction.
      *
      *
      * @param text
@@ -159,14 +162,14 @@ public class MailMergeService {
         }
         
         // Check if key exists
-        MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
+        /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
         if(trans == null) {
             trans = new MailMergeRequest();
             trans.setPROGRAM(MailMergeLabel.UNSUBSCRIBE.name().toLowerCase());
             trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
             trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
             updateService.getEm().persist(trans);
-        }
+        }*/
         
         ServerInstance landingServer
                 = landingService.getNextServerInstance(
@@ -176,7 +179,7 @@ public class MailMergeService {
             throw new IncompleteDataException("Please contact app administrator to set a landing server.");
         }
 
-        String unsubLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
+        String unsubLink = landingServer.getURI().concat("/").concat(UNSUBSCRIBE_PROGRAM_NAME).concat("/").concat(unsubscribeKey);
 
         String newEmailBody = text.replace(MailMergeLabel.UNSUBSCRIBE.label(), unsubLink);
 

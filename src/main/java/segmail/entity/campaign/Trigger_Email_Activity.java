@@ -8,6 +8,7 @@ package segmail.entity.campaign;
 import eds.entity.mail.Email;
 import eds.entity.transaction.EnterpriseTransactionTrigger;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**
@@ -16,6 +17,9 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="TRIGGER_EMAIL_ACTIVITY")
+@EntityListeners({
+    Trigger_Email_Activity_Listener.class
+})
 public class Trigger_Email_Activity extends EnterpriseTransactionTrigger<Email,CampaignActivity> {
     private String SUBCRIBER_EMAIL;
 

@@ -18,7 +18,7 @@ import javax.persistence.Table;
 public class SubscriberAccount extends EnterpriseObject {
 
     private String EMAIL;
-
+    
     public String getEMAIL() {
         return EMAIL;
     }

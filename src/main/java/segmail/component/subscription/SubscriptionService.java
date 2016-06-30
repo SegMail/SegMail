@@ -325,8 +325,10 @@ public class SubscriptionService {
             newSubscr.setSTATUS(SUBSCRIPTION_STATUS.NEW);
             
             // Create confirmation and unsubscribe keys
-            String confirmKey = encryptService.getHash("confirm subscription of "+newOrExistingAcc.getOBJECTID()+" to list "+list.getOBJECTID(), EncryptionType.SHA256);
-            String unsubKey = encryptService.getHash("unsubscribe "+newOrExistingAcc.getOBJECTID()+" from list "+list.getOBJECTID(), EncryptionType.SHA256);
+            //String confirmKey = encryptService.getHash("confirm subscription of "+newOrExistingAcc.getOBJECTID()+" to list "+list.getOBJECTID(), EncryptionType.SHA256);
+            //String unsubKey = encryptService.getHash("unsubscribe "+newOrExistingAcc.getOBJECTID()+" from list "+list.getOBJECTID(), EncryptionType.SHA256);
+            String confirmKey = getConfirmationHashCode(newOrExistingAcc.getOBJECTID(), listId);
+            String unsubKey = getUnsubscribeHashCode(newOrExistingAcc.getOBJECTID(), listId);
             
             newSubscr.setCONFIRMATION_KEY(confirmKey);
             newSubscr.setUNSUBSCRIBE_KEY(unsubKey);
@@ -829,5 +831,16 @@ public class SubscriptionService {
 
     public Subscription unsubscribeSubscriber(String email, long listId) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    private String getConfirmationHashCode(long subscriberId, long listId) {
+        String confirmKey = encryptService.getHash("confirm subscription of "+subscriberId+" to list "+listId, EncryptionType.SHA256);
+        return confirmKey;
+        
+    }
+    
+    private String getUnsubscribeHashCode(long subscriberId, long listId) {
+        String unsubKey = encryptService.getHash("unsubscribe "+subscriberId+" from list "+listId, EncryptionType.SHA256);
+        return unsubKey;
     }
 }
