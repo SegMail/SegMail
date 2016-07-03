@@ -16,7 +16,7 @@
         <param-name>primefaces.UPLOADER</param-name>
         <param-value>commons</param-value>
     </context-param>
-    <!--<filter>
+    <filter>
         <filter-name>Primefaces Fileupload Filter</filter-name>
         <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
     </filter>
@@ -25,7 +25,7 @@
         <servlet-name>Faces Servlet</servlet-name>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>-->
+    </filter-mapping>
     
     <!--non-JSF values-->
     
