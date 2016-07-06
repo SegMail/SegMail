@@ -27,7 +27,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 
 /**
@@ -82,6 +81,10 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
     private boolean authenticateWS(SOAPMessageContext context)
             throws SOAPException, UserAccountLockedException, UserLoginException {
 
+        //If the request comes from the an authenticated session, no need to authenticate
+        if(sessionContainer.isLoggedIn())
+            return true;
+        
         HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
 
             //String username = req.getHeader(WebserviceSOAPKeys.USERNAME);
@@ -107,8 +110,10 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
         String ip = req.getRemoteAddr();
 
         User authenticatedUser = wsService.authenticateApplication(username, password, server);
+        sessionContainer.setSessionId(req.getRequestedSessionId());
         sessionContainer.setUser(authenticatedUser);
-        
+        sessionContainer.setLoggedIn(true);
+        sessionContainer.setUserType(authenticatedUser.getUSERTYPE());
 
         return true;
 

@@ -7,6 +7,7 @@ package segmail.program.list;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +39,15 @@ public class FormImportSubscriber {
     
     // File upload
     private Part file;
+    private String fileFirstLine;
+    private List<String> fileColumns;
+    private boolean renderFieldSelector;
     
     @PostConstruct
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()){
             initMapping();
+            this.setRenderFieldSelector(false);
         }
     }
 
@@ -65,6 +70,30 @@ public class FormImportSubscriber {
     public void setFile(Part file) {
         this.file = file;
     }
+
+    public String getFileFirstLine() {
+        return fileFirstLine;
+    }
+
+    public void setFileFirstLine(String fileFirstLine) {
+        this.fileFirstLine = fileFirstLine;
+    }
+
+    public List<String> getFileColumns() {
+        return fileColumns;
+    }
+
+    public void setFileColumns(List<String> fileColumns) {
+        this.fileColumns = fileColumns;
+    }
+
+    public boolean isRenderFieldSelector() {
+        return renderFieldSelector;
+    }
+
+    public void setRenderFieldSelector(boolean renderFieldSelector) {
+        this.renderFieldSelector = renderFieldSelector;
+    }
     
     public void startImport() {
         InputStream is = null;
@@ -84,5 +113,14 @@ public class FormImportSubscriber {
     
     public void initMapping() {
         program.setListFieldMapping(new HashMap<Integer,String>());
+    }
+    
+    public void setColumns() {
+        String[] columns = this.getFileFirstLine().split(",");
+        setFileColumns(new ArrayList());
+        for(String col : columns) {
+            getFileColumns().add(col);
+        }
+        setRenderFieldSelector(true);
     }
 }

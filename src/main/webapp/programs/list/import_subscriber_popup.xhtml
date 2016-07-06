@@ -39,13 +39,20 @@
                                     <span class="input-group-addon btn btn-default btn-file">
                                         <span class="fileinput-new">Select file</span>
                                         <span class="fileinput-exists">Change</span>
-                                        <h:inputFile id="fileUploaded" value="#{FormImportSubscriber.file}" ></h:inputFile>
+                                        <h:inputFile id="fileUploaded" value="#{FormImportSubscriber.file}" 
+                                                     >
+                                            <!--<f:ajax listener="#{FormImportSubscriber.setColumns()}"
+                                                    event="valueChange"
+                                                    onevent="saveSettings"
+                                                    render="field_selector" execute="field_selector">
+                                            </f:ajax>-->
+                                        </h:inputFile>
                                     </span>
                                     <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
                                 </div>
                             </div>
                         </div>
-                        <div id="field_selector" class="form-group" style="display: none;">
+                        <div id="field_selector" class="form-group">
                             <c:forEach items="#{FormImportSubscriber.listFields}" var="field">
                                 <div class="form-group">
                                     <label>#{field.FIELD_NAME}: </label>
@@ -54,20 +61,30 @@
                                                          styleClass="select2"
                                                          value="#{FormImportSubscriber.listFieldMapping[field.SNO]}"
                                                          >
+                                            
                                         </h:selectOneMenu>
                                     </div>
                                 </div>
                             </c:forEach>
                         </div>
+                        <div id="progress-bar" class="form-group">
+                            <h4><span id="progress-bar-level"></span>% done</h4>
+                            <div class="progress progress-small">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" ></div>
+                            </div>
+                        </div>
+                        <div id="upload-status">
+                            <p>109 Subscribers created </p>
+                            <p>22 Existing Subscribers with other lists </p>
+                            <p>87 New Subscribers </p>
+                            <p id="error-message"></p>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-success" jsf:id="importButton" style="display:none;"
+                        <button class="btn btn-success" id="importButton"
+                                onclick="startFileUpload();return false;"
                                 >
-                            <f:ajax listener="#{FormImportSubscriber.startImport()}"
-                                    event="click"
-                                    onevent="saveSettings"
-                                    render="@form" execute="@form">
-                            </f:ajax>
+                            
                             Import
                         </button>
                     </div>
@@ -75,6 +92,6 @@
                 </div>
             </div>
         </div>
-
+        
     </form>
 </html>
