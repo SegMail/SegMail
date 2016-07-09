@@ -90,4 +90,7 @@ function FileNavigator (file, encoding, options) {
     self.getSize = function(callback) {
         return callback(file ? file.size : 0);
     };
+    
+    //Gets the total number of lines from LineNavigator
+    self.getLines = navigator.getLines;
 }

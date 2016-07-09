@@ -6,6 +6,7 @@
 package segmail.program.list;
 
 import eds.component.batch.BatchProcessingException;
+import eds.component.client.ClientFacade;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -42,6 +43,8 @@ public class FormListSubscriber {
     private ProgramList program;
     @Inject
     private UserSessionContainer userContainer;
+    @Inject
+    private ClientFacade clientFacade;
 
     @EJB
     private SubscriptionService subService;
@@ -93,7 +96,7 @@ public class FormListSubscriber {
                 throw new RuntimeException("List is not set yet but you still manage to come to this page? Notify your admin immediately! =)");
             }
 
-            subService.subscribe(program.getListEditingId(), this.getFieldValues());
+            subService.subscribe(clientFacade.getClient().getOBJECTID(), program.getListEditingId(), this.getFieldValues(), true);
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Subscriber added! A welcome email will be sent to the subscriber soon.", null);
             //How to redirect to List editing panel?
             program.refresh();

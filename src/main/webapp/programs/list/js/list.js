@@ -1,5 +1,7 @@
 var web_service_endpoint = 'WSImportSubscriber';
 
+var DELIMITER = ',';
+
 function saveSettings(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
@@ -44,14 +46,14 @@ function bindFileInput() {
                 console.log('Empty file.');
                 return;
             }
-            var headers = firstLine.split(',');
+            var headers = firstLine.split(DELIMITER);
             $('#field_selector select').empty().append($('<option>', { 
                 value: '',
                 text : '--No field selected--' 
             }));
             $.each(headers, function (i, item) {
                 $('#field_selector select').append($('<option>', { 
-                    value: item,
+                    value: i,
                     text : item 
                 })).select2(); 
             });
@@ -72,7 +74,7 @@ function startFileUpload() {
         console.log('Error: no file selected')   
     }
     var navigator = new FileNavigator(files[0]);
-    
+    PanelUpdater();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
     var md5Hash = '';
@@ -109,6 +111,8 @@ var checkFileHash = function(file) {
     var startIndex = 0;
     var countLines = 0;
     
+    //navigator.getSize(PanelUpdater.start);
+    
     navigator.readSomeLines(
             startIndex,
             function linesReadHandler(err,index,lines,eof,progress) {
@@ -120,12 +124,15 @@ var checkFileHash = function(file) {
                 //console.log(lines.length);
                 
                 if(eof) {
+                    PanelUpdater.setTotalLines(countLines);
+                    //console.log(PanelUpdater.getTotalLines());
                     var contents = '';
                     for(var i=0; i<lines.length; i++){
                         contents += lines[i];
                         //console.log(lines[i]);
                         //console.log(contents);
                     }
+                    
                     checkFileStatus(file,file.name,md5(contents),successAndStart);
                     return;
                 }
@@ -161,34 +168,203 @@ var checkFileStatus = function(file,name,hash,success,error) {
         error: function (SOAPResponse) {
             console.log(this);
             //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
-            var errorMessage = '';
-            switch(SOAPResponse.httpCode){
-                case 500    :   errorMessage = 'Your session has expired. Please refresh the page and try again.';
-                                break;
-                default     :   errorMessage = SOAPResponse.httpText;
-                                break;
-            }
-            $('#error-message').text('Error: ').append(errorMessage);
-            block_refresh($('#importButton').parents(".block"));
+            logErrors(SOAPResponse);
         }
     })
 };
 
-var successAndStart = function(file,index){
-    console.log('Started');
+var successAndStart = function(file,startIndex){
+    console.log('Started with index '+startIndex);
+    
+    //set buffer variables
+    var readIndex = (startIndex >= 0) ? startIndex : 0;
+    var navigator = new FileNavigator(file,'', {
+        chunkSize : Math.pow(2,18) * 2 //Assuming ASCII encoding 2 bytes per character
+    });
+    navigator.readSomeLines(
+        readIndex,
+        function linesReadHandler(err,index,lines,eof,progress) {
+            if(err){
+                console.log('Error at line '+index,err);
+                return;
+            }
+            //Call SOAP
+            console.log('Now at line '+index);
+            console.log('This batch is '+lines.length+' lines long.');
+            console.log('progress = '+progress);
+            //Construct the JSON objects for each subscriber
+            //Construct the container JSON object to collect all subscriber objects
+            //Call Webservice
+            var batch = constructSubscribers(lines);
+            console.log(batch);
+            sendBatchToWS(batch, function(totalCreated,existing,fresh){
+                PanelUpdater.updateLines(lines.length);
+                PanelUpdater.updateTotalCreated(totalCreated);
+                PanelUpdater.updateSubWithOtherLists(existing);
+                PanelUpdater.updateFreshSubscribers(fresh);
+                //console.log(PanelUpdater.getProgress());
+                PanelUpdater.updateStatus();
+            });
+            
+            if(eof){
+                return;
+            }
+            
+            navigator.readSomeLines(index + lines.length, linesReadHandler);
+    });
 };
 
+var constructSubscribers = function(array){
+    //get mapping first
+    var mapping = {};
+    $('select.select2').each(function(i,item){
+        var id = item.id;
+        var val = item.value;
+        if(val) {
+            console.log(id,val);
+            var idStore = mapping[val];
+            if(!idStore){
+                idStore = [];
+            } 
+            idStore[idStore.length] = id; //id = the key of the field
+            mapping[val] = idStore; //val = position in file
+        }
+    });
+    console.log(mapping);
+    
+    //Initialize the container object
+    var container = {};
+    
+    //For each item in array, pass in a function to construct and add in the JSON object for subscriber
+    $.each(array,function(i,row){
+        var newObj = {
+            sno : i
+        };
+        var delimitedRow = row.split(DELIMITER);
+        $.each(mapping,function(j,node){
+            if(!node)
+                return;
+            
+            $.each(node,function(k,field){
+                newObj[field] = delimitedRow[j];
+            });
+        });
+        container[i] = newObj;
+        
+        //update progress
+        
+    });
+    //console.log(container);
+    return container;
+}
 
-/*var onSuccess = function(e){
-    bindFileInput();
-};
+var sendBatchToWS = function(batch,successCallback,errorCallback){
+    $.soap({
+        url :   web_service_endpoint,
+        method: 'addSubscribers',
+        appendMethodToURL: 0,
+        data : {
+            subscribers : JSON.stringify(batch)
+        },
+        namespaceQualifier: 'ns',
+        namespaceURL: 'http://webservice.list.program.segmail/',
+        noPrefix: 0,
+        HTTPHeaders : {
+            
+        },
+        success: function (SOAPResponse) {
+            var xmlResults = SOAPResponse.toJSON();
+            console.log(xmlResults);
+            
+            //Retrieve these numbers from xmlResults
+            //successCallback(totalCreated,existing,fresh);
+            successCallback(1,1,1);
+            
+        },
+        error: function (SOAPResponse) {
+            console.log(this);
+            //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
+            logErrors(SOAPResponse);
+            errorCallback();
+        }
+    })
+}
 
-
-$('#importButton').bind('onSuccess',function(e){
-    bindFileInput();
-});
-*/
 $(document).ready(function () {
     //$('#importButton').trigger('onSuccess');
     bindFileInput();
+});
+
+var logErrors = function(SOAPResponse){
+    var errorMessage = '';
+    switch(SOAPResponse.httpCode){
+        case 500    :   errorMessage = 'Your session has expired. Please refresh the page and try again.';
+                        break;
+        default     :   errorMessage = SOAPResponse.httpText;
+                        break;
+    }
+    $('#error-message').text('Error: ').append(errorMessage);
+    block_refresh($('#importButton').parents(".block"));
+};
+
+var PanelUpdater = (function(){
+    var totalLines = 0;
+    var linesUpdated = 0;
+    var totalCreated = 0;
+    var subWithOtherLists = 0;
+    var freshSubscribers = 0;
+    
+    return {
+        setTotalLines : function(lines) {
+            totalLines = lines;
+        },
+        
+        getTotalLines : function() {
+            return totalLines;
+        },
+        
+        updateLines : function(lines) {
+            linesUpdated += lines;
+        },
+        
+        updateTotalCreated : function(created) {
+            totalCreated += created;
+        },
+        
+        updateSubWithOtherLists : function(otherList) {
+            subWithOtherLists += otherList;
+        },
+        
+        updateFreshSubscribers : function(fresh) {
+            freshSubscribers += fresh;
+        },
+        
+        getUpdatedlines : function() {
+            return linesUpdated;
+        },
+        
+        getTotalCreated : function() {
+            return totalCreated;
+        },
+        
+        getSubWithOtherLists : function() {
+            return subWithOtherLists;
+        },
+        
+        getFreshSubscribers : function() {
+            return freshSubscribers;
+        },
+        
+        getProgress : function() {
+            return 100 * linesUpdated / totalLines ;
+        },
+        
+        updateStatus : function () {
+            $('#progress-bar').css('width',this.getProgress()+'%');
+            $('#progress-bar-level').html(Math.round(this.getProgress()));
+            $('#totalCreated').html(this.getTotalCreated());
+            $('#subWithOtherLists').html(this.getSubWithOtherLists());
+            $('#freshSubscribers').html(this.getFreshSubscribers());
+        }
+    };
 });

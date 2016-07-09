@@ -18,13 +18,13 @@ import javax.persistence.Table;
 @Table(name="SUBSCRIPTION")
 public class Subscription extends EnterpriseRelationship<SubscriberAccount,SubscriptionList> {
 
+    private String STATUS;
     private String CONFIRMATION_KEY;
     private String UNSUBSCRIBE_KEY;
     
     public Subscription() {
+        STATUS = SUBSCRIPTION_STATUS.NEW.name; //default
     }
-    
-    private String STATUS;
 
     public String getSTATUS() {
         return STATUS;
