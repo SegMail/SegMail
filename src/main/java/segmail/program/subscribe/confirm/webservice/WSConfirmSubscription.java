@@ -5,11 +5,15 @@
  */
 package segmail.program.subscribe.confirm.webservice;
 
+import eds.component.batch.BatchProcessingException;
+import eds.component.data.IncompleteDataException;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.transaction.TransactionService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -116,6 +120,23 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             throw new RuntimeException("You received this transaction code by mistake.", ex);
         }
     }
+    
+    @Override
+    public String resend(String key) 
+            throws UnwantedAccessException {
+        if (key == null || key.isEmpty()) {
+            throw new UnwantedAccessException("Key is not provided.");
+        }
+        try {
+            subService.retriggerConfirmation(key);
+            
+        } catch (IncompleteDataException ex) {
+            //Do something, log an error in admin dashboard or send an email to administrator
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return "Email has been retriggered";
+    }
 
     /*
     public String process(String function, String key)
@@ -178,4 +199,6 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
         return listname;
     }
     */
+
+    
 }

@@ -639,7 +639,7 @@ public class SubscriptionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException, BatchProcessingException 
+    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException 
             {
         try {
             //Retrieve "Send as" from the list
@@ -806,5 +806,53 @@ public class SubscriptionService {
 
     public Subscription unsubscribeSubscriber(String email, long listId) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    /**
+     * This is designed to be called from a WEB server to retrigger a confirmation
+     * email.
+     * 
+     * @param key 
+     * @throws eds.component.data.IncompleteDataException 
+     */
+    public void retriggerConfirmation(String key) throws IncompleteDataException {
+        List<Subscription> subscriptions = getSubscriptionByConfirmKey(key);
+        //Impossible to have a duplicate because the key was created with list id and 
+        //subscriber id. 
+        if(subscriptions == null || subscriptions.isEmpty()) {
+            //What should we do if the key is not found?
+            return;
+        }
+        
+        Subscription subscription = subscriptions.get(0);
+        //We also need to check the status to see if the subscription is still NEW.
+        //If the status has already been confirmed, do not send out anything and
+        //log this request. 
+        //send out an email to system administrator?
+        if(!subscription.getSTATUS().equals(SUBSCRIPTION_STATUS.NEW.name())) {
+            //What should we do?
+            return;
+        }
+        
+        this.sendConfirmationEmail(subscription);
+    }
+    
+    /**
+     * This is a helper method that should not be exposed.
+     * 
+     * @param confirmOrUnsubKey
+     * @return 
+     */
+    private List<Subscription> getSubscriptionByConfirmKey(String confirmKey) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
+        Root<Subscription> fromSubsc = query.from(Subscription.class);
+        
+        query.where(builder.equal(fromSubsc.get(Subscription_.CONFIRMATION_KEY), confirmKey));
+        
+        List<Subscription> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
     }
 }

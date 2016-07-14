@@ -61,15 +61,21 @@
                 <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.LANDING}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <h4>This is the landing page</h4>
+                            <h4>Oops, seems like you have reached this place by mistake.</h4>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p></p>
+                            <p>
+                                If you were led here by some links from your email, most probably our 
+                                servers have run into some issues. Please help us to correct this problem
+                                by submitting a help request to <u>help [at] segmail.io</u>
+                            </p>
+                            <p>
+                                While you're here, <a href="#">check us out</a>.
+                            </p>
                         </div>
                     </div>
-                    
                 </c:when>
                 <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.EXPIRED}">
                     <div class="row">
@@ -79,7 +85,7 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p>Click here to request a new confirmation email: </p>
+                            <p>Click here to request a new confirmation email: <a jsf:action="#{FormConfirmSubcription.requestNewConfirmationLink()}">request new confirmation email</a></p>
                         </div>
                     </div>
                     
@@ -87,15 +93,31 @@
                 <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.ERROR}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <h4>The application has encountered an error.</h4>
+                            <h4>Oops, seems like the application has encountered an error.</h4>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
-                            <p>Please notify your administrators.</p>
+                            <p>
+                                If you were led here by some links from your email, most probably our 
+                                servers have run into some issues. Please help us to correct this problem
+                                by submitting a help request to <u>help [at] segmail.io</u>
+                            </p>
                         </div>
                     </div>
                     
+                </c:when>
+                <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.EXPIRED}">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <h4>The confirmation email has been resent to your email.</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            <p>Please check your email again.</p>
+                        </div>
+                    </div>
                 </c:when>
 
                 

@@ -19,6 +19,8 @@ import java.net.MalformedURLException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -75,9 +77,7 @@ public class FormConfirmSubcription {
             //ex.printStackTrace(System.out);
             program.setCurrentPage(program.getPROCESSED());
             
-        } /*catch (ExpiredTransactionException ex) {
-            program.setCurrentPage(program.getEXPIRED());
-        }*/ catch (IncompleteDataException ex) {
+        } catch (IncompleteDataException ex) {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
         } catch (MalformedURLException ex) {
@@ -87,6 +87,31 @@ public class FormConfirmSubcription {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
         }
+    }
+    
+    public void requestNewConfirmationLink(){
+        try {
+            String key = program.getRequestKey();
+            if(key == null || key.isEmpty())
+                throw new UnwantedAccessException();
+            
+            String namespace = "http://webservice.confirm.subscribe.program.segmail/";
+            String endpointName = "WSConfirmSubscription";
+            WSConfirmSubscriptionInterface clientService = wsService.getWSProvider(endpointName, namespace, WSConfirmSubscriptionInterface.class);
+            
+            String result = clientService.resend(key);
+            
+            program.setCurrentPage(program.getRESENT());
+        } catch (UnwantedAccessException ex) {
+            program.setCurrentPage(program.getLANDING());
+        } catch (IncompleteDataException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+            program.setCurrentPage(program.getERROR());
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+            program.setCurrentPage(program.getERROR());
+        }
+            
     }
 
     public String getListName() {

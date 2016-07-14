@@ -21,6 +21,7 @@ public class ProgramConfirmSubscription extends Program {
     private final String PROCESSED = "PROCESSED";
     private final String EXPIRED = "EXPIRED";
     private final String ERROR = "ERROR";
+    private final String RESENT = "RESENT";
     
     private String currentPage;
     
@@ -85,6 +86,10 @@ public class ProgramConfirmSubscription extends Program {
 
     public String getEXPIRED() {
         return EXPIRED;
+    }
+
+    public String getRESENT() {
+        return RESENT;
     }
     
     
