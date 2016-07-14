@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 
 /**
@@ -27,6 +28,7 @@ public class FormSetupListTypes {
     @Inject private UserSessionContainer userContainer;
     
     @EJB private SubscriptionService subService;
+    @EJB private ListService listService;
     
     @PostConstruct
     public void init(){
@@ -35,7 +37,7 @@ public class FormSetupListTypes {
     
     public void setupListType(){
         try {
-            subService.setupListTypes();
+            listService.setupListTypes();
         } catch (EJBException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(programList.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);

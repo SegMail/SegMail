@@ -22,6 +22,7 @@ import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 
 /**
  *
@@ -43,6 +44,8 @@ public class FormListList {
     private ClientService clientService;
     @EJB
     private SubscriptionService subscriptionService;
+    @EJB
+    private ListService listService;
 
     
     @PostConstruct
@@ -73,7 +76,7 @@ public class FormListList {
                 throw new RuntimeException("No client object found for this user " + user);
             }
 
-            List<SubscriptionList> allLists = subscriptionService.getAllListForClient(client.getOBJECTID());
+            List<SubscriptionList> allLists = listService.getAllListForClient(client.getOBJECTID());
 
             this.programList.setAllLists(allLists);
         } catch (DBConnectionException ex) {

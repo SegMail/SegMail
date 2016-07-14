@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -48,6 +49,8 @@ public class FormListSubscriber {
 
     @EJB
     private SubscriptionService subService;
+    @EJB
+    private ListService listService;
 
     private boolean removed;
 
@@ -153,7 +156,7 @@ public class FormListSubscriber {
             if (listId <= 0) {
                 return;
             }
-            List<SubscriptionListField> fieldList = subService.getFieldsForSubscriptionList(listId);
+            List<SubscriptionListField> fieldList = listService.getFieldsForSubscriptionList(listId);
             this.program.setFieldList(fieldList);
 
         } catch (EJBException ex) {

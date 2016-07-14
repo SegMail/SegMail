@@ -23,7 +23,6 @@ import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
-import segurl.filter.SegURLResolver;
 
 /**
  *

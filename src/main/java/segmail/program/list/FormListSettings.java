@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 import segmail.entity.subscription.SubscriptionList;
 
 /**
@@ -30,6 +31,7 @@ public class FormListSettings {
     
     @EJB private SubscriptionService subService;
     @EJB private UserService userService;
+    @EJB private ListService listService;
     
     private final String formName = "FormListSettings";
     
@@ -48,17 +50,12 @@ public class FormListSettings {
     
     public void saveSettings(){
         try {
-            subService.saveList(program.getListEditing());
+            listService.saveList(program.getListEditing());
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Settings saved!", null);
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
+        } catch (EJBException ex) { 
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
-    
-    
-    
-    
 }

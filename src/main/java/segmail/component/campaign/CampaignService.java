@@ -13,9 +13,6 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
-import eds.entity.data.EnterpriseRelationship_;
-import eds.entity.mail.Email;
-import eds.entity.mail.Email_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -27,22 +24,18 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import seca2.bootstrap.module.Client.ClientContainer;
-import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
 import segmail.entity.campaign.Assign_Campaign_Activity;
-import segmail.entity.campaign.Assign_Campaign_Activity_;
 import segmail.entity.campaign.Assign_Campaign_Client;
 import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivitySchedule;
-import segmail.entity.campaign.Trigger_Email_Activity;
-import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -64,6 +57,7 @@ public class CampaignService {
     @EJB CampaignExecutionService campExecService; 
     @EJB BatchSchedulingService batchScheduleService;
     @EJB LandingService landingService;
+    @EJB ListService listService;
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Campaign getCampaign(long campaignId) {
@@ -297,7 +291,7 @@ public class CampaignService {
     public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) throws EntityNotFoundException {
         //Get all available lists for client and make sure client is authorized. (1 SQL query)
         List<SubscriptionList> toBeAssigned = new ArrayList<>();
-        List<SubscriptionList> availableLists = subService.getAllListForClient(clientContainer.getClient().getOBJECTID());
+        List<SubscriptionList> availableLists = listService.getAllListForClient(clientContainer.getClient().getOBJECTID());
         for(Long inList : targetLists) {
             boolean found = false;
             for(SubscriptionList availList : availableLists) {

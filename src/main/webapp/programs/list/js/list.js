@@ -2,6 +2,8 @@ var web_service_endpoint = 'WSImportSubscriber';
 
 var DELIMITER = ',';
 
+var ERROR_COUNT_LIMIT = 10;
+
 function saveSettings(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
@@ -34,6 +36,7 @@ function bindFileInput() {
         //event.stopPropagation();
         //https://github.com/anpur/client-line-navigator
         var files = document.getElementById('fileUploaded').files;
+        if(!files) return;
         var navigator = new FileNavigator(files[0]);
         navigator.readLines(0,1,function lineReadHandler(err, partIndex, lines, eof){
             if (err) console.log(err);
@@ -73,8 +76,9 @@ function startFileUpload() {
     if(files === null || files.length <= 0) {
         console.log('Error: no file selected')   
     }
-    var navigator = new FileNavigator(files[0]);
-    PanelUpdater();
+    //var navigator = new FileNavigator(files[0]);
+    PanelUpdater.reset();
+    checkedErrorsCollector.reset();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
     var md5Hash = '';
@@ -105,6 +109,8 @@ var checkFileHash = function(file) {
     
     if(!file) {
         console.log('File not defined!');
+        $('#error-messages').text('Please select a file.');
+        block_refresh($('#importButton').parents(".block"));
         return;
     }
     var navigator = new FileNavigator(file);
@@ -124,13 +130,11 @@ var checkFileHash = function(file) {
                 //console.log(lines.length);
                 
                 if(eof) {
-                    PanelUpdater.setTotalLines(countLines);
+                    PanelUpdater.setTotalLines(countLines-1); //minus first line which is the header
                     //console.log(PanelUpdater.getTotalLines());
                     var contents = '';
                     for(var i=0; i<lines.length; i++){
                         contents += lines[i];
-                        //console.log(lines[i]);
-                        //console.log(contents);
                     }
                     
                     checkFileStatus(file,file.name,md5(contents),successAndStart);
@@ -168,7 +172,7 @@ var checkFileStatus = function(file,name,hash,success,error) {
         error: function (SOAPResponse) {
             console.log(this);
             //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
-            logErrors(SOAPResponse);
+            logSOAPErrors(SOAPResponse);
         }
     })
 };
@@ -177,7 +181,7 @@ var successAndStart = function(file,startIndex){
     console.log('Started with index '+startIndex);
     
     //set buffer variables
-    var readIndex = (startIndex >= 0) ? startIndex : 0;
+    var readIndex = (startIndex >= 0) ? startIndex : 1;
     var navigator = new FileNavigator(file,'', {
         chunkSize : Math.pow(2,18) * 2 //Assuming ASCII encoding 2 bytes per character
     });
@@ -195,15 +199,16 @@ var successAndStart = function(file,startIndex){
             //Construct the JSON objects for each subscriber
             //Construct the container JSON object to collect all subscriber objects
             //Call Webservice
-            var batch = constructSubscribers(lines);
+            var batch = constructSubscribers(lines,index);
             console.log(batch);
             sendBatchToWS(batch, function(totalCreated,existing,fresh){
                 PanelUpdater.updateLines(lines.length);
-                PanelUpdater.updateTotalCreated(totalCreated);
+                PanelUpdater.updateTotalProcessed(totalCreated);
                 PanelUpdater.updateSubWithOtherLists(existing);
                 PanelUpdater.updateFreshSubscribers(fresh);
                 //console.log(PanelUpdater.getProgress());
                 PanelUpdater.updateStatus();
+                checkedErrorsCollector.updateErrorList();
             });
             
             if(eof){
@@ -214,14 +219,14 @@ var successAndStart = function(file,startIndex){
     });
 };
 
-var constructSubscribers = function(array){
+var constructSubscribers = function(array,startIndex){
     //get mapping first
     var mapping = {};
     $('select.select2').each(function(i,item){
         var id = item.id;
         var val = item.value;
         if(val) {
-            console.log(id,val);
+            //console.log(id,val);
             var idStore = mapping[val];
             if(!idStore){
                 idStore = [];
@@ -238,7 +243,7 @@ var constructSubscribers = function(array){
     //For each item in array, pass in a function to construct and add in the JSON object for subscriber
     $.each(array,function(i,row){
         var newObj = {
-            sno : i
+            sno : i+startIndex
         };
         var delimitedRow = row.split(DELIMITER);
         $.each(mapping,function(j,node){
@@ -246,7 +251,12 @@ var constructSubscribers = function(array){
                 return;
             
             $.each(node,function(k,field){
-                newObj[field] = delimitedRow[j];
+                var str = delimitedRow[j];
+                if(str && str.charAt(0) === '"')
+                    str = str.substring(1,str.length);
+                if(str && str.charAt(str.length-1) === '"')
+                    str = str.substring(0,str.length-1);
+                newObj[field] = str;
             });
         });
         container[i] = newObj;
@@ -274,18 +284,18 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
         },
         success: function (SOAPResponse) {
             var xmlResults = SOAPResponse.toJSON();
-            console.log(xmlResults);
+            //console.log(xmlResults);
             
             //Retrieve these numbers from xmlResults
             //successCallback(totalCreated,existing,fresh);
-            successCallback(1,1,1);
-            
+            if(successCallback) successCallback(1,1,1);
+            logCheckedErrors(SOAPResponse);
         },
         error: function (SOAPResponse) {
-            console.log(this);
+            //console.log(this);
             //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
-            logErrors(SOAPResponse);
-            errorCallback();
+            logSOAPErrors(SOAPResponse);
+            if(errorCallback) errorCallback();
         }
     })
 }
@@ -293,24 +303,57 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
 $(document).ready(function () {
     //$('#importButton').trigger('onSuccess');
     bindFileInput();
+    $('#fileUploaded').val('');//To clear the previous uploaded file
 });
 
-var logErrors = function(SOAPResponse){
+var logSOAPErrors = function(SOAPResponse){
+    var jsonresult = SOAPResponse.toJSON();
+    //console.log(SOAPResponse.content); 
+    
     var errorMessage = '';
+    var severity = '';
     switch(SOAPResponse.httpCode){
-        case 500    :   errorMessage = 'Your session has expired. Please refresh the page and try again.';
+        case 404    :   errorMessage = SOAPResponse.httpText;
+                        severity = 'danger';
+                        break;
+        case 500    :   errorMessage = processError500(jsonresult);
+                        severity = 'danger';
                         break;
         default     :   errorMessage = SOAPResponse.httpText;
+                        severity = 'danger';
                         break;
     }
-    $('#error-message').text('Error: ').append(errorMessage);
+    if($('#soap-errors').find('.alert').length <= 0)
+        $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
     block_refresh($('#importButton').parents(".block"));
 };
+
+var logCheckedErrors = function(SOAPResponse) {
+    var jsonresult = SOAPResponse.toJSON();
+    
+    var responseObject = JSON.parse(jsonresult['#document']['S:Envelope']['S:Body']["ns2:addSubscribersResponse"]["return"]);
+    //Parse into JSON object first
+    console.log(responseObject);
+    var keys = Object.keys(responseObject);
+    for(var i = 0; i < keys.length; i++) {
+        var values = responseObject[keys[i]];
+        values.sort(function(a,b){
+            return a['sno'] - b['sno'];
+        });
+        //Pass ERROR_COUNT_LIMIT objects in 1 shot rather than 1 by 1
+        for(var j = 0; j < values.length; j++) {
+            checkedErrorsCollector.addLine(keys[i],values[j]['sno']);
+        }
+        
+    }
+    checkedErrorsCollector.updateErrorList();
+}
 
 var PanelUpdater = (function(){
     var totalLines = 0;
     var linesUpdated = 0;
-    var totalCreated = 0;
+    var totalProcessed = 0;
+    var existing = 0;
     var subWithOtherLists = 0;
     var freshSubscribers = 0;
     
@@ -327,8 +370,12 @@ var PanelUpdater = (function(){
             linesUpdated += lines;
         },
         
-        updateTotalCreated : function(created) {
-            totalCreated += created;
+        updateTotalProcessed : function(created) {
+            totalProcessed += created;
+        },
+        
+        updateExisting : function(exist) {
+            existing += exist;
         },
         
         updateSubWithOtherLists : function(otherList) {
@@ -343,8 +390,12 @@ var PanelUpdater = (function(){
             return linesUpdated;
         },
         
-        getTotalCreated : function() {
-            return totalCreated;
+        getTotalProcessed : function() {
+            return totalProcessed;
+        },
+        
+        getExisting : function() {
+            return existing;
         },
         
         getSubWithOtherLists : function() {
@@ -356,15 +407,97 @@ var PanelUpdater = (function(){
         },
         
         getProgress : function() {
-            return 100 * linesUpdated / totalLines ;
+            return (totalLines > 0) ? 100 * linesUpdated / totalLines : 0;
         },
         
         updateStatus : function () {
             $('#progress-bar').css('width',this.getProgress()+'%');
             $('#progress-bar-level').html(Math.round(this.getProgress()));
-            $('#totalCreated').html(this.getTotalCreated());
+            $('#totalProcessed').html(this.getTotalProcessed());
+            $('#existing').html(this.getExisting());
             $('#subWithOtherLists').html(this.getSubWithOtherLists());
             $('#freshSubscribers').html(this.getFreshSubscribers());
+        },
+        
+        reset : function() {
+            totalLines = 0;
+            linesUpdated = 0;
+            totalProcessed = 0;
+            existing = 0;
+            subWithOtherLists = 0;
+            freshSubscribers = 0;
+            this.updateStatus();
         }
     };
-});
+})();
+
+var processError500 = function(JsonResult) {
+    var faultstring = JsonResult['#document']['S:Envelope']['S:Body']['S:Fault']["faultstring"];
+    console.log(faultstring);
+    if(faultstring.indexOf('UserLoginException') > -1) //if starts with java.lang.RuntimeException: eds.component.user.UserLoginException: Please enter username.
+        return "Please log in again.";
+    switch(faultstring) {
+        default    :   return 'Error occurred at server side: '+faultstring;
+    }
+};
+
+var checkedErrorsCollector = (function(){
+    var container = 'error-messages';
+    var errorItemList = {};
+    
+    return {
+        addError    :   function(errorMessage) {
+            var id = this.getId(errorMessage);
+            if($('#'+container).find('#'+id).length <= 0)
+                $('#'+container).append(
+                    '<div id='+id+'>'
+                        +'<p>\"<strong>'+errorMessage+'</strong>\" at:</p>'
+                    +'</div>'
+                    );
+        },
+        
+        addLine     :   function(errorMessage,lineNum) {
+            this.addError(errorMessage);
+            if(!errorItemList[errorMessage])
+                errorItemList[errorMessage] = [];
+            errorItemList[errorMessage].push(lineNum);
+        },
+        
+        getId       :   function(errorMessage) {
+            var words = errorMessage.split(' ');
+            var id = '';
+            for(var i = 0; i < words.length && i < 3; i++){
+                if(i > 0)
+                    id += '-';
+                id += words[i];
+            }
+            return id;
+        },
+        
+        updateErrorList :   function() {
+            var keys = Object.keys(errorItemList);
+            $.each(keys,function(i,key){
+                errorItemList[key].sort(function(a,b){
+                    return a - b;
+                });
+                var id = checkedErrorsCollector.getId(key);
+                $('#'+id).empty();
+                $('#'+id).append('<p><strong>'+key+'</strong></p>');
+                $('#'+id).append('<ul></ul>');
+                for(var i = 0; i < errorItemList[key].length; i++){
+                    if(i >= ERROR_COUNT_LIMIT) {
+                        $('#'+id+' ul').append('<li><em>...and '+ (errorItemList[key].length-i)+' more</em></li>');
+                        return;
+                    }
+                    var lineNum = errorItemList[key][i];
+                    $('#'+id+' ul').append('<li>Line number '+lineNum+'</li>');
+                }
+            });
+        },
+        
+        reset : function() {
+            errorItemList = {};
+        }
+    }
+    
+})();

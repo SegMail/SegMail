@@ -8,8 +8,6 @@ package segmail.program.campaign;
 import eds.component.data.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -22,6 +20,7 @@ import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
 import segmail.component.campaign.CampaignService;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriptionList;
 
@@ -38,6 +37,7 @@ public class FormAssignLists implements FormEditEntity {
     
     @EJB SubscriptionService subService;
     @EJB CampaignService campService;
+    @EJB ListService listService;
     
     @PostConstruct
     public void init() {
@@ -72,7 +72,7 @@ public class FormAssignLists implements FormEditEntity {
     }
     
     public void loadOwnLists() {
-        List<SubscriptionList> ownedList = subService.getAllListForClient(clientContainer.getClient().getOBJECTID());
+        List<SubscriptionList> ownedList = listService.getAllListForClient(clientContainer.getClient().getOBJECTID());
         setOwnedLists(ownedList);
     }
     
