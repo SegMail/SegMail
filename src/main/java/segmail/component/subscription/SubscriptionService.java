@@ -254,10 +254,10 @@ public class SubscriptionService {
      * @throws EntityNotFoundException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Map<String, List> massSubscribe(
+    public Map<String, List<Map>> massSubscribe(
             long clientId,
             long listId,
-            List<Map> subscribers,
+            List<Map<String,Object>> subscribers,
             boolean doubleOptin) throws EntityNotFoundException {
         // Find the list object
         SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
@@ -276,11 +276,12 @@ public class SubscriptionService {
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
         
         //Set up the return results Map
-        Map<String, List> results = new HashMap<>();
+        Map<String, List<Map>> results = new HashMap<>();
 ;
         //Loop through each Map object, which represents a subscriber
         for (int i = 0; i < subscribers.size(); i++) {
             Map subscriber  = subscribers.get(i);
+            
             try {
                 for (SubscriptionListField field : fields) {
                     if (field.isMANDATORY()
@@ -328,10 +329,10 @@ public class SubscriptionService {
                     //If the new field value already exist in the DB, just update it
                     if (existingFieldValues.contains(value)) {
                         value = existingFieldValues.get(existingFieldValues.indexOf(value));//Make use of equals()
-                        value.setVALUE(subscriber.get(field.generateKey().toString()).toString());//Update value no matter what
+                        value.setVALUE((String)subscriber.get(field.generateKey().toString()));//Update value no matter what
                         updateService.getEm().merge(value);
                     } else {
-                        value.setVALUE(subscriber.get(field.generateKey().toString()).toString());//Update value no matter what
+                        value.setVALUE((String)subscriber.get(field.generateKey().toString()));//Update value no matter what
                         value.setSNO(++maxSNO);
                         updateService.getEm().persist(value);
                     }

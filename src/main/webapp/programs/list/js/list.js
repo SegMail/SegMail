@@ -79,6 +79,7 @@ function startFileUpload() {
     //var navigator = new FileNavigator(files[0]);
     PanelUpdater.reset();
     checkedErrorsCollector.reset();
+    $('#soap-errors').empty();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
     var md5Hash = '';
@@ -116,8 +117,6 @@ var checkFileHash = function(file) {
     var navigator = new FileNavigator(file);
     var startIndex = 0;
     var countLines = 0;
-    
-    //navigator.getSize(PanelUpdater.start);
     
     navigator.readSomeLines(
             startIndex,
@@ -163,16 +162,14 @@ var checkFileStatus = function(file,name,hash,success,error) {
         },
         success: function (SOAPResponse) {
             var xmlResults = SOAPResponse.toJSON();
-            //var test = JSON.stringify(xmlResults);
             var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:checkFileStatusResponse']["return"];
             //console.log(result);
             success(file,result);
             block_refresh($('#importButton').parents(".block"));
         },
         error: function (SOAPResponse) {
-            console.log(this);
-            //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
             logSOAPErrors(SOAPResponse);
+            block_refresh($('#importButton').parents(".block"));
         }
     })
 };
@@ -209,6 +206,7 @@ var successAndStart = function(file,startIndex){
                 //console.log(PanelUpdater.getProgress());
                 PanelUpdater.updateStatus();
                 checkedErrorsCollector.updateErrorList();
+                checkedErrorsCollector.generateErrorFile(file);
             });
             
             if(eof){
@@ -266,7 +264,7 @@ var constructSubscribers = function(array,startIndex){
     });
     //console.log(container);
     return container;
-}
+};
 
 var sendBatchToWS = function(batch,successCallback,errorCallback){
     $.soap({
@@ -288,8 +286,7 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
             
             //Retrieve these numbers from xmlResults
             //successCallback(totalCreated,existing,fresh);
-            if(successCallback) successCallback(1,1,1);
-            logCheckedErrors(SOAPResponse);
+            logCheckedErrors(SOAPResponse,successCallback);
         },
         error: function (SOAPResponse) {
             //console.log(this);
@@ -325,10 +322,9 @@ var logSOAPErrors = function(SOAPResponse){
     }
     if($('#soap-errors').find('.alert').length <= 0)
         $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
-    block_refresh($('#importButton').parents(".block"));
 };
 
-var logCheckedErrors = function(SOAPResponse) {
+var logCheckedErrors = function(SOAPResponse,callback) {
     var jsonresult = SOAPResponse.toJSON();
     
     var responseObject = JSON.parse(jsonresult['#document']['S:Envelope']['S:Body']["ns2:addSubscribersResponse"]["return"]);
@@ -340,13 +336,12 @@ var logCheckedErrors = function(SOAPResponse) {
         values.sort(function(a,b){
             return a['sno'] - b['sno'];
         });
-        //Pass ERROR_COUNT_LIMIT objects in 1 shot rather than 1 by 1
         for(var j = 0; j < values.length; j++) {
             checkedErrorsCollector.addLine(keys[i],values[j]['sno']);
         }
         
     }
-    checkedErrorsCollector.updateErrorList();
+    if(callback) callback(1,1,1);
 }
 
 var PanelUpdater = (function(){
@@ -443,7 +438,9 @@ var processError500 = function(JsonResult) {
 
 var checkedErrorsCollector = (function(){
     var container = 'error-messages';
+    var fileDownloadContainerId = 'error-file-download';
     var errorItemList = {};
+    var outputErrorFileContent = '';
     
     return {
         addError    :   function(errorMessage) {
@@ -464,7 +461,7 @@ var checkedErrorsCollector = (function(){
         },
         
         getId       :   function(errorMessage) {
-            var words = errorMessage.split(' ');
+            var words = errorMessage.split(/[\s,.]+/);
             var id = '';
             for(var i = 0; i < words.length && i < 3; i++){
                 if(i > 0)
@@ -495,9 +492,107 @@ var checkedErrorsCollector = (function(){
             });
         },
         
+        generateErrorFile   :   function(file) {
+            $('#'+fileDownloadContainerId).empty();
+            if(PanelUpdater.getProgress() < 100) {
+                 return;
+            }
+            
+            //Re-arrange the lines with errors into a sorted array
+            var sortedArray = [];
+            var keys = Object.keys(errorItemList);
+            for(var i = 0; i < keys.length; i++){
+                var key = keys[i];
+                for(var j = 0; j < errorItemList[key].length; j++){
+                    var line = errorItemList[key][j];
+                    /*navigator.readLines(line['sno'],1,function linesReadHandler(err, index, lines, eof){
+                        sortedArray[sortedArray.length]['line'] = lines[0];
+                        sortedArray[sortedArray.length]['sno'] = line['sno'];
+                        return;
+                    });*/
+                    sortedArray[sortedArray.length] = {
+                        sno : line,
+                        error : key
+                    };
+                }
+            }
+            sortedArray.sort(function sortFn(a,b){
+                return a['sno'] - b['sno'];
+            });
+            console.log(sortedArray);
+            
+            if(sortedArray.length <= 0)
+                return;
+            //Start our awesome algorithm
+            //These are pointers to our sortedArray items
+            //They will tell us
+            //- When to stop the algorithm
+            //- When to hit the file reading and what lines should we read
+            var bufferStart = 0; 
+            var bufferEnd = 0;
+            var navigator = new FileNavigator(file);
+            
+            while(bufferEnd < sortedArray.length-1) {
+                var bufferStartSno = sortedArray[bufferStart]['sno'];
+                var bufferEndSno = sortedArray[bufferEnd]['sno'];
+                var bufferEndNextSno = sortedArray[bufferEnd+1]['sno'];
+                /**
+                 * If the difference between the current buffer end and 
+                 * the next element is 1, then increment buffer end pointer by 1 
+                 * and proceed to the next iteration.
+                 * Keep iterating and incrementing until either:
+                 * - The next sno is > 1 line away from the current bufferEnd, or
+                 * - we reach the end of sortedArray.
+                 */
+                if(bufferEndNextSno - bufferEndSno === 1){
+                    bufferEnd++;
+                    if(bufferEnd < sortedArray.length-1)
+                        continue;
+                }
+                
+                
+                /**
+                 * If not, it means it's time to hit the file reader
+                 */
+                navigator.readLines(
+                        bufferStartSno,
+                        bufferEndSno - bufferStartSno,
+                    function linesReadHandler(err, index, lines, eof){
+                        for(var i = 0; i < lines.length; i++) {
+                            outputErrorFileContent += lines[i] + '\r\n';
+                        }
+                        /**
+                         * If it is the end, create the link
+                         */
+                        if(bufferEnd >= sortedArray.length - 1){
+                            //console.log(outputErrorFileContent);
+                            $('#'+fileDownloadContainerId).append('<a id=\"'+fileDownloadContainerId+'-link\">Click here to download error file.</a>');
+                            $('#'+fileDownloadContainerId+'-link').attr('href','data:text/plain;charset=utf-8,'+encodeURIComponent(outputErrorFileContent));
+                            $('#'+fileDownloadContainerId+'-link').attr('download',file.name);
+                            console.log('Done');
+                        }
+                });
+                /**
+                 * After hitting, we need to increment the buffer pointers
+                 */
+                bufferStart = bufferEnd + 1;
+                bufferEnd = bufferStart;
+            }
+            
+            //read first line as header into the new file
+            //outputErrorFileContent += lines[0] + '\r\n';
+            //console.log(outputErrorFileContent);
+
+            
+        },
+        
         reset : function() {
             errorItemList = {};
+            outputErrorFileContent = '';
+            $('#'+container).empty();
+            $('#'+fileDownloadContainerId).empty();
         }
-    }
+    };
     
 })();
+

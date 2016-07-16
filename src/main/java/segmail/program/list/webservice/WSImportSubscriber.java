@@ -13,6 +13,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -25,6 +26,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonParser;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
@@ -41,48 +43,52 @@ import segmail.program.list.ProgramList;
 @HandlerChain(file = "handlers-server.xml")
 public class WSImportSubscriber {
 
-    @EJB FileService fileService;
-    @EJB SubscriptionService subService;
-    
+    @EJB
+    FileService fileService;
+    @EJB
+    SubscriptionService subService;
+
     /**
-     * External webservice endpoints cannot inject ClientFacades because the calling 
-     * service may not be the actual business user so ClientModule doesn't initialize
-     * the correct Client object here. In this case, we are sure that this is an
-     * internal service (called on an ERP server where the user is authenticated
-     * and accessing a private program) so we are injecting it here.
+     * External webservice endpoints cannot inject ClientFacades because the
+     * calling service may not be the actual business user so ClientModule
+     * doesn't initialize the correct Client object here. In this case, we are
+     * sure that this is an internal service (called on an ERP server where the
+     * user is authenticated and accessing a private program) so we are
+     * injecting it here.
      */
-    @Inject ClientFacade clientFacade;
-    
+    @Inject
+    ClientFacade clientFacade;
+
     /**
-     * Again not supposed to inject UI beans into webservice endpoints but just for 
-     * convenience sake.
+     * Again not supposed to inject UI beans into webservice endpoints but just
+     * for convenience sake.
      */
-    @Inject ProgramList program;
-    
+    @Inject
+    ProgramList program;
+
     /**
-     * Returns the last position of the file uploaded and -1 if it is a new file.
-     * 
+     * Returns the last position of the file uploaded and -1 if it is a new
+     * file.
+     *
      * @param filename
      * @param fileHash
-     * @return 
+     * @return
      */
     @WebMethod(operationName = "checkFileStatus")
     public int checkFileStatus(
             @WebParam(name = "filename") String filename,
             @WebParam(name = "fileHash") String fileHash) {
-        
-        FileTransaction file = fileService.createOrGetFileTransaction(filename, fileHash,"");
-        
+
+        FileTransaction file = fileService.createOrGetFileTransaction(filename, fileHash, "");
+
         return file.getLAST_PROCESSING_POSITION();
     }
 
     /**
-     * Web service operation
-     * Tries to insert all subscribers provided and returns the following:
-     * 1) Total subscriptions created
-     * 2) Number of subscribers who are already subscribed to other lists of the
-     * client
-     * 3) 
+     * Web service operation Tries to insert all subscribers provided and
+     * returns the following: 1) Total subscriptions created 2) Number of
+     * subscribers who are already subscribed to other lists of the client 3)
+     *
      * @param subscribers
      * @param listId
      * @return
@@ -91,44 +97,79 @@ public class WSImportSubscriber {
     @WebMethod(operationName = "addSubscribers")
     public String addSubscribers(
             @WebParam(name = "subscribers") String subscribers
-            //,@WebParam(name = "listId") long listId
-            //,@WebParam(name = "clientId") long clientId //Only for internal services we can inject Client object
-        ) throws EntityNotFoundException {
-        if(program.getListEditingId() <= 0)
+    //,@WebParam(name = "listId") long listId
+    //,@WebParam(name = "clientId") long clientId //Only for internal services we can inject Client object
+    ) throws EntityNotFoundException {
+        if (program.getListEditingId() <= 0) {
             throw new EntityNotFoundException("No list found.");
-        
-        if(clientFacade.getClient() == null || clientFacade.getClient().getOBJECTID() <= 0)
+        }
+
+        if (clientFacade.getClient() == null || clientFacade.getClient().getOBJECTID() <= 0) {
             throw new EntityNotFoundException("No client found.");
-            
-            
+        }
+
         JsonReader reader = Json.createReader(new StringReader(subscribers));
         JsonObject subscribersObj = reader.readObject();
-        
-        int i = 0;
-        for(JsonValue subscriber : subscribersObj.values()) {
-            if(++i > 1000)
-                break;
-            System.out.println(subscriber.toString());
+
+        List<Map<String, Object>> subscribersList = new ArrayList<>();
+        //Need to construct the maps ourselves
+        for (JsonValue subscriberObj : subscribersObj.values()) {
             
-            JsonObject subObj = (JsonObject)subscriber;
-            //System.out.println(subObj.getString("listfield000000007300001"));
+            Map<String, Object> subscriber = this.convertJsonObjectToMap((JsonObject)subscriberObj);
+            subscribersList.add(subscriber);
         }
-        List subscribersList = new ArrayList(subscribersObj.values());
-        Map<String, List> results = subService.massSubscribe(clientFacade.getClient().getOBJECTID(), program.getListEditingId(), subscribersList, false);
-        
-        //Construct the JSON response object
+
+        Map<String, List<Map>> results = subService.massSubscribe(clientFacade.getClient().getOBJECTID(), program.getListEditingId(), subscribersList, false);
+
+        //Construct the JSON response object from the Map object
         //Return object will only contain errors
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
-        for(Map.Entry<String, List> entry : results.entrySet()){
-            String key = entry.getKey();
-            List values = entry.getValue();
-            JsonArrayBuilder errorIndexesBuilder = Json.createArrayBuilder();
-            for(Object value : values){
-                errorIndexesBuilder.add((JsonValue) value);
+        for (String key : results.keySet()) {
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            List<Map> objHavingThisError = results.get(key);
+            for(Map mapObj : objHavingThisError) {
+                JsonObjectBuilder jsonObjBuilder = this.convertMapToJson(mapObj);
+                arrayBuilder.add(jsonObjBuilder);
             }
-            resultObjectBuilder.add(key, errorIndexesBuilder.build());
+            resultObjectBuilder.add(key, arrayBuilder);
         }
         String result = resultObjectBuilder.build().toString();
         return result;
+    }
+
+    protected Map<String, Object> convertJsonObjectToMap(JsonObject jsonObj) {
+
+        Map<String, Object> mapObj = new HashMap<>();
+
+        for (String key : jsonObj.keySet()) {
+            JsonValue value = (JsonValue) jsonObj.get(key);
+            //subscriber.put(key, value);
+            ValueType vType = value.getValueType();
+            //Convert everything to String
+            switch (vType) {
+                case NUMBER:
+                    mapObj.put(key, Integer.toString(jsonObj.getJsonNumber(key).intValueExact()));
+                    break;
+                case STRING:
+                    mapObj.put(key, jsonObj.getJsonString(key).getString());
+                    break;
+                case TRUE:
+                case FALSE:
+                    mapObj.put(key, Boolean.toString(jsonObj.getBoolean(key)));
+                    break;
+                default: //subscriber.put(key, subObj.getJsonString(key)); break;
+                    break; //If the type is not recognized, don't put it in.
+            }
+        }
+
+        return mapObj;
+    }
+
+    protected JsonObjectBuilder convertMapToJson(Map<String, Object> mapObj) {
+        JsonObjectBuilder jsonObjBuilder = Json.createObjectBuilder();
+        for(String key : mapObj.keySet()) {
+            jsonObjBuilder.add(key, mapObj.get(key).toString()); //Only strings are allowed here
+        }
+        return jsonObjBuilder;
     }
 }
