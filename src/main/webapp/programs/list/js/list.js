@@ -80,6 +80,7 @@ function startFileUpload() {
     PanelUpdater.reset();
     checkedErrorsCollector.reset();
     $('#soap-errors').empty();
+    WSController.reset();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
     var md5Hash = '';
@@ -107,6 +108,7 @@ function startFileUpload() {
 
 var checkFileHash = function(file) {
     block_refresh($('#importButton').parents(".block"));
+    $('#importButton').prop("disable",true);
     
     if(!file) {
         console.log('File not defined!');
@@ -180,7 +182,7 @@ var successAndStart = function(file,startIndex){
     //set buffer variables
     var readIndex = (startIndex >= 0) ? startIndex : 1;
     var navigator = new FileNavigator(file,'', {
-        chunkSize : Math.pow(2,18) * 2 //Assuming ASCII encoding 2 bytes per character
+        chunkSize : Math.pow(2,15) * 2 //Assuming ASCII encoding 2 bytes per character
     });
     navigator.readSomeLines(
         readIndex,
@@ -251,9 +253,11 @@ var constructSubscribers = function(array,startIndex){
             $.each(node,function(k,field){
                 var str = delimitedRow[j];
                 if(str && str.charAt(0) === '"')
-                    str = str.substring(1,str.length);
+                    str = str.substring(1,str.length); //Remove opening "
                 if(str && str.charAt(str.length-1) === '"')
-                    str = str.substring(0,str.length-1);
+                    str = str.substring(0,str.length-1); //Remove closing "
+
+                str.replace(/(\r\n|\n|\r)/gm,""); //Remove line breaks
                 newObj[field] = str;
             });
         });
@@ -267,6 +271,7 @@ var constructSubscribers = function(array,startIndex){
 };
 
 var sendBatchToWS = function(batch,successCallback,errorCallback){
+    WSController.incrementCallCounts();
     $.soap({
         url :   web_service_endpoint,
         method: 'addSubscribers',
@@ -287,12 +292,14 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
             //Retrieve these numbers from xmlResults
             //successCallback(totalCreated,existing,fresh);
             logCheckedErrors(SOAPResponse,successCallback);
+            WSController.decrementCallCounts();
         },
         error: function (SOAPResponse) {
             //console.log(this);
             //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
             logSOAPErrors(SOAPResponse);
             if(errorCallback) errorCallback();
+            WSController.decrementCallCounts();
         }
     })
 }
@@ -505,11 +512,6 @@ var checkedErrorsCollector = (function(){
                 var key = keys[i];
                 for(var j = 0; j < errorItemList[key].length; j++){
                     var line = errorItemList[key][j];
-                    /*navigator.readLines(line['sno'],1,function linesReadHandler(err, index, lines, eof){
-                        sortedArray[sortedArray.length]['line'] = lines[0];
-                        sortedArray[sortedArray.length]['sno'] = line['sno'];
-                        return;
-                    });*/
                     sortedArray[sortedArray.length] = {
                         sno : line,
                         error : key
@@ -523,66 +525,35 @@ var checkedErrorsCollector = (function(){
             
             if(sortedArray.length <= 0)
                 return;
+            
             //Start our awesome algorithm
-            //These are pointers to our sortedArray items
-            //They will tell us
-            //- When to stop the algorithm
-            //- When to hit the file reading and what lines should we read
+            //Forget awesome, think simple
             var bufferStart = 0; 
             var bufferEnd = 0;
             var navigator = new FileNavigator(file);
             
-            while(bufferEnd < sortedArray.length-1) {
-                var bufferStartSno = sortedArray[bufferStart]['sno'];
-                var bufferEndSno = sortedArray[bufferEnd]['sno'];
-                var bufferEndNextSno = sortedArray[bufferEnd+1]['sno'];
-                /**
-                 * If the difference between the current buffer end and 
-                 * the next element is 1, then increment buffer end pointer by 1 
-                 * and proceed to the next iteration.
-                 * Keep iterating and incrementing until either:
-                 * - The next sno is > 1 line away from the current bufferEnd, or
-                 * - we reach the end of sortedArray.
-                 */
-                if(bufferEndNextSno - bufferEndSno === 1){
-                    bufferEnd++;
-                    if(bufferEnd < sortedArray.length-1)
-                        continue;
+            navigator.readSomeLines(0,function callback(err,index,lines,eof,progress){
+                
+                //Write the first line
+                if(index === 0) {
+                    outputErrorFileContent += lines[0] + '\r\n';
                 }
                 
+                //Assume that sortedArray is always smaller than file
+                for(var i = 0; i < sortedArray.length; i++) {
+                    var errorLine = sortedArray[i]['sno'] - index;//index is the offest
+                    var actualLine = lines[errorLine];
+                    outputErrorFileContent += actualLine + '\r\n';
+                }
                 
-                /**
-                 * If not, it means it's time to hit the file reader
-                 */
-                navigator.readLines(
-                        bufferStartSno,
-                        bufferEndSno - bufferStartSno,
-                    function linesReadHandler(err, index, lines, eof){
-                        for(var i = 0; i < lines.length; i++) {
-                            outputErrorFileContent += lines[i] + '\r\n';
-                        }
-                        /**
-                         * If it is the end, create the link
-                         */
-                        if(bufferEnd >= sortedArray.length - 1){
-                            //console.log(outputErrorFileContent);
-                            $('#'+fileDownloadContainerId).append('<a id=\"'+fileDownloadContainerId+'-link\">Click here to download error file.</a>');
-                            $('#'+fileDownloadContainerId+'-link').attr('href','data:text/plain;charset=utf-8,'+encodeURIComponent(outputErrorFileContent));
-                            $('#'+fileDownloadContainerId+'-link').attr('download',file.name);
-                            console.log('Done');
-                        }
-                });
-                /**
-                 * After hitting, we need to increment the buffer pointers
-                 */
-                bufferStart = bufferEnd + 1;
-                bufferEnd = bufferStart;
-            }
-            
-            //read first line as header into the new file
-            //outputErrorFileContent += lines[0] + '\r\n';
-            //console.log(outputErrorFileContent);
-
+                if(eof) {
+                    //console.log(outputErrorFileContent);
+                    $('#'+fileDownloadContainerId).append('<a id=\"'+fileDownloadContainerId+'-link\">Click here to download error file.</a>');
+                    $('#'+fileDownloadContainerId+'-link').attr('href','data:text/plain;charset=utf-8,'+encodeURIComponent(outputErrorFileContent));
+                    $('#'+fileDownloadContainerId+'-link').attr('download',file.name);
+                    console.log('Done');
+                }
+            });
             
         },
         
@@ -596,3 +567,25 @@ var checkedErrorsCollector = (function(){
     
 })();
 
+var WSController = (function(){
+    var MAX_NUM_CALLS = 10;
+    var count = 0;
+    
+    return {
+        incrementCallCounts : function(){
+            count++;
+        },
+        decrementCallCounts : function(){
+            count--;
+        },
+        checkCall : function(callback){
+            while(count >= MAX_NUM_CALLS){
+                
+            }
+            callback();
+        },
+        reset : function(){
+            count = 0;
+        }
+    }
+})();

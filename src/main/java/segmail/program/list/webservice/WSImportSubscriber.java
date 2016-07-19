@@ -32,6 +32,9 @@ import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import org.jboss.logging.Logger;
+import segmail.component.subscription.MassSubscriptionService;
+import segmail.component.subscription.SubscriptionContainer;
 import segmail.component.subscription.SubscriptionService;
 import segmail.program.list.ProgramList;
 
@@ -47,6 +50,8 @@ public class WSImportSubscriber {
     FileService fileService;
     @EJB
     SubscriptionService subService;
+    @EJB
+    MassSubscriptionService massSubService;
 
     /**
      * External webservice endpoints cannot inject ClientFacades because the
@@ -58,6 +63,9 @@ public class WSImportSubscriber {
      */
     @Inject
     ClientFacade clientFacade;
+    
+    @Inject
+    SubscriptionContainer subContainer;
 
     /**
      * Again not supposed to inject UI beans into webservice endpoints but just
@@ -103,6 +111,8 @@ public class WSImportSubscriber {
         if (program.getListEditingId() <= 0) {
             throw new EntityNotFoundException("No list found.");
         }
+        subContainer.setList(program.getListEditing());
+        subContainer.setListFields(program.getFieldList());
 
         if (clientFacade.getClient() == null || clientFacade.getClient().getOBJECTID() <= 0) {
             throw new EntityNotFoundException("No client found.");
@@ -119,15 +129,23 @@ public class WSImportSubscriber {
             subscribersList.add(subscriber);
         }
 
-        Map<String, List<Map>> results = subService.massSubscribe(clientFacade.getClient().getOBJECTID(), program.getListEditingId(), subscribersList, false);
+        Map<String, List<Map<String,Object>>> results = new HashMap<>();
+        try {
+            results = massSubService.massSubscribe(subscribersList, false);
+        } catch(Exception ex) {
+            ex.printStackTrace(System.out);
+            //System.out.println("First subscriber: "+subscribersList.get(0).toString());
+            //System.out.println("Last subscriber: "+subscribersList.get(subscribersList.size()-1).toString());
+        }
+        
 
         //Construct the JSON response object from the Map object
         //Return object will only contain errors
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
         for (String key : results.keySet()) {
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            List<Map> objHavingThisError = results.get(key);
-            for(Map mapObj : objHavingThisError) {
+            List<Map<String,Object>> objHavingThisError = results.get(key);
+            for(Map<String,Object> mapObj : objHavingThisError) {
                 JsonObjectBuilder jsonObjBuilder = this.convertMapToJson(mapObj);
                 arrayBuilder.add(jsonObjBuilder);
             }
@@ -168,6 +186,10 @@ public class WSImportSubscriber {
     protected JsonObjectBuilder convertMapToJson(Map<String, Object> mapObj) {
         JsonObjectBuilder jsonObjBuilder = Json.createObjectBuilder();
         for(String key : mapObj.keySet()) {
+            if(key == null){
+                System.out.println("key: "+key);
+                continue;
+            }
             jsonObjBuilder.add(key, mapObj.get(key).toString()); //Only strings are allowed here
         }
         return jsonObjBuilder;

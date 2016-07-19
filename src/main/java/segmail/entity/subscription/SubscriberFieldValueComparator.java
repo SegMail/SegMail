@@ -11,10 +11,10 @@ import java.util.Comparator;
  *
  * @author LeeKiatHaw
  */
-public class SubscriptionListFieldComparator implements Comparator<SubscriptionListField> {
+public class SubscriberFieldValueComparator implements Comparator<SubscriberFieldValue> {
 
     @Override
-    public int compare(SubscriptionListField o1, SubscriptionListField o2) {
+    public int compare(SubscriberFieldValue o1, SubscriberFieldValue o2) {
         if(o1.getOWNER() == null) return -1;
         if(o2.getOWNER() == null) return 1;
         
