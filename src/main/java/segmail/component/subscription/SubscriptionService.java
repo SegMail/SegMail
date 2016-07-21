@@ -828,13 +828,13 @@ public class SubscriptionService {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private String getConfirmationHashCode(long subscriberId, long listId) {
+    public String getConfirmationHashCode(long subscriberId, long listId) {
         String confirmKey = encryptService.getHash("confirm subscription of " + subscriberId + " to list " + listId, EncryptionType.SHA256);
         return confirmKey;
 
     }
 
-    private String getUnsubscribeHashCode(long subscriberId, long listId) {
+    public String getUnsubscribeHashCode(long subscriberId, long listId) {
         String unsubKey = encryptService.getHash("unsubscribe " + subscriberId + " from list " + listId, EncryptionType.SHA256);
         return unsubKey;
     }

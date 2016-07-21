@@ -25,11 +25,13 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import static segmail.component.subscription.SubscriptionService.DEFAULT_EMAIL_FIELD_NAME;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValueComparator;
 import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriberOwnership;
+import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 
@@ -59,6 +61,8 @@ public class MassSubscriptionService {
      * version. If the existing subscriber has a particular field value, and a
      * later version of it has another new different field value, both of them
      * will be retained.
+     * 
+     * No emails will be sent out with this mode as of now.
      *
      * @param clientId
      * @param listId
@@ -74,11 +78,8 @@ public class MassSubscriptionService {
      * @throws EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Map<String, List<Map<String,Object>>> massSubscribe(
-            //long clientId,
-            //long listId,
-            List<Map<String, Object>> subscribers,
-            boolean doubleOptin) throws EntityNotFoundException {
+    public Map<String, List<Map<String,Object>>> massSubscribe(List<Map<String, Object>> subscribers) 
+            throws EntityNotFoundException {
 
         //Set up the return results Map
         Map<String, List<Map<String,Object>>> results = new HashMap<>();
@@ -120,6 +121,7 @@ public class MassSubscriptionService {
                         errorKey = "Invalid email";
                         break;
                     }
+                    subscriber.put((String) field.generateKey(), email); //put in the processed email string
                 }
             }
             if(!errorKey.isEmpty()) {
@@ -168,8 +170,9 @@ public class MassSubscriptionService {
         List<SubscriberOwnership> createNewSubOwnership = new ArrayList<>();
         List<SubscriberFieldValue> updateFieldValueList = new ArrayList<>();
         List<SubscriberFieldValue> createFieldValueList = new ArrayList<>();
+        List<Subscription> createNewSubscription = new ArrayList<>();
         
-        try {
+        //try {
         for (int i = 0; i < survivors.size(); i++) {
             Map<String, Object> survivor = survivors.get(i);
             String email = emails.get(i); //emails and survivors have the same order
@@ -201,12 +204,12 @@ public class MassSubscriptionService {
                 for (SubscriberFieldValue existingFieldValue : subFieldValues) { //Loop through existing field values
                     //If exist, add it into updateFieldValueList
                     //Note that if duplicates exist here, the latest value will be taken
-                    if (key != null && key.equals(existingFieldValue.getFIELD_KEY()) &&
-                            survivor.get(key) != null &&
-                            !((String) survivor.get(key)).equals(existingFieldValue.getVALUE())
-                            ) {
-                        existingFieldValue.setVALUE((String) survivor.get(key)); //Update existing value
-                        updateFieldValueList.add(existingFieldValue);
+                    if (key != null && key.equals(existingFieldValue.getFIELD_KEY())) {
+                        if(survivor.get(key) != null && 
+                                !((String) survivor.get(key)).equals(existingFieldValue.getVALUE())) {
+                            existingFieldValue.setVALUE((String) survivor.get(key)); //Update existing value
+                            updateFieldValueList.add(existingFieldValue);
+                        }
                         createNew = false;
                         break; //break from this loop
                     }
@@ -226,6 +229,18 @@ public class MassSubscriptionService {
                         ownership.setSOURCE(owner);
                         ownership.setTARGET(client);
                         createNewSubOwnership.add(ownership);
+                        //Create Subscription!!!
+                        Subscription subscription = new Subscription();
+                        subscription.setSOURCE(owner);
+                        subscription.setTARGET(list);
+                        subscription.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
+                        String confirmKey = subService.getConfirmationHashCode(owner.getOBJECTID(), list.getOBJECTID());
+                        String unsubKey = subService.getUnsubscribeHashCode(owner.getOBJECTID(), list.getOBJECTID());
+
+                        subscription.setCONFIRMATION_KEY(confirmKey);
+                        subscription.setUNSUBSCRIBE_KEY(unsubKey);
+                        createNewSubscription.add(subscription);
+                        
                     }
                     newValue.setOWNER(owner);
                     int highestSNO = (subFieldValues.isEmpty()) ? 
@@ -235,9 +250,9 @@ public class MassSubscriptionService {
                     createFieldValueList.add(newValue);
                 }
             }
-        }} catch (Exception ex) {
-    ex.printStackTrace(System.out);
-}
+//        }} catch (Exception ex) {
+//    ex.printStackTrace(System.out);/
+        }
 
         //Time to do db updates and inserts
         try {
@@ -247,7 +262,10 @@ public class MassSubscriptionService {
             createFieldValueList = createFieldValueList(createFieldValueList);
             //Create SubscriberOwnership!!!
             createNewSubOwnership = createSubscriberOwnership(createNewSubOwnership);
-            
+            //Create Subscription!!!
+            createNewSubscription = createSubscription(createNewSubscription);
+            //Send confirmation email if double optin is turned on
+                
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
             System.out.println("Time taken to update "+subscribers.size()+" subscribers is "+timeTaken);
@@ -326,6 +344,18 @@ public class MassSubscriptionService {
             }
         }
         return createNewSubOwnership;
+    }
+    
+    public List<Subscription> createSubscription(List<Subscription> createNewSubscription) {
+        for(int i = 0; i < createNewSubscription.size(); i++) {
+            Subscription acc = createNewSubscription.get(i);
+            objService.getEm().persist(acc);
+            
+            if(i >= MAX_RECORDS_PER_FLUSH || i >= createNewSubscription.size()-1){
+                objService.getEm().flush();
+            }
+        }
+        return createNewSubscription;
     }
 
     private boolean containsKey(List<SubscriptionListField> fields, String key) {

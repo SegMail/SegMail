@@ -123,4 +123,8 @@ public class FormImportSubscriber {
         }
         setRenderFieldSelector(true);
     }
+    
+    public void done() {
+        program.refresh();
+    }
 }

@@ -63,6 +63,9 @@ function bindFileInput() {
             
             $('#field_selector').show();
             $('#importButton').show();
+            $('#progress-bar-container').show();
+            $('#soap-errors').show();
+            $('#upload-status').show();
             //Send JSF ajax to populate the headers as options instead
             //refreshFileColumns(event);
         }); 
@@ -182,7 +185,7 @@ var successAndStart = function(file,startIndex){
     //set buffer variables
     var readIndex = (startIndex >= 0) ? startIndex : 1;
     var navigator = new FileNavigator(file,'', {
-        chunkSize : Math.pow(2,15) * 2 //Assuming ASCII encoding 2 bytes per character
+        chunkSize : Math.pow(2,10) * 2 //Assuming ASCII encoding 2 bytes per character
     });
     navigator.readSomeLines(
         readIndex,
@@ -200,11 +203,11 @@ var successAndStart = function(file,startIndex){
             //Call Webservice
             var batch = constructSubscribers(lines,index);
             console.log(batch);
-            sendBatchToWS(batch, function(totalCreated,existing,fresh){
-                PanelUpdater.updateLines(lines.length);
-                PanelUpdater.updateTotalProcessed(totalCreated);
-                PanelUpdater.updateSubWithOtherLists(existing);
-                PanelUpdater.updateFreshSubscribers(fresh);
+            sendBatchToWS(batch, function(totalProcessed,success,errors){
+                //PanelUpdater.updateLines(lines.length);
+                PanelUpdater.updateTotalProcessed(totalProcessed);
+                PanelUpdater.updateSuccess(success);
+                PanelUpdater.updateError(errors);
                 //console.log(PanelUpdater.getProgress());
                 PanelUpdater.updateStatus();
                 checkedErrorsCollector.updateErrorList();
@@ -257,7 +260,7 @@ var constructSubscribers = function(array,startIndex){
                 if(str && str.charAt(str.length-1) === '"')
                     str = str.substring(0,str.length-1); //Remove closing "
 
-                str.replace(/(\r\n|\n|\r)/gm,""); //Remove line breaks
+                //str.replace(/(\r\n|\n|\r)/gm,""); //Remove line breaks
                 newObj[field] = str;
             });
         });
@@ -308,6 +311,12 @@ $(document).ready(function () {
     //$('#importButton').trigger('onSuccess');
     bindFileInput();
     $('#fileUploaded').val('');//To clear the previous uploaded file
+    $('#field_selector').hide();
+    $('#importButton').hide();
+    $('#progress-bar-container').hide();
+    $('#soap-errors').hide();
+    $('#upload-status').hide();
+    $('#doneButton').hide();
 });
 
 var logSOAPErrors = function(SOAPResponse){
@@ -337,8 +346,20 @@ var logCheckedErrors = function(SOAPResponse,callback) {
     var responseObject = JSON.parse(jsonresult['#document']['S:Envelope']['S:Body']["ns2:addSubscribersResponse"]["return"]);
     //Parse into JSON object first
     console.log(responseObject);
+    var totalCount = 0;
+    var errors = 0;
+    
     var keys = Object.keys(responseObject);
     for(var i = 0; i < keys.length; i++) {
+        if(keys[i] === 'total') {
+            totalCount = responseObject[keys[i]];
+            continue;
+        }
+        if(keys[i] === 'errors') {
+            errors = responseObject[keys[i]];
+            continue;
+        }
+       
         var values = responseObject[keys[i]];
         values.sort(function(a,b){
             return a['sno'] - b['sno'];
@@ -348,16 +369,14 @@ var logCheckedErrors = function(SOAPResponse,callback) {
         }
         
     }
-    if(callback) callback(1,1,1);
+    if(callback) callback(totalCount,totalCount-errors,errors);
 }
 
 var PanelUpdater = (function(){
     var totalLines = 0;
-    var linesUpdated = 0;
     var totalProcessed = 0;
-    var existing = 0;
-    var subWithOtherLists = 0;
-    var freshSubscribers = 0;
+    var totalSuccess = 0;
+    var totalError = 0;
     
     return {
         setTotalLines : function(lines) {
@@ -368,66 +387,47 @@ var PanelUpdater = (function(){
             return totalLines;
         },
         
-        updateLines : function(lines) {
-            linesUpdated += lines;
+        updateTotalProcessed : function(processed) {
+            totalProcessed += processed;
         },
         
-        updateTotalProcessed : function(created) {
-            totalProcessed += created;
+        updateSuccess : function(success) {
+            totalSuccess += success;
         },
         
-        updateExisting : function(exist) {
-            existing += exist;
-        },
-        
-        updateSubWithOtherLists : function(otherList) {
-            subWithOtherLists += otherList;
-        },
-        
-        updateFreshSubscribers : function(fresh) {
-            freshSubscribers += fresh;
-        },
-        
-        getUpdatedlines : function() {
-            return linesUpdated;
+        updateError : function(error) {
+            totalError += error;
         },
         
         getTotalProcessed : function() {
             return totalProcessed;
         },
         
-        getExisting : function() {
-            return existing;
+        getSuccess : function() {
+            return totalSuccess;
         },
         
-        getSubWithOtherLists : function() {
-            return subWithOtherLists;
-        },
-        
-        getFreshSubscribers : function() {
-            return freshSubscribers;
+        getError : function() {
+            return totalError;
         },
         
         getProgress : function() {
-            return (totalLines > 0) ? 100 * linesUpdated / totalLines : 0;
+            return (totalLines > 0) ? 100 * totalProcessed / totalLines : 0;
         },
         
         updateStatus : function () {
             $('#progress-bar').css('width',this.getProgress()+'%');
             $('#progress-bar-level').html(Math.round(this.getProgress()));
             $('#totalProcessed').html(this.getTotalProcessed());
-            $('#existing').html(this.getExisting());
-            $('#subWithOtherLists').html(this.getSubWithOtherLists());
-            $('#freshSubscribers').html(this.getFreshSubscribers());
+            $('#totalSuccess').html(this.getSuccess());
+            $('#totalError').html(this.getError());
         },
         
         reset : function() {
             totalLines = 0;
-            linesUpdated = 0;
             totalProcessed = 0;
-            existing = 0;
-            subWithOtherLists = 0;
-            freshSubscribers = 0;
+            totalSuccess = 0;
+            totalError = 0;
             this.updateStatus();
         }
     };
@@ -552,6 +552,7 @@ var checkedErrorsCollector = (function(){
                     $('#'+fileDownloadContainerId+'-link').attr('href','data:text/plain;charset=utf-8,'+encodeURIComponent(outputErrorFileContent));
                     $('#'+fileDownloadContainerId+'-link').attr('download',file.name);
                     console.log('Done');
+                    $('#doneButton').show();
                 }
             });
             

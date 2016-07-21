@@ -77,9 +77,8 @@
                         <div id="soap-errors"></div>
                         <div id="upload-status">
                             <p><span id="totalProcessed"></span> Subscribers processed </p>
-                            <p><span id="existing"></span> Subscribers already in this list </p>
-                            <p><span id="subWithOtherLists"></span> Existing Subscribers with other lists </p>
-                            <p><span id="freshSubscribers"></span> New Subscribers </p>
+                            <p><span id="totalSuccess"></span> Subscribers successfully updated/created </p>
+                            <p><span id="totalError"></span> Subscribers with errors </p>
                             
                             
                             <h4 id="error-message-header">Errors:</h4>
@@ -88,11 +87,15 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-success" id="importButton"
+                        <button class="btn btn-primary" id="importButton"
                                 onclick="startFileUpload();return false;"
                                 >
-                            
                             Import
+                        </button>
+                        <button class="btn btn-success" id="doneButton"
+                                jsf:action="#{FormImportSubscriber.done()}"
+                                >
+                                    Done
                         </button>
                     </div>
 

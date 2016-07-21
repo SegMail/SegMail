@@ -130,17 +130,18 @@ public class WSImportSubscriber {
         }
 
         Map<String, List<Map<String,Object>>> results = new HashMap<>();
-        try {
-            results = massSubService.massSubscribe(subscribersList, false);
-        } catch(Exception ex) {
-            ex.printStackTrace(System.out);
+        //try {
+            results = massSubService.massSubscribe(subscribersList);
+        //} catch(Exception ex) {
+        //    ex.printStackTrace(System.out);
             //System.out.println("First subscriber: "+subscribersList.get(0).toString());
             //System.out.println("Last subscriber: "+subscribersList.get(subscribersList.size()-1).toString());
-        }
+        //}
         
 
         //Construct the JSON response object from the Map object
         //Return object will only contain errors
+        int totalErrors = 0;
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
         for (String key : results.keySet()) {
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
@@ -148,9 +149,14 @@ public class WSImportSubscriber {
             for(Map<String,Object> mapObj : objHavingThisError) {
                 JsonObjectBuilder jsonObjBuilder = this.convertMapToJson(mapObj);
                 arrayBuilder.add(jsonObjBuilder);
+                totalErrors++;
             }
             resultObjectBuilder.add(key, arrayBuilder);
         }
+        //Add processing stats
+        resultObjectBuilder.add("total", subscribersList.size());
+        resultObjectBuilder.add("errors", totalErrors );
+        
         String result = resultObjectBuilder.build().toString();
         return result;
     }
