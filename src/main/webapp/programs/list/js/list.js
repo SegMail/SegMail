@@ -77,13 +77,15 @@ function startFileUpload() {
     //Get the file object and create a FileNavigator wrapper
     var files = document.getElementById('fileUploaded').files;
     if(files === null || files.length <= 0) {
-        console.log('Error: no file selected')   
+        //console.log('Error: no file selected')   
+        return
     }
     //var navigator = new FileNavigator(files[0]);
     PanelUpdater.reset();
     checkedErrorsCollector.reset();
     $('#soap-errors').empty();
     WSController.reset();
+    $('#importButton').hide();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
     var md5Hash = '';
@@ -305,7 +307,7 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
             WSController.decrementCallCounts();
         }
     })
-}
+};
 
 $(document).ready(function () {
     //$('#importButton').trigger('onSuccess');
@@ -336,8 +338,9 @@ var logSOAPErrors = function(SOAPResponse){
                         severity = 'danger';
                         break;
     }
-    if($('#soap-errors').find('.alert').length <= 0)
-        $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
+    //if($('#soap-errors').find('.alert').length <= 0)
+    //    $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
+    GenericErrorController.setErrors(errorMessage,severity);
 };
 
 var logCheckedErrors = function(SOAPResponse,callback) {
@@ -533,7 +536,11 @@ var checkedErrorsCollector = (function(){
             var navigator = new FileNavigator(file);
             
             navigator.readSomeLines(0,function callback(err,index,lines,eof,progress){
-                
+                if(err) {
+                    console.log(err);
+                    return;
+                }
+                    
                 //Write the first line
                 if(index === 0) {
                     outputErrorFileContent += lines[0] + '\r\n';
@@ -542,8 +549,11 @@ var checkedErrorsCollector = (function(){
                 //Assume that sortedArray is always smaller than file
                 for(var i = 0; i < sortedArray.length; i++) {
                     var errorLine = sortedArray[i]['sno'] - index;//index is the offest
+                    if(errorLine < 0 || errorLine >= lines.length)
+                        continue;
                     var actualLine = lines[errorLine];
-                    outputErrorFileContent += actualLine + '\r\n';
+                    var errorMessage = sortedArray[i]['error'];
+                    outputErrorFileContent += actualLine + ',' + errorMessage + '\r\n';
                 }
                 
                 if(eof) {
@@ -553,7 +563,10 @@ var checkedErrorsCollector = (function(){
                     $('#'+fileDownloadContainerId+'-link').attr('download',file.name);
                     console.log('Done');
                     $('#doneButton').show();
+                    return;
                 }
+                
+                navigator.readSomeLines(index + lines.length, callback);
             });
             
         },
@@ -590,3 +603,18 @@ var WSController = (function(){
         }
     }
 })();
+
+var GenericErrorController = function(){
+    var id = 'soap-errors';
+    
+    return {
+        
+        setErrors : function(error,severity) {
+            $('#'+id)
+            if($('#'+id).find('.alert').length > 0) {
+                $('#'+id).empty();
+            }
+            $($('#'+id)).append('<div class="alert alert-'+severity+'"><strong>'+error+'</strong></div>');
+        }
+    };
+}();

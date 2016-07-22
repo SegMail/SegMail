@@ -127,4 +127,8 @@ public class FormImportSubscriber {
     public void done() {
         program.refresh();
     }
+    
+    public void cancel() {
+        program.refresh();
+    }
 }

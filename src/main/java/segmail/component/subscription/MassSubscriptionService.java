@@ -234,11 +234,7 @@ public class MassSubscriptionService {
                         subscription.setSOURCE(owner);
                         subscription.setTARGET(list);
                         subscription.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
-                        String confirmKey = subService.getConfirmationHashCode(owner.getOBJECTID(), list.getOBJECTID());
-                        String unsubKey = subService.getUnsubscribeHashCode(owner.getOBJECTID(), list.getOBJECTID());
-
-                        subscription.setCONFIRMATION_KEY(confirmKey);
-                        subscription.setUNSUBSCRIBE_KEY(unsubKey);
+                        
                         createNewSubscription.add(subscription);
                         
                     }
@@ -349,6 +345,11 @@ public class MassSubscriptionService {
     public List<Subscription> createSubscription(List<Subscription> createNewSubscription) {
         for(int i = 0; i < createNewSubscription.size(); i++) {
             Subscription acc = createNewSubscription.get(i);
+            String confirmKey = subService.getConfirmationHashCode(acc.getSOURCE().getOBJECTID(), acc.getTARGET().getOBJECTID());
+            String unsubKey = subService.getUnsubscribeHashCode(acc.getSOURCE().getOBJECTID(), acc.getTARGET().getOBJECTID());
+
+            acc.setCONFIRMATION_KEY(confirmKey);
+            acc.setUNSUBSCRIBE_KEY(unsubKey);
             objService.getEm().persist(acc);
             
             if(i >= MAX_RECORDS_PER_FLUSH || i >= createNewSubscription.size()-1){
