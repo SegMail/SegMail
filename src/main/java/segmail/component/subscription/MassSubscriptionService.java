@@ -261,8 +261,6 @@ public class MassSubscriptionService {
                         createNewSubscription.add(subscription);
                 }
             }
-//        }} catch (Exception ex) {
-//    ex.printStackTrace(System.out);/
         }
 
         //Time to do db updates and inserts
@@ -279,7 +277,8 @@ public class MassSubscriptionService {
             if(doubleOptin) {
                 sendConfirmationEmails(createNewSubscription);
             }
-                
+            //Update the number of subscribers
+            subService.updateSubscriberCount(list.getOBJECTID());
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
             System.out.println("Time taken to update "+subscribers.size()+" subscribers is "+timeTaken);

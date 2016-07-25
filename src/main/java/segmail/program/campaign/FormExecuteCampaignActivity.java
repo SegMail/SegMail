@@ -36,7 +36,7 @@ public class FormExecuteCampaignActivity {
     public void executeAndClose() {
         try {
             //campService.startSendingCampaignEmail(program.getEditingActivity());
-            campExecService.executeCampaignActivity(program.getEditingActivity().getOBJECTID(), 0, 10);
+            campExecService.executeCampaignActivity(program.getEditingActivity().getOBJECTID(), 10);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity "+program.getEditingActivity().getACTIVITY_NAME()+" has started.", "");
             program.refresh();
         } catch (EntityNotFoundException ex) {

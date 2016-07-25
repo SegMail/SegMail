@@ -43,6 +43,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
@@ -54,6 +55,7 @@ import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.SubscriberOwnership_;
+import segmail.entity.subscription.SubscriptionList_;
 import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
@@ -68,13 +70,6 @@ public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
     public static final String DEFAULT_KEY_FOR_LIST = "LIST";
-
-    public static final String MASS_SUBSCRIBE_TOTAL_PROCESSED = "MASS_SUBSCRIBE_TOTAL_PROCESSED";
-    public static final String MASS_SUBSCRIBE_INCOMPLETE = "MASS_SUBSCRIBE_INCOMPLETE";
-    public static final String MASS_SUBSCRIBE_INVALID = "MASS_SUBSCRIBE_INVALID";
-    public static final String MASS_SUBSCRIBE_EXISTING = "MASS_SUBSCRIBE_EXISTING";
-    public static final String MASS_SUBSCRIBE_SEND_ERRORS = "MASS_SUBSCRIBE_SEND_ERRORS";
-    public static final String MASS_SUBSCRIBE_SUCCESS = "MASS_SUBSCRIBE_SUCCESS";
 
     /**
      * Generic services
@@ -138,7 +133,6 @@ public class SubscriptionService {
     public void subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
             throws EntityNotFoundException, IncompleteDataException, SubscriptionException, BatchProcessingException, RelationshipExistsException {
         
-        
         SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
         if (list == null) {
             throw new EntityNotFoundException(SubscriptionList.class, listId);
@@ -162,7 +156,6 @@ public class SubscriptionService {
         if(email == null || email.isEmpty())
             throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
                 
-        
         subContainer.setList(list);
         subContainer.setListFields(fields);
 
@@ -173,242 +166,8 @@ public class SubscriptionService {
         for(String key : results.keySet()) {
             throw new SubscriptionException(key);
         }
-        
-        /*try {
-            // Find the list object
-            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-            if (list == null) {
-                throw new EntityNotFoundException(SubscriptionList.class, listId);
-            }
-
-            // Check if the values provided for the subscriber is valid for the list
-            // Check if mandatory fields are not filled in
-            String email = "";
-            List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
-            for (SubscriptionListField field : fields) {
-                if (field.isMANDATORY()
-                        && (values.get(field.generateKey().toString()) == null || ((String) values.get(field.generateKey().toString())).isEmpty())) {
-                    throw new IncompleteDataException("Mandatory list field " + field.getFIELD_NAME() + " is missing.");
-                }
-                if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
-                    email = (String) values.get(field.generateKey().toString());// If there exist multiple fieldvalues of email, then the latest one will be used
-                }
-            }
-            if (email.isEmpty()) {
-                throw new IncompleteDataException(DEFAULT_EMAIL_FIELD_NAME + " is always required for a subscription.");
-            }
-            if (!EmailValidator.getInstance().isValid(email)) {
-                throw new DataValidationException("Email address is not valid.");
-            }
-
-            // Check if the account exist, if not, create a new one
-            // Check if account exist with the same client only
-            SubscriberAccount newOrExistingAcc = getExistingOrCreateNewSubscriber(email, clientId);
-
-            //Update the subscriber account first by merging
-            //Even if it exist, it is required to merge it to manage it later
-            newOrExistingAcc = updateService.getEm().merge(newOrExistingAcc);
-            //updateService.getEm().flush();
-
-            //Retrieve all existing fields for SubscriberAccount
-            List<SubscriberFieldValue> existingFieldValues = objectService.getEnterpriseData(newOrExistingAcc.getOBJECTID(), SubscriberFieldValue.class);
-
-            // Connect all new field values to the account and create them in the DB
-            // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
-            // Get the highest count of the FieldValue SNO
-            int maxSNO = objectService.getHighestSNO(SubscriberFieldValue.class, newOrExistingAcc.getOBJECTID());
-            for (SubscriptionListField field : fields) {
-
-                SubscriberFieldValue value = new SubscriberFieldValue();
-                value.setOWNER(newOrExistingAcc);
-                value.setFIELD_KEY(field.generateKey().toString());
-
-                //If the new field value already exist in the DB, just update it
-                if (existingFieldValues.contains(value)) {
-                    value = existingFieldValues.get(existingFieldValues.indexOf(value));//Make use of equals()
-                    value.setVALUE(values.get(field.generateKey().toString()).toString());//Update value no matter what
-                    updateService.getEm().merge(value);
-                } else {
-                    value.setVALUE(values.get(field.generateKey().toString()).toString());//Update value no matter what
-                    value.setSNO(++maxSNO);
-                    updateService.getEm().persist(value);
-                }
-            }
-
-            // Create the relationship
-            Subscription newSubscr = new Subscription();
-            newSubscr.setTARGET(list);
-            newSubscr.setSOURCE(newOrExistingAcc);
-            if (!doubleOptin) {
-                newSubscr.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
-            }
-
-            // Create confirmation and unsubscribe keys
-            //String confirmKey = encryptService.getHash("confirm subscription of "+newOrExistingAcc.getOBJECTID()+" to list "+list.getOBJECTID(), EncryptionType.SHA256);
-            //String unsubKey = encryptService.getHash("unsubscribe "+newOrExistingAcc.getOBJECTID()+" from list "+list.getOBJECTID(), EncryptionType.SHA256);
-            String confirmKey = getConfirmationHashCode(newOrExistingAcc.getOBJECTID(), listId);
-            String unsubKey = getUnsubscribeHashCode(newOrExistingAcc.getOBJECTID(), listId);
-
-            newSubscr.setCONFIRMATION_KEY(confirmKey);
-            newSubscr.setUNSUBSCRIBE_KEY(unsubKey);
-
-            //Check if the subscription already exist
-            if (checkSubscribed(email, listId)) {
-                throw new RelationshipExistsException(newSubscr);
-            }
-
-            updateService.getEm().persist(newSubscr);
-
-            //Update the count of the list
-            list.setSUBSCRIBER_COUNT(list.getSUBSCRIBER_COUNT() + 1);
-            list = updateService.getEm().merge(list);
-
-            //Send confirmation email
-            if (doubleOptin) {
-                sendConfirmationEmail(newSubscr);
-            }
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }*/
     }
 
-    /**
-     * Written for ERP mass import.
-     *
-     * @param clientId
-     * @param listId
-     * @param subscribers
-     * @param doubleOptin
-     * @return
-     * @throws EntityNotFoundException
-     */
-    /*@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-     public Map<String, List<Map>> massSubscribe(
-     long clientId,
-     long listId,
-     List<Map<String,Object>> subscribers,
-     boolean doubleOptin) throws EntityNotFoundException {
-     // Find the list object
-     SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-     if (list == null) {
-     throw new EntityNotFoundException(SubscriptionList.class, listId);
-     }
-        
-     Client client = objectService.getEnterpriseObjectById(clientId, Client.class);
-     if (client == null) {
-     throw new EntityNotFoundException(Client.class, clientId);
-     }
-
-     // Check if the values provided for the subscriber is valid for the list
-     // Check if mandatory fields are not filled in
-     String email = "";
-     List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
-        
-     //Set up the return results Map
-     Map<String, List<Map>> results = new HashMap<>();
-     ;
-     //Loop through each Map object, which represents a subscriber
-     for (int i = 0; i < subscribers.size(); i++) {
-     Map subscriber  = subscribers.get(i);
-            
-     try {
-     for (SubscriptionListField field : fields) {
-     if (field.isMANDATORY()
-     && (subscriber.get(field.generateKey().toString()) == null || ((String) subscriber.get(field.generateKey().toString())).isEmpty())) {
-     throw new IncompleteDataException("Mandatory list field " + field.getFIELD_NAME() + " is missing.");
-     }
-     if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
-     email = (String) subscriber.get(field.generateKey().toString());// If there exist multiple fieldvalues of email, then the latest one will be used
-     }
-     }
-     if (email.isEmpty()) {
-     throw new IncompleteDataException(DEFAULT_EMAIL_FIELD_NAME + " is always required for a subscription.");
-     }
-     if (!EmailValidator.getInstance().isValid(email)) {
-     throw new DataValidationException("Email address is not valid.");
-     }
-                
-     //Check if the subscription already exist
-     if (checkSubscribed(email, listId)) {
-     throw new RelationshipExistsException("Subscriber is already on this list.");
-     }
-
-     // Check if the account exist, if not, create a new one
-     // Check if account exist with the same client only
-     SubscriberAccount newOrExistingAcc = getExistingOrCreateNewSubscriber(email, client);
-
-     //Update the subscriber account first by merging
-     //Even if it exist, it is required to merge it to manage it later
-     newOrExistingAcc = updateService.getEm().merge(newOrExistingAcc);
-     //updateService.getEm().flush();
-
-     //Retrieve all existing fields for SubscriberAccount
-     List<SubscriberFieldValue> existingFieldValues = objectService.getEnterpriseData(newOrExistingAcc.getOBJECTID(), SubscriberFieldValue.class);
-
-     // Connect all new field values to the account and create them in the DB
-     // If you pass in a set of fieldvalues with the same field object, then the latest one will be the last to be inserted and overwrites the rest
-     // Get the highest count of the FieldValue SNO
-     int maxSNO = objectService.getHighestSNO(SubscriberFieldValue.class, newOrExistingAcc.getOBJECTID());
-     for (SubscriptionListField field : fields) {
-
-     SubscriberFieldValue value = new SubscriberFieldValue();
-     value.setOWNER(newOrExistingAcc);
-     value.setFIELD_KEY(field.generateKey().toString());
-
-     //If the new field value already exist in the DB, just update it
-     if (existingFieldValues.contains(value)) {
-     value = existingFieldValues.get(existingFieldValues.indexOf(value));//Make use of equals()
-     value.setVALUE((String)subscriber.get(field.generateKey().toString()));//Update value no matter what
-     updateService.getEm().merge(value);
-     } else {
-     value.setVALUE((String)subscriber.get(field.generateKey().toString()));//Update value no matter what
-     value.setSNO(++maxSNO);
-     updateService.getEm().persist(value);
-     }
-     }
-
-     // Create the relationship
-     Subscription newSubscr = new Subscription();
-     newSubscr.setTARGET(list);
-     newSubscr.setSOURCE(newOrExistingAcc);
-     if (!doubleOptin) {
-     newSubscr.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
-     }
-
-     // Create confirmation and unsubscribe keys
-     //String confirmKey = encryptService.getHash("confirm subscription of "+newOrExistingAcc.getOBJECTID()+" to list "+list.getOBJECTID(), EncryptionType.SHA256);
-     //String unsubKey = encryptService.getHash("unsubscribe "+newOrExistingAcc.getOBJECTID()+" from list "+list.getOBJECTID(), EncryptionType.SHA256);
-     String confirmKey = getConfirmationHashCode(newOrExistingAcc.getOBJECTID(), listId);
-     String unsubKey = getUnsubscribeHashCode(newOrExistingAcc.getOBJECTID(), listId);
-
-     newSubscr.setCONFIRMATION_KEY(confirmKey);
-     newSubscr.setUNSUBSCRIBE_KEY(unsubKey);
-     updateService.getEm().persist(newSubscr);
-
-     //Update the count of the list
-     list.setSUBSCRIBER_COUNT(list.getSUBSCRIBER_COUNT() + 1);
-     list = updateService.getEm().merge(list);
-
-     //Send confirmation email
-     if (doubleOptin) {
-     sendConfirmationEmail(newSubscr);
-     }
-                
-     //For all kinds of exceptions, just log the index with the error message as key, 
-     //so that we don't have to specifically tell the calling service what the results
-     //are and let them interpret themselves.
-     } catch (Exception ex) {
-     if(results.get(ex.getMessage()) == null)
-     results.put(ex.getMessage(), new ArrayList());
-     results.get(ex.getMessage()).add(subscriber);
-     }
-     }
-     return results;
-     }*/
     /**
      * There is no check for duplicates or already subscribed, like single
      * subscribe() method. The latest duplicates will overwrite all previous
@@ -941,5 +700,25 @@ public class SubscriptionService {
     public List<SubscriberFieldValue> getSubscriberValuesBySubscribers(List<Long> subscribers) {
         List<SubscriberFieldValue> results = objectService.getEnterpriseDataByIds(subscribers, SubscriberFieldValue.class);
         return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int updateSubscriberCount(long listId) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
+        Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
+        
+        Subquery<Long> countQuery = query.subquery(Long.class);
+        Root<Subscription> fromSubscription = countQuery.from(Subscription.class);
+        countQuery.select(builder.count(fromSubscription));
+        countQuery.where(builder.equal(fromSubscription.get(Subscription_.TARGET), listId));
+        
+        query.set(fromList.get(SubscriptionList_.SUBSCRIBER_COUNT), countQuery);
+        query.where(builder.equal(fromList.get(SubscriptionList_.OBJECTID),listId));
+        
+        int result = objectService.getEm().createQuery(query)
+                .executeUpdate();
+        
+        return result;
     }
 }

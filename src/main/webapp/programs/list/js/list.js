@@ -620,11 +620,11 @@ $(document).ready(function () {
     $('#doneButton').hide();
     
     //Datatables
-    //$('.sortable').dataTable();
-    /*$('.sortable').on('page.dt',function(){
+    $('.sortable').dataTable();
+    $('.sortable').on('page.dt',function(){
         console.log('Page event triggered');
         $('.sortable').row.add({
             "EMAIL" : "test"
         }).draw();
-    })*/
+    });
 });

@@ -56,7 +56,7 @@ import segmail.entity.subscription.Subscription_;
 @Stateless
 public class CampaignExecutionService {
 
-    public final int BATCH_SIZE = 100;
+    public final int BATCH_SIZE = 20;
     
     @Inject ClientFacade clientFacade;
 
@@ -102,17 +102,16 @@ public class CampaignExecutionService {
      * [start]+size th subscriber.
      *
      * @param campaignActivityId
+     * @param maxSize
      * @param startIndex
      * @param size
      * @return 
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.RelationshipNotFoundException
      */
-    public int executeCampaignActivity(long campaignActivityId, int startIndex, int size)
+    public int executeCampaignActivity(long campaignActivityId, final int maxSize)
             throws EntityNotFoundException, RelationshipNotFoundException {
-        int currIndex = startIndex;
-        final int targetIndex = currIndex + size; //Process until currIndex >= targetIndex
-
+        
         CampaignActivity campaignActivity = campService.getCampaignActivity(campaignActivityId); //DB hit
         if (campaignActivity == null) {
             throw new EntityNotFoundException(CampaignActivity.class, campaignActivityId);
@@ -120,12 +119,12 @@ public class CampaignExecutionService {
         
         int count = 0; //Number 
         
-        while (currIndex < targetIndex) {
+        while (count < maxSize) {
             //Retrieve all subscriber emails
-            //List<String> subscribers = getUnsentSubscriberEmailsForCampaign(campaignActivityId, currIndex, BATCH_SIZE); //DB hit
-            List<SubscriberAccount> subscribers = getUnsentSubscriberEmailsForCampaign(campaignActivityId, currIndex, BATCH_SIZE); //DB hit
+            List<SubscriberAccount> subscribers = 
+                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, Math.min(maxSize,BATCH_SIZE)); //DB hit
             //Lock 'em!
-            subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_READ);
+            subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
             //Skip if there are no more subscribers to be sent to
             if(subscribers.isEmpty())
                 break;
@@ -136,14 +135,6 @@ public class CampaignExecutionService {
 
                 Email email = new Email();
                 try {
-                    //Before sending, check again
-                    //WARNING: This result might be cached
-                    //This doesn't solve the concurrent issue. We need something at EDS layer to 
-                    //facilitate object locking. Something like a lock indicator.
-                    //List<Trigger_Email_Activity> checkTriggers = this.getEmailTriggers(campaignActivityId, subscriber.getEMAIL()); //DB hit
-                    //if (checkTriggers != null && !checkTriggers.isEmpty()) {
-                    //    continue;
-                    //}
                     
                     email.setSUBJECT(campaignActivity.getACTIVITY_NAME());
                     email.addRecipient(subscriber.getEMAIL());
@@ -173,7 +164,6 @@ public class CampaignExecutionService {
                 }
             }
             objService.getEm().flush();
-            currIndex = currIndex + BATCH_SIZE;
         }
         return count;
 
