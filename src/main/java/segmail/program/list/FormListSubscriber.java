@@ -7,7 +7,6 @@ package segmail.program.list;
 
 import eds.component.batch.BatchProcessingException;
 import eds.component.client.ClientFacade;
-import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
@@ -23,9 +22,10 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
+import segmail.component.subscription.MassSubscriptionService;
+import segmail.component.subscription.SubscriptionException;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -43,14 +43,15 @@ public class FormListSubscriber {
     @Inject
     private ProgramList program;
     @Inject
-    private UserSessionContainer userContainer;
-    @Inject
     private ClientFacade clientFacade;
+    
 
     @EJB
     private SubscriptionService subService;
     @EJB
     private ListService listService;
+    @EJB
+    private MassSubscriptionService massSubService;
 
     private boolean removed;
 
@@ -98,8 +99,9 @@ public class FormListSubscriber {
             if (program.getListEditing() == null) {
                 throw new RuntimeException("List is not set yet but you still manage to come to this page? Notify your admin immediately! =)");
             }
-
+            
             subService.subscribe(clientFacade.getClient().getOBJECTID(), program.getListEditingId(), this.getFieldValues(), true);
+            
             FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Subscriber added! A welcome email will be sent to the subscriber soon.", null);
             //How to redirect to List editing panel?
             program.refresh();
@@ -108,13 +110,13 @@ public class FormListSubscriber {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Subscriber already exist in this list", "");
         } catch (BatchProcessingException ex) {
             ex.printStackTrace(System.out);
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Something wrong with the sending of emails", "Please contact your system admin.");
+        } catch (SubscriptionException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } /*catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }*/

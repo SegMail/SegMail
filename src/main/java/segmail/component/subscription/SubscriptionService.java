@@ -87,6 +87,8 @@ public class SubscriptionService {
     private EncryptionService encryptService;
     @EJB
     private ListService listService;
+    @EJB
+    private MassSubscriptionService massSubService;
 
     /**
      * Delegate services
@@ -112,6 +114,9 @@ public class SubscriptionService {
      */
     @Inject
     ClientFacade clientFacade;
+    
+    @Inject 
+    SubscriptionContainer subContainer;
 
     /**
      * This assumes that the client has constructed a list of
@@ -122,15 +127,54 @@ public class SubscriptionService {
      * @param clientId
      * @param listId
      * @param values
+     * @param doubleOptin
      * @throws EntityNotFoundException
      * @throws IncompleteDataException
-     * @throws DataValidationException
+     * @throws segmail.component.subscription.SubscriptionException
+     * @throws eds.component.batch.BatchProcessingException
      * @throws RelationshipExistsException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
-            throws EntityNotFoundException, IncompleteDataException, DataValidationException, RelationshipExistsException, BatchProcessingException {
-        try {
+            throws EntityNotFoundException, IncompleteDataException, SubscriptionException, BatchProcessingException, RelationshipExistsException {
+        
+        
+        SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+        if (list == null) {
+            throw new EntityNotFoundException(SubscriptionList.class, listId);
+        }
+        
+        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
+        if(fields == null || fields.isEmpty()){
+            throw new IncompleteDataException("List "+listId+" does not have fields created.");
+        }
+        
+        //Look for the key in fields for DEFAULT_EMAIL_FIELD_NAME
+        String email = "";
+        for(SubscriptionListField field : fields) {
+            if(field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
+                email = (String) values.get((String)field.generateKey());
+                if(email != null && checkSubscribed(email, listId)){
+                    throw new RelationshipExistsException("Subscriber is already on this list");
+                }
+            }
+        }
+        if(email == null || email.isEmpty())
+            throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
+                
+        
+        subContainer.setList(list);
+        subContainer.setListFields(fields);
+
+        List<Map<String,Object>> singleSubscriberMap = new ArrayList<>();
+        singleSubscriberMap.add(values);
+        
+        Map<String,List<Map<String,Object>>> results = massSubService.massSubscribe(singleSubscriberMap, doubleOptin);
+        for(String key : results.keySet()) {
+            throw new SubscriptionException(key);
+        }
+        
+        /*try {
             // Find the list object
             SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
             if (list == null) {
@@ -229,7 +273,7 @@ public class SubscriptionService {
                 throw new DBConnectionException(pex.getCause().getMessage());
             }
             throw new EJBException(pex);
-        }
+        }*/
     }
 
     /**
@@ -579,6 +623,9 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Map<Long, Map<String, String>> getSubscriberValuesMap(long listId, int startIndex, int limit) {
         try {
+            //Get all the SubscriptionFields first
+            List<String> fields = listService.getSubscriptionListFieldKeys(listId);
+            
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
             Root<Subscription> fromSubscr = criteria.from(Subscription.class);
@@ -590,7 +637,8 @@ public class SubscriptionService {
                             builder.equal(fromSubscr.get(Subscription_.TARGET), listId),
                             builder.equal(
                                     fromSubscr.get(Subscription_.SOURCE),
-                                    fromFieldValue.get(SubscriberFieldValue_.OWNER))
+                                    fromFieldValue.get(SubscriberFieldValue_.OWNER)),
+                                    fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields)
                     )
             );
 
@@ -778,6 +826,26 @@ public class SubscriptionService {
         query.select(fromSubscription);
         query.where(builder.and(
                 builder.equal(fromSubscriber.get(SubscriberAccount_.EMAIL), subscriberEmail),
+                builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
+                builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID))
+        ));
+
+        List<Subscription> results = this.objectService.getEm().createQuery(query)
+                .getResultList();
+
+        return results;
+    }
+    
+    public List<Subscription> getSubscriptionsByEmails(List<String> subscriberEmails, long listId) {
+        CriteriaBuilder builder = this.objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
+        Root<SubscriberAccount> fromSubscriber = query.from(SubscriberAccount.class);
+        Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
+        Root<Subscription> fromSubscription = query.from(Subscription.class);
+
+        query.select(fromSubscription);
+        query.where(builder.and(
+                fromSubscriber.get(SubscriberAccount_.EMAIL).in(subscriberEmails),
                 builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
                 builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID))
         ));

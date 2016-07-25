@@ -6,6 +6,7 @@
 package segmail.component.campaign;
 
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -21,12 +22,14 @@ import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.LockModeType;
 import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import org.hibernate.LockMode;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
@@ -53,12 +56,14 @@ import segmail.entity.subscription.Subscription_;
 @Stateless
 public class CampaignExecutionService {
 
-    public final int BATCH_SIZE = 1000;
+    public final int BATCH_SIZE = 100;
     
     @Inject ClientFacade clientFacade;
 
     @EJB
     GenericObjectService objService;
+    @EJB
+    UpdateObjectService updService;
     @EJB
     CampaignService campService;
     @EJB
@@ -99,45 +104,49 @@ public class CampaignExecutionService {
      * @param campaignActivityId
      * @param startIndex
      * @param size
+     * @return 
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.RelationshipNotFoundException
      */
-    public void executeCampaignActivity(long campaignActivityId, int startIndex, int size)
+    public int executeCampaignActivity(long campaignActivityId, int startIndex, int size)
             throws EntityNotFoundException, RelationshipNotFoundException {
         int currIndex = startIndex;
         final int targetIndex = currIndex + size; //Process until currIndex >= targetIndex
 
-        CampaignActivity campaignActivity = campService.getCampaignActivity(campaignActivityId);
+        CampaignActivity campaignActivity = campService.getCampaignActivity(campaignActivityId); //DB hit
         if (campaignActivity == null) {
             throw new EntityNotFoundException(CampaignActivity.class, campaignActivityId);
         }
-
-        //List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
-        //if(campaigns == null || campaigns.isEmpty())
-        //    throw new RelationshipNotFoundException("Campaign not found for CampaignActivity "+campaignActivityId);
-        //Campaign campaign = campaigns.get(0);
+        
+        int count = 0; //Number 
+        
         while (currIndex < targetIndex) {
             //Retrieve all subscriber emails
-            List<String> subscribers = this.getUnsentSubscriberEmailsForCampaign(campaignActivityId, currIndex, BATCH_SIZE);
-            
+            //List<String> subscribers = getUnsentSubscriberEmailsForCampaign(campaignActivityId, currIndex, BATCH_SIZE); //DB hit
+            List<SubscriberAccount> subscribers = getUnsentSubscriberEmailsForCampaign(campaignActivityId, currIndex, BATCH_SIZE); //DB hit
+            //Lock 'em!
+            subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_READ);
+            //Skip if there are no more subscribers to be sent to
+            if(subscribers.isEmpty())
+                break;
             //Retrieve all unsubscribe codes
-            Map<String,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientFacade.getClient().getOBJECTID());
+            Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientFacade.getClient().getOBJECTID()); //DB hit
             
-            for (String subscriber : subscribers) {
+            for (SubscriberAccount subscriber : subscribers) {
 
+                Email email = new Email();
                 try {
                     //Before sending, check again
                     //WARNING: This result might be cached
                     //This doesn't solve the concurrent issue. We need something at EDS layer to 
-                    //facilitate object locking.
-                    List<Trigger_Email_Activity> checkTriggers = this.getEmailTriggers(campaignActivityId, subscriber);
-                    if (checkTriggers != null && !checkTriggers.isEmpty()) {
-                        continue;
-                    }
+                    //facilitate object locking. Something like a lock indicator.
+                    //List<Trigger_Email_Activity> checkTriggers = this.getEmailTriggers(campaignActivityId, subscriber.getEMAIL()); //DB hit
+                    //if (checkTriggers != null && !checkTriggers.isEmpty()) {
+                    //    continue;
+                    //}
                     
-                    Email email = new Email();
                     email.setSUBJECT(campaignActivity.getACTIVITY_NAME());
-                    email.addRecipient(subscriber);
+                    email.addRecipient(subscriber.getEMAIL());
                     
                     String content = campaignActivity.getACTIVITY_CONTENT();
                     content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber));
@@ -156,14 +165,17 @@ public class CampaignExecutionService {
                     CampaignExecutionError error = new CampaignExecutionError();
                     error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
                     error.setERROR_MESSAGE(ex.getMessage());
-                    error.setRECIPIENT(subscriber);
+                    error.setRECIPIENT(subscriber.getEMAIL());
                     
                     objService.getEm().persist(error);
-                } 
+                } finally {
+                    count++;
+                }
             }
-
+            objService.getEm().flush();
             currIndex = currIndex + BATCH_SIZE;
         }
+        return count;
 
     }
 
@@ -202,7 +214,7 @@ public class CampaignExecutionService {
      * @param size
      * @return
      */
-    public List<String> getUnsentSubscriberEmailsForCampaign(long campaignActivityId, int startIndex, int size) {
+    /*public List<String> getUnsentSubscriberEmailsForCampaign(long campaignActivityId, int startIndex, int size) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<String> query = builder.createQuery(String.class);
         Root<SubscriberAccount> fromSubAcc = query.from(SubscriberAccount.class);
@@ -239,7 +251,47 @@ public class CampaignExecutionService {
                 .getResultList();
 
         return results;
+    }*/
+    
+    public List<SubscriberAccount> getUnsentSubscriberEmailsForCampaign(long campaignActivityId, int startIndex, int size) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
+        Root<SubscriberAccount> fromSubAcc = query.from(SubscriberAccount.class);
+        Root<Subscription> fromSubp = query.from(Subscription.class);
+        Root<Assign_Campaign_List> fromAssignCampList = query.from(Assign_Campaign_List.class);
+        Root<Assign_Campaign_Activity> fromAssignCampAct = query.from(Assign_Campaign_Activity.class);
+
+        //Subquery
+        Subquery<String> emailQuery = query.subquery(String.class);
+        Root<Trigger_Email_Activity> fromTrigger = emailQuery.from(Trigger_Email_Activity.class);
+        emailQuery.select(fromTrigger.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
+
+        emailQuery.where(
+                builder.and(
+                        builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), campaignActivityId)
+                )
+        );
+
+        query.select(fromSubAcc);
+        query.distinct(true);
+        query.where(
+                builder.and(
+                        builder.equal(fromAssignCampAct.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.SOURCE), fromAssignCampAct.get(Assign_Campaign_Activity_.SOURCE)),
+                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.TARGET), fromSubp.get(Subscription_.TARGET)),
+                        builder.equal(fromSubp.get(Subscription_.SOURCE), fromSubAcc.get(SubscriberAccount_.OBJECTID)),
+                        builder.not(fromSubAcc.get(SubscriberAccount_.EMAIL).in(emailQuery))
+                )
+        );
+
+        List<SubscriberAccount> results = objService.getEm().createQuery(query)
+                .setFirstResult(startIndex)
+                .setMaxResults(size)
+                .getResultList();
+
+        return results;
     }
+
 
     public List<Trigger_Email_Activity> getEmailTriggers(long campaignActivityId, String email) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
@@ -263,16 +315,18 @@ public class CampaignExecutionService {
     /**
      * By using a map, this actually guarantees the uniqueness of the results. 
      * 1 subcriber to 1 code. If the subscriber is subscribed to multiple lists,
-     * only the last subscription will be returned. During unsubcribing, we just
-     * need to let the subscriber choose which list they would like to unsubscribe from.
+     * only the last subscription will be returned. If they click on any links 
+     * with any of their own unsubscribe codes, they will be able to see all the 
+     * lists that they are subscribed to and select which ones they want to unsubscribe
+     * from (lists from the same client of course). 
      * 
-     * @param emails
+     * @param subscribers
      * @param clientId
      * @return 
      */
-    public Map<String,String> getUnsubscribeCodes(List<String> emails, long clientId) {
+    public Map<SubscriberAccount,String> getUnsubscribeCodes(List<SubscriberAccount> subscribers, long clientId) {
         //Simplest and least expensive solution.
-        if(emails == null || emails.isEmpty())
+        if(subscribers == null || subscribers.isEmpty())
             return new HashMap<>();
         
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
@@ -281,11 +335,9 @@ public class CampaignExecutionService {
         Root<SubscriberAccount> fromSubscrb = query.from(SubscriberAccount.class);
         Root<SubscriberOwnership> fromOwner = query.from(SubscriberOwnership.class);
         
-        query.multiselect(fromSubscrb.get(SubscriberAccount_.EMAIL),fromSubscrp.get(Subscription_.UNSUBSCRIBE_KEY));
+        query.multiselect(fromSubscrb,fromSubscrp.get(Subscription_.UNSUBSCRIBE_KEY));
         
-        query.where(
-                builder.and(
-                        fromSubscrb.get(SubscriberAccount_.EMAIL).in(emails),
+        query.where(builder.and(fromSubscrb.in(subscribers),
                         builder.equal(fromSubscrb.get(SubscriberAccount_.OBJECTID), fromSubscrp.get(Subscription_.SOURCE)),
                         builder.equal(fromSubscrb.get(SubscriberAccount_.OBJECTID), fromOwner.get(SubscriberOwnership_.SOURCE)),
                         builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId)
@@ -294,9 +346,9 @@ public class CampaignExecutionService {
         List<Object[]> results = objService.getEm().createQuery(query)
                 .getResultList();
         
-        Map<String,String> resultMap = new HashMap<>();
+        Map<SubscriberAccount,String> resultMap = new HashMap<>();
         for(Object[] result : results){
-            resultMap.put(result[0].toString(), result[1].toString());
+            resultMap.put((SubscriberAccount)result[0], result[1].toString());
         }
         
         return resultMap;

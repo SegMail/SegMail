@@ -310,6 +310,17 @@ public class ListService {
             throw new EJBException(pex);
         }
     }
+    
+    public List<String> getSubscriptionListFieldKeys(long listId) {
+        List<SubscriptionListField> allFieldList = this.getFieldsForSubscriptionList(listId);
+        List<String> results = new ArrayList<>();
+        
+        for(SubscriptionListField field : allFieldList) {
+            results.add((String) field.generateKey());
+        }
+        
+        return results;
+    }
 
     public List<SubscriptionList> getAllListForClient(long clientid) {
         try {

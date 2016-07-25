@@ -45,11 +45,11 @@
             <div class="col-md-12">
                 <div class="block">
                     <div class="block-content np">
-                        <table jsf:id="subscriber_table" class="table table-bordered table-striped">
+                        <table jsf:id="subscriber_table" class="table table-bordered table-striped sortable">
                             <thead>
                                 <tr>
                                     <c:forEach items="#{FormListSubscriber.listFields}" var="field">
-                                        <td>#{field.FIELD_NAME}</td>
+                                        <th>#{field.FIELD_NAME}</th>
                                     </c:forEach>
                                 </tr>
                             </thead>
@@ -58,7 +58,7 @@
                                     <tr>
                                         <c:forEach items="#{FormListSubscriber.listFields}" var="field">
                                             <td>
-                                                <span>#{subscriber.value[field.generateKey().toString()]}</span>
+                                                #{subscriber.value[field.generateKey().toString()]}
                                             </td>
                                         </c:forEach>
                                     </tr>

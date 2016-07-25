@@ -10,6 +10,7 @@ import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -157,7 +158,7 @@ public class MailMergeService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseUnsubscribeLink(String text, String unsubscribeKey) throws IncompleteDataException {
 
-        if (!text.contains(MailMergeLabel.UNSUBSCRIBE.label())) {
+        if (text == null || text.isEmpty() || !text.contains(MailMergeLabel.UNSUBSCRIBE.label())) {
             return text;
         }
         
@@ -185,5 +186,16 @@ public class MailMergeService {
 
         return newEmailBody;
 
+    }
+    
+    public String parseEverything(String text, Map<String,Object> params) throws IncompleteDataException {
+        String result = text;
+        //Has to be a better way to register all these parsing in a queue and process them together
+        result = this.parseConfirmationLink(result, (String) params.get(MailMergeLabel.CONFIRM.label()));
+        result = this.parseUnsubscribeLink(result, (String) params.get(MailMergeLabel.UNSUBSCRIBE.label()));
+        //result = this.parseListAttributes(result, (Long) params.get("LISTID"));
+        //result = this.parseMultipleContent(result, (Long) params.get("LISTID"));
+        
+        return result;
     }
 }

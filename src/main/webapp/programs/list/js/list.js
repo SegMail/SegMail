@@ -309,18 +309,6 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
     })
 };
 
-$(document).ready(function () {
-    //$('#importButton').trigger('onSuccess');
-    bindFileInput();
-    $('#fileUploaded').val('');//To clear the previous uploaded file
-    $('#field_selector').hide();
-    $('#importButton').hide();
-    $('#progress-bar-container').hide();
-    $('#soap-errors').hide();
-    $('#upload-status').hide();
-    $('#doneButton').hide();
-});
-
 var logSOAPErrors = function(SOAPResponse){
     var jsonresult = SOAPResponse.toJSON();
     //console.log(SOAPResponse.content); 
@@ -508,6 +496,9 @@ var checkedErrorsCollector = (function(){
                  return;
             }
             
+            $('#doneButton').show();
+            console.log('Done');
+            
             //Re-arrange the lines with errors into a sorted array
             var sortedArray = [];
             var keys = Object.keys(errorItemList);
@@ -561,8 +552,6 @@ var checkedErrorsCollector = (function(){
                     $('#'+fileDownloadContainerId).append('<a id=\"'+fileDownloadContainerId+'-link\">Click here to download error file.</a>');
                     $('#'+fileDownloadContainerId+'-link').attr('href','data:text/plain;charset=utf-8,'+encodeURIComponent(outputErrorFileContent));
                     $('#'+fileDownloadContainerId+'-link').attr('download',file.name);
-                    console.log('Done');
-                    $('#doneButton').show();
                     return;
                 }
                 
@@ -618,3 +607,24 @@ var GenericErrorController = function(){
         }
     };
 }();
+
+$(document).ready(function () {
+    //$('#importButton').trigger('onSuccess');
+    bindFileInput();
+    $('#fileUploaded').val('');//To clear the previous uploaded file
+    $('#field_selector').hide();
+    $('#importButton').hide();
+    $('#progress-bar-container').hide();
+    $('#soap-errors').hide();
+    $('#upload-status').hide();
+    $('#doneButton').hide();
+    
+    //Datatables
+    //$('.sortable').dataTable();
+    /*$('.sortable').on('page.dt',function(){
+        console.log('Page event triggered');
+        $('.sortable').row.add({
+            "EMAIL" : "test"
+        }).draw();
+    })*/
+});

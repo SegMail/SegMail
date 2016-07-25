@@ -9,8 +9,6 @@ import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
 import eds.component.file.FileService;
 import eds.entity.file.FileTransaction;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,20 +17,16 @@ import java.util.Map;
 import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
-import javax.json.stream.JsonParser;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import org.jboss.logging.Logger;
 import segmail.component.subscription.MassSubscriptionService;
 import segmail.component.subscription.SubscriptionContainer;
 import segmail.component.subscription.SubscriptionService;
@@ -129,14 +123,7 @@ public class WSImportSubscriber {
             subscribersList.add(subscriber);
         }
 
-        Map<String, List<Map<String,Object>>> results = new HashMap<>();
-        //try {
-            results = massSubService.massSubscribe(subscribersList);
-        //} catch(Exception ex) {
-        //    ex.printStackTrace(System.out);
-            //System.out.println("First subscriber: "+subscribersList.get(0).toString());
-            //System.out.println("Last subscriber: "+subscribersList.get(subscribersList.size()-1).toString());
-        //}
+        Map<String, List<Map<String,Object>>> results = massSubService.massSubscribe(subscribersList,false);
         
 
         //Construct the JSON response object from the Map object

@@ -328,30 +328,22 @@ public class CampaignService {
      * This is it. The real thing.
      * 
      * 1) Update the status of the email activity to STARTED.
-     * 2) Create a sending schedule. This will trigger the process to load up the mail queue so that 
-     * EmailService can send them out asynchronously. The process to trigger this process is also 
-     * executed asynchronously.
+     * 2) Create a sending schedule, which is the process to load up the mail queue so that 
+     * EmailService can send them out asynchronously. This process shall also be 
+     * executed asynchronously. 
+     * 3) If this doesn't throw any exceptions, it means that the sending schedule 
+     * is guaranteed to execute even after a system restart. Otherwise, rollback
+     * will occur and the sending schedule created halfway will be destroyed.
      * 
      * @param emailActivity 
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void startSendingCampaignEmail(CampaignActivity emailActivity) throws EntityNotFoundException, IncompleteDataException, BatchProcessingException {
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void startSendingCampaignEmail(CampaignActivity emailActivity) {
+        /**
+         * Schedule the first one and let the subsequent ones keep scheduling 
+         * the subsequent ones until the lists are done.
+         */
         
-        //Using OBJECT_IDs of the Subscribers, divide them into the preferred batch number stated in CampaignActivitySchedule.SEND_IN_BATCH
-        //This method cannot be here, create another scheduler EJB
-        
-        
-        //Schedule the batch jobs
-        
-        //Create a batch job that will execute this exeSchedule until it gets done.
-        /*batchScheduleService.createSingleStepJob(
-                "Sending campaign email \""+emailActivity.getACTIVITY_NAME()+"\"", 
-                "CampaignExecutionService", "executeCampaignActivity", 
-                new Object[]{emailActivity.getOBJECTID()}, 
-                landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID()       , 
-                activitySchedule.get(0).getCRON_EXPRESSION());
-        */
-        //That's all folks! Let's see the magic happening all by itself.
     }
     
     public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {

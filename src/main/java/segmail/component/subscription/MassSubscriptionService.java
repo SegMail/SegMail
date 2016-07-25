@@ -6,13 +6,16 @@
 package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
+import eds.component.batch.BatchProcessingException;
 import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
 import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -64,10 +67,7 @@ public class MassSubscriptionService {
      * 
      * No emails will be sent out with this mode as of now.
      *
-     * @param clientId
-     * @param listId
      * @param subscribers
-     * @param doubleOptin
      * @return a Map of error messages and their records. A list of possible
      * error messages:
      * <ul>
@@ -78,7 +78,7 @@ public class MassSubscriptionService {
      * @throws EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Map<String, List<Map<String,Object>>> massSubscribe(List<Map<String, Object>> subscribers) 
+    public Map<String, List<Map<String,Object>>> massSubscribe(List<Map<String, Object>> subscribers, boolean doubleOptin) 
             throws EntityNotFoundException {
 
         //Set up the return results Map
@@ -145,8 +145,9 @@ public class MassSubscriptionService {
          * update 2) Subscribers who already exist but requires update
          * (identified by email) 3) Fresh subscribers
          *
-         * First we have to retrieve all SubscriberAccount objects
          */
+        //First we have to retrieve all SubscriberAccount objects
+        //This assumes that SubscriberAccount and SubscriberOwneship always exists together and never mutually exclusive.
         List<SubscriberAccount> existingSubscribers = subService.getSubscribersForClientByEmails(emails, client.getOBJECTID()); //DB hit, can be cached
         Collections.sort(existingSubscribers);//Meaningless...not entirely...
         List<Long> existingSubscriberIds = new ArrayList<>();
@@ -156,6 +157,11 @@ public class MassSubscriptionService {
         //And also all their SubscriberFieldValues
         List<SubscriberFieldValue> existingFieldValues = subService.getSubscriberValuesBySubscribers(existingSubscriberIds); //DB hit, can be cached
         Collections.sort(existingFieldValues); //Default sorting method for EnterpriseData
+        //All existing subscriptions
+        //Just in case the SubscriberAccount, Ownership and FieldValues are created but the subscription is not,
+        //this is used for checking.
+        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID());
+        
         /**
          * For each survivor: 1) Check if SubscriberAccount has already been
          * created for. - If yes, no need to update it. Remove it from the
@@ -177,23 +183,24 @@ public class MassSubscriptionService {
             Map<String, Object> survivor = survivors.get(i);
             String email = emails.get(i); //emails and survivors have the same order
             List<SubscriberFieldValue> subFieldValues = new ArrayList<>();
-            SubscriberAccount owner = null; //Hypothetical owner
+            SubscriberAccount account = null; //Hypothetical account
 
             //Find the existing SubscriberAccount
             for (SubscriberAccount existingSubscriber : existingSubscribers) {
                 //If found, get SubscriberFieldValues from existingFieldValues
                 if (existingSubscriber.getEMAIL() == null ? email == null : existingSubscriber.getEMAIL().equals(email)) {
-                    owner = existingSubscriber;
+                    account = existingSubscriber;
                     break;
                 }
             }
             //Find all its existing SubscriberFieldValues
             for (SubscriberFieldValue existingFieldValue : existingFieldValues) {
-                if(existingFieldValue.getOWNER().equals(owner)) {
-                    subFieldValues.add(existingFieldValue);break;
+                if(existingFieldValue.getOWNER().equals(account)) {
+                    subFieldValues.add(existingFieldValue);
                 }
             }
-            Collections.sort(subFieldValues,new SubscriberFieldValueComparator());
+            Collections.sort(subFieldValues,new SubscriberFieldValueComparator()); //Sorting is necessary because u need to get highest SNO
+            
             //If subFieldValues exists, it means that the subscriber already exist and might require updates.
             //If it exists in survivor Map, update the value
             //If it doesn't exist in survivor Map, create it
@@ -220,30 +227,38 @@ public class MassSubscriptionService {
                     SubscriberFieldValue newValue = new SubscriberFieldValue();
                     newValue.setFIELD_KEY(key);
                     newValue.setVALUE((String) survivor.get(key));
-                    if (owner == null) {
-                        owner = new SubscriberAccount();
-                        owner.setEMAIL(email);
-                        createNewSubAccList.add(owner);
+                    if (account == null) {
+                        account = new SubscriberAccount();
+                        account.setEMAIL(email);
+                        createNewSubAccList.add(account);
                         //Create SubscriberOwnership!!!
                         SubscriberOwnership ownership = new SubscriberOwnership();
-                        ownership.setSOURCE(owner);
+                        ownership.setSOURCE(account);
                         ownership.setTARGET(client);
                         createNewSubOwnership.add(ownership);
-                        //Create Subscription!!!
-                        Subscription subscription = new Subscription();
-                        subscription.setSOURCE(owner);
-                        subscription.setTARGET(list);
-                        subscription.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
                         
-                        createNewSubscription.add(subscription);
                         
                     }
-                    newValue.setOWNER(owner);
+                    newValue.setOWNER(account);
+                    
+                    //Set the SNO
                     int highestSNO = (subFieldValues.isEmpty()) ? 
                             0 : subFieldValues.get(subFieldValues.size()-1).getSNO() + 1;
                     newValue.setSNO(highestSNO);
 
                     createFieldValueList.add(newValue);
+                    //Need to add and sort otherwise you won't get the correct highestSNO
+                    subFieldValues.add(newValue); 
+                    Collections.sort(subFieldValues,new SubscriberFieldValueComparator());
+                    
+                    //Decide if we should create Subscription
+                    Subscription subscription = new Subscription();
+                    subscription.setSOURCE(account);
+                    subscription.setTARGET(list);
+                    subscription.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
+
+                    if(!existingSubscription.contains(subscription))
+                        createNewSubscription.add(subscription);
                 }
             }
 //        }} catch (Exception ex) {
@@ -261,6 +276,9 @@ public class MassSubscriptionService {
             //Create Subscription!!!
             createNewSubscription = createSubscription(createNewSubscription);
             //Send confirmation email if double optin is turned on
+            if(doubleOptin) {
+                sendConfirmationEmails(createNewSubscription);
+            }
                 
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
@@ -367,4 +385,12 @@ public class MassSubscriptionService {
         return false;
     }
     
+    @Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void sendConfirmationEmails(List<Subscription> newSubscriptions) 
+            throws IncompleteDataException, BatchProcessingException {
+        for(Subscription newSubscription : newSubscriptions) {
+            subService.sendConfirmationEmail(newSubscription);
+        }
+    }
 }

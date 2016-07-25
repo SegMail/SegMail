@@ -41,12 +41,8 @@ public class FormExecuteCampaignActivity {
             program.refresh();
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }/* catch (IncompleteDataException ex) {
+        } catch (RelationshipNotFoundException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (BatchProcessingException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }*/ catch (RelationshipNotFoundException ex) {
-            Logger.getLogger(FormExecuteCampaignActivity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

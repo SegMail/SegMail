@@ -16,6 +16,6 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(SubscriberFieldValue.class)
 public class SubscriberFieldValue_ extends EnterpriseData_{
     
-    public static volatile SingularAttribute<SubscriberFieldValue,SubscriptionListField> FIELD;
+    public static volatile SingularAttribute<SubscriberFieldValue,String> FIELD_KEY;
     public static volatile SingularAttribute<SubscriberFieldValue,String> VALUE;
 }

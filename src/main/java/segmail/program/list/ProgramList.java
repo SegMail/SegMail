@@ -41,7 +41,7 @@ public class ProgramList extends Program implements Serializable {
     private Map<Long,Map<String,String>> subscriberTable;
     private SubscriberAccount subscriber;
     private Map<String,Object> fieldValues; //For adding new subscribers
-    private int page = 1; //For data-dripping purpose
+    private int page = 0; //For data-dripping purpose
     
     //For the confirmation emails
     private List<AutoresponderEmail> confirmationEmails;

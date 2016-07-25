@@ -104,17 +104,5 @@ public class FormEditEmailActivity implements FormEditEntity {
         }
     }
     
-    public void sendAndClose() {
-        try {
-            campaignService.startSendingCampaignEmail(program.getEditingActivity());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign has been scheduled for sending.", "");
-        } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (BatchProcessingException ex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
-    }
 
 }
