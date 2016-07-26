@@ -5,6 +5,7 @@
  */
 package eds.component.batch;
 
+import com.google.common.base.Objects;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
@@ -51,9 +52,13 @@ public class BatchExecutionService {
             job.getBATCH_JOB().setLAST_RUN(new Timestamp(start.getMillis()));
             updService.getEm().merge(job);
             updService.getEm().flush();
+            
+            Object ret = null;
             List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
             for (BatchJobStep step : steps) {
-                step.execute();
+                ret = step.execute();
+                Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, 
+                        (ret == null) ? "" : ret.toString());
             }
             //Record completion info
             job.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
@@ -64,11 +69,11 @@ public class BatchExecutionService {
             DateTime now = DateTime.now();
             List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(job.getBATCH_JOB().getBATCH_JOB_ID());
             //Should be loosely coupled procedure, no exceptions thrown
-            if(triggers != null || !triggers.isEmpty()) {
-                Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
+            if(triggers != null && !triggers.isEmpty()
+                    && !Objects.equal((ret == null) ? null : ret.getClass(),StopNextRunQuickAndDirty.class)) { //THIS IS A HACK!!!
+                //Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
                 scheduleService.triggerNextBatchJobRun(now, triggers.get(0));
             }
-            
         } catch (Throwable ex) {
             Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
             job.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);

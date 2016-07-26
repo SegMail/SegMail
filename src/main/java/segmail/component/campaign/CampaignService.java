@@ -24,7 +24,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import seca2.bootstrap.module.Client.ClientContainer;
+import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
@@ -338,12 +340,30 @@ public class CampaignService {
      * @param emailActivity 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void startSendingCampaignEmail(CampaignActivity emailActivity) {
+    public void startSendingCampaignEmail(CampaignActivity emailActivity) 
+            throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
         /**
          * Schedule the first one and let the subsequent ones keep scheduling 
          * the subsequent ones until the lists are done.
          */
         
+        List<CampaignActivitySchedule> scheduleList = objService.getEnterpriseData(emailActivity.getOBJECTID(), CampaignActivitySchedule.class);
+        if(scheduleList == null || scheduleList.isEmpty())
+            throw new IncompleteDataException("No CampaignActivitySchedule set for CampaignActivity "+emailActivity.getACTIVITY_NAME());
+        CampaignActivitySchedule schedule = scheduleList.get(0);
+        Object[] params = {emailActivity.getOBJECTID(), (int)schedule.getSEND_IN_BATCH() };
+        
+        batchScheduleService.createSingleStepJob(
+                emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME(), 
+                "CampaignExecutionService", 
+                "executeCampaignActivity", 
+                params,
+                landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID(),
+                schedule.generateCronExp().getCRON_EXPRESSION());
+        
+        //Actually we don't need to do this but just for consistency sake
+        //CRON_EXPRESSION don't need to be stored in the first place
+        objService.getEm().merge(schedule);
     }
     
     public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {

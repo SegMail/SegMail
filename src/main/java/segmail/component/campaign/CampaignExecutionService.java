@@ -7,6 +7,7 @@ package segmail.component.campaign;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.batch.StopNextRunQuickAndDirty;
 import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -21,6 +22,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.LockModeType;
 import javax.persistence.Tuple;
@@ -30,6 +33,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import org.hibernate.LockMode;
+import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
@@ -77,6 +81,7 @@ public class CampaignExecutionService {
      * @param campaignActivityId
      * @return
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivityExecutionSchedule createActivityExecutionSchedule(long campaignActivityId, List<Long> targetedLists) {
 
         CampaignActivityExecutionSchedule newExecution = new CampaignActivityExecutionSchedule();
@@ -109,7 +114,8 @@ public class CampaignExecutionService {
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.RelationshipNotFoundException
      */
-    public int executeCampaignActivity(long campaignActivityId, final int maxSize)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public StopNextRunQuickAndDirty executeCampaignActivity(long campaignActivityId, final int maxSize)
             throws EntityNotFoundException, RelationshipNotFoundException {
         
         CampaignActivity campaignActivity = campService.getCampaignActivity(campaignActivityId); //DB hit
@@ -122,7 +128,7 @@ public class CampaignExecutionService {
         while (count < maxSize) {
             //Retrieve all subscriber emails
             List<SubscriberAccount> subscribers = 
-                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, Math.min(maxSize,BATCH_SIZE)); //DB hit
+                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxSize,BATCH_SIZE)); //DB hit
             //Lock 'em!
             subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
             //Skip if there are no more subscribers to be sent to
@@ -165,7 +171,8 @@ public class CampaignExecutionService {
             }
             objService.getEm().flush();
         }
-        return count;
+        //Ugly HACK, but simplest solution
+        return (count <= maxSize) ? new StopNextRunQuickAndDirty() : null;
 
     }
 
@@ -204,45 +211,6 @@ public class CampaignExecutionService {
      * @param size
      * @return
      */
-    /*public List<String> getUnsentSubscriberEmailsForCampaign(long campaignActivityId, int startIndex, int size) {
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-        CriteriaQuery<String> query = builder.createQuery(String.class);
-        Root<SubscriberAccount> fromSubAcc = query.from(SubscriberAccount.class);
-        Root<Subscription> fromSubp = query.from(Subscription.class);
-        Root<Assign_Campaign_List> fromAssignCampList = query.from(Assign_Campaign_List.class);
-        Root<Assign_Campaign_Activity> fromAssignCampAct = query.from(Assign_Campaign_Activity.class);
-
-        //Subquery
-        Subquery<String> emailQuery = query.subquery(String.class);
-        Root<Trigger_Email_Activity> fromTrigger = emailQuery.from(Trigger_Email_Activity.class);
-        emailQuery.select(fromTrigger.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
-
-        emailQuery.where(
-                builder.and(
-                        builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), campaignActivityId)
-                )
-        );
-
-        query.select(fromSubAcc.get(SubscriberAccount_.EMAIL));
-        query.distinct(true);
-        query.where(
-                builder.and(
-                        builder.equal(fromAssignCampAct.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
-                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.SOURCE), fromAssignCampAct.get(Assign_Campaign_Activity_.SOURCE)),
-                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.TARGET), fromSubp.get(Subscription_.TARGET)),
-                        builder.equal(fromSubp.get(Subscription_.SOURCE), fromSubAcc.get(SubscriberAccount_.OBJECTID)),
-                        builder.not(fromSubAcc.get(SubscriberAccount_.EMAIL).in(emailQuery))
-                )
-        );
-
-        List<String> results = objService.getEm().createQuery(query)
-                .setFirstResult(startIndex)
-                .setMaxResults(size)
-                .getResultList();
-
-        return results;
-    }*/
-    
     public List<SubscriberAccount> getUnsentSubscriberEmailsForCampaign(long campaignActivityId, int startIndex, int size) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
@@ -343,4 +311,10 @@ public class CampaignExecutionService {
         
         return resultMap;
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void executeAllCampaignActivities() {
+        
+    }
+    
 }

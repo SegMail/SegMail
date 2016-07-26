@@ -322,7 +322,8 @@ public class BatchSchedulingService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJobTrigger trigger) throws BatchProcessingException {
+    public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJobTrigger trigger) 
+            throws BatchProcessingException {
         if(trigger == null)
             return null;
         BatchJobRun newRun = new BatchJobRun();

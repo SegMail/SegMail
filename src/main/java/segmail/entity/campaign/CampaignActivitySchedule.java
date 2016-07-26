@@ -28,7 +28,7 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
     protected String CRON_EXPRESSION;
     
     protected int EVERY_HOUR;
-
+    
     public long getSEND_IN_BATCH() {
         return SEND_IN_BATCH;
     }
@@ -85,7 +85,8 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
                         (getEVERY_HOUR()-1 > 0) ? 
                                 (
                                         (getEVERY_HOUR() < 24) ? 
-                                                FieldExpressionFactory.every(getEVERY_HOUR()) : 
+                                                FieldExpressionFactory.between(time.getHourOfDay(),59).and(FieldExpressionFactory.every(getEVERY_HOUR()))
+                                                         : 
                                                 FieldExpressionFactory.on(time.getHourOfDay())
                                         )
                                 : FieldExpressionFactory.always()
