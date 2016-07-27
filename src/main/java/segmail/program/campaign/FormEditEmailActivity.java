@@ -58,7 +58,9 @@ public class FormEditEmailActivity implements FormEditEntity {
         try {
             
             campaignService.updateCampaignActivity(getEditingActivity());
-            campaignService.updateCampaignActivitySchedule(this.getEditingSchedule());
+            campaignService.updateCampaignActivitySchedule(getEditingSchedule());
+            loadActivity(program.getEditingCampaignId());
+            
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -104,5 +106,13 @@ public class FormEditEmailActivity implements FormEditEntity {
         }
     }
     
+    public void loadActivity(long activityId) {
+        CampaignActivity act = campaignService.getCampaignActivity(activityId);
+        program.setEditingActivity(act);
+        
+        CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
+        program.setEditingSchedule(schedule);
+        
+    }
 
 }

@@ -42,7 +42,6 @@ import segmail.entity.campaign.Assign_Campaign_Activity_;
 import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityExecutionSchedule;
 import segmail.entity.campaign.CampaignExecutionError;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
@@ -81,10 +80,10 @@ public class CampaignExecutionService {
      * @param campaignActivityId
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivityExecutionSchedule createActivityExecutionSchedule(long campaignActivityId, List<Long> targetedLists) {
+    /*@TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivityExecution createActivityExecutionSchedule(long campaignActivityId, List<Long> targetedLists) {
 
-        CampaignActivityExecutionSchedule newExecution = new CampaignActivityExecutionSchedule();
+        CampaignActivityExecution newExecution = new CampaignActivityExecution();
         newExecution.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
 
         String targetedListsString = "";
@@ -100,7 +99,7 @@ public class CampaignExecutionService {
         objService.getEm().persist(newExecution);
 
         return newExecution;
-    }
+    }*/
 
     /**
      * Executes the campaign activity from the [start]th subscriber to

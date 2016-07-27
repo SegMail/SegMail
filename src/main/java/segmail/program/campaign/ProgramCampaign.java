@@ -119,6 +119,7 @@ public class ProgramCampaign extends Program{
     }
 
     public void setEditingActivity(CampaignActivity editingActivity) {
+        this.setEditingCampaignId(editingActivity.getOBJECTID());
         this.editingActivity = editingActivity;
     }
 

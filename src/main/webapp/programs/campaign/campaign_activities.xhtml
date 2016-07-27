@@ -66,7 +66,7 @@
                                                 class="btn btn-success list-item-trigger"
                                                 title="Edit Activity"
                                                 >
-                                                <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
+                                                <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
                                                         render="FormEditEmailActivity"
                                                         onevent="load_activity"
                                                         >
@@ -81,7 +81,7 @@
                                                 class="btn btn-warning list-item-trigger"
                                                 title="Execute Activity"
                                                 >
-                                                <f:ajax event="click" listener="#{FormCampaignActivities.loadActivity(activity.OBJECTID)}"
+                                                <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
                                                         render="FormExecuteCampaignActivity"
                                                         onevent="executeAndClose"
                                                         >

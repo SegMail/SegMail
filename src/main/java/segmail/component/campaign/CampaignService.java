@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
@@ -284,8 +285,7 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivitySchedule updateCampaignActivitySchedule(CampaignActivitySchedule schedule) {
-        schedule.generateCronExp();
-        
+        //schedule.generateCronExp();
         return objService.getEm().merge(schedule);
     }
     
@@ -353,13 +353,15 @@ public class CampaignService {
         CampaignActivitySchedule schedule = scheduleList.get(0);
         Object[] params = {emailActivity.getOBJECTID(), (int)schedule.getSEND_IN_BATCH() };
         
+        DateTime now = DateTime.now();
         batchScheduleService.createSingleStepJob(
                 emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME(), 
                 "CampaignExecutionService", 
                 "executeCampaignActivity", 
                 params,
                 landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID(),
-                schedule.generateCronExp().getCRON_EXPRESSION());
+                schedule.generateCronExp(now).getCRON_EXPRESSION(),
+                now);
         
         //Actually we don't need to do this but just for consistency sake
         //CRON_EXPRESSION don't need to be stored in the first place

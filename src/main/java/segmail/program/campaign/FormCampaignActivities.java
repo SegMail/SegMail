@@ -74,11 +74,11 @@ public class FormCampaignActivities {
         return readableStatus;
     }
     
-    public void loadActivity(long activityId) {
+    /*public void loadActivity(long activityId) {
         CampaignActivity act = campaignService.getCampaignActivity(activityId);
         program.setEditingActivity(act);
         
         CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
         program.setEditingSchedule(schedule);
-    }
+    }*/
 }

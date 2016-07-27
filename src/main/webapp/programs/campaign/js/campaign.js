@@ -13,13 +13,13 @@ var PREVIEW_HEIGHT = 400;
  * @returns {undefined}
  */
 
-function load_activity(activityId, event) {
+/*function load_activity(activityId, event) {
     jsf.ajax.request(
             $('#FormCampaignActivities'),
             event,
             {
             })
-}
+}*/
 
 function refresh_summernote() {
     $('textarea.editor').summernote({

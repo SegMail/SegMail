@@ -164,11 +164,47 @@ public class BatchSchedulingService {
      * @param params
      * @param cronTriggerExpression
      * @param serverId
+     * @param currentTime that tells BatchSchedulingService when to start computing
+     * the next run based on cronTriggerExpression.
+     * 
      * @return
      * @throws eds.component.batch.BatchProcessingException
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.IncompleteDataException
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJobRun createSingleStepJob(
+            String batchJobName,
+            String serviceName,
+            String serviceMethod,
+            Object[] params,
+            long serverId,
+            String cronTriggerExpression,
+            DateTime currentTime)
+            throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
+        try {
+            //Create batch job and the single step
+            BatchJob newBatchJob = this.createBatchJob(serverId, batchJobName);
+            BatchJobStep newStep = this.createJobStep(serviceName, serviceMethod, params, newBatchJob.getBATCH_JOB_ID());
+
+            //Create the trigger using cronTriggerExpression
+            BatchJobTrigger newTrigger = this.createJobTrigger(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
+
+            //Trigger next run
+            //Because Cron expression doesn't have seconds, so if you don't set this,
+            //your batch job won't run immediately even if your Cron expression 
+            //means so.
+            BatchJobRun newRun = triggerNextBatchJobRun(currentTime.withSecondOfMinute(0), newTrigger); 
+
+            return newRun;
+
+        } catch (SecurityException ex) {
+            throw new BatchProcessingException("Batch processing failed:", ex);
+        } catch (IOException ex) {
+            throw new BatchProcessingException("Batch processing failed:", ex);
+        }
+    }
+    
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJobRun createSingleStepJob(
             String batchJobName,
@@ -477,6 +513,7 @@ public class BatchSchedulingService {
         //Get the next execution time
         ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
         DateTime nextExecution = executionTime.nextExecution(now);
+        DateTime lastExecution = executionTime.lastExecution(now);
         
         return nextExecution;
     }
@@ -595,5 +632,19 @@ public class BatchSchedulingService {
         CronParser parser = new CronParser(cronDef);
         return parser.parse(cronExp).validate();
         
+    }
+    
+    public static void main(String[] args) {
+        BatchSchedulingService testService = new BatchSchedulingService();
+        DateTime now = DateTime.now();
+        String cronExpression = "57 7-23/6 * * * *";
+        ExecutionTime executionTime = ExecutionTime.forCron(testService.getValidCronExp(cronExpression,CronType.QUARTZ));
+        DateTime nextExecution = executionTime.nextExecution(now);
+        DateTime lastExecution = executionTime.lastExecution(now);
+        
+        System.out.println(cronExpression);
+        System.out.println(now);
+        System.out.println(lastExecution);
+        System.out.println(nextExecution);
     }
 }

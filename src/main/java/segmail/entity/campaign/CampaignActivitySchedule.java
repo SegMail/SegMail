@@ -10,8 +10,11 @@ import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.field.expression.FieldExpressionFactory;
+import eds.entity.audit.AuditedObjectListener;
 import eds.entity.data.EnterpriseData;
+import eds.entity.data.EnterpriseDataListener;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
 
@@ -21,7 +24,13 @@ import org.joda.time.DateTime;
  */
 @Entity
 @Table(name="CAMPAIGN_ACTIVITY_SCHEDULE")
+@EntityListeners({
+    CampaignActivityScheduleListener.class
+})
 public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
+    
+    public static final int MAX_SEND_IN_BATCH = 100000;
+    public static final int MIN_SEND_IN_BATCH = 1;
 
     protected long SEND_IN_BATCH;
     
@@ -85,7 +94,7 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
                         (getEVERY_HOUR()-1 > 0) ? 
                                 (
                                         (getEVERY_HOUR() < 24) ? 
-                                                FieldExpressionFactory.between(time.getHourOfDay(),59).and(FieldExpressionFactory.every(getEVERY_HOUR()))
+                                                FieldExpressionFactory.every(FieldExpressionFactory.between(time.getHourOfDay(),23),getEVERY_HOUR())
                                                          : 
                                                 FieldExpressionFactory.on(time.getHourOfDay())
                                         )
