@@ -12,35 +12,29 @@ import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipNotFoundException;
-import eds.entity.data.EnterpriseRelationship_;
+import eds.entity.client.Client;
 import eds.entity.mail.Email;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.LockModeType;
-import javax.persistence.Tuple;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import org.hibernate.LockMode;
-import org.joda.time.DateTime;
-import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Activity_;
+import segmail.entity.campaign.Assign_Campaign_Client;
 import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
+import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignExecutionError;
 import segmail.entity.campaign.Trigger_Email_Activity;
@@ -50,6 +44,7 @@ import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.SubscriberOwnership_;
 import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.Subscription_;
 
 /**
@@ -122,19 +117,31 @@ public class CampaignExecutionService {
             throw new EntityNotFoundException(CampaignActivity.class, campaignActivityId);
         }
         
+        List<Campaign> campaign = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
+        if (campaign == null || campaign.isEmpty())
+            throw new RelationshipNotFoundException("CampaignActivity "+campaignActivityId+" is not assigned to any Campaign.");
+        
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.get(0).getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class);
+        if (targetLists == null || targetLists.isEmpty())
+            throw new RelationshipNotFoundException("Campaign "+campaign.get(0).getOBJECTID()+" is not assigned any target lists.");
+        
+        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.get(0).getOBJECTID(), Assign_Campaign_Client.class, Client.class);
+        if (clientLists == null || clientLists.isEmpty())
+            throw new RelationshipNotFoundException("Campaign "+campaign.get(0).getOBJECTID()+" is not assigned to any Clients.");
+        
         int count = 0; //Number 
         
         while (count < maxSize) {
             //Retrieve all subscriber emails
             List<SubscriberAccount> subscribers = 
-                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxSize,BATCH_SIZE)); //DB hit
+                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxSize-count,BATCH_SIZE)); //DB hit
             //Lock 'em!
             subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
             //Skip if there are no more subscribers to be sent to
             if(subscribers.isEmpty())
                 break;
             //Retrieve all unsubscribe codes
-            Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientFacade.getClient().getOBJECTID()); //DB hit
+            Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientLists.get(0).getOBJECTID()); //DB hit
             
             for (SubscriberAccount subscriber : subscribers) {
 
@@ -171,7 +178,7 @@ public class CampaignExecutionService {
             objService.getEm().flush();
         }
         //Ugly HACK, but simplest solution
-        return (count <= maxSize) ? new StopNextRunQuickAndDirty() : null;
+        return (count < maxSize) ? new StopNextRunQuickAndDirty() : null;
 
     }
 

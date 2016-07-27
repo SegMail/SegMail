@@ -9,10 +9,13 @@ import com.cronutils.builder.CronBuilder;
 import com.cronutils.model.Cron;
 import com.cronutils.model.CronType;
 import com.cronutils.model.definition.CronDefinitionBuilder;
+import com.cronutils.model.field.expression.And;
+import com.cronutils.model.field.expression.Every;
+import com.cronutils.model.field.expression.FieldExpression;
 import com.cronutils.model.field.expression.FieldExpressionFactory;
-import eds.entity.audit.AuditedObjectListener;
 import eds.entity.data.EnterpriseData;
-import eds.entity.data.EnterpriseDataListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
@@ -94,7 +97,8 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
                         (getEVERY_HOUR()-1 > 0) ? 
                                 (
                                         (getEVERY_HOUR() < 24) ? 
-                                                FieldExpressionFactory.every(FieldExpressionFactory.between(time.getHourOfDay(),23),getEVERY_HOUR())
+                                                //FieldExpressionFactory.every(FieldExpressionFactory.on(time.getHourOfDay()),getEVERY_HOUR())
+                                                everyNHourStartingFrom(getEVERY_HOUR(), time.getHourOfDay())
                                                          : 
                                                 FieldExpressionFactory.on(time.getHourOfDay())
                                         )
@@ -116,5 +120,24 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
      */
     public CampaignActivitySchedule generateCronExp() {
         return this.generateCronExp(DateTime.now());
+    }
+    
+    public And everyNHourStartingFrom(int n, int start) {
+        //7,14,21,28,35,42,49,56,63,70,77,84,91,98,105
+        //24,48,72,96,
+        if(n <= 0 || 24 % n != 0)
+            throw new RuntimeException("Please choose a factor of 24.");
+        
+        //int[] hours = new int[0];
+        int startHour = start;
+        List<FieldExpression> hoursExpressions = new ArrayList<>();
+        //hoursExpressions.add(FieldExpressionFactory.on(startHour));
+        //startHour = (startHour + n) % 24;
+        do {
+            //hours[hours.length] = startHour;
+            hoursExpressions.add(FieldExpressionFactory.on(startHour));
+            startHour = (startHour + n) % 24;
+        } while(startHour != start);
+        return FieldExpressionFactory.and(hoursExpressions);
     }
 }

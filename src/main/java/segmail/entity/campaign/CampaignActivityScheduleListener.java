@@ -6,7 +6,6 @@
 package segmail.entity.campaign;
 
 import eds.component.data.DataValidationException;
-import eds.entity.audit.AuditedObject;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 

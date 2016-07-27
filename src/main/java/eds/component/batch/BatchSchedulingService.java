@@ -47,6 +47,7 @@ import javax.persistence.criteria.Root;
 import org.joda.time.DateTime;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.ServerInstance;
+import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -512,8 +513,8 @@ public class BatchSchedulingService {
     public DateTime getNextExecutionTimeCron(String cronExpression, DateTime now, CronType cronType){
         //Get the next execution time
         ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
-        DateTime nextExecution = executionTime.nextExecution(now);
-        DateTime lastExecution = executionTime.lastExecution(now);
+        DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1));//because ExecutionTime will plus 1 sec
+        //DateTime lastExecution = executionTime.lastExecution(now);
         
         return nextExecution;
     }
@@ -636,15 +637,21 @@ public class BatchSchedulingService {
     
     public static void main(String[] args) {
         BatchSchedulingService testService = new BatchSchedulingService();
-        DateTime now = DateTime.now();
-        String cronExpression = "57 7-23/6 * * * *";
-        ExecutionTime executionTime = ExecutionTime.forCron(testService.getValidCronExp(cronExpression,CronType.QUARTZ));
-        DateTime nextExecution = executionTime.nextExecution(now);
+        DateTime now = DateTime.now().withSecondOfMinute(0);//.withMillisOfSecond(0);
+        
+        CampaignActivitySchedule schedule = new CampaignActivitySchedule();
+        schedule.setEVERY_HOUR(3);
+        schedule.generateCronExp(now);
+        
+        String cronExpression = schedule.getCRON_EXPRESSION();// = "57 11,17,23,5 * * * ";
+        ExecutionTime executionTime = ExecutionTime.forCron(testService.getValidCronExp(cronExpression,CronType.UNIX));
+        DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1)); //ugly hack because of the inherent nature of ExecutionTime
         DateTime lastExecution = executionTime.lastExecution(now);
+        
         
         System.out.println(cronExpression);
         System.out.println(now);
-        System.out.println(lastExecution);
-        System.out.println(nextExecution);
+        System.out.println("last: "+lastExecution);
+        System.out.println("next: "+nextExecution);
     }
 }
