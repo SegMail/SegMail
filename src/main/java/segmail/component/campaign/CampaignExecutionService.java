@@ -29,6 +29,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Activity_;
 import segmail.entity.campaign.Assign_Campaign_Client;
@@ -70,41 +71,12 @@ public class CampaignExecutionService {
     SubscriptionService subService;
 
     /**
-     *
-     *
-     * @param campaignActivityId
-     * @return
-     */
-    /*@TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivityExecution createActivityExecutionSchedule(long campaignActivityId, List<Long> targetedLists) {
-
-        CampaignActivityExecution newExecution = new CampaignActivityExecution();
-        newExecution.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
-
-        String targetedListsString = "";
-        for (Long list : targetedLists) {
-            if (!targetedListsString.isEmpty()) {
-                targetedListsString += ",";
-            }
-            targetedListsString += list.toString();
-        }
-
-        newExecution.setTARGETED_LIST_ID(targetedListsString);
-
-        objService.getEm().persist(newExecution);
-
-        return newExecution;
-    }*/
-
-    /**
      * Executes the campaign activity from the [start]th subscriber to
      * [start]+size th subscriber.
      *
      * @param campaignActivityId
      * @param maxSize
-     * @param startIndex
-     * @param size
-     * @return 
+     * @return a very quick and dirty way to stop the batch job because I have no solution yet
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.RelationshipNotFoundException
      */
@@ -178,7 +150,13 @@ public class CampaignExecutionService {
             objService.getEm().flush();
         }
         //Ugly HACK, but simplest solution
-        return (count < maxSize) ? new StopNextRunQuickAndDirty() : null;
+        if(count < maxSize || count == 0) {
+            campaignActivity.setSTATUS(ACTIVITY_STATUS.COMPLETED.name);
+            objService.getEm().merge(campaignActivity);
+            
+            return new StopNextRunQuickAndDirty();
+        }
+        return null;
 
     }
 

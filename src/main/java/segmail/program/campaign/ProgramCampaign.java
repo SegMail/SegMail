@@ -60,7 +60,7 @@ public class ProgramCampaign extends Program{
         //initEditCampaignMode(); //On first load do this in Forms
         activityStatusMapping = new HashMap<String,String>();
         activityStatusMapping.put(ACTIVITY_STATUS.NEW.name, "primary");
-        activityStatusMapping.put(ACTIVITY_STATUS.STARTED.name, "info");
+        activityStatusMapping.put(ACTIVITY_STATUS.EXECUTING.name, "info");
         activityStatusMapping.put(ACTIVITY_STATUS.COMPLETED.name, "success");
         activityStatusMapping.put(ACTIVITY_STATUS.STOPPED.name, "default");
     }

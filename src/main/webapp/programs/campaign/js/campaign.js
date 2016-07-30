@@ -1,6 +1,8 @@
 var SUMMERNOTE_HEIGHT = 290;
 var PREVIEW_HEIGHT = 400;
 
+//var web_service_endpoint = 'WSCampaignActivityLink';
+
 /**
  * To submit a JSF partial request using pure JS, you need to:
  * 1) Attach a f:ajax in the form that you want to submit in the xhtml page.
@@ -38,9 +40,10 @@ function refresh_summernote() {
     });
     // Observe a specific DOM element:
     observeDOM(document.getElementsByClassName('note-editable')[0], function () {
-        console.log('dom changed');
+        //console.log('dom changed');
         preview();
         highlightAndCreateLinks();
+        
     });
 }
 
@@ -50,7 +53,7 @@ function refresh_select2() {
     select.select2("destroy").select2();
 }
 
-function preview() {
+var preview = function() {
     $('#content').next().find('.note-editable').each(function () {
 
         var height = $('#editor-form').height();
@@ -65,42 +68,161 @@ function preview() {
         //Transform the container as well, or the whole modal will remain long
         $('#preview-form').height(scaleY * $('#preview').height());
     });
+    $('#pseudo-preview').val($('#preview').html());
 }
 
 function highlightAndCreateLinks() {
 
-    var index = 1;
+    var index = 0;
     var prevPos = 0;
     var positions = [];
     //Clear the preview pane first
     $('#links').empty();
+    //Clear the linksContainer too
+    linksContainer.reset();
     $('#preview').find('a').each(function () {
-        //console.log($(this).attr('href'));
-        var offset = $(this).offset().top - $('#preview').offset().top;
-        //console.log($(this).attr('href')+'(offset:'+offset+')');
-
+        var obj = $(this);
+        var offset = obj.offset().top - $('#preview').offset().top;
         positions.push(offset);
 
         var marginTop = Math.max(offset - prevPos - $('#links div').last().height(), 0);
         //Add new element to links pane
-        $('#links').append(
-                "<div style='margin-top: "
+        var link = "<div style='margin-top: "
                 + marginTop
                 + "px;' "
                 + "class='css-bounce' "
                 + ">"
                 + "<span class='badge badge-primary'>"
-                + (index++)
+                + (++index) //key 1
                 + "</span> "
-                + $(this).text()
-                + "</div>"
-                );
+                + obj.text() //key 2
+                + "</div>";
+        $('#links').append(link);
         //factor in the height for offset
         var prevHeight = $('#links div').last().height();
         prevPos = offset;// - 
-
+        //Call WS to create or update links
+        //Update the generated parsed link in the text so that we don't have to 
+        //parse it anymore during sending!
+        callWSCreateUpdateLink(obj.attr('href'),obj.html(),index,
+            function(redirectLink){
+                //Replace the html target by this 
+                obj.attr('href',redirectLink);
+                linksContainer.addLink(redirectLink);
+            },
+            function(){
+                console.log('Error has occurred');
+            }
+        )
+        //Construct a JSON object
+        
     });
 }
+
+var callWSCreateUpdateLink = function(linkTarget,linkText,index,successCallback,errorCallback){
+    $.soap({
+        url :   web_service_endpoint,
+        method: 'createOrUpdateLink',
+        appendMethodToURL: 0,
+        data : {
+            linkTarget : linkTarget,
+            linkText : linkText,
+            index : index
+        },
+        namespaceQualifier: 'ns',
+        namespaceURL: 'http://webservice.campaign.program.segmail/',
+        noPrefix: 0,
+        HTTPHeaders : {
+            
+        },
+        success: function (SOAPResponse) {
+            var xmlResults = SOAPResponse.toJSON();
+            var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:createOrUpdateLinkResponse']["return"];
+            if(successCallback) successCallback(result);
+        },
+        error: function (SOAPResponse) {
+            logSOAPErrors(SOAPResponse);
+            if(errorCallback) errorCallback();
+        }
+    });
+    //successCallback('dfrwogfwlfa,cr');
+ };
+ 
+var logSOAPErrors = function(SOAPResponse){
+    var jsonresult = SOAPResponse.toJSON();
+    //console.log(SOAPResponse.content); 
+    
+    var errorMessage = '';
+    var severity = '';
+    switch(SOAPResponse.httpCode){
+        case 404    :   errorMessage = SOAPResponse.httpText;
+                        severity = 'danger';
+                        break;
+        case 500    :   errorMessage = processError500(jsonresult);
+                        severity = 'danger';
+                        break;
+        default     :   errorMessage = SOAPResponse.httpText;
+                        severity = 'danger';
+                        break;
+    }
+    //if($('#soap-errors').find('.alert').length <= 0)
+    //    $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
+    GenericErrorController.setErrors(errorMessage,severity);
+};
+
+/**
+ * To enhance performanace by caching the links that were already generated.
+ * 
+ * @type Function|campaign_L176.campaignAnonym$17
+ */
+var linksContainer = function(){
+    var linksArray = [];
+    
+    return {
+        addLink : function(redirectLink) {
+            /*var linkObj = {
+                'target' : target,
+                'text' : text,
+                'index' : index
+            };
+            linksArray.push(linkObj);
+            this.submit();*/
+            linksArray.push(redirectLink);
+        },
+        
+        contains : function(link) {
+            for(var i = 0; i < linksArray.length; i++) {
+                if(linksArray[i] === link)
+                    return true;
+            }
+            return false;
+        },
+        
+        submit : function() {
+            $('#pseudo-links').val(JSON.stringify(linksArray));
+        },
+        
+        reset : function() {
+            linksArray = [];
+        }
+    }
+}();
+
+var GenericErrorController = function(){
+    var id = 'soap-errors';
+    
+    return {
+        
+        setErrors : function(error,severity) {
+            $('#'+id)
+            if($('#'+id).find('.alert').length > 0) {
+                $('#'+id).empty();
+            }
+            $($('#'+id)).append('<div class="alert alert-'+severity+'"><strong>'+error+'</strong></div>');
+        }
+    };
+}();
+
 
 /**
  * This algorithm must produce an evenly distributed list of items based on their 
@@ -170,6 +292,7 @@ function saveAndContinue(data) {
              //IMPORTANT! This will copy the contents of Summernote editor into our original textarea.
             preview();
             highlightAndCreateLinks();
+            linksContainer.submit();
             break;
 
         case "complete": // This is called right after ajax response is received.
@@ -212,8 +335,9 @@ function load_activity(data) {
             refresh_summernote();
             refresh_select2();
             setSendInBatch('sendInBatch');
-            preview();
-            highlightAndCreateLinks();
+            modifyDomToGeneratePreview();
+            //preview();
+            //highlightAndCreateLinks();
             break;
     }
 };
@@ -312,4 +436,15 @@ function setSendInBatch(id) {
         document.getElementById(id).value = null;
 }
 
+/**
+ * A simple hack to force-generate a preview and links by adding and subtracting
+ * a small unoticable DOM object.
+ * 
+ * @returns {undefined}
+ */
+var modifyDomToGeneratePreview = function() {
+    var randomNum = Math.round(Math.random()*100000);
+    $('.note-editable').append('<div id=modifyDomToGeneratePreview'+randomNum+'></div>');
+    $('#modifyDomToGeneratePreview'+randomNum).remove();
+}
 

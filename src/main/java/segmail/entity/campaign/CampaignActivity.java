@@ -33,6 +33,8 @@ public class CampaignActivity extends EnterpriseObject {
     
     private String ACTIVITY_CONTENT;
     
+    private String ACTIVITY_CONTENT_PROCESSED;
+    
     private String STATUS;
     
     private java.sql.Timestamp SCHEDULED_TIME;
@@ -115,8 +117,15 @@ public class CampaignActivity extends EnterpriseObject {
     public void setACTIVITY_CONTENT(String ACTIVITY_CONTENT) {
         this.ACTIVITY_CONTENT = ACTIVITY_CONTENT;
     }
-    
-    
+
+    @Column(columnDefinition="MEDIUMTEXT")
+    public String getACTIVITY_CONTENT_PROCESSED() {
+        return ACTIVITY_CONTENT_PROCESSED;
+    }
+
+    public void setACTIVITY_CONTENT_PROCESSED(String ACTIVITY_CONTENT_PROCESSED) {
+        this.ACTIVITY_CONTENT_PROCESSED = ACTIVITY_CONTENT_PROCESSED;
+    }
 
     @Override
     public void randInit() {

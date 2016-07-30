@@ -39,14 +39,15 @@ function bindFileInput() {
         if(!files) return;
         var navigator = new FileNavigator(files[0]);
         navigator.readLines(0,1,function lineReadHandler(err, partIndex, lines, eof){
-            if (err) console.log(err);
-            
+            if (err) //console.log(err);
+                GenericErrorController.setErrors(err,'danger');
             //Get the first line
             var firstLine = lines[0];
             //document.getElementById('columns').value = firstLine;
             //console.log(firstLine);
             if(!firstLine){
-                console.log('Empty file.');
+                //console.log('Empty file.');
+                GenericErrorController.setErrors("Empty file.","danger");
                 return;
             }
             var headers = firstLine.split(DELIMITER);
@@ -78,13 +79,13 @@ function startFileUpload() {
     var files = document.getElementById('fileUploaded').files;
     if(files === null || files.length <= 0) {
         //console.log('Error: no file selected')   
+        GenericErrorController.setErrors("No file selected.","danger");
         return
     }
     //var navigator = new FileNavigator(files[0]);
     PanelUpdater.reset();
     checkedErrorsCollector.reset();
     $('#soap-errors').empty();
-    WSController.reset();
     $('#importButton').hide();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
@@ -116,8 +117,9 @@ var checkFileHash = function(file) {
     $('#importButton').prop("disable",true);
     
     if(!file) {
-        console.log('File not defined!');
-        $('#error-messages').text('Please select a file.');
+        //console.log('File not defined!');
+        GenericErrorController.setErrors("No file selected. Please select file.","danger");
+        //$('#error-messages').text('Please select a file.');
         block_refresh($('#importButton').parents(".block"));
         return;
     }
@@ -129,7 +131,8 @@ var checkFileHash = function(file) {
             startIndex,
             function linesReadHandler(err,index,lines,eof,progress) {
                 if(err){
-                    console.log('FileNavigator error: '+err);
+                    //console.log('FileNavigator error: '+err);
+                    GenericErrorController.setErrors('FileNavigator error: '+err,'danger');
                     return;
                 }
                 countLines += lines.length;
@@ -182,7 +185,7 @@ var checkFileStatus = function(file,name,hash,success,error) {
 };
 
 var successAndStart = function(file,startIndex){
-    console.log('Started with index '+startIndex);
+    //console.log('Started with index '+startIndex);
     
     //set buffer variables
     var readIndex = (startIndex >= 0) ? startIndex : 1;
@@ -194,6 +197,7 @@ var successAndStart = function(file,startIndex){
         function linesReadHandler(err,index,lines,eof,progress) {
             if(err){
                 console.log('Error at line '+index,err);
+                
                 return;
             }
             //Call SOAP
@@ -276,7 +280,6 @@ var constructSubscribers = function(array,startIndex){
 };
 
 var sendBatchToWS = function(batch,successCallback,errorCallback){
-    WSController.incrementCallCounts();
     $.soap({
         url :   web_service_endpoint,
         method: 'addSubscribers',
@@ -297,14 +300,14 @@ var sendBatchToWS = function(batch,successCallback,errorCallback){
             //Retrieve these numbers from xmlResults
             //successCallback(totalCreated,existing,fresh);
             logCheckedErrors(SOAPResponse,successCallback);
-            WSController.decrementCallCounts();
+            
         },
         error: function (SOAPResponse) {
             //console.log(this);
             //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
             logSOAPErrors(SOAPResponse);
             if(errorCallback) errorCallback();
-            WSController.decrementCallCounts();
+            
         }
     })
 };
@@ -336,7 +339,7 @@ var logCheckedErrors = function(SOAPResponse,callback) {
     
     var responseObject = JSON.parse(jsonresult['#document']['S:Envelope']['S:Body']["ns2:addSubscribersResponse"]["return"]);
     //Parse into JSON object first
-    console.log(responseObject);
+    //console.log(responseObject);
     var totalCount = 0;
     var errors = 0;
     
@@ -426,7 +429,7 @@ var PanelUpdater = (function(){
 
 var processError500 = function(JsonResult) {
     var faultstring = JsonResult['#document']['S:Envelope']['S:Body']['S:Fault']["faultstring"];
-    console.log(faultstring);
+    //console.log(faultstring);
     if(faultstring.indexOf('UserLoginException') > -1) //if starts with java.lang.RuntimeException: eds.component.user.UserLoginException: Please enter username.
         return "Please log in again.";
     switch(faultstring) {
@@ -497,7 +500,7 @@ var checkedErrorsCollector = (function(){
             }
             
             $('#doneButton').show();
-            console.log('Done');
+            //console.log('Done');
             
             //Re-arrange the lines with errors into a sorted array
             var sortedArray = [];
@@ -515,7 +518,7 @@ var checkedErrorsCollector = (function(){
             sortedArray.sort(function sortFn(a,b){
                 return a['sno'] - b['sno'];
             });
-            console.log(sortedArray);
+            //console.log(sortedArray);
             
             if(sortedArray.length <= 0)
                 return;
@@ -528,7 +531,8 @@ var checkedErrorsCollector = (function(){
             
             navigator.readSomeLines(0,function callback(err,index,lines,eof,progress){
                 if(err) {
-                    console.log(err);
+                    //console.log(err);
+                    GenericErrorController.setErrors(err,'danger');
                     return;
                 }
                     
@@ -622,7 +626,7 @@ $(document).ready(function () {
     //Datatables
     $('.sortable').dataTable();
     $('.sortable').on('page.dt',function(){
-        console.log('Page event triggered');
+        //console.log('Page event triggered');
         $('.sortable').row.add({
             "EMAIL" : "test"
         }).draw();

@@ -11,7 +11,8 @@ package segmail.entity.campaign;
  */
 public enum ACTIVITY_STATUS {
     NEW("NEW"),
-    STARTED("STARTED"),
+    EDITING("EDITING"),
+    EXECUTING("EXECUTING"),
     COMPLETED("COMPLETED"),
     STOPPED("STOPPED");
     

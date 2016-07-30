@@ -82,11 +82,19 @@
                                     </div>
                                     <div id="links-form" class="col-md-6 col-sm-6 col-xs-6"><!--links pane-->
                                         <div id="links">
-
+                                            
                                         </div>
                                     </div>
                                 </div>
-
+                                <h:inputHidden pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                                </h:inputHidden>
+                                <h:inputHidden pass:id="pseudo-links" value="#{FormEditEmailActivity.linksDelimited}" >
+                                </h:inputHidden>
+                                <h:inputHidden pass:id="activity-id" value="#{FormEditEmailActivity.editingActivity.OBJECTID}" >
+                                </h:inputHidden>
+                                <script type="text/javascript" >
+                                    var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                                </script>
                             </div>
                         </div>
                         <div class="modal-footer">

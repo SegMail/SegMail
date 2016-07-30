@@ -28,6 +28,7 @@ import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
+import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
@@ -38,6 +39,7 @@ import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
+import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -239,13 +241,22 @@ public class CampaignService {
     public CampaignActivity updateCampaignActivity(CampaignActivity activity) 
             throws IncompleteDataException {
         validateCampaignActivity(activity);
+        activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
+        
         return objService.getEm().merge(activity);
     }
     
+    /**
+     * Should validators be in EJB services? 
+     * 
+     * @param activity
+     * @throws IncompleteDataException 
+     */
     public void validateCampaignActivity(CampaignActivity activity) 
             throws IncompleteDataException {
         if(activity.getACTIVITY_NAME() == null || activity.getACTIVITY_NAME().isEmpty())
             throw new IncompleteDataException("Campaign activities must have a name.");
+        
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -366,6 +377,9 @@ public class CampaignService {
         //Actually we don't need to do this but just for consistency sake
         //CRON_EXPRESSION don't need to be stored in the first place
         objService.getEm().merge(schedule);
+        
+        //Update the status of the activity
+        emailActivity.setSTATUS(ACTIVITY_STATUS.EXECUTING.name);
     }
     
     public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {
@@ -420,5 +434,37 @@ public class CampaignService {
         
         return results;
         
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) {
+        
+        //Get the existing link first
+        List<CampaignActivityOutboundLink> allLinks = objService.getEnterpriseData(activity.getOBJECTID(), CampaignActivityOutboundLink.class);
+        
+        CampaignActivityOutboundLink selectedLink = new CampaignActivityOutboundLink();
+        selectedLink.setOWNER(activity);
+        selectedLink.setSNO(index);
+        //If found
+        for(CampaignActivityOutboundLink link : allLinks) {
+            if(link.getSNO() == index){
+                selectedLink = objService.getEm().merge(link);
+                break;
+            }
+        }
+        selectedLink.setLINK_TARGET(linkTarget);
+        selectedLink.setLINK_TEXT(linkText);
+        //If not found
+        if(selectedLink.getLINK_KEY() == null || selectedLink.getLINK_KEY().isEmpty())
+            objService.getEm().persist(selectedLink);
+        
+        
+        return selectedLink;
+    }
+    
+    public String constructLink(CampaignActivityOutboundLink link) throws IncompleteDataException {
+        ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+        
+        return server.getURI() + "/link/" + link.getLINK_KEY();
     }
 }
