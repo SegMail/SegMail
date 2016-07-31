@@ -12,6 +12,7 @@ import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipNotFoundException;
+import eds.component.mail.MailService;
 import eds.entity.client.Client;
 import eds.entity.mail.Email;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import org.joda.time.DateTime;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
@@ -37,9 +39,13 @@ import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
+import segmail.entity.campaign.CampaignActivityOutboundLink;
+import segmail.entity.campaign.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignExecutionError;
+import segmail.entity.campaign.LinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.SubscriberOwnership;
@@ -69,6 +75,8 @@ public class CampaignExecutionService {
     MailMergeService mmService;
     @EJB
     SubscriptionService subService;
+    @EJB
+    MailService mailService;
 
     /**
      * Executes the campaign activity from the [start]th subscriber to
@@ -128,7 +136,8 @@ public class CampaignExecutionService {
                     
                     email.setBODY(content);
                     
-                    objService.getEm().persist(email);
+                    //objService.getEm().persist(email);
+                    mailService.queueEmail(email, DateTime.now());
                     
                     Trigger_Email_Activity trigger = new Trigger_Email_Activity();
                     trigger.setTRIGGERED_TRANSACTION(email);
@@ -188,7 +197,7 @@ public class CampaignExecutionService {
     /**
      * A long query but worth the performance. If a subscriber appears in more
      * than 1 list, only 1 email will be sent. 1 Email per CampaignActivity per
-     * SubscriberAccount.
+     * SubscriberAccount. Only send to Subscriptions with CONFIRMED status.
      *
      * @param campaignActivityId
      * @param startIndex
@@ -222,6 +231,7 @@ public class CampaignExecutionService {
                         builder.equal(fromAssignCampList.get(Assign_Campaign_List_.SOURCE), fromAssignCampAct.get(Assign_Campaign_Activity_.SOURCE)),
                         builder.equal(fromAssignCampList.get(Assign_Campaign_List_.TARGET), fromSubp.get(Subscription_.TARGET)),
                         builder.equal(fromSubp.get(Subscription_.SOURCE), fromSubAcc.get(SubscriberAccount_.OBJECTID)),
+                        builder.equal(fromSubp.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.CONFIRMED.toString()),
                         builder.not(fromSubAcc.get(SubscriberAccount_.EMAIL).in(emailQuery))
                 )
         );
@@ -301,4 +311,34 @@ public class CampaignExecutionService {
         
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String getRedirectLinkAndUpdateHit(String linkKey) throws EntityNotFoundException {
+        CampaignActivityOutboundLink link = getLinkByKey(linkKey);
+        if(link == null)
+            throw new EntityNotFoundException("Link key "+linkKey+" not found.");
+        
+        LinkClick newLinkClick = new LinkClick();
+        newLinkClick.setLINK_KEY(linkKey);
+        
+        objService.getEm().persist(newLinkClick);
+        
+        return link.getLINK_TARGET();
+    }
+    
+    public CampaignActivityOutboundLink getLinkByKey(String linkKey) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<CampaignActivityOutboundLink> query = builder.createQuery(CampaignActivityOutboundLink.class);
+        Root<CampaignActivityOutboundLink> fromLink = query.from(CampaignActivityOutboundLink.class);
+        
+        query.select(fromLink);
+        query.where(builder.equal(fromLink.get(CampaignActivityOutboundLink_.LINK_KEY),linkKey));
+        
+        List<CampaignActivityOutboundLink> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        if(results == null || results.isEmpty())
+            return null;
+        
+        return results.get(0);
+    }
 }

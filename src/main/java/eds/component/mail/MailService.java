@@ -68,7 +68,8 @@ public class MailService {
     public static final int UPDATE_BATCH_SIZE = 100;
     
     public static final String DEFAULT_SMTP_ENDPOINT = "email-smtp.us-east-1.amazonaws.com";
-    public static final String DEFAULT_HTTPS_ENDPOINT = "email.us-east-1.amazonaws.com";
+    public static final String DEFAULT_HTTPS_ENDPOINT_PROD = "email.us-east-1.amazonaws.com"; //Current production
+    public static final String DEFAULT_HTTPS_ENDPOINT_SANDBOX = "email.us-west-2.amazonaws.com"; //Sandbox
 
     /**
      * Sends 1 email and logs it in the database depending on the logging flag.
@@ -126,7 +127,7 @@ public class MailService {
             // You will need to have AWS_ACCESS_KEY_ID and AWS_SECRET_KEY in your1111 
             // web.xml environmental variables
             AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
-            client.setEndpoint(DEFAULT_HTTPS_ENDPOINT);
+            client.setEndpoint(DEFAULT_HTTPS_ENDPOINT_PROD);
             
             client.sendEmail(request);
             

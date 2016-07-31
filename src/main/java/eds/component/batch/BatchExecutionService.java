@@ -67,6 +67,13 @@ public class BatchExecutionService {
             
             //Trigger the next run
             DateTime now = DateTime.now();
+            //If the entire batch job only took less than 1 second,
+            //we have to add 1 second so that it would be scheduled in the next
+            //second. This is because the granularity of triggerNextBatchJobRun()
+            //is 1 second, not milliseconds.
+            if(now.withMillisOfSecond(0).equals(start.withMillisOfSecond(0)))
+                now = now.plusSeconds(1);
+            
             List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(job.getBATCH_JOB().getBATCH_JOB_ID());
             //Should be loosely coupled procedure, no exceptions thrown
             if(triggers != null && !triggers.isEmpty()

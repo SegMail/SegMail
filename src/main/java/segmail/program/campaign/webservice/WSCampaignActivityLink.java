@@ -5,6 +5,7 @@
  */
 package segmail.program.campaign.webservice;
 
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import javax.ejb.EJB;
 import javax.inject.Inject;
@@ -12,10 +13,8 @@ import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
-import seca2.entity.landing.ServerInstance;
+import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.program.campaign.ProgramCampaign;
@@ -29,6 +28,7 @@ import segmail.program.campaign.ProgramCampaign;
 public class WSCampaignActivityLink {
 
     @EJB CampaignService campService;
+    @EJB CampaignExecutionService campExeService;
     @EJB LandingService landingService;
     
     /**
@@ -57,6 +57,14 @@ public class WSCampaignActivityLink {
         CampaignActivityOutboundLink link = campService.createOrUpdateLink(program.getEditingActivity(), linkTarget, linkText, index);
         
         String redirectLink = campService.constructLink(link);
+        
+        return redirectLink;
+    }
+    
+    @WebMethod(operationName = "redirectAndUpdate")
+    public String redirectAndUpdate(
+            @WebParam(name = "linkKey") String linkKey ) throws EntityNotFoundException {
+        String redirectLink = campExeService.getRedirectLinkAndUpdateHit(linkKey);
         
         return redirectLink;
     }

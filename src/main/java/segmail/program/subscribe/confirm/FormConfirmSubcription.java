@@ -43,7 +43,6 @@ public class FormConfirmSubcription {
             extractParams(reqContainer);
             callConfirmWS();
         }
-        
     }
 
     public void callConfirmWS() {

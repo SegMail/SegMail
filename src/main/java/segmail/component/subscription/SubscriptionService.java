@@ -642,8 +642,9 @@ public class SubscriptionService {
 
         Subscription sub = results.get(0);
 
-        sub.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
+        sub.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED.toString());
         //sub.setCONFIRMATION_KEY("");//remove confirmation key?
+        
 
         sub = updateService.getEm().merge(sub);
 

@@ -237,7 +237,6 @@ public class MassSubscriptionService {
                         ownership.setTARGET(client);
                         createNewSubOwnership.add(ownership);
                         
-                        
                     }
                     newValue.setOWNER(account);
                     
@@ -251,16 +250,19 @@ public class MassSubscriptionService {
                     subFieldValues.add(newValue); 
                     Collections.sort(subFieldValues,new SubscriberFieldValueComparator());
                     
-                    //Decide if we should create Subscription
-                    Subscription subscription = new Subscription();
-                    subscription.setSOURCE(account);
-                    subscription.setTARGET(list);
-                    subscription.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
-
-                    if(!existingSubscription.contains(subscription))
-                        createNewSubscription.add(subscription);
                 }
             }
+            //Decide if we should create Subscription
+            Subscription subscription = new Subscription();
+            subscription.setSOURCE(account);
+            subscription.setTARGET(list);
+            if(doubleOptin)
+                subscription.setSTATUS(SUBSCRIPTION_STATUS.NEW);
+            else
+                subscription.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED);
+
+            if(!existingSubscription.contains(subscription))
+                createNewSubscription.add(subscription);
         }
 
         //Time to do db updates and inserts
