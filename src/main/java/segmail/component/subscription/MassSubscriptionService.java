@@ -7,8 +7,10 @@ package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
 import eds.component.batch.BatchProcessingException;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import eds.component.mail.InvalidEmailException;
 import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -389,7 +391,10 @@ public class MassSubscriptionService {
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendConfirmationEmails(List<Subscription> newSubscriptions) 
-            throws IncompleteDataException, BatchProcessingException {
+            throws IncompleteDataException, 
+            BatchProcessingException, 
+            DataValidationException, 
+            InvalidEmailException {
         for(Subscription newSubscription : newSubscriptions) {
             subService.sendConfirmationEmail(newSubscription);
         }

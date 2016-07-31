@@ -19,6 +19,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.encryption.EncryptionService;
 import eds.component.encryption.EncryptionType;
+import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
 import eds.entity.mail.Email;
 import segmail.entity.subscription.SubscriberAccount;
@@ -109,8 +110,8 @@ public class SubscriptionService {
      */
     @Inject
     ClientFacade clientFacade;
-    
-    @Inject 
+
+    @Inject
     SubscriptionContainer subContainer;
 
     /**
@@ -132,38 +133,39 @@ public class SubscriptionService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
             throws EntityNotFoundException, IncompleteDataException, SubscriptionException, BatchProcessingException, RelationshipExistsException {
-        
+
         SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
         if (list == null) {
             throw new EntityNotFoundException(SubscriptionList.class, listId);
         }
-        
+
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
-        if(fields == null || fields.isEmpty()){
-            throw new IncompleteDataException("List "+listId+" does not have fields created.");
+        if (fields == null || fields.isEmpty()) {
+            throw new IncompleteDataException("List " + listId + " does not have fields created.");
         }
-        
+
         //Look for the key in fields for DEFAULT_EMAIL_FIELD_NAME
         String email = "";
-        for(SubscriptionListField field : fields) {
-            if(field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
-                email = (String) values.get((String)field.generateKey());
-                if(email != null && checkSubscribed(email, listId)){
+        for (SubscriptionListField field : fields) {
+            if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
+                email = (String) values.get((String) field.generateKey());
+                if (email != null && checkSubscribed(email, listId)) {
                     throw new RelationshipExistsException("Subscriber is already on this list");
                 }
             }
         }
-        if(email == null || email.isEmpty())
+        if (email == null || email.isEmpty()) {
             throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
-                
+        }
+
         subContainer.setList(list);
         subContainer.setListFields(fields);
 
-        List<Map<String,Object>> singleSubscriberMap = new ArrayList<>();
+        List<Map<String, Object>> singleSubscriberMap = new ArrayList<>();
         singleSubscriberMap.add(values);
-        
-        Map<String,List<Map<String,Object>>> results = massSubService.massSubscribe(singleSubscriberMap, doubleOptin);
-        for(String key : results.keySet()) {
+
+        Map<String, List<Map<String, Object>>> results = massSubService.massSubscribe(singleSubscriberMap, doubleOptin);
+        for (String key : results.keySet()) {
             throw new SubscriptionException(key);
         }
     }
@@ -236,7 +238,7 @@ public class SubscriptionService {
                     }
                 }
             }
-            if(!errorKey.isEmpty()) {
+            if (!errorKey.isEmpty()) {
                 if (results.get(errorKey) == null) {
                     results.put(errorKey, new ArrayList());
                 }
@@ -335,7 +337,6 @@ public class SubscriptionService {
         }
 
         //Time to do db updates and inserts
-        
         return results;
     }
 
@@ -384,7 +385,7 @@ public class SubscriptionService {
         try {
             //Get all the SubscriptionFields first
             List<String> fields = listService.getSubscriptionListFieldKeys(listId);
-            
+
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
             Root<Subscription> fromSubscr = criteria.from(Subscription.class);
@@ -397,7 +398,7 @@ public class SubscriptionService {
                             builder.equal(
                                     fromSubscr.get(Subscription_.SOURCE),
                                     fromFieldValue.get(SubscriberFieldValue_.OWNER)),
-                                    fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields)
+                            fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields)
                     )
             );
 
@@ -463,56 +464,50 @@ public class SubscriptionService {
      * @throws BatchProcessingException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException, BatchProcessingException {
-        try {
+    public void sendConfirmationEmail(Subscription sub)
+            throws IncompleteDataException, BatchProcessingException, DataValidationException, InvalidEmailException {
             //Retrieve "Send as" from the list
             /*SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-             if(list == null)
-             throw new EntityNotFoundException(SubscriptionList.class,listId);*/
+         if(list == null)
+         throw new EntityNotFoundException(SubscriptionList.class,listId);*/
 
-            SubscriptionList list = sub.getTARGET();
+        SubscriptionList list = sub.getTARGET();
 
-            String sendAs = list.getSEND_AS_EMAIL();
-            if (sendAs == null || sendAs.isEmpty()) {
-                throw new IncompleteDataException("Please set \"Send As\" address before sending confirmation emails.");
-            }
+        String sendAs = list.getSEND_AS_EMAIL();
+        if (sendAs == null || sendAs.isEmpty()) {
+            throw new IncompleteDataException("Please set \"Send As\" address before sending confirmation emails.");
+        }
 
             //Retrieve the autoemail from list using AutoresponderService
-            //List<AutoresponderEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(
-            //        listId,Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);
-            List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
-            AutoresponderEmail assignedConfirmEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
-                    ? null : assignedAutoEmails.get(0);
+        //List<AutoresponderEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(
+        //        listId,Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);
+        List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
+        AutoresponderEmail assignedConfirmEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
+                ? null : assignedAutoEmails.get(0);
 
-            if (assignedConfirmEmail == null) {
-                throw new IncompleteDataException("Please assign a Confirmation email before adding subscribers.");
-            }
+        if (assignedConfirmEmail == null) {
+            throw new IncompleteDataException("Please assign a Confirmation email before adding subscribers.");
+        }
 
-            //Parse all mailmerge functions using MailMergeService
-            String newEmailBody = assignedConfirmEmail.getBODY();
-            newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
-            //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
-            newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
+        //Parse all mailmerge functions using MailMergeService
+        String newEmailBody = assignedConfirmEmail.getBODY();
+        newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
+        //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
+        newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
-            //Send the email using MailService
-            Email confirmEmail = new Email();
-            confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
-            confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
-            confirmEmail.setBODY(newEmailBody);
-            confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
-            confirmEmail.addRecipient(sub.getSOURCE().getEMAIL());
+        //Send the email using MailService
+        Email confirmEmail = new Email();
+        confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
+        confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
+        confirmEmail.setBODY(newEmailBody);
+        confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
+        confirmEmail.addRecipient(sub.getSOURCE().getEMAIL());
 
             //mailService.sendEmailByAWS(confirmEmail, true);
-            //BatchJobStep step = batchService.createJobStep("MailService", "sendEmailNow", new Object[] {confirmEmail,true});
-            //batchService.executeJobStep(step);
-            mailService.queueEmail(confirmEmail, DateTime.now());
+        //BatchJobStep step = batchService.createJobStep("MailService", "sendEmailNow", new Object[] {confirmEmail,true});
+        //batchService.executeJobStep(step);
+        mailService.queueEmail(confirmEmail, DateTime.now());
 
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
     }
 
     /**
@@ -594,7 +589,7 @@ public class SubscriptionService {
 
         return results;
     }
-    
+
     public List<Subscription> getSubscriptionsByEmails(List<String> subscriberEmails, long listId) {
         CriteriaBuilder builder = this.objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
@@ -644,7 +639,6 @@ public class SubscriptionService {
 
         sub.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED.toString());
         //sub.setCONFIRMATION_KEY("");//remove confirmation key?
-        
 
         sub = updateService.getEm().merge(sub);
 
@@ -702,24 +696,24 @@ public class SubscriptionService {
         List<SubscriberFieldValue> results = objectService.getEnterpriseDataByIds(subscribers, SubscriberFieldValue.class);
         return results;
     }
-    
+
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int updateSubscriberCount(long listId) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
         Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
-        
+
         Subquery<Long> countQuery = query.subquery(Long.class);
         Root<Subscription> fromSubscription = countQuery.from(Subscription.class);
         countQuery.select(builder.count(fromSubscription));
         countQuery.where(builder.equal(fromSubscription.get(Subscription_.TARGET), listId));
-        
+
         query.set(fromList.get(SubscriptionList_.SUBSCRIBER_COUNT), countQuery);
-        query.where(builder.equal(fromList.get(SubscriptionList_.OBJECTID),listId));
-        
+        query.where(builder.equal(fromList.get(SubscriptionList_.OBJECTID), listId));
+
         int result = objectService.getEm().createQuery(query)
                 .executeUpdate();
-        
+
         return result;
     }
 }

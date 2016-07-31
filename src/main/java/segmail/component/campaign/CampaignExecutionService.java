@@ -9,15 +9,19 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.batch.StopNextRunQuickAndDirty;
 import eds.component.client.ClientFacade;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipNotFoundException;
+import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
 import eds.entity.client.Client;
 import eds.entity.mail.Email;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -81,6 +85,9 @@ public class CampaignExecutionService {
     /**
      * Executes the campaign activity from the [start]th subscriber to
      * [start]+size th subscriber.
+     * 
+     * Designed to be processed like a background job, but in actual fact no 
+     * service methods should be designed just for foreground/background processing.
      *
      * @param campaignActivityId
      * @param maxSize
@@ -90,7 +97,7 @@ public class CampaignExecutionService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public StopNextRunQuickAndDirty executeCampaignActivity(long campaignActivityId, final int maxSize)
-            throws EntityNotFoundException, RelationshipNotFoundException {
+            throws EntityNotFoundException, RelationshipNotFoundException, DataValidationException, IncompleteDataException, InvalidEmailException {
         
         CampaignActivity campaignActivity = campService.getCampaignActivity(campaignActivityId); //DB hit
         if (campaignActivity == null) {
@@ -145,13 +152,35 @@ public class CampaignExecutionService {
                     
                     objService.getEm().persist(trigger);
                     
-                } catch (IncompleteDataException ex) {
-                    CampaignExecutionError error = new CampaignExecutionError();
+                //} catch (IncompleteDataException ex) {
+                    //Logger.getLogger(CampaignExecutionService.class.getName()).log(Level.SEVERE, null, ex);
+                    /*CampaignExecutionError error = new CampaignExecutionError();
                     error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
                     error.setERROR_MESSAGE(ex.getMessage());
                     error.setRECIPIENT(subscriber.getEMAIL());
                     
-                    objService.getEm().persist(error);
+                    objService.getEm().persist(error);*/
+                //} catch (DataValidationException ex) {
+                    //Logger.getLogger(CampaignExecutionService.class.getName()).log(Level.SEVERE, null, ex);
+                    /*CampaignExecutionError error = new CampaignExecutionError();
+                    error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
+                    error.setERROR_MESSAGE(ex.getMessage());
+                    error.setRECIPIENT(subscriber.getEMAIL());
+                    
+                    objService.getEm().persist(error);*/
+                //} catch (InvalidEmailException ex) {
+                    //Logger.getLogger(CampaignExecutionService.class.getName()).log(Level.SEVERE, null, ex);
+                    /*CampaignExecutionError error = new CampaignExecutionError();
+                    error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
+                    error.setERROR_MESSAGE(ex.getMessage());
+                    error.setRECIPIENT(subscriber.getEMAIL());
+                    //debug
+                    try {
+                        objService.getEm().persist(error);
+                    } catch (Throwable tex) {
+                        ex.printStackTrace(System.out);
+                    }*/
+                    
                 } finally {
                     count++;
                 }

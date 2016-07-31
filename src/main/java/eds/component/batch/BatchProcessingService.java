@@ -1,20 +1,27 @@
 package eds.component.batch;
 
+import com.google.common.base.Objects;
 import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
+import eds.entity.batch.BatchJobRunError;
 import eds.entity.batch.BatchJobRun_;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStepParam;
+import eds.entity.batch.BatchJobTrigger;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
@@ -48,62 +55,21 @@ public class BatchProcessingService {
     private boolean reported;
 
     @EJB
-    UpdateObjectService updateService;
+    UpdateObjectService updService;
 
     @EJB
     LandingService landingService;
 
     @EJB
     BatchExecutionService execService;
+    
+    @EJB
+    BatchSchedulingService scheduleService;
 
     @PostConstruct
     public void init() {
         reported = false;
         
-    }
-
-    public void executeJobStep(BatchJobStep batchJobStep) throws BatchProcessingException {
-        try {
-            int numParams = batchJobStep.getPARAMS().size();
-            Object[] params = new Object[numParams];
-
-            for (int i = 0; i < numParams; i++) {
-                BatchJobStepParam param = batchJobStep.getPARAMS().get(i);
-
-                if (param.getSERIALIZED_OBJECT() != null && !param.getSERIALIZED_OBJECT().isEmpty()) {
-                    Object obj = param.SERIALIZED_OBJECT();
-                    Class clazz = obj.getClass();
-                    params[i] = obj;
-                    continue;
-                }
-                params[i] = param.getSTRING_VALUE();
-            }
-
-            Object ejb = InitialContext.doLookup("java:module/" + batchJobStep.getSERVICE_NAME());
-            System.out.println(ejb.getClass().getName());
-
-            Method[] methodArray = ejb.getClass().getMethods();
-            for (int i = 0; i < methodArray.length; i++) {
-                if (batchJobStep.getSERVICE_METHOD().equals(methodArray[i].getName())) {
-                    Method method = methodArray[i];
-                    method.invoke(ejb, params);
-                }
-            }
-
-        } catch (ClassNotFoundException ex) {
-            throw new BatchProcessingException("Batch processing failed:", ex);
-        } catch (IOException ex) {
-            throw new BatchProcessingException("Batch processing failed:", ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-            ex.printStackTrace(System.out);
-        }
     }
 
     /**
@@ -112,7 +78,7 @@ public class BatchProcessingService {
      *
      * @param scheduleTime
      */
-    @Asynchronous
+    /*@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void processBatchJobQueue(DateTime dt) throws IncompleteDataException {
         String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
@@ -127,6 +93,76 @@ public class BatchProcessingService {
         for (BatchJobRun run : nextNJobs) {
             execService.executeJob(run);
         }
+    }*/
+    
+    //@Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void processBatchJobQueue(DateTime dt) {
+        String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
+        if (maxJobString == null || maxJobString.isEmpty()) {
+            System.setProperty(PROCESS_JOB_MODE, "false");
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
+            return;
+        }
+        int maxJobs = Integer.parseInt(maxJobString);
+        List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
+        for (BatchJobRun run : nextNJobs) {
+            try {
+                //Update the status first
+                DateTime start = DateTime.now();
+                run.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
+                run.setSTART_TIME(new Timestamp(start.getMillis()));
+                run.getBATCH_JOB().setLAST_RUN(new Timestamp(start.getMillis()));
+                run = updService.getEm().merge(run);
+                updService.getEm().flush();
+                
+                //results.add(execService.executeJob(run));
+                Future<?> result = execService.executeJobNew(run);
+                Object ret = result.get();
+                
+                //If an exception has occured
+                if(ret != null && Throwable.class.isAssignableFrom(ret.getClass())) {
+                    BatchJobRunError newError = new BatchJobRunError(run, (Throwable) ret);
+                    updService.getEm().persist(newError);
+                    
+                    run.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
+                    updService.getEm().persist(run);
+                    continue;
+                }
+                
+                run.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
+                run.setEND_TIME(new Timestamp(DateTime.now().getMillis()));
+                run = updService.getEm().merge(run);
+                updService.getEm().flush();
+                
+                //Dont schedule the next run
+                if(ret != null && Objects.equal(ret.getClass(), StopNextRunQuickAndDirty.class)) {
+                    continue;
+                }
+                List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(run.getBATCH_JOB().getBATCH_JOB_ID());
+                if (triggers != null && !triggers.isEmpty()) {
+                    //Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
+                    DateTime next = DateTime.now();
+                    //If the entire batch job only took less than 1 second,
+                    //we have to add 1 second so that it would be scheduled in the next
+                    //second. This is because the granularity of triggerNextBatchJobRun()
+                    //is 1 second, not milliseconds.
+                    if (next.withMillisOfSecond(0).equals(start.withMillisOfSecond(0))) {
+                        next = next.plusSeconds(1);
+                    }
+                    scheduleService.triggerNextBatchJobRun(next, triggers.get(0));
+                }
+                
+            }
+            catch (InterruptedException ex) {
+                Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
+                Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (BatchProcessingException ex) {
+                Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
     }
 
     /**
@@ -142,7 +178,7 @@ public class BatchProcessingService {
         Timestamp ts = new Timestamp(time.getMillis());
         String serverName = landingService.getOwnServerName();
 
-        CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = updService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
         Root<BatchJobRun> fromBatchJobRun = query.from(BatchJobRun.class);
 
@@ -157,7 +193,7 @@ public class BatchProcessingService {
 
         query.orderBy(builder.asc(fromBatchJobRun.get(BatchJobRun_.SCHEDULED_TIME)));
 
-        List<BatchJobRun> results = updateService.getEm().createQuery(query)
+        List<BatchJobRun> results = updService.getEm().createQuery(query)
                 .setFirstResult(0)
                 .setMaxResults(n)
                 //.setLockMode(LockModeType.PESSIMISTIC_READ) //The BatchExecutionService should be locking it, not this
