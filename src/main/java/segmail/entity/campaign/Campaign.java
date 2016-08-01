@@ -21,6 +21,16 @@ public class Campaign extends EnterpriseObject {
     protected String CAMPAIGN_NAME;
     
     protected String CAMPAIGN_GOALS;
+    
+    /**
+     * The email displayed in the From field when viewed by the recipient.
+     */
+    private String OVERRIDE_SEND_AS_EMAIL;
+    
+    /**
+     * The name displayed in the From field when viewed by the recipient.
+     */
+    private String OVERRIDE_SEND_AS_NAME;
 
     public String getCAMPAIGN_NAME() {
         return CAMPAIGN_NAME;
@@ -37,6 +47,22 @@ public class Campaign extends EnterpriseObject {
 
     public void setCAMPAIGN_GOALS(String CAMPAIGN_GOALS) {
         this.CAMPAIGN_GOALS = CAMPAIGN_GOALS;
+    }
+
+    public String getOVERRIDE_SEND_AS_EMAIL() {
+        return OVERRIDE_SEND_AS_EMAIL;
+    }
+
+    public void setOVERRIDE_SEND_AS_EMAIL(String OVERRIDE_SEND_AS_EMAIL) {
+        this.OVERRIDE_SEND_AS_EMAIL = OVERRIDE_SEND_AS_EMAIL;
+    }
+
+    public String getOVERRIDE_SEND_AS_NAME() {
+        return OVERRIDE_SEND_AS_NAME;
+    }
+
+    public void setOVERRIDE_SEND_AS_NAME(String OVERRIDE_SEND_AS_NAME) {
+        this.OVERRIDE_SEND_AS_NAME = OVERRIDE_SEND_AS_NAME;
     }
 
     @Override

@@ -333,6 +333,18 @@ public class CampaignService {
             
             newAssigns.add(newAssign);
             updService.getEm().persist(newAssign);
+            
+            //Set Sender's attributes in Campaign with the first list that was assigned
+            if(campaign.getOVERRIDE_SEND_AS_EMAIL() == null || campaign.getOVERRIDE_SEND_AS_EMAIL().isEmpty()) {
+                campaign.setOVERRIDE_SEND_AS_EMAIL(targetList.getSEND_AS_EMAIL());
+                updService.getEm().merge(campaign);
+            }
+            
+            if(campaign.getOVERRIDE_SEND_AS_NAME()== null || campaign.getOVERRIDE_SEND_AS_NAME().isEmpty()) {
+                campaign.setOVERRIDE_SEND_AS_NAME(targetList.getSEND_AS_NAME());
+                updService.getEm().merge(campaign);   
+            }
+            
         }
         return newAssigns;
     }

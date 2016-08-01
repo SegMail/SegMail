@@ -104,17 +104,18 @@ public class CampaignExecutionService {
             throw new EntityNotFoundException(CampaignActivity.class, campaignActivityId);
         }
         
-        List<Campaign> campaign = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
-        if (campaign == null || campaign.isEmpty())
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
+        if (campaigns == null || campaigns.isEmpty())
             throw new RelationshipNotFoundException("CampaignActivity "+campaignActivityId+" is not assigned to any Campaign.");
+        Campaign campaign = campaigns.get(0);
         
-        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.get(0).getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class);
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class);
         if (targetLists == null || targetLists.isEmpty())
-            throw new RelationshipNotFoundException("Campaign "+campaign.get(0).getOBJECTID()+" is not assigned any target lists.");
+            throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
         
-        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.get(0).getOBJECTID(), Assign_Campaign_Client.class, Client.class);
+        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);
         if (clientLists == null || clientLists.isEmpty())
-            throw new RelationshipNotFoundException("Campaign "+campaign.get(0).getOBJECTID()+" is not assigned to any Clients.");
+            throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned to any Clients.");
         
         int count = 0; //Number 
         
@@ -137,11 +138,14 @@ public class CampaignExecutionService {
                     
                     email.setSUBJECT(campaignActivity.getACTIVITY_NAME());
                     email.addRecipient(subscriber.getEMAIL());
+                    email.setSENDER_ADDRESS(campaign.getOVERRIDE_SEND_AS_EMAIL());
+                    email.setSENDER_NAME(campaign.getOVERRIDE_SEND_AS_NAME());
                     
                     String content = campaignActivity.getACTIVITY_CONTENT();
                     content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber));
                     
-                    email.setBODY(content);
+                    //email.setBODY(content);
+                    email.setBODY(campaignActivity.getACTIVITY_CONTENT_PROCESSED());
                     
                     //objService.getEm().persist(email);
                     mailService.queueEmail(email, DateTime.now());

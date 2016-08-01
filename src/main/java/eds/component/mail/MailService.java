@@ -79,7 +79,7 @@ public class MailService {
      * @param email The data structure representing an email.
      * @param logging If logging is turned on, the email will be logged.
      */
-    @Asynchronous
+    //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendEmailNow(Email email, boolean logging) {
         try {

@@ -141,29 +141,4 @@ public class CampaignActivity extends EnterpriseObject {
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    public static void main(String[] args) throws JAXBException {
-        XMLEncoder encoder =
-           new XMLEncoder(
-              new BufferedOutputStream(
-                System.out));
-        CampaignActivity ca = new CampaignActivity();
-        ca.setACTIVITY_CONTENT("fingirng");
-        encoder.writeObject(ca);
-        encoder.close();
-        
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-"<java version=\"1.8.0_20\" class=\"java.beans.XMLDecoder\">\n" +
-" <object class=\"segmail.entity.campaign.CampaignActivity\">\n" +
-"  <void property=\"ACTIVITY_CONTENT\">\n" +
-"   <string>fingirng</string>\n" +
-"  </void>\n" +
-" </object>\n" +
-"</java>";
-         XMLDecoder decoder =
-            new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
-         CampaignActivity ca2 = (CampaignActivity) decoder.readObject();
-         decoder.close();
-         System.out.println(ca2.ACTIVITY_CONTENT);
-    }
 }

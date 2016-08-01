@@ -41,8 +41,9 @@ function refresh_summernote() {
     // Observe a specific DOM element:
     observeDOM(document.getElementsByClassName('note-editable')[0], function () {
         //console.log('dom changed');
-        preview();
-        highlightAndCreateLinks();
+        //preview();
+        //highlightAndCreateLinks();
+        doEverything();
         
     });
 }
@@ -68,7 +69,7 @@ var preview = function() {
         //Transform the container as well, or the whole modal will remain long
         $('#preview-form').height(scaleY * $('#preview').height());
     });
-    $('#pseudo-preview').val($('#preview').html());
+    
 }
 
 function highlightAndCreateLinks() {
@@ -80,7 +81,9 @@ function highlightAndCreateLinks() {
     $('#links').empty();
     //Clear the linksContainer too
     linksContainer.reset();
-    $('#preview').find('a').each(function () {
+    var allLinks = $('#preview').find('a');
+    var count = allLinks.size();
+    allLinks.each(function () {
         var obj = $(this);
         var offset = obj.offset().top - $('#preview').offset().top;
         positions.push(offset);
@@ -109,12 +112,14 @@ function highlightAndCreateLinks() {
                 //Replace the html target by this 
                 obj.attr('href',redirectLink);
                 linksContainer.addLink(redirectLink);
+                if(!--count) copyPreviewContent();
             },
             function(){
                 console.log('Error has occurred');
             }
         )
-        //Construct a JSON object
+        
+        //execute callback
         
     });
 }
@@ -169,6 +174,21 @@ var logSOAPErrors = function(SOAPResponse){
     //    $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
     GenericErrorController.setErrors(errorMessage,severity);
 };
+
+var processError500 = function(JsonResult) {
+    var faultstring = JsonResult['#document']['S:Envelope']['S:Body']['S:Fault']["faultstring"];
+    //console.log(faultstring);
+    if(faultstring.indexOf('UserLoginException') > -1) //if starts with java.lang.RuntimeException: eds.component.user.UserLoginException: Please enter username.
+        return "Please log in again.";
+    switch(faultstring) {
+        default    :   return 'Error occurred at server side: '+faultstring;
+    }
+};
+
+var copyPreviewContent = function() {
+    var content = $('#preview').html();
+    $('#pseudo-preview').val(content);
+}
 
 /**
  * To enhance performanace by caching the links that were already generated.
@@ -290,9 +310,8 @@ function saveAndContinue(data) {
             //ajaxloader.style.display = 'block';
             block_refresh(block);
              //IMPORTANT! This will copy the contents of Summernote editor into our original textarea.
-            preview();
-            highlightAndCreateLinks();
-            linksContainer.submit();
+            //preview();
+            //highlightAndCreateLinks();
             break;
 
         case "complete": // This is called right after ajax response is received.
@@ -307,6 +326,7 @@ function saveAndContinue(data) {
             setSendInBatch('sendInBatch');
             preview();
             highlightAndCreateLinks();
+            //copyPreviewContent();
             break;
     }
 };
@@ -321,8 +341,9 @@ function load_activity(data) {
         case "begin": // This is called right before ajax request is been sent.
             //ajaxloader.style.display = 'block';
             block_refresh(block);
-            preview();
-            highlightAndCreateLinks();
+            //preview();
+            //highlightAndCreateLinks();
+            
             break;
 
         case "complete": // This is called right after ajax response is received.
@@ -338,6 +359,7 @@ function load_activity(data) {
             modifyDomToGeneratePreview();
             //preview();
             //highlightAndCreateLinks();
+            //copyPreviewContent();
             break;
     }
 };
@@ -448,3 +470,7 @@ var modifyDomToGeneratePreview = function() {
     $('#modifyDomToGeneratePreview'+randomNum).remove();
 }
 
+var doEverything = function() {
+    preview();
+    highlightAndCreateLinks();
+}

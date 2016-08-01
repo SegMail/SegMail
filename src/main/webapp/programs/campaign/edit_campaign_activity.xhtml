@@ -86,7 +86,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <h:inputHidden pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                                <h:inputHidden id="pseudo-preview" pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
                                 </h:inputHidden>
                                 <h:inputHidden pass:id="pseudo-links" value="#{FormEditEmailActivity.linksDelimited}" >
                                 </h:inputHidden>
@@ -100,7 +100,7 @@
                         <div class="modal-footer">
                             <h:commandButton styleClass="btn btn-success"
                                              value="Save &amp; continue"
-                                             onclick="reapply_textarea('content')"
+                                             onclick="reapply_textarea('content');"
                                              >
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
                                         event="click"
