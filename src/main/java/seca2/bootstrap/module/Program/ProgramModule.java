@@ -84,8 +84,8 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             return true;
         
         //If it is a webservice call, bypass processing
-        if(requestContainer.isWebservice())
-            return true;
+        //if(requestContainer.isWebservice())
+        //    return true;
         
         long userTypeId = (sessionContainer.getUserType() == null) ? 
                 -1 : sessionContainer.getUserType().getOBJECTID();
@@ -112,6 +112,11 @@ public class ProgramModule extends BootstrapModule implements Serializable {
             requestContainer.setViewLocation(errorViewRoot);
             requestContainer.setErrorMessage(this.getName()+": No programs found");
             requestContainer.setError(true);
+            return true;
+        }
+        
+        //If found but it is a WS call,
+        if(requestContainer.isWebservice()) {
             return true;
         }
         
