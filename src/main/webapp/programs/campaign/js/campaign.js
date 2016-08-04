@@ -1,5 +1,6 @@
 var SUMMERNOTE_HEIGHT = 290;
 var PREVIEW_HEIGHT = 450;
+var PREVIEW_WIDTH = 420;
 
 //var web_service_endpoint = 'WSCampaignActivityLink';
 
@@ -68,9 +69,13 @@ var preview = function (sourceSel, sourceContSel, targetSel, targetContSel) {
         $(targetContSel).height(scaleY * $(targetSel).load().height());
         highlightAndCreateLinks();
     },50);
-    
+};
 
-}
+var registerDelayedChange = function(){
+    $('.note-editable').delayedChange().on('delayedchange',function(){
+        doEverything();
+    });
+};
 
 
 var highlightAndCreateLinks = function () {
@@ -87,9 +92,8 @@ var highlightAndCreateLinks = function () {
         return;
 
     var count = allLinks.size();
-    allLinks.each(function () {
+    allLinks.each(function (index) {
         var obj = $(this);
-        var index = allLinks.index(obj);
         callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
                 function (redirectLink) {
                     //Replace the html target by this 
@@ -325,7 +329,7 @@ function saveAndContinue(data) {
             refresh_select2();
             setSendInBatch('sendInBatch');
             preview('.note-editable', '#editor-form', '#preview', '#preview-form');
-            highlightAndCreateLinks();
+            //highlightAndCreateLinks();
             //copyPreviewContent();
             break;
     }
@@ -504,27 +508,52 @@ var doEverything = function () {
     //highlightAndCreateLinks();
 };
 var resizeHtml = function () {
-    
-    //var scaleX = Math.min($(targetSel).width() / maxWidth, 1);
-    //var height; = document.getElementById('html-content').clientHeight;
-    //var heightJq;// = $('#html-content').height();
     setTimeout(function(){
-        var maxWidth = largestWidth('html-content');
-        var scaleX = Math.min($('#html-content').width() / maxWidth, 1);
-        //var scaleY = Math.min(PREVIEW_HEIGHT / $('#html-content').height(), 1);
-        
-        //height = document.getElementById('html-content').clientHeight;
-        //heightJq = $('#html-content').height();
+        var maxWidth = largestWidth('#html-content');
         var scaleY = Math.min(PREVIEW_HEIGHT / $('#html-content').height(), 1);
+        var scaleX = Math.min(PREVIEW_WIDTH / maxWidth, 1);
         $('#html-content').css({
             transform: 'scale(' + scaleX + ',' + scaleY + ')',
             'transform-origin': '0 0 0'
         });
         //Transform the container as well, or the whole modal will remain long
-        //var height = $('#html').height()
         $('#html-content-form').height(PREVIEW_HEIGHT);
-    },100);
-    
-    
+        
+        setTimeout(function(){
+            var position = 0;
+            var last;
+            $('#html-content').find('a').each(function(index){
+                console.log(index);
+                
+                var offset = $(this).offset().top - $('#html-content').offset().top;
+                console.log('offset: '+offset);
+                var marginTop1 = offset;// - last.height();// - last.offset().top;
+                
+                if(index > 0) {
+                    var lastOffset = position;//$('#links-start div').last().css('margin-top').replace("px", "");
+                    console.log('last offset: '+ lastOffset);
+                    marginTop1 = marginTop1 - lastOffset;
+                }
+                console.log('marginTop1: '+marginTop1);
+                var marginTop = Math.max(marginTop1, 0);
+                console.log('marginTop: '+marginTop);
+                var link = //"<div style='margin-top: "
+                            //+ marginTop
+                            //+ "px;' "
+                            '<div '
+                            + "class='css-bounce' "
+                            + ">"
+                            + "<span class='badge badge-primary'>"
+                            + (index + 1) //key 1
+                            + "</span> "
+                            + $(this).text() //key 2
+                            + "</div>";
+                $('#links-start').append(link);
 
+                $('#links-start div').last().css('margin-top',marginTop);
+                position = position + marginTop + $('#links-start div').last().height();
+                console.log(index+' done');
+            })
+        },300);
+    },200);
 }
