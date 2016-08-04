@@ -392,6 +392,8 @@ public class CampaignService {
         
         //Update the status of the activity
         emailActivity.setSTATUS(ACTIVITY_STATUS.EXECUTING.name);
+        objService.getEm().merge(emailActivity);
+        
     }
     
     public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {

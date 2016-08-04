@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormTrackEmailActivity">
+        <div class="modal-content" style="overflow-y: hidden;">
+            <div class="block">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        Track Email Conversion
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <s2:messenger id="FormTrackEmailActivity_messenger" for="FormTrackEmailActivity" showDetail="true" showSummary="true"
+                                              class="form-control"></s2:messenger>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                            <div id="html-content-form" class="col-md-4 col-sm-6 col-xs-6"><!--preview pane-->
+                                <div id="html-content">
+                                    <h:outputText
+                                        escape="false" 
+                                        value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
+                                </div>
+                            </div>
+                            <div id="links-start-form" class="col-md-6 col-sm-6 col-xs-6"><!--links pane-->
+                                <div id="links-start">
+
+                                </div>
+                            </div>
+                        <h:inputHidden id="pseudo-preview" pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                        </h:inputHidden>
+                        <script type="text/javascript" >
+                                    var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                        </script>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <h:commandButton styleClass="btn btn-success"
+                                     value="Save &amp; continue"
+                                     
+                                     >
+                        <f:ajax listener="#{FormTrackEmailActivity.saveAndContinue()}"
+                                event="click"
+                                onevent="track_activity"
+                                render="@form" execute="@form">
+                        </f:ajax>
+                    </h:commandButton>
+                    <h:commandButton styleClass="btn btn-default"
+                                     value="Save &amp; close"
+                                     onclick="reapply_textarea('content')"
+                                     >
+                        <f:ajax listener="#{FormTrackEmailActivity.saveAndClose()}"
+                                event="click"
+                                onevent="saveAndContinue"
+                                render="@form" execute="@form">
+                        </f:ajax>
+                    </h:commandButton>
+                    <button class="btn btn-danger"
+                            onclick="$('.delete-container').toggle('slow');
+                                            return false;">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

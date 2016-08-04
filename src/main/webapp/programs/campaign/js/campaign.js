@@ -1,5 +1,5 @@
 var SUMMERNOTE_HEIGHT = 290;
-var PREVIEW_HEIGHT = 400;
+var PREVIEW_HEIGHT = 450;
 
 //var web_service_endpoint = 'WSCampaignActivityLink';
 
@@ -16,26 +16,25 @@ var PREVIEW_HEIGHT = 400;
  */
 
 /*function load_activity(activityId, event) {
-    jsf.ajax.request(
-            $('#FormCampaignActivities'),
-            event,
-            {
-            })
-}*/
+ jsf.ajax.request(
+ $('#FormCampaignActivities'),
+ event,
+ {
+ })
+ }*/
 
 function refresh_summernote() {
     $('textarea.editor').summernote({
         height: SUMMERNOTE_HEIGHT,
-        
         toolbar: [
-            ['style',['style']],
+            ['style', ['style']],
             ['font', ['bold', 'italic', 'underline']],
             //['font', ['fontname']],
             ['color', ['color']],
             ['para', ['ul', 'ol', 'paragraph']],
             ['table', ['table']],
             ['insert', ['link', 'picture']],
-            ['view',['codeview']]
+            ['view', ['codeview']]
         ]
     });
     // Observe a specific DOM element:
@@ -44,7 +43,7 @@ function refresh_summernote() {
         //preview();
         //highlightAndCreateLinks();
         doEverything();
-        
+
     });
 }
 
@@ -54,27 +53,29 @@ function refresh_select2() {
     select.select2("destroy").select2();
 }
 
-var preview = function() {
-    $('#content').next().find('.note-editable').each(function () {
-
-        var height = $('#editor-form').height();
-        $('#preview').html($(this).html());
-        var maxWidth = largestWidth('#preview');
-        var scaleX = Math.min($('#preview').width() / maxWidth, 1);
-        var scaleY = Math.min(PREVIEW_HEIGHT / $('#preview').height(), 1);
-        $('#preview').css({
+var preview = function (sourceSel, sourceContSel, targetSel, targetContSel) {
+    setTimeout(function(){
+        var height = $(sourceContSel).height();
+        $(targetSel).html($(sourceSel).html());
+        var maxWidth = largestWidth(targetSel);
+        var scaleX = Math.min($(targetSel).width() / maxWidth, 1);
+        var scaleY = Math.min(PREVIEW_HEIGHT / $(targetSel).height(), 1);
+        $(targetSel).css({
             transform: 'scale(' + scaleX + ',' + scaleY + ')',
             'transform-origin': '0 0 0'
         });
         //Transform the container as well, or the whole modal will remain long
-        $('#preview-form').height(scaleY * $('#preview').height());
-    });
+        $(targetContSel).height(scaleY * $(targetSel).load().height());
+        highlightAndCreateLinks();
+    },50);
     
+
 }
 
-function highlightAndCreateLinks() {
 
-    var index = 0;
+var highlightAndCreateLinks = function () {
+
+    //var index = 0;
     var prevPos = 0;
     var positions = [];
     //Clear the preview pane first
@@ -82,110 +83,113 @@ function highlightAndCreateLinks() {
     //Clear the linksContainer too
     linksContainer.reset();
     var allLinks = $('#preview').find('a');
+    if (allLinks.size() <= 0)
+        return;
+
     var count = allLinks.size();
     allLinks.each(function () {
         var obj = $(this);
-        var offset = obj.offset().top - $('#preview').offset().top;
-        positions.push(offset);
+        var index = allLinks.index(obj);
+        callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
+                function (redirectLink) {
+                    //Replace the html target by this 
+                    obj.attr('href', redirectLink);
+                    var offset = obj.offset().top - $('#preview').offset().top;
 
-        var marginTop = Math.max(offset - prevPos - $('#links div').last().height(), 0);
-        //Add new element to links pane
-        var link = "<div style='margin-top: "
-                + marginTop
-                + "px;' "
-                + "class='css-bounce' "
-                + ">"
-                + "<span class='badge badge-primary'>"
-                + (++index) //key 1
-                + "</span> "
-                + obj.text() //key 2
-                + "</div>";
-        $('#links').append(link);
-        //factor in the height for offset
-        var prevHeight = $('#links div').last().height();
-        prevPos = offset;// - 
-        //Call WS to create or update links
-        //Update the generated parsed link in the text so that we don't have to 
-        //parse it anymore during sending!
-        callWSCreateUpdateLink(obj.attr('href'),obj.html(),index,
-            function(redirectLink){
-                //Replace the html target by this 
-                obj.attr('href',redirectLink);
-                linksContainer.addLink(redirectLink);
-                if(!--count) copyPreviewContent();
-            },
-            function(){
-                console.log('Error has occurred');
-            }
-        )
-        
-        //execute callback
-        
+                    var marginTop = Math.max(offset - prevPos - $('#links div').load().last().height(), 0);
+                    //Add new element to links pane
+                    var link = //"<div style='margin-top: "
+                            //+ marginTop
+                            "<div style='position: relative; top: "
+                            + offset
+                            + "px;' "
+                            + "class='css-bounce' "
+                            + ">"
+                            + "<span class='badge badge-primary'>"
+                            + (index + 1) //key 1
+                            + "</span> "
+                            + obj.text() //key 2
+                            + "</div>";
+                    $('#links').append(link);
+                    prevPos = offset;
+
+                    if (!--count)
+                        copyPreviewContent();
+                },
+                function () {
+                    console.log('Error has occurred');
+                }
+        );
     });
 }
 
-var callWSCreateUpdateLink = function(linkTarget,linkText,index,successCallback,errorCallback){
+var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallback, errorCallback) {
     $.soap({
-        url :   web_service_endpoint,
+        url: web_service_endpoint,
         method: 'createOrUpdateLink',
         appendMethodToURL: 0,
-        data : {
-            linkTarget : linkTarget,
-            linkText : linkText,
-            index : index
+        data: {
+            linkTarget: linkTarget,
+            linkText: linkText,
+            index: index
         },
         namespaceQualifier: 'ns',
         namespaceURL: 'http://webservice.campaign.program.segmail/',
         noPrefix: 0,
-        HTTPHeaders : {
-            
+        HTTPHeaders: {
         },
         success: function (SOAPResponse) {
             var xmlResults = SOAPResponse.toJSON();
             var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:createOrUpdateLinkResponse']["return"];
-            if(successCallback) successCallback(result);
+            if (successCallback)
+                successCallback(result);
         },
         error: function (SOAPResponse) {
             logSOAPErrors(SOAPResponse);
-            if(errorCallback) errorCallback();
+            if (errorCallback)
+                errorCallback();
         }
     });
     //successCallback('dfrwogfwlfa,cr');
- };
- 
-var logSOAPErrors = function(SOAPResponse){
+};
+
+var logSOAPErrors = function (SOAPResponse) {
     var jsonresult = SOAPResponse.toJSON();
     //console.log(SOAPResponse.content); 
-    
+
     var errorMessage = '';
     var severity = '';
-    switch(SOAPResponse.httpCode){
-        case 404    :   errorMessage = SOAPResponse.httpText;
-                        severity = 'danger';
-                        break;
-        case 500    :   errorMessage = processError500(jsonresult);
-                        severity = 'danger';
-                        break;
-        default     :   errorMessage = SOAPResponse.httpText;
-                        severity = 'danger';
-                        break;
+    switch (SOAPResponse.httpCode) {
+        case 404    :
+            errorMessage = SOAPResponse.httpText;
+            severity = 'danger';
+            break;
+        case 500    :
+            errorMessage = processError500(jsonresult);
+            severity = 'danger';
+            break;
+        default     :
+            errorMessage = SOAPResponse.httpText;
+            severity = 'danger';
+            break;
     }
     //if($('#soap-errors').find('.alert').length <= 0)
     //    $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
-    GenericErrorController.setErrors(errorMessage,severity);
+    GenericErrorController.setErrors(errorMessage, severity);
 };
 
-var processError500 = function(JsonResult) {
+var processError500 = function (JsonResult) {
     var faultstring = JsonResult['#document']['S:Envelope']['S:Body']['S:Fault']["faultstring"];
     //console.log(faultstring);
-    if(faultstring.indexOf('UserLoginException') > -1) //if starts with java.lang.RuntimeException: eds.component.user.UserLoginException: Please enter username.
+    if (faultstring.indexOf('UserLoginException') > -1) //if starts with java.lang.RuntimeException: eds.component.user.UserLoginException: Please enter username.
         return "Please log in again.";
-    switch(faultstring) {
-        default    :   return 'Error occurred at server side: '+faultstring;
+    switch (faultstring) {
+        default    :
+            return 'Error occurred at server side: ' + faultstring;
     }
 };
 
-var copyPreviewContent = function() {
+var copyPreviewContent = function () {
     var content = $('#preview').html();
     $('#pseudo-preview').val(content);
 }
@@ -195,50 +199,46 @@ var copyPreviewContent = function() {
  * 
  * @type Function|campaign_L176.campaignAnonym$17
  */
-var linksContainer = function(){
+var linksContainer = function () {
     var linksArray = [];
-    
+
     return {
-        addLink : function(redirectLink) {
+        addLink: function (redirectLink) {
             /*var linkObj = {
-                'target' : target,
-                'text' : text,
-                'index' : index
-            };
-            linksArray.push(linkObj);
-            this.submit();*/
+             'target' : target,
+             'text' : text,
+             'index' : index
+             };
+             linksArray.push(linkObj);
+             this.submit();*/
             linksArray.push(redirectLink);
         },
-        
-        contains : function(link) {
-            for(var i = 0; i < linksArray.length; i++) {
-                if(linksArray[i] === link)
+        contains: function (link) {
+            for (var i = 0; i < linksArray.length; i++) {
+                if (linksArray[i] === link)
                     return true;
             }
             return false;
         },
-        
-        submit : function() {
+        submit: function () {
             $('#pseudo-links').val(JSON.stringify(linksArray));
         },
-        
-        reset : function() {
+        reset: function () {
             linksArray = [];
         }
     }
 }();
 
-var GenericErrorController = function(){
+var GenericErrorController = function () {
     var id = 'soap-errors';
-    
+
     return {
-        
-        setErrors : function(error,severity) {
-            $('#'+id)
-            if($('#'+id).find('.alert').length > 0) {
-                $('#'+id).empty();
+        setErrors: function (error, severity) {
+            $('#' + id)
+            if ($('#' + id).find('.alert').length > 0) {
+                $('#' + id).empty();
             }
-            $($('#'+id)).append('<div class="alert alert-'+severity+'"><strong>'+error+'</strong></div>');
+            $($('#' + id)).append('<div class="alert alert-' + severity + '"><strong>' + error + '</strong></div>');
         }
     };
 }();
@@ -258,7 +258,7 @@ function rearrangeDivs(posArray) {
 }
 
 function largestWidth(selector) {
-    var maxWidth = 0;
+    var maxWidth = 1;
     var widestSpan = null;
     var $element;
     $(selector).find('*').each(function () {
@@ -303,20 +303,20 @@ function saveAndContinue(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
-    
+
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
             //ajaxloader.style.display = 'block';
             block_refresh(block);
-             //IMPORTANT! This will copy the contents of Summernote editor into our original textarea.
+            //IMPORTANT! This will copy the contents of Summernote editor into our original textarea.
             //preview();
             //highlightAndCreateLinks();
             break;
 
         case "complete": // This is called right after ajax response is received.
             //ajaxloader.style.display = 'none';
-            
+
             break;
 
         case "success": // This is called when ajax response is successfully processed.
@@ -324,18 +324,19 @@ function saveAndContinue(data) {
             refresh_summernote();
             refresh_select2();
             setSendInBatch('sendInBatch');
-            preview();
+            preview('.note-editable', '#editor-form', '#preview', '#preview-form');
             highlightAndCreateLinks();
             //copyPreviewContent();
             break;
     }
-};
+}
+;
 
 function load_activity(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
-    
+
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
@@ -343,12 +344,12 @@ function load_activity(data) {
             block_refresh(block);
             //preview();
             //highlightAndCreateLinks();
-            
+
             break;
 
         case "complete": // This is called right after ajax response is received.
             //ajaxloader.style.display = 'none';
-            
+
             break;
 
         case "success": // This is called when ajax response is successfully processed.
@@ -362,13 +363,14 @@ function load_activity(data) {
             //copyPreviewContent();
             break;
     }
-};
+}
+;
 
 function create_new_activity(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".refresh");
     //var ajaxloader = document.getElementById("ajaxloader");
-    
+
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
@@ -377,20 +379,21 @@ function create_new_activity(data) {
             break;
 
         case "complete": // This is called right after ajax response is received.
-            
+
             break;
 
         case "success": // This is called when ajax response is successfully processed.
             block_refresh(block);
             break;
     }
-};
+}
+;
 
 function saveBasicSettings(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
-    
+
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
@@ -400,20 +403,21 @@ function saveBasicSettings(data) {
 
         case "complete": // This is called right after ajax response is received.
             block_refresh(block);
-            
+
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            
+
             break;
     }
-};
+}
+;
 
 function saveAssignLists(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
-    
+
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
@@ -429,13 +433,14 @@ function saveAssignLists(data) {
             refresh_select2();
             break;
     }
-};
+}
+;
 
 function executeAndClose(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
-    
+
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
@@ -450,11 +455,35 @@ function executeAndClose(data) {
         case "success": // This is called when ajax response is successfully processed.
             break;
     }
-};
+}
+;
+
+function track_activity(data) {
+    var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
+    var block = $(data.source).parents(".block");
+    //var ajaxloader = document.getElementById("ajaxloader");
+
+
+    switch (ajaxstatus) {
+        case "begin": // This is called right before ajax request is been sent.
+
+            break;
+
+        case "complete": // This is called right after ajax response is received.
+            break;
+
+        case "success": // This is called when ajax response is successfully processed.
+            //highlightAndCreateLinks();
+            //preview('#raw-html','#raw-html-form','#html','#html-form');
+            resizeHtml();
+            break;
+    }
+}
+;
 
 function setSendInBatch(id) {
     var value = document.getElementById(id).value;
-    if(value <= 0 )
+    if (value <= 0)
         document.getElementById(id).value = null;
 }
 
@@ -464,13 +493,38 @@ function setSendInBatch(id) {
  * 
  * @returns {undefined}
  */
-var modifyDomToGeneratePreview = function() {
-    var randomNum = Math.round(Math.random()*100000);
-    $('.note-editable').append('<div id=modifyDomToGeneratePreview'+randomNum+'></div>');
-    $('#modifyDomToGeneratePreview'+randomNum).remove();
-}
+var modifyDomToGeneratePreview = function () {
+    var randomNum = Math.round(Math.random() * 100000);
+    $('.note-editable').append('<div id=modifyDomToGeneratePreview' + randomNum + '></div>');
+    $('#modifyDomToGeneratePreview' + randomNum).remove();
+};
 
-var doEverything = function() {
-    preview();
-    highlightAndCreateLinks();
+var doEverything = function () {
+    preview('.note-editable', '#editor-form', '#preview', '#preview-form');
+    //highlightAndCreateLinks();
+};
+var resizeHtml = function () {
+    
+    //var scaleX = Math.min($(targetSel).width() / maxWidth, 1);
+    //var height; = document.getElementById('html-content').clientHeight;
+    //var heightJq;// = $('#html-content').height();
+    setTimeout(function(){
+        var maxWidth = largestWidth('html-content');
+        var scaleX = Math.min($('#html-content').width() / maxWidth, 1);
+        //var scaleY = Math.min(PREVIEW_HEIGHT / $('#html-content').height(), 1);
+        
+        //height = document.getElementById('html-content').clientHeight;
+        //heightJq = $('#html-content').height();
+        var scaleY = Math.min(PREVIEW_HEIGHT / $('#html-content').height(), 1);
+        $('#html-content').css({
+            transform: 'scale(' + scaleX + ',' + scaleY + ')',
+            'transform-origin': '0 0 0'
+        });
+        //Transform the container as well, or the whole modal will remain long
+        //var height = $('#html').height()
+        $('#html-content-form').height(PREVIEW_HEIGHT);
+    },100);
+    
+    
+
 }
