@@ -41,6 +41,8 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.campaign.LinkClick;
+import segmail.entity.campaign.LinkClick_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -166,6 +168,12 @@ public class CampaignService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivity createCampaignActivity(long campaignId, String name, String goals, ACTIVITY_TYPE type) throws IncompleteDataException, EntityNotFoundException {
         
+        //Assign campaign to activity (save 1 SQL query)
+        //assignCampaignToActivity(campaignId,newActivity.getOBJECTID());
+        Campaign campaign = getCampaign(campaignId);
+        if(campaign == null)
+            throw new EntityNotFoundException(Campaign.class,campaignId);
+        
         CampaignActivity newActivity = new CampaignActivity();
         newActivity.setACTIVITY_NAME(name);
         newActivity.setACTIVITY_GOALS(goals);
@@ -175,12 +183,6 @@ public class CampaignService {
         validateCampaignActivity(newActivity);
         
         objService.getEm().persist(newActivity);
-        
-        //Assign campaign to activity (save 1 SQL query)
-        //assignCampaignToActivity(campaignId,newActivity.getOBJECTID());
-        Campaign campaign = getCampaign(campaignId);
-        if(campaign == null)
-            throw new EntityNotFoundException(Campaign.class,campaignId);
         
         Assign_Campaign_Activity newAssign = new Assign_Campaign_Activity();
         newAssign.setSOURCE(campaign);
@@ -476,9 +478,31 @@ public class CampaignService {
         return selectedLink;
     }
     
+    /**
+     * 
+     * @param link
+     * @return
+     * @throws IncompleteDataException 
+     */
     public String constructLink(CampaignActivityOutboundLink link) throws IncompleteDataException {
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
         
         return server.getURI() + "/link/" + link.getLINK_KEY();
     }
+    
+    public long getLinkClicks(String key) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<LinkClick> fromClicks = query.from(LinkClick.class);
+        
+        query.select(builder.count(fromClicks));
+        query.where(builder.equal(fromClicks.get(LinkClick_.LINK_KEY), key));
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    
 }

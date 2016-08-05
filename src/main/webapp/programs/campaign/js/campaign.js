@@ -54,8 +54,8 @@ function refresh_select2() {
     select.select2("destroy").select2();
 }
 
-var preview = function (sourceSel, sourceContSel, targetSel, targetContSel) {
-    setTimeout(function(){
+var preview = function (sourceSel, sourceContSel, targetSel, targetContSel, timeout) {
+    setTimeout(function () {
         var height = $(sourceContSel).height();
         $(targetSel).html($(sourceSel).html());
         var maxWidth = largestWidth(targetSel);
@@ -67,76 +67,114 @@ var preview = function (sourceSel, sourceContSel, targetSel, targetContSel) {
         });
         //Transform the container as well, or the whole modal will remain long
         $(targetContSel).height(scaleY * $(targetSel).load().height());
-        highlightAndCreateLinks();
-    },50);
+        //highlightAndCreateLinks();
+    }, timeout);
 };
 
-var registerDelayedChange = function(){
-    $('.note-editable').delayedChange().on('delayedchange',function(){
+var registerDelayedChange = function () {
+    $('.note-editable').delayedChange().on('delayedchange', function () {
         doEverything();
     });
 };
 
 
-var highlightAndCreateLinks = function () {
+var highlightAndCreateLinks = function (timeout) {
+    setTimeout(function () {
+        //var index = 0;
+        var prevPos = 0;
+        var positions = [];
+        //Clear the preview pane first
+        $('#links').empty();
+        //Clear the linksContainer too
+        linksContainer.reset();
+        var allLinks = $('#preview').find('a');
+        if (allLinks.size() <= 0)
+            return;
 
-    //var index = 0;
-    var prevPos = 0;
-    var positions = [];
-    //Clear the preview pane first
-    $('#links').empty();
-    //Clear the linksContainer too
-    linksContainer.reset();
-    var allLinks = $('#preview').find('a');
-    if (allLinks.size() <= 0)
-        return;
+        var count = allLinks.size();
+        var position = 0;
+        allLinks.each(function (index) {
+            //Create the badges for each link first, then call WS to get the redirectlink and fill them up in the preview pane!
+            var obj = $(this);
+            var linkText = obj.text();
+            var offset = obj.offset().top - $('#preview').offset().top;
+            var marginTop1 = offset;
 
-    var count = allLinks.size();
-    allLinks.each(function (index) {
-        var obj = $(this);
-        callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
-                function (redirectLink) {
-                    //Replace the html target by this 
-                    obj.attr('href', redirectLink);
-                    var offset = obj.offset().top - $('#preview').offset().top;
+            if (index > 0) {
+                var lastOffset = position;
+                marginTop1 = marginTop1 - lastOffset;
+            }
+            var marginTop = Math.max(marginTop1, 0);
+            var link =
+                    '<div '
+                    + "class='css-bounce' "
+                    + ">"
+                    //+ "<span class='badge badge-primary'>"
+                    + "<span class='link-button'>"
+                    + (index + 1) //key 1
+                    + "</span> "
+                    + linkText //key 2
+                    + "</div>";
+            $('#links').append(link);
 
-                    var marginTop = Math.max(offset - prevPos - $('#links div').load().last().height(), 0);
-                    //Add new element to links pane
-                    var link = //"<div style='margin-top: "
-                            //+ marginTop
-                            "<div style='position: relative; top: "
-                            + offset
-                            + "px;' "
-                            + "class='css-bounce' "
-                            + ">"
-                            + "<span class='badge badge-primary'>"
-                            + (index + 1) //key 1
-                            + "</span> "
-                            + obj.text() //key 2
-                            + "</div>";
-                    $('#links').append(link);
-                    prevPos = offset;
-
-                    if (!--count)
-                        copyPreviewContent();
-                },
-                function () {
-                    console.log('Error has occurred');
-                }
-        );
-    });
+            $('#links div').last().css('margin-top', marginTop);
+            position = position + marginTop + $('#links div').last().height();
+            
+            callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
+                    function (redirectLink) {
+                        obj.attr('href', redirectLink);
+                        if (!--count)
+                            copyPreviewContent();
+                    },
+                    function () {
+                        console.log('Error has occurred');
+                    }
+            );
+        });
+    }, timeout);
 }
 
 var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallback, errorCallback) {
+    callWS(web_service_endpoint, 'createOrUpdateLink', {
+        linkTarget: linkTarget,
+        linkText: linkText,
+        index: index
+    }, successCallback, errorCallback);
+    /*$.soap({
+     url: web_service_endpoint,
+     method: 'createOrUpdateLink',
+     appendMethodToURL: 0,
+     data: {
+     linkTarget: linkTarget,
+     linkText: linkText,
+     index: index
+     },
+     namespaceQualifier: 'ns',
+     namespaceURL: 'http://webservice.campaign.program.segmail/',
+     noPrefix: 0,
+     HTTPHeaders: {
+     },
+     success: function (SOAPResponse) {
+     var xmlResults = SOAPResponse.toJSON();
+     var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:createOrUpdateLinkResponse']["return"];
+     if (successCallback)
+     successCallback(result);
+     },
+     error: function (SOAPResponse) {
+     logSOAPErrors(SOAPResponse);
+     if (errorCallback)
+     errorCallback();
+     }
+     });*/
+    //successCallback('dfrwogfwlfa,cr');
+};
+
+var callWS = function (url, method, data, successCallback, errorCallback) {
     $.soap({
-        url: web_service_endpoint,
-        method: 'createOrUpdateLink',
+        url: url,
+        method: method,
         appendMethodToURL: 0,
-        data: {
-            linkTarget: linkTarget,
-            linkText: linkText,
-            index: index
-        },
+        data: data,
         namespaceQualifier: 'ns',
         namespaceURL: 'http://webservice.campaign.program.segmail/',
         noPrefix: 0,
@@ -144,7 +182,7 @@ var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallb
         },
         success: function (SOAPResponse) {
             var xmlResults = SOAPResponse.toJSON();
-            var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:createOrUpdateLinkResponse']["return"];
+            var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:' + method + 'Response']["return"];
             if (successCallback)
                 successCallback(result);
         },
@@ -154,7 +192,6 @@ var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallb
                 errorCallback();
         }
     });
-    //successCallback('dfrwogfwlfa,cr');
 };
 
 var logSOAPErrors = function (SOAPResponse) {
@@ -177,8 +214,6 @@ var logSOAPErrors = function (SOAPResponse) {
             severity = 'danger';
             break;
     }
-    //if($('#soap-errors').find('.alert').length <= 0)
-    //    $('#soap-errors').append('<div class="alert alert-'+severity+'"><strong>'+errorMessage+'</strong></div>');
     GenericErrorController.setErrors(errorMessage, severity);
 };
 
@@ -328,9 +363,10 @@ function saveAndContinue(data) {
             refresh_summernote();
             refresh_select2();
             setSendInBatch('sendInBatch');
-            preview('.note-editable', '#editor-form', '#preview', '#preview-form');
+            //preview('.note-editable', '#editor-form', '#preview', '#preview-form',);
             //highlightAndCreateLinks();
             //copyPreviewContent();
+            doEverything();
             break;
     }
 }
@@ -477,9 +513,8 @@ function track_activity(data) {
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            //highlightAndCreateLinks();
-            //preview('#raw-html','#raw-html-form','#html','#html-form');
-            resizeHtml();
+            resizeContent(100);
+            renderLinksAndRefreshStats(100);
             break;
     }
 }
@@ -504,11 +539,12 @@ var modifyDomToGeneratePreview = function () {
 };
 
 var doEverything = function () {
-    preview('.note-editable', '#editor-form', '#preview', '#preview-form');
-    //highlightAndCreateLinks();
+    preview('.note-editable', '#editor-form', '#preview', '#preview-form', 0);
+    highlightAndCreateLinks(50);
 };
-var resizeHtml = function () {
-    setTimeout(function(){
+
+var resizeContent = function (timeout) {
+    setTimeout(function () {
         var maxWidth = largestWidth('#html-content');
         var scaleY = Math.min(PREVIEW_HEIGHT / $('#html-content').height(), 1);
         var scaleX = Math.min(PREVIEW_WIDTH / maxWidth, 1);
@@ -518,42 +554,83 @@ var resizeHtml = function () {
         });
         //Transform the container as well, or the whole modal will remain long
         $('#html-content-form').height(PREVIEW_HEIGHT);
-        
-        setTimeout(function(){
-            var position = 0;
-            var last;
-            $('#html-content').find('a').each(function(index){
-                console.log(index);
-                
-                var offset = $(this).offset().top - $('#html-content').offset().top;
-                console.log('offset: '+offset);
-                var marginTop1 = offset;// - last.height();// - last.offset().top;
-                
-                if(index > 0) {
-                    var lastOffset = position;//$('#links-start div').last().css('margin-top').replace("px", "");
-                    console.log('last offset: '+ lastOffset);
-                    marginTop1 = marginTop1 - lastOffset;
-                }
-                console.log('marginTop1: '+marginTop1);
-                var marginTop = Math.max(marginTop1, 0);
-                console.log('marginTop: '+marginTop);
-                var link = //"<div style='margin-top: "
-                            //+ marginTop
-                            //+ "px;' "
-                            '<div '
-                            + "class='css-bounce' "
-                            + ">"
-                            + "<span class='badge badge-primary'>"
-                            + (index + 1) //key 1
-                            + "</span> "
-                            + $(this).text() //key 2
-                            + "</div>";
-                $('#links-start').append(link);
 
-                $('#links-start div').last().css('margin-top',marginTop);
-                position = position + marginTop + $('#links-start div').last().height();
-                console.log(index+' done');
-            })
-        },300);
-    },200);
+    }, timeout);
+};
+
+var renderLinksAndRefreshStats = function (timeout) {
+    setTimeout(function () {
+        var position = 0;
+        var wsCounts = $('#html-content').find('a').size();
+        $('#links-start').empty();
+        $('#stats-table').find('tbody').empty();
+        $('#html-content').find('a').each(function (index) {
+            //console.log(index);
+            var redirectLink = $(this).attr('href');
+            var linkText = $(this).text();
+            var offset = $(this).offset().top - $('#html-content').offset().top;
+            var marginTop1 = offset;
+
+            if (index > 0) {
+                var lastOffset = position;
+                marginTop1 = marginTop1 - lastOffset;
+            }
+            
+            var link = //"<div style='margin-top: "
+                    //+ marginTop
+                    //+ "px;' "
+                    '<div '
+                    + "class='css-bounce' "
+                    + ">"
+                    + "<span class='link-button'>"
+                    + (index + 1) //key 1
+                    + "</span> "
+                    + linkText //key 2
+                    + "</div>";
+            $('#links-start').append(link);
+            //minus another half a line cause you want the link-button to centralize
+            var marginTop = Math.max(marginTop1, 0);
+            if(marginTop > 0) //It is not "sticking" to the previous button
+                marginTop -= 0.5*$('#links-start div').last().height();
+            else
+                marginTop -= 0.3*$('#links-start div').last().height();
+            $('#links-start div').last().css('margin-top', marginTop);
+            position = position + marginTop + $('#links-start div').last().height();
+            //console.log(index+' done');
+
+            //Call webservice to get counts and update 
+            callWS(web_service_endpoint, 'getClickCountForActivity', {
+                'redirectLink': redirectLink
+            }, function (result) {
+                //Add result to table
+                var row = '<tr>' +
+                        '<td>' + (index + 1) + '</td>' +
+                        '<td>' + linkText + '</td>' +
+                        '<td>' + result + '</td>' +
+                        '<td>' + '%' + '</td>' +
+                        '</tr>';
+                $('#stats-table').find('tbody').append(row);
+                //Once all calls are done
+                if (!--wsCounts) {
+                    $('#stats-table').dataTable({
+                        'destroy': true,
+                        'filter': false,
+                        'paging': false,
+                        'searching': false
+
+                    });
+                }
+            }, function () {
+                GenericErrorController.setErrors('Error encountered');
+            });
+        });
+    }, timeout);
+};
+
+var getSentEmails = function() {
+    callWS(web_service_endpoint, 'getExecutedForCampaignActivity', {
+        campaignActivityId : $('#activity-id').val()
+    }, function(result){
+        
+    }, errorCallback);
 }

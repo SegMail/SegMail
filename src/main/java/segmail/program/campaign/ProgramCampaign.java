@@ -88,6 +88,7 @@ public class ProgramCampaign extends Program{
 
     public void setEditingCampaign(Campaign editingCampaign) {
         this.editingCampaign = editingCampaign;
+        this.setEditingCampaignId((editingCampaign == null) ? -1 :editingCampaign.getOBJECTID());
     }
 
     public List<Campaign> getAllCampaigns() {
@@ -119,7 +120,6 @@ public class ProgramCampaign extends Program{
     }
 
     public void setEditingActivity(CampaignActivity editingActivity) {
-        this.setEditingCampaignId(editingActivity.getOBJECTID());
         this.editingActivity = editingActivity;
     }
 

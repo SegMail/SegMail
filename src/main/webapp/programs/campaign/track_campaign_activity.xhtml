@@ -27,50 +27,112 @@
                         </div>
                     </div>
                     <div class="row">
-                            <div id="html-content-form" class="col-md-4 col-sm-4 col-xs-4"><!--preview pane-->
-                                <div id="html-content">
-                                    <h:outputText
-                                        escape="false" 
-                                        value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
+                        <div id="html-content-form" class="col-md-4 col-sm-4 col-xs-4"><!--preview pane-->
+                            <div id="html-content">
+                                <h:outputText
+                                    escape="false" 
+                                    value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
+                            </div>
+                        </div>
+                        <div id="links-start-form" class="col-md-3 col-sm-4 col-xs-4"><!--links pane-->
+                            <div id="links-start">
+                            </div>
+                        </div>
+                        <div id="stats-form" class="col-md-5 col-sm-4 col-xs-4"><!--links pane-->
+                            <div id="stats-panel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h2>Click-through rates</h2>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-bottom: 20px;">
+                                    <div class="col-md-4">
+                                        <div class="widget">
+                                            <div class="widget-container">
+                                                <div class="widget-text">
+                                                    67,628
+                                                </div>
+                                            </div>
+                                            <div class="widget-content">
+                                                <div class="widget-text">
+                                                    <strong>
+                                                        Targeted
+                                                    </strong>
+                                                    100%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="widget widget-primary">
+                                            <div class="widget-container">
+                                                <div class="widget-text">
+                                                    1,562
+                                                </div>
+                                            </div>
+                                            <div class="widget-content">
+                                                <div class="widget-text">
+                                                    <strong>
+                                                        Sent
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="widget widget-success">
+                                            <div class="widget-container">
+                                                <div class="widget-text">
+                                                    562
+                                                </div>
+                                            </div>
+                                            <div class="widget-content">
+                                                <div class="widget-text">
+                                                    <strong>
+                                                        Clicked
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="stats-table" class="table table-striped">
+                                            <thead>
+                                                <th>#</th>
+                                                <th>Link</th>
+                                                <th>Clicks</th>
+                                                <th>%</th>
+                                                
+                                            </thead>
+                                            <tbody>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="links-start-form" class="col-md-4 col-sm-4 col-xs-4"><!--links pane-->
-                                <div id="links-start">
-
-                                </div>
-                            </div>
+                        </div>
                         <h:inputHidden id="pseudo-preview" pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
                         </h:inputHidden>
+                        <h:inputHidden id="activity-id" pass:id="activity-id" value="#{FormEditEmailActivity.editingActivity.OBJECTID}" >
+                        </h:inputHidden>
                         <script type="text/javascript" >
-                                    var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                            var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
                         </script>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <h:commandButton styleClass="btn btn-success"
-                                     value="Save &amp; continue"
-                                     
-                                     >
-                        <f:ajax listener="#{FormTrackEmailActivity.saveAndContinue()}"
-                                event="click"
-                                onevent="track_activity"
-                                render="@form" execute="@form">
-                        </f:ajax>
-                    </h:commandButton>
-                    <h:commandButton styleClass="btn btn-default"
-                                     value="Save &amp; close"
-                                     onclick="reapply_textarea('content')"
-                                     >
-                        <f:ajax listener="#{FormTrackEmailActivity.saveAndClose()}"
-                                event="click"
-                                onevent="saveAndContinue"
-                                render="@form" execute="@form">
-                        </f:ajax>
-                    </h:commandButton>
-                    <button class="btn btn-danger"
-                            onclick="$('.delete-container').toggle('slow');
-                                            return false;">
-                        Delete
+                    <button class="btn btn-primary"
+                            onclick="resizeContent(100);
+                                     renderLinksAndRefreshStats(100);
+                                     return false;">
+                        Refresh
+                    </button>
+                    <button data-dismiss="modal" class="btn btn-default">
+                        Close
                     </button>
                 </div>
             </div>

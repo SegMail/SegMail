@@ -12,7 +12,8 @@ import javax.jws.WebService;
 import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
 
 /**
- *
+ * This is exposed to the public, so only public methods should be available.
+ * 
  * @author LeeKiatHaw
  */
 @WebService(

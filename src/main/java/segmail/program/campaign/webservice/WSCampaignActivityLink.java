@@ -68,4 +68,32 @@ public class WSCampaignActivityLink {
         
         return redirectLink;
     }
+    
+    /**
+     * 
+     * @param redirectLink
+     * @return count of link clicks or -1 if no such link is found
+     */
+    @WebMethod(operationName = "getClickCountForActivity")
+    public long getClickCountForActivity(@WebParam(name = "redirectLink") String redirectLink) {
+        //Get the key from the link
+        if(redirectLink == null || redirectLink.isEmpty())
+            return -1;
+        
+        String[] split = redirectLink.split("/");
+        if(split == null || split.length <=0)
+            return -1;
+        
+        String key = split[split.length-1];
+        
+        long result = campService.getLinkClicks(key);
+        
+        return result;
+    }
+    
+    @WebMethod(operationName = "getExecutedForCampaignActivity")
+    public long getExecutedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
+        long result = campExeService.countEmailsSentForActivity(campaignActivityId);
+        return result;
+    }
 }

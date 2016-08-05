@@ -113,7 +113,7 @@
                                                 </c:otherwise>
                                             </c:choose>
                                             <button
-                                                jsf:renderd="#{activity.STATUS ne 'COMPLETED'}"
+                                                jsf:rendered="#{activity.STATUS ne 'COMPLETED' and activity.STATUS ne 'EXECUTING'}"
                                                 jsf:id="execute_campaign_activity_button_#{activity.OBJECTID}"
                                                 href="#execute_campaign_activity"
                                                 data-toggle="modal"

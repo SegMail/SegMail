@@ -1,0 +1,16 @@
+.link-button {
+    border-radius: 50%;
+    background: #95b75d;//#33414e;
+    border: 1px solid #FFF;
+    box-shadow: 0 0 0 1px #e5e5e5;
+    width: 22px;
+    height: 22px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin: -12px 5px;
+    display: inline-block;
+    color: #FFF;
+    //padding: 5px;
+    text-align: center;
+    font-size: 12px;
+}

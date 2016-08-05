@@ -16,6 +16,7 @@ import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseObject_;
 import eds.entity.mail.Email;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,7 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivityOutboundLink_;
+import segmail.entity.campaign.CampaignActivity_;
 import segmail.entity.campaign.CampaignExecutionError;
 import segmail.entity.campaign.LinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
@@ -373,5 +375,26 @@ public class CampaignExecutionService {
             return null;
         
         return results.get(0);
+    }
+    
+    /**
+     * Returns the number of emails that are already sent for the given activityId.
+     * 
+     * @param activityId
+     * @return 
+     */
+    public long countEmailsSentForActivity(long activityId) {
+        //Just count the total number of Trigger_Email_Activity !
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignActivity> fromActivity = query.from(CampaignActivity.class);
+        
+        query.select(builder.count(fromActivity));
+        query.where(builder.equal(fromActivity.get(CampaignActivity_.OBJECTID), activityId));
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
     }
 }

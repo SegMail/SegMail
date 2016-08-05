@@ -15,7 +15,7 @@ import javax.persistence.Table;
  * A Trigger_Email_Activity is a relationship stating that "the CampaignActivity,
  * Target EnterpriseObject, has triggered the Email, Source EnterpriseTransaction."
  * 
- * A relationship signifies that an Email has been sent out for the CampaignActivity.
+ * This relationship signifies that an Email has been sent out for the CampaignActivity.
  * 
  * @author LeeKiatHaw
  */

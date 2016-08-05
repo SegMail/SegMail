@@ -85,11 +85,9 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void saveAndContinue() {
         try {
 
-            campaignService.updateCampaignActivity(getEditingActivity());
+            CampaignActivity activity = campaignService.updateCampaignActivity(getEditingActivity());
             campaignService.updateCampaignActivitySchedule(getEditingSchedule());
-            loadActivity(program.getEditingCampaignId());
-
-            List<CampaignActivityOutboundLink> links = this.constructLinks(linksDelimited);
+            loadActivity(activity.getOBJECTID());
 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
