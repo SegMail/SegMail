@@ -24,6 +24,9 @@
                                 <s2:messenger id="FormTrackEmailActivity_messenger" for="FormTrackEmailActivity" showDetail="true" showSummary="true"
                                               class="form-control"></s2:messenger>
                             </div>
+                            <div id="soap-errors">
+                                
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -49,16 +52,16 @@
                                     <div class="col-md-4">
                                         <div class="widget">
                                             <div class="widget-container">
-                                                <div class="widget-text">
-                                                    67,628
+                                                <div id="targeted" class="widget-text">
+                                                    
                                                 </div>
+                                                
                                             </div>
                                             <div class="widget-content">
                                                 <div class="widget-text">
                                                     <strong>
                                                         Targeted
                                                     </strong>
-                                                    100%
                                                 </div>
                                             </div>
                                         </div>
@@ -66,8 +69,8 @@
                                     <div class="col-md-4">
                                         <div class="widget widget-primary">
                                             <div class="widget-container">
-                                                <div class="widget-text">
-                                                    1,562
+                                                <div id="sent" class="widget-text">
+                                                    
                                                 </div>
                                             </div>
                                             <div class="widget-content">
@@ -82,8 +85,8 @@
                                     <div class="col-md-4">
                                         <div class="widget widget-success">
                                             <div class="widget-container">
-                                                <div class="widget-text">
-                                                    562
+                                                <div id="clicked" class="widget-text">
+                                                    
                                                 </div>
                                             </div>
                                             <div class="widget-content">
@@ -110,6 +113,9 @@
                                             <tbody>
                                                 
                                             </tbody>
+                                            <tfoot>
+                                                
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div>
@@ -126,7 +132,8 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary"
-                            onclick="resizeContent(100);
+                            onclick="getTopNumbers(0);
+                                     resizeContent(100);
                                      renderLinksAndRefreshStats(100);
                                      return false;">
                         Refresh

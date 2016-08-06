@@ -105,19 +105,20 @@ var highlightAndCreateLinks = function (timeout) {
                 marginTop1 = marginTop1 - lastOffset;
             }
             var marginTop = Math.max(marginTop1, 0);
+            if(marginTop > 0) //It is not "sticking" to the previous button
+                marginTop -= 0.5*12; //12px is the pre-defined size of the div
+            else
+                marginTop -= 0.25*$('#links div').last().height();
+            
             var link =
-                    '<div '
-                    + "class='css-bounce' "
-                    + ">"
-                    //+ "<span class='badge badge-primary'>"
+                    '<div style="margin-top: '+marginTop+'px">'
                     + "<span class='link-button'>"
                     + (index + 1) //key 1
                     + "</span> "
                     + linkText //key 2
                     + "</div>";
             $('#links').append(link);
-
-            $('#links div').last().css('margin-top', marginTop);
+            $('#links div').last().addClass('css-bounce');//.css('margin-top', marginTop);
             position = position + marginTop + $('#links div').last().height();
             
             callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
@@ -140,33 +141,6 @@ var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallb
         linkText: linkText,
         index: index
     }, successCallback, errorCallback);
-    /*$.soap({
-     url: web_service_endpoint,
-     method: 'createOrUpdateLink',
-     appendMethodToURL: 0,
-     data: {
-     linkTarget: linkTarget,
-     linkText: linkText,
-     index: index
-     },
-     namespaceQualifier: 'ns',
-     namespaceURL: 'http://webservice.campaign.program.segmail/',
-     noPrefix: 0,
-     HTTPHeaders: {
-     },
-     success: function (SOAPResponse) {
-     var xmlResults = SOAPResponse.toJSON();
-     var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:createOrUpdateLinkResponse']["return"];
-     if (successCallback)
-     successCallback(result);
-     },
-     error: function (SOAPResponse) {
-     logSOAPErrors(SOAPResponse);
-     if (errorCallback)
-     errorCallback();
-     }
-     });*/
-    //successCallback('dfrwogfwlfa,cr');
 };
 
 var callWS = function (url, method, data, successCallback, errorCallback) {
@@ -513,6 +487,7 @@ function track_activity(data) {
             break;
 
         case "success": // This is called when ajax response is successfully processed.
+            getTopNumbers(0);
             resizeContent(100);
             renderLinksAndRefreshStats(100);
             break;
@@ -562,6 +537,7 @@ var renderLinksAndRefreshStats = function (timeout) {
     setTimeout(function () {
         var position = 0;
         var wsCounts = $('#html-content').find('a').size();
+        var totalClicks = 0;
         $('#links-start').empty();
         $('#stats-table').find('tbody').empty();
         $('#html-content').find('a').each(function (index) {
@@ -575,26 +551,22 @@ var renderLinksAndRefreshStats = function (timeout) {
                 var lastOffset = position;
                 marginTop1 = marginTop1 - lastOffset;
             }
-            
-            var link = //"<div style='margin-top: "
-                    //+ marginTop
-                    //+ "px;' "
-                    '<div '
-                    + "class='css-bounce' "
-                    + ">"
+            //minus another half a line cause you want the link-button to centralize
+            var marginTop = Math.max(marginTop1, 0);
+            if(marginTop > 0) //It is not "sticking" to the previous button
+                marginTop -= 0.5*12; //12px is the pre-defined size of the div
+            else
+                marginTop -= 0.25*$('#links-start div').last().height();
+            var link = 
+                    '<div style="margin-top: '+marginTop+'px">'
                     + "<span class='link-button'>"
                     + (index + 1) //key 1
                     + "</span> "
                     + linkText //key 2
                     + "</div>";
+            
             $('#links-start').append(link);
-            //minus another half a line cause you want the link-button to centralize
-            var marginTop = Math.max(marginTop1, 0);
-            if(marginTop > 0) //It is not "sticking" to the previous button
-                marginTop -= 0.5*$('#links-start div').last().height();
-            else
-                marginTop -= 0.3*$('#links-start div').last().height();
-            $('#links-start div').last().css('margin-top', marginTop);
+            $('#links-start div').addClass('css-bounce');
             position = position + marginTop + $('#links-start div').last().height();
             //console.log(index+' done');
 
@@ -603,25 +575,38 @@ var renderLinksAndRefreshStats = function (timeout) {
                 'redirectLink': redirectLink
             }, function (result) {
                 //Add result to table
+                var totalSent = Number($('#sent').html());
+                var clickthrough = (totalSent === 0) ? 0 : (Number(result) / totalSent) * 100.0;
                 var row = '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td>' + linkText + '</td>' +
                         '<td>' + result + '</td>' +
-                        '<td>' + '%' + '</td>' +
+                        '<td>' + clickthrough + '%' + '</td>' +
                         '</tr>';
                 $('#stats-table').find('tbody').append(row);
+                totalClicks += Number(result);
                 //Once all calls are done
                 if (!--wsCounts) {
+                    
+                    var totalClickthrough = (totalSent === 0) ? 0 : (Number(totalClicks) / totalSent) * 100.0;
+                    var summaryRow = '<tr>' +
+                                     '<td colspan="2" style="text-align: right;"><strong>Total</strong></td>' +
+                                     '<td>' + totalClicks + '</td>' +
+                                     '<td>' + totalClickthrough + '%</td>' +
+                                     '</tr>';
+                    $('#stats-table').find('tfoot').append(summaryRow);
+                                     
                     $('#stats-table').dataTable({
                         'destroy': true,
                         'filter': false,
                         'paging': false,
-                        'searching': false
-
+                        'searching': false,
+                        'info': false
                     });
+                    $('#clicked').html(totalClicks);
                 }
             }, function () {
-                GenericErrorController.setErrors('Error encountered');
+                
             });
         });
     }, timeout);
@@ -631,6 +616,25 @@ var getSentEmails = function() {
     callWS(web_service_endpoint, 'getExecutedForCampaignActivity', {
         campaignActivityId : $('#activity-id').val()
     }, function(result){
-        
-    }, errorCallback);
+        $('#sent').html(result);
+    }, function(){
+        $('#sent').html(0);
+    });
+};
+
+var getTotalTargeted = function() {
+    callWS(web_service_endpoint, 'getTotalTargetedForCampaignActivity', {
+        campaignActivityId : $('#activity-id').val()
+    }, function(result){
+        $('#targeted').html(result);
+    }, function(){
+        $('#targeted').html(0);
+    });
+}
+
+var getTopNumbers = function(timeout) {
+    setTimeout(function(){
+        getTotalTargeted();
+        getSentEmails();
+    },timeout)
 }

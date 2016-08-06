@@ -17,7 +17,10 @@ import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
 import eds.entity.client.Client;
 import eds.entity.data.EnterpriseObject_;
+import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
+import eds.entity.mail.Email_;
+import eds.entity.transaction.EnterpriseTransaction_;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +147,8 @@ public class CampaignExecutionService {
                     email.setSENDER_NAME(campaign.getOVERRIDE_SEND_AS_NAME());
                     
                     String content = campaignActivity.getACTIVITY_CONTENT();
-                    content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber));
+                    //content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); we'll use the WS method to edit unsub links
+                    
                     
                     //email.setBODY(content);
                     email.setBODY(campaignActivity.getACTIVITY_CONTENT_PROCESSED());
@@ -387,14 +391,100 @@ public class CampaignExecutionService {
         //Just count the total number of Trigger_Email_Activity !
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
-        Root<CampaignActivity> fromActivity = query.from(CampaignActivity.class);
+        Root<Trigger_Email_Activity> fromTrigger = query.from(Trigger_Email_Activity.class);
+        Root<Email> fromEmail = query.from(Email.class);
         
-        query.select(builder.count(fromActivity));
-        query.where(builder.equal(fromActivity.get(CampaignActivity_.OBJECTID), activityId));
+        query.select(builder.count(fromTrigger));
+        query.where(builder.and(
+                builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), activityId),
+                builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERED_TRANSACTION), fromEmail.get(Email_.TRANSACTION_ID)),
+                builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.SENT.label)
+                ));
         
         Long result = objService.getEm().createQuery(query)
                 .getSingleResult();
         
+        return result;
+    }
+    
+    /**
+     * The implementation of this method is based on the way we execute the activities.
+     * At the point of execution, we do not know who we are going to send to, if 
+     * a subscriber is actively subscribed to a targeted list, then we will send 
+     * to this subscriber, otherwise, if the subscription turns inactive at the point
+     * of execution, we won't be able to send this campaign to this subscriber.
+     * So the only way to forecast how many subscribers we are going to send to,
+     * we use 2 numbers:
+     * <ul>
+     * <li>Unsent</li>
+     * <li>Sent</li>
+     * </ul>
+     * Unsent will be changing throughout the lifetime of the campaign as new subscribers
+     * are activated or existing subscribers unsubscribes. Sent will be a growing 
+     * number but will not change after the activity has completed.
+     * <br>
+     * Hence, once completed, the targeted count of a campaign should be the number 
+     * sent because the unsent number will keep growing even though the activity
+     * has completed and the new subscribers will never be targeted for this activity.
+     * <br>
+     * Returns -1 if the campaignActivityId provided is not valid.
+     * 
+     * @param campaignActivityId
+     * @return
+     */
+    public long countTargetedSubscribersForCampaign(long campaignActivityId) {
+        CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
+        if(activity == null)
+            return -1;
+        long total = countEmailsSentForActivity(campaignActivityId);
+        if(!ACTIVITY_STATUS.COMPLETED.name.equals(activity.getSTATUS()))
+                total += countUnsentSubscriberEmailsForCampaign(campaignActivityId);
+        
+        return total;
+    }
+    
+    /**
+     * Same implementation as getUnsentSubscriberEmailsForCampaign but getting the
+     * count directly from database instead of retrieving the records.
+     * 
+     * @param campaignActivityId
+     * @return 
+     */
+    public long countUnsentSubscriberEmailsForCampaign(long campaignActivityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<SubscriberAccount> fromSubAcc = query.from(SubscriberAccount.class);
+        Root<Subscription> fromSubp = query.from(Subscription.class);
+        Root<Assign_Campaign_List> fromAssignCampList = query.from(Assign_Campaign_List.class);
+        Root<Assign_Campaign_Activity> fromAssignCampAct = query.from(Assign_Campaign_Activity.class);
+
+        //Subquery
+        Subquery<String> emailQuery = query.subquery(String.class);
+        Root<Trigger_Email_Activity> fromTrigger = emailQuery.from(Trigger_Email_Activity.class);
+        emailQuery.select(fromTrigger.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
+
+        emailQuery.where(
+                builder.and(
+                        builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), campaignActivityId)
+                )
+        );
+
+        query.select(builder.count(fromSubAcc));
+        query.distinct(true);
+        query.where(
+                builder.and(
+                        builder.equal(fromAssignCampAct.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.SOURCE), fromAssignCampAct.get(Assign_Campaign_Activity_.SOURCE)),
+                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.TARGET), fromSubp.get(Subscription_.TARGET)),
+                        builder.equal(fromSubp.get(Subscription_.SOURCE), fromSubAcc.get(SubscriberAccount_.OBJECTID)),
+                        builder.equal(fromSubp.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.CONFIRMED.toString()),
+                        builder.not(fromSubAcc.get(SubscriberAccount_.EMAIL).in(emailQuery))
+                )
+        );
+
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+
         return result;
     }
 }

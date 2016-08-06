@@ -96,4 +96,10 @@ public class WSCampaignActivityLink {
         long result = campExeService.countEmailsSentForActivity(campaignActivityId);
         return result;
     }
+    
+    @WebMethod(operationName = "getTotalTargetedForCampaignActivity")
+    public long getTotalTargetedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
+        long result = campExeService.countTargetedSubscribersForCampaign(campaignActivityId);
+        return result;
+    }
 }
