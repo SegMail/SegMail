@@ -28,10 +28,6 @@
                 <h:form id="test1" prependId="true" enctype="multipart/form-data">
 
                     <h:inputFile value="#{FormTestEverything.file}" ></h:inputFile>
-                    <p:commandButton id="upload_xml_setup" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
-                                     actionListener="#{FormTestEverything.uploadXMLPlain}"
-                                     update="@form" ajax="true" process="@form"
-                                     ></p:commandButton><!--This doesn't work-->
                     <!--h:commandButton works, but it cannot call blockui-->
                     <h:commandButton id="upload_xml_setup2" styleClass="btn btn-primary col-md-12 col-xs-12" value="Setup via XML."
                                      actionListener="#{FormTestEverything.uploadXMLPlain}"
@@ -39,9 +35,7 @@
                         <f:ajax execute="@all" render="message1"/>
                     </h:commandButton>
                     <s2:messenger id="message1" for="test1" showDetail="true" showSummary="true" ></s2:messenger>
-                    <p:blockUI block="test1" trigger="test1:upload_xml_setup,test1:upload_xml_setup2" >
-                        <p id="spinner">Please wait while we do what we do best.</p>
-                    </p:blockUI>
+                    
                 </h:form>
             </div>
             <br />

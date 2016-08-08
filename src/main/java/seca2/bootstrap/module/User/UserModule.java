@@ -56,7 +56,7 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response)
-            throws ServletException, IOException, UserLoginException, UserAccountLockedException {
+            throws ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;

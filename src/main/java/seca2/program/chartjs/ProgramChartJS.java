@@ -17,7 +17,8 @@ import javax.inject.Named;
 @SessionScoped
 public class ProgramChartJS extends Program {
     
-    private final String WEB_SERVICE_ENDPOINT = "/SegMail/ChartJSService";
+    //private final String WEB_SERVICE_ENDPOINT = "/SegMail/ChartJSService";
+    private final String WEB_SERVICE_ENDPOINT = "ChartJSService";
     
     private final String WEB_SERVICE_METHOD = "outstandingLoanOverTime";
     

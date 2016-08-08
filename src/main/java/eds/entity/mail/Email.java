@@ -5,8 +5,11 @@
  */
 package eds.entity.mail;
 
+import eds.entity.data.EnterpriseObject;
 import eds.entity.transaction.EnterpriseTransaction;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -21,6 +24,8 @@ import javax.persistence.Table;
 @Table(name="EMAIL")
 public class Email extends EnterpriseTransaction {
     
+    public static final String CREATED_FROM = "CREATED_FROM";
+    
     private String SUBJECT;
     
     private String BODY;
@@ -34,7 +39,7 @@ public class Email extends EnterpriseTransaction {
     private Set<String> REPLY_TO_ADDRESSES = new HashSet();
     
     private int RETRIES;
-
+    
     public String getSUBJECT() {
         return SUBJECT;
     }
@@ -101,6 +106,5 @@ public class Email extends EnterpriseTransaction {
     public void setRETRIES(int RETRIES) {
         this.RETRIES = RETRIES;
     }
-    
     
 }

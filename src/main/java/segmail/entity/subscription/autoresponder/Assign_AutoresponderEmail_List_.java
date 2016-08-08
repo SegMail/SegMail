@@ -12,7 +12,7 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(Assign_AutoresponderEmail_Client.class)
+@StaticMetamodel(Assign_AutoresponderEmail_List.class)
 public class Assign_AutoresponderEmail_List_ extends EnterpriseRelationship_{
     
 }

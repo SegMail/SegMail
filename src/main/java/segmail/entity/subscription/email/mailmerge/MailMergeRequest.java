@@ -19,7 +19,25 @@ import javax.persistence.Table;
 @EntityListeners({
     MailMergeRequestListener.class})
 public class MailMergeRequest extends EnterpriseTransaction {
+    
+    /**
+     * The corresponding MAILMERGE_LABEL name;
+     */
+    private String MAILMERGE_LABEL;
+    
+    /**
+     * The processed value. Usually a link.
+     */
+    private String MAILMERGE_VALUE;
 
+    public String getMAILMERGE_LABEL() {
+        return MAILMERGE_LABEL;
+    }
+
+    public void setMAILMERGE_LABEL(String MAILMERGE_LABEL) {
+        this.MAILMERGE_LABEL = MAILMERGE_LABEL;
+    }
+    
     public void overrideSTATUS(MAILMERGE_STATUS mailmerge_status) {
         this.PROCESSING_STATUS = mailmerge_status.name();
     }

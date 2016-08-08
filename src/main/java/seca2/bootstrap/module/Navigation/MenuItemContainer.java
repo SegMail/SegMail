@@ -8,7 +8,9 @@ package seca2.bootstrap.module.Navigation;
 
 import eds.entity.navigation.MenuItem;
 import java.util.Objects;
-import segurl.filter.SegURLResolver;
+import javax.inject.Inject;
+import seca2.bootstrap.UserRequestContainer;
+
 
 /**
  * Wrapper class
@@ -64,10 +66,6 @@ public class MenuItemContainer {
         this.contextPath = contextPath;
     }
     
-    public boolean containsProgram(String programName){
-        return (SegURLResolver.getResolver().resolveProgramName(this.menuItem.getMENU_ITEM_URL())
-                .equalsIgnoreCase(programName));
-    }
 
     @Override
     public int hashCode() {

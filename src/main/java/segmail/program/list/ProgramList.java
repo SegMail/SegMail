@@ -3,6 +3,7 @@ package segmail.program.list;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.enterprise.context.SessionScoped;
@@ -40,7 +41,7 @@ public class ProgramList extends Program implements Serializable {
     private Map<Long,Map<String,String>> subscriberTable;
     private SubscriberAccount subscriber;
     private Map<String,Object> fieldValues; //For adding new subscribers
-    private int page = 1; //For data-dripping purpose
+    private int page = 0; //For data-dripping purpose
     
     //For the confirmation emails
     private List<AutoresponderEmail> confirmationEmails;
@@ -55,6 +56,8 @@ public class ProgramList extends Program implements Serializable {
     private List<SubscriptionListField> fieldList;
     private SubscriptionListField newField;
     
+    //For import
+    private Map<Integer,String> listFieldMapping = new HashMap<>();
     
     private final String formName = "ProgramList";
     
@@ -151,7 +154,7 @@ public class ProgramList extends Program implements Serializable {
         this.selectedWelcomeEmailId = selectedWelcomeEmailId;
     }
     
-    public void refresh(){
+    /*public void refresh(){
         try {
             //redirect to itself after setting list editing
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -161,7 +164,7 @@ public class ProgramList extends Program implements Serializable {
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
-    }
+    }*/
 
     public List<SubscriptionListField> getFieldList() {
         return fieldList;
@@ -227,8 +230,18 @@ public class ProgramList extends Program implements Serializable {
         this.showActiveTabs = showActiveTabs;
     }
 
+    public Map<Integer, String> getListFieldMapping() {
+        return listFieldMapping;
+    }
+
+    public void setListFieldMapping(Map<Integer, String> listFieldMapping) {
+        this.listFieldMapping = listFieldMapping;
+    }
+    
+    
+
     @Override
-    public void initProgramParams() {
+    public void initRequestParams() {
         
     }
 

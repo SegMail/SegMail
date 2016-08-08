@@ -17,34 +17,39 @@ import org.joda.time.DateTime;
  */
 public class MailMergeRequestListener {
     
-    private final int EXPIRATION_TIME_MS = 86400000; //24 hours
+    //private final int EXPIRATION_TIME_MS = 86400000; //24 hours
     
     @PrePersist
-    public void PrePersist(EnterpriseTransaction trans) {
-        this.recordExpiry(trans);
+    public void PrePersist(MailMergeRequest req) {
+        this.recordExpiry(req);
     }
     
     @PostPersist
-    public void PostPersist(EnterpriseTransaction trans) {
+    public void PostPersist(MailMergeRequest req) {
         
     }
     
     @PreUpdate
-    public void PreUpdate(EnterpriseTransaction trans) {
+    public void PreUpdate(MailMergeRequest req) {
         
     }
     
-    public void recordExpiry(EnterpriseTransaction trans) {
+    public void recordExpiry(MailMergeRequest req) {
         
-        java.sql.Timestamp lastChanged = (trans.getDATETIME_CHANGED() == null) ? 
-                trans.getDATETIME_CREATED() : trans.getDATETIME_CHANGED();
+        java.sql.Timestamp lastChanged = (req.getDATETIME_CHANGED() == null) ? 
+                req.getDATETIME_CREATED() : req.getDATETIME_CHANGED();
         
         if(lastChanged == null)
             return;
         
+        int expiry = MAILMERGE_REQUEST.valueOf(req.getMAILMERGE_LABEL()).expiry;
+        
+        if(expiry <= 0)
+            return;
+        
         DateTime newExpiryDate = new DateTime(lastChanged.getTime());
-        newExpiryDate.plusMillis(EXPIRATION_TIME_MS);
-        trans.setEXPIRY_DATETIME(new java.sql.Timestamp(newExpiryDate.getMillis()));
+        newExpiryDate.plusMillis(expiry);
+        req.setEXPIRY_DATETIME(new java.sql.Timestamp(newExpiryDate.getMillis()));
         
     }
 }

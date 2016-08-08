@@ -5,16 +5,12 @@
  */
 package eds.entity.batch;
 
-import eds.component.batch.BatchProcessingException;
-import eds.component.batch.BatchProcessingService;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.CascadeType;
@@ -107,7 +103,7 @@ public class BatchJobStep implements Serializable {
         this.PARAMS.add(param);
     }
 
-    public void execute() 
+    public Object execute() 
             throws 
             IOException, 
             ClassNotFoundException, 
@@ -132,13 +128,16 @@ public class BatchJobStep implements Serializable {
         Object ejb = InitialContext.doLookup("java:module/" + getSERVICE_NAME());
         System.out.println(ejb.getClass().getName());
 
+        Object ret = null;
         Method[] methodArray = ejb.getClass().getMethods();
         for (int i = 0; i < methodArray.length; i++) {
             if (getSERVICE_METHOD().equals(methodArray[i].getName())) {
                 Method method = methodArray[i];
-                method.invoke(ejb, params);
+                ret = method.invoke(ejb, params);
                 break;
             }
         }
+        
+        return ret;
     }
 }

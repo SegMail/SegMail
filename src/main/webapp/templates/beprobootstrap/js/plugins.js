@@ -367,9 +367,9 @@ function gPlugins(container){
     gICheck.init(container);
     gValidate.init(container);
     gMask.init(container);
-    gTableSimple.init(container);
-    gTableDefault.init(container);
-    gTableSortable.init(container);
+    //gTableSimple.init(container);
+    //gTableDefault.init(container);
+    //gTableSortable.init(container);
     gSpinner.init(container);
     gKnob.init(container);   
     gChained.init(container);

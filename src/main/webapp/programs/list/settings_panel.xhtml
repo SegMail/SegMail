@@ -20,7 +20,7 @@
                         >
                     <!--f:ajax won't append its code to the onclick attribute of the button element-->
                     <f:ajax execute="@form" render="@form :FormListList :FormEditListHeader" 
-
+                            onevent="saveSettings"
                             listener="#{FormListSettings.saveSettings()}"
                             event="click">
                     </f:ajax>

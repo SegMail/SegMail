@@ -37,6 +37,11 @@
             <property name="hibernate.classloading.use_current_tccl_as_parent" value="false" />
             <!--http://stackoverflow.com/questions/3677380/proper-hibernate-annotation-for-byte-->
             <property name="hibernate.jdbc.use_streams_for_binary" value="false" />
+            
+            <property name="hibernate.jdbc.batch_size" value="1000" />
+            <property name="hibernate.order_inserts" value="true" />
+            <property name="hibernate.order_updates" value="true" />
+            <property name="hibernate.jdbc.batch_versioned_data" value="true" />
         </properties>
     </persistence-unit>
 </persistence>  

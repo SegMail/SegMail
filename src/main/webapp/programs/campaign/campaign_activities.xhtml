@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormCampaignActivities">
+        <s2:messenger id="FormCampaignActivities_Messenger" for="FormCampaignActivities" showDetail="true" showSummary="true"
+                      class="form-group"></s2:messenger>
+
+        <div class="block-content">
+            <h2 class="pull-left">Campaign Activites</h2>
+            <div class="pull-right">
+
+                <a href="#create_new_activity" 
+                   class="btn btn-default nm" data-toggle="modal">
+                    <span class="fa fa-plus"></span>
+                </a>
+                <button type="button" class="btn btn-default nm">
+                    <span class="fa fa-refresh">
+
+                    </span>
+                </button>
+            </div>
+        </div>
+        <div class="block-content np">
+            <table class="table table-hover">
+                <tbody>
+                    <c:choose>
+                        <c:when test="#{FormCampaignActivities.allActivities.size() gt 0}">
+                            <tr>
+                                <th>Status</th>
+                                <th>Date Created</th>
+                                <th>Subject</th>
+                                <th>Clickthrough %</th>
+                                <th></th>
+                            </tr>
+                            <c:forEach items="#{FormCampaignActivities.allActivities}" var="activity" >
+                                <tr>
+                                    <td>
+                                        <span class="group group-#{FormCampaignActivities.activityStatusMapping.get(activity.STATUS)}">
+                                        </span>
+                                        #{FormCampaignActivities.toReadableActivityStatus(activity.STATUS)}
+                                    </td>
+                                    <td>
+                                        #{activity.DATE_CREATED}
+                                    </td>
+                                    <td>
+                                        #{activity.ACTIVITY_NAME}
+                                    </td>
+                                    <td>
+                                        4.55% (fake)
+                                    </td>
+                                    <td>
+                                        <div class="pull-right">
+                                            <c:choose>
+                                                <c:when test="#{activity.STATUS eq 'NEW'}">
+                                                    <button
+
+                                                        jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
+                                                        href="#edit_campaign_activity"
+                                                        data-toggle="modal"
+                                                        style="margin-right: 3px;"
+                                                        class="btn btn-success list-item-trigger"
+                                                        title="Edit Activity"
+                                                        >
+                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
+                                                                render="FormEditEmailActivity"
+                                                                onevent="load_activity"
+                                                                >
+                                                        </f:ajax>
+                                                        <i class="fa fa-pencil"></i>
+                                                    </button>
+                                                </c:when>
+                                                <c:when test="#{activity.STATUS eq 'EDITING'}">
+                                                    <button
+                                                        jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
+                                                        href="#edit_campaign_activity"
+                                                        data-toggle="modal"
+                                                        style="margin-right: 3px;"
+                                                        class="btn btn-success list-item-trigger"
+                                                        title="Edit Activity"
+                                                        >
+                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
+                                                                render="FormEditEmailActivity"
+                                                                onevent="load_activity"
+                                                                >
+                                                        </f:ajax>
+                                                        <i class="fa fa-pencil"></i>
+                                                    </button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button
+                                                        jsf:id="track_campaign_activity_button_#{activity.OBJECTID}"
+                                                        href="#track_campaign_activity"
+                                                        data-toggle="modal"
+                                                        style="margin-right: 3px;"
+                                                        class="btn btn-primary list-item-trigger"
+                                                        title="Track Activity"
+                                                        >
+                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
+                                                                render="FormTrackEmailActivity"
+                                                                onevent="track_activity"
+                                                                >
+                                                        </f:ajax>
+                                                        <i class="fa fa-bar-chart-o"></i>
+                                                    </button>
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <button
+                                                jsf:rendered="#{activity.STATUS ne 'COMPLETED' and activity.STATUS ne 'EXECUTING'}"
+                                                jsf:id="execute_campaign_activity_button_#{activity.OBJECTID}"
+                                                href="#execute_campaign_activity"
+                                                data-toggle="modal"
+                                                style="margin-right: 3px;"
+                                                class="btn btn-warning list-item-trigger"
+                                                title="Execute Activity"
+                                                >
+                                                <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
+                                                        render="FormExecuteCampaignActivity"
+                                                        onevent="executeAndClose"
+                                                        >
+                                                </f:ajax>
+                                                <i class="fa fa-send"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <tr>
+                                <td style="text-align:center; padding: 30px 0">
+                                    <h2>
+                                        There are no activities in this campaign. 
+                                    </h2>
+                                    <a href="#create_new_activity" 
+                                       class="btn btn-success nm" data-toggle="modal">
+                                        Create one now
+                                    </a>
+                                </td>
+                            </tr>
+                        </c:otherwise>
+                    </c:choose>
+
+
+                </tbody>
+            </table>
+        </div>
+        <div class="block-footer">
+            <div class="pull-left">
+
+            </div>
+            <div class="pull-right">
+
+            </div>
+        </div>
+    </form>
+
+</html>

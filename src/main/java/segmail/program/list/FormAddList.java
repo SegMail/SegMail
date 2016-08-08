@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 
 /**
  *
@@ -40,6 +41,7 @@ public class FormAddList {
     @Inject private ProgramList programList;
     
     @EJB private SubscriptionService subscriptionService;
+    @EJB private ListService listService;
     @EJB private ClientService clientService;
     @EJB private GenericObjectService genericDBService;
     private boolean startFirstList;
@@ -61,7 +63,7 @@ public class FormAddList {
             if(client == null)
                 throw new RuntimeException("No client object found for this user "+user);
             
-            SubscriptionList SubscriptionList = subscriptionService.createList(listName, remote);
+            SubscriptionList SubscriptionList = listService.createList(listName, remote, client.getOBJECTID());
             
             //this.checkNoListYet(); //refresh the editing panel
             

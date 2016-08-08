@@ -18,6 +18,7 @@ import javax.jws.soap.SOAPBinding.Style;
  */
 @WebService
 @SOAPBinding(style = Style.RPC)
+@HandlerChain(file = "handlers-server.xml")
 public interface ChartJSService {
     
     @WebMethod(operationName = "add")

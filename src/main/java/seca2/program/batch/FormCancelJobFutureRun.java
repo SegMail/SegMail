@@ -10,18 +10,20 @@ import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import seca2.program.FormEdit;
+import seca2.program.FormEditEntity;
 
 /**
  *
  * @author LeeKiatHaw
  */
+@RequestScoped
 @Named("FormCancelJobFutureRun")
-public class FormCancelJobFutureRun implements FormEdit {
+public class FormCancelJobFutureRun implements FormEditEntity {
     
     @Inject ProgramBatch program;
     

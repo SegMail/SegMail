@@ -9,7 +9,6 @@ package eds.entity.program;
 
 import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**
@@ -23,14 +22,32 @@ import javax.persistence.Table;
 public class Program extends EnterpriseObject{
     
     private String PROGRAM_NAME;
-    private String VIEW_DIRECTORY;
+    //private String VIEW_DIRECTORY;
     private String VIEW_ROOT;
-    private String BEAN_DIRECTORY;
+    //private String BEAN_DIRECTORY;
     
     private String DISPLAY_TITLE;
     private String DISPLAY_DESCRIPTION;
     
     private Boolean IS_PUBLIC; //http://stackoverflow.com/a/10648207/5765606
+    
+    public Program() {
+        super();
+    }
+    
+    /**
+     * Copy constructor
+     * @param program 
+     */
+    public Program(Program program) {
+        this.PROGRAM_NAME = program.PROGRAM_NAME;
+        //this.VIEW_DIRECTORY = program.VIEW_DIRECTORY;
+        this.VIEW_ROOT = program.VIEW_ROOT;
+        //this.BEAN_DIRECTORY = program.BEAN_DIRECTORY;
+        this.DISPLAY_TITLE = program.DISPLAY_TITLE;
+        this.DISPLAY_DESCRIPTION = program.DISPLAY_DESCRIPTION;
+        this.IS_PUBLIC = program.IS_PUBLIC;
+    }
     
     public String getPROGRAM_NAME() {
         return PROGRAM_NAME;
@@ -38,22 +55,6 @@ public class Program extends EnterpriseObject{
 
     public void setPROGRAM_NAME(String PROGRAM_NAME) {
         this.PROGRAM_NAME = PROGRAM_NAME;
-    }
-
-    public String getVIEW_DIRECTORY() {
-        return VIEW_DIRECTORY;
-    }
-
-    public void setVIEW_DIRECTORY(String VIEW_DIRECTORY) {
-        this.VIEW_DIRECTORY = VIEW_DIRECTORY;
-    }
-
-    public String getBEAN_DIRECTORY() {
-        return BEAN_DIRECTORY;
-    }
-
-    public void setBEAN_DIRECTORY(String BEAN_DIRECTORY) {
-        this.BEAN_DIRECTORY = BEAN_DIRECTORY;
     }
 
     public String getVIEW_ROOT() {

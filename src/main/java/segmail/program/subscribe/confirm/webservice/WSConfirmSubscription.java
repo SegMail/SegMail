@@ -18,6 +18,7 @@ import javax.jws.WebService;
 import javax.jws.WebParam;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
@@ -69,20 +70,16 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             if (key == null || key.isEmpty()) {
                 throw new UnwantedAccessException("Key is not provided.");
             }
+            //Check if it is a testing link
+            MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(key);
+            if(label != null && label.equals(MAILMERGE_REQUEST.CONFIRM))
+                return "This is a testing list";
 
             MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
-
-            /*List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
-
-            if (params == null || params.isEmpty()) {
-                throw new RuntimeException("Transaction parameters missing.");
-            }
             
-            MailMergeRequest trans = (MailMergeRequest) params.get(0).getOWNER();
-            if (trans == null) {
-                throw new RuntimeException("Transaction key not found.");
-            }*/
-            
+            if(trans == null)
+                throw new UnwantedAccessException();
+
             if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
                 throw new TransactionProcessedException();
             }
@@ -116,66 +113,4 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             throw new RuntimeException("You received this transaction code by mistake.", ex);
         }
     }
-
-    /*
-    public String process(String function, String key)
-            throws UnwantedAccessException, TransactionProcessedException {
-        if (key == null || key.isEmpty()) {
-            throw new UnwantedAccessException("Key is not provided.");
-        }
-
-        MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
-
-        if (trans == null) {
-            throw new RuntimeException("Transaction key not found.");
-        }
-
-        if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
-            throw new TransactionProcessedException();
-        }
-
-        List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
-
-        if (params == null || params.isEmpty()) {
-            throw new RuntimeException("Transaction parameters missing.");
-        }
-
-        String email = "";
-        long listId = -1;
-
-        for (EnterpriseTransactionParam p : params) {
-            if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME)) {
-                email = p.getPARAM_VALUE();
-            }
-            if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST)) {
-                listId = Long.parseLong(p.getPARAM_VALUE());
-            }
-        }
-
-        //Determine which function to call
-        MailMergeLabel functionEnum = MailMergeLabel.getMailMergeLabel(function);
-        String listname = "";
-        try {
-            switch (functionEnum) {
-                case CONFIRM:
-                    Subscription confirmedSubsc = subService.confirmSubscriber(email, listId);
-                    listname = confirmedSubsc.getTARGET().getLIST_NAME();
-                    break;
-                case UNSUBSCRIBE:
-                    Subscription unsubSubsc = subService.unsubscribeSubscriber(email, listId);
-                    listname = unsubSubsc.getTARGET().getLIST_NAME();
-                    break;
-            }
-            int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name());
-
-            if (updateResults <= 0) {
-                throw new RuntimeException("No Transaction was udpated.");
-            }
-        } catch (RelationshipNotFoundException ex) {
-            throw new RuntimeException("You received this transaction code by mistake.", ex);
-        }
-
-        return listname;
-    }
-    */
 }

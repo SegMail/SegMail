@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+
+    <form jsf:id="FormBasicSettings">
+        <div class="block-content">
+            <div class="form-group">
+                <s2:messenger id="FormBasicSettings_Messenger" for="FormBasicSettings" showDetail="true" showSummary="true"
+                              class="form-control"
+                              ></s2:messenger>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Campaign name:
+                </label>
+                <input type="text" class="form-control validate[required]" id="serviceName"
+                       jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_NAME}"
+                       />
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Campaign goals:
+                </label>
+                <textarea class="form-control" id="campaignGoals"
+                          rows="10"
+                          style="resize: none;"
+                          jsf:value="#{FormBasicSettings.editingCampaign.CAMPAIGN_GOALS}"
+                          />
+            </div>
+        </div>
+        <div class="block-footer">
+            <div class="pull-left">
+                <button class="btn btn-default"
+                        onclick="document.getElementById('FormBasicSettings').reset();
+                                return false;">
+                    I screwed up. Help!
+                </button>
+            </div>
+            <div class="pull-right">
+                <button jsf:id="saveBasicSettings" class="btn btn-primary"                                 
+                                 >
+                    <f:ajax listener="#{FormBasicSettings.saveAndContinue()}"
+                            event="click"
+                            onevent="saveBasicSettings"
+                            render="@form :PageToolbar" execute="@form">
+                    </f:ajax>
+                    <i class="fa fa-floppy-o"></i>
+                    Update
+                </button>
+            </div>
+        </div>
+    </form>
+</html>

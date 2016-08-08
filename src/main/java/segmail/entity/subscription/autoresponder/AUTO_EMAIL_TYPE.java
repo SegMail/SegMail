@@ -24,14 +24,4 @@ public enum AUTO_EMAIL_TYPE {
     public String toString() {
         return this.name; //To change body of generated methods, choose Tools | Templates.
     }
-    
-    public static AUTO_EMAIL_TYPE getType(String name){
-        if(name == null ? CONFIRMATION.name() == null : name.equals(CONFIRMATION.name())) 
-            return CONFIRMATION;
-        if(name == null ? WELCOME.name() == null : name.equals(WELCOME.name())) 
-            return WELCOME;
-        if(name == null ? AUTORESPONDER.name() == null : name.equals(AUTORESPONDER.name())) 
-            return AUTORESPONDER;
-        return AUTORESPONDER; //default
-    }
 }

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+        <ui:define name="main-program-panel">
+
+            <div class="row"><!--For the message-->
+                <div class="col-md-12">
+                    <form jsf:id="ProgramCampaign">
+                        <s2:messenger for="ProgramCampaign" showDetail="true" showSummary="true" closable="true" />
+                    </form>
+                </div>
+            </div>
+
+            <div id="stats_panel"> <!--stats widget-->
+
+            </div>
+
+            <c:choose>
+                <c:when test="#{FormProgramModeSwitch.editCampaignMode}"> <!--Individual Campaign mode-->
+                    <ui:include src="edit_campaign.xhtml"></ui:include>
+                </c:when>
+                <c:otherwise><!--List Campaign mode-->
+                    <ui:include src="campaign_list_panel.xhtml" ></ui:include>
+                </c:otherwise>
+            </c:choose>
+
+            <div id="transactions_panel"> <!--Transaction widget-->
+                <form jsf:id="form">
+                    
+                </form>
+            </div>
+            <div class="modal fade" id="create_new_campaign">
+                <ui:include src="create_new_campaign.xhtml"></ui:include>
+            </div>
+            <!--<div jsf:rendered="#{FormEditCampaign.editingCampaign ne null}" class="modal fade" id="edit_campaign">
+                <ui:include src="edit_campaign.xhtml"></ui:include>
+            </div>-->
+            <div class="modal fade" id="create_new_activity">
+                <ui:include src="create_new_activity.xhtml"></ui:include>
+            </div>
+            <div class="modal fade" id="edit_campaign_activity" >
+                <ui:include src="edit_campaign_activity.xhtml" ></ui:include>
+            </div>
+            <div class="modal fade" id="execute_campaign_activity" >
+                <ui:include src="execute_campaign_activity.xhtml" ></ui:include>
+            </div>
+            <div class="modal fade" id="track_campaign_activity" >
+                <ui:include src="track_campaign_activity.xhtml" ></ui:include>
+            </div>
+        </ui:define>
+
+        <ui:define name="scripts-bottom" id="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/campaign.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/custom/summernote_hack.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/select2/select2.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery.soap/jquery.soap.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/md5/md5.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery-delayedchange/jquery.delayedchange.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/datatables.min.js"></script>
+        </ui:define>
+
+        <ui:define name="toolbar-right"  >
+            <ui:include src="edit_campaign_controls.xhtml"/>
+        </ui:define>
+        
+        <ui:define name="head">
+            <link rel="stylesheet" type="text/css" href="#{request.contextPath}/programs/campaign/css/bounce.css" />
+            <link rel="stylesheet" type="text/css" href="#{request.contextPath}/programs/campaign/css/link-button.css" />
+        </ui:define>
+
+    </ui:composition>
+</html>
+

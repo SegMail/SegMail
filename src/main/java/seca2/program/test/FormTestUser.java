@@ -96,8 +96,8 @@ public class FormTestUser implements Serializable {
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch(Exception ex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), //why? i forgot why...
-                    ex.getCause().getMessage());
+                    ex.getClass().getSimpleName(), //why? i forgot why...
+                    ex.getMessage());
         }
     }
     
@@ -248,6 +248,7 @@ public class FormTestUser implements Serializable {
     }
     
     public void createUserWithType(String usertypename, String username, String password){
+        
         List<UserType> usertypeList = this.userService.getUserTypeByName(usertypename);
         if(usertypeList == null || usertypeList.isEmpty())
             throw new RuntimeException("No UserTypes created yet.");
@@ -257,5 +258,6 @@ public class FormTestUser implements Serializable {
         this.setUsername(username);
         this.setPassword(password);
         this.createUser();
+        
     }
 }

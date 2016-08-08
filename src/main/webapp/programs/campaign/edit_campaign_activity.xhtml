@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormEditEmailActivity">
+        <div class="modal-content" style="overflow-y: hidden;">
+            <div class="block">
+                <div id="delete-template-1" class="delete-confirm-container">
+                    <div class="delete-container send-container" data-role="main">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                Edit Email Activity
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <s2:messenger id="FormEditEmailActivity_messenger" for="FormEditEmailActivity" showDetail="true" showSummary="true"
+                                                      class="form-control"></s2:messenger>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="editor-form" class="col-md-6"
+                                     >
+                                    <div class="form-group">
+                                        <label>
+                                            Subject:
+                                        </label>
+                                        <input type="text" class="form-control"
+                                               jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_NAME}"
+                                               name="subject" 
+                                               >
+                                        </input>
+                                    </div>
+                                    <div class="form-group">
+                                        <textarea id="content" class="editor"
+                                                  jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
+                                        </textarea>
+                                    </div>
+                                    <div class="controls">
+                                        <div class="row-form">
+                                            <div class="col-md-3">
+                                                <strong>Send in batchs of:</strong>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input id="sendInBatch" type="number" style="" class="form-control"
+                                                       onchange="setSendInBatch('sendInBatch')"
+                                                       jsf:value="#{FormEditEmailActivity.editingSchedule.SEND_IN_BATCH}"
+                                                       placeholder="blank or 0 = send all"
+                                                       >
+                                                </input>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="form-group">
+                                                    <h:selectOneMenu style="width: 100%;"
+                                                                     styleClass="select2"
+                                                                     value="#{FormEditEmailActivity.editingSchedule.EVERY_HOUR}"
+                                                                     >
+                                                        <f:selectItem itemValue="6" itemLabel="Every 6 hours"></f:selectItem>
+                                                        <f:selectItem itemValue="12" itemLabel="Every 12 hours"></f:selectItem>
+                                                        <f:selectItem itemValue="24" itemLabel="Every 24 hours"></f:selectItem>
+                                                    </h:selectOneMenu>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                    <div id="preview-form" class="col-md-6 col-sm-6 col-xs-6"><!--preview pane-->
+                                        <div id="preview">
+
+                                        </div>
+                                    </div>
+                                    <div id="links-form" class="col-md-6 col-sm-6 col-xs-6"><!--links pane-->
+                                        <div id="links">
+                                        </div>
+                                    </div>
+                                </div>
+                                <h:inputHidden id="pseudo-preview" pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                                </h:inputHidden>
+                                <script type="text/javascript" >
+                                    var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                                </script>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <h:commandButton styleClass="btn btn-success"
+                                             value="Save &amp; continue"
+                                             onclick="reapply_textarea('content');"
+                                             >
+                                <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
+                                        event="click"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                            </h:commandButton>
+                            <h:commandButton styleClass="btn btn-default"
+                                             value="Save &amp; close"
+                                             onclick="reapply_textarea('content')"
+                                             >
+                                <f:ajax listener="#{FormEditEmailActivity.saveAndClose()}"
+                                        event="click"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                            </h:commandButton>
+                            <button class="btn btn-danger"
+                                    onclick="$('.delete-container').toggle('slow');
+                                        return false;">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="delete-container" data-role="delete" style="display: none;">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                Are you sure you want to delete this email activity?
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                You will lose all information in this email activity. 
+                                That includes your send logs and conversion rates.
+                            </p>
+                            <a href="#">Learn how to archive your old activities.</a>
+                        </div>
+                        <div class="modal-footer">
+                            <button jsf:id="delete_button"
+                                    class="btn btn-danger">
+                                <f:ajax event="click" listener="#{FormEditEmailActivity.delete()}"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                                Confirm delete
+                            </button>
+                            <button class="btn btn-default"
+                                    onclick="$('.delete-container').toggle('slow');
+                                        return false;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="send-container" data-role="send" style="display:none;">
+                        <div class="modal-header">
+                            <h4 class="modal-title">
+                                Are you sure you want to start sending out this email?
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                This email will be received by your targeted list subscribers.
+                                You can see the conversion rates shortly once the sending starts.
+                            </p>
+                            <div class="form-group">
+                                <s2:messenger id="FormEditEmailActivity_messenger2" for="FormEditEmailActivity" showDetail="true" showSummary="true"
+                                                      class="form-control"></s2:messenger>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button jsf:id="send_button"
+                                    class="btn btn-warning"><!--should the sending form be another modal pop instead?-->
+                                <f:ajax event="click" listener="#{FormEditEmailActivity.sendAndClose()}"
+                                        onevent="saveAndContinue"
+                                        render="@form" execute="@form">
+                                </f:ajax>
+                                Confirm send
+                            </button>
+                            <button class="btn btn-default"
+                                    onclick="$('.send-container').toggle('slow');
+                                        return false;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

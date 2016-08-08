@@ -67,6 +67,7 @@ public class ClientModule extends BootstrapModule implements Serializable {
     @Override
     protected String urlPattern() {
         return "/program/*";
+        //return "/*"; //WS calls can be initiated by System users so it is best not to handle 
     }
 
     @Override

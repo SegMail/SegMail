@@ -28,7 +28,7 @@ public abstract class Program implements Serializable {
     @PostConstruct
     public void init() {
         clearVariables();
-        initProgramParams();
+        initRequestParams();
         initProgram();
     }
     
@@ -37,7 +37,7 @@ public abstract class Program implements Serializable {
      */
     public abstract void clearVariables();
     
-    public abstract void initProgramParams();
+    public abstract void initRequestParams();
     
     public abstract void initProgram();
     
@@ -50,7 +50,7 @@ public abstract class Program implements Serializable {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request
             ec.getFlash().setKeepMessages(true);
-            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
+            ec.redirect(ec.getRequestContextPath()+reqContainer.printFullPathWithoutContext());
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }

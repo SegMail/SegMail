@@ -49,7 +49,7 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     /**
      * Current number of subscribers by subscription.
      */
-    private int SUBSCRIBER_COUNT;
+    private long SUBSCRIBER_COUNT;
     
     /**
      * The address the recipient is sending to when they click "Reply" in the 
@@ -128,11 +128,11 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
         this.REMOTE = REMOTE;
     }
 
-    public int getSUBSCRIBER_COUNT() {
+    public long getSUBSCRIBER_COUNT() {
         return SUBSCRIBER_COUNT;
     }
 
-    public void setSUBSCRIBER_COUNT(int SUBSCRIBER_COUNT) {
+    public void setSUBSCRIBER_COUNT(long SUBSCRIBER_COUNT) {
         this.SUBSCRIBER_COUNT = SUBSCRIBER_COUNT;
     }
 

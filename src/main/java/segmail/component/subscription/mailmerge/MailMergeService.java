@@ -9,7 +9,10 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
+import eds.component.webservice.TransactionProcessedException;
+import eds.component.webservice.UnwantedAccessException;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -21,15 +24,22 @@ import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
-import segmail.entity.subscription.email.mailmerge.MailMergeLabel;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
 /**
+ * A MailMerge is a piece of information that comes from an EnterpriseObject in
+ * the system and it is represented by a code that can be inserted in any
+ * content.
+ *
+ *
  *
  * @author LeeKiatHaw
  */
 @Stateless
 public class MailMergeService {
+
+    public static final String UNSUBSCRIBE_PROGRAM_NAME = "unsubscribe";
 
     @EJB
     private GenericObjectService objectService;
@@ -80,15 +90,15 @@ public class MailMergeService {
             //long listId
             String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
-        if (!text.contains(MailMergeLabel.CONFIRM.label())) {
+        if (!text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
             return text;
         }
 
         //1. Create a transaction with expiry date 
         MailMergeRequest trans = transService.getTransactionByKey(confirmationKey, MailMergeRequest.class);
-        if(trans == null) {
+        if (trans == null) {
             trans = new MailMergeRequest();
-            trans.setPROGRAM(MailMergeLabel.CONFIRM.name().toLowerCase());
+            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
             trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
             trans.setTRANSACTION_KEY(confirmationKey); //More like an override
             updateService.getEm().persist(trans);
@@ -97,19 +107,18 @@ public class MailMergeService {
 
         //2. Create the transaction parameters
         /*EnterpriseTransactionParam subscriberParam = new EnterpriseTransactionParam();
-        subscriberParam.setOWNER(trans);
-        subscriberParam.setPARAM_KEY(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME);
-        subscriberParam.setPARAM_VALUE(email);
-        updateService.getEm().persist(subscriberParam);
+         subscriberParam.setOWNER(trans);
+         subscriberParam.setPARAM_KEY(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME);
+         subscriberParam.setPARAM_VALUE(email);
+         updateService.getEm().persist(subscriberParam);
 
-        EnterpriseTransactionParam listParam = new EnterpriseTransactionParam();
-        listParam.setOWNER(trans);
-        listParam.setPARAM_KEY(SubscriptionService.DEFAULT_KEY_FOR_LIST);
-        listParam.setPARAM_VALUE(Long.toString(listId));
-        updateService.getEm().persist(listParam);
-        //Might want to use guid instead.
-        */
-
+         EnterpriseTransactionParam listParam = new EnterpriseTransactionParam();
+         listParam.setOWNER(trans);
+         listParam.setPARAM_KEY(SubscriptionService.DEFAULT_KEY_FOR_LIST);
+         listParam.setPARAM_VALUE(Long.toString(listId));
+         updateService.getEm().persist(listParam);
+         //Might want to use guid instead.
+         */
         //3. Return the link with program name "confirm" and the generated transaction ID 
         ServerInstance landingServer
                 = landingService.getNextServerInstance(
@@ -121,7 +130,7 @@ public class MailMergeService {
 
         String confirmLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
 
-        String newEmailBody = text.replace(MailMergeLabel.CONFIRM.label(), confirmLink);
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.CONFIRM.label(), confirmLink);
 
         return newEmailBody;
     }
@@ -140,10 +149,11 @@ public class MailMergeService {
 
     /**
      * - Check if the transaction key was already created by looking at the
-     * params. - If exist, re-use the same transaction key
-     * - For unsubscription key, we use a more consistent one:
-     * [email]+[salt]+[listId]+[salt] so that we can check if it exists before
-     * - Let's use the subscriber's ID (the one assigned to the client)
+     * params. - If exist, re-use the same transaction key - For unsubscription
+     * key, we use a more consistent one: [email]+[salt]+[listId]+[salt] so that
+     * we can check if it exists before - Let's use the subscriber's ID (the one
+     * assigned to the client) - Don't store another transaction because this is
+     * not a time-limited transaction.
      *
      *
      * @param text
@@ -154,20 +164,19 @@ public class MailMergeService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseUnsubscribeLink(String text, String unsubscribeKey) throws IncompleteDataException {
 
-        if (!text.contains(MailMergeLabel.UNSUBSCRIBE.label())) {
+        if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.UNSUBSCRIBE.label())) {
             return text;
         }
-        
+
         // Check if key exists
-        MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
-        if(trans == null) {
-            trans = new MailMergeRequest();
-            trans.setPROGRAM(MailMergeLabel.UNSUBSCRIBE.name().toLowerCase());
-            trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
-            trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
-            updateService.getEm().persist(trans);
-        }
-        
+        /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
+         if(trans == null) {
+         trans = new MailMergeRequest();
+         trans.setPROGRAM(MAILMERGE_REQUEST.UNSUBSCRIBE.name().toLowerCase());
+         trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
+         trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
+         updateService.getEm().persist(trans);
+         }*/
         ServerInstance landingServer
                 = landingService.getNextServerInstance(
                         LandingServerGenerationStrategy.ROUND_ROBIN,
@@ -176,11 +185,56 @@ public class MailMergeService {
             throw new IncompleteDataException("Please contact app administrator to set a landing server.");
         }
 
-        String unsubLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
+        String unsubLink = landingServer.getURI().concat("/").concat(UNSUBSCRIBE_PROGRAM_NAME).concat("/").concat(unsubscribeKey);
 
-        String newEmailBody = text.replace(MailMergeLabel.UNSUBSCRIBE.label(), unsubLink);
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLink);
 
         return newEmailBody;
 
     }
+
+    public String parseEverything(String text, Map<String, Object> params) throws IncompleteDataException {
+        String result = text;
+        //Has to be a better way to register all these parsing in a queue and process them together
+        result = this.parseConfirmationLink(result, (String) params.get(MAILMERGE_REQUEST.CONFIRM.label()));
+        result = this.parseUnsubscribeLink(result, (String) params.get(MAILMERGE_REQUEST.UNSUBSCRIBE.label()));
+        //result = this.parseListAttributes(result, (Long) params.get("LISTID"));
+        //result = this.parseMultipleContent(result, (Long) params.get("LISTID"));
+
+        return result;
+    }
+
+    /**
+     * Forget it, let's just hardcode the hell out of our launch!
+     * 
+     * @param requestType name property of the MAILMERGE_REQUEST type
+     * @param requestKey key to identify the request
+     * @return
+     */
+    /*@TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public MailMergeRequest processMailMergeRequest(String requestType, String requestKey) 
+            throws UnwantedAccessException, TransactionProcessedException {
+        if (requestKey == null || requestKey.isEmpty()) {
+            throw new UnwantedAccessException("Key is not provided.");
+        }
+        if (requestType == null || requestType.isEmpty()) {
+            throw new UnwantedAccessException("Type is not provided.");
+        }
+
+        //Check if it is a testing link
+        MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(requestKey);
+        if (label != null) {
+            return label;//throw exception instead
+        }
+        MailMergeRequest trans = transService.getTransactionByKey(requestKey, MailMergeRequest.class);
+        if (trans == null) {
+            throw new UnwantedAccessException();
+        }
+
+        if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
+            throw new TransactionProcessedException();
+        }
+        
+        return trans;
+    }*/
 }

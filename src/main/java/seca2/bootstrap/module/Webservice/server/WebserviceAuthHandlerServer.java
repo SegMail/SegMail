@@ -27,7 +27,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 
 /**
@@ -71,6 +70,16 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
 
     @Override
     public boolean handleFault(SOAPMessageContext context) {
+        /*try {
+            SOAPMessage message = context.getMessage();
+            SOAPBody body = message.getSOAPBody();
+            SOAPFault fault = body.getFault();
+            String code = fault.getFaultCode();
+            String faultString = fault.getFaultString();
+            
+        } catch (SOAPException ex) {
+            Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
         return true;
     }
 
@@ -82,6 +91,10 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
     private boolean authenticateWS(SOAPMessageContext context)
             throws SOAPException, UserAccountLockedException, UserLoginException {
 
+        //If the request comes from the an authenticated session, no need to authenticate
+        if(sessionContainer.isLoggedIn())
+            return true;
+        
         HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
 
             //String username = req.getHeader(WebserviceSOAPKeys.USERNAME);
@@ -101,26 +114,34 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
         String password = header.getAttribute(WebserviceSOAPKeys.PASSWORD);
         
         String server = header.getAttribute(WebserviceSOAPKeys.SERVER_NAME);
+        
+        if(username == null || username.isEmpty()
+                || password == null || password.isEmpty())
+            throw new UserLoginException("No username or password provided. Please log in again.");
 
             //Get the host of the application
         //More reliable to get from HTTP header than manually set it in SOAP header
         String ip = req.getRemoteAddr();
 
         User authenticatedUser = wsService.authenticateApplication(username, password, server);
+        sessionContainer.setSessionId(req.getRequestedSessionId());
         sessionContainer.setUser(authenticatedUser);
-        
+        sessionContainer.setLoggedIn(true);
+        sessionContainer.setUserType(authenticatedUser.getUSERTYPE());
 
         return true;
 
     }
+    
 
     private SOAPFault setSOAPFault(Exception ex, SOAPMessageContext context) throws SOAPException {
-        Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 
         SOAPBody body = context.getMessage().getSOAPBody();
         SOAPFault fault = body.addFault();
 
-        QName faultName = new QName(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Server");
+        //QName faultName = new QName(SOAPConstants.URI_NS_SOAP_1_2_ENVELOPE, "Server");
+        QName faultName = new QName(WebserviceSOAPKeys.NAMESPACE, ex.getClass().getSimpleName());
         fault.setFaultCode(faultName);
         fault.setFaultActor(ex.getClass().getSimpleName());
         fault.setFaultString(ex.getMessage());

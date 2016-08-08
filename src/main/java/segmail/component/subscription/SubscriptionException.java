@@ -5,10 +5,13 @@
  */
 package segmail.component.subscription;
 
+import javax.ejb.ApplicationException;
+
 /**
  *
  * @author LeeKiatHaw
  */
+@ApplicationException(rollback = true)
 public class SubscriptionException extends Exception {
 
     public SubscriptionException(String message) {

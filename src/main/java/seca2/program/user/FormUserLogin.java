@@ -49,7 +49,10 @@ public class FormUserLogin {
     public void init(){
         FacesContext fc = FacesContext.getCurrentInstance();
         ExternalContext ec = fc.getExternalContext();
-        if(fc.isPostback() /* && must have some other ways to know this is a timeout*/){
+        if(!fc.isPostback() /* && must have some other ways to know this is a timeout*/
+            && !userContainer.isLoggedIn()
+                && (userContainer.getLastProgram() != null && !userContainer.getLastProgram().isEmpty())
+                ){
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
         }
     }

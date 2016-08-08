@@ -220,7 +220,7 @@ public class AutoresponderService {
             throw new IncompleteDataException("Autoresponder emails must have a type.");
         }
 
-        List<AutoresponderEmail> results = this.getAutoEmailsBySubjectAndTypeForClient(temp.getSUBJECT(), AUTO_EMAIL_TYPE.getType(temp.getTYPE()), clientId);
+        List<AutoresponderEmail> results = this.getAutoEmailsBySubjectAndTypeForClient(temp.getSUBJECT(), AUTO_EMAIL_TYPE.valueOf(temp.getTYPE()), clientId);
 
         if (results != null && !results.isEmpty()) {
             //Must check if the retrieved email is the same one as temp because update methods will 

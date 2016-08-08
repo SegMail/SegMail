@@ -130,5 +130,14 @@ public class UserRequestContainer {
         this.webservice = webservice;
     }
     
-    
+    public String printFullPathWithoutContext() {
+        String fullPath = getProgramName();
+        for(String orderedParam : programParamsOrdered) {
+            fullPath += "/" + orderedParam;
+        }
+        if(!fullPath.startsWith("/"))
+            fullPath = "/"+fullPath;
+        
+        return fullPath;
+    }
 }

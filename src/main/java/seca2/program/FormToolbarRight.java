@@ -35,7 +35,7 @@ public class FormToolbarRight  {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request
             ec.getFlash().setKeepMessages(true);
-            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
+            ec.redirect(ec.getRequestContextPath()+reqContainer.printFullPathWithoutContext());
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
