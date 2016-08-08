@@ -452,6 +452,18 @@ public class CampaignService {
         
     }
     
+    /**
+     * There are normal links and also mailmerge links. If it is a normal link,
+     * return the correct redirect URL that will lead to the intended target. If 
+     * it is a mailmerge link, return an example link that will allow the user to
+     * test out by clicking the link and come to the intended page. 
+     * 
+     * @param activity
+     * @param linkTarget
+     * @param linkText
+     * @param index
+     * @return 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) {
         
@@ -486,6 +498,8 @@ public class CampaignService {
      */
     public String constructLink(CampaignActivityOutboundLink link) throws IncompleteDataException {
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+        
+        
         
         return server.getURI() + "/link/" + link.getLINK_KEY();
     }

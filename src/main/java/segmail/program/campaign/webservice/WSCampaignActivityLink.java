@@ -37,11 +37,12 @@ public class WSCampaignActivityLink {
      */
     @Inject ProgramCampaign program;
     /**
-     * This is a sample web service operation
+     * 
      * @param linkTarget
      * @param linkText
      * @param index
      * @return a generated redirect link
+     * @throws eds.component.data.IncompleteDataException
      */
     @WebMethod(operationName = "createOrUpdateLink")
     public String createOrUpdateLink(
@@ -61,6 +62,12 @@ public class WSCampaignActivityLink {
         return redirectLink;
     }
     
+    /**
+     * 
+     * @param linkKey
+     * @return
+     * @throws EntityNotFoundException 
+     */
     @WebMethod(operationName = "redirectAndUpdate")
     public String redirectAndUpdate(
             @WebParam(name = "linkKey") String linkKey ) throws EntityNotFoundException {

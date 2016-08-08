@@ -16,16 +16,12 @@ import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
 import eds.entity.client.Client;
-import eds.entity.data.EnterpriseObject_;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
-import eds.entity.transaction.EnterpriseTransaction_;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -49,8 +45,6 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivityOutboundLink_;
-import segmail.entity.campaign.CampaignActivity_;
-import segmail.entity.campaign.CampaignExecutionError;
 import segmail.entity.campaign.LinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
@@ -140,20 +134,17 @@ public class CampaignExecutionService {
 
                 Email email = new Email();
                 try {
-                    
+                    //Set the header info of the email
                     email.setSUBJECT(campaignActivity.getACTIVITY_NAME());
                     email.addRecipient(subscriber.getEMAIL());
                     email.setSENDER_ADDRESS(campaign.getOVERRIDE_SEND_AS_EMAIL());
                     email.setSENDER_NAME(campaign.getOVERRIDE_SEND_AS_NAME());
                     
-                    String content = campaignActivity.getACTIVITY_CONTENT();
-                    //content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); we'll use the WS method to edit unsub links
+                    //Set the body of the email
+                    String content = campaignActivity.getACTIVITY_CONTENT_PROCESSED();
+                    content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); //we'll use the WS method to edit unsub links [update] not now, let's stick to hardcoding as there isn't enough time
+                    email.setBODY(content);
                     
-                    
-                    //email.setBODY(content);
-                    email.setBODY(campaignActivity.getACTIVITY_CONTENT_PROCESSED());
-                    
-                    //objService.getEm().persist(email);
                     mailService.queueEmail(email, DateTime.now());
                     
                     Trigger_Email_Activity trigger = new Trigger_Email_Activity();
@@ -161,35 +152,6 @@ public class CampaignExecutionService {
                     trigger.setTRIGGERING_OBJECT(campaignActivity);
                     
                     objService.getEm().persist(trigger);
-                    
-                //} catch (IncompleteDataException ex) {
-                    //Logger.getLogger(CampaignExecutionService.class.getName()).log(Level.SEVERE, null, ex);
-                    /*CampaignExecutionError error = new CampaignExecutionError();
-                    error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
-                    error.setERROR_MESSAGE(ex.getMessage());
-                    error.setRECIPIENT(subscriber.getEMAIL());
-                    
-                    objService.getEm().persist(error);*/
-                //} catch (DataValidationException ex) {
-                    //Logger.getLogger(CampaignExecutionService.class.getName()).log(Level.SEVERE, null, ex);
-                    /*CampaignExecutionError error = new CampaignExecutionError();
-                    error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
-                    error.setERROR_MESSAGE(ex.getMessage());
-                    error.setRECIPIENT(subscriber.getEMAIL());
-                    
-                    objService.getEm().persist(error);*/
-                //} catch (InvalidEmailException ex) {
-                    //Logger.getLogger(CampaignExecutionService.class.getName()).log(Level.SEVERE, null, ex);
-                    /*CampaignExecutionError error = new CampaignExecutionError();
-                    error.setCAMPAIGN_ACTIVITY_ID(campaignActivityId);
-                    error.setERROR_MESSAGE(ex.getMessage());
-                    error.setRECIPIENT(subscriber.getEMAIL());
-                    //debug
-                    try {
-                        objService.getEm().persist(error);
-                    } catch (Throwable tex) {
-                        ex.printStackTrace(System.out);
-                    }*/
                     
                 } finally {
                     count++;

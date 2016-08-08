@@ -61,11 +61,8 @@
                             <ui:include src="editing_panel_header.xhtml"></ui:include>
                             <div class="block" >
                                 <ul class="nav nav-tabs">
-                                    <li class="#{(FormTabController.showActiveTabs.get('subscribers_panel') ? 'active' : '')}">
-                                        <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
-                                    </li>
-                                    <li class="#{(FormTabController.showActiveTabs.get('activities_panel') ? 'active' : '')}">
-                                        <a href="#activities_panel" data-toggle="tab">Activities</a>
+                                    <li class="#{(FormTabController.showActiveTabs.get('settings_panel') ? 'active' : '')}">
+                                        <a href="#settings_panel" data-toggle="tab">Settings</a>
                                     </li>
                                     <li class="#{(FormTabController.showActiveTabs.get('fieldset_panel') ? 'active' : '')}">
                                         <a href="#fieldset_panel" data-toggle="tab">Define fields</a>
@@ -73,12 +70,12 @@
                                     <li class="#{(FormTabController.showActiveTabs.get('email_panel') ? 'active' : '')}">
                                         <a href="#email_panel" data-toggle="tab">Confirmation &amp; Welcome Emails</a>
                                     </li>
-                                    <li class="#{(FormTabController.showActiveTabs.get('settings_panel') ? 'active' : '')}">
-                                        <a href="#settings_panel" data-toggle="tab">Settings</a>
+                                    <li class="#{(FormTabController.showActiveTabs.get('signup_panel') ? 'active' : '')}">
+                                        <a href="#signup_panel" data-toggle="tab">Signup Code</a>
                                     </li>
-                                    <!--<li >
-                                        <a href="#delete_panel" data-toggle="tab">Delete List</a>
-                                    </li>-->
+                                    <li class="#{(FormTabController.showActiveTabs.get('subscribers_panel') ? 'active' : '')}">
+                                        <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
+                                    </li>
                                 </ul>
                                 <div class="block-content tab-content">
                                     <div class="tab-pane #{(FormTabController.showActiveTabs.get('subscribers_panel') ? 'active' : '')}" id="subscribers_panel">
@@ -92,6 +89,9 @@
                                     </div>
                                     <div class="tab-pane #{(FormTabController.showActiveTabs.get('settings_panel') ? 'active' : '')}" id="settings_panel">
                                         <ui:include src="settings_panel.xhtml"></ui:include>
+                                    </div>
+                                    <div class="tab-pane #{(FormTabController.showActiveTabs.get('signup_panel') ? 'active' : '')}" id="signup_panel">
+                                        <ui:include src="signup_panel.xhtml"></ui:include>
                                     </div>
                                 </div>
                             </div>

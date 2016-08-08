@@ -2,28 +2,6 @@ var SUMMERNOTE_HEIGHT = 290;
 var PREVIEW_HEIGHT = 450;
 var PREVIEW_WIDTH = 420;
 
-//var web_service_endpoint = 'WSCampaignActivityLink';
-
-/**
- * To submit a JSF partial request using pure JS, you need to:
- * 1) Attach a f:ajax in the form that you want to submit in the xhtml page.
- * 2) In this JS function, pass in the source, ajax event and list of params. Refer to
- * https://docs.oracle.com/cd/E17802_01/j2ee/javaee/javaserverfaces/2.0/docs/js-api/symbols/jsf.ajax.html#.request
- * for detailed explanation of each param.
- * 
- * @param {type} activityId
- * @param {type} event
- * @returns {undefined}
- */
-
-/*function load_activity(activityId, event) {
- jsf.ajax.request(
- $('#FormCampaignActivities'),
- event,
- {
- })
- }*/
-
 function refresh_summernote() {
     $('textarea.editor').summernote({
         height: SUMMERNOTE_HEIGHT,
@@ -540,6 +518,7 @@ var renderLinksAndRefreshStats = function (timeout) {
         var totalClicks = 0;
         $('#links-start').empty();
         $('#stats-table').find('tbody').empty();
+        $('#stats-table').find('tfoot').empty();
         $('#html-content').find('a').each(function (index) {
             //console.log(index);
             var redirectLink = $(this).attr('href');
@@ -636,5 +615,9 @@ var getTopNumbers = function(timeout) {
     setTimeout(function(){
         getTotalTargeted();
         getSentEmails();
-    },timeout)
+    },timeout);
+};
+
+var generateUnsubLink = function() {
+    
 }
