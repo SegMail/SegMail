@@ -100,6 +100,7 @@ public class MailMergeService {
             trans = new MailMergeRequest();
             trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
             trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
+            trans.setMAILMERGE_LABEL(MAILMERGE_REQUEST.CONFIRM.name());
             trans.setTRANSACTION_KEY(confirmationKey); //More like an override
             updateService.getEm().persist(trans);
         }

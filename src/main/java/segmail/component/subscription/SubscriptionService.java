@@ -32,6 +32,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
+import javax.ejb.AsyncResult;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -493,7 +496,7 @@ public class SubscriptionService {
         String newEmailBody = assignedConfirmEmail.getBODY();
         newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
         //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
-        newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
+        //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
         //Send the email using MailService
         Email confirmEmail = new Email();
@@ -697,8 +700,9 @@ public class SubscriptionService {
         return results;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public int updateSubscriberCount(long listId) {
+    @Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Future<Integer> updateSubscriberCount(long listId) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
         Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
@@ -714,6 +718,6 @@ public class SubscriptionService {
         int result = objectService.getEm().createQuery(query)
                 .executeUpdate();
 
-        return result;
+        return new AsyncResult<>(result);
     }
 }

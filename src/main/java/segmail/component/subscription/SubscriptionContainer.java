@@ -13,7 +13,8 @@ import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 
 /**
- *
+ * RequestScoped cache for Subscription-related information.
+ * 
  * @author LeeKiatHaw
  */
 @RequestScoped

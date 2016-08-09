@@ -42,6 +42,9 @@ public class MailMergeRequestListener {
         if(lastChanged == null)
             return;
         
+        if(req.getMAILMERGE_LABEL() == null)
+            return;
+        
         int expiry = MAILMERGE_REQUEST.valueOf(req.getMAILMERGE_LABEL()).expiry;
         
         if(expiry <= 0)

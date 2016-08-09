@@ -77,6 +77,11 @@ public class Email extends EnterpriseTransaction {
     public void addRecipient(String TO) {
         this.RECIPIENTS.add(TO);
     }
+    
+    public void addSingleRecipient(String TO) {
+        this.RECIPIENTS = new HashSet();
+        this.addRecipient(TO);
+    }
 
     public String getSENDER_NAME() {
         return SENDER_NAME;
