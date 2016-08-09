@@ -245,29 +245,26 @@ public class NavigationService implements Serializable {
         return null;
     }
     
+    /**
+     * 
+     * @param usertypeid
+     * @return a list of all MenuItems assigned to the user type unordered, or 
+     * an empty list if there is none found.
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) {
         
-        try {
-            //List<MenuItem> results = this.objectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
-            List<MenuItemAccess> access = this.objectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
-            
-            Collections.sort(access, new MenuItemAccessComparator());
-            
-            List<MenuItem> results = new ArrayList<MenuItem>();
-            for(MenuItemAccess a : access){
-                results.add(a.getSOURCE());
-            }
-            
-            return results;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
+        //List<MenuItem> results = this.objectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
+        List<MenuItemAccess> access = this.objectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
+
+        Collections.sort(access, new MenuItemAccessComparator());
+
+        List<MenuItem> results = new ArrayList<MenuItem>();
+        for(MenuItemAccess a : access){
+            results.add(a.getSOURCE());
         }
+
+        return results;
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)

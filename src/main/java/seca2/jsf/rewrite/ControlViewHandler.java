@@ -52,6 +52,12 @@ public class ControlViewHandler extends ViewHandlerWrapper {
         
         pathInfo = (reqContainer.getProgramName() == null) ? 
                 pathInfo : "/".concat(reqContainer.getProgramName());
+        
+        //Add request parameters
+        for(String param : reqContainer.getPathParser().getOrderedParams()) {
+            if(param != null && !param.isEmpty())
+                pathInfo = pathInfo.concat("/"+param);
+        }
             
         //return contextPath.concat("").concat(pathInfo); 
         return contextPath.concat(servletPath).concat(pathInfo); 

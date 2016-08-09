@@ -20,9 +20,10 @@
             <script src="#{request.contextPath}/templates/beprobootstrap/js/ajax/ajax-loader.js"></script> 
 
             <!--custom hacks-->
-            <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/hacks/primefaces-hacks.css" /><!--PF hacks-->
+            <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/hacks/primefaces-hacks.css" />
+            <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/hacks/bootstrap.css" />
 
-            <!--all other additional required resoures-->
+            <!--all other additional required resoures-->   
             <ui:insert name="head" />
 
         </h:head>
@@ -81,33 +82,38 @@
                 <div class="page-content">
                     <div class="container" style="height:100%;">
                         <div class="page-toolbar">
-                            <c:if test="#{not empty UserSessionContainer.currentProgram }" >
-                                <div class="page-toolbar-block">
-                                    <div class="page-toolbar-title">#{UserSessionContainer.currentProgram.DISPLAY_TITLE}</div>
-                                    <div class="page-toolbar-subtitle">#{UserSessionContainer.currentProgram.DISPLAY_DESCRIPTION}</div>
-                                </div>
-                                <div class="page-toolbar-block pull-right">
-                                    <form jsf:id="FormToolbarRight">
-                                        <ui:insert name="toolbar-right"></ui:insert>
-                                        <div class="widget-info widget-from">
-                                            <button class="btn btn-default tipb"
-                                                    data-original-title="If you've just updated something and don't see it yet, click here."
-                                                    jsf:actionListener="#{FormToolbarRight.refresh()}">
-                                                <i class="fa fa-refresh"></i>
-                                                Refresh
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </c:if>
-                            <ul class="breadcrumb">
-                                <li><a href="#">Dashboard</a></li>
-                                <li><a href="#">UI Elements</a></li>
-                                <li class="active">Blocks &amp; Panels</li>
-                            </ul>                 
+                            <form jsf:id="PageToolbar">
+                                <c:if test="#{not empty UserSessionContainer.currentProgram }" >
+                                    <div class="page-toolbar-block">
+                                        <div jsf:id="page-toolbar-title" class="page-toolbar-title">#{UserSessionContainer.currentProgram.DISPLAY_TITLE}</div>
+                                        <div jsf:id="page-toolbar-subtitle" class="page-toolbar-subtitle">#{UserSessionContainer.currentProgram.DISPLAY_DESCRIPTION}</div>
+                                    </div>
+                                    <div class="page-toolbar-block pull-right">
+                                        <form jsf:id="FormToolbarRight">
+
+                                            <div class="widget-info widget-from">
+                                                <ui:insert name="toolbar-right"></ui:insert>
+                                                <button class="btn btn-default tipb"
+                                                        data-original-title="If you've just updated something and don't see it yet, click here."
+                                                        jsf:actionListener="#{FormToolbarRight.refresh()}">
+                                                    <i class="fa fa-refresh"></i>
+                                                    Refresh
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </c:if>
+                            </form>
+                            <form jsf:id="PageBreadCrumbs">
+                                <ul class="breadcrumb">
+                                    <li><a href="#">Dashboard</a></li>
+                                    <li><a href="#">UI Elements</a></li>
+                                    <li class="active">Blocks &amp; Panels</li>
+                                </ul>   
+                            </form>
                         </div>
                         <ui:insert name="main-program-panel" />
-                        
+
                     </div>
 
                 </div><!-- page content wrapper -->
@@ -127,7 +133,7 @@
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/jquery/jquery-ui.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap/bootstrap.min.js"></script>
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/mcustomscrollbar/jquery.mCustomScrollbar.min.js"></script>   
-        
+
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins.js"></script>        
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/actions.js"></script> 
         <!--Minimum required for the template-->
@@ -161,18 +167,18 @@
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/icheck/jquery.icheck.min.js"></script>
 
         <!--For fileuploader--><div jsf:rendered="false">
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.gears.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.silverlight.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.flash.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.browserplus.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.html4.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.html5.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/jquery.plupload.queue/jquery.plupload.queue.js'></script>
-        <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/imgareaselect/jquery.imgareaselect.min.js'></script>
-        <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/filetree/jqueryFileTree.js"></script>
-        <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/dropzone/dropzone.js"></script>
-        <!--For fileuploader--></div>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.gears.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.silverlight.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.flash.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.browserplus.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.html4.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/plupload.html5.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/plupload/jquery.plupload.queue/jquery.plupload.queue.js'></script>
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/imgareaselect/jquery.imgareaselect.min.js'></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/filetree/jqueryFileTree.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/dropzone/dropzone.js"></script>
+            <!--For fileuploader--></div>
 
         <!--For editable forms-->
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/bootstrap-editable.min.js"></script>  
@@ -184,11 +190,7 @@
         <!--for a bug fix in Mojarra 2.2--><h:outputScript library="javax.faces" name="jsf.js" target="head" />
         <!--<h:outputScript library="primefaces" name="jquery/jquery.js" target="head"/>must be included, if not when there are no PF components on the page, JQuery would not be automatically loaded-->
         <!--<h:outputScript library="primefaces" name="jquery/jquery-plugins.js" target="head"/>-->
-        
-        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/demo.js"></script>-->
-        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/maps.js"></script>        
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/charts.js"></script>-->
-        
+
 
         <script src="#{request.contextPath}/templates/common/js/bootstrap-select.js"></script>
         <ui:insert name="scripts-bottom"></ui:insert>

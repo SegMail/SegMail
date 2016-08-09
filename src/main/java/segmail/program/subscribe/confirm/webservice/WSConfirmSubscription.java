@@ -22,6 +22,7 @@ import javax.jws.WebService;
 import javax.jws.WebParam;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
@@ -73,20 +74,16 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             if (key == null || key.isEmpty()) {
                 throw new UnwantedAccessException("Key is not provided.");
             }
+            //Check if it is a testing link
+            MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(key);
+            if(label != null && label.equals(MAILMERGE_REQUEST.CONFIRM))
+                return "This is a testing list";
 
             MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
-
-            /*List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
-
-            if (params == null || params.isEmpty()) {
-                throw new RuntimeException("Transaction parameters missing.");
-            }
             
-            MailMergeRequest trans = (MailMergeRequest) params.get(0).getOWNER();
-            if (trans == null) {
-                throw new RuntimeException("Transaction key not found.");
-            }*/
-            
+            if(trans == null)
+                throw new UnwantedAccessException();
+
             if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
                 throw new TransactionProcessedException();
             }
@@ -120,6 +117,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             throw new RuntimeException("You received this transaction code by mistake.", ex);
         }
     }
+<<<<<<< HEAD
     
     @Override
     public String resend(String key) 
@@ -201,4 +199,6 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
     */
 
     
+=======
+>>>>>>> master
 }

@@ -13,12 +13,12 @@ import javax.persistence.Table;
  *
  * @author LeeKiatHaw
  */
-@Entity
+    @Entity
 @Table(name="SUBSCRIBER_ACCOUNT")
 public class SubscriberAccount extends EnterpriseObject {
 
     private String EMAIL;
-
+    
     public String getEMAIL() {
         return EMAIL;
     }

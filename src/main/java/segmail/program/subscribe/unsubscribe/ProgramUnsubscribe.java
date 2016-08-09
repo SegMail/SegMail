@@ -33,7 +33,7 @@ public class ProgramUnsubscribe extends Program {
     }
 
     @Override
-    public void initProgramParams() {
+    public void initRequestParams() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

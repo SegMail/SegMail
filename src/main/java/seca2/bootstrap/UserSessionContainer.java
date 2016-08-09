@@ -35,6 +35,7 @@ public class UserSessionContainer implements Serializable, ActiveUser {
     private String servletPath;
     
     private Program currentProgram;
+    private Program overrideProgram;
     private Layout currentLayout;
     
     
@@ -100,11 +101,14 @@ public class UserSessionContainer implements Serializable, ActiveUser {
     }
 
     public Program getCurrentProgram() {
+        if(overrideProgram != null)
+            return overrideProgram;
         return currentProgram;
     }
 
     public void setCurrentProgram(Program currentProgram) {
         this.currentProgram = currentProgram;
+        revertProgramOverwrite();
     }
 
     public Layout getCurrentLayout() {
@@ -123,4 +127,21 @@ public class UserSessionContainer implements Serializable, ActiveUser {
         this.menu = menu;
     }
     
+    public void overwriteProgramTitle(String overwriteTitle) {
+        if(overrideProgram == null)
+            overrideProgram = new Program(currentProgram);
+        
+        overrideProgram.setDISPLAY_TITLE(overwriteTitle);
+    }
+    
+    public void overwriteProgramDescription(String overwriteDesc) {
+        if(overrideProgram == null)
+            overrideProgram = new Program(currentProgram);
+        
+        overrideProgram.setDISPLAY_DESCRIPTION(overwriteDesc);
+    }
+    
+    public void revertProgramOverwrite() {
+        overrideProgram = null;
+    }
 }

@@ -20,7 +20,10 @@ import javax.xml.ws.handler.MessageContext;
  *
  * @author LeeKiatHaw
  */
-@WebService(endpointInterface = "seca2.program.chartjs.ChartJSService")
+@WebService(
+        serviceName = "ChartJSService"
+    //endpointInterface = "seca2.program.chartjs.ChartJSService"
+)
 @HandlerChain(file = "/handlers-server.xml")
 public class ChartJSServiceImpl implements ChartJSService {
 

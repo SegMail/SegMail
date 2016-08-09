@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.joda.time.DateTime;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import seca2.program.FormEdit;
+import seca2.program.FormEditEntity;
 
 /**
  * FormDelete
@@ -26,7 +26,7 @@ import seca2.program.FormEdit;
  */
 @RequestScoped
 @Named("FormCancelJobRun")
-public class FormCancelJobRun implements FormEdit{
+public class FormCancelJobRun implements FormEditEntity{
     
     @Inject ProgramBatch program;
     

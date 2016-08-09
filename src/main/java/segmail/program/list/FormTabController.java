@@ -25,11 +25,11 @@ public class FormTabController {
     @Inject private ProgramList program;
     
     private final String[] tabs = {
-        "subscribers_panel",
-        "activities_panel",
+        "settings_panel",
         "fieldset_panel",
         "email_panel",
-        "settings_panel"
+        "signup_panel",
+        "subscribers_panel",
     };
     
     private final String DEFAULT_TAB = "subscribers_panel";
@@ -41,7 +41,11 @@ public class FormTabController {
             for(String tab : tabs){
                 tabsMap.put(tab, Boolean.FALSE);
             }
-            tabsMap.put(DEFAULT_TAB, Boolean.TRUE);
+            
+            if(!program.getSubscriberTable().isEmpty())
+                tabsMap.put("subscribers_panel", Boolean.TRUE);
+            else
+                tabsMap.put("settings_panel", Boolean.TRUE);
             setShowActiveTabs(tabsMap);
         }
         

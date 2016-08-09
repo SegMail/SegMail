@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.entity.landing.ServerInstance;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import seca2.program.FormEdit;
+import seca2.program.FormEditEntity;
 
 /**
  *
@@ -30,7 +30,7 @@ import seca2.program.FormEdit;
  */
 @RequestScoped
 @Named("FormEditJobRun")
-public class FormEditJobRun implements FormEdit{
+public class FormEditJobRun implements FormEditEntity{
     
     @Inject ProgramBatch program;
     

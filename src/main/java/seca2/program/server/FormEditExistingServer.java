@@ -20,7 +20,7 @@ import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
 import seca2.entity.landing.ServerResource;
 import seca2.entity.landing.ServerResourceType;
-import seca2.program.FormEdit;
+import seca2.program.FormEditEntity;
 
 /**
  *
@@ -28,7 +28,7 @@ import seca2.program.FormEdit;
  */
 @RequestScoped
 @Named("FormEditExistingServer")
-public class FormEditExistingServer implements FormEdit {
+public class FormEditExistingServer implements FormEditEntity {
     
     @Inject ProgramServer program;
     

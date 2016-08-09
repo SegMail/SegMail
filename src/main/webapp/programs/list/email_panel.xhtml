@@ -19,21 +19,26 @@
                         for your list.
                     </div>
                     <div class="page-toolbar-block pull-right">
-                        <p:commandButton id="save_button_pf" class="btn btn-primary"
-                                         actionListener="#{FormListEmail.saveEmailSettings()}"
-                                         update="form_list_email_message" value="Save"
-                                         icon="fa fa-floppy-o"
-                            >
-                        </p:commandButton>
+                        <button jsf:id="save_settings_button" class="btn btn-primary"
 
+                                >
+                            <!--f:ajax won't append its code to the onclick attribute of the button element-->
+                            <f:ajax execute="@form" render="@form :FormListList :FormEditListHeader" 
+                                    onevent="saveSettings"
+                                    listener="#{FormListEmail.saveEmailSettings()}"
+                                    event="click">
+                            </f:ajax>
+                            <i class="fa fa-floppy-o"></i>
+                            Save
+                        </button>
                     </div>  
                 </div>
                 <div class="row">
                     <div class="col-md-12">
                         <s2:messenger id="form_list_email_message" for="form_list_email" showDetail="true" showSummary="true"></s2:messenger>
-                        
+
                     </div>
-                    
+
                 </div>
                 <!--Test the timeline gadget-->
 
@@ -110,9 +115,5 @@
                 </div>
             </div>
         </div>
-        <p:blockUI block="form_list_email" trigger="form_list_email:save_button_pf"
-                   >
-            <p id="spinner"></p>
-        </p:blockUI>
     </form>
 </html>

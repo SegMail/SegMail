@@ -15,6 +15,12 @@ public class SubscriptionListFieldComparator implements Comparator<SubscriptionL
 
     @Override
     public int compare(SubscriptionListField o1, SubscriptionListField o2) {
+        if(o1.getOWNER() == null) return -1;
+        if(o2.getOWNER() == null) return 1;
+        
+        if(!o1.getOWNER().equals(o2.getOWNER()))
+            return o1.getOWNER().compareTo(o2.getOWNER());
+        
         return o1.getSNO() - o2.getSNO();
     }
     

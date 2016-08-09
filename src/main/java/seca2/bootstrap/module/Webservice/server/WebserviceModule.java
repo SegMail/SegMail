@@ -70,7 +70,7 @@ public class WebserviceModule extends BootstrapModule {
 
     @Override
     protected boolean bypassDuringWeb() {
-        return true;
+        return false;
     }
 
     @Override

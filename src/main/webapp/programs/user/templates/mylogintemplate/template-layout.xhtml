@@ -3,32 +3,33 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui" 
-      class="full ">
+      xmlns:p="http://primefaces.org/ui" >
     <f:view contentType="text/html" >
         <h:head>
             <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/bootstrap/bootstrap.min.css" /><!-- Loading Bootstrap UI -->
-            <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/bootstrap/the-big-picture.css" /><!-- Loading Flat UI -->
-            <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/flat-ui/docs.css" /><!-- Loading Flat UI -->
+            <!--<link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/bootstrap/the-big-picture2.css" /> Loading Flat UI -->
+            <!--<link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/flat-ui/demo.css" / demo -->
             <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/flat-ui/flat-ui.css" /><!-- Loading Flat UI -->
             <link rel="stylesheet" href="#{request.contextPath}/programs/user/templates/mylogintemplate/css/spinner/spinner.css" /><!-- AJAX Loader -->
             <!--custom hacks-->
             <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
         </h:head>
         <h:body>
-            <h:panelGroup layout="block" style="background-color: #1ABC9C">
-                <!--A login page for an enterprise software should not have a menu.-->
+            <div class="container" style="width: 970px;">
                 
-                <ui:insert name="header" />
-                <ui:insert name="login-block" />
-            </h:panelGroup>
+                    <!--A login page for an enterprise software should not have a menu.-->
+
+                    <!--<ui:insert name="header" />-->
+                    <ui:insert name="login-block" />
+                
+            </div>
         </h:body>
         <!--load all scripts-->
         <!--<h:outputScript library="primefaces" name="jquery/jquery.js" target="head" />-->
         
+        <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery-2.0.3.min.js"></script>-->
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>-->
         <script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/bootstrap.min.js"></script>
-        <!--<script src="#{request.contextPath}/programs/user/templates/mylogintemplate/js/jquery.js"></script>-->
-        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
         <!--Custom components/hacks-->
 
     </f:view>

@@ -54,7 +54,7 @@ public class ProgramServer extends Program {
     private boolean showEditingPanel;
     
     @Override
-    public void initProgramParams() {
+    public void initRequestParams() {
         this.setShowEditingPanel(false);
     }
     

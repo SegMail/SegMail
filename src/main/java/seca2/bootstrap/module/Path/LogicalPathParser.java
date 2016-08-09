@@ -191,6 +191,10 @@ public final class LogicalPathParser {
         return this.viewId;
     }
 
+    public String getServletPath() {
+        return servletPath;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

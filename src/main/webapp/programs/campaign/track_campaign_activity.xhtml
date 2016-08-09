@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormTrackEmailActivity">
+        <div class="modal-content" style="overflow-y: hidden;">
+            <div class="block">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        Track Email Conversion
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <s2:messenger id="FormTrackEmailActivity_messenger" for="FormTrackEmailActivity" showDetail="true" showSummary="true"
+                                              class="form-control"></s2:messenger>
+                            </div>
+                            <div id="soap-errors">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="html-content-form" class="col-md-4 col-sm-4 col-xs-4"><!--preview pane-->
+                            <div id="html-content">
+                                <h:outputText
+                                    escape="false" 
+                                    value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
+                            </div>
+                        </div>
+                        <div id="links-start-form" class="col-md-3 col-sm-4 col-xs-4"><!--links pane-->
+                            <div id="links-start">
+                            </div>
+                        </div>
+                        <div id="stats-form" class="col-md-5 col-sm-4 col-xs-4"><!--links pane-->
+                            <div id="stats-panel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h2>Click-through rates</h2>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-bottom: 20px;">
+                                    <div class="col-md-4">
+                                        <div class="widget">
+                                            <div class="widget-container">
+                                                <div id="targeted" class="widget-text">
+                                                    0
+                                                </div>
+                                                
+                                            </div>
+                                            <div class="widget-content">
+                                                <div class="widget-text">
+                                                    <strong>
+                                                        Targeted
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="widget widget-primary">
+                                            <div class="widget-container">
+                                                <div id="sent" class="widget-text">
+                                                    0
+                                                </div>
+                                            </div>
+                                            <div class="widget-content">
+                                                <div class="widget-text">
+                                                    <strong>
+                                                        Sent
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="widget widget-success">
+                                            <div class="widget-container">
+                                                <div id="clicked" class="widget-text">
+                                                    0
+                                                </div>
+                                            </div>
+                                            <div class="widget-content">
+                                                <div class="widget-text">
+                                                    <strong>
+                                                        Clicked
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table id="stats-table" class="table table-striped">
+                                            <thead>
+                                                <th>#</th>
+                                                <th>Link</th>
+                                                <th>Clicks</th>
+                                                <th>%</th>
+                                                
+                                            </thead>
+                                            <tbody>
+                                                
+                                            </tbody>
+                                            <tfoot>
+                                                
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h:inputHidden id="pseudo-preview" pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                        </h:inputHidden>
+                        <h:inputHidden id="activity-id" pass:id="activity-id" value="#{FormEditEmailActivity.editingActivity.OBJECTID}" >
+                        </h:inputHidden>
+                        <script type="text/javascript" >
+                            var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                        </script>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary"
+                            onclick="getTopNumbers(0);
+                                     resizeContent(100);
+                                     renderLinksAndRefreshStats(100);
+                                     return false;">
+                        Refresh
+                    </button>
+                    <button data-dismiss="modal" class="btn btn-default">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

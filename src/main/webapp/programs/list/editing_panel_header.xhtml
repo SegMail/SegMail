@@ -15,7 +15,9 @@
             <div class="block-content" jsf:rendered="#{FormEditListHeader.loaded}">
                 <h2>
                     <strong>#{ProgramList.listEditing.LIST_NAME}</strong>
-                    <span class="badge badge-info" style="margin-left: 10px;">10</span>
+                    <span class="badge badge-info" style="margin-left: 10px;">
+                        #{ProgramList.listEditing.SUBSCRIBER_COUNT}
+                    </span>
                 </h2>
                 <span>Remote list. </span>
                 <a href="#">Make local. </a>

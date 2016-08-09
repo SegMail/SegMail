@@ -5,22 +5,28 @@
  */
 package eds.component.batch;
 
+import com.google.common.base.Objects;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
+import eds.entity.batch.BatchJobRunError;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStep_;
 import eds.entity.batch.BatchJobTrigger;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.naming.NamingException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -39,46 +45,95 @@ public class BatchExecutionService {
     @EJB
     UpdateObjectService updService;
     @EJB
-    BatchSchedulingService scheduleService; 
+    BatchSchedulingService scheduleService;
 
-    @Asynchronous
+    /*@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Future<BATCH_JOB_RUN_STATUS> executeJob(BatchJobRun job) {
-        try {
+    public AsyncResult<BATCH_JOB_RUN_STATUS> executeJob(BatchJobRun job) {
+        try { //don't set the status here, set it outside when the execut
             DateTime start = DateTime.now();
             job.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
             job.setSTART_TIME(new Timestamp(start.getMillis()));
             job.getBATCH_JOB().setLAST_RUN(new Timestamp(start.getMillis()));
-            updService.getEm().merge(job);
+            job = updService.getEm().merge(job);
             updService.getEm().flush();
+
+            Object ret = null;
             List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
             for (BatchJobStep step : steps) {
-                step.execute();
+                ret = step.execute();
+                Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR,
+                        (ret == null) ? "" : ret.toString());
             }
             //Record completion info
             job.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
             DateTime end = DateTime.now();
             job.setEND_TIME(new Timestamp(end.getMillis()));
-            
+
             //Trigger the next run
             DateTime now = DateTime.now();
+            //If the entire batch job only took less than 1 second,
+            //we have to add 1 second so that it would be scheduled in the next
+            //second. This is because the granularity of triggerNextBatchJobRun()
+            //is 1 second, not milliseconds.
+            if (now.withMillisOfSecond(0).equals(start.withMillisOfSecond(0))) {
+                now = now.plusSeconds(1);
+            }
+
             List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(job.getBATCH_JOB().getBATCH_JOB_ID());
             //Should be loosely coupled procedure, no exceptions thrown
-            if(triggers != null || !triggers.isEmpty()) {
-                Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
+            if (triggers != null && !triggers.isEmpty()
+                    && !Objects.equal((ret == null) ? null : ret.getClass(), StopNextRunQuickAndDirty.class)) { //THIS IS A HACK!!!
+                //Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
                 scheduleService.triggerNextBatchJobRun(now, triggers.get(0));
             }
-            
+        } catch (InvocationTargetException ex) {
+            Throwable tex = ex.getTargetException();
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, tex.getMessage());
         } catch (Throwable ex) {
             Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
             job.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
-            
+
+            //Log BatchJobRunError
+            //BatchJobRunError newError = new BatchJobRunError(job,ex);
+            //updService.getEm().persist(ex);
         } finally {
-            updService.getEm().merge(job);
-            updService.getEm().flush();
+            //job = updService.getEm().merge(job);
+            //updService.getEm().flush();
             return new AsyncResult<>(BATCH_JOB_RUN_STATUS.valueOf(job.getSTATUS()));
         }
-        
+
+    }*/
+
+    @Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public Future<?> executeJobNew(BatchJobRun job) {
+
+        try {
+            Object ret = null; //Only return the last return object from the last step
+            List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
+            for (BatchJobStep step : steps) {
+                ret = step.execute();
+                
+            }
+            return new AsyncResult<>(ret);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
+            return new AsyncResult<>(ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
+            return new AsyncResult<>(ex);
+        } catch (NamingException ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
+            return new AsyncResult<>(ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
+            return new AsyncResult<>(ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
+            return new AsyncResult<>(ex.getTargetException());
+        } 
     }
 
     public List<BatchJobStep> getBatchJobSteps(long batchJobId) {
@@ -102,5 +157,12 @@ public class BatchExecutionService {
         job.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
         updService.getEm().merge(job);
         updService.getEm().flush();
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void logErrors(BatchJobRun job, Throwable ex) {
+        BatchJobRunError newError = new BatchJobRunError(job, ex);
+
+        updService.getEm().persist(ex);
     }
 }

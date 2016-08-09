@@ -30,7 +30,7 @@ public class ProgramConfirmSubscription extends Program {
     private String requestKey;
 
     @Override
-    public void initProgramParams() {
+    public void initRequestParams() {
         
     }
 
