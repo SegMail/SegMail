@@ -46,5 +46,5 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      */
     @WebMethod
     public String resend(@WebParam(name = "key") String key)
-            throws UnwantedAccessException;
+            throws TransactionProcessedException, UnwantedAccessException;
 }

@@ -6,11 +6,13 @@
 package segmail.program.subscribe.confirm.webservice;
 
 import eds.component.batch.BatchProcessingException;
+import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
+import eds.component.mail.InvalidEmailException;
 import eds.component.transaction.TransactionService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +69,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     @Override
-    public String confirm(@WebParam(name = "key") String key) 
+    public String confirm(@WebParam(name = "key") String key)
             throws TransactionProcessedException, UnwantedAccessException {
 
         try {
@@ -76,13 +78,15 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             }
             //Check if it is a testing link
             MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(key);
-            if(label != null && label.equals(MAILMERGE_REQUEST.CONFIRM))
+            if (label != null && label.equals(MAILMERGE_REQUEST.CONFIRM)) {
                 return "This is a testing list";
+            }
 
             MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
-            
-            if(trans == null)
+
+            if (trans == null) {
                 throw new UnwantedAccessException();
+            }
 
             if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
                 throw new TransactionProcessedException();
@@ -93,17 +97,16 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             //    throw new ExpiredTransactionException();
 
             /*String email = "";
-            long listId = -1;
+             long listId = -1;
 
-            for (EnterpriseTransactionParam p : params) {
-                if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME)) {
-                    email = p.getPARAM_VALUE();
-                }
-                if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST)) {
-                    listId = Long.parseLong(p.getPARAM_VALUE());
-                }
-            }*/
-
+             for (EnterpriseTransactionParam p : params) {
+             if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME)) {
+             email = p.getPARAM_VALUE();
+             }
+             if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST)) {
+             listId = Long.parseLong(p.getPARAM_VALUE());
+             }
+             }*/
             Subscription confirmedSubsc = subService.confirmSubscriber(key);
 
             int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name());
@@ -117,88 +120,40 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             throw new RuntimeException("You received this transaction code by mistake.", ex);
         }
     }
-<<<<<<< HEAD
-    
-    @Override
-    public String resend(String key) 
-            throws UnwantedAccessException {
-        if (key == null || key.isEmpty()) {
-            throw new UnwantedAccessException("Key is not provided.");
-        }
-        try {
-            subService.retriggerConfirmation(key);
-            
-        } catch (IncompleteDataException ex) {
-            //Do something, log an error in admin dashboard or send an email to administrator
-            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return "Email has been retriggered";
-    }
 
-    /*
-    public String process(String function, String key)
+    @Override
+    public String resend(String key)
             throws UnwantedAccessException, TransactionProcessedException {
         if (key == null || key.isEmpty()) {
             throw new UnwantedAccessException("Key is not provided.");
         }
-
         MailMergeRequest trans = transService.getTransactionByKey(key, MailMergeRequest.class);
 
         if (trans == null) {
-            throw new RuntimeException("Transaction key not found.");
+            throw new UnwantedAccessException();
         }
 
         if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
             throw new TransactionProcessedException();
         }
-
-        List<EnterpriseTransactionParam> params = transService.getTransactionParamsByKey(key, EnterpriseTransactionParam.class);
-
-        if (params == null || params.isEmpty()) {
-            throw new RuntimeException("Transaction parameters missing.");
-        }
-
-        String email = "";
-        long listId = -1;
-
-        for (EnterpriseTransactionParam p : params) {
-            if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME)) {
-                email = p.getPARAM_VALUE();
-            }
-            if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST)) {
-                listId = Long.parseLong(p.getPARAM_VALUE());
-            }
-        }
-
-        //Determine which function to call
-        MailMergeLabel functionEnum = MailMergeLabel.getMailMergeLabel(function);
-        String listname = "";
         try {
-            switch (functionEnum) {
-                case CONFIRM:
-                    Subscription confirmedSubsc = subService.confirmSubscriber(email, listId);
-                    listname = confirmedSubsc.getTARGET().getLIST_NAME();
-                    break;
-                case UNSUBSCRIBE:
-                    Subscription unsubSubsc = subService.unsubscribeSubscriber(email, listId);
-                    listname = unsubSubsc.getTARGET().getLIST_NAME();
-                    break;
-            }
-            int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name());
+            subService.retriggerConfirmation(key);
 
-            if (updateResults <= 0) {
-                throw new RuntimeException("No Transaction was udpated.");
-            }
-        } catch (RelationshipNotFoundException ex) {
-            throw new RuntimeException("You received this transaction code by mistake.", ex);
+        } /*catch (IncompleteDataException ex) {
+            //Do something, log an error in admin dashboard or send an email to administrator
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (BatchProcessingException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DataValidationException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidEmailException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+        catch (Throwable ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
         }
 
-        return listname;
+        return "Email has been retriggered";
     }
-    */
-
-    
-=======
->>>>>>> master
 }

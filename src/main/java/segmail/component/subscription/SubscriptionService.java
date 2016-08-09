@@ -467,14 +467,8 @@ public class SubscriptionService {
      * @throws BatchProcessingException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-<<<<<<< HEAD
-    public void sendConfirmationEmail(Subscription sub) throws IncompleteDataException 
-            {
-        try {
-=======
     public void sendConfirmationEmail(Subscription sub)
             throws IncompleteDataException, BatchProcessingException, DataValidationException, InvalidEmailException {
->>>>>>> master
             //Retrieve "Send as" from the list
             /*SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
          if(list == null)
@@ -658,7 +652,6 @@ public class SubscriptionService {
     public Subscription unsubscribeSubscriber(String email, long listId) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-<<<<<<< HEAD
     
     /**
      * This is designed to be called from a WEB server to retrigger a confirmation
@@ -667,7 +660,8 @@ public class SubscriptionService {
      * @param key 
      * @throws eds.component.data.IncompleteDataException 
      */
-    public void retriggerConfirmation(String key) throws IncompleteDataException {
+    public void retriggerConfirmation(String key) 
+            throws IncompleteDataException, BatchProcessingException, DataValidationException, InvalidEmailException {
         List<Subscription> subscriptions = getSubscriptionByConfirmKey(key);
         //Impossible to have a duplicate because the key was created with list id and 
         //subscriber id. 
@@ -707,7 +701,6 @@ public class SubscriptionService {
         
         return results;
     }
-=======
 
     public String getConfirmationHashCode(long subscriberId, long listId) {
         String confirmKey = encryptService.getHash("confirm subscription of " + subscriberId + " to list " + listId, EncryptionType.SHA256);
@@ -776,5 +769,4 @@ public class SubscriptionService {
 
         return new AsyncResult<>(result);
     }
->>>>>>> master
 }
