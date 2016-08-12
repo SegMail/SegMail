@@ -41,7 +41,9 @@ public class ProgramConfirmSubscription extends Program {
 
     @Override
     public void clearVariables() {
-        
+        this.setRequestKey("");
+        this.setListName("");
+        this.setCurrentPage("");
     }
 
     public String getListName() {

@@ -31,8 +31,9 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      * @param key
      * @return
      *     returns java.lang.String
-     * @throws eds.component.webservice.TransactionProcessedException
-     * @throws eds.component.webservice.UnwantedAccessException
+     * @throws TransactionProcessedException if the transaction was already processed before this call.
+     * @throws UnwantedAccessException if the key is not provided or doesn't match to any requests
+     * registered at the ERP server.
      */
     @WebMethod
     public String confirm(@WebParam(name = "key") String key)
@@ -42,6 +43,7 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      * 
      * @param key
      * @return 
+     * @throws eds.component.webservice.TransactionProcessedException 
      * @throws UnwantedAccessException if key is not provided. 
      */
     @WebMethod

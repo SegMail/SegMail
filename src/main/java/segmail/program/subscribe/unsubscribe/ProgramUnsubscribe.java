@@ -29,17 +29,19 @@ public class ProgramUnsubscribe extends Program {
     
     @Override
     public void clearVariables() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.setListName("");
+        this.setRequestKey("");
+        this.setCurrentPage("");
     }
 
     @Override
     public void initRequestParams() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void initProgram() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     public String getRequestKey() {

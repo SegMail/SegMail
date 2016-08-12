@@ -613,6 +613,12 @@ public class SubscriptionService {
         return results;
     }
 
+    /**
+     * 
+     * @param confirmKey
+     * @return
+     * @throws RelationshipNotFoundException if no Subscription is found for the confirmKey
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Subscription confirmSubscriber(String confirmKey)
             throws RelationshipNotFoundException {
@@ -637,6 +643,9 @@ public class SubscriptionService {
         if (results == null || results.isEmpty()) {
             throw new RelationshipNotFoundException("Subscription not found for confirmation key.");
         }
+        
+        if (results.size() > 1)
+            throw new RuntimeException("SHA-512 collision! We're all going to die!!!");
 
         Subscription sub = results.get(0);
 
@@ -649,8 +658,35 @@ public class SubscriptionService {
 
     }
 
-    public Subscription unsubscribeSubscriber(String email, long listId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Subscription unsubscribeSubscriber(String unsubKey) throws RelationshipNotFoundException {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
+        Root<Subscription> fromSubsc = query.from(Subscription.class);
+
+        query.select(fromSubsc);
+        query.where(builder.equal(fromSubsc.get(Subscription_.UNSUBSCRIBE_KEY), unsubKey));
+
+        List<Subscription> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        if (results == null || results.isEmpty()) {
+            throw new RelationshipNotFoundException("Subscription not found for unsubscribe key.");
+        }
+        
+        if (results.size() > 1)
+            throw new RuntimeException("SHA-512 collision! We're all going to die!!!");
+
+        Subscription sub = results.get(0);
+        
+        sub.setSTATUS(SUBSCRIPTION_STATUS.UNSUBSCRIBED.toString());
+        //sub.setCONFIRMATION_KEY("");//remove confirmation key?
+
+        sub = updateService.getEm().merge(sub);
+        
+        updateSubscriberCount(sub.getTARGET().getOBJECTID());
+
+        return sub;
     }
     
     /**
@@ -769,4 +805,5 @@ public class SubscriptionService {
 
         return new AsyncResult<>(result);
     }
+    
 }

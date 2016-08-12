@@ -90,6 +90,7 @@
                                 </h:inputHidden>
                                 <script type="text/javascript" >
                                     var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                                    var web_service_endpoint2 = '#{request.contextPath}/WSCampaignActivityMailMerge';
                                 </script>
                             </div>
                         </div>
@@ -100,7 +101,7 @@
                                              >
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
                                         event="click"
-                                        onevent="saveAndContinue"
+                                        onevent="load_activity"
                                         render="@form" execute="@form">
                                 </f:ajax>
                             </h:commandButton>

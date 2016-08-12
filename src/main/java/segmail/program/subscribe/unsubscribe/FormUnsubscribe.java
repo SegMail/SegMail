@@ -6,6 +6,7 @@
 package segmail.program.subscribe.unsubscribe;
 
 import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipNotFoundException;
 import eds.component.webservice.UnwantedAccessException;
 import eds.component.webservice.WebserviceService;
 import java.net.MalformedURLException;
@@ -60,6 +61,7 @@ public class FormUnsubscribe {
             program.setCurrentPage(program.getSUCCESS());
             
         } catch (UnwantedAccessException ex) {
+            ex.printStackTrace(System.out);
             program.setCurrentPage(program.getLANDING());
         } catch (IncompleteDataException ex) {
             ex.printStackTrace(System.out);
@@ -71,6 +73,7 @@ public class FormUnsubscribe {
     }
 
     public void extractParams(UserRequestContainer reqContainer) {
+        program.clearVariables();
         List<String> params = reqContainer.getProgramParamsOrdered();
         if(params == null || params.isEmpty())
             return;

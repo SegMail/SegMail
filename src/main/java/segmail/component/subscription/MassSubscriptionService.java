@@ -433,6 +433,7 @@ public class MassSubscriptionService {
             List<SubscriberAccount> subscribers = groupedByLists.get(subscription.getTARGET());
             if (subscribers == null) {
                 subscribers = new ArrayList<>();
+                groupedByLists.put(subscription.getTARGET(), subscribers);
             }
             subscribers.add(subscription.getSOURCE());
         }

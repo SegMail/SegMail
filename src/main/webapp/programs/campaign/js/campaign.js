@@ -45,7 +45,6 @@ var preview = function (sourceSel, sourceContSel, targetSel, targetContSel, time
         });
         //Transform the container as well, or the whole modal will remain long
         $(targetContSel).height(scaleY * $(targetSel).load().height());
-        //highlightAndCreateLinks();
     }, timeout);
 };
 
@@ -77,6 +76,9 @@ var highlightAndCreateLinks = function (timeout) {
             var linkText = obj.text();
             var offset = obj.offset().top - $('#preview').offset().top;
             var marginTop1 = offset;
+            
+            if(obj.attr('data-link'))
+                return;
 
             if (index > 0) {
                 var lastOffset = position;
@@ -494,6 +496,7 @@ var modifyDomToGeneratePreview = function () {
 var doEverything = function () {
     preview('.note-editable', '#editor-form', '#preview', '#preview-form', 0);
     highlightAndCreateLinks(50);
+    parseLink('!unsubscribe',100);
 };
 
 var resizeContent = function (timeout) {
@@ -618,6 +621,33 @@ var getTopNumbers = function(timeout) {
     },timeout);
 };
 
-var generateUnsubLink = function() {
-    
+var parseLink = function(label, timeout) {
+    //var unsubToken = '[!unsubscribe]';
+    var token = md5(label);
+    setTimeout(function(){
+        var content = $('#preview').html();
+        var unsubLink = '<a class="'+token+'"></a>';
+        $('#preview').html(content.replace(label,unsubLink));
+        var count = $('#preview a.'+token).size();
+        $('#preview a.'+token).each(function(){
+            var link = $(this);
+            link.attr('data-link',token)
+            callWS(web_service_endpoint2,'getTestLink',
+                    {label : label},
+                    function(result){
+                        var jsonObj = JSON.parse(result);
+                        link.attr('href',jsonObj['testLink']);
+                        link.html(jsonObj["name"]);
+                        
+                        link.removeClass(token);
+                        if (!--count)
+                            copyPreviewContent();
+                    },
+                    function(){
+                        
+                    });
+            
+        })
+                
+    },timeout);
 }

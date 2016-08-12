@@ -109,6 +109,9 @@ public class FormConfirmSubcription {
         } catch (MalformedURLException ex) {
             Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
             program.setCurrentPage(program.getERROR());
+        } catch (TransactionProcessedException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+            program.setCurrentPage(program.getPROCESSED());
         }
             
     }
@@ -122,6 +125,7 @@ public class FormConfirmSubcription {
     }
 
     public void extractParams(UserRequestContainer reqContainer) {
+        program.clearVariables();
         List<String> params = reqContainer.getProgramParamsOrdered();
         
         String reqKey = (params != null && !params.isEmpty()) ? params.get(0) : "";

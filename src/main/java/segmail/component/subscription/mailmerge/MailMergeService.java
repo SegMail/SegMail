@@ -168,6 +168,8 @@ public class MailMergeService {
         if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.UNSUBSCRIBE.label())) {
             return text;
         }
+        
+        
 
         // Check if key exists
         /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
@@ -178,7 +180,7 @@ public class MailMergeService {
          trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
          updateService.getEm().persist(trans);
          }*/
-        ServerInstance landingServer
+        /*ServerInstance landingServer
                 = landingService.getNextServerInstance(
                         LandingServerGenerationStrategy.ROUND_ROBIN,
                         ServerNodeType.WEB);
@@ -187,11 +189,11 @@ public class MailMergeService {
         }
 
         String unsubLink = landingServer.getURI().concat("/").concat(UNSUBSCRIBE_PROGRAM_NAME).concat("/").concat(unsubscribeKey);
-
-        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLink);
+        */
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubscribeKey);
 
         return newEmailBody;
-
+        
     }
 
     public String parseEverything(String text, Map<String, Object> params) throws IncompleteDataException {
