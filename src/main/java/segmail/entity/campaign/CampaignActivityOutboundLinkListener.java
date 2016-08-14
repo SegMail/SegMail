@@ -5,7 +5,7 @@
  */
 package segmail.entity.campaign;
 
-import eds.component.encryption.EncryptionService;
+import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -27,7 +27,7 @@ public class CampaignActivityOutboundLinkListener {
         if(link.getLINK_KEY() != null && !link.getLINK_KEY().isEmpty())
             return;
         //So that no collision!
-        String hash = EncryptionService.getHash(link.getOWNER().toString()+link.getSNO()+link.getLINK_TEXT()+link.getLINK_TARGET(), EncryptionType.SHA256);
+        String hash = EncryptionUtility.getHash(link.getOWNER().toString()+link.getSNO()+link.getLINK_TEXT()+link.getLINK_TARGET(), EncryptionType.SHA256);
         link.setLINK_KEY(hash);
     }
 }

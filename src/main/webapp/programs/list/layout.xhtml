@@ -11,7 +11,7 @@
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
         <ui:define name="toolbar-right">
-            
+
         </ui:define>
 
         <ui:define name="main-program-panel">
@@ -125,8 +125,22 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/jquery.dataTables.min.js"></script>
+
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/codemirror.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/addon/edit/matchbrackets.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/xml/xml.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/javascript/javascript.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/css/css.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/clike/clike.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/php/php.js"></script>
+            <script>
+
+                
+
+            </script>        
         </ui:define>
-        
+
         <ui:define name="head">
             <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/common/js/jasny-bootstrap/css/jasny-bootstrap.min.css" />
         </ui:define>

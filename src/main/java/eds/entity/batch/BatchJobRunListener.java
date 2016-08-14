@@ -5,7 +5,7 @@
  */
 package eds.entity.batch;
 
-import eds.component.encryption.EncryptionService;
+import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.entity.audit.ActiveUser;
 import javax.inject.Inject;
@@ -66,7 +66,7 @@ public class BatchJobRunListener {
         long batchJobId = run.getBATCH_JOB().getBATCH_JOB_ID();
         long ts = run.getDATETIME_CREATED().getTime();
         double random = Math.random()*ts;
-        String hash = EncryptionService.getHash(Long.toHexString(batchJobId^ts)+Double.toString(random), EncryptionType.MD5);
+        String hash = EncryptionUtility.getHash(Long.toHexString(batchJobId^ts)+Double.toString(random), EncryptionType.MD5);
         
         run.setRUN_KEY(hash);
     }

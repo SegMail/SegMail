@@ -46,7 +46,7 @@ public class DevAPIForm {
     }
     
     public void initAPIAccount(){
-        apiAccount = userService.getAPIAccountById(userContainer.getUser().getOBJECTID());
+        //apiAccount = userService.(userContainer.getUser().getOBJECTID());
     }
     
     public void generateAPIKey(){

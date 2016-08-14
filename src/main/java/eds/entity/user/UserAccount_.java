@@ -23,4 +23,5 @@ public class UserAccount_ extends EnterpriseData_ {
     public static volatile SingularAttribute<UserAccount,Integer> UNSUCCESSFUL_ATTEMPTS;
     public static volatile SingularAttribute<UserAccount,java.sql.Date> LAST_UNSUCCESS_ATTEMPT;
     public static volatile SingularAttribute<UserAccount,String> PROFILE_PIC_URL;
+    public static volatile SingularAttribute<UserAccount,String> API_KEY;
 }

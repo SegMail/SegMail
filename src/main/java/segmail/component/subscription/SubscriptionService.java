@@ -17,7 +17,7 @@ import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
 import eds.component.data.DataValidationException;
 import eds.component.data.RelationshipNotFoundException;
-import eds.component.encryption.EncryptionService;
+import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailService;
@@ -82,8 +82,6 @@ public class SubscriptionService {
     private GenericObjectService objectService;
     @EJB
     private UpdateObjectService updateService;
-    @EJB
-    private EncryptionService encryptService;
     @EJB
     private ListService listService;
     @EJB
@@ -739,13 +737,13 @@ public class SubscriptionService {
     }
 
     public String getConfirmationHashCode(long subscriberId, long listId) {
-        String confirmKey = encryptService.getHash("confirm subscription of " + subscriberId + " to list " + listId, EncryptionType.SHA256);
+        String confirmKey = EncryptionUtility.getHash("confirm subscription of " + subscriberId + " to list " + listId, EncryptionType.SHA256);
         return confirmKey;
 
     }
 
     public String getUnsubscribeHashCode(long subscriberId, long listId) {
-        String unsubKey = encryptService.getHash("unsubscribe " + subscriberId + " from list " + listId, EncryptionType.SHA256);
+        String unsubKey = EncryptionUtility.getHash("unsubscribe " + subscriberId + " from list " + listId, EncryptionType.SHA256);
         return unsubKey;
     }
 

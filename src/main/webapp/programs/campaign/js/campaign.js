@@ -22,7 +22,6 @@ function refresh_summernote() {
         //preview();
         //highlightAndCreateLinks();
         doEverything();
-
     });
 }
 

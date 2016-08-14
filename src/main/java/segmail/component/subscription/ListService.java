@@ -14,7 +14,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import eds.component.encryption.EncryptionService;
+import eds.component.encryption.EncryptionUtility;
 import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,15 +53,6 @@ public class ListService {
     private UpdateObjectService updateService;
     @EJB
     private GenericConfigService configService;
-    @EJB
-    private EncryptionService encryptService;
-
-    /**
-     * External services
-     */
-    //@EJB private LandingService landingService;
-    @EJB
-    private BatchProcessingService batchService;
 
     public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
         if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name()) && !field.getFIELD_NAME().equals("Email")) {

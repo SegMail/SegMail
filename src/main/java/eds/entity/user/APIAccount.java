@@ -5,14 +5,19 @@
  */
 package eds.entity.user;
 
+import eds.component.encryption.EncryptionUtility;
+import eds.component.encryption.EncryptionType;
 import eds.entity.data.EnterpriseData;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Table;
 
 /**
  *
  * @author LeeKiatHaw
  */
-//@Entity
-//@Table(name="API_ACCOUNT")
+@Entity
+@Table(name="API_ACCOUNT")
 public class APIAccount extends EnterpriseData<User> {
 
     private String APIKey;
@@ -32,7 +37,12 @@ public class APIAccount extends EnterpriseData<User> {
 
     @Override
     public Object generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        User owner = getOWNER();
+        String keyToBeEncrypted = owner.getOBJECTID() + owner.getOBJECT_NAME() + getSTART_DATE() + getEND_DATE() + getDATE_CHANGED() + getSNO() + getVersion() + this;
+        String key = "";
+        setAPIKey(key);
+        
+        return key;
     }
 
     @Override
