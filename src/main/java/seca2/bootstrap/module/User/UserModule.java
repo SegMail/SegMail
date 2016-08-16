@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import eds.component.user.UserService;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

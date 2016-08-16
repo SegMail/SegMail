@@ -53,7 +53,7 @@ public class FormSignupCode {
         if(!FacesContext.getCurrentInstance().isPostback()) {
             loadOwnLists();
             selectDefaultList();
-            setListFieldsJson();
+            getListFieldsJson();
         }
     }
     
@@ -74,10 +74,11 @@ public class FormSignupCode {
         
     }
     
-    public void setListFieldsJson() {
+    public String getListFieldsJson() {
         String signupCode = generateListFields();
         program.setListFieldsJson(signupCode);
         
+        return signupCode;
     }
     
     /*public String generateListFields() throws IncompleteDataException {
@@ -106,9 +107,6 @@ public class FormSignupCode {
         return signupCode;
     }*/
     
-    public String getListFieldsJson() {
-        return program.getListFieldsJson();
-    }
 
     public void setListFieldsJson(String signupCode) {
         program.setListFieldsJson(signupCode);
@@ -166,7 +164,7 @@ public class FormSignupCode {
             if(userAccount.getAPI_KEY() == null || userAccount.getAPI_KEY().isEmpty())
                 userAccount = userService.regenerateAPIKey(userAccount.getOWNER().getOBJECTID());
             
-            url += "subscribe/"+userAccount.getAPI_KEY();
+            url += "rest/subscribe/"+userAccount.getAPI_KEY();
             return url;
         } catch (IncompleteDataException ex) {
             Logger.getLogger(FormSignupCode.class.getName()).log(Level.SEVERE, null, ex);

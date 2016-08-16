@@ -29,6 +29,7 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(seca2.bootstrap.module.Webservice.REST.RestAuthenticationFilter.class);
         resources.add(segmail.program.subscribe.confirm.webservice.WSHttpSubscribe.class);
     }
     

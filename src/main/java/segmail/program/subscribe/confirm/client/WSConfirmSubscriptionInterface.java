@@ -7,7 +7,7 @@ import eds.component.webservice.ExpiredTransactionException;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
+import seca2.bootstrap.module.Webservice.SOAP.client.GenericWSInterface;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 

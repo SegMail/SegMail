@@ -6,7 +6,7 @@ import javax.jws.HandlerChain;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
-import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
+import seca2.bootstrap.module.Webservice.SOAP.client.GenericWSInterface;
 
 
 /**

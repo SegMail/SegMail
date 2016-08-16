@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.server;
+package seca2.bootstrap.module.Webservice.SOAP.server;
 
 import eds.component.user.UserAccountLockedException;
 import eds.component.user.UserLoginException;

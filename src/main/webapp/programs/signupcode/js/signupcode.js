@@ -28,14 +28,15 @@ var buildSignupCode = function() {
         var fieldKey = fieldList[i]['key'];
         var fieldDesc = fieldList[i]['description'];
         var fieldMandatory = fieldList[i]['mandatory'];
-        console.log('field name: '+fieldName+', fieldKey: '+fieldKey+', fieldDesc: '+fieldDesc+', fieldMandatory: '+fieldMandatory);
+        //console.log('field name: '+fieldName+', fieldKey: '+fieldKey+', fieldDesc: '+fieldDesc+', fieldMandatory: '+fieldMandatory);
         
         var fieldCode = '<label>'+fieldName+': </label>'
                         + '<input name="'+fieldKey+'" />';
-        code += '\n'+fieldCode;
+        code += '\n'+fieldCode + '<br />';
                         
     }
-    code += '</form>';
+    code += '<button >Subscribe</button>';
+    code += '\n</form>';
     $('#codeEditor').text(code);
 }
 

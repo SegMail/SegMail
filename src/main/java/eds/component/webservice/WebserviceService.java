@@ -17,7 +17,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.xml.namespace.QName;
-import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
+import seca2.bootstrap.module.Webservice.SOAP.client.GenericWSInterface;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;

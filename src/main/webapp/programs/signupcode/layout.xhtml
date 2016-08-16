@@ -34,7 +34,8 @@
                                 please <em><strong>do not change or remove</strong></em> any of the existing markup.
                             </p>
                             <p>
-                                You can contact us at <strong><u>help@segmail.io</u></strong> if you need any help. Have fun!
+                                You can contact us at <strong><u>signup@segmail.io</u></strong> if you need any help
+                                setting styles for your signup code. Have fun!
                             </p>
                         </div>
                     </div>
@@ -53,13 +54,13 @@
                                         Subscribe to the following lists:
                                     </label>
                                     
-                                    <h:selectOneListbox pass:id="selectList" styleClass="select2" style="width: 100%;"
+                                    <h:selectOneListbox id="slectList" pass:id="selectList" styleClass="select2" style="width: 100%;"
                                                         value="#{FormSignupCode.selectedListId}" 
                                                          >
                                         <f:selectItems value="#{FormSignupCode.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
                                                        itemValue="#{list.OBJECTID}">
                                         </f:selectItems>
-                                        <f:ajax event="change" listener="#{FormSignupCode.setListFieldsJson}"
+                                        <f:ajax event="change" 
                                                 render="@form" execute="@form"
                                                 onevent="refreshEverything"
                                                 delay="1000" >

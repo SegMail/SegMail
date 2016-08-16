@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.client;
+package seca2.bootstrap.module.Webservice.SOAP.client;
 
 import eds.component.webservice.WebserviceSOAPKeys;
 import java.util.Set;

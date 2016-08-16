@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.server;
+package seca2.bootstrap.module.Webservice;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ import seca2.bootstrap.UserRequestContainer;
  * @author LeeKiatHaw
  */
 @CoreModule
-public class WebserviceModule extends BootstrapModule {
+public class WebserviceModule extends BootstrapModule implements Serializable {
 
     @Inject
     UserRequestContainer requestContainer;
@@ -136,6 +137,8 @@ public class WebserviceModule extends BootstrapModule {
     
     private boolean checkRESTCall(HttpServletRequest req, UserRequestContainer requestContainer) {
         String restPath = req.getServletContext().getInitParameter(defaults.WEBSERVICE_PATH);
+        if(restPath == null || restPath.isEmpty())
+            restPath = System.getProperty(defaults.WEBSERVICE_PATH);
         String servletPath = req.getServletPath();
         
         return (restPath.equals(servletPath));
