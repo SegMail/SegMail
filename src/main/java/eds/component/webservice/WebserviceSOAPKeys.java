@@ -14,8 +14,8 @@ public class WebserviceSOAPKeys {
     public static String NAMESPACE = "http://webservice.component.segerp/";
 
     
-    public static String USERNAME = "miqhri4jtmfnkjtbh";
-    public static String PASSWORD = "newjkgmkesghramdfewkgr";
-    public static String SERVER_NAME = "jcrkwngu5fmkfbr";
+    public static String USERNAME = "username";
+    public static String PASSWORD = "password";
+    public static String SERVER_NAME = "servername";
     
 }

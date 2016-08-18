@@ -5,8 +5,8 @@
  */
 package eds.entity.user;
 
-import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
+import eds.component.encryption.EncryptionUtility;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -39,7 +39,7 @@ public class APIAccount extends EnterpriseData<User> {
     public Object generateKey() {
         User owner = getOWNER();
         String keyToBeEncrypted = owner.getOBJECTID() + owner.getOBJECT_NAME() + getSTART_DATE() + getEND_DATE() + getDATE_CHANGED() + getSNO() + getVersion() + this;
-        String key = "";
+        String key = EncryptionUtility.getHash(keyToBeEncrypted, EncryptionType.SHA256);
         setAPIKey(key);
         
         return key;

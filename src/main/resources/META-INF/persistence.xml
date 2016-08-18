@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
     <persistence-unit name="HIBERNATE" transaction-type="JTA">
         <jar-file>lib/EDS-1.0-SNAPSHOT.jar</jar-file>
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
@@ -29,19 +29,19 @@
             <!--<property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create" />-->
         
             <property name="hibernate.transaction.factory_class" value="org.hibernate.transaction.JTATransactionFactory"/>
-            <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform" />
+            <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform"/>
             <property name="hibernate.transaction.manager_lookup_class" value="org.hibernate.transaction.CMTTransactionFactory"/>
         
             <!--<property name="hibernate.transaction.auto_close_session" value="false" />-->
-            <property name="hibernate.transaction.flush_before_completion" value="true" />
-            <property name="hibernate.classloading.use_current_tccl_as_parent" value="false" />
+            <property name="hibernate.transaction.flush_before_completion" value="true"/>
+            <property name="hibernate.classloading.use_current_tccl_as_parent" value="false"/>
             <!--http://stackoverflow.com/questions/3677380/proper-hibernate-annotation-for-byte-->
-            <property name="hibernate.jdbc.use_streams_for_binary" value="false" />
+            <property name="hibernate.jdbc.use_streams_for_binary" value="false"/>
             
-            <property name="hibernate.jdbc.batch_size" value="1000" />
-            <property name="hibernate.order_inserts" value="true" />
-            <property name="hibernate.order_updates" value="true" />
-            <property name="hibernate.jdbc.batch_versioned_data" value="true" />
+            <property name="hibernate.jdbc.batch_size" value="1000"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            <property name="hibernate.order_updates" value="true"/>
+            <property name="hibernate.jdbc.batch_versioned_data" value="true"/>
         </properties>
     </persistence-unit>
-</persistence>  
+</persistence>
