@@ -72,8 +72,10 @@ public class MassSubscriptionService {
 
     @Inject
     SubscriptionContainer subContainer;
-    @Inject
-    ClientContainer clientContainer;
+    //@Inject
+    //ClientContainer clientContainer; //EJB services should not be injected with ClientContainer because they 
+    //can be called in different context and ClientContainers are only in the ERP context, particularly the JSF
+    //context.
 
     /**
      * There is no check for duplicates or already subscribed, like single
@@ -85,6 +87,7 @@ public class MassSubscriptionService {
      * No emails will be sent out with this mode as of now.
      *
      * @param subscribers
+     * @param doubleOptin
      * @return a Map of error messages and their records. A list of possible
      * error messages:
      * <ul>
@@ -92,7 +95,11 @@ public class MassSubscriptionService {
      * missing.</li>
      * <li>Invalid email</li>
      *
-     * @throws EntityNotFoundException
+     * @throws EntityNotFoundException if any of the required objects are missing:
+     * <ul>
+     * <li>SubscriptionList (Cached in SubscriptionContainer)</li>
+     * <li>Client (Cached in SubscriptionContainer)</li>
+     * </ul>
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<String, List<Map<String, Object>>> massSubscribe(List<Map<String, Object>> subscribers, boolean doubleOptin)
@@ -106,7 +113,7 @@ public class MassSubscriptionService {
             throw new EntityNotFoundException("SubscriptionList not initialized.");
         }
 
-        Client client = clientContainer.getClient(); //objService.getEnterpriseObjectById(clientId, Client.class); //DB hit, can be cached
+        Client client = subContainer.getClient(); //objService.getEnterpriseObjectById(clientId, Client.class); //DB hit, can be cached
         if (client == null) {
             throw new EntityNotFoundException("Client not initialized.");
         }
@@ -329,7 +336,7 @@ public class MassSubscriptionService {
         return newSubAccList;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int updateFieldValueList(List<SubscriberFieldValue> fieldValueList) {
         int results = 0;
 

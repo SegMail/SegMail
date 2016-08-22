@@ -8,14 +8,18 @@ package seca2.bootstrap.module.Webservice.REST.client;
 import eds.component.data.IncompleteDataException;
 import eds.component.webservice.WebserviceSOAPKeys;
 import eds.component.webservice.WebserviceService;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
@@ -26,6 +30,7 @@ import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.ServerInstance;
+import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
  *
@@ -39,6 +44,8 @@ public abstract class GenericRestClient {
 
     @Inject
     RestClientContainer restContainer;
+    @Inject
+    RestClientAuthOutboundFilter filter;
 
     @EJB
     LandingService landingService;
@@ -71,7 +78,8 @@ public abstract class GenericRestClient {
             }
             
             targetEndpointURL = targetServer.getURI();
-            client = javax.ws.rs.client.ClientBuilder.newClient();
+            //Solution from http://stackoverflow.com/a/36220060/5765606
+            client = ClientBuilder.newBuilder().register(filter).build();
             
         } catch (IncompleteDataException ex) {
             Logger.getLogger(GenericRestClient.class.getName()).log(Level.SEVERE, null, ex);
@@ -101,6 +109,10 @@ public abstract class GenericRestClient {
         Response response = authWebTarget.request(
                 MediaType.APPLICATION_JSON_TYPE).post(
                         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+        
+        if(response.getStatus() != Response.Status.OK.getStatusCode()) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, Response.Status.fromStatusCode(response.getStatus()).name(), response.getStatusInfo().getReasonPhrase());
+        }
         String token = response.readEntity(String.class);
 
         restContainer.setApiKey(token);
@@ -113,7 +125,7 @@ public abstract class GenericRestClient {
      */
     protected WebTarget getWebTarget(String endpointPath) {
         webTarget = client.target(targetEndpointURL).path(restPath).path(endpointPath);
-        
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "targetEndpointURL", targetEndpointURL);
         return webTarget;
     }
 }

@@ -46,7 +46,8 @@ public class RestServerAuthEndpoint {
             return Response.ok(token).build();
 
         } catch (Exception e) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(e).build();
         }      
     }
 

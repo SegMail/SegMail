@@ -112,9 +112,6 @@ public class FormListSubscriber {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Subscriber already exist in this list", "");
-        } catch (BatchProcessingException ex) {
-            ex.printStackTrace(System.out);
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Something wrong with the sending of emails", "Please contact your system admin.");
         } catch (SubscriptionException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } /*catch (Exception ex) {

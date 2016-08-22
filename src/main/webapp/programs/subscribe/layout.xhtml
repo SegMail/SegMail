@@ -7,21 +7,85 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
 
         <ui:define name="main-program-panel">
-            <form jsf:id="FormSubscribe" >
-                #{FormSubscribe.invokeString}
+            <form jsf:id="FormSubscribe">
+
+                <c:choose >
+                    <c:when test="#{FormSubscribe.pageName eq ProgramSubscribe.PAGE_GENERIC_ERROR}">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-8 col-md-offset-2">
+                                <h4>Oops there was an error with your request.</h4>
+                                <p>You can notify the administrators of the site.</p>
+                                <!--<p>You might want to tell them this was what happened:</p>
+                                <p class="lead" style="color: #26b99a; margin-left: 20px">
+                                    #{FormSubscribe.errorMessage}
+                                </p>-->
+                            </div>
+                        </div>
+
+                    </c:when>
+                    <c:when test="#{FormSubscribe.pageName eq ProgramSubscribe.PAGE_ALREADY_SUBSCRIBED_AND_RESEND}">
+                            <div class="row">
+                            <div class="col-sm-12 col-md-8 col-md-offset-2">
+                                <h4>You have subscribed to this mailing list.</h4>
+                                <div pass:id="resend-panel" jsf:id="resend-panel">
+                                    <p>
+                                        <h:commandLink id="resend-button"
+                                                       action="#{FormSubscribe.resendConfirmation()}"
+                                                       value="Click here if you haven't received the confirmation email."
+                                                       >
+                                            <f:ajax execute="resend-panel"
+                                                    render="@form"
+                                                    onevent="resend">
+                                            </f:ajax>
+                                        </h:commandLink>
+                                        
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                </c:when>
+                    <c:otherwise>
+
+                        <div class="row">
+                            <div class="col-sm-12 col-md-8 col-md-offset-2">
+                                <h4>You have subscribed to the list:</h4>
+                                <p class="lead" style="color: #26b99a; margin-left: 20px">
+                                    #{FormSubscribe.listName}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-8 col-md-offset-2">
+                                <h4>One more step to go!</h4>
+                                <p>
+                                    You should be receiving a confirmation email shortly, just click 
+                                    on the confirmation link in the email and you will be set to go.
+                                </p>
+                                <p>
+                                    Cheers!
+                                </p>
+                            </div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+
             </form>
 
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
-            
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribe/js/subscribe.js" />
 
+        </ui:define>
+        <ui:define name="head">
+            <link rel="stylesheet" href="#{request.contextPath}/templates/common/css/ajax-ring/ajax-ring.css" />
         </ui:define>
 
     </ui:composition>

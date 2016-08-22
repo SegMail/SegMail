@@ -5,6 +5,7 @@
  */
 package segmail.component.subscription;
 
+import eds.entity.client.Client;
 import java.io.Serializable;
 import java.util.List;
 import javax.enterprise.context.RequestScoped;
@@ -22,7 +23,7 @@ public class SubscriptionContainer implements Serializable {
     
     private SubscriptionList list;
     private List<SubscriptionListField> listFields;
-    
+    private Client client;
 
     public SubscriptionList getList() {
         return list;
@@ -38,6 +39,14 @@ public class SubscriptionContainer implements Serializable {
 
     public void setListFields(List<SubscriptionListField> listFields) {
         this.listFields = listFields;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
     
     

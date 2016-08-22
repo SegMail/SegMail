@@ -239,6 +239,16 @@ public class MailService {
         return "";
     }
 
+    /**
+     * Puts Email in QUEUED status with scheduleTime. If the processEmailQueue(DateTime) 
+     * or processEmailQueue() service methods are scheduled, the email will be 
+     * picked up at the soonest after scheduleTime to be sent out.
+     * 
+     * @param email
+     * @param scheduledTime
+     * @throws DataValidationException if validateEmail(Email) throws one.
+     * @throws InvalidEmailException if validateEmail(Email) throws one.
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void queueEmail(Email email, DateTime scheduledTime) 
             throws DataValidationException, InvalidEmailException {
@@ -299,6 +309,13 @@ public class MailService {
         System.out.println("MailService.printMail2()");
     }
 
+    /**
+     * 
+     * @param email
+     * @throws DataValidationException
+     * @throws InvalidEmailException if either Sender's email address or any of
+     * the Recipients' email addresses are not valid based on org.apache.commons.validator.routines.EmailValidator
+     */
     public void validateEmail(Email email) throws DataValidationException, InvalidEmailException {
         if (email.getSENDER_ADDRESS() == null || email.getSENDER_ADDRESS().isEmpty()) {
             throw new DataValidationException("Emails must have sender's address.");

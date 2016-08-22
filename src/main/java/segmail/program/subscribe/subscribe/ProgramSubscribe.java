@@ -18,16 +18,25 @@ import seca2.program.Program;
 @Named("ProgramSubscribe")
 public class ProgramSubscribe extends Program {
     
-    private long userId;
+    private long clientId;
     private long listId;
     private Map<String,String> subscriberFieldValues;
-
-    public long getUserId() {
-        return userId;
+    private boolean error;
+    private String errorMessage;
+    private String listname = "";
+    private String confirmationKey;
+    
+    private String pageName;
+    private final String PAGE_SUCCESS = "PAGE_SUCCESS";
+    private final String PAGE_ALREADY_SUBSCRIBED_AND_RESEND = "PAGE_ALREADY_SUBSCRIBED_AND_RESEND";
+    private final String PAGE_GENERIC_ERROR = "PAGE_GENERIC_ERROR";
+    
+    public long getClientId() {
+        return clientId;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setClientId(long clientId) {
+        this.clientId = clientId;
     }
 
     public long getListId() {
@@ -46,11 +55,65 @@ public class ProgramSubscribe extends Program {
         this.subscriberFieldValues = subscriberFieldValues;
     }
 
+    public boolean isError() {
+        return error;
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
+    }
+
+    public String getListname() {
+        return listname;
+    }
+
+    public void setListname(String listname) {
+        this.listname = listname;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getPageName() {
+        return pageName;
+    }
+
+    public void setPageName(String pageName) {
+        this.pageName = pageName;
+    }
+
+    public String getPAGE_SUCCESS() {
+        return PAGE_SUCCESS;
+    }
+
+    public String getPAGE_ALREADY_SUBSCRIBED_AND_RESEND() {
+        return PAGE_ALREADY_SUBSCRIBED_AND_RESEND;
+    }
+
+    public String getPAGE_GENERIC_ERROR() {
+        return PAGE_GENERIC_ERROR;
+    }
+
+    public String getConfirmationKey() {
+        return confirmationKey;
+    }
+
+    public void setConfirmationKey(String confirmationKey) {
+        this.confirmationKey = confirmationKey;
+    }
+    
     @Override
     public void clearVariables() {
         listId = 0;
-        userId = 0;
+        clientId = 0;
         subscriberFieldValues = new HashMap<>();
+        pageName = "";
+        confirmationKey = "";
     }
 
     @Override
@@ -62,12 +125,12 @@ public class ProgramSubscribe extends Program {
             if(params.length <= 0 || params[0] == null || params[0].isEmpty())
                 continue;
             
-            if("userid".equalsIgnoreCase(key))  {
+            if("client".equalsIgnoreCase(key))  {
                 
-                setUserId(Long.parseLong(params[0]));
+                setClientId(Long.parseLong(params[0]));
                 continue;
             }
-            if("listid".equalsIgnoreCase(key)) {
+            if("list".equalsIgnoreCase(key)) {
                 setListId(Long.parseLong(params[0]));
                 continue;
             }

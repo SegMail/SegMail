@@ -120,20 +120,9 @@ public class WebserviceService {
         DateTime now = DateTime.now();
         List<APIAccount> accounts =  getAPIAccounts(user.getOBJECTID(),now,now);
         
-        List<APIAccount> delimitedAccounts = new ArrayList<>();
         //If there is an existing API key, delimit it and create a new one
         if(accounts != null && !accounts.isEmpty()) {
-            for(APIAccount account : accounts) {
-                //This part which delimits the existing record will be coded in UpdateServices 
-                objService.getEm().remove(account);
-                objService.getEm().flush();
-                java.sql.Date delimitDate = new java.sql.Date(now.minusDays(1).getMillis());
-                account.setEND_DATE(delimitDate);
-                //Inser only if start date before end date, else it is considered deleted.
-                if(account.getSTART_DATE().before(account.getEND_DATE()))
-                    delimitedAccounts.add(account);
-            }
-            updService.insertEntepriseData(delimitedAccounts, APIAccount.class);
+            return accounts.get(0).getAPIKey();
         }
         
         //Create new API key
@@ -175,5 +164,52 @@ public class WebserviceService {
     public String getRestPath() {
         String restPath = System.getProperty(REST_PATH);
         return restPath;
+    }
+    
+    public List<APIAccount> getAPIAccounts(String token) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<APIAccount> query = builder.createQuery(APIAccount.class);
+        Root<APIAccount> fromAPI = query.from(APIAccount.class);
+        
+        query.select(fromAPI);
+        query.where(builder.equal(fromAPI.get(APIAccount_.APIKey), token));
+        
+        List<APIAccount> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    /**
+     * Checks if the token is valid and if the user application that was issued 
+     * the token comes from the same IP address that was assigned in LandingService
+     * module.
+     * 
+     * @param token
+     * @param ipAddress
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public User authenticateApplicationToken(String token, String ipAddress) throws UserLoginException {
+        
+        List<APIAccount> accounts = this.getAPIAccounts(token);
+        if(accounts == null || accounts.isEmpty())
+            throw new UserLoginException("Invalid token.");
+        
+        APIAccount account = accounts.get(0);
+        User user = account.getOWNER();
+        
+        //Get Server assigned to the account
+        ServerInstance server = landingService.getServerFromUser(user.getOBJECTID());
+        if(server == null)
+            throw new UserLoginException("No servers assigned to user account.");
+        
+        if(ipAddress == null ||
+                server.getIP_ADDRESS() == null ||
+                !ipAddress.equals(server.getIP_ADDRESS()))
+            throw new UserLoginException("Unauthorized IP address.");
+        
+        return user;
+            
     }
 }

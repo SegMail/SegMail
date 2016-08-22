@@ -13,7 +13,8 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**
- *
+ * This should be under the Landing component instead of User component.
+ * 
  * @author LeeKiatHaw
  */
 @Entity

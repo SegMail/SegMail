@@ -10,6 +10,8 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <script type="text/javascript" >
+        var listId = #{FormSignupCode.selectedListId};
+        var clientId = #{FormSignupCode.clientId};
         var fieldList = #{FormSignupCode.listFieldsJson};
         var serverUrl = '#{FormSignupCode.signupLink}';
     </script>

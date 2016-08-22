@@ -5,12 +5,17 @@
  */
 package seca2.bootstrap.module.Webservice.REST;
 
+import eds.component.user.UserLoginException;
+import eds.component.webservice.WebserviceService;
 import java.io.IOException;
 import javax.annotation.Priority;
+import javax.ejb.EJB;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
@@ -24,6 +29,10 @@ import javax.ws.rs.ext.Provider;
 @Priority(Priorities.AUTHENTICATION)
 public class RestAuthenticationFilter implements ContainerRequestFilter {
 
+    @Context HttpServletRequest req;
+    
+    @EJB WebserviceService wsService;
+    
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // Get the HTTP Authorization header from the request
@@ -37,11 +46,13 @@ public class RestAuthenticationFilter implements ContainerRequestFilter {
 
         // Extract the token from the HTTP Authorization header
         String token = authorizationHeader.substring("Bearer".length()).trim();
+        
+        String ip = req.getRemoteAddr();
 
         try {
 
             // Validate the token
-            validateToken(token);
+            validateToken(token,ip);
 
         } catch (Exception e) {
             requestContext.abortWith(
@@ -49,8 +60,8 @@ public class RestAuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
-    private void validateToken(String token) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void validateToken(String token, String ip) throws UserLoginException {
+        wsService.authenticateApplicationToken(token, ip);
     }
     
 }

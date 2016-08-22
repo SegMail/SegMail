@@ -23,6 +23,8 @@ var refresh_select2 = function() {
 var buildSignupCode = function() {
     
     var code = '<form action="'+serverUrl+'" method="post" enctype="application/x-www-form-urlencoded" >';
+    code += '\n<input name="client" type="hidden" value="'+clientId+'" />';
+    code += '\n<input name="list" type="hidden" value="'+listId+'" />';
     for(var i = 0; i < fieldList.length; i++) {
         var fieldName = fieldList[i]['name'];
         var fieldKey = fieldList[i]['key'];

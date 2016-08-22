@@ -28,7 +28,6 @@ import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +47,15 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
+import seca2.bootstrap.module.Webservice.REST.RestSecured;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SubscriptionListField;
@@ -70,6 +75,7 @@ import segmail.entity.subscription.autoresponder.AutoresponderEmail;
  */
 @Stateless
 @Interceptors({ClientResourceInterceptor.class})
+@Path("/subscription")
 public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
@@ -125,42 +131,55 @@ public class SubscriptionService {
      * @param listId
      * @param values
      * @param doubleOptin
-     * @throws EntityNotFoundException
-     * @throws IncompleteDataException
-     * @throws segmail.component.subscription.SubscriptionException
-     * @throws eds.component.batch.BatchProcessingException
-     * @throws RelationshipExistsException
+     * @return 
+     * @throws EntityNotFoundException if clientId or listId are not found
+     * @throws IncompleteDataException if:
+     * <ul>
+     * <li>List doesn't have <em>any</em> fields created yet.</li>
+     * <li>Email is not provided.</li>
+     * <ul>
+     * @throws segmail.component.subscription.SubscriptionException if
+     * <ul>
+     * <li>Any mandatory field is not provided, specified by SubscriptionListField.MANDATORY.</li>
+     * <ul>
+     * @throws RelationshipExistsException if the subscriber is already subscribed to the list
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
-            throws EntityNotFoundException, IncompleteDataException, SubscriptionException, BatchProcessingException, RelationshipExistsException {
+    public Subscription subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
+            throws EntityNotFoundException, IncompleteDataException, SubscriptionException, RelationshipExistsException {
 
+        Client client = objectService.getEnterpriseObjectById(clientId, Client.class); //DB hit, can be cached
+        if (client == null) {
+            throw new EntityNotFoundException(Client.class, clientId);
+        }
+        subContainer.setClient(client);
+        
         SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
         if (list == null) {
             throw new EntityNotFoundException(SubscriptionList.class, listId);
         }
+        subContainer.setList(list);
 
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
         if (fields == null || fields.isEmpty()) {
             throw new IncompleteDataException("List " + listId + " does not have fields created.");
         }
+        subContainer.setListFields(fields);
 
         //Look for the key in fields for DEFAULT_EMAIL_FIELD_NAME
         String email = "";
         for (SubscriptionListField field : fields) {
             if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
                 email = (String) values.get((String) field.generateKey());
-                if (email != null && checkSubscribed(email, listId)) {
-                    throw new RelationshipExistsException("Subscriber is already on this list");
-                }
+                break;
             }
         }
         if (email == null || email.isEmpty()) {
             throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
         }
-
-        subContainer.setList(list);
-        subContainer.setListFields(fields);
+        if (checkSubscribed(email, listId)) {
+            throw new RelationshipExistsException("Subscriber is already on this list");
+        }
 
         List<Map<String, Object>> singleSubscriberMap = new ArrayList<>();
         singleSubscriberMap.add(values);
@@ -169,6 +188,8 @@ public class SubscriptionService {
         for (String key : results.keySet()) {
             throw new SubscriptionException(key);
         }
+        
+        return this.getSubscriptions(email, listId).get(0);
     }
 
     /**
@@ -460,18 +481,21 @@ public class SubscriptionService {
     /**
      *
      * @param sub
-     * @throws IncompleteDataException if no Send As address is set for list or
+     * @throws IncompleteDataException If no Send As address is set for list or
      * a confirmation email is not assigned to the list.
-     * @throws BatchProcessingException
+     * @throws eds.component.data.DataValidationException if the following error 
+     * occurs:<br>
+     * <ul>
+     * <li>List object has no SEND_AS_EMAIL set.</li>
+     * <li>List object has no AutoresponderEmail of the AUTO_EMAIL_TYPE CONFIRMATION</li>
+     * </ul>
+     * @throws eds.component.mail.InvalidEmailException if either sender's or 
+     * recipients' email addresses are invalid.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void sendConfirmationEmail(Subscription sub)
-            throws IncompleteDataException, BatchProcessingException, DataValidationException, InvalidEmailException {
-            //Retrieve "Send as" from the list
-            /*SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-         if(list == null)
-         throw new EntityNotFoundException(SubscriptionList.class,listId);*/
-
+            throws IncompleteDataException, DataValidationException, InvalidEmailException {
+        
         SubscriptionList list = sub.getTARGET();
 
         String sendAs = list.getSEND_AS_EMAIL();
@@ -479,9 +503,7 @@ public class SubscriptionService {
             throw new IncompleteDataException("Please set \"Send As\" address before sending confirmation emails.");
         }
 
-            //Retrieve the autoemail from list using AutoresponderService
-        //List<AutoresponderEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(
-        //        listId,Assign_AutoConfirmEmail_List.class, AutoConfirmEmail.class);
+        //Retrieve the autoemail from list using AutoresponderService
         List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
         AutoresponderEmail assignedConfirmEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
                 ? null : assignedAutoEmails.get(0);
@@ -504,9 +526,6 @@ public class SubscriptionService {
         confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
         confirmEmail.addRecipient(sub.getSOURCE().getEMAIL());
 
-            //mailService.sendEmailByAWS(confirmEmail, true);
-        //BatchJobStep step = batchService.createJobStep("MailService", "sendEmailNow", new Object[] {confirmEmail,true});
-        //batchService.executeJobStep(step);
         mailService.queueEmail(confirmEmail, DateTime.now());
 
     }
@@ -598,7 +617,7 @@ public class SubscriptionService {
         Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
         Root<Subscription> fromSubscription = query.from(Subscription.class);
 
-        query.select(fromSubscription);
+        query.select(fromSubscription).distinct(true);
         query.where(builder.and(
                 fromSubscriber.get(SubscriberAccount_.EMAIL).in(subscriberEmails),
                 builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
@@ -694,7 +713,12 @@ public class SubscriptionService {
      * @param key 
      * @throws eds.component.data.IncompleteDataException 
      */
-    public void retriggerConfirmation(String key) 
+    @Path("/retriggerConfirmation")
+    @PUT
+    @RestSecured
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void retriggerConfirmation(@FormParam("key")String key) 
             throws IncompleteDataException, BatchProcessingException, DataValidationException, InvalidEmailException {
         List<Subscription> subscriptions = getSubscriptionByConfirmKey(key);
         //Impossible to have a duplicate because the key was created with list id and 
@@ -709,12 +733,46 @@ public class SubscriptionService {
         //If the status has already been confirmed, do not send out anything and
         //log this request. 
         //send out an email to system administrator?
-        if(!subscription.getSTATUS().equals(SUBSCRIPTION_STATUS.NEW.name())) {
+        //if(!subscription.getSTATUS().equals(SUBSCRIPTION_STATUS.NEW.name())) {
             //What should we do?
-            return;
-        }
+        //    return;
+        //}
         
         this.sendConfirmationEmail(subscription);
+    }
+    
+    /**
+     * A method which is better for Web server calls.
+     * 
+     * @param listId
+     * @param email
+     * @throws RelationshipNotFoundException if the subscriber has not even signed up yet.
+     * @throws IncompleteDataException If no Send As address is set for list or
+     * a confirmation email is not assigned to the list.
+     * @throws DataValidationException if the following error 
+     * occurs:<br>
+     * <ul>
+     * <li>List object has no SEND_AS_EMAIL set.</li>
+     * <li>List object has no AutoresponderEmail of the AUTO_EMAIL_TYPE CONFIRMATION</li>
+     * </ul>
+     * @throws InvalidEmailException if either sender's or recipients' email 
+     * addresses are invalid.
+     */
+    
+    public void retriggerConfirmation(@FormParam("listId") long listId, @FormParam("email") String email) 
+            throws 
+            RelationshipNotFoundException, 
+            IncompleteDataException, 
+            DataValidationException, 
+            InvalidEmailException {
+        List<Subscription> subscriptions = getSubscriptions(email, listId);
+        if(subscriptions == null || subscriptions.isEmpty())
+            throw new RelationshipNotFoundException(email+" is not subscribed to list "+listId+" yet.");
+        
+        Subscription subscription = subscriptions.get(0);
+        
+        //Doesn't matter the status, just retrigger!
+        sendConfirmationEmail(subscription);
     }
     
     /**

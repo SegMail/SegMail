@@ -32,7 +32,9 @@ public class ApplicationConfig extends Application {
         resources.add(org.glassfish.json.jaxrs.JsonStructureBodyReader.class);
         resources.add(org.glassfish.json.jaxrs.JsonStructureBodyWriter.class);
         resources.add(seca2.bootstrap.module.Webservice.REST.RestAuthenticationFilter.class);
+        resources.add(seca2.bootstrap.module.Webservice.REST.client.RestClientAuthOutboundFilter.class);
         resources.add(seca2.bootstrap.module.Webservice.REST.server.RestServerAuthEndpoint.class);
+        resources.add(segmail.component.subscription.SubscriptionService.class);
         resources.add(segmail.program.subscribe.subscribe.webservice.WSHttpSubscribe.class);
     }
     

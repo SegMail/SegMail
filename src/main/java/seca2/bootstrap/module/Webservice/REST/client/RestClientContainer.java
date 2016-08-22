@@ -6,6 +6,7 @@
 package seca2.bootstrap.module.Webservice.REST.client;
 
 import java.io.Serializable;
+import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
@@ -17,6 +18,7 @@ import javax.inject.Named;
  */
 //@SessionScoped
 @ApplicationScoped
+@Startup
 @Named("RestClientContainer")
 public class RestClientContainer implements Serializable {
     

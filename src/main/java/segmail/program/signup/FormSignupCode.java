@@ -128,6 +128,10 @@ public class FormSignupCode {
         program.setSelectedListId(selectedListId);
     }
     
+    public long getClientId() {
+        return clientCont.getClient().getOBJECTID();
+    }
+    
     public String generateListFields() {
         long selectedListId = this.getSelectedListId();
         if(selectedListId <= 0)
@@ -151,11 +155,11 @@ public class FormSignupCode {
     
     public String getSignupLink() {
         try {
-            ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
+            ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
             String url = server.getURI() ;
             if(!url.endsWith("/"))
                 url += "/";
-            
+            /*
             UserAccount userAccount = userService.getUserAccountById(userSessCont.getUser().getOBJECTID());
             
             if(userAccount == null)
@@ -163,8 +167,8 @@ public class FormSignupCode {
             
             if(userAccount.getAPI_KEY() == null || userAccount.getAPI_KEY().isEmpty())
                 userAccount = userService.regenerateAPIKey(userAccount.getOWNER().getOBJECTID());
-            
-            url += "rest/subscribe/"+userAccount.getAPI_KEY();
+            */
+            url += "subscribe";//+userAccount.getAPI_KEY();
             return url;
         } catch (IncompleteDataException ex) {
             Logger.getLogger(FormSignupCode.class.getName()).log(Level.SEVERE, null, ex);

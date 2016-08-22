@@ -7,9 +7,11 @@ package seca2.bootstrap.module.Webservice.REST.client;
 
 import java.io.IOException;
 import javax.inject.Inject;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import org.apache.http.HttpHeaders;
 
 /**
@@ -18,12 +20,15 @@ import org.apache.http.HttpHeaders;
  * 
  * @author LeeKiatHaw
  */
+@Provider
 public class RestClientAuthOutboundFilter implements ClientRequestFilter {
 
     @Inject RestClientContainer restContainer;
     
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
+        
+        System.out.println("JAX-WS client filter called.");//debug
         
         //If it is an authentication request, don't block it
         if(requestContext.getUri().getPath().endsWith("authentication"))
@@ -36,7 +41,7 @@ public class RestClientAuthOutboundFilter implements ClientRequestFilter {
                             .entity("No API key. Please request one from the target endpoint /authentication")
                             .build());
         }
-        
+        System.out.println("JAX-WS api key: "+restContainer.getApiKey());//debug
         requestContext.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer "+restContainer.getApiKey());
         
     }
