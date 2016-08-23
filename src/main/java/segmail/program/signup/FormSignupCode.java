@@ -80,33 +80,6 @@ public class FormSignupCode {
         
         return signupCode;
     }
-    
-    /*public String generateListFields() throws IncompleteDataException {
-
-        List<String> selectedLists = getSelectedLists();
-        
-        List<SubscriptionListField> fieldList = getFieldList();
-        
-        landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
-        
-        String signupCode = "<form action=\"http://localhost:8080/SegMail/rest/subscribe\" "
-                + "method=\"POST\"\n" +
-"              enctype=\"application/x-www-form-urlencoded\"\n" +
-"              >\n" +
-"            <input type=\"hidden\" name=\"list\" value=\"" + "" + " ></input>\n" +
-"            <input type=\"hidden\" name=\"client\" value=\""+ clientCont.getClient().getOBJECTID() +"\"></input>\n" +
-"            <label for=\"email\">\n" +
-"                Email:\n" +
-"            </label>\n" +
-"                <input type=\"text\" name=\"email\" />\n" +
-"            \n" +
-"                <button>Subscribe</button>\n" +
-"                <input type=\"submit\" value=\"Submit\">\n" +
-"        </form>";
-        
-        return signupCode;
-    }*/
-    
 
     public void setListFieldsJson(String signupCode) {
         program.setListFieldsJson(signupCode);
@@ -159,15 +132,7 @@ public class FormSignupCode {
             String url = server.getURI() ;
             if(!url.endsWith("/"))
                 url += "/";
-            /*
-            UserAccount userAccount = userService.getUserAccountById(userSessCont.getUser().getOBJECTID());
             
-            if(userAccount == null)
-                throw new RuntimeException("You do not have a user account set up yet, please contact your administrators to help you with this.");
-            
-            if(userAccount.getAPI_KEY() == null || userAccount.getAPI_KEY().isEmpty())
-                userAccount = userService.regenerateAPIKey(userAccount.getOWNER().getOBJECTID());
-            */
             url += "subscribe";//+userAccount.getAPI_KEY();
             return url;
         } catch (IncompleteDataException ex) {
@@ -175,4 +140,6 @@ public class FormSignupCode {
             return "["+ex.getMessage()+"]";
         }
     }
+    
+    
 }

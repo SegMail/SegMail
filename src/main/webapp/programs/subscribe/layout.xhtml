@@ -14,7 +14,7 @@
 
         <ui:define name="main-program-panel">
             <form jsf:id="FormSubscribe">
-
+                <h:inputHidden value="#{FormSubscribe.confirmationKey}" ></h:inputHidden>
                 <c:choose >
                     <c:when test="#{FormSubscribe.pageName eq ProgramSubscribe.PAGE_GENERIC_ERROR}">
                         <div class="row">
@@ -34,6 +34,14 @@
                             <div class="col-sm-12 col-md-8 col-md-offset-2">
                                 <h4>You have subscribed to this mailing list.</h4>
                                 <div pass:id="resend-panel" jsf:id="resend-panel">
+                                    <h4>One more step to go!</h4>
+                                    <p>
+                                        You should be receiving a confirmation email shortly, just click 
+                                        on the confirmation link in the email and you will be set to go.
+                                    </p>
+                                    <p>
+                                        Cheers!
+                                    </p>
                                     <p>
                                         <h:commandLink id="resend-button"
                                                        action="#{FormSubscribe.resendConfirmation()}"

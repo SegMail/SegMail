@@ -5,17 +5,13 @@
  */
 package segmail.program.subscribe.subscribe;
 
-import eds.component.data.RelationshipExistsException;
+import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
-import segmail.entity.subscription.Subscription;
 import segmail.program.subscribe.subscribe.client.RestClientSubscribe;
 
 /**
@@ -59,6 +55,7 @@ public class FormSubscribe {
         } catch (Throwable ex) {
             this.setPageName(program.getPAGE_GENERIC_ERROR());
             setErrorMessage(ex.getMessage());
+            java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.INFO, ex.getMessage());
         }
     }
     
@@ -103,9 +100,13 @@ public class FormSubscribe {
     }
     
     public void resendConfirmation() {
-        Logger.getLogger(this.getClass().getName()).log(Logger.Level.INFO, "Resend called");
-        
-        wsClient.retriggerConfirmation(program.getConfirmationKey());
-        
+        try {
+            wsClient.retriggerConfirmation(program.getConfirmationKey());
+            this.setPageName(program.getPAGE_ALREADY_SUBSCRIBED_AND_RESEND());
+        } catch (Exception ex) {
+            this.setPageName(program.getPAGE_GENERIC_ERROR());
+            
+            Logger.getLogger(this.getClass().getName()).log(Logger.Level.ERROR, ex.getMessage());
+        }
     }
 }

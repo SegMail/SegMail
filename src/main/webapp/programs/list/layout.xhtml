@@ -70,9 +70,6 @@
                                     <li class="#{(FormTabController.showActiveTabs.get('email_panel') ? 'active' : '')}">
                                         <a href="#email_panel" data-toggle="tab">Confirmation &amp; Welcome Emails</a>
                                     </li>
-                                    <li class="#{(FormTabController.showActiveTabs.get('signup_panel') ? 'active' : '')}">
-                                        <a href="#signup_panel" data-toggle="tab">Signup Code</a>
-                                    </li>
                                     <li class="#{(FormTabController.showActiveTabs.get('subscribers_panel') ? 'active' : '')}">
                                         <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
                                     </li>
@@ -89,9 +86,6 @@
                                     </div>
                                     <div class="tab-pane #{(FormTabController.showActiveTabs.get('settings_panel') ? 'active' : '')}" id="settings_panel">
                                         <ui:include src="settings_panel.xhtml"></ui:include>
-                                    </div>
-                                    <div class="tab-pane #{(FormTabController.showActiveTabs.get('signup_panel') ? 'active' : '')}" id="signup_panel">
-                                        <ui:include src="signup_panel.xhtml"></ui:include>
                                     </div>
                                 </div>
                             </div>

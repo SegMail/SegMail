@@ -6,9 +6,11 @@
 package segmail.program.subscribe.subscribe.webservice;
 
 import eds.component.batch.BatchProcessingException;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.mail.InvalidEmailException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +18,15 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -53,6 +59,7 @@ public class WSHttpSubscribe {
      * <ul>
      * <li>Response code 201: If the 
      */
+    @Path("/subscribe")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -114,4 +121,26 @@ public class WSHttpSubscribe {
         } 
     }
     
+    @Path("/retriggerConfirmation")
+    @POST
+    @RestSecured
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Response retriggerConfirmation(@FormParam("key")String key) {
+        try {
+            subService.retriggerConfirmation(key);
+            
+            return Response.ok(Response.Status.OK).entity(key).build();
+            
+        } catch (IncompleteDataException ex) {
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        } catch (DataValidationException ex) {
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        } catch (InvalidEmailException ex) {
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
+        }
+    }
 }

@@ -37,7 +37,7 @@ import segmail.entity.subscription.SubscriptionList;
 public class RestClientSubscribe extends GenericRestClient {
     
     public String subscribe(Map<String,String[]> paramMap) throws RelationshipExistsException {
-        WebTarget target = getWebTarget("subscribe");
+        WebTarget target = getWebTarget("subscribe").path("subscribe");
         Form form = new Form();
         for(String key : paramMap.keySet()) {
             String[] params = paramMap.get(key);
@@ -52,7 +52,6 @@ public class RestClientSubscribe extends GenericRestClient {
                 MediaType.APPLICATION_JSON_TYPE).post(
                         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         
-        
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {
             
             String error = response.readEntity(String.class);
@@ -66,11 +65,11 @@ public class RestClientSubscribe extends GenericRestClient {
     
     
     public void retriggerConfirmation(String confirmationKey) {
-        WebTarget target = getWebTarget("/subscription/retriggerConfirmation");
+        WebTarget target = getWebTarget("subscribe").path("retriggerConfirmation");
         Form form = new Form();
         form.param("key", confirmationKey);
         
-        Response response = target.request().put(
+        Response response = target.request().post(
                         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {    

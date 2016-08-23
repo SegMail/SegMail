@@ -58,6 +58,13 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     private String REPLY_TO_ADDRESS;
     
     /**
+     * After double opt-in, if users were to be redirected to another site
+     */
+    private String REDIRECT_CONFIRM;
+    
+    private String REDIRECT_WELCOME;
+    
+    /**
      * The email address that bounces are returned to. 
      * 
      * We will not use this at the moment, but SES own bounce handling instead:
@@ -143,5 +150,22 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     public void setREPLY_TO_ADDRESS(String REPLY_TO_ADDRESS) {
         this.REPLY_TO_ADDRESS = REPLY_TO_ADDRESS;
     }
+
+    public String getREDIRECT_CONFIRM() {
+        return REDIRECT_CONFIRM;
+    }
+
+    public void setREDIRECT_CONFIRM(String REDIRECT_CONFIRM) {
+        this.REDIRECT_CONFIRM = REDIRECT_CONFIRM;
+    }
+
+    public String getREDIRECT_WELCOME() {
+        return REDIRECT_WELCOME;
+    }
+
+    public void setREDIRECT_WELCOME(String REDIRECT_WELCOME) {
+        this.REDIRECT_WELCOME = REDIRECT_WELCOME;
+    }
+    
     
 }

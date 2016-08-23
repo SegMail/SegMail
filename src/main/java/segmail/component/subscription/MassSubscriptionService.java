@@ -302,12 +302,14 @@ public class MassSubscriptionService {
             createNewSubOwnership = createSubscriberOwnership(createNewSubOwnership);
             //Create Subscription!!!
             createNewSubscription = createSubscription(createNewSubscription);
-            //Send confirmation email if double optin is turned on
+            //Update the number of subscribers (async call)
+            subService.updateSubscriberCount(list.getOBJECTID());
+            
+            //Send confirmation email if double optin is turned on (must be last)
             if (doubleOptin) {
                 sendConfirmationEmails(createNewSubscription);
             }
-            //Update the number of subscribers (async call)
-            subService.updateSubscriberCount(list.getOBJECTID());
+            
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
             System.out.println("Time taken to update " + subscribers.size() + " subscribers is " + timeTaken);
@@ -416,22 +418,22 @@ public class MassSubscriptionService {
         return false;
     }
 
-    /*@Asynchronous
-     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-     public void sendConfirmationEmails(List<Subscription> newSubscriptions) 
-     throws IncompleteDataException, 
-     BatchProcessingException, 
-     DataValidationException, 
-     InvalidEmailException {
-     for(Subscription newSubscription : newSubscriptions) {
-     subService.sendConfirmationEmail(newSubscription);
-     }
-     }*/
+    /**
+     * This is a bulk version of SubscriptionService.sendConfirmationEmail().
+     * Not good to have multiple versions of the same operation. 
+     * See SubscriptionService.subscribe() and 
+     * MassSubscriptionService.massSubscribe()
+     * 
+     * @param newSubscriptions
+     * @throws IncompleteDataException
+     * @throws BatchProcessingException
+     * @throws DataValidationException
+     * @throws InvalidEmailException 
+     */
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendConfirmationEmails(List<Subscription> newSubscriptions)
             throws IncompleteDataException,
-            BatchProcessingException,
             DataValidationException,
             InvalidEmailException {
         //Group the SubscriberAccounts together by SubscriptionList

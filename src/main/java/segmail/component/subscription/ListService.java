@@ -43,7 +43,7 @@ import segmail.entity.subscription.SubscriptionListFieldComparator;
  */
 @Stateless
 public class ListService {
-    
+
     /**
      * Generic services
      */
@@ -253,14 +253,9 @@ public class ListService {
      * @param list
      */
     public void saveList(SubscriptionList list) {
-        try {
-            updateService.getEm().merge(list);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+
+        updateService.getEm().merge(list);
+
     }
 
     /**
@@ -301,15 +296,15 @@ public class ListService {
             throw new EJBException(pex);
         }
     }
-    
+
     public List<String> getSubscriptionListFieldKeys(long listId) {
         List<SubscriptionListField> allFieldList = this.getFieldsForSubscriptionList(listId);
         List<String> results = new ArrayList<>();
-        
-        for(SubscriptionListField field : allFieldList) {
+
+        for (SubscriptionListField field : allFieldList) {
             results.add((String) field.generateKey());
         }
-        
+
         return results;
     }
 
@@ -326,8 +321,5 @@ public class ListService {
             throw new EJBException(ex);
         }
     }
-    
-    
-    
-    
+
 }

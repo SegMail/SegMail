@@ -47,15 +47,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
-import seca2.bootstrap.module.Webservice.REST.RestSecured;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SubscriptionListField;
@@ -479,7 +475,7 @@ public class SubscriptionService {
     }
 
     /**
-     *
+     * 
      * @param sub
      * @throws IncompleteDataException If no Send As address is set for list or
      * a confirmation email is not assigned to the list.
@@ -713,13 +709,9 @@ public class SubscriptionService {
      * @param key 
      * @throws eds.component.data.IncompleteDataException 
      */
-    @Path("/retriggerConfirmation")
-    @PUT
-    @RestSecured
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void retriggerConfirmation(@FormParam("key")String key) 
-            throws IncompleteDataException, BatchProcessingException, DataValidationException, InvalidEmailException {
+    public void retriggerConfirmation(String key) 
+            throws IncompleteDataException, DataValidationException, InvalidEmailException {
         List<Subscription> subscriptions = getSubscriptionByConfirmKey(key);
         //Impossible to have a duplicate because the key was created with list id and 
         //subscriber id. 
@@ -729,16 +721,9 @@ public class SubscriptionService {
         }
         
         Subscription subscription = subscriptions.get(0);
-        //We also need to check the status to see if the subscription is still NEW.
-        //If the status has already been confirmed, do not send out anything and
-        //log this request. 
-        //send out an email to system administrator?
-        //if(!subscription.getSTATUS().equals(SUBSCRIPTION_STATUS.NEW.name())) {
-            //What should we do?
-        //    return;
-        //}
         
-        this.sendConfirmationEmail(subscription);
+        //this.sendConfirmationEmail(subscription);
+        massSubService.sendConfirmationEmails(subscriptions); 
     }
     
     /**
