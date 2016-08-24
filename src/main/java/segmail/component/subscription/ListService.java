@@ -27,6 +27,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Assign_Client_List;
@@ -251,9 +252,22 @@ public class ListService {
      * Potentially there could be a generic operation that updates the entity.
      *
      * @param list
+     * @throws eds.component.data.DataValidationException if:
+     * <ul>
+     * <li>REDIRECT_CONFIRM or REDIRECT_WELCOME are invalid</li>
+     * </ul>
      */
-    public void saveList(SubscriptionList list) {
+    public void saveList(SubscriptionList list) throws DataValidationException {
 
+        boolean validURL = true;
+        if(list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
+            if(UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM()))
+                throw new DataValidationException("Redirect URL "+list.getREDIRECT_CONFIRM() +" is invalid.");
+        }
+        if(list.getREDIRECT_WELCOME()!= null && !list.getREDIRECT_WELCOME().isEmpty()) {
+            if(UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME()))
+                throw new DataValidationException("Redirect URL "+list.getREDIRECT_WELCOME() +" is invalid.");
+        }
         updateService.getEm().merge(list);
 
     }

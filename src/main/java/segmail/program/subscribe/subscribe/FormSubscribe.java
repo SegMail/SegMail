@@ -5,6 +5,7 @@
  */
 package segmail.program.subscribe.subscribe;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -12,6 +13,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.jboss.logging.Logger;
+import seca2.bootstrap.module.Webservice.REST.client.RedirectException;
 import segmail.program.subscribe.subscribe.client.RestClientSubscribe;
 
 /**
@@ -52,10 +54,18 @@ public class FormSubscribe {
             //setListname(sub.getTARGET().getLIST_NAME());
             this.setPageName(program.getPAGE_ALREADY_SUBSCRIBED_AND_RESEND());
             this.setConfirmationKey(confirmationKey);
+        } catch (RedirectException ex) {
+            try {
+                FacesContext.getCurrentInstance().getExternalContext().redirect(ex.getMessage());
+            } catch (IOException ex1) {
+                Logger.getLogger(this.getClass().getName()).log(Logger.Level.ERROR, ex1);
+                this.setPageName(program.getPAGE_GENERIC_ERROR());
+                setErrorMessage(ex.getMessage());
+            }
         } catch (Throwable ex) {
             this.setPageName(program.getPAGE_GENERIC_ERROR());
             setErrorMessage(ex.getMessage());
-            java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.INFO, ex.getMessage());
+            Logger.getLogger(this.getClass().getName()).log(Logger.Level.ERROR, ex.getMessage());
         }
     }
     

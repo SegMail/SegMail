@@ -5,12 +5,13 @@
  */
 package segmail.program.subscribe.subscribe.webservice;
 
-import eds.component.batch.BatchProcessingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.mail.InvalidEmailException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -92,15 +92,23 @@ public class WSHttpSubscribe {
                 subscriberMap.put(key, values.get(0));
             }
             
-            
             //Get the list from listKey
             Subscription subscription = subService.subscribe(clientId, listId, subscriberMap, true);
+            
+            SubscriptionList list = subscription.getTARGET();
+            if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
+                String redirectUrl = list.getREDIRECT_CONFIRM();
+                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("https://"))
+                    redirectUrl = "http://"+redirectUrl;
+                
+                return Response.status(Response.Status.TEMPORARY_REDIRECT).entity(redirectUrl).build();
+            }
             
             return Response.ok("ok").entity(subscription.getCONFIRMATION_KEY()).build();
             
         } catch (EntityNotFoundException ex) {
             Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
-            return Response.status(Response.Status.NOT_FOUND).entity(ex.getMessage()).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         } catch (IncompleteDataException ex) {
             Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
@@ -118,7 +126,7 @@ public class WSHttpSubscribe {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
             return Response.status(Response.Status.OK).entity(subscriptions.get(0).getCONFIRMATION_KEY()).build();
             
-        } 
+        }  
     }
     
     @Path("/retriggerConfirmation")

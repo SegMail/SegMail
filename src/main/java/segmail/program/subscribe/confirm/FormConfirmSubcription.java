@@ -19,8 +19,10 @@ import java.net.MalformedURLException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.context.ExternalContext;
 
 /**
  *
@@ -60,7 +62,16 @@ public class FormConfirmSubcription {
             
             String results = clientService.confirm(key);
             
-            this.setListName(results);
+            //Ugly hack, could have used JAX-RS and return a redirect response
+            if(results.startsWith("redirect: ")) {
+                String redirectUrl = results.replace("redirect: ", "");
+                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("http://") ){
+                    redirectUrl = "http://" + redirectUrl;
+                }
+                FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
+            }
+            
+            //this.setListName(results);
             program.setCurrentPage(program.getSUCCESS());
             
         } catch (UnwantedAccessException ex) {

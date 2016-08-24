@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import static javax.ws.rs.core.Response.Status.OK;
 import seca2.bootstrap.module.Webservice.REST.client.GenericRestClient;
+import seca2.bootstrap.module.Webservice.REST.client.RedirectException;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 
@@ -36,7 +37,7 @@ import segmail.entity.subscription.SubscriptionList;
 @Named("RestClientSubscribe")
 public class RestClientSubscribe extends GenericRestClient {
     
-    public String subscribe(Map<String,String[]> paramMap) throws RelationshipExistsException {
+    public String subscribe(Map<String,String[]> paramMap) throws RelationshipExistsException, RedirectException {
         WebTarget target = getWebTarget("subscribe").path("subscribe");
         Form form = new Form();
         for(String key : paramMap.keySet()) {
@@ -51,6 +52,11 @@ public class RestClientSubscribe extends GenericRestClient {
         Response response = target.request(
                 MediaType.APPLICATION_JSON_TYPE).post(
                         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+        
+        if(response.getStatus() == Response.Status.TEMPORARY_REDIRECT.getStatusCode()) {
+            String redirectLink = response.readEntity(String.class);
+            throw new RedirectException(redirectLink);
+        }
         
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {
             

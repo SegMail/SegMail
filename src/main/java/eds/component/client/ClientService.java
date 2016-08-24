@@ -184,11 +184,20 @@ public class ClientService {
         } 
     }
     
+    /**
+     * Creates a Client object based on the user.alias() name. 
+     * 
+     * @param user
+     * @param clienttypeid
+     * @return
+     * @throws IncompleteDataException
+     * @throws EntityNotFoundException
+     * @throws EntityExistsException
+     * @throws RelationshipExistsException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ClientUserAssignment registerClientForUser(User user, long clienttypeid)
-        throws DBConnectionException, IncompleteDataException, EntityNotFoundException, EntityExistsException, RelationshipExistsException{
-        try{
-            
+        throws IncompleteDataException, EntityNotFoundException, EntityExistsException, RelationshipExistsException{
             if(user == null)
                 throw new IncompleteDataException("User not provided.");
             
@@ -221,13 +230,7 @@ public class ClientService {
             this.em.persist(newAssignment);
             
             return newAssignment;
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } 
+          
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)

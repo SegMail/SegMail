@@ -5,14 +5,10 @@
  */
 package segmail.program.subscribe.confirm.webservice;
 
-import eds.component.batch.BatchProcessingException;
-import eds.component.data.DataValidationException;
-import eds.component.data.IncompleteDataException;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
-import eds.component.mail.InvalidEmailException;
 import eds.component.transaction.TransactionService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +20,7 @@ import javax.jws.WebService;
 import javax.jws.WebParam;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
@@ -91,22 +88,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
                 throw new TransactionProcessedException();
             }
-            //Let's not do this first, too much trouble. Wait for enhancements!
-            //DateTime expiry = new DateTime(trans.getEXPIRY_DATETIME());
-            //if(expiry.isBeforeNow())
-            //    throw new ExpiredTransactionException();
-
-            /*String email = "";
-             long listId = -1;
-
-             for (EnterpriseTransactionParam p : params) {
-             if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_EMAIL_FIELD_NAME)) {
-             email = p.getPARAM_VALUE();
-             }
-             if (p.getPARAM_KEY().equals(SubscriptionService.DEFAULT_KEY_FOR_LIST)) {
-             listId = Long.parseLong(p.getPARAM_VALUE());
-             }
-             }*/
+            
             Subscription confirmedSubsc = subService.confirmSubscriber(key);
 
             int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name());
@@ -114,8 +96,13 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             if (updateResults <= 0) {
                 throw new RuntimeException("No Transaction was udpated.");
             }
+            
+            SubscriptionList list = confirmedSubsc.getTARGET();
+            if(list.getREDIRECT_WELCOME() != null && !list.getREDIRECT_WELCOME().isEmpty()) {
+                return "redirect: "+list.getREDIRECT_WELCOME(); //Ugly hack, could have used JAX-RS and return a redirect response
+            }
 
-            return confirmedSubsc.getTARGET().getLIST_NAME();
+            return list.getLIST_NAME();
         } catch (RelationshipNotFoundException ex) {
             throw new RuntimeException("You received this transaction code by mistake.", ex);
         }

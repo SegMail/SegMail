@@ -32,14 +32,7 @@
                 <c:when test="#{FormConfirmSubcription.currentPage == ProgramConfirmSubscription.SUCCESS}">
                     <div class="row">
                         <div class="col-sm-12 col-md-8 col-md-off-2">
-                            <h4>You have been subscribed to the list:</h4>
-                            <p class="lead" style="color: #26b99a; margin-left: 20px">
-                                #{FormConfirmSubcription.listName}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-8 col-md-offset-2">
+                            <h4>You have been subscribed successfully</h4>
                             <p>You should be receiving a welcome email shortly.</p>
                         </div>
                     </div>
@@ -49,10 +42,6 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <h4>Your subscription has already been processed</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-8 col-md-off-2">
                             <p>You should be receiving a welcome email shortly.</p>
                         </div>
                     </div>
@@ -62,10 +51,6 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <h4>Oops, seems like you have reached this place by mistake.</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <p>
                                 If you were led here by some links from your email, most probably our 
                                 servers have run into some issues. Please help us to correct this problem
@@ -81,10 +66,6 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <h4>The link that you have clicked on has already expired</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <p>Click here to request a new confirmation email: <a jsf:action="#{FormConfirmSubcription.requestNewConfirmationLink()}">request new confirmation email</a></p>
                         </div>
                     </div>
@@ -94,10 +75,6 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <h4>Oops, seems like the application has encountered an error.</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <p>
                                 If you were led here by some links from your email, most probably our 
                                 servers have run into some issues. Please help us to correct this problem
@@ -111,10 +88,6 @@
                     <div class="row">
                         <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <h4>The confirmation email has been resent to your email.</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-8 col-md-offset-2">
                             <p>Please check your email again.</p>
                         </div>
                     </div>

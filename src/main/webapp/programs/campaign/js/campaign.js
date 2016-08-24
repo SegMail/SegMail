@@ -625,7 +625,7 @@ var parseLink = function(label, timeout) {
     var token = md5(label);
     setTimeout(function(){
         var content = $('#preview').html();
-        var unsubLink = '<a class="'+token+'"></a>';
+        var unsubLink = '<a target="_blank" class="'+token+'"></a>';
         $('#preview').html(content.replace(label,unsubLink));
         var count = $('#preview a.'+token).size();
         $('#preview a.'+token).each(function(){

@@ -103,6 +103,9 @@ public class MailMergeService {
             trans.setMAILMERGE_LABEL(MAILMERGE_REQUEST.CONFIRM.name());
             trans.setTRANSACTION_KEY(confirmationKey); //More like an override
             updateService.getEm().persist(trans);
+        } else {
+            trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
+            updateService.getEm().merge(trans);
         }
         // Get the subscription's confirmation key
 

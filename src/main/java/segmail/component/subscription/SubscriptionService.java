@@ -664,6 +664,9 @@ public class SubscriptionService {
 
         sub.setSTATUS(SUBSCRIPTION_STATUS.CONFIRMED.toString());
         //sub.setCONFIRMATION_KEY("");//remove confirmation key?
+        
+        //Send out welcome email (if assigned)
+        
 
         sub = updateService.getEm().merge(sub);
 

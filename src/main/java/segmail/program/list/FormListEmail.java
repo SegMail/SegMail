@@ -6,8 +6,11 @@
 package segmail.program.list;
 
 import eds.component.GenericObjectService;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -178,8 +181,13 @@ public class FormListEmail {
     }
 
     public void assignRedirects() {
-        //Save the redirect link
-        listService.saveList(program.getListEditing());
+        try {
+            //Save the redirect link
+            listService.saveList(program.getListEditing());
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Redirect links are assigned.", "");
+        } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        }
 
     }
 
