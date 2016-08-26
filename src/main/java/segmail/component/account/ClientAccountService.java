@@ -50,7 +50,7 @@ public class ClientAccountService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void createSegmailAccount(SegmailAccountContainer newAccount) 
+    public SegmailAccountContainer createSegmailAccount(SegmailAccountContainer newAccount) 
             throws EntityNotFoundException, IncompleteDataException, EntityExistsException, RelationshipExistsException {
         //Create user account
         List<UserType> userTypes = userService.getUserTypeByName(SEGMAIL_USER_ACCOUNT_NAME);
@@ -71,7 +71,9 @@ public class ClientAccountService {
         //If help is true, send admin an email 
         //or use SubscriberFieldValue to store it and MailTriggers(new module) to trigger
         
-        //Find the list id and assign it to the client
         
+        newAccount.setClientAssignment(clientAssign);
+        
+        return newAccount;
     }
 }

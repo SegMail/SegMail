@@ -5,17 +5,23 @@
  */
 package segmail.component.account;
 
+import eds.entity.client.ClientUserAssignment;
+
 /**
  *
  * @author LeeKiatHaw
  */
 public class SegmailAccountContainer {
     
+    //Input
     private String email;
     private String password;
     private boolean help;
     private String uploadedSubscriberListKey; //or a simpler listId?
     private long listId;
+    
+    //Output
+    private ClientUserAssignment clientAssignment;
 
     public String getEmail() {
         return email;
@@ -55,6 +61,14 @@ public class SegmailAccountContainer {
 
     public void setListId(long listId) {
         this.listId = listId;
+    }
+
+    public ClientUserAssignment getClientAssignment() {
+        return clientAssignment;
+    }
+
+    public void setClientAssignment(ClientUserAssignment clientAssignment) {
+        this.clientAssignment = clientAssignment;
     }
     
     

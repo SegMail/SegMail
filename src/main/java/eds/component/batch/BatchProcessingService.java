@@ -7,29 +7,19 @@ import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRunError;
 import eds.entity.batch.BatchJobRun_;
-import eds.entity.batch.BatchJobStep;
-import eds.entity.batch.BatchJobStepParam;
 import eds.entity.batch.BatchJobTrigger;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -141,7 +131,6 @@ public class BatchProcessingService {
                 }
                 List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(run.getBATCH_JOB().getBATCH_JOB_ID());
                 if (triggers != null && !triggers.isEmpty()) {
-                    //Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, "No trigger found for batch job "+job.getBATCH_JOB().getBATCH_JOB_ID());
                     DateTime next = DateTime.now();
                     //If the entire batch job only took less than 1 second,
                     //we have to add 1 second so that it would be scheduled in the next
