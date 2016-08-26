@@ -297,7 +297,7 @@ public class ProgramService implements Serializable {
             for(ProgramAssignment p : results){
                 if(p.getSOURCE().getPROGRAM_NAME().equalsIgnoreCase(programName))
                     return p.getSOURCE();
-                if(p.isDEFAULT_ASSIGNMENT())
+                if(p.isDEFAULT_ASSIGNMENT()) //This will return the default program even if the target program is not found, not very good design
                     result = p.getSOURCE();
             }
             return result;

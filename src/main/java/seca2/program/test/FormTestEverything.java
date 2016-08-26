@@ -30,7 +30,6 @@ import seca2.program.test.layout.FormAssignLayoutProgram;
 import seca2.program.test.layout.FormAssignLayoutUserType;
 import seca2.program.test.layout.FormAssignLayoutUsername;
 import seca2.program.test.layout.FormCreateLayout;
-import segmail.program.list.FormSetupListTypes;
 
 /**
  * Note: This is not a test, but a setup!
@@ -52,7 +51,6 @@ public class FormTestEverything {
     @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     @Inject private FormRegisterClientType formRegisterClientType;
     @Inject private FormRegisterClientForUsername formRegisterClientForObjectname;
-    @Inject private FormSetupListTypes formSetupListTypes;
     
     // Setup variables
     
@@ -371,8 +369,6 @@ public class FormTestEverything {
         this.formRegisterClientForObjectname.registerClientForUser(CLIENT_TYPE_PERSON, ADMIN_USERTYPE_TM);
         this.formRegisterClientForObjectname.registerClientForUser(CLIENT_TYPE_PERSON, ADMIN_USERTYPE_CHARTJS);
         
-        //Setup list types
-        formSetupListTypes.setupListType();
     }
     
     public void uploadXMLPlain(){
@@ -585,9 +581,6 @@ public class FormTestEverything {
                     String username = usernamenodes.item(i).getTextContent();
                     this.formRegisterClientForObjectname.registerClientForUser(clientname, username);
                 }
-                
-                //Setup list types
-                formSetupListTypes.setupListType();
                 
             }
             

@@ -107,6 +107,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         
         //If no matching program is found and no default program, stop processing and 
         //show the error page
+        //This could also mean that the user has no permission to view the page 
         if (program == null) {
             String errorViewRoot = request.getServletContext().getInitParameter(defaults.ERROR_VIEWROOT);
             requestContainer.setViewLocation(errorViewRoot);
@@ -195,7 +196,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //If it's a found public program
         if(newProgram == null){
             Program publicProgram = programService.getSingleProgramByName(programName);
-            if(publicProgram != null && publicProgram.isIS_PUBLIC())
+            if(publicProgram != null && publicProgram.isIS_PUBLIC()) 
                 newProgram = publicProgram;
         }
         
