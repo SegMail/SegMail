@@ -19,6 +19,10 @@ import java.net.MalformedURLException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.faces.context.ExternalContext;
 
 /**
  *
@@ -58,7 +62,16 @@ public class FormConfirmSubcription {
             
             String results = clientService.confirm(key);
             
-            this.setListName(results);
+            //Ugly hack, could have used JAX-RS and return a redirect response
+            if(results.startsWith("redirect: ")) {
+                String redirectUrl = results.replace("redirect: ", "");
+                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("http://") ){
+                    redirectUrl = "http://" + redirectUrl;
+                }
+                FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
+            }
+            
+            //this.setListName(results);
             program.setCurrentPage(program.getSUCCESS());
             
         } catch (UnwantedAccessException ex) {
@@ -74,9 +87,7 @@ public class FormConfirmSubcription {
             //ex.printStackTrace(System.out);
             program.setCurrentPage(program.getPROCESSED());
             
-        } /*catch (ExpiredTransactionException ex) {
-            program.setCurrentPage(program.getEXPIRED());
-        }*/ catch (IncompleteDataException ex) {
+        } catch (IncompleteDataException ex) {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
         } catch (MalformedURLException ex) {
@@ -86,6 +97,34 @@ public class FormConfirmSubcription {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
         }
+    }
+    
+    public void requestNewConfirmationLink(){
+        try {
+            String key = program.getRequestKey();
+            if(key == null || key.isEmpty())
+                throw new UnwantedAccessException();
+            
+            String namespace = "http://webservice.confirm.subscribe.program.segmail/";
+            String endpointName = "WSConfirmSubscription";
+            WSConfirmSubscriptionInterface clientService = wsService.getWSProvider(endpointName, namespace, WSConfirmSubscriptionInterface.class);
+            
+            String result = clientService.resend(key);
+            
+            program.setCurrentPage(program.getRESENT());
+        } catch (UnwantedAccessException ex) {
+            program.setCurrentPage(program.getLANDING());
+        } catch (IncompleteDataException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+            program.setCurrentPage(program.getERROR());
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+            program.setCurrentPage(program.getERROR());
+        } catch (TransactionProcessedException ex) {
+            Logger.getLogger(FormConfirmSubcription.class.getName()).log(Level.SEVERE, null, ex);
+            program.setCurrentPage(program.getPROCESSED());
+        }
+            
     }
 
     public String getListName() {
@@ -97,6 +136,7 @@ public class FormConfirmSubcription {
     }
 
     public void extractParams(UserRequestContainer reqContainer) {
+        program.clearVariables();
         List<String> params = reqContainer.getProgramParamsOrdered();
         
         String reqKey = (params != null && !params.isEmpty()) ? params.get(0) : "";

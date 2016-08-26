@@ -29,6 +29,8 @@ public class UserAccount extends EnterpriseData<User> {
     
     //[20150314] Put this here temporarily until there is a need to put it somewhere else
     private String PROFILE_PIC_URL;
+    
+    private String API_KEY;
 
     public String getUSERNAME() {
         return USERNAME;
@@ -77,6 +79,14 @@ public class UserAccount extends EnterpriseData<User> {
     
     public void setPROFILE_PIC_URL(String PROFILE_PIC_URL){
         this.PROFILE_PIC_URL = PROFILE_PIC_URL;
+    }
+
+    public String getAPI_KEY() {
+        return API_KEY;
+    }
+
+    public void setAPI_KEY(String API_KEY) {
+        this.API_KEY = API_KEY;
     }
 
     @Override

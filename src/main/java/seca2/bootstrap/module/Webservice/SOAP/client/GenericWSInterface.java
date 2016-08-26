@@ -3,14 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+package seca2.bootstrap.module.Webservice.SOAP.client;
 
-package eds.entity.user;
+import javax.jws.soap.SOAPBinding;
 
 /**
  *
- * @author KH
+ * @author LeeKiatHaw
  */
-public class NewUserListener {
-    
+@SOAPBinding(style = SOAPBinding.Style.RPC)
+public interface GenericWSInterface {
     
 }

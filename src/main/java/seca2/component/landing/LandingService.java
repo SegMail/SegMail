@@ -450,4 +450,13 @@ public class LandingService {
 
         return servers.get(0);
     }
+    
+    public ServerInstance getServerFromUser(long userId) {
+        List<ServerInstance> results = objectService.getAllSourceObjectsFromTarget(userId, Assign_Server_User.class, ServerInstance.class);
+        
+        if(results == null || results.isEmpty())
+            return null;
+        
+        return results.get(0);
+    }
 }

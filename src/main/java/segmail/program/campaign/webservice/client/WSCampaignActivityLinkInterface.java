@@ -9,7 +9,7 @@ import eds.component.data.EntityNotFoundException;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
+import seca2.bootstrap.module.Webservice.SOAP.client.GenericWSInterface;
 
 /**
  * This is exposed to the public, so only public methods should be available.

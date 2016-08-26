@@ -5,7 +5,10 @@
  */
 package segmail.program.list;
 
+import eds.component.data.DataValidationException;
 import eds.component.user.UserService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import segmail.component.subscription.SubscriptionService;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -52,7 +55,7 @@ public class FormListSettings {
         try {
             listService.saveList(program.getListEditing());
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Settings saved!", null);
-        } catch (EJBException ex) { 
+        } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());

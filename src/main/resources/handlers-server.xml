@@ -5,7 +5,7 @@
       <!--<handler-name>eds.component.webservice.WebServiceService</handler-name>
       <handler-class>eds.component.webservice.WebServiceService</handler-class>-->
       <handler-name>WebserviceAuthHandlerServer</handler-name>
-      <handler-class>seca2.bootstrap.module.Webservice.server.WebserviceAuthHandlerServer</handler-class>
+      <handler-class>seca2.bootstrap.module.Webservice.SOAP.server.WebserviceAuthHandlerServer</handler-class>
     </handler>
   </handler-chain>
 </handler-chains>

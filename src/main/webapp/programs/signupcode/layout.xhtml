@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+        <ui:define name="toolbar-right">
+
+        </ui:define>
+
+        <ui:define name="main-program-panel">
+            <div class="row"><!--Page message-->
+                <div class="col-md-12">
+                    <form jsf:id="ProgramList">
+                        <s2:messenger for="ProgramList" showDetail="true" showSummary="true" closable="true" />
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="col-md-12">
+                    <div class="block">
+                        <div class="block-content">
+                            <p>
+                                Select the lists that you want to add your subscribers to, then copy and paste it
+                                into your website's HTML code. You can <em><strong>add</strong></em> styles but 
+                                please <em><strong>do not change or remove</strong></em> any of the existing markup.
+                            </p>
+                            <p>
+                                You can contact us at <strong><u>signup@segmail.io</u></strong> if you need any help
+                                setting styles for your signup code. Have fun!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form jsf:id="FormSignupCode">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="block nb">
+                            <div class="block-head">
+                                <h2>Options</h2>
+                            </div>
+                            <div class="block-content">
+                                <div class="form-group">
+                                    <label>
+                                        Subscribe to the following lists:
+                                    </label>
+                                    
+                                    <h:selectOneListbox id="slectList" pass:id="selectList" styleClass="select2" style="width: 100%;"
+                                                        value="#{FormSignupCode.selectedListId}" 
+                                                         >
+                                        <f:selectItems value="#{FormSignupCode.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                                       itemValue="#{list.OBJECTID}">
+                                        </f:selectItems>
+                                        <f:ajax event="change" 
+                                                render="@form" execute="@form"
+                                                onevent="refreshEverything"
+                                                delay="1000" >
+                                        </f:ajax>
+                                    </h:selectOneListbox>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="block nb">
+                            <div class="block-content">
+                                <textarea id="codeEditor"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <ui:include src="generate_signup_code.xhtml" ></ui:include>
+            </form>
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/codemirror.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/addon/edit/matchbrackets.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/xml/xml.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/javascript/javascript.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/css/css.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/clike/clike.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/php/php.js"></script>
+
+            <script type='text/javascript' src="#{request.contextPath}/programs/signupcode/js/signupcode.js"></script>
+            
+        </ui:define>
+
+        <ui:define name="head">
+        </ui:define>
+
+    </ui:composition>
+</html>
+

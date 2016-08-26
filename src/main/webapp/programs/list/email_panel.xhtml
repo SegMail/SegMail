@@ -73,6 +73,14 @@
                                             </f:selectItems>
                                         </h:selectOneMenu>
                                     </p>
+                                    <p>
+                                        <label for="confirmRedirect" >
+                                            After subscribing, redirect subscribers to (leave blank to show our standard page):
+                                        </label>
+                                        <h:inputText id="confirmRedirect" styleClass="form-control"
+                                                     value="#{FormListEmail.listEditing.REDIRECT_CONFIRM}" >
+                                        </h:inputText>
+                                    </p>
 
                                 </div>
                             </div>
@@ -100,7 +108,14 @@
                                             </f:selectItems>
 
                                         </h:selectOneMenu>
+                                        <label for="welcomeRedirect" >
+                                            After confirming, redirect subscribers to (leave blank to show our standard page):
+                                        </label>
+                                        <h:inputText id="welcomeRedirect" styleClass="form-control"
+                                               value="#{FormListEmail.listEditing.REDIRECT_WELCOME}" >
+                                        </h:inputText>
                                     </p>
+                                    
                                 </div>
                             </div>
                             <div class="timeline-event">

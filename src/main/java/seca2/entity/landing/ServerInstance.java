@@ -9,6 +9,7 @@ import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 import seca2.component.landing.ServerNodeType;
 
 /**
@@ -21,6 +22,7 @@ import seca2.component.landing.ServerNodeType;
     ServerIPResolverListener.class,
     ServerInstanceListener.class
 })
+@XmlRootElement
 public class ServerInstance extends EnterpriseObject {
     
     /**

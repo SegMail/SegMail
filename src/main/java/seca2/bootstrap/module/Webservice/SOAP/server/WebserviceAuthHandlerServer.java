@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.server;
+package seca2.bootstrap.module.Webservice.SOAP.server;
 
 import eds.component.user.UserAccountLockedException;
 import eds.component.user.UserLoginException;
@@ -124,6 +124,9 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
         String ip = req.getRemoteAddr();
 
         User authenticatedUser = wsService.authenticateApplication(username, password, server);
+        //This is useless because cookies are not managed our client application, which basically
+        //existing in the same code base as the server application. Session IDs are not maintained 
+        //and therefore sessions are not maintained across HTTP requests.
         sessionContainer.setSessionId(req.getRequestedSessionId());
         sessionContainer.setUser(authenticatedUser);
         sessionContainer.setLoggedIn(true);

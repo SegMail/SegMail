@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.server;
+package seca2.bootstrap.module.Webservice;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ import seca2.bootstrap.UserRequestContainer;
  * @author LeeKiatHaw
  */
 @CoreModule
-public class WebserviceModule extends BootstrapModule {
+public class WebserviceModule extends BootstrapModule implements Serializable {
 
     @Inject
     UserRequestContainer requestContainer;
@@ -91,14 +92,26 @@ public class WebserviceModule extends BootstrapModule {
         return "WebserviceModule";
     }
     
+    /**
+     * There are 2 types of format of WS - XML (SOAP) and JSON. The SOAP protocol
+     * uses a strict pre-defined XML structure that needs to be parsed. A SOAP 
+     * request String has a "?wsdl" appended at the end, and its request body is 
+     * pure XML. If it were to use JSON, we can use JAX-RS to handle such calls.
+     * 
+     * @param request
+     * @param response
+     * @return
+     * @throws SOAPException 
+     */
     private boolean checkWScalls(ServletRequest request, ServletResponse response) throws SOAPException {
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         
         boolean queryStringIsWSDL = checkQueryString(req);
         boolean contentTypeIsSOAPXML = checkContentType(req);
+        boolean isRESTCall = checkRESTCall(req,requestContainer);
         
-        return queryStringIsWSDL || contentTypeIsSOAPXML;
+        return queryStringIsWSDL || contentTypeIsSOAPXML || isRESTCall;
     }
     
     private boolean checkQueryString(HttpServletRequest req) {
@@ -120,6 +133,15 @@ public class WebserviceModule extends BootstrapModule {
                 contentType != null &&
                 (contentType.toUpperCase().contains("TEXT/XML") || 
                 contentType.toUpperCase().contains("SOAP"));
+    }
+    
+    private boolean checkRESTCall(HttpServletRequest req, UserRequestContainer requestContainer) {
+        String restPath = req.getServletContext().getInitParameter(defaults.WEBSERVICE_PATH);
+        if(restPath == null || restPath.isEmpty())
+            restPath = System.getProperty(defaults.WEBSERVICE_PATH);
+        String servletPath = req.getServletPath();
+        
+        return (restPath.equals(servletPath));
     }
 
 }

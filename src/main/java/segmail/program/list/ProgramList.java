@@ -154,18 +154,6 @@ public class ProgramList extends Program implements Serializable {
         this.selectedWelcomeEmailId = selectedWelcomeEmailId;
     }
     
-    /*public void refresh(){
-        try {
-            //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //Keep all messages posted in this request
-            ec.getFlash().setKeepMessages(true);
-            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
-        } catch (Exception ex){
-            FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
-        }
-    }*/
-
     public List<SubscriptionListField> getFieldList() {
         return fieldList;
     }
@@ -237,7 +225,6 @@ public class ProgramList extends Program implements Serializable {
     public void setListFieldMapping(Map<Integer, String> listFieldMapping) {
         this.listFieldMapping = listFieldMapping;
     }
-    
     
 
     @Override

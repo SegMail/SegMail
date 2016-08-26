@@ -14,7 +14,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import eds.component.encryption.EncryptionService;
+import eds.component.encryption.EncryptionUtility;
 import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +27,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Assign_Client_List;
@@ -43,7 +44,7 @@ import segmail.entity.subscription.SubscriptionListFieldComparator;
  */
 @Stateless
 public class ListService {
-    
+
     /**
      * Generic services
      */
@@ -53,15 +54,6 @@ public class ListService {
     private UpdateObjectService updateService;
     @EJB
     private GenericConfigService configService;
-    @EJB
-    private EncryptionService encryptService;
-
-    /**
-     * External services
-     */
-    //@EJB private LandingService landingService;
-    @EJB
-    private BatchProcessingService batchService;
 
     public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
         if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name()) && !field.getFIELD_NAME().equals("Email")) {
@@ -260,16 +252,24 @@ public class ListService {
      * Potentially there could be a generic operation that updates the entity.
      *
      * @param list
+     * @throws eds.component.data.DataValidationException if:
+     * <ul>
+     * <li>REDIRECT_CONFIRM or REDIRECT_WELCOME are invalid</li>
+     * </ul>
      */
-    public void saveList(SubscriptionList list) {
-        try {
-            updateService.getEm().merge(list);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+    public void saveList(SubscriptionList list) throws DataValidationException {
+
+        boolean validURL = true;
+        if(list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
+            if(UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM()))
+                throw new DataValidationException("Redirect URL "+list.getREDIRECT_CONFIRM() +" is invalid.");
         }
+        if(list.getREDIRECT_WELCOME()!= null && !list.getREDIRECT_WELCOME().isEmpty()) {
+            if(UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME()))
+                throw new DataValidationException("Redirect URL "+list.getREDIRECT_WELCOME() +" is invalid.");
+        }
+        updateService.getEm().merge(list);
+
     }
 
     /**
@@ -310,15 +310,15 @@ public class ListService {
             throw new EJBException(pex);
         }
     }
-    
+
     public List<String> getSubscriptionListFieldKeys(long listId) {
         List<SubscriptionListField> allFieldList = this.getFieldsForSubscriptionList(listId);
         List<String> results = new ArrayList<>();
-        
-        for(SubscriptionListField field : allFieldList) {
+
+        for (SubscriptionListField field : allFieldList) {
             results.add((String) field.generateKey());
         }
-        
+
         return results;
     }
 
@@ -335,8 +335,5 @@ public class ListService {
             throw new EJBException(ex);
         }
     }
-    
-    
-    
-    
+
 }

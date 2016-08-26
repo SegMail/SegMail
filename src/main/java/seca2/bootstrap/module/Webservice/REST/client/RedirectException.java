@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.client;
-
-import javax.jws.soap.SOAPBinding;
+package seca2.bootstrap.module.Webservice.REST.client;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@SOAPBinding(style = SOAPBinding.Style.RPC)
-public interface GenericWSInterface {
+public class RedirectException extends Exception {
+
+    public RedirectException(String redirectLink) {
+        super(redirectLink);
+    }
     
 }

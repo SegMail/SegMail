@@ -1,11 +1,13 @@
 
 package segmail.program.subscribe.confirm.client;
 
+import eds.component.batch.BatchProcessingException;
+import eds.component.data.IncompleteDataException;
 import eds.component.webservice.ExpiredTransactionException;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import seca2.bootstrap.module.Webservice.client.GenericWSInterface;
+import seca2.bootstrap.module.Webservice.SOAP.client.GenericWSInterface;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 
@@ -29,12 +31,22 @@ public interface WSConfirmSubscriptionInterface extends GenericWSInterface {
      * @param key
      * @return
      *     returns java.lang.String
-     * @throws eds.component.webservice.TransactionProcessedException
-     * @throws eds.component.webservice.UnwantedAccessException
-     * @throws eds.component.webservice.ExpiredTransactionException
+     * @throws TransactionProcessedException if the transaction was already processed before this call.
+     * @throws UnwantedAccessException if the key is not provided or doesn't match to any requests
+     * registered at the ERP server.
      */
     @WebMethod
     public String confirm(@WebParam(name = "key") String key)
             throws TransactionProcessedException, UnwantedAccessException;
             
+    /**
+     * 
+     * @param key
+     * @return 
+     * @throws eds.component.webservice.TransactionProcessedException 
+     * @throws UnwantedAccessException if key is not provided. 
+     */
+    @WebMethod
+    public String resend(@WebParam(name = "key") String key)
+            throws TransactionProcessedException, UnwantedAccessException;
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.bootstrap.module.Webservice.client;
+package seca2.bootstrap.module.Webservice.SOAP.client;
 
 import eds.component.webservice.WebserviceSOAPKeys;
 import java.util.Set;
@@ -33,8 +33,8 @@ public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageConte
     //private String username = "sws";
     //private String password = "sws";
     
-    public static final String USERNAME_KEY = "WebserviceAuthHandlerClient.WS_CLIENT_USERNAME";
-    public static final String PASSWORD_KEY = "WebserviceAuthHandlerClient.WS_PASSWORD_KEY";
+    public static final String USERNAME_KEY = "WS_CLIENT_USERNAME";
+    public static final String PASSWORD_KEY = "WS_PASSWORD_KEY";
     
     @EJB LandingService landingService = new LandingService(); //No EJB context here!!! WTF!!!
     

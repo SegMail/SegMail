@@ -107,11 +107,12 @@ public class WSImportSubscriber {
         }
         subContainer.setList(program.getListEditing());
         subContainer.setListFields(program.getFieldList());
-
+        
         if (clientFacade.getClient() == null || clientFacade.getClient().getOBJECTID() <= 0) {
             throw new EntityNotFoundException("No client found.");
         }
-
+        subContainer.setClient(clientFacade.getClient()); //Do not use ClientFacade or ClientContainer in EJB services because they might not be called in the same context (JSF vs JAX-WS/JAX-RS)
+        
         JsonReader reader = Json.createReader(new StringReader(subscribers));
         JsonObject subscribersObj = reader.readObject();
 

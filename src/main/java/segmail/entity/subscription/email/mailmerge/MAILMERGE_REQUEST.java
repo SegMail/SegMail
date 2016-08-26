@@ -12,7 +12,7 @@ package segmail.entity.subscription.email.mailmerge;
 
 public enum MAILMERGE_REQUEST {
     CONFIRM("CONFIRM","[!confirm]",86400000),
-    UNSUBSCRIBE("UNSUBSCRIBE","[!unsubscribe]",-1);
+    UNSUBSCRIBE("UNSUBSCRIBE","!unsubscribe",-1);
     
     final String name;
     final String label;

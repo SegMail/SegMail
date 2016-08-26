@@ -15,20 +15,17 @@ import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
-import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
-import eds.entity.transaction.EnterpriseTransaction_;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
@@ -39,12 +36,10 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 
 /**
@@ -239,6 +234,16 @@ public class MailService {
         return "";
     }
 
+    /**
+     * Puts Email in QUEUED status with scheduleTime. If the processEmailQueue(DateTime) 
+     * or processEmailQueue() service methods are scheduled, the email will be 
+     * picked up at the soonest after scheduleTime to be sent out.
+     * 
+     * @param email
+     * @param scheduledTime
+     * @throws DataValidationException if validateEmail(Email) throws one.
+     * @throws InvalidEmailException if validateEmail(Email) throws one.
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void queueEmail(Email email, DateTime scheduledTime) 
             throws DataValidationException, InvalidEmailException {
@@ -299,6 +304,13 @@ public class MailService {
         System.out.println("MailService.printMail2()");
     }
 
+    /**
+     * 
+     * @param email
+     * @throws DataValidationException
+     * @throws InvalidEmailException if either Sender's email address or any of
+     * the Recipients' email addresses are not valid based on org.apache.commons.validator.routines.EmailValidator
+     */
     public void validateEmail(Email email) throws DataValidationException, InvalidEmailException {
         if (email.getSENDER_ADDRESS() == null || email.getSENDER_ADDRESS().isEmpty()) {
             throw new DataValidationException("Emails must have sender's address.");

@@ -9,6 +9,7 @@ import eds.entity.batch.BatchJobStepParam;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -16,6 +17,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIPTION")
+@XmlRootElement
 public class Subscription extends EnterpriseRelationship<SubscriberAccount,SubscriptionList> {
 
     private String STATUS;
