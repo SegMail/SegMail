@@ -36,8 +36,6 @@ import eds.component.encryption.EncryptionUtility;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserAccount_;
-import eds.entity.user.UserPreferenceSet;
-import eds.entity.user.UserPreferenceSet_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
 import eds.entity.user.User_;
@@ -406,15 +404,15 @@ public class UserService extends DBService {
 
                 User user = (User) HibernateHelper.initializeAndUnproxy(owner);
 
-                List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
+                //List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
 
-                userValues.put(this.US_USER, user);
+                //userValues.put(this.US_USER, user);
                 /*
                  userValues.put(USER, user);
                  userValues.put(USER_TYPE, user.getUSERTYPE());
                  userValues.put(USER_ATTRIBUTES, preferences);
                  */
-                System.out.println("");//debug
+                //System.out.println("");//debug
 
             } else {
                 throw new UserLoginException("UserService: Something not handled yet!");
@@ -499,29 +497,6 @@ public class UserService extends DBService {
             }
             throw pex;
         }
-    }
-
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<UserPreferenceSet> getUserPreferences(long userid) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<UserPreferenceSet> criteria = builder.createQuery(UserPreferenceSet.class);
-
-        Root<UserPreferenceSet> sourceEntity = criteria.from(UserPreferenceSet.class); //FROM UserAccount
-        criteria.select(sourceEntity);
-
-        criteria.where(builder.equal(sourceEntity.get(UserPreferenceSet_.OWNER), userid));
-
-        /* Faulty assumption to use getSingleResult()
-         * getSingleResult() throws exception as long as there is no 1 single result 
-         * returned!
-         *
-         *UserPreferenceSet result = em.createQuery(criteria)
-         *       .getSingleResult();
-         */
-        List<UserPreferenceSet> results = objectService.getEm().createQuery(criteria)
-                .getResultList();
-
-        return results;
     }
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)

@@ -319,7 +319,7 @@ public class LayoutService implements Serializable {
      * @
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<Layout> getLayoutsByUser(User user) {
+    public List<Layout> getLayoutsByUserOrType(User user) {
         try {
             if (user == null) {
                 return new ArrayList<Layout>();

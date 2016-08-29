@@ -51,7 +51,7 @@ public class ClientModule extends BootstrapModule implements Serializable {
 
     @Override
     protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
@@ -64,10 +64,14 @@ public class ClientModule extends BootstrapModule implements Serializable {
         return true;
     }
 
+    /**
+     * WS calls can be initiated by System users so it is best not to handle for 
+     * "/*"
+     * @return 
+     */
     @Override
     protected String urlPattern() {
         return "/program/*";
-        //return "/*"; //WS calls can be initiated by System users so it is best not to handle 
     }
 
     @Override

@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.SubscriptionList;
@@ -368,12 +369,14 @@ public class AutoresponderService {
         Root<AutoresponderEmail> fromAutoEmail = query.from(AutoresponderEmail.class);
         Root<Assign_AutoresponderEmail_Client> fromAssignAutoEmailClient = query.from(Assign_AutoresponderEmail_Client.class);
 
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)));
+        conditions.add(builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId));
+        if(type != null)
+            conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()));
+        
         query.select(fromAutoEmail);
-        query.where(builder.and(
-                builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()),
-                builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)),
-                builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId)
-        ));
+        query.where(builder.and(conditions.toArray(new Predicate[]{})));
 
         List<AutoresponderEmail> results = objectService.getEm().createQuery(query)
                 .getResultList();

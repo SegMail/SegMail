@@ -8,8 +8,6 @@ package seca2.bootstrap.module.Navigation;
 
 import eds.entity.navigation.MenuItem;
 import java.util.Objects;
-import javax.inject.Inject;
-import seca2.bootstrap.UserRequestContainer;
 
 
 /**

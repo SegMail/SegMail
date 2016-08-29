@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormEditExistingTemplate" >
+        <div class="row">
+            <div class="col-md-6">
+                <div id="editor-panel" class="block">
+                    <div class="block-content">
+                        <div class="form-group" style=" ">
+                            <label>Subject</label>
+                            <input type="text" class="form-control"
+                                   jsf:value="#{FormEditExistingTemplate.editingTemplate.SUBJECT}"
+                                   name="email" 
+                                   />
+                        </div>
+                        <div class="form-group">
+                            <label>Body</label>
+                            <span class="help-block">Click here for the list of mail merge tags</span>
+                            <textarea id="editor" class="editor"
+                                      jsf:value="#{FormEditExistingTemplate.editingTemplate.BODY}">
+                                
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="block-footer">
+                        <div class="pull-left">
+                            <a href="#{request.contextPath}/autoemail/" class="btn btn-default">Return without Saving</a>
+                        </div>
+                        <div class="pull-right">
+                            <span id="saveResults" >
+                                
+                            </span>
+                            <button id="saveButton" onclick="onSave();return false;" class="btn btn-success">Save</button>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="block">
+                    <div class="block-content">
+                        <h2>This is how your email will look like</h2>
+                        <p>
+                            It's a WYSIWYG editor on your left but you would miss out how the mail merge
+                            tags will look like.
+                        </p>
+                    </div>
+                </div>
+                <div id="preview-panel" class="block">
+                    <div id="preview" class="block-content" style="background-color: ">
+                        
+                    </div>
+                    <h:inputHidden pass:id="processedContent" id="processedContent"
+                                   value="#{FormEditExistingTemplate.editingTemplate.BODY_PROCESSED}"
+                                   ></h:inputHidden>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" >
+            var web_service_endpoint = '#{request.contextPath}/WSAutoresponder';
+        </script>
+    </form>
+
+</html>

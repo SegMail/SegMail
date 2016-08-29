@@ -8,6 +8,7 @@ package seca2.bootstrap;
 import seca2.bootstrap.module.Path.LogicalPathParser;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
@@ -41,6 +42,15 @@ public class UserRequestContainer {
     //Test webservice
     private boolean webservice;
     
+    private boolean renderPageToolbar;
+    private boolean renderPageBreadCrumbs;
+    
+    @PostConstruct
+    public void init() {
+        //default values
+        renderPageToolbar = true;
+        renderPageBreadCrumbs = true;
+    }
 
     public String getProgramName() {
         return programName;
@@ -128,6 +138,22 @@ public class UserRequestContainer {
 
     public void setWebservice(boolean webservice) {
         this.webservice = webservice;
+    }
+
+    public boolean isRenderPageToolbar() {
+        return renderPageToolbar;
+    }
+
+    public void setRenderPageToolbar(boolean renderPageToolbar) {
+        this.renderPageToolbar = renderPageToolbar;
+    }
+
+    public boolean isRenderPageBreadCrumbs() {
+        return renderPageBreadCrumbs;
+    }
+
+    public void setRenderPageBreadCrumbs(boolean renderPageBreadCrumbs) {
+        this.renderPageBreadCrumbs = renderPageBreadCrumbs;
     }
     
     public String printFullPathWithoutContext() {

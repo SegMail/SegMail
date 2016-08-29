@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <div class="row"><!--For the message-->
+        <div class="col-md-12">
+            <form jsf:id="ProgramTemplate">
+                <s2:messenger for="ProgramTemplate" showDetail="true" showSummary="true" closable="true" />
+            </form>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="block">
+                <div class="block-content">
+                    <h2><strong>Confirmation emails</strong></h2>
+
+                    <p>
+                        Confirmation emails are sent to your subscribers upon the first time they 
+                        signup to confirm that the email address that they have provided belongs
+                        to them. You can create your own confirmation emails here that can be 
+                        <u>shared across different lists</u>.
+                    </p>
+                    <div class="form-group">
+                        <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
+                           onclick="$('#popup_title').html('Create new confirmation email');
+                                    $('#email_type').val('CONFIRMATION')">
+                            Create new confirmation email
+                        </a>
+                    </div>
+                    <div class="list-group">
+                        <c:forEach items="#{FormAllAutoEmail.confirmationTemplates}" var="confirm">
+                            <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
+                                <a href="#{request.contextPath}/#{UserRequestContainer.programName}/#{confirm.OBJECTID}" class="list-group-item" data-toggle="modal"
+                                   >
+                                    
+                                    #{confirm.SUBJECT}
+                                </a>
+                            </form>
+                        </c:forEach>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="block">
+                <div class="block-content">
+
+                    <h2><strong>Welcome emails</strong></h2>
+
+                    <p>
+                        Welcome emails are sent to your subscribers upon confirmation of their subscription.
+                    </p>
+                    <div class="form-group">
+                        <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
+                           onclick="$('#popup_title').html('Create new welcome email');
+                                    $('#email_type').val('WELCOME')">
+
+                            Create new welcome email
+                        </a>
+                    </div>
+                    <div class="list-group">
+
+                        <c:forEach items="#{FormAllAutoEmail.welcomeTemplates}" var="newsletter">
+                            <form jsf:id="edit_newsletter_popup_link_#{newsletter.OBJECTID}" name="newsletter_#{newsletter.OBJECTID}" >
+                                <a href="#edit_auto_email_popup" class="list-group-item" data-toggle="modal"
+
+                                   >
+                                    <f:ajax event="click" render="edit_auto_email_form"
+                                            listener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}"
+                                            onevent="edit"
+                                            />
+                                    #{newsletter.SUBJECT}
+                                </a>
+                            </form>
+                        </c:forEach>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</html>

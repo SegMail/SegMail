@@ -84,7 +84,10 @@
     <context-param>
         <param-name>DEFAULT_TEMPLATE_LOCATION</param-name>
         <param-value>/templates/flatui-web/template-layout.xhtml</param-value>
-        <!--<param-value>/templates/mytemplate/template-layout.xhtml</param-value>-->
+    </context-param>
+    <context-param>
+        <param-name>DEFAULT_MENU_LOCATION</param-name>
+        <param-value>/programs/menu/top_menu.xhtml</param-value>
     </context-param>
     <context-param>
         <param-name>NO_AUTHORIZATION_VIEWROOT</param-name>

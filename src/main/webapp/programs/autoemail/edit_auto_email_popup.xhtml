@@ -9,90 +9,29 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <form jsf:id="edit_auto_email_form" >
-        <div class="modal-content">
-            <div class="">
-                <div class="modal-header">
-                    <h4 id="popup_title_edit" class="modal-title"></h4>
-                    <input type="hidden" jsf:value="#{FormEditExistingTemplate.program.editingTemplate.OBJECTID}" id="template_id" />
-                </div>
-                <div id="delete-template-1" class="delete-confirm-container">
-                    <div class="delete-container" data-role="main">
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <s2:messenger id="FormEditTemp_messenger" for="edit_auto_email_form" showDetail="true" showSummary="true"
-                                              class="form-group"></s2:messenger>
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    Subject:
-                                </label>
-                                <input type="text" class="form-control"
-                                       jsf:value="#{FormEditExistingTemplate.program.editingTemplate.SUBJECT}"
-                                       name="email" 
-                                       />
-                            </div>
-                            <div class="form-group">
-                                <textarea id="body_edit" class="editor"
-                                          jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}">
-                                </textarea>
-                            </div>
 
-                        </div>
-                        <div class="modal-footer">
-                            <p:commandButton id="save_continue_button" styleClass="btn btn-success" 
-                                             value="Save &amp; continue"
-                                             update="FormEditTemp_messenger"
-                                             actionListener="#{FormEditExistingTemplate.saveTemplateAndContinue()}"
-                                             onstart="reapply_textarea('body_edit')"
-                                             oncomplete="popup.popup();"
-
-                                             >
-                            </p:commandButton>
-                            <p:commandButton id="save_close_button" styleClass="btn btn-primary" 
-                                             value="Save &amp; close" 
-                                             update="FormEditTemp_messenger,ProgramTemplate"
-                                             actionListener="#{FormEditExistingTemplate.saveTemplateAndClose()}"
-                                             onstart="reapply_textarea('body_edit')"
-                                             
-                                             >
-                            </p:commandButton>
-                            <p:commandButton id="close_button" styleClass="btn btn-default" 
-                                             value="Close" 
-                                             update="FormEditTemp_messenger,ProgramTemplate"
-                                             actionListener="#{FormEditExistingTemplate.closeWithoutSaving()}"
-                                             >
-                            </p:commandButton>
-                            <p:commandButton id="delete_button"  styleClass="btn btn-danger"
-                                             value="Delete"
-                                onclick="$('.delete-container').toggle()">
-                                                 
-                            </p:commandButton>
-                        </div>
-                    </div>
-                    <div class="delete-container" data-role="delete" style="display: none;">
-                        <div class="modal-body">
-                            <h2>Are you sure you want to delete this template?</h2>
-                        </div>
-                        <div class="modal-footer">
-                            <p:commandButton id="delete_confirm_button" styleClass="btn btn-danger" 
-                                             value="Confirm delete" update="ProgramTemplate"
-                                             actionListener="#{FormEditExistingTemplate.deleteTemplate()}"
-                                             >
-                            </p:commandButton>
-                            <p:commandButton id="cancel_delete_button"  styleClass="btn btn-default"
-                                             value="Cancel"
-                                             onclick="$('.delete-container').toggle()">
-                            </p:commandButton>
-                        </div>
-                    </div>
+        <div class="row">
+            <div class="col-md-6 col-sm-12"><!--Editing panel-->
+                <div class="form-group">
+                    <s2:messenger id="FormEditTemp_messenger" for="edit_auto_email_form" showDetail="true" showSummary="true"
+                                  class="form-group"></s2:messenger>
                 </div>
-                <p:blockUI block="edit_auto_email_form" 
-                           trigger="edit_auto_email_form:save_continue_button,
-                                    edit_auto_email_form:save_close_button,
-                                    edit_auto_email_form:delete_confirm_button"
-                           >
-                    <p id="spinner"></p>
-                </p:blockUI>
+                <div class="form-group">
+                    <label>
+                        Subject:
+                    </label>
+                    <input type="text" class="form-control"
+                           jsf:value="#{FormEditExistingTemplate.program.editingTemplate.SUBJECT}"
+                           name="email" 
+                           />
+                </div>
+                <div class="form-group">
+                    <textarea id="body_edit" class="editor"
+                              jsf:value="#{FormEditExistingTemplate.program.editingTemplate.BODY}">
+                    </textarea>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12"><!--Preview panel-->
 
             </div>
         </div>

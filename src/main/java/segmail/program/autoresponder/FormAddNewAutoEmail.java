@@ -61,32 +61,23 @@ public class FormAddNewAutoEmail {
             // Get the client associated with the user and assign it
             AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(subject, body, type);
             
-            //Refresh the list of email templates on the page
-            //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit
-            
-            //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            //ec.redirect(programContainer.getCurrentURL());
-            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
+            program.refresh();
             
         } catch (EntityExistsException ex) { //Transaction did not go through
             //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "There is already an email with this subject, please re-enter a different subject.", null);
-        } catch (IOException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "Please contact administrator.");
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "There is already an email with this subject, please re-enter a different subject.", null);
         } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (RelationshipExistsException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "There is already an email created and assigned to your account.", 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "There is already an email created and assigned to your account.", 
                     "Please click the refresh button on the top right hand corner to see if it's already there. "
                             + "Autoresponder emails are distinguished by their type and subject title."
                             + "If this problem persist, please contact your administrator. ");
         } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Oops..but this shouldn't happen.", 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Oops..but this shouldn't happen.", 
                     "Please raise an issue to our administrator, we will try to resolve it shortly!");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, 
                     ex.getClass().getSimpleName()+": "+ex.getMessage(), "Please raise an issue to our administrator, we will try to resolve it shortly!");
         }
     }

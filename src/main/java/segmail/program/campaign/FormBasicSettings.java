@@ -44,8 +44,10 @@ public class FormBasicSettings implements FormEditEntity {
     @Override
     public void saveAndContinue() {
         try {
-            campaignService.updateCampaign(this.getEditingCampaign());
+            Campaign campaign = campaignService.updateCampaign(this.getEditingCampaign());
+            program.setEditingCampaign(campaign);
             reloadProgramToolbar();
+            
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign updated!", "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -69,8 +71,8 @@ public class FormBasicSettings implements FormEditEntity {
     }
 
     public void reloadProgramToolbar() {
-        formSwitch.reloadCampaign();
+        //formSwitch.reloadCampaign();
         formSwitch.initEditCampaignMode();
-        formSwitch.modifySessionContainer();
+        program.modifySessionContainer();
     }
 }

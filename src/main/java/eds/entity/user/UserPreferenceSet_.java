@@ -15,5 +15,5 @@ import javax.persistence.metamodel.StaticMetamodel;
  */
 @StaticMetamodel(UserType.class)
 public class UserPreferenceSet_ extends EnterpriseData_{
-    public static volatile MapAttribute<UserPreferenceSet,String,String> PREFERENCES;
+    //public static volatile MapAttribute<UserPreferenceSet,String,String> PREFERENCES;
 }

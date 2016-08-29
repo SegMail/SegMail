@@ -6,12 +6,11 @@
 package segmail.program.autoresponder;
 
 import eds.component.client.ClientFacade;
-import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
 import eds.component.user.UserService;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import eds.entity.user.UserType;
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
@@ -20,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import seca2.program.Program;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
@@ -27,20 +27,16 @@ import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
  *
  * @author LeeKiatHaw
  */
-@Named("ProgramWelcomeEmail")
+@Named("ProgramAutoresponder")
 @SessionScoped
-public class ProgramAutoresponder implements Serializable {
+public class ProgramAutoresponder extends Program{
     
     @EJB 
     private AutoresponderService autoresponderService;
     @EJB
     private UserService userService;
-    @EJB
-    private ClientService clientService;
     
     @Inject private UserSessionContainer userContainer;
-    
-    @Inject private ProgramTemplateLoader loader;
     
     @Inject private ClientFacade clientFacade;
     
@@ -50,66 +46,21 @@ public class ProgramAutoresponder implements Serializable {
     
     private List<UserType> allUserTypes;
     
-    private final String formName = "ProgramTemplate";
-    
     private AutoresponderEmail editingTemplate;
     
-    // @PostConstruct
-    public void init(){
-        //this.initializeClient();
-        //this.initializeAllConfirmationEmails();
-        //this.initializeAllWelcomeEmails();
-        //this.initializeAllTemplates();
-        //this.initializeAllUserTypes();
-        
-        // Rightfully, a program bean should not be performing any loading logic, 
-        // but just be a holding shell for all the required frontend data.
-        // Initialize loader for the 1st time
-        this.initializeAllTemplates();
-        
-    }
+    private long editingTemplateId;
     
-    public void initializeAllConfirmationEmails() {
-        try {
-            
-            //this.setConfirmationTemplates(autoresponderService.getAvailableConfirmationEmailForClient(clientFacade.getClient().getOBJECTID()));
-            System.out.println(autoresponderService.getClass().getSimpleName())
-;            this.setConfirmationTemplates(autoresponderService.getAvailableAutoEmailsForClient(clientFacade.getClient().getOBJECTID(),AUTO_EMAIL_TYPE.CONFIRMATION));
-
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-
-    public void initializeAllWelcomeEmails() {
-        try {
-            
-            //this.setWelcomeTemplates(autoresponderService.getAvailableWelcomeEmailForClient(clientFacade.getClient().getOBJECTID()));
-            this.setWelcomeTemplates(autoresponderService.getAvailableAutoEmailsForClient(clientFacade.getClient().getOBJECTID(),AUTO_EMAIL_TYPE.WELCOME));
-
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
+    private boolean edit;
 
     public void initializeAllUserTypes() {
         try {
             this.setAllUserTypes(userService.getAllUserTypes());
 
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
-    }
-    
-    public void initializeAllTemplates() {
-        this.initializeAllConfirmationEmails();
-        this.initializeAllWelcomeEmails();
     }
 
     public List<AutoresponderEmail> getConfirmationTemplates() {
@@ -136,14 +87,6 @@ public class ProgramAutoresponder implements Serializable {
         this.welcomeTemplates = welcomeTemplates;
     }
 
-    public ProgramTemplateLoader getLoader() {
-        return loader;
-    }
-
-    public void setLoader(ProgramTemplateLoader loader) {
-        this.loader = loader;
-    }
-
     UserSessionContainer getUserContainer() {
         return userContainer;
     }
@@ -160,9 +103,37 @@ public class ProgramAutoresponder implements Serializable {
         this.editingTemplate = editingTemplate;
     }
 
-    public String getFormName() {
-        return formName;
+    public boolean isEdit() {
+        return edit;
     }
 
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
+
+    public long getEditingTemplateId() {
+        return editingTemplateId;
+    }
+
+    public void setEditingTemplateId(long editingTemplateId) {
+        this.editingTemplateId = editingTemplateId;
+    }
+
+    @Override
+    public void clearVariables() {
+        
+        
+    }
+
+    @Override
+    public void initRequestParams() {
+        
+    }
+
+    @Override
+    public void initProgram() {
+        
+        
+    }
     
 }

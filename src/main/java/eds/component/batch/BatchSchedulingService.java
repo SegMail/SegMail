@@ -634,24 +634,4 @@ public class BatchSchedulingService {
         return parser.parse(cronExp).validate();
         
     }
-    
-    public static void main(String[] args) {
-        BatchSchedulingService testService = new BatchSchedulingService();
-        DateTime now = DateTime.now().withSecondOfMinute(0);//.withMillisOfSecond(0);
-        
-        CampaignActivitySchedule schedule = new CampaignActivitySchedule();
-        schedule.setEVERY_HOUR(3);
-        schedule.generateCronExp(now);
-        
-        String cronExpression = schedule.getCRON_EXPRESSION();// = "57 11,17,23,5 * * * ";
-        ExecutionTime executionTime = ExecutionTime.forCron(testService.getValidCronExp(cronExpression,CronType.UNIX));
-        DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1)); //ugly hack because of the inherent nature of ExecutionTime
-        DateTime lastExecution = executionTime.lastExecution(now);
-        
-        
-        System.out.println(cronExpression);
-        System.out.println(now);
-        System.out.println("last: "+lastExecution);
-        System.out.println("next: "+nextExecution);
-    }
 }

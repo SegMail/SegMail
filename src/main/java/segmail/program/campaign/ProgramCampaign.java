@@ -155,6 +155,19 @@ public class ProgramCampaign extends Program{
         this.targetLists = targetLists;
     }
     
-    
+    /**
+     * First of its kind...of a stupid modification. It's only because we
+     * hard-coded the program layout page.
+     *
+     */
+    public void modifySessionContainer() {
+        if (isEditCampaignMode()) {
+            sessContainer.overwriteProgramTitle(this.getEditingCampaign().getCAMPAIGN_NAME());
+            sessContainer.overwriteProgramDescription(this.getEditingCampaign().getCAMPAIGN_GOALS());
+            return;
+        }
+        sessContainer.revertProgramOverwrite();
+
+    }
     
 }

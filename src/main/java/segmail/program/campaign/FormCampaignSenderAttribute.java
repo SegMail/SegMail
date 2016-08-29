@@ -52,23 +52,23 @@ public class FormCampaignSenderAttribute implements FormEditEntity {
 
     @Override
     public void saveAndClose() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void closeWithoutSaving() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void delete() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
     
     public void reloadProgramToolbar() {
         formSwitch.reloadCampaign();
         formSwitch.initEditCampaignMode();
-        formSwitch.modifySessionContainer();
+        program.modifySessionContainer();
     }
     
 }

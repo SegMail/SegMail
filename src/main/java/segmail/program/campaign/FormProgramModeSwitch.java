@@ -48,7 +48,7 @@ public class FormProgramModeSwitch {
         if (!FacesContext.getCurrentInstance().isPostback()) {
             reloadCampaign();
             initEditCampaignMode();
-            modifySessionContainer();
+            program.modifySessionContainer();
         }
     }
 
@@ -86,7 +86,7 @@ public class FormProgramModeSwitch {
         }
         if (params != null && !params.isEmpty()) {
             long newId = Long.parseLong(params.get(0));
-            if (getEditingCampaignId() == newId) {
+            if (getEditingCampaignId() == newId) { //this is screwing up with the
                 return;
             }
             setEditingCampaignId(newId);
@@ -105,18 +105,5 @@ public class FormProgramModeSwitch {
         this.setEditCampaignMode(false);
     }
 
-    /**
-     * First of its kind...of a stupid modification. It's only because we
-     * hard-coded the program layout page.
-     *
-     */
-    public void modifySessionContainer() {
-        if (isEditCampaignMode()) {
-            sessCont.overwriteProgramTitle(this.getEditingCampaign().getCAMPAIGN_NAME());
-            sessCont.overwriteProgramDescription(this.getEditingCampaign().getCAMPAIGN_GOALS());
-            return;
-        }
-        sessCont.revertProgramOverwrite();
-
-    }
+    
 }

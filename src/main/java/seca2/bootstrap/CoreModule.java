@@ -16,7 +16,10 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- *
+ * In the bootstrapping process, CoreModules are loaded first, followed by NonCoreModules.
+ * CoreModules should not be changed in any extensions, nor should an extension
+ * require adding a CoreModule.
+ * 
  * @author vincent.a.lee
  */
 @Qualifier

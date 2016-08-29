@@ -39,6 +39,7 @@ public class UserSessionContainer implements Serializable, ActiveUser {
     private Layout currentLayout;
     
     
+    
     private List<MenuItemContainer> menu; //Shoukd it be a session object?
     
     @PostConstruct

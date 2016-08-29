@@ -7,12 +7,9 @@ package segmail.program.list;
 
 import eds.component.data.DataValidationException;
 import eds.component.user.UserService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import segmail.component.subscription.SubscriptionService;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;

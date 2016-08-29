@@ -32,8 +32,6 @@ public class DefaultKeys {
     
     public final String DEFAULT_HOME = "/programs/test/layout.xhtml";
     
-    private final String DEFAULT_TEMPLATE_NAME = "DEFAULT_TEMPLATE_LOCATION";
-    
     /**
      * A flag to indicate which mode the application is running on. Reference to 
      * the RunMode enumeration.
@@ -80,21 +78,17 @@ public class DefaultKeys {
      */
     public final String DEFAULT_TEMPLATE_LOCATION = "DEFAULT_TEMPLATE_LOCATION";
     
+    /**
+     * The global default menu location
+     */
+    public final String DEFAULT_MENU_LOCATION = "DEFAULT_MENU_LOCATION";
+    
     public final String GLOBAL_VIEWROOT = "GLOBAL_VIEWROOT";
     
-    private String DEFAULT_TEMPLATE;
     
     @PostConstruct
     public void init(){
         
         
     }
-
-    public String getDEFAULT_TEMPLATE() {
-        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        DEFAULT_TEMPLATE = ec.getInitParameter(DEFAULT_TEMPLATE_NAME);
-        return DEFAULT_TEMPLATE;
-    }
-    
-    
 }

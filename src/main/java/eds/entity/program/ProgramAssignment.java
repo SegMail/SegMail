@@ -7,7 +7,6 @@
 package eds.entity.program;
 
 import eds.entity.data.EnterpriseRelationship;
-import eds.entity.user.User;
 import eds.entity.user.UserType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -28,19 +27,6 @@ public class ProgramAssignment extends EnterpriseRelationship<Program,UserType> 
     public ProgramAssignment(Program s, UserType t) {
         super(s, t);
     }
-
-    //Any additional attributes to be maintained for this relationship?
-    //protected String REL_TYPE = "MENU_ITEM_ACCESS"; no need to redefine it here
-    
-    /*@PrePersist
-    public void prePersist(){
-        this.REL_TYPE = "PROGRAM_ASSIGNMENT";
-    }
-    
-    @PreUpdate
-    public void preUpdate(){
-        this.REL_TYPE = "PROGRAM_ASSIGNMENT";
-    }*/
     
     @Override
     public void randInit() {

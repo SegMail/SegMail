@@ -97,12 +97,6 @@ public class MenuItem extends EnterpriseObject{// implements TreeBranch<MenuItem
     public Object generateKey() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    /*@PrePersist
-    @PreUpdate
-    public void PrePersist(){
-        this.OBJECT_NAME = this.MENU_ITEM_NAME;
-    }*/
 
     
 }

@@ -5,9 +5,7 @@
  */
 package eds.entity.mail;
 
-import eds.entity.data.EnterpriseObject;
 import eds.entity.transaction.EnterpriseTransaction_;
-import javax.persistence.metamodel.MapAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

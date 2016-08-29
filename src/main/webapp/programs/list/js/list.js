@@ -1,4 +1,4 @@
-var web_service_endpoint = 'WSImportSubscriber';
+//var web_service_endpoint = 'WSImportSubscriber';
 
 var DELIMITER = ',';
 
@@ -13,18 +13,14 @@ function saveSettings(data) {
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
             block_refresh(block);
-            //data.source.onBegin();
             break;
 
         case "complete": // This is called right after ajax response is received.
             block_refresh(block);
-            //data.source.onComplete();
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            //$(data.source).trigger('onSuccess');
             bindFileInput();
-            //data.source.onSuccess();
             break;
     }
 }
@@ -40,14 +36,11 @@ function bindFileInput() {
             return;
         var navigator = new FileNavigator(files[0]);
         navigator.readLines(0, 1, function lineReadHandler(err, partIndex, lines, eof) {
-            if (err) //console.log(err);
+            if (err) 
                 GenericErrorController.setErrors(err, 'danger');
             //Get the first line
             var firstLine = lines[0];
-            //document.getElementById('columns').value = firstLine;
-            //console.log(firstLine);
             if (!firstLine) {
-                //console.log('Empty file.');
                 GenericErrorController.setErrors("Empty file.", "danger");
                 return;
             }
@@ -68,8 +61,6 @@ function bindFileInput() {
             $('#progress-bar-container').show();
             $('#soap-errors').show();
             $('#upload-status').show();
-            //Send JSF ajax to populate the headers as options instead
-            //refreshFileColumns(event);
         });
     });
 }
@@ -78,12 +69,10 @@ function startFileUpload() {
 
     //Get the file object and create a FileNavigator wrapper
     var files = document.getElementById('fileUploaded').files;
-    if (files === null || files.length <= 0) {
-        //console.log('Error: no file selected')   
+    if (files === null || files.length <= 0) { 
         GenericErrorController.setErrors("No file selected.", "danger");
         return
     }
-    //var navigator = new FileNavigator(files[0]);
     PanelUpdater.reset();
     checkedErrorsCollector.reset();
     $('#soap-errors').empty();
@@ -92,10 +81,6 @@ function startFileUpload() {
     //by checking the file hash
     var md5Hash = '';
     checkFileHash(files[0]);
-    //console.log(storeFileHash.getHash());
-    //checkFileStatus(files[0].name, storeFileHash.getHash());
-
-
     //Show a different panel which will tell the user to wait and do not close the window
     //if the file upload was interrupted, ask them to upload the same file again
     //Show the progress bar and hide the file selector
@@ -118,9 +103,7 @@ var checkFileHash = function (file) {
     $('#importButton').prop("disable", true);
 
     if (!file) {
-        //console.log('File not defined!');
         GenericErrorController.setErrors("No file selected. Please select file.", "danger");
-        //$('#error-messages').text('Please select a file.');
         block_refresh($('#importButton').parents(".block"));
         return;
     }
@@ -132,16 +115,13 @@ var checkFileHash = function (file) {
             startIndex,
             function linesReadHandler(err, index, lines, eof, progress) {
                 if (err) {
-                    //console.log('FileNavigator error: '+err);
                     GenericErrorController.setErrors('FileNavigator error: ' + err, 'danger');
                     return;
                 }
                 countLines += lines.length;
-                //console.log(lines.length);
 
                 if (eof) {
                     PanelUpdater.setTotalLines(countLines - 1); //minus first line which is the header
-                    //console.log(PanelUpdater.getTotalLines());
                     var contents = '';
                     for (var i = 0; i < lines.length; i++) {
                         contents += lines[i];
@@ -173,7 +153,6 @@ var checkFileStatus = function (file, name, hash, success, error) {
         success: function (SOAPResponse) {
             var xmlResults = SOAPResponse.toJSON();
             var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:checkFileStatusResponse']["return"];
-            //console.log(result);
             success(file, result);
             block_refresh($('#importButton').parents(".block"));
         },
@@ -185,7 +164,6 @@ var checkFileStatus = function (file, name, hash, success, error) {
 };
 
 var successAndStart = function (file, startIndex) {
-    //console.log('Started with index '+startIndex);
 
     //set buffer variables
     var readIndex = (startIndex >= 0) ? startIndex : 1;
@@ -196,25 +174,19 @@ var successAndStart = function (file, startIndex) {
             readIndex,
             function linesReadHandler(err, index, lines, eof, progress) {
                 if (err) {
-                    console.log('Error at line ' + index, err);
-
+                    GenericErrorController.setErrors('File read error: '+err+' at line '+index,'danger');
                     return;
                 }
                 //Call SOAP
-                console.log('Now at line ' + index);
-                console.log('This batch is ' + lines.length + ' lines long.');
-                console.log('progress = ' + progress);
                 //Construct the JSON objects for each subscriber
                 //Construct the container JSON object to collect all subscriber objects
                 //Call Webservice
                 var batch = constructSubscribers(lines, index);
-                console.log(batch);
                 sendBatchToWS(batch, function (totalProcessed, success, errors) {
                     //PanelUpdater.updateLines(lines.length);
                     PanelUpdater.updateTotalProcessed(totalProcessed);
                     PanelUpdater.updateSuccess(success);
                     PanelUpdater.updateError(errors);
-                    //console.log(PanelUpdater.getProgress());
                     PanelUpdater.updateStatus();
                     checkedErrorsCollector.updateErrorList();
                     checkedErrorsCollector.generateErrorFile(file);
@@ -235,7 +207,6 @@ var constructSubscribers = function (array, startIndex) {
         var id = item.id;
         var val = item.value;
         if (val) {
-            //console.log(id,val);
             var idStore = mapping[val];
             if (!idStore) {
                 idStore = [];
@@ -244,7 +215,6 @@ var constructSubscribers = function (array, startIndex) {
             mapping[val] = idStore; //val = position in file
         }
     });
-    console.log(mapping);
 
     //Initialize the container object
     var container = {};
@@ -275,7 +245,6 @@ var constructSubscribers = function (array, startIndex) {
         //update progress
 
     });
-    //console.log(container);
     return container;
 };
 
@@ -294,7 +263,6 @@ var sendBatchToWS = function (batch, successCallback, errorCallback) {
         },
         success: function (SOAPResponse) {
             var xmlResults = SOAPResponse.toJSON();
-            //console.log(xmlResults);
 
             //Retrieve these numbers from xmlResults
             //successCallback(totalCreated,existing,fresh);
@@ -302,8 +270,6 @@ var sendBatchToWS = function (batch, successCallback, errorCallback) {
 
         },
         error: function (SOAPResponse) {
-            //console.log(this);
-            //$('#soapcall').text('Response: Error!').append(SOAPResponse.toString());
             logSOAPErrors(SOAPResponse);
             if (errorCallback)
                 errorCallback();
@@ -314,7 +280,6 @@ var sendBatchToWS = function (batch, successCallback, errorCallback) {
 
 var logSOAPErrors = function (SOAPResponse) {
     var jsonresult = SOAPResponse.toJSON();
-    //console.log(SOAPResponse.content); 
 
     var errorMessage = '';
     var severity = '';
@@ -341,8 +306,6 @@ var logCheckedErrors = function (SOAPResponse, callback) {
     var jsonresult = SOAPResponse.toJSON();
 
     var responseObject = JSON.parse(jsonresult['#document']['S:Envelope']['S:Body']["ns2:addSubscribersResponse"]["return"]);
-    //Parse into JSON object first
-    //console.log(responseObject);
     var totalCount = 0;
     var errors = 0;
 
@@ -423,7 +386,6 @@ var PanelUpdater = (function () {
 
 var processError500 = function (JsonResult) {
     var faultstring = JsonResult['#document']['S:Envelope']['S:Body']['S:Fault']["faultstring"];
-    //console.log(faultstring);
     if (faultstring.indexOf('UserLoginException') > -1) //if starts with java.lang.RuntimeException: eds.component.user.UserLoginException: Please enter username.
         return "Please log in again.";
     switch (faultstring) {
@@ -491,7 +453,6 @@ var checkedErrorsCollector = (function () {
             }
 
             $('#doneButton').show();
-            //console.log('Done');
 
             //Re-arrange the lines with errors into a sorted array
             var sortedArray = [];
@@ -509,7 +470,6 @@ var checkedErrorsCollector = (function () {
             sortedArray.sort(function sortFn(a, b) {
                 return a['sno'] - b['sno'];
             });
-            //console.log(sortedArray);
 
             if (sortedArray.length <= 0)
                 return;
@@ -522,7 +482,6 @@ var checkedErrorsCollector = (function () {
 
             navigator.readSomeLines(0, function callback(err, index, lines, eof, progress) {
                 if (err) {
-                    //console.log(err);
                     GenericErrorController.setErrors(err, 'danger');
                     return;
                 }
@@ -543,7 +502,6 @@ var checkedErrorsCollector = (function () {
                 }
 
                 if (eof) {
-                    //console.log(outputErrorFileContent);
                     $('#' + fileDownloadContainerId).append('<a id=\"' + fileDownloadContainerId + '-link\">Click here to download error file.</a>');
                     $('#' + fileDownloadContainerId + '-link').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(outputErrorFileContent));
                     $('#' + fileDownloadContainerId + '-link').attr('download', file.name);
@@ -615,25 +573,8 @@ $(document).ready(function () {
     //Datatables
     $('.sortable').dataTable();
     $('.sortable').on('page.dt', function () {
-        //console.log('Page event triggered');
         $('.sortable').row.add({
             "EMAIL": "test"
         }).draw();
     });
-    
-    //Signup code
-    setupSignupCode();
 });
-
-var setupSignupCode = function () {
-    var editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
-        lineNumbers: true,
-        matchBrackets: true,
-        mode: "application/x-httpd-php",
-        indentUnit: 4,
-        indentWithTabs: true,
-        enterMode: "keep",
-        tabMode: "shift"
-    });
-    editor.setSize('100%', '280px');
-}

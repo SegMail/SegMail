@@ -10,21 +10,19 @@ import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import eds.entity.data.EnterpriseObject;
-import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import seca2.program.FormEditEntity;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 
 /**
@@ -33,118 +31,32 @@ import segmail.component.subscription.autoresponder.AutoresponderService;
  */
 @Named("FormEditExistingTemplate")
 @RequestScoped
-public class FormEditExistingTemplate {
-    
-    @EJB private AutoresponderService autoresponderService;
-    @EJB private GenericObjectService objectService;
+public class FormEditExistingTemplate implements FormEditEntity {
+
+    @EJB
+    private AutoresponderService autoresponderService;
+    @EJB
+    private GenericObjectService objectService;
     //@EJB private UserService userService;
-    
-    @Inject private ProgramAutoresponder program;
-    
-    @Inject private UserSessionContainer userContainer;
-    @Inject private UserRequestContainer requestContainer;
-    
-    private final String formName = "edit_template_form";
-    
+
+    @Inject
+    private ProgramAutoresponder program;
+
+    @Inject
+    private UserSessionContainer userContainer;
+    @Inject
+    private UserRequestContainer requestContainer;
+
     @PostConstruct
-    public void init(){
-        
-    }
-    
-    public void loadTemplate(long templateId){
-        try {
+    public void init() {
+        if (!FacesContext.getCurrentInstance().isPostback()) {
             
-            // Retrieve the template based on the Id
-            // Using cast because when retrieving with AutoresponderEmail.class, issue https://github.com/SegMail/SegMail/issues/35 occurs
-            AutoresponderEmail editing = (AutoresponderEmail) objectService.getEnterpriseObjectById(templateId, EnterpriseObject.class); 
-            
-            program.setEditingTemplate(editing);
-            
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
-    
-    public void saveTemplateAndContinue(){
-        try {
-            AutoresponderEmail newTemplate = autoresponderService.saveAutoEmail(program.getEditingTemplate());
-            
-            //redirect to itself after setting list editing
-            //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            //ec.redirect(programContainer.getCurrentURL());
-            
-            //Do not redirect, reload instead
-            program.setEditingTemplate(newTemplate);
-            
-            //Set success message
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Template updated.", null);
-            
-        } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EntityExistsException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-    
-    public void saveTemplateAndClose(){
-        try {
-            autoresponderService.saveAutoEmail(program.getEditingTemplate());
-            
-            refresh();
-            
-            //Set success message
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template updated.", null);
-            
-        } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EntityExistsException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
-    
-    public void closeWithoutSaving(){
-        refresh();
-    }
-    
-    public void deleteTemplate(){
-        try {
-            autoresponderService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "Template deleted.",null);
-            refresh();
-            
-            
-        } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
-        }
-        
-    }
-    
-    public void refresh(){
-        try {
-            //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            //ec.redirect(programContainer.getCurrentURL());
-            ec.redirect(ec.getRequestContextPath()+"/".concat(requestContainer.getProgramName()));
-        } catch (Exception ex){
-            FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
-        }
+
+    @Override
+    public void closeWithoutSaving() {
+        program.refresh();
     }
 
     public ProgramAutoresponder getProgram() {
@@ -154,6 +66,55 @@ public class FormEditExistingTemplate {
     public void setProgram(ProgramAutoresponder program) {
         this.program = program;
     }
+
     
-    
+    public AutoresponderEmail getEditingTemplate() {
+        return program.getEditingTemplate();
+    }
+
+    public void setEditingTemplate(AutoresponderEmail editingTemplate) {
+        program.setEditingTemplate(editingTemplate);
+    }
+
+    @Override
+    public void saveAndContinue() {
+        try {
+            AutoresponderEmail newTemplate = autoresponderService.saveAutoEmail(program.getEditingTemplate());
+
+            program.setEditingTemplate(newTemplate);
+
+            //Set success message
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template updated.", null);
+
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (EntityExistsException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (EJBException ex) { //Transaction did not go through
+            //Throwable cause = ex.getCause();
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        }
+    }
+
+    @Override
+    public void saveAndClose() {
+        saveAndContinue();
+        closeWithoutSaving();
+    }
+
+    @Override
+    public void delete() {
+        try {
+            autoresponderService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template deleted.", null);
+            program.refresh();
+
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (DBConnectionException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        }
+    }
 }
