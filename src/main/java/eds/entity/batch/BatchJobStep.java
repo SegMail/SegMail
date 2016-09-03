@@ -51,11 +51,11 @@ public class BatchJobStep implements Serializable {
         this.SERVICE_NAME = SERVICE_NAME;
     }
 
-    @OneToMany
-    @JoinColumns({
+    @OneToMany(mappedBy="BATCH_JOB_STEP")
+    /*@JoinColumns({
         @JoinColumn(name = "BATCH_JOB_STEP"),
         @JoinColumn(name = "BATCH_JOB_STEP_ORDER")
-    })
+    })*/
     @OrderColumn(name = "PARAM_ORDER")
     public List<BatchJobStepParam> getPARAMS() {
         return PARAMS;
@@ -71,9 +71,9 @@ public class BatchJobStep implements Serializable {
         CascadeType.MERGE,
         CascadeType.REFRESH
     })
-    /*@JoinColumn(name = "BATCH_JOB",
+    @JoinColumn(name = "BATCH_JOB",
             referencedColumnName = "BATCH_JOB_ID",
-            foreignKey = @ForeignKey(name = "BATCH_JOB", value = NO_CONSTRAINT))*/
+            foreignKey = @ForeignKey(name = "BATCH_JOB", value = NO_CONSTRAINT))
     public BatchJob getBATCH_JOB() {
         return BATCH_JOB;
     }
