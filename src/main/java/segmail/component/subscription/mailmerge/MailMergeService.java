@@ -7,6 +7,7 @@ package segmail.component.subscription.mailmerge;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import eds.component.webservice.TransactionProcessedException;
@@ -243,4 +244,29 @@ public class MailMergeService {
         
         return trans;
     }*/
+    
+    /**
+     * Gets a test link for the mailmerge label
+     * 
+     * @param label
+     * @return 
+     */
+    public String getTestLink(String label) throws DataValidationException, IncompleteDataException{
+        MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
+        if(request == null)
+            throw new DataValidationException("Invalid label");
+        
+        ServerInstance testServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+        if(testServer == null || testServer.getURI() == null || testServer.getURI().isEmpty())
+            throw new IncompleteDataException("Test server is not setup properly. Please contact your system admin.");
+        
+        String testServerAddress = testServer.getURI();
+        if(!testServerAddress.endsWith("/"))
+            testServerAddress = testServerAddress + "/";
+        
+        String name = request.name().toLowerCase();
+        String testLink = testServerAddress + name + "/" + label;
+        
+        return testLink;
+    }
 }

@@ -69,20 +69,15 @@
                     </div>
                     <div class="list-group">
 
-                        <c:forEach items="#{FormAllAutoEmail.welcomeTemplates}" var="newsletter">
-                            <form jsf:id="edit_newsletter_popup_link_#{newsletter.OBJECTID}" name="newsletter_#{newsletter.OBJECTID}" >
-                                <a href="#edit_auto_email_popup" class="list-group-item" data-toggle="modal"
-
+                        <c:forEach items="#{FormAllAutoEmail.welcomeTemplates}" var="welcome">
+                            <form jsf:id="edit_newsletter_popup_link_#{welcome.OBJECTID}" name="newsletter_#{welcome.OBJECTID}" >
+                                <a href="#{request.contextPath}/#{UserRequestContainer.programName}/#{welcome.OBJECTID}" 
+                                   class="list-group-item" 
                                    >
-                                    <f:ajax event="click" render="edit_auto_email_form"
-                                            listener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}"
-                                            onevent="edit"
-                                            />
-                                    #{newsletter.SUBJECT}
+                                    #{welcome.SUBJECT}
                                 </a>
                             </form>
                         </c:forEach>
-
                     </div>
 
                 </div>

@@ -11,7 +11,7 @@ package segmail.entity.subscription.email.mailmerge;
  */
 
 public enum MAILMERGE_REQUEST {
-    CONFIRM("CONFIRM","[!confirm]",86400000),
+    CONFIRM("CONFIRM","!confirm",86400000),
     UNSUBSCRIBE("UNSUBSCRIBE","!unsubscribe",-1);
     
     final String name;
@@ -35,6 +35,13 @@ public enum MAILMERGE_REQUEST {
     @Override
     public String toString() {
         return this.name; //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public String toCapFirstLetter() {
+        String firstLetter = this.name.substring(0, 1);
+        String theRest = this.name.toLowerCase().substring(1);
+        theRest = firstLetter + theRest;
+        return theRest;
     }
     
     public static MAILMERGE_REQUEST getByLabel(String label) {

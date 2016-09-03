@@ -71,13 +71,19 @@ public class BatchJobStep implements Serializable {
         CascadeType.MERGE,
         CascadeType.REFRESH
     })
-    @JoinColumn(name = "BATCH_JOB",
+    /*@JoinColumn(name = "BATCH_JOB",
             referencedColumnName = "BATCH_JOB_ID",
-            foreignKey = @ForeignKey(name = "BATCH_JOB", value = NO_CONSTRAINT))
+            foreignKey = @ForeignKey(name = "BATCH_JOB", value = NO_CONSTRAINT))*/
     public BatchJob getBATCH_JOB() {
         return BATCH_JOB;
     }
 
+    /**
+     * It doesn't matter now whether this field is auto-generated because all 
+     * batch jobs only have 1 step.
+     * 
+     * @return 
+     */
     @Id
     public int getSTEP_ORDER() {
         return STEP_ORDER;

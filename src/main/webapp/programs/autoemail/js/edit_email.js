@@ -8,65 +8,44 @@ var refresh_summernote = function () {
     });
 }
 
+// Events
+
+
 var onEditorChange = function() {
-    //render preview
-    renderPreview();
-    //render mailmerge tags with sameple links
+    renderEverything();
 }
 
 var onSave = function() {
     //Block button
     $('#saveButton').prop('disabled',true);
-    
-    //Copy summernote content back to textarea
-    reapply_textarea('editor');
-    
-    //Copy preview content into a hidden input field for JSF to process
-    renderPreview();
-    
-    //Call webservice
-    $.soap({
-        url : web_service_endpoint,
-        method : 'saveAutoemail',
-        appendMethodToURL: 0,
-        namespaceQualifier: 'ns',
-        namespaceURL: 'http://webservice.autoresponder.program.segmail/',
-        noPrefix: 0,
-        HTTPHeaders: {
-        },
-    /*$.ajax({
-        type : "POST",
-        contentType : "application/json",
-        url: "/autoresponder/save",*/
-        data : {
-            'body' : document.getElementById('editor').innerHTML,//$('#editor').html().text(),
+    renderEverything();
+    //saveAutoemail();
+    callWS(
+        'saveAutoemail',{
+            'body' : $('#editor').text(),
             'bodyProcessed' : $('#processedContent').val()
-        },
-        success : function(SOAPResponse) {
-            var xmlResults = SOAPResponse.toJSON();
-            var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:saveAutoemailResponse']["return"];
-            $('#saveResults').html(result); //Don't know how it will look like yet
+        },function(result){
+            $('#saveResults').html('Saved at '+result); //Don't know how it will look like yet
             $('#saveButton').prop('disabled',false);
-        },
-        error : function(SOAPResponse) {
-            var response = SOAPResponse.toJSON();
-            $('#saveResults').html(response); //Don't know how it will look like yet
+        },function(error){
+            $('#saveResults').html('Error: '+error); //Don't know how it will look like yet
             $('#saveButton').prop('disabled',false);
-        }
-    })
+        });
 };
 
+// Helper functions
 var toggleMenu = function () {
     if ($(document).has('#FormEditExistingTemplate').length) {
         page_navigation();
     }
 };
 
-var renderPreview = function() {
+var renderPreview = function(timeout) {
     //Copy the html over from 
-    //setTimeout(function(){
+    setTimeout(function(){
+        //Copy summernote content back to textarea
+        reapply_textarea('editor');
         $('#preview').html($('.note-editable').html());
-        $('#processedContent').val($('#preview').html());
         
         //Get ratios
         var scaleY = $('#preview-panel').height() / $('#preview').height();
@@ -79,8 +58,7 @@ var renderPreview = function() {
             'transform-origin': '0 0 0'
         });
         
-        
-    //},timeout);
+    },timeout);
 };
 
 function largestWidth(selector) {
@@ -112,14 +90,50 @@ var adjustPreviewPanelHeight = function() {
     
 };
 
-var renderMailmergeTags = function() {
-    
+var renderMailmergeTag = function(label,timeout) {
+    var token = md5(label);
+    setTimeout(function(){
+        var content = $('#preview').html();
+        var mmLink = '<a target="_blank" class="'+token+'"></a>';
+        $('#preview').html(content.replace(label,mmLink));
+        var count = $('#preview a.'+token).size();
+        $('#preview a.'+token).each(function(){
+            var link = $(this);
+            link.attr('data-link',token)
+            callWS('createMailmergeTestLink',
+                    {label : label},
+                    function(result){
+                        var jsonObj = JSON.parse(result);
+                        link.attr('href',jsonObj['url']);
+                        link.html(jsonObj["name"]);
+                        
+                        link.removeClass(token);
+                        if (!--count)
+                            $('#processedContent').val($('#preview').html());
+                    },
+                    function(code,error,message){
+                        $('#saveResults').html('<span style="color: red">Error: '+message+'</span>');    
+                    });
+        })
+                
+    },timeout);
 }
 
+var renderEverything = function() {
+    renderPreview(0);
+    renderMailmergeTag('!confirm',50);
+}
 
+var modifyDomToGeneratePreview = function () {
+    var randomNum = Math.round(Math.random() * 100000);
+    $('.note-editable').append('<div id=modifyDomToGeneratePreview' + randomNum + '></div>');
+    $('#modifyDomToGeneratePreview' + randomNum).remove();
+};
 
+//Loader
 $(document).ready(function () {
     toggleMenu();
     refresh_summernote();
     adjustPreviewPanelHeight();
+    modifyDomToGeneratePreview();
 });

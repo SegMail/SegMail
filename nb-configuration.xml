@@ -33,5 +33,6 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-maven-jaxws._5f_C_5f_WSConfirmSubscription_5f_1>file:/Users/LeeKiatHaw/SegMail/src/wsdl/10.2.225.240_8080/SegMail/WSConfirmSubscription.wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_WSConfirmSubscription_5f_1>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_ChartJSServiceImplService_5f_1>http://lees-mbp.home:8080/SegMail/ChartJSServiceImplService?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_ChartJSServiceImplService_5f_1>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_ChartJSServiceImplService>http://lees-mbp.home:8080/SegMail/ChartJSServiceImplService?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_ChartJSServiceImplService>
+        <org-netbeans-modules-javascript2-requirejs.enabled>true</org-netbeans-modules-javascript2-requirejs.enabled>
     </properties>
 </project-shared-configuration>
