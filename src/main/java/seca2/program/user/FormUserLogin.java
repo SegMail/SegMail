@@ -53,7 +53,7 @@ public class FormUserLogin {
             && !userContainer.isLoggedIn()
                 && (userContainer.getLastProgram() != null && !userContainer.getLastProgram().isEmpty())
                 ){
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
         }
     }
 
@@ -61,7 +61,7 @@ public class FormUserLogin {
         try {
             Map<String,Object> userValues = new HashMap<String,Object>();
             User authenticatedUser = userService.login(this.username, this.password);
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Login successful!", null);
             
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Initialize userValues into userContainer
@@ -91,13 +91,13 @@ public class FormUserLogin {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }
         } catch (UserLoginException esliex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
         } catch (DBConnectionException dbex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (UserAccountLockedException ualex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
 
