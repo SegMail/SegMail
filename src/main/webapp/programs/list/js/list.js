@@ -559,6 +559,12 @@ var GenericErrorController = function () {
     };
 }();
 
+var toggleMenu = function () {
+    if ($(document).has('#list_editing_block').length) {
+        page_navigation();
+    }
+};
+
 $(document).ready(function () {
     //$('#importButton').trigger('onSuccess');
     bindFileInput();
@@ -572,9 +578,10 @@ $(document).ready(function () {
 
     //Datatables
     $('.sortable').dataTable();
-    $('.sortable').on('page.dt', function () {
+    /*$('.sortable').on('page.dt', function () {
         $('.sortable').row.add({
             "EMAIL": "test"
         }).draw();
-    });
+    });*/
+    toggleMenu();
 });

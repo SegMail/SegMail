@@ -45,6 +45,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.FormParam;
@@ -410,13 +411,16 @@ public class SubscriptionService {
             Root<SubscriberFieldValue> fromFieldValue = criteria.from(SubscriberFieldValue.class);
 
             criteria.select(fromFieldValue);
+            List<Predicate> conditions = new ArrayList<>();
+            conditions.add(builder.equal(fromSubscr.get(Subscription_.TARGET), listId));
+            conditions.add(builder.equal(
+                                    fromSubscr.get(Subscription_.SOURCE),
+                                    fromFieldValue.get(SubscriberFieldValue_.OWNER)));
+            if(fields != null && !fields.isEmpty())
+                conditions.add(fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields));
             criteria.where(
                     builder.and(
-                            builder.equal(fromSubscr.get(Subscription_.TARGET), listId),
-                            builder.equal(
-                                    fromSubscr.get(Subscription_.SOURCE),
-                                    fromFieldValue.get(SubscriberFieldValue_.OWNER)),
-                            fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields)
+                        conditions.toArray(new Predicate[]{})
                     )
             );
 

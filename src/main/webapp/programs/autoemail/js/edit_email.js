@@ -1,7 +1,12 @@
 var refresh_summernote = function () {
     $('textarea.editor').summernote({
-        height: 280, //try the CSS flex approach next time
-        
+        height: 260, //try the CSS flex approach next time
+        toolbar : [
+            ['style', ['style', 'bold', 'italic', 'underline']],
+            ['insert' ['picture', 'link' ]],
+            ['para', ['ol','ul','paragraph','height']],
+            ['misc', ['codeview','help']]
+        ]
     });
     observeDOM(document.getElementsByClassName('note-editable')[0], function () {
         onEditorChange();
@@ -132,6 +137,9 @@ var modifyDomToGeneratePreview = function () {
 
 //Loader
 $(document).ready(function () {
+    if($('#editor-panel').size() <= 0)
+        return;
+    
     toggleMenu();
     refresh_summernote();
     adjustPreviewPanelHeight();

@@ -1,4 +1,8 @@
 
+var refreshSelect2 = function(){
+    $(".select2").select2();
+};
+        
 var addNew = function(data){
     var ajaxStatus = data.status; 
     var block = $(data.source).parents(".modal-dialog");
@@ -13,6 +17,7 @@ var addNew = function(data){
             break;
 
         case "success": // This is called when ajax response is successfully processed.
+            refreshSelect2();
             block_refresh(block); 
             
             break;

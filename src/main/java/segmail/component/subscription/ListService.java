@@ -18,6 +18,7 @@ import eds.component.encryption.EncryptionUtility;
 import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -56,7 +57,7 @@ public class ListService {
     private GenericConfigService configService;
 
     public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
-        if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name()) && !field.getFIELD_NAME().equals("Email")) {
+        if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name()) && !field.getFIELD_NAME().equalsIgnoreCase(FIELD_TYPE.EMAIL.name())) {
             throw new DataValidationException("Only the \"Email\" field can have order number 1");
         }
         if (field.getSNO() < 1) {
@@ -143,18 +144,26 @@ public class ListService {
      * @throws eds.component.data.DataValidationException
      * @throws eds.component.data.IncompleteDataException
      */
-    public void updateSubscriptionListFields(List<SubscriptionListField> fieldList) throws DataValidationException, IncompleteDataException {
-        try {
-            EntityManager em = updateService.getEm();
-            for (SubscriptionListField f : fieldList) {
-                validateListField(f);
-                em.merge(f);
-            }
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+    public void fullRefreshUpdateSubscriptionListFields(List<SubscriptionListField> fieldList) 
+            throws DataValidationException, IncompleteDataException {
+        if(fieldList == null || fieldList.isEmpty())
+            return;
+        
+        long listId = fieldList.get(0).getOWNER().getOBJECTID();
+        
+        //If any of the fields have duplicated FIELD_NAME, do not proceed
+        
+        //Delete all existing fields first
+        updateService.deleteAllEnterpriseDataByType(listId, SubscriptionListField.class);
+        
+        //Sort and fill in SNO
+        Collections.sort(fieldList,new SubscriptionListFieldComparator());
+        for(int i = 0; i< fieldList.size(); i++) {
+            SubscriptionListField field = fieldList.get(i);
+            field.setSNO(i+1);
+            validateListField(field); //Throws exception if something is wrong and rolls back the whole shit
+            
+            updateService.getEm().persist(field);
         }
     }
 
@@ -299,16 +308,11 @@ public class ListService {
      * @return SubscriptionListFieldList if there is at least 1 record available
      */
     public List<SubscriptionListField> getFieldsForSubscriptionList(long listId) {
-        try {
-            List<SubscriptionListField> allFieldList = objectService.getEnterpriseData(listId, SubscriptionListField.class);
-            Collections.sort(allFieldList, new SubscriptionListFieldComparator());
-            return allFieldList;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        
+        List<SubscriptionListField> allFieldList = objectService.getEnterpriseData(listId, SubscriptionListField.class);
+        Collections.sort(allFieldList, new SubscriptionListFieldComparator());
+        return allFieldList;
+        
     }
 
     public List<String> getSubscriptionListFieldKeys(long listId) {

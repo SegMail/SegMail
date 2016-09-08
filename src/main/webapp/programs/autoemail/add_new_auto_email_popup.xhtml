@@ -7,8 +7,9 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="FormAddNewTemplate">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormAddNewAutoEmail">
 
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -21,19 +22,31 @@
                     </div>
 
                     <div jsf:id="modal-body" class="modal-body">
-                        <input type="hidden" jsf:value="#{FormAddNewTemplate.type}" id="email_type" />
+                        <input type="hidden" jsf:value="#{FormAddNewAutoEmail.type}" id="email_type" />
                         <div class="form-group">
-                            <s2:messenger id="FormAddNewTemplate_messenger" for="FormAddNewTemplate" showDetail="true" showSummary="true"
+                            <s2:messenger id="FormAddNewAutoEmail_messenger" for="FormAddNewAutoEmail" showDetail="true" showSummary="true"
                                           class="form-group"></s2:messenger>
                         </div>
                         <div class="form-group">
                             <label>
                                 Subject:
                             </label>
-                            <input type="text" class="form-control" id="subject"
-                                   jsf:value="#{FormAddNewTemplate.subject}"
+                            <input type="text" class="form-control validate[required]" id="subject"
+                                   jsf:value="#{FormAddNewAutoEmail.subject}"
                                    name="email"
                                    />
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                Select list:
+                            </label>
+                            <h:selectOneListbox id="slectList" pass:id="selectList" styleClass="select2 validate[required]" style="width: 100%;"
+                                                        value="#{FormAddNewAutoEmail.selectedListId}" 
+                                                         >
+                                <f:selectItems value="#{FormAddNewAutoEmail.lists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                               itemValue="#{list.OBJECTID}">
+                                </f:selectItems>
+                            </h:selectOneListbox>
                         </div>
                         <div class="form-group">
                             <p>We'll show you a nicer editor later so you can edit the body of the email.</p>
@@ -42,9 +55,11 @@
                     </div>
                     <div class="modal-footer">
 
-                        <button jsf:id="add_new_auto_email_button" class="btn btn-success">
+                        <button jsf:id="add_new_auto_email_button" class="btn btn-success"
+                                >
                             <f:ajax render="modal-body" execute="@form"
-                                    listener="#{FormAddNewTemplate.addNewAutoEmail()}"
+                                    
+                                    listener="#{FormAddNewAutoEmail.addNewAutoEmail()}"
                                     event="click"
                                     onevent="addNew"
                                     ></f:ajax>

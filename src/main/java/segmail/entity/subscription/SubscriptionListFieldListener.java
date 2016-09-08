@@ -5,18 +5,26 @@
  */
 package segmail.entity.subscription;
 
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+
 /**
  *
  * @author LeeKiatHaw
  */
 public class SubscriptionListFieldListener {
     
-    
+    @PrePersist
+    @PreUpdate
     public void prePersistUpdate(SubscriptionListField field){
-        
+        updateMailmergeTage(field);
     }
     
-    public void createKey(SubscriptionListField field){
+    public void updateMailmergeTage(SubscriptionListField field){
+        String fieldName = field.getFIELD_NAME();
+        fieldName = fieldName.replace(" ", "-");
+        fieldName = "!" + fieldName;
         
+        field.setMAILMERGE_TAG(fieldName);
     }
 }

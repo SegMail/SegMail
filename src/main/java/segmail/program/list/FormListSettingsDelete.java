@@ -15,6 +15,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
@@ -30,6 +31,7 @@ public class FormListSettingsDelete {
     
     @Inject private ProgramList program;
     @Inject private UserSessionContainer userContainer;
+    @Inject private UserRequestContainer reqContainer;
     
     @EJB private SubscriptionService subService;
     @EJB private UserService userService;
@@ -55,6 +57,7 @@ public class FormListSettingsDelete {
             program.setListEditing(null);
             
             //Reload the entire page to refresh all other components in the page
+            reqContainer.getProgramParamsOrdered().clear(); //So that it's not refreshed with the deleted list ID
             program.refresh();
             
         } catch (DBConnectionException ex) {

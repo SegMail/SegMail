@@ -11,31 +11,32 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
-import java.io.IOException;
+import java.util.List;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@Named("FormAddNewTemplate")
+@Named("FormAddNewAutoEmail")
 @RequestScoped
 public class FormAddNewAutoEmail {
     
     @EJB private AutoresponderService autoresponderService;
     @EJB private UserService userService;
+    @EJB private ListService listService;
     
     @Inject private ProgramAutoresponder program;
     @Inject private ClientFacade clientFacade;
@@ -57,9 +58,13 @@ public class FormAddNewAutoEmail {
     
     public void addNewAutoEmail(){
         try {
+            if(getSelectedListId() <= 0)
+                throw new IncompleteDataException("Please select a list.");
             // Create the new template
             // Get the client associated with the user and assign it
             AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(subject, body, type);
+            //Assign it to the selected list
+            autoresponderService.assignAutoEmailToList(newTemplate.getOBJECTID(), getSelectedListId());
             
             program.refresh();
             
@@ -80,6 +85,11 @@ public class FormAddNewAutoEmail {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, 
                     ex.getClass().getSimpleName()+": "+ex.getMessage(), "Please raise an issue to our administrator, we will try to resolve it shortly!");
         }
+    }
+    
+    public void loadLists() {
+        List<SubscriptionList> lists = listService.getAllListForClient(clientFacade.getClient().getOBJECTID());
+        setLists(lists);
     }
 
     public String getSubject() {
@@ -113,6 +123,22 @@ public class FormAddNewAutoEmail {
 
     public void setType(AUTO_EMAIL_TYPE type) {
         this.type = type;
+    }
+    
+    public List<SubscriptionList> getLists() {
+        return program.getLists();
+    }
+
+    public void setLists(List<SubscriptionList> lists) {
+        program.setLists(lists);
+    }
+    
+    public long getSelectedListId() {
+        return program.getSelectedListId();
+    }
+
+    public void setSelectedListId(long selectedListId) {
+        program.setSelectedListId(selectedListId);
     }
     
 }

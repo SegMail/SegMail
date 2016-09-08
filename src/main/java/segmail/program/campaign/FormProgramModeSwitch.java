@@ -6,8 +6,6 @@
 package segmail.program.campaign;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -18,6 +16,7 @@ import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.Campaign;
+import segmail.program.campaign.ProgramCampaign;
 
 /**
  * Impt! If this request scoped bean loads the editing Campaign, then it must be
