@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
@@ -49,11 +50,11 @@ public class FormAddNewAutoEmail {
     //private AutoEmailTypeFactory.TYPE type;
     private AUTO_EMAIL_TYPE type;
     
-    private final String formName = "add_new_auto_email_form";
-    
     @PostConstruct
     public void init(){
-        
+        if(!FacesContext.getCurrentInstance().isPostback()) {
+            loadLists();
+        }
     }
     
     public void addNewAutoEmail(){

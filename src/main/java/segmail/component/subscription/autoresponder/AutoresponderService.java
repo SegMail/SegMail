@@ -434,4 +434,5 @@ public class AutoresponderService {
                 .getResultList();
         return results;
     }
+    
 }

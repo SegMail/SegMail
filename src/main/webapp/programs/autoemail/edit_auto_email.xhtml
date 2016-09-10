@@ -23,7 +23,18 @@
                         </div>
                         <div class="form-group">
                             <label>Body</label>
-                            <span class="help-block">Click here for the list of mail merge tags</span>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                    Mailmerge <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li role="presentation" class="dropdown-header">Select mailmerge fields to insert</li>
+                                    <c:forEach items="#{FormEditExistingTemplate.listFields}" var="field">
+                                        <li><a href="#">#{field.FIELD_NAME}</a></li>
+                                    </c:forEach>
+                                    
+                                </ul>
+                            </div>
                             <textarea id="editor" class="editor"
                                       jsf:value="#{FormEditExistingTemplate.editingTemplate.BODY}">
                             </textarea>
@@ -67,6 +78,12 @@
         </div>
         <script type="text/javascript" >
             var web_service_endpoint = '#{request.contextPath}/WSAutoresponder';
+            
+            var mailmergeTagsSubscriber = [
+                <c:forEach items="#{FormEditExistingTemplate.listFields}" var="field">
+                    '#{field.MAILMERGE_TAG}',
+                </c:forEach>
+            ]
         </script>
         
     </form>

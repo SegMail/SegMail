@@ -23,17 +23,15 @@
             <div class="modal fade" id="add_new_auto_email_popup">
                 <ui:include src="add_new_auto_email_popup.xhtml"></ui:include>
             </div>
-            <div class="modal fade" id="edit_auto_email_popup">
-                <ui:include src="edit_auto_email_popup.xhtml"></ui:include>
-            </div>
         </ui:define>
 
         <ui:define name="scripts-bottom" id="scripts-bottom">
-            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/template_popup.js" />
+            
             <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/validation.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/custom/summernote_hack.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/delete_confirmation.js" />
-            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.js"></script>
+            <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote-ext-template.js"></script>-->
             
             <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/add_new_auto_email_popup.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/edit_email.js" />

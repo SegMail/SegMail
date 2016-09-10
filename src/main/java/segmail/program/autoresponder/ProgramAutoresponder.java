@@ -22,6 +22,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
 /**
@@ -56,6 +57,8 @@ public class ProgramAutoresponder extends Program{
     private List<SubscriptionList> lists;
     
     private long selectedListId;
+    
+    private List<SubscriptionListField> listFields;
 
     public void initializeAllUserTypes() {
         try {
@@ -138,6 +141,14 @@ public class ProgramAutoresponder extends Program{
 
     public void setSelectedListId(long selectedListId) {
         this.selectedListId = selectedListId;
+    }
+
+    public List<SubscriptionListField> getListFields() {
+        return listFields;
+    }
+
+    public void setListFields(List<SubscriptionListField> listFields) {
+        this.listFields = listFields;
     }
 
     @Override
