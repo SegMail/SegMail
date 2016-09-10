@@ -7,10 +7,17 @@ package seca2.program.mysettings;
 
 import eds.component.client.ClientService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.DataValidationException;
+import eds.component.data.EntityExistsException;
+import eds.component.data.EntityNotFoundException;
+import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -40,9 +47,9 @@ public class ContactDetailsForm {
         try {
             this.initContactInfo();
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
     
@@ -58,11 +65,17 @@ public class ContactDetailsForm {
                 this.mySettingsProgram.getContactInfo().setOWNER(newclient);
             }
             this.clientService.updateClientContact(mySettingsProgram.getContactInfo());
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_FATAL, "Your contact details has been updated!", null);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Your contact details has been updated!", null);
+        }  catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (EntityExistsException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
+        } catch (RelationshipExistsException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
     
