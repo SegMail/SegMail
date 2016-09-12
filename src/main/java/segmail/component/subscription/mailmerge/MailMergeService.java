@@ -12,18 +12,28 @@ import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
+import eds.entity.data.EnterpriseData_;
+import eds.entity.data.EnterpriseRelationship_;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
 import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.SubscriptionListField_;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List_;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
@@ -251,7 +261,7 @@ public class MailMergeService {
      * @param label
      * @return 
      */
-    public String getTestLink(String label) throws DataValidationException, IncompleteDataException{
+    public String getSystemTestLink(String label) throws DataValidationException, IncompleteDataException{
         MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
         if(request == null)
             throw new DataValidationException("Invalid label");
@@ -268,5 +278,35 @@ public class MailMergeService {
         String testLink = testServerAddress + name + "/" + label;
         
         return testLink;
+    }
+    
+    /**
+     * 
+     * @param label
+     * @param autoemailId
+     * @return a randomly selected subscriber from the SubscriptionList that is 
+     * assigned to the given autoemailId, or the label, if the SubscriptionList is 
+     * empty.
+     */
+    public SubscriptionListField getSubscriptionListField(String label, long autoemailId) throws IncompleteDataException {
+        
+        //Get the SubscriptionListField
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<Assign_AutoresponderEmail_List> fromAssign = query.from(Assign_AutoresponderEmail_List.class);
+        Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
+        
+        query.select(fromField);
+        query.where(
+                builder.and(
+                        builder.equal(fromAssign.get(Assign_AutoresponderEmail_List_.SOURCE), autoemailId),
+                        builder.equal(fromAssign.get(Assign_AutoresponderEmail_List_.TARGET), fromField.get(SubscriptionListField_.OWNER)),
+                        builder.equal(fromField.get(SubscriptionListField_.MAILMERGE_TAG), label)
+        ));
+        
+        List<SubscriptionListField> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return (results == null || results.isEmpty()) ? null : results.get(0);
     }
 }

@@ -23,7 +23,7 @@ public class SubscriptionListFieldListener {
     public void updateMailmergeTage(SubscriptionListField field){
         String fieldName = field.getFIELD_NAME();
         fieldName = fieldName.replace(" ", "-");
-        fieldName = "!" + fieldName;
+        fieldName = "{" + fieldName + "}";
         
         field.setMAILMERGE_TAG(fieldName);
     }

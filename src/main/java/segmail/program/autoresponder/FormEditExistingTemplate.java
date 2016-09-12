@@ -10,7 +10,9 @@ import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -25,10 +27,12 @@ import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
 import segmail.component.subscription.ListService;
+import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -45,6 +49,8 @@ public class FormEditExistingTemplate implements FormEditEntity {
     //@EJB private UserService userService;
     @EJB
     private ListService listService;
+    @EJB
+    private SubscriptionService subService;
 
     @Inject
     private ProgramAutoresponder program;
@@ -57,7 +63,8 @@ public class FormEditExistingTemplate implements FormEditEntity {
     @PostConstruct
     public void init() {
         if (!FacesContext.getCurrentInstance().isPostback()) {
-            loadListFields();
+            loadListAndListFields();
+            loadRandomSubscriber();
         }
     }
 
@@ -90,6 +97,30 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void setListFields(List<SubscriptionListField> listFields) {
         program.setListFields(listFields);
     }
+    
+    public SubscriptionList getAssignedList() {
+        return program.getAssignedList();
+    }
+
+    public void setAssignedList(SubscriptionList assignedList) {
+        program.setAssignedList(assignedList);
+    }
+    
+    public Map<String, String> getRandomSubscriber() {
+        return program.getRandomSubscriber();
+    }
+
+    public void setRandomSubscriber(Map<String, String> randomSubscriber) {
+        program.setRandomSubscriber(randomSubscriber);
+    }
+    
+    public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
+        return program.getMailmergeLinkTags();
+    }
+
+    public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
+        program.setMailmergeLinkTags(mailmergeLinkTags);
+    }
 
     @Override
     public void saveAndContinue() {
@@ -97,7 +128,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
             AutoresponderEmail newTemplate = autoresponderService.saveAutoEmail(program.getEditingTemplate());
 
             program.setEditingTemplate(newTemplate);
-            loadListFields();
+            loadListAndListFields();
             //Set success message
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template updated.", null);
 
@@ -133,7 +164,10 @@ public class FormEditExistingTemplate implements FormEditEntity {
         }
     }
     
-    public void loadListFields() {
+    public void loadListAndListFields() {
+        setAssignedList(null);
+        setListFields(null);
+        
         if(this.getEditingTemplate() == null) 
             return;
         
@@ -147,8 +181,30 @@ public class FormEditExistingTemplate implements FormEditEntity {
         
         SubscriptionList assignedList = assignedLists.get(0);
         
+        setAssignedList(assignedList);
+        
         List<SubscriptionListField> listFields = listService.getFieldsForSubscriptionList(assignedList.getOBJECTID());
         
         setListFields(listFields);
+    }
+    
+    public void loadRandomSubscriber() {
+        //Clear it first
+        setRandomSubscriber(new HashMap<String,String>());
+        
+        if(this.getEditingTemplate() == null) 
+            return;
+        
+        //This is a coding errror
+        if(this.getAssignedList() == null)
+            throw new RuntimeException("No assigned lists found.");
+        
+        SubscriptionList assignedList = getAssignedList();
+        Map<Long, Map<String, String>> subscribers = subService.getSubscriberValuesMap(assignedList.getOBJECTID(), 0, 1);
+        
+        for(Long id : subscribers.keySet()) {
+            setRandomSubscriber(subscribers.get(id));
+            getRandomSubscriber().put("OBJECTID", id.toString());
+        }
     }
 }

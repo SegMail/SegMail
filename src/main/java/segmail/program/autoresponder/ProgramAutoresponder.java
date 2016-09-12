@@ -12,6 +12,7 @@ import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import eds.entity.user.UserType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -24,6 +25,7 @@ import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -59,17 +61,12 @@ public class ProgramAutoresponder extends Program{
     private long selectedListId;
     
     private List<SubscriptionListField> listFields;
-
-    public void initializeAllUserTypes() {
-        try {
-            this.setAllUserTypes(userService.getAllUserTypes());
-
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to DB!", "Please contact administrators.");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
-        }
-    }
+    
+    private SubscriptionList assignedList;
+    
+    private Map<String,String> randomSubscriber;
+    
+    private MAILMERGE_REQUEST[] mailmergeLinkTags = MAILMERGE_REQUEST.values();
 
     public List<AutoresponderEmail> getConfirmationTemplates() {
         return confirmationTemplates;
@@ -77,14 +74,6 @@ public class ProgramAutoresponder extends Program{
 
     public void setConfirmationTemplates(List<AutoresponderEmail> confirmationTemplates) {
         this.confirmationTemplates = confirmationTemplates;
-    }
-
-    public List<UserType> getAllUserTypes() {
-        return allUserTypes;
-    }
-
-    public void setAllUserTypes(List<UserType> allUserTypes) {
-        this.allUserTypes = allUserTypes;
     }
 
     public List<AutoresponderEmail> getWelcomeTemplates() {
@@ -149,6 +138,30 @@ public class ProgramAutoresponder extends Program{
 
     public void setListFields(List<SubscriptionListField> listFields) {
         this.listFields = listFields;
+    }
+
+    public SubscriptionList getAssignedList() {
+        return assignedList;
+    }
+
+    public void setAssignedList(SubscriptionList assignedList) {
+        this.assignedList = assignedList;
+    }
+
+    public Map<String, String> getRandomSubscriber() {
+        return randomSubscriber;
+    }
+
+    public void setRandomSubscriber(Map<String, String> randomSubscriber) {
+        this.randomSubscriber = randomSubscriber;
+    }
+
+    public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
+        return mailmergeLinkTags;
+    }
+
+    public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
+        this.mailmergeLinkTags = mailmergeLinkTags;
     }
 
     @Override

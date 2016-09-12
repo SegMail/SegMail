@@ -22,19 +22,6 @@
                                    />
                         </div>
                         <div class="form-group">
-                            <label>Body</label>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                    Mailmerge <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li role="presentation" class="dropdown-header">Select mailmerge fields to insert</li>
-                                    <c:forEach items="#{FormEditExistingTemplate.listFields}" var="field">
-                                        <li><a href="#">#{field.FIELD_NAME}</a></li>
-                                    </c:forEach>
-                                    
-                                </ul>
-                            </div>
                             <textarea id="editor" class="editor"
                                       jsf:value="#{FormEditExistingTemplate.editingTemplate.BODY}">
                             </textarea>
@@ -83,7 +70,12 @@
                 <c:forEach items="#{FormEditExistingTemplate.listFields}" var="field">
                     '#{field.MAILMERGE_TAG}',
                 </c:forEach>
-            ]
+            ];
+            var mailmergeLinks = [
+                <c:forEach items="#{FormEditExistingTemplate.mailmergeLinkTags}" var="link">
+                    '#{link.label()}',
+                </c:forEach>
+            ];
         </script>
         
     </form>

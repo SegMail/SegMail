@@ -399,11 +399,21 @@ public class SubscriptionService {
         }
     }
 
+    /**
+     * **Serious bug: limit limits the num of fields, not subscriber!
+     * @param listId
+     * @param startIndex
+     * @param limit
+     * @return The subscribers in a map of a map with their object IDs as primary key in the first map and
+     * the list's field keys as keys in the 2nd map.
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Map<Long, Map<String, String>> getSubscriberValuesMap(long listId, int startIndex, int limit) {
         try {
             //Get all the SubscriptionFields first
             List<String> fields = listService.getSubscriptionListFieldKeys(listId);
+            //Multiply limit by number of fields, otherwise we would limit by num of fields, not num of subscribers
+            int limitSubscribers = limit * fields.size();
 
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
@@ -426,7 +436,7 @@ public class SubscriptionService {
 
             List<SubscriberFieldValue> results = objectService.getEm().createQuery(criteria)
                     .setFirstResult(startIndex)
-                    .setMaxResults(limit)
+                    .setMaxResults(limitSubscribers)
                     .getResultList();
 
             Map<Long, Map<String, String>> resultMap

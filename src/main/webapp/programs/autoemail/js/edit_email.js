@@ -2,7 +2,7 @@
 $.extend($.summernote.plugins, {
     MailMerge: function (context) {
         var ui = $.summernote.ui;
-        var paramSubcriber = context.options.MailMerge.subscriber;
+        var tags = context.options.MailMerge.tags;
 
         context.memo('button.MailMerge', function () {
             // create button
@@ -10,14 +10,14 @@ $.extend($.summernote.plugins, {
                 ui.button({
                     className: 'dropdown-toggle',
                     contents: ' Mailmerge tags <span class="caret"></span>',
-                    tooltip: 'Click here to select the mail merge tag to insert',
+                    //tooltip: 'Click here to select the mail merge tag to insert',
                     data: {
                         toggle: 'dropdown'
                     }
                 }),
                 ui.dropdown({
                     className: 'dropdown-template',
-                    items: paramSubcriber,
+                    items: tags,
                     click: function (event) {
                         var $button = $(event.target);
                         var value = $button.data('value');
@@ -27,7 +27,7 @@ $.extend($.summernote.plugins, {
                         context.invoke('editor.insertNode', node);
                     }
                 })
-            ])
+            ]);
 
             return button.render();   // return button as jquery object 
         });
@@ -47,14 +47,18 @@ var refresh_summernote = function () {
             ["mybutton", ["MailMerge"]]
         ],
         MailMerge: {
-            subscriber: mailmergeTagsSubscriber
+            tags: function() {
+                var allTagsAndLinks = [];
+                mailmergeTagsSubscriber.forEach(function(item){
+                    allTagsAndLinks.push(item);
+                });
+                mailmergeLinks.forEach(function(item){
+                    allTagsAndLinks.push(item);
+                });
+                
+                return allTagsAndLinks;
+            }()
         }
-
-        /*popover: {//wtf does this do? f knows
-         link: [
-         ['link', ['linkDialogShow', 'unlink']]
-         ]
-         }*/
     });
     observeDOM(document.getElementsByClassName('note-editable')[0], function () {
         onEditorChange();
@@ -62,8 +66,6 @@ var refresh_summernote = function () {
 }
 
 // Events
-
-
 var onEditorChange = function () {
     renderEverything();
 }
@@ -139,42 +141,120 @@ var adjustPreviewPanelHeight = function () {
             + parseInt($('#editor-panel').css('border-bottom-width').replace("px", ""));
     var previewHeight = editorBottom - $('#preview-panel').offset().top;
     $('#preview-panel').height(previewHeight);
-    //});
-
 };
 
-var renderMailmergeTag = function (label, timeout) {
+var mailmergeWSCache = {};
+
+var renderMailmergeLinkHelper = function(token,result) {
+    var jsonObj = JSON.parse(result);
+    var count = $('#preview a.' + token).size();
+    $('#preview a.' + token).each(function(){
+        var link = $(this);
+        link.attr('href', jsonObj['url']);
+        link.html(jsonObj["name"]);
+        if (!--count)
+            $('#processedContent').val($('#preview').html());
+    });
+}
+var renderMailmergeLink = function(label,timeout) {
     var token = md5(label);
+    
     setTimeout(function () {
-        var content = $('#preview').html();
-        var mmLink = '<a target="_blank" class="' + token + '"></a>';
-        $('#preview').html(content.replace(label, mmLink));
-        var count = $('#preview a.' + token).size();
-        $('#preview a.' + token).each(function () {
-            var link = $(this);
-            link.attr('data-link', token)
-            callWS('createMailmergeTestLink',
-                    {label: label},
+        if(mailmergeWSCache[token]){
+            renderMailmergeLinkHelper(token,mailmergeWSCache[token]);
+            return;
+        }
+        callWS('createSystemMailmergeTestLink',
+            {label: label},
             function (result) {
-                var jsonObj = JSON.parse(result);
-                link.attr('href', jsonObj['url']);
-                link.html(jsonObj["name"]);
-
-                link.removeClass(token);
-                if (!--count)
-                    $('#processedContent').val($('#preview').html());
+                renderMailmergeLinkHelper(token,result);
+                //Cache the results
+                mailmergeWSCache[token] = result;
             },
-                    function (code, error, message) {
-                        $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-                    });
-        })
-
+            function (code, error, message) {
+                $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
+            }
+        );
     }, timeout);
+};
+
+var renderMailmergeTagHelper = function(token,result) {
+    var count = $('#preview span.' + token).size();
+    $('#preview span.' + token).each(function(){
+        $(this).html(result);
+        if (!--count)
+            $('#processedContent').val($('#preview').html());
+    });
+}
+
+var renderMailmergeTag = function(label,timeout) {
+    var token = md5(label);
+    
+    setTimeout(function () {
+        if(mailmergeWSCache[token]){
+            renderMailmergeTagHelper(token,mailmergeWSCache[token]);
+            return;
+        }
+        callWS('createSubscriberMailmergeTestValue',
+            {label: label},
+            function (result) {
+                renderMailmergeTagHelper(token,result);
+                //Cache the results
+                mailmergeWSCache[token] = result;
+            },
+            function (code, error, message) {
+                $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
+            }
+        );
+    }, timeout);
+};
+
+var replaceMailmergeTags = function(tags,timeout) {
+    setTimeout(function() {
+        var content = $('#preview').html();
+        for(var i=0; i<tags.length; i++) {
+            var label = tags[i];
+            var token = md5(label);
+            var mmTag = '<span class="' + token + '"></span>';
+            content = content.replace(RegExp(label,'g'), mmTag);
+        }
+        $('#preview').html(content);
+    },timeout);
+}
+
+var replaceMailmergeLinks = function(links,timeout) {
+    setTimeout(function() {
+        var content = $('#preview').html();
+        for(var i=0; i<links.length; i++) {
+            var label = links[i];
+            var token = md5(label);
+            var mmLink = '<a target="_blank" class="' + token + '"></a>';
+            content = content.replace(RegExp(label,'g'), mmLink);
+        }
+        $('#preview').html(content);
+    },timeout);
+}
+
+var renderMailmergeTags = function(tags,timeout) {
+    //Call WS and render the actual values
+    for(var i=0; i<tags.length; i++) {
+        renderMailmergeTag(tags[i],timeout);
+    }
+}
+
+var renderMailmergeLinks = function(tags,timeout) {
+    //Call WS and render the actual values
+    for(var i=0; i<tags.length; i++) {
+        renderMailmergeLink(tags[i],timeout);
+    }
 }
 
 var renderEverything = function () {
     renderPreview(0);
-    renderMailmergeTag('!confirm', 50);
+    replaceMailmergeTags(mailmergeTagsSubscriber,50);
+    replaceMailmergeLinks(mailmergeLinks,50);
+    renderMailmergeTags(mailmergeTagsSubscriber,50);
+    renderMailmergeLinks(mailmergeLinks,50);
 }
 
 var modifyDomToGeneratePreview = function () {

@@ -5,10 +5,12 @@
  */
 package segmail.program.autoresponder.webservice;
 
+import eds.component.GenericObjectService;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.json.Json;
@@ -17,13 +19,12 @@ import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import javax.xml.ws.Response;
 import org.joda.time.DateTime;
-import seca2.component.landing.LandingServerGenerationStrategy;
-import seca2.component.landing.ServerNodeType;
-import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.program.autoresponder.ProgramAutoresponder;
@@ -38,6 +39,8 @@ public class WSAutoresponder {
 
     @EJB AutoresponderService autoemailService;
     @EJB MailMergeService mmService;
+    @EJB
+    private GenericObjectService objectService;
     
     @Inject ProgramAutoresponder program;
     /**
@@ -80,11 +83,11 @@ public class WSAutoresponder {
      * @throws DataValidationException if the input label is not recognized by MAILMERGE_REQUEST
      * @throws IncompleteDataException if the test server is not set up
      */
-    @WebMethod(operationName = "createMailmergeTestLink")
-    public String createMailmergeTestLink(@WebParam(name = "label")String label) 
+    @WebMethod(operationName = "createSystemMailmergeTestLink")
+    public String createSystemMailmergeTestLink(@WebParam(name = "label")String label) 
             throws DataValidationException, IncompleteDataException {
         
-        String url = mmService.getTestLink(label);
+        String url = mmService.getSystemTestLink(label);
         
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
         resultObjectBuilder.add("name", MAILMERGE_REQUEST.getByLabel(label).toCapFirstLetter());
@@ -93,5 +96,24 @@ public class WSAutoresponder {
         String result = resultObjectBuilder.build().toString();
         
         return result;
+    }
+    
+    /**
+     * 
+     * @param label
+     * @return the field value of a random subscriber from the assigned list
+     */
+    @WebMethod(operationName = "createSubscriberMailmergeTestValue")
+    public String createSubscriberMailmergeTestValue(@WebParam(name = "label")String label) {
+        List<SubscriptionListField> fields = program.getListFields();
+        
+        for(SubscriptionListField field : fields) {
+            if(field.getMAILMERGE_TAG().equals(label)) {
+                String value = program.getRandomSubscriber().get(field.generateKey());
+                return (value == null) ? label : value;
+            }
+        }
+        
+        return label;
     }
 }
