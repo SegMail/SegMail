@@ -65,10 +65,10 @@ var createMailmergeTestLink = function(label,htmlLink) {
     });
 };
 
-var callWS = function(method,data,successCallback,errorCallback,timeout) {
+var callWS = function(url,method,data,successCallback,errorCallback,timeout) {
     setTimeout(function(){
     $.soap({
-        url : web_service_endpoint,
+        url : url,
         method : method,
         appendMethodToURL: 0,
         namespaceQualifier: 'ns',

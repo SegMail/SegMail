@@ -8,12 +8,11 @@ package segmail.component.subscription.mailmerge;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.DataValidationException;
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
-import eds.component.webservice.TransactionProcessedException;
-import eds.component.webservice.UnwantedAccessException;
-import eds.entity.data.EnterpriseData_;
-import eds.entity.data.EnterpriseRelationship_;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -28,8 +27,9 @@ import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
+import segmail.component.subscription.ListService;
 import segmail.entity.subscription.SubscriberAccount;
-import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListField_;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
@@ -63,7 +63,9 @@ public class MailMergeService {
     private SubscriptionService subscriptionService;
     @EJB
     private LandingService landingService;
-
+    @EJB
+    private ListService listService;
+    
     /**
      *
      * @param content
@@ -151,14 +153,40 @@ public class MailMergeService {
     }
 
     /**
-     * Not implemented yet.
-     *
+     * In the future, we should build a MailmergeTag EnterpriseObject class that 
+     * can store the attribute and object key of its owner object.
      * @param text
      * @param listId
-     * @return
+     * @param mmKey assume this is a SubscriptionListField.MAILMERGE_TAG 
+     * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String parseListAttributes(String text, long listId) {
+    public String parseMailmergeTags(/*MailmergeTag mailmergeTag, */ 
+            String text, 
+            long listId, 
+            long subscriberId) {
+        //Get all fields
+        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
+        //Get all values
+        Long[] lists = {listId};
+        List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscribers(Arrays.asList(lists));
+        
+        for(SubscriptionListField field : fields) {
+            String mailmergeTag = field.getMAILMERGE_TAG();
+            String key = (String) field.generateKey();
+            /**
+             * If Subscriber doesn't have certain values, it will be replaced as an empty
+             * String instead of the mailmergeTag.
+             */
+            String valueString = ""; 
+            for(SubscriberFieldValue value : values) {
+                if(value.getFIELD_KEY().equals(key)) {
+                    valueString = value.getVALUE();
+                    break;
+                }
+            }
+            text = text.replace(mailmergeTag, valueString);
+        }
+        
         return text;
     }
 
@@ -278,35 +306,5 @@ public class MailMergeService {
         String testLink = testServerAddress + name + "/" + label;
         
         return testLink;
-    }
-    
-    /**
-     * 
-     * @param label
-     * @param autoemailId
-     * @return a randomly selected subscriber from the SubscriptionList that is 
-     * assigned to the given autoemailId, or the label, if the SubscriptionList is 
-     * empty.
-     */
-    public SubscriptionListField getSubscriptionListField(String label, long autoemailId) throws IncompleteDataException {
-        
-        //Get the SubscriptionListField
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
-        Root<Assign_AutoresponderEmail_List> fromAssign = query.from(Assign_AutoresponderEmail_List.class);
-        Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
-        
-        query.select(fromField);
-        query.where(
-                builder.and(
-                        builder.equal(fromAssign.get(Assign_AutoresponderEmail_List_.SOURCE), autoemailId),
-                        builder.equal(fromAssign.get(Assign_AutoresponderEmail_List_.TARGET), fromField.get(SubscriptionListField_.OWNER)),
-                        builder.equal(fromField.get(SubscriptionListField_.MAILMERGE_TAG), label)
-        ));
-        
-        List<SubscriptionListField> results = objectService.getEm().createQuery(query)
-                .getResultList();
-        
-        return (results == null || results.isEmpty()) ? null : results.get(0);
     }
 }

@@ -16,7 +16,8 @@
                     <div class="block-content">
                         <div class="form-group" style=" ">
                             <label>Subject</label>
-                            <input type="text" class="form-control"
+                            <input id="subject"
+                                   type="text" class="form-control"
                                    jsf:value="#{FormEditExistingTemplate.editingTemplate.SUBJECT}"
                                    name="email" 
                                    />
@@ -64,7 +65,7 @@
             </div>
         </div>
         <script type="text/javascript" >
-            var web_service_endpoint = '#{request.contextPath}/WSAutoresponder';
+            var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
             
             var mailmergeTagsSubscriber = [
                 <c:forEach items="#{FormEditExistingTemplate.listFields}" var="field">

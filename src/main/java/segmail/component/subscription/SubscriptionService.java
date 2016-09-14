@@ -525,6 +525,7 @@ public class SubscriptionService {
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedConfirmEmail.getBODY();
         newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
+        newEmailBody = mailMergeService.parseMailmergeTags(newEmailBody, sub.getTARGET().getOBJECTID(), sub.getSOURCE().getOBJECTID());
         //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 

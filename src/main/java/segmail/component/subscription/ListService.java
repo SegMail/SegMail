@@ -38,6 +38,9 @@ import segmail.entity.subscription.ListType_;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
+import segmail.entity.subscription.SubscriptionListField_;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List_;
 
 /**
  *
@@ -312,6 +315,33 @@ public class ListService {
         List<SubscriptionListField> allFieldList = objectService.getEnterpriseData(listId, SubscriptionListField.class);
         Collections.sort(allFieldList, new SubscriptionListFieldComparator());
         return allFieldList;
+        
+    }
+    
+    /**
+     * Temporary until we build a full blown solution in MailmergeTag.
+     * 
+     * @param listId
+     * @param mailmergeTag
+     * @return 
+     */
+    public List<SubscriptionListField> getFieldsForSubscriptionList(long listId, String mailmergeTag) {
+        
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
+        
+        query.select(fromField);
+        query.where(
+                builder.and(
+                        builder.equal(fromField.get(SubscriptionListField_.OWNER), listId),
+                        builder.equal(fromField.get(SubscriptionListField_.MAILMERGE_TAG), mailmergeTag)
+        ));
+        
+        List<SubscriptionListField> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
         
     }
 

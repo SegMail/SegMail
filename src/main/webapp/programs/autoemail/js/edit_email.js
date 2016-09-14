@@ -39,12 +39,10 @@ var refresh_summernote = function () {
     $('textarea.editor').summernote({
         height: 260, //try the CSS flex approach next time
         toolbar: [
-            ["style", ["style"]],
-             ["font", ["bold", "italic", "underline"]],
+             ["font", ["bold", "italic", "underline","style"]],
              ["test", ["picture", "link"]],
              ["para", ["ol", "ul", "paragraph", "height"]],
-             ["misc", ["codeview", "help"]],
-            ["mybutton", ["MailMerge"]]
+             ["misc", ["codeview", "help", "MailMerge"]]
         ],
         MailMerge: {
             tags: function() {
@@ -73,19 +71,27 @@ var onEditorChange = function () {
 var onSave = function () {
     //Block button
     $('#saveButton').prop('disabled', true);
-    renderEverything();
-    //saveAutoemail();
-    callWS(
-            'saveAutoemail', {
-                'body': $('#editor').text(),
-                'bodyProcessed': $('#processedContent').val()
-            }, function (result) {
-        $('#saveResults').html('Saved at ' + result); //Don't know how it will look like yet
-        $('#saveButton').prop('disabled', false);
-    }, function (error) {
-        $('#saveResults').html('Error: ' + error); //Don't know how it will look like yet
-        $('#saveButton').prop('disabled', false);
-    });
+    renderEverything(); //This will get called later than the below code 
+    setTimeout(function(){
+        var subject = $('#subject').val();
+        var body = $('#editor').text();
+        var bodyProcessed = $('#processedContent').val();
+        callWS(
+                WSAutoresponderEndpoint,
+                'saveAutoemail', 
+                {
+                    'subject' : subject,
+                    'body': body,
+                    'bodyProcessed': bodyProcessed
+                }, function (result) {
+            $('#saveResults').html('Saved at ' + result); //Don't know how it will look like yet
+            $('#saveButton').prop('disabled', false);
+        }, function (error) {
+            $('#saveResults').html('Error: ' + error); //Don't know how it will look like yet
+            $('#saveButton').prop('disabled', false);
+        });
+    },100);
+    
 };
 
 // Helper functions
@@ -143,118 +149,15 @@ var adjustPreviewPanelHeight = function () {
     $('#preview-panel').height(previewHeight);
 };
 
-var mailmergeWSCache = {};
-
-var renderMailmergeLinkHelper = function(token,result) {
-    var jsonObj = JSON.parse(result);
-    var count = $('#preview a.' + token).size();
-    $('#preview a.' + token).each(function(){
-        var link = $(this);
-        link.attr('href', jsonObj['url']);
-        link.html(jsonObj["name"]);
-        if (!--count)
-            $('#processedContent').val($('#preview').html());
-    });
-}
-var renderMailmergeLink = function(label,timeout) {
-    var token = md5(label);
-    
-    setTimeout(function () {
-        if(mailmergeWSCache[token]){
-            renderMailmergeLinkHelper(token,mailmergeWSCache[token]);
-            return;
-        }
-        callWS('createSystemMailmergeTestLink',
-            {label: label},
-            function (result) {
-                renderMailmergeLinkHelper(token,result);
-                //Cache the results
-                mailmergeWSCache[token] = result;
-            },
-            function (code, error, message) {
-                $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-            }
-        );
-    }, timeout);
-};
-
-var renderMailmergeTagHelper = function(token,result) {
-    var count = $('#preview span.' + token).size();
-    $('#preview span.' + token).each(function(){
-        $(this).html(result);
-        if (!--count)
-            $('#processedContent').val($('#preview').html());
-    });
-}
-
-var renderMailmergeTag = function(label,timeout) {
-    var token = md5(label);
-    
-    setTimeout(function () {
-        if(mailmergeWSCache[token]){
-            renderMailmergeTagHelper(token,mailmergeWSCache[token]);
-            return;
-        }
-        callWS('createSubscriberMailmergeTestValue',
-            {label: label},
-            function (result) {
-                renderMailmergeTagHelper(token,result);
-                //Cache the results
-                mailmergeWSCache[token] = result;
-            },
-            function (code, error, message) {
-                $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-            }
-        );
-    }, timeout);
-};
-
-var replaceMailmergeTags = function(tags,timeout) {
-    setTimeout(function() {
-        var content = $('#preview').html();
-        for(var i=0; i<tags.length; i++) {
-            var label = tags[i];
-            var token = md5(label);
-            var mmTag = '<span class="' + token + '"></span>';
-            content = content.replace(RegExp(label,'g'), mmTag);
-        }
-        $('#preview').html(content);
-    },timeout);
-}
-
-var replaceMailmergeLinks = function(links,timeout) {
-    setTimeout(function() {
-        var content = $('#preview').html();
-        for(var i=0; i<links.length; i++) {
-            var label = links[i];
-            var token = md5(label);
-            var mmLink = '<a target="_blank" class="' + token + '"></a>';
-            content = content.replace(RegExp(label,'g'), mmLink);
-        }
-        $('#preview').html(content);
-    },timeout);
-}
-
-var renderMailmergeTags = function(tags,timeout) {
-    //Call WS and render the actual values
-    for(var i=0; i<tags.length; i++) {
-        renderMailmergeTag(tags[i],timeout);
-    }
-}
-
-var renderMailmergeLinks = function(tags,timeout) {
-    //Call WS and render the actual values
-    for(var i=0; i<tags.length; i++) {
-        renderMailmergeLink(tags[i],timeout);
-    }
-}
-
 var renderEverything = function () {
     renderPreview(0);
-    replaceMailmergeTags(mailmergeTagsSubscriber,50);
-    replaceMailmergeLinks(mailmergeLinks,50);
-    renderMailmergeTags(mailmergeTagsSubscriber,50);
-    renderMailmergeLinks(mailmergeLinks,50);
+    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber,
+    function(){//successCallback
+        
+    },
+    function(){//errorCallback
+        $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
+    });
 }
 
 var modifyDomToGeneratePreview = function () {

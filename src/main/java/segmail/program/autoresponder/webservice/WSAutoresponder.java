@@ -47,14 +47,17 @@ public class WSAutoresponder {
      * Saves the body and bodyProcessed into AutoresponderEmail BODY and BODY_PROCESSED
      * fields for the existing editing AutoresponderEmail that is in context.
      * 
+     * @param subject
      * @param body
      * @param bodyProcessed
+     * @return 
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.IncompleteDataException
      * @throws eds.component.data.EntityExistsException
      */
     @WebMethod(operationName = "saveAutoemail")
     public String saveAutoemail(
+            @WebParam(name = "subject") String subject,
             @WebParam(name = "body") String body,
             @WebParam(name = "bodyProcessed") String bodyProcessed) 
             throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
@@ -63,6 +66,7 @@ public class WSAutoresponder {
         if(autoemail == null)
             throw new EntityNotFoundException("No AutoresponderEmail found.");
         
+        autoemail.setSUBJECT(subject);
         autoemail.setBODY(body);
         autoemail.setBODY_PROCESSED(bodyProcessed);
         
