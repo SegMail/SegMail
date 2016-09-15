@@ -325,16 +325,17 @@ public class MassSubscriptionService {
         return results;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberAccount> createNewSubscriberAccounts(List<SubscriberAccount> newSubAccList) {
         for (int i = 0; i < newSubAccList.size(); i++) {
             SubscriberAccount acc = newSubAccList.get(i);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= newSubAccList.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return newSubAccList;
     }
 
@@ -361,37 +362,43 @@ public class MassSubscriptionService {
             results += objService.getEm().createQuery(query)
                     .executeUpdate();
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= fieldValueList.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return results;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberFieldValue> createFieldValueList(List<SubscriberFieldValue> fieldValueList) {
         for (int i = 0; i < fieldValueList.size(); i++) {
             SubscriberFieldValue acc = fieldValueList.get(i);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= fieldValueList.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return fieldValueList;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberOwnership> createSubscriberOwnership(List<SubscriberOwnership> createNewSubOwnership) {
         for (int i = 0; i < createNewSubOwnership.size(); i++) {
             SubscriberOwnership acc = createNewSubOwnership.get(i);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= createNewSubOwnership.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return createNewSubOwnership;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Subscription> createSubscription(List<Subscription> createNewSubscription) {
         for (int i = 0; i < createNewSubscription.size(); i++) {
             Subscription acc = createNewSubscription.get(i);
@@ -402,10 +409,11 @@ public class MassSubscriptionService {
             acc.setUNSUBSCRIBE_KEY(unsubKey);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= createNewSubscription.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return createNewSubscription;
     }
 
@@ -424,20 +432,49 @@ public class MassSubscriptionService {
      * See SubscriptionService.subscribe() and 
      * MassSubscriptionService.massSubscribe()
      * 
+     * Potential performance issue but we'll deal with it when we get there
+     * 
      * @param newSubscriptions
-     * @throws IncompleteDataException
-     * @throws BatchProcessingException
-     * @throws DataValidationException
-     * @throws InvalidEmailException 
      */
-    @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void sendConfirmationEmails(List<Subscription> newSubscriptions)
-            throws IncompleteDataException,
-            DataValidationException,
-            InvalidEmailException {
+    //@Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void sendConfirmationEmails(List<Subscription> newSubscriptions) throws IncompleteDataException, DataValidationException, InvalidEmailException
+             {
+        for(Subscription newSubscription : newSubscriptions) {
+            
+            SubscriptionList list = newSubscription.getTARGET();
+            String sendAs = list.getSEND_AS_EMAIL();
+            
+            if (sendAs == null || sendAs.isEmpty()) {
+                throw new IncompleteDataException("Please set \"Send As\" address before sending confirmation emails.");
+            }
+            
+            //Retrieve the autoemail from list using AutoresponderService
+            List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
+            AutoresponderEmail assignedConfirmEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
+                    ? null : assignedAutoEmails.get(0);
+
+            if (assignedConfirmEmail == null) {
+                throw new IncompleteDataException("Please assign a Confirmation email before adding subscribers.");
+            }
+            
+            //Parse all mailmerge functions using MailMergeService
+            String newEmailBody = assignedConfirmEmail.getBODY();
+            newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, newSubscription.getCONFIRMATION_KEY());
+            newEmailBody = mailMergeService.parseMailmergeTags(newEmailBody, newSubscription.getTARGET().getOBJECTID(), newSubscription.getSOURCE().getOBJECTID());
+
+             //Send the email using MailService
+            Email confirmEmail = new Email();
+            confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
+            confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
+            confirmEmail.setBODY(newEmailBody);
+            confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
+            confirmEmail.addRecipient(newSubscription.getSOURCE().getEMAIL());
+
+            mailService.queueEmail(confirmEmail, DateTime.now());
+        }
         //Group the SubscriberAccounts together by SubscriptionList
-        Map<SubscriptionList, List<SubscriberAccount>> groupedByLists = new HashMap<>();
+        /*Map<SubscriptionList, List<SubscriberAccount>> groupedByLists = new HashMap<>();
         for (Subscription subscription : newSubscriptions) {
             List<SubscriberAccount> subscribers = groupedByLists.get(subscription.getTARGET());
             if (subscribers == null) {
@@ -460,7 +497,6 @@ public class MassSubscriptionService {
             Email confirmEmail = new Email();
             confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
             confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
-            confirmEmail.setBODY(assignedConfirmEmail.getBODY());
             confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
 
             for (SubscriberAccount subscriber : groupedByLists.get(list)) {
@@ -487,6 +523,6 @@ public class MassSubscriptionService {
                 mailService.queueEmail(confirmEmail, DateTime.now());
                 
             }
-        }
+        }*/
     }
 }

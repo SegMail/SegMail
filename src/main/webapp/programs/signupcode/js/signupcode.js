@@ -33,7 +33,7 @@ var buildSignupCode = function() {
         //console.log('field name: '+fieldName+', fieldKey: '+fieldKey+', fieldDesc: '+fieldDesc+', fieldMandatory: '+fieldMandatory);
         
         var fieldCode = '<label>'+fieldName+': </label>'
-                        + '<input name="'+fieldKey+'" />';
+                        + '<input '+(fieldMandatory ? 'required ':'')+'name="'+fieldKey+'" />';
         code += '\n'+fieldCode + '<br />';
                         
     }

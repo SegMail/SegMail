@@ -7,7 +7,6 @@ package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
-import eds.component.batch.BatchProcessingException;
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientResourceInterceptor;
 import eds.component.data.DBConnectionException;
@@ -188,177 +187,7 @@ public class SubscriptionService {
         
         return this.getSubscriptions(email, listId).get(0);
     }
-
-    /**
-     * There is no check for duplicates or already subscribed, like single
-     * subscribe() method. The latest duplicates will overwrite all previous
-     * version. If the existing subscriber has a particular field value, and a
-     * later version of it has another new different field value, both of them
-     * will be retained.
-     *
-     * @param clientId
-     * @param listId
-     * @param subscribers
-     * @param doubleOptin
-     * @return a Map of error messages and their records. A list of possible
-     * error messages:
-     * <ul>
-     * <li>Mandatory list field [SubscriptionListField.FIELD_NAME] is
-     * missing.</li>
-     * <li>Invalid email</li>
-     *
-     * @throws EntityNotFoundException
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Map<String, List<Map>> massSubscribe(
-            long clientId,
-            long listId,
-            List<Map<String, Object>> subscribers,
-            boolean doubleOptin) throws EntityNotFoundException {
-
-        //Set up the return results Map
-        Map<String, List<Map>> results = new HashMap<>();
-
-        SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class); //DB hit, can be cached
-        if (list == null) {
-            throw new EntityNotFoundException(SubscriptionList.class, listId);
-        }
-
-        Client client = objectService.getEnterpriseObjectById(clientId, Client.class); //DB hit, can be cached
-        if (client == null) {
-            throw new EntityNotFoundException(Client.class, clientId);
-        }
-
-        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId); //DB hit, can be cached
-
-        //This is the list of emails to be added and checked for existing subscribers
-        List<String> emails = new ArrayList<>();
-        //This is the list of subscriber field values that will be added because they passed
-        //field validatons
-        List<Map<String, Object>> survivors = new ArrayList<>();
-
-        //Check for mandatory fields and retrieve all emails in a list so that we can check for existing later
-        for (Map<String, Object> subscriber : subscribers) {
-            String email = "";
-            String errorKey = "";
-            for (SubscriptionListField field : fields) {
-                if (field.isMANDATORY()
-                        && (subscriber.get((String) field.generateKey()) == null || ((String) subscriber.get((String) field.generateKey())).isEmpty())) {
-                    //throw new IncompleteDataException("Mandatory list field " + field.getFIELD_NAME() + " is missing.");
-                    errorKey = "Mandatory list field " + field.getFIELD_NAME() + " is missing.";
-                    break;
-                }
-                if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
-                    email = (String) subscriber.get((String) field.generateKey());// If there exist multiple fieldvalues of email, then the latest one will be used
-                    //Validate email format
-                    if (!EmailValidator.getInstance().isValid(email)) {
-                        errorKey = "Invalid email";
-                        break;
-                    }
-                }
-            }
-            if (!errorKey.isEmpty()) {
-                if (results.get(errorKey) == null) {
-                    results.put(errorKey, new ArrayList());
-                }
-                results.get(errorKey).add(subscriber);
-                continue;
-            }
-            //If it passes field validations, add it to emails List
-            emails.add(email);
-            survivors.add(subscriber);//This will overwrite duplicates!
-            //If there are duplicates, the latest copy in the file will be used.
-        }
-        if (survivors.isEmpty()) {
-            return results;
-        }
-
-        /**
-         * There will be 3 groups: 1) Subscribers who already exist but have no
-         * update 2) Subscribers who already exist but requires update
-         * (identified by email) 3) Fresh subscribers
-         *
-         * First we have to retrieve all SubscriberAccount objects
-         */
-        List<SubscriberAccount> existingSubscribers = this.getSubscribersForClientByEmails(emails, clientId); //DB hit, can be cached
-        Collections.sort(existingSubscribers);//Meaningless...not entirely...
-        List<Long> existingSubscriberIds = new ArrayList<>();
-        for (SubscriberAccount account : existingSubscribers) {
-            existingSubscriberIds.add(account.getOBJECTID());
-        }
-        //And also all their SubscriberFieldValues
-        List<SubscriberFieldValue> existingFieldValues = this.getSubscriberValuesBySubscribers(existingSubscriberIds); //DB hit, can be cached
-        Collections.sort(existingFieldValues); //Default sorting method for EnterpriseData
-        /**
-         * For each survivor: 1) Check if SubscriberAccount has already been
-         * created for. - If yes, no need to update it. Remove it from the
-         * survivor list. - If no, create it and add it to createNewSubAccList
-         *
-         * 2) Check if it exists in existingFieldValues by comparing it using
-         * email and the field key - If yes, compare their values. - If same,
-         * ignore it. - If different, add it to updateFieldValueList - If no,
-         * add it to createFieldValueList
-         */
-        List<SubscriberAccount> createNewSubAccList = new ArrayList<>();
-        List<SubscriberFieldValue> updateFieldValueList = new ArrayList<>();
-        List<SubscriberFieldValue> createFieldValueList = new ArrayList<>();
-
-        for (int i = 0; i < survivors.size(); i++) {
-            Map<String, Object> survivor = survivors.get(i);
-            String email = emails.get(i); //emails and survivors have the same order
-            List<SubscriberFieldValue> fieldValues = new ArrayList<>();
-            SubscriberAccount owner = null; //Hypothetical owner
-
-            //Find the existing SubscriberAccount and its corresponding SubscriberFieldValues
-            for (SubscriberAccount existingSubscriber : existingSubscribers) {
-                //If found, get SubscriberFieldValues from existingFieldValues
-                if (existingSubscriber.getEMAIL() == null ? email == null : existingSubscriber.getEMAIL().equals(email)) {
-                    owner = existingSubscriber;
-                    //find all its fieldvalues and add them in fieldValues
-                    /*for(SubscriberFieldValue existingFieldValue : existingFieldValues) {
-                     //Having a null owner is quite impossible so we would see nullpointerexception if it happens and fix this issue
-                     if(existingSubscriber.equals(existingFieldValue.getOWNER())) {
-                     fieldValues.add(existingFieldValue);
-                     }
-                     }*/
-                }
-            }
-            //If fieldValues exists, it means that the subscriber already exist and might require updates.
-            //If it exists in survivor Map, update the value
-            //If it doesn't exist in survivor Map, create it
-            for (String key : survivor.keySet()) {
-                boolean createNew = true;
-                for (SubscriberFieldValue fieldValue : existingFieldValues) {
-                    //If exist, add it into updateFieldValueList
-                    //Note that if duplicates exist here, the latest value will be taken
-                    if (key == null ? fieldValue.getFIELD_KEY() == null : key.equals(fieldValue.getFIELD_KEY())) {
-                        fieldValue.setVALUE((String) survivor.get(key));
-                        updateFieldValueList.add(fieldValue);
-                        createNew = false;
-                        break; //break from this loop
-                    }
-                }
-                //If it was not found, construct it and add it in to createFieldValueList
-                if (createNew) {
-                    SubscriberFieldValue newValue = new SubscriberFieldValue();
-                    newValue.setFIELD_KEY(key);
-                    newValue.setVALUE((String) survivor.get(key));
-                    if (owner == null) {
-                        owner = new SubscriberAccount();
-                        owner.setEMAIL(email);
-                        createNewSubAccList.add(owner);
-                    }
-                    newValue.setOWNER(owner);
-
-                    createFieldValueList.add(newValue);
-                }
-            }
-        }
-
-        //Time to do db updates and inserts
-        return results;
-    }
-
+    
     /**
      * Check if a subscriber subscriberEmail is already subscribed to a list.
      *
@@ -839,13 +668,15 @@ public class SubscriptionService {
         return results;
     }
 
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<SubscriberFieldValue> getSubscriberValuesBySubscribers(List<Long> subscribers) {
         List<SubscriberFieldValue> results = objectService.getEnterpriseDataByIds(subscribers, SubscriberFieldValue.class);
         return results;
     }
 
     @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Future<Integer> updateSubscriberCount(long listId) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);

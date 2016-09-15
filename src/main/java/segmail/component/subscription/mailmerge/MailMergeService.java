@@ -111,7 +111,8 @@ public class MailMergeService {
         MailMergeRequest trans = transService.getTransactionByKey(confirmationKey, MailMergeRequest.class);
         if (trans == null) {
             trans = new MailMergeRequest();
-            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
+            //trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
+            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.program());
             trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
             trans.setMAILMERGE_LABEL(MAILMERGE_REQUEST.CONFIRM.name());
             trans.setTRANSACTION_KEY(confirmationKey); //More like an override
@@ -146,8 +147,9 @@ public class MailMergeService {
         }
 
         String confirmLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
-
-        String newEmailBody = text.replace(MAILMERGE_REQUEST.CONFIRM.label(), confirmLink);
+        String confirmLinkHtml = "<a target='_blank' href='"+confirmLink+"'>"+MAILMERGE_REQUEST.CONFIRM.defaultHtmlText()+"</a>";
+        
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.CONFIRM.label(), confirmLinkHtml);
 
         return newEmailBody;
     }
@@ -160,6 +162,7 @@ public class MailMergeService {
      * @param mmKey assume this is a SubscriptionListField.MAILMERGE_TAG 
      * @return 
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String parseMailmergeTags(/*MailmergeTag mailmergeTag, */ 
             String text, 
             long listId, 
@@ -167,8 +170,8 @@ public class MailMergeService {
         //Get all fields
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
         //Get all values
-        Long[] lists = {listId};
-        List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscribers(Arrays.asList(lists));
+        Long[] subscribers = {subscriberId};
+        List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscribers(Arrays.asList(subscribers));
         
         for(SubscriptionListField field : fields) {
             String mailmergeTag = field.getMAILMERGE_TAG();

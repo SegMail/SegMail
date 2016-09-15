@@ -68,7 +68,7 @@ public class WSCampaignActivityMailMerge {
         String testLink = mmService.getSystemTestLink(label);
         
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
-        resultObjectBuilder.add("name", MAILMERGE_REQUEST.getByLabel(label).toCapFirstLetter());
+        resultObjectBuilder.add("name", MAILMERGE_REQUEST.getByLabel(label).defaultHtmlText());
         resultObjectBuilder.add("testLink", testLink);
         
         String result = resultObjectBuilder.build().toString();

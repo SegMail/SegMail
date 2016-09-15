@@ -51,7 +51,7 @@ public class FormListSettingsDelete {
             listService.deleteList(program.getListEditing().getOBJECTID());
             
             //Display success message
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, 
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, 
                     "List "+program.getListEditing().getLIST_NAME()+" has been deleted!", null);
             //Remove the list from editing panel once it has been deleted
             program.setListEditing(null);
