@@ -51,7 +51,7 @@ public class ProgramService implements Serializable {
      * @return
      * @throws DBConnectionException 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Program getSingleProgramByName(String programName) {
         try {
             
@@ -74,7 +74,7 @@ public class ProgramService implements Serializable {
      * @return
      * @throws DBConnectionException 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Program> getAllPrograms() {
         try {
             CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -182,7 +182,7 @@ public class ProgramService implements Serializable {
         }
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Program getProgramById(long programId) {
         try{
             return em.find(Program.class, programId);
@@ -196,7 +196,7 @@ public class ProgramService implements Serializable {
     }
     
     //Translation services
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String getViewRootFromProgramName(String programName) {
         try{
             CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -224,7 +224,7 @@ public class ProgramService implements Serializable {
         }
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public boolean checkProgramAuthForUserType(long usertypeid, String programName) {
         try {
         Program program = this.getSingleProgramByName(programName);
@@ -243,7 +243,7 @@ public class ProgramService implements Serializable {
     }
     
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public boolean checkProgramAuthForUserType(long usertypeid, long programid) {
         try{
             
@@ -262,7 +262,7 @@ public class ProgramService implements Serializable {
         }
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<ProgramAssignment> getProgramAssignmentsForUserType(long usertypeid) {
         try{
             List<ProgramAssignment> result = this.genericEntepriseObjectService.getRelationshipsForTargetObject(usertypeid, ProgramAssignment.class);
@@ -287,7 +287,7 @@ public class ProgramService implements Serializable {
      * @param userTypeId
      * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Program getProgramForUserType(String programName,long userTypeId){
         try {
             List<ProgramAssignment> results = this.genericEntepriseObjectService.getRelationshipsForTargetObject(userTypeId, ProgramAssignment.class);

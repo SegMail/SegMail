@@ -170,7 +170,7 @@ public class UserService extends DBService {
     }
     
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<UserType> getAllUserTypes() throws DBConnectionException {
 
         try {
@@ -197,7 +197,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public UserType getUserTypeById(long userTypeId) throws DBConnectionException {
 
         try {
@@ -225,7 +225,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<UserType> getUserTypeByName(String userTypeName) {
 
         try {
@@ -260,7 +260,7 @@ public class UserService extends DBService {
      * @return
      * @throws DBConnectionException
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public UserType getSingleUserTypeByName(String userTypeName) {
 
         try {
@@ -281,7 +281,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public User getUserById(long userId) throws DBConnectionException {
         try {
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -308,7 +308,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public User getUserByUsername(String username) throws DBConnectionException {
         try {
             UserAccount userAccount = this.getUserAccountByUsername(username);
@@ -499,7 +499,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public UserAccount getUserAccountByUsername(String username)
             throws DBConnectionException {
         try {
@@ -533,7 +533,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public UserAccount getUserAccountById(long userid)
             throws DBConnectionException {
         try {
@@ -567,7 +567,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public boolean checkUsernameExist(String username) throws DBConnectionException {
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -592,7 +592,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public long getUserCount() throws DBConnectionException {
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -616,7 +616,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String getUserProfilePicLocation(long userid) throws DBConnectionException {
 
         try {
@@ -717,7 +717,7 @@ public class UserService extends DBService {
         return hashedPassword;
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<UserAccount> getWebServiceUserAccounts() {
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();

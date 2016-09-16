@@ -73,7 +73,7 @@ public class MailMergeService {
      * @param subscribers
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String parseMultipleContent(String content, long listId, List<SubscriberAccount> subscribers) {
 
         return "";
@@ -162,7 +162,6 @@ public class MailMergeService {
      * @param mmKey assume this is a SubscriptionListField.MAILMERGE_TAG 
      * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String parseMailmergeTags(/*MailmergeTag mailmergeTag, */ 
             String text, 
             long listId, 

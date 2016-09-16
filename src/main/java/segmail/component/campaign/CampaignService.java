@@ -66,13 +66,13 @@ public class CampaignService {
     @EJB LandingService landingService;
     @EJB ListService listService;
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Campaign getCampaign(long campaignId) {
         Campaign campaign = objService.getEnterpriseObjectById(campaignId, Campaign.class);
         return campaign;
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Campaign> getAllCampaignForClient(long clientId) {
         List<Campaign> results = objService.getAllSourceObjectsFromTarget(clientId, Assign_Campaign_Client.class, Campaign.class);
         return results;

@@ -302,6 +302,10 @@ public class MassSubscriptionService {
             createNewSubOwnership = createSubscriberOwnership(createNewSubOwnership);
             //Create Subscription!!!
             createNewSubscription = createSubscription(createNewSubscription);
+            
+            //Necessary for #74
+            //As inspired by http://stackoverflow.com/a/11333262/5765606
+            //objService.getEm().clear();
             //Update the number of subscribers (async call)
             subService.updateSubscriberCount(list.getOBJECTID());
             

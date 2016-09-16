@@ -391,7 +391,7 @@ public class AutoresponderService {
      * @param type
      * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<AutoresponderEmail> getAssignedAutoEmailsForList(long listId, AUTO_EMAIL_TYPE type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<AutoresponderEmail> query = builder.createQuery(AutoresponderEmail.class);
@@ -417,7 +417,7 @@ public class AutoresponderService {
      * @param type
      * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Assign_AutoresponderEmail_List> getAssignedAutoEmailsAssignmentsForList(long listId, AUTO_EMAIL_TYPE type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<Assign_AutoresponderEmail_List> query = builder.createQuery(Assign_AutoresponderEmail_List.class);

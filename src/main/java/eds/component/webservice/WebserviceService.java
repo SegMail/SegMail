@@ -86,7 +86,7 @@ public class WebserviceService {
 
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String getNextWSEndpointURL(String endpointName) 
             throws IncompleteDataException{
         

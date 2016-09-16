@@ -226,7 +226,7 @@ public class MailService {
      * @param listId
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String parseEmailContent(String emailContent, long listId) {
 
         //1. Parse global codes
@@ -255,7 +255,7 @@ public class MailService {
         updateService.getEm().persist(email);
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Email> getNextNEmailsInQueue(DateTime processTime, int nextNEmails) {
         Timestamp nowTS = new Timestamp(processTime.getMillis());
         // Get all queued email sorted by their DATE_CHANGED

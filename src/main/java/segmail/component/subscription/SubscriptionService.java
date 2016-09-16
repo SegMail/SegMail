@@ -49,7 +49,6 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
@@ -197,7 +196,7 @@ public class SubscriptionService {
      * @param listId
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public boolean checkSubscribed(String subscriberEmail, long listId) {
         try {
             //Retrieving Subscriptions which has a SubscriberAccount subscriberEmail and a SubscriptionList ID
@@ -236,7 +235,7 @@ public class SubscriptionService {
      * @return The subscribers in a map of a map with their object IDs as primary key in the first map and
      * the list's field keys as keys in the 2nd map.
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Map<Long, Map<String, String>> getSubscriberValuesMap(long listId, int startIndex, int limit) {
         try {
             //Get all the SubscriptionFields first
@@ -668,7 +667,7 @@ public class SubscriptionService {
         return results;
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    //
     public List<SubscriberFieldValue> getSubscriberValuesBySubscribers(List<Long> subscribers) {
         List<SubscriberFieldValue> results = objectService.getEnterpriseDataByIds(subscribers, SubscriberFieldValue.class);
         return results;

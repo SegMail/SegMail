@@ -56,7 +56,7 @@ public class LandingService {
     @EJB
     private UpdateObjectService updateService;
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<ServerInstance> getServerInstances() {
         try {
             return objectService.getAllEnterpriseObjects(ServerInstance.class);
@@ -68,7 +68,7 @@ public class LandingService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public ServerInstance getServerInstance(long serverId) {
         try {
             return objectService.getEnterpriseObjectById(serverId, ServerInstance.class);
@@ -80,7 +80,7 @@ public class LandingService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<ServerInstance> getServerInstances(ServerNodeType type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<ServerInstance> query = builder.createQuery(ServerInstance.class);
@@ -156,7 +156,7 @@ public class LandingService {
      * @param serverId
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Assign_Server_User getServerUserAssignment(long serverId) {
         List<Assign_Server_User> assignments = objectService.getRelationshipsForSourceObject(serverId, Assign_Server_User.class);
 
@@ -222,7 +222,7 @@ public class LandingService {
      * @throws eds.component.data.IncompleteDataException if no servers are
      * found
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy, ServerNodeType type)
             throws IncompleteDataException {
             //Currently there's no strategy, just take the first one.
@@ -256,7 +256,7 @@ public class LandingService {
     }
 
     //Wrong return param - should return a list or use "Contains"
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public User getUserFromServerName(String serverName) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<User> query = builder.createQuery(User.class);

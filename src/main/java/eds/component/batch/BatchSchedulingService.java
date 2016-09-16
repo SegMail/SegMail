@@ -251,7 +251,6 @@ public class BatchSchedulingService {
      * @param status If null, all statuses will be retrieved.
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<BatchJobRun> getBatchRuns(Timestamp start, Timestamp end, BATCH_JOB_RUN_STATUS status) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
@@ -316,7 +315,6 @@ public class BatchSchedulingService {
 
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public BatchJob getBatchJobById(long batchJobId) {
         return objectService.getEm().find(BatchJob.class, batchJobId);
     }
@@ -398,7 +396,6 @@ public class BatchSchedulingService {
      * @param key
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<BatchJobRun> getJobRunsByKey(String key) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
@@ -476,7 +473,6 @@ public class BatchSchedulingService {
      *
      * @param run
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     private void updateBatchJobRunStatus(BatchJobRun run) {
         
         if (run.getCANCEL_TIME() != null) {
@@ -509,7 +505,6 @@ public class BatchSchedulingService {
      * @param cronType
      * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public DateTime getNextExecutionTimeCron(String cronExpression, DateTime now, CronType cronType){
         //Get the next execution time
         ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
@@ -519,7 +514,6 @@ public class BatchSchedulingService {
         return nextExecution;
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<BatchJobTrigger> loadBatchJobTriggers(long batchJobId) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobTrigger> query = builder.createQuery(BatchJobTrigger.class);

@@ -52,7 +52,6 @@ public class ClientService {
     @Inject
     private ClientFacade clientFacade;
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Client getClientById(long clientid) throws DBConnectionException {
         try {
             //Try the shorter JPA way
@@ -69,8 +68,7 @@ public class ClientService {
             throw ex;
         }
     }
-
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public ClientType getClientTypeById(long clienttypeid) throws DBConnectionException {
         try {
 
@@ -88,7 +86,6 @@ public class ClientService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Client getClientByClientname(String clientname) throws DBConnectionException {
         try {
             //Try the shorter JPA way
@@ -108,7 +105,6 @@ public class ClientService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ClientType getClientTypeByName(String clienttypename) throws DBConnectionException {
         try {
 
@@ -247,8 +243,7 @@ public class ClientService {
         return newAssignment;
 
     }
-
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public ContactInfo getContactInfoForUser(long userid) throws DBConnectionException {
         try {
             List<ClientUserAssignment> clientAssignment
@@ -307,8 +302,7 @@ public class ClientService {
         }
 
     }
-
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Client getClientByAssignedUser(long userid) throws DBConnectionException {
         try {
             List<ClientUserAssignment> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
