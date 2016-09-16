@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
@@ -32,6 +33,7 @@ public class FormListSettingsDelete {
     @Inject private ProgramList program;
     @Inject private UserSessionContainer userContainer;
     @Inject private UserRequestContainer reqContainer;
+    @Inject private ClientContainer clientContainer;
     
     @EJB private SubscriptionService subService;
     @EJB private UserService userService;
@@ -48,7 +50,7 @@ public class FormListSettingsDelete {
             //Check if password provided is correct
             userService.login(userContainer.getUsername(), passwordForDeletion);
             
-            listService.deleteList(program.getListEditing().getOBJECTID());
+            listService.deleteList(program.getListEditing().getOBJECTID(),clientContainer.getClient().getOBJECTID());
             
             //Display success message
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, 

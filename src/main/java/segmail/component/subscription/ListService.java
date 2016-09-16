@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -35,6 +38,7 @@ import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.ListType;
 import segmail.entity.subscription.ListType_;
+import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
@@ -171,7 +175,12 @@ public class ListService {
     }
 
     /**
-     * Deletes a list and all its assignment.
+     * Deletes all the following relationships first:
+     * - Assign_Client_List
+     * - Subscription
+     * 
+     * Then proceeds to delete the SubscriptionList itself. It does not delete
+     * the subscribers under this list.
      *
      * Potentially long running operation that requires the background job
      * scheduling mechanism.
@@ -179,15 +188,30 @@ public class ListService {
      * @param listId
      * @throws eds.component.data.EntityNotFoundException
      */
-    public void deleteList(long listId) throws EntityNotFoundException {
-        try {
-            updateService.deleteObjectDataAndRelationships(listId);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void deleteList(long listId, long clientId) throws EntityNotFoundException {
+        int assignClientList = updateService.deleteRelationshipByTarget(listId, Assign_Client_List.class);
+        
+        //Asynchronous call, but no need for async actually, just an experiment
+        deleteSubscriptions(listId);
+        //Delete fields
+        updateService.deleteAllEnterpriseDataByType(listId, SubscriptionListField.class);
+        
+        //Finally remove the list entity
+        EntityManager em = updateService.getEm();
+        em.remove(em.find(SubscriptionList.class, listId));
+    }
+    
+    /**
+     * For experimenting. Asynchronous is not really needed after all since the 
+     * underlying SQL executes relatively fast.
+     * 
+     * @param listId 
+     */
+    @Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void deleteSubscriptions(long listId) {
+        updateService.deleteRelationshipByTarget(listId, Subscription.class);
     }
 
     public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException {
