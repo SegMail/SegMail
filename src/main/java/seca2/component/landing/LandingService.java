@@ -252,7 +252,7 @@ public class LandingService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteServer(long serverId)
             throws EntityNotFoundException {
-        updateService.deleteObjectDataAndRelationships(serverId);
+        updateService.deleteObjectDataAndRelationships(serverId,ServerInstance.class);
     }
 
     //Wrong return param - should return a list or use "Contains"

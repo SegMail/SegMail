@@ -354,7 +354,7 @@ public class AutoresponderService {
      */
     public void deleteAutoEmail(long autoEmailId) throws EntityNotFoundException {
         try {
-            updateService.deleteObjectDataAndRelationships(autoEmailId);
+            updateService.deleteObjectDataAndRelationships(autoEmailId,AutoresponderEmail.class);
         } catch (PersistenceException pex) {
             if (pex.getCause() instanceof GenericJDBCException) {
                 throw new DBConnectionException(pex.getCause().getMessage());

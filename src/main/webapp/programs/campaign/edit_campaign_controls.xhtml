@@ -9,7 +9,7 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <h:panelGroup layout="block" rendered="#{FormProgramModeSwitch.editCampaignMode}">
+    <h:panelGroup layout="block" rendered="#{FormProgramModeSwitch.programLevel() eq 1}">
         <a  href="#{request.contextPath}/campaign"
             class="btn btn-primary"
             >

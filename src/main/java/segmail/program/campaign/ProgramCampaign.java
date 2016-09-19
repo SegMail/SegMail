@@ -38,6 +38,7 @@ public class ProgramCampaign extends Program{
     private List<CampaignActivity> allActivities;
     private Map<String,String> activityStatusMapping;
     
+    private long editingActivityId;
     private CampaignActivity editingActivity;
     private CampaignActivitySchedule editingSchedule;
     
@@ -121,6 +122,7 @@ public class ProgramCampaign extends Program{
 
     public void setEditingActivity(CampaignActivity editingActivity) {
         this.editingActivity = editingActivity;
+        this.setEditingActivityId((editingActivity == null) ? -1 :editingActivity.getOBJECTID());
     }
 
     public CampaignActivitySchedule getEditingSchedule() {
@@ -154,6 +156,14 @@ public class ProgramCampaign extends Program{
     public void setTargetLists(List<SubscriptionList> targetLists) {
         this.targetLists = targetLists;
     }
+
+    public long getEditingActivityId() {
+        return editingActivityId;
+    }
+
+    public void setEditingActivityId(long editingActivityId) {
+        this.editingActivityId = editingActivityId;
+    }
     
     /**
      * First of its kind...of a stupid modification. It's only because we
@@ -161,13 +171,14 @@ public class ProgramCampaign extends Program{
      *
      */
     public void modifySessionContainer() {
+         
         if (isEditCampaignMode()) {
             sessContainer.overwriteProgramTitle(this.getEditingCampaign().getCAMPAIGN_NAME());
             sessContainer.overwriteProgramDescription(this.getEditingCampaign().getCAMPAIGN_GOALS());
             return;
         }
         sessContainer.revertProgramOverwrite();
-
+                
     }
     
 }

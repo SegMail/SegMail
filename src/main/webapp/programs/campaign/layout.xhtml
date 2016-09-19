@@ -12,7 +12,7 @@
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
         <ui:define name="main-program-panel">
-
+            
             <div class="row"><!--For the message-->
                 <div class="col-md-12">
                     <form jsf:id="ProgramCampaign">
@@ -24,13 +24,18 @@
             <div id="stats_panel"> <!--stats widget-->
 
             </div>
-
             <c:choose>
-                <c:when test="#{FormProgramModeSwitch.editCampaignMode}"> <!--Individual Campaign mode-->
+                <c:when test="#{FormProgramModeSwitch.programLevel() == 0}">
+                    <ui:include src="campaign_list_panel.xhtml" ></ui:include>
+                </c:when>
+                <c:when test="#{FormProgramModeSwitch.programLevel() == 1}">
                     <ui:include src="edit_campaign.xhtml"></ui:include>
                 </c:when>
-                <c:otherwise><!--List Campaign mode-->
-                    <ui:include src="campaign_list_panel.xhtml" ></ui:include>
+                <c:when test="#{FormProgramModeSwitch.programLevel() == 2}">
+                    <ui:include src="edit_campaign_activity.xhtml"></ui:include>
+                </c:when>
+                <c:otherwise>
+                    
                 </c:otherwise>
             </c:choose>
 
@@ -42,14 +47,8 @@
             <div class="modal fade" id="create_new_campaign">
                 <ui:include src="create_new_campaign.xhtml"></ui:include>
             </div>
-            <!--<div jsf:rendered="#{FormEditCampaign.editingCampaign ne null}" class="modal fade" id="edit_campaign">
-                <ui:include src="edit_campaign.xhtml"></ui:include>
-            </div>-->
             <div class="modal fade" id="create_new_activity">
                 <ui:include src="create_new_activity.xhtml"></ui:include>
-            </div>
-            <div class="modal fade" id="edit_campaign_activity" >
-                <ui:include src="edit_campaign_activity.xhtml" ></ui:include>
             </div>
             <div class="modal fade" id="execute_campaign_activity" >
                 <ui:include src="execute_campaign_activity.xhtml" ></ui:include>

@@ -14,8 +14,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import seca2.program.FormNavigation;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.Campaign;
+import segmail.entity.campaign.CampaignActivity;
 import segmail.program.campaign.ProgramCampaign;
 
 /**
@@ -30,6 +32,11 @@ import segmail.program.campaign.ProgramCampaign;
 @RequestScoped
 @Named("FormProgramModeSwitch")
 public class FormProgramModeSwitch {
+    
+    /**
+     * Small trick to init this bean a little earlier than the rest
+     */
+    private String activate = "";
 
     @EJB
     CampaignService campaignService;
@@ -45,8 +52,8 @@ public class FormProgramModeSwitch {
     @PostConstruct
     public void init() {
         if (!FacesContext.getCurrentInstance().isPostback()) {
-            reloadCampaign();
-            initEditCampaignMode();
+            reloadEntities();
+            //initEditCampaignMode();
             program.modifySessionContainer();
         }
     }
@@ -74,34 +81,76 @@ public class FormProgramModeSwitch {
     public void setEditingCampaignId(long editingCampaignId) {
         program.setEditingCampaignId(editingCampaignId);
     }
-
-    public void reloadCampaign() {
-
-        List<String> params = reqCont.getProgramParamsOrdered();
-        if (params == null || params.isEmpty()) {
-            setEditingCampaignId(-1);
-            setEditingCampaign(null);
-            return;
-        }
-        if (params != null && !params.isEmpty()) {
-            long newId = Long.parseLong(params.get(0));
-            if (getEditingCampaignId() == newId) { //this is screwing up with the
-                return;
-            }
-            setEditingCampaignId(newId);
-        }
-
-        Campaign editingCampaign = campaignService.getCampaign(getEditingCampaignId());
-        setEditingCampaign(editingCampaign);
+    
+    public long getEditingActivityId() {
+        return program.getEditingActivityId();
     }
 
-    public void initEditCampaignMode() {
-        //Initialize the campaign ID, if exist and decide whether to load the campaign or not.
-        if (this.getEditingCampaignId() > 0) {
-            this.setEditCampaignMode(true);
+    public void setEditingActivityId(long editingActivityId) {
+        program.setEditingActivityId(editingActivityId);
+    }
+    
+    public CampaignActivity getEditingActivity() {
+        return program.getEditingActivity();
+    }
+
+    public void setEditingActivity(CampaignActivity editingActivity) {
+        program.setEditingActivity(editingActivity);
+    }
+
+    public String getActivate() {
+        return activate;
+    }
+
+    public void setActivate(String activate) {
+        this.activate = activate;
+    }
+    
+    public void reloadEntities() {
+
+        List<String> params = reqCont.getProgramParamsOrdered();
+        
+        if(params.size() >= 1) {
+            long newCampaignId = Long.parseLong(params.get(0));
+            if (getEditingCampaignId() != newCampaignId) { 
+                setEditingCampaignId(newCampaignId);
+
+                Campaign editingCampaign = campaignService.getCampaign(getEditingCampaignId());
+                setEditingCampaign(editingCampaign);
+            }
+        }
+        
+        if(params.size() >= 2) {
+            long newActivityId = Long.parseLong(params.get(1));
+            if (getEditingActivityId() != newActivityId) { 
+                setEditingActivityId(newActivityId);
+
+                CampaignActivity editingActivy = campaignService.getCampaignActivity(newActivityId);
+                setEditingActivity(editingActivy);
+            }
+        }
+    }
+
+    /**
+     * Gets the "level" of the program based on the request URL in UserRequestContainer.
+     * Eg. "/campaign" is 0, "/campaign/32/112" is 2.
+     * 
+     * @return 
+     */
+    public int programLevel() {
+        return reqCont.getProgramParamsOrdered().size();
+    }
+    
+    public void modifySessionContainer() {
+        List<String> params = reqCont.getProgramParamsOrdered();
+        if(params.size() >= 2) {
+            reqCont.setRenderPageToolbar(false);
+            reqCont.setRenderPageBreadCrumbs(false);
             return;
         }
-        this.setEditCampaignMode(false);
+        
+        reqCont.setRenderPageToolbar(true);
+        reqCont.setRenderPageBreadCrumbs(true);
     }
 
     

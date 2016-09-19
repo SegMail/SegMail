@@ -71,8 +71,8 @@ public class FormBasicSettings implements FormEditEntity {
     }
 
     public void reloadProgramToolbar() {
-        //formSwitch.reloadCampaign();
-        formSwitch.initEditCampaignMode();
+        //formSwitch.reloadEntities();
+        //formSwitch.initEditCampaignMode();
         program.modifySessionContainer();
     }
 }

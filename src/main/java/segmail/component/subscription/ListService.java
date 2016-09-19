@@ -7,18 +7,15 @@ package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
-import eds.component.batch.BatchProcessingService;
 import eds.component.config.GenericConfigService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import eds.component.encryption.EncryptionUtility;
 import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
@@ -33,7 +30,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.hibernate.exception.GenericJDBCException;
-import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.ListType;
@@ -43,8 +39,6 @@ import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
 import segmail.entity.subscription.SubscriptionListField_;
-import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
-import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List_;
 
 /**
  *
@@ -189,17 +183,25 @@ public class ListService {
      * @throws eds.component.data.EntityNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void deleteList(long listId, long clientId) throws EntityNotFoundException {
-        int assignClientList = updateService.deleteRelationshipByTarget(listId, Assign_Client_List.class);
+    public void deleteList(long listId, long clientId) throws EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
+        //int assignClientList = updateService.deleteRelationshipByTarget(listId, Assign_Client_List.class);
         
         //Asynchronous call, but no need for async actually, just an experiment
-        deleteSubscriptions(listId);
+        //deleteSubscriptions(listId);
+        //updateService.deleteRelationshipByTarget(listId, Subscription.class);
         //Delete fields
-        updateService.deleteAllEnterpriseDataByType(listId, SubscriptionListField.class);
-        
+        //updateService.deleteAllEnterpriseDataByType(listId, SubscriptionListField.class);
+        //updateService.deleteAllEnterpriseDataByOwnerType(listId, SubscriptionList.class);
+        //updateService.deleteRelationshipBySourceType(listId, SubscriptionList.class);
+        //updateService.deleteRelationshipByTargetType(listId, SubscriptionList.class);
+        updateService.deleteObjectDataAndRelationships(listId, SubscriptionList.class);
         //Finally remove the list entity
-        EntityManager em = updateService.getEm();
-        em.remove(em.find(SubscriptionList.class, listId));
+        //EntityManager em = updateService.getEm();
+        //em.remove(em.find(SubscriptionList.class, listId));
+        
+        //Asynchronous call
+        //For rest of the other stuff
+        //deleteOtherListDataAndRel(listId);
     }
     
     /**
@@ -210,10 +212,11 @@ public class ListService {
      */
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void deleteSubscriptions(long listId) {
-        updateService.deleteRelationshipByTarget(listId, Subscription.class);
+    public void deleteOtherListDataAndRel(long listId) throws EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
+        updateService.deleteObjectDataAndRelationships(listId,SubscriptionList.class);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException {
         try {
             if (listname == null || listname.isEmpty()) {

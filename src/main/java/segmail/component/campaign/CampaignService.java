@@ -263,7 +263,7 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int deleteCampaignActivity(long campaignActivityId) throws EntityNotFoundException {
-        int deleted = updService.deleteObjectDataAndRelationships(campaignActivityId);
+        int deleted = updService.deleteObjectDataAndRelationships(campaignActivityId,CampaignActivity.class);
         return deleted;
     }
     
