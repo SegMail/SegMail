@@ -1,5 +1,40 @@
 var mailmergeWSCache = {};
 
+$.extend($.summernote.plugins, {
+    MailMerge: function (context) {
+        var ui = $.summernote.ui;
+        var tags = context.options.MailMerge.tags;
+
+        context.memo('button.MailMerge', function () {
+            // create button
+            var button = ui.buttonGroup([
+                ui.button({
+                    className: 'dropdown-toggle',
+                    contents: ' Mailmerge tags <span class="caret"></span>',
+                    //tooltip: 'Click here to select the mail merge tag to insert',
+                    data: {
+                        toggle: 'dropdown'
+                    }
+                }),
+                ui.dropdown({
+                    className: 'dropdown-template',
+                    items: tags,
+                    click: function (event) {
+                        var $button = $(event.target);
+                        var value = $button.data('value');
+                        //var path = context.options.mailmerge.path + '/' + value + '.html';
+                        var node = document.createElement('span');
+                        node.innerHTML = value;
+                        context.invoke('editor.insertNode', node);
+                    }
+                })
+            ]);
+
+            return button.render();   // return button as jquery object 
+        });
+    }
+});
+
 var renderMailmergeLinkHelper = function(sourceSel,targetSel,token,result) {
     var jsonObj = JSON.parse(result);
     //var count = $(sourceSel+' a.' + token).size();
@@ -21,6 +56,7 @@ var renderMailmergeLink = function(sourceSel,targetSel,label,errorCallback,timeo
         }
         callWS(WSAutoresponderEndpoint,
             'createSystemMailmergeTestLink',
+            'http://webservice.autoresponder.program.segmail/',
             {label: label},
             function (result) {
                 renderMailmergeLinkHelper(sourceSel,targetSel,token,result);
@@ -54,6 +90,7 @@ var renderMailmergeTag = function(sourceSel,targetSel,label,errorCallback,timeou
         }
         callWS(WSAutoresponderEndpoint,
             'createSubscriberMailmergeTestValue',
+            'http://webservice.autoresponder.program.segmail/',
             {label: label},
             function (result) {
                 renderMailmergeTagHelper(sourceSel,targetSel,token,result);

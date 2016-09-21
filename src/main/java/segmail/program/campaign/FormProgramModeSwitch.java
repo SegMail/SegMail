@@ -54,7 +54,7 @@ public class FormProgramModeSwitch {
         if (!FacesContext.getCurrentInstance().isPostback()) {
             reloadEntities();
             //initEditCampaignMode();
-            program.modifySessionContainer();
+            modifySessionContainer();
         }
     }
 
@@ -146,11 +146,20 @@ public class FormProgramModeSwitch {
         if(params.size() >= 2) {
             reqCont.setRenderPageToolbar(false);
             reqCont.setRenderPageBreadCrumbs(false);
-            return;
         }
         
-        reqCont.setRenderPageToolbar(true);
-        reqCont.setRenderPageBreadCrumbs(true);
+        if(params.size() >= 1) {
+            sessCont.overwriteProgramTitle(this.getEditingCampaign().getCAMPAIGN_NAME());
+            sessCont.overwriteProgramDescription(this.getEditingCampaign().getCAMPAIGN_GOALS());
+        }
+        
+        if(params.size() <= 0) {
+            reqCont.setRenderPageToolbar(true);
+            reqCont.setRenderPageBreadCrumbs(true);
+            sessCont.revertProgramOverwrite();
+        }
+        
+        
     }
 
     

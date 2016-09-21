@@ -65,14 +65,14 @@ var createMailmergeTestLink = function(label,htmlLink) {
     });
 };
 
-var callWS = function(url,method,data,successCallback,errorCallback,timeout) {
+var callWS = function(url,method,namespace,data,successCallback,errorCallback,timeout) {
     setTimeout(function(){
     $.soap({
         url : url,
         method : method,
         appendMethodToURL: 0,
         namespaceQualifier: 'ns',
-        namespaceURL: 'http://webservice.autoresponder.program.segmail/',
+        namespaceURL: namespace,//'http://webservice.autoresponder.program.segmail/',
         noPrefix: 0,
         HTTPHeaders: {
         },

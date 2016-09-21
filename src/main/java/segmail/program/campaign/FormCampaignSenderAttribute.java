@@ -68,7 +68,7 @@ public class FormCampaignSenderAttribute implements FormEditEntity {
     public void reloadProgramToolbar() {
         formSwitch.reloadEntities();
         //formSwitch.initEditCampaignMode();
-        program.modifySessionContainer();
+        formSwitch.modifySessionContainer();
     }
     
 }

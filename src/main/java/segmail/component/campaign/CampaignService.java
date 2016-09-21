@@ -13,6 +13,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseData_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -47,6 +48,8 @@ import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.SubscriptionListField_;
 import segmail.entity.subscription.Subscription_;
 
 /**
@@ -294,6 +297,24 @@ public class CampaignService {
     public List<SubscriptionList> getTargetedLists(long campaignId) {
         List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaignId, Assign_Campaign_List.class, SubscriptionList.class);
         return targetLists;
+    }
+    
+    public List<SubscriptionListField> getTargetedListFields(long campaignId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromFields = query.from(SubscriptionListField.class);
+        Root<Assign_Campaign_List> fromAssign = query.from(Assign_Campaign_List.class);
+        
+        query.select(fromFields);
+        query.where(builder.and(
+                builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), campaignId),
+                builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromFields.get(SubscriptionListField_.OWNER))
+                ));
+        
+        List<SubscriptionListField> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)

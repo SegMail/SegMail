@@ -22,12 +22,9 @@ import javax.jws.WebParam;
 import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
-import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
-import segmail.program.autoresponder.ProgramAutoresponder;
 
 /**
  *
@@ -42,7 +39,8 @@ public class WSAutoresponder {
     @EJB
     private GenericObjectService objectService;
     
-    @Inject ProgramAutoresponder program;
+    //@Inject ProgramAutoresponder program;
+    @Inject AutoresponderSessionContainer listCont;
     /**
      * Saves the body and bodyProcessed into AutoresponderEmail BODY and BODY_PROCESSED
      * fields for the existing editing AutoresponderEmail that is in context.
@@ -62,7 +60,7 @@ public class WSAutoresponder {
             @WebParam(name = "bodyProcessed") String bodyProcessed) 
             throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
         
-        AutoresponderEmail autoemail = program.getEditingTemplate();
+        AutoresponderEmail autoemail = listCont.getEditingTemplate();
         if(autoemail == null)
             throw new EntityNotFoundException("No AutoresponderEmail found.");
         
@@ -72,7 +70,7 @@ public class WSAutoresponder {
         
         autoemail = autoemailService.saveAutoEmail(autoemail);
         
-        program.setEditingTemplate(autoemail);
+        //program.setEditingTemplate(autoemail);//not necessary
         
         DateTime now = DateTime.now();
         
@@ -109,11 +107,11 @@ public class WSAutoresponder {
      */
     @WebMethod(operationName = "createSubscriberMailmergeTestValue")
     public String createSubscriberMailmergeTestValue(@WebParam(name = "label")String label) {
-        List<SubscriptionListField> fields = program.getListFields();
+        List<SubscriptionListField> fields = listCont.getFields();
         
         for(SubscriptionListField field : fields) {
             if(field.getMAILMERGE_TAG().equals(label)) {
-                String value = program.getRandomSubscriber().get(field.generateKey());
+                String value = listCont.getRandomSubscriber().get(field.generateKey());
                 return (value == null) ? label : value;
             }
         }

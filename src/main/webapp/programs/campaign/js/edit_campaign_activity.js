@@ -1,43 +1,13 @@
-//Functions and objects
-/*$.extend($.summernote.plugins, {
-    MailMerge: function (context) {
-        var ui = $.summernote.ui;
-        var tags = context.options.MailMerge.tags;
-
-        context.memo('button.MailMerge', function () {
-            // create button
-            var button = ui.buttonGroup([
-                ui.button({
-                    className: 'dropdown-toggle',
-                    contents: ' Mailmerge tags <span class="caret"></span>',
-                    //tooltip: 'Click here to select the mail merge tag to insert',
-                    data: {
-                        toggle: 'dropdown'
-                    }
-                }),
-                ui.dropdown({
-                    className: 'dropdown-template',
-                    items: tags,
-                    click: function (event) {
-                        var $button = $(event.target);
-                        var value = $button.data('value');
-                        //var path = context.options.mailmerge.path + '/' + value + '.html';
-                        var node = document.createElement('span');
-                        node.innerHTML = value;
-                        context.invoke('editor.insertNode', node);
-                    }
-                })
-            ]);
-
-            return button.render();   // return button as jquery object 
-        });
-    }
-});
-*/
+var SUMMERNOTE_HEIGHT = 280;
+var PREVIEW_HEIGHT = 450;
+var PREVIEW_WIDTH = 420;
 
 var refresh_summernote = function (selector) {
+    if($(selector).length <= 0)
+        return;
+    
     $(selector).summernote({
-        height: 260, //try the CSS flex approach next time
+        height: SUMMERNOTE_HEIGHT, //try the CSS flex approach next time
         toolbar: [
              ["font", ["bold", "italic", "underline","style"]],
              ["test", ["picture", "link"]],
@@ -63,41 +33,53 @@ var refresh_summernote = function (selector) {
     });
 }
 
-// Events
 var onEditorChange = function () {
     renderEverything();
 }
 
-var onSave = function () {
-    //Block button
-    $('#saveButton').prop('disabled', true);
-    renderEverything(); //This will get called later than the below code 
-    setTimeout(function(){
-        var subject = $('#subject').val();
-        var body = $('#editor').text();
-        var bodyProcessed = $('#processedContent').val();
-        callWS(
-                WSAutoresponderEndpoint,
-                'saveAutoemail', 
-                {
-                    'subject' : subject,
-                    'body': body,
-                    'bodyProcessed': bodyProcessed
-                }, function (result) {
-            $('#saveResults').html('Saved at ' + result); //Don't know how it will look like yet
-            $('#saveButton').prop('disabled', false);
-        }, function (error) {
-            $('#saveResults').html('Error: ' + error); //Don't know how it will look like yet
-            $('#saveButton').prop('disabled', false);
-        });
-    },100);
-    
-};
+var renderEverything = function () {
+    renderPreview(0);
+    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber,
+    function(){//successCallback
+        
+    },
+    function(){//errorCallback
+        $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
+    });
+}
 
-// Helper functions
-var toggleMenu = function () {
-    if ($(document).has('#FormEditExistingTemplate').length) {
-        page_navigation();
+/**
+ * No WS calls for this one, just JSF ajax.
+ * 
+ * @returns {undefined}
+ */
+var onSave = function (data) {
+    var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
+    var block = $(data.source).parents(".block");
+
+    switch (ajaxstatus) {
+        case "begin": // This is called right before ajax request is been sent.
+            reapply_textarea('editor');
+            block_refresh(block);
+            break;
+
+        case "complete": // This is called right after ajax response is received.
+            break;
+
+        case "success": // This is called when ajax response is successfully processed.
+            block_refresh(block);
+            refresh_summernote('textarea.editor');
+            modifyDomToGeneratePreview();
+            noty({
+                text : 'Email saved.',
+                type : 'success'
+            });
+            break;
+        case "error":
+            noty({
+                text : 'Error.',
+                type : 'danger'
+            });
     }
 };
 
@@ -137,6 +119,9 @@ function largestWidth(selector) {
 }
 
 var adjustPreviewPanelHeight = function () {
+    
+    if($('#editor-panel').length <= 0)
+        return;
     //Listen for resize on the #editor-panel
     //$('.note-editable').resize(function(){ //seems like only for window
     //Adjust heights
@@ -166,11 +151,15 @@ var modifyDomToGeneratePreview = function () {
     $('#modifyDomToGeneratePreview' + randomNum).remove();
 };
 
-//Loader
-$(document).ready(function () {
-    if ($('#editor-panel').size() <= 0)
-        return;
+// Helper functions
+var toggleMenu = function () {
+    if ($(document).has('#FormEditEmailActivity').length) {
+        page_navigation();
+    }
+};
 
+$(document).ready(function () {
+    
     toggleMenu();
     refresh_summernote('textarea.editor');
     adjustPreviewPanelHeight();

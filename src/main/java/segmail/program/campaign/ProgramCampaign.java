@@ -18,6 +18,8 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -45,6 +47,13 @@ public class ProgramCampaign extends Program{
     private List<SubscriptionList> ownedLists;
     private List<SubscriptionList> targetLists;
     private List<String> selectedLists; //JSF selectMany component will store it as String.
+    
+    private MAILMERGE_REQUEST[] mailmergeLinkTags = MAILMERGE_REQUEST.values();
+    
+    /**
+     * Intersection of field sets from the different targeted lists.
+     */
+    private List<SubscriptionListField> listFields;
     
     @Override
     public void clearVariables() {
@@ -165,20 +174,20 @@ public class ProgramCampaign extends Program{
         this.editingActivityId = editingActivityId;
     }
     
-    /**
-     * First of its kind...of a stupid modification. It's only because we
-     * hard-coded the program layout page.
-     *
-     */
-    public void modifySessionContainer() {
-         
-        if (isEditCampaignMode()) {
-            sessContainer.overwriteProgramTitle(this.getEditingCampaign().getCAMPAIGN_NAME());
-            sessContainer.overwriteProgramDescription(this.getEditingCampaign().getCAMPAIGN_GOALS());
-            return;
-        }
-        sessContainer.revertProgramOverwrite();
-                
+    public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
+        return mailmergeLinkTags;
+    }
+
+    public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
+        this.mailmergeLinkTags = mailmergeLinkTags;
+    }
+
+    public List<SubscriptionListField> getListFields() {
+        return listFields;
+    }
+
+    public void setListFields(List<SubscriptionListField> listFields) {
+        this.listFields = listFields;
     }
     
 }

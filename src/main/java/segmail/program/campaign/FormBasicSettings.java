@@ -46,7 +46,7 @@ public class FormBasicSettings implements FormEditEntity {
         try {
             Campaign campaign = campaignService.updateCampaign(this.getEditingCampaign());
             program.setEditingCampaign(campaign);
-            reloadProgramToolbar();
+            //reloadProgramToolbar();
             
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign updated!", "");
         } catch (IncompleteDataException ex) {
@@ -73,6 +73,6 @@ public class FormBasicSettings implements FormEditEntity {
     public void reloadProgramToolbar() {
         //formSwitch.reloadEntities();
         //formSwitch.initEditCampaignMode();
-        program.modifySessionContainer();
+        //program.modifySessionContainer();
     }
 }

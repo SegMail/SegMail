@@ -2,7 +2,7 @@ var SUMMERNOTE_HEIGHT = 290;
 var PREVIEW_HEIGHT = 450;
 var PREVIEW_WIDTH = 420;
 
-function refresh_summernote() {
+/*function refresh_summernote() {
     $('textarea.editor').summernote({
         height: SUMMERNOTE_HEIGHT,
         toolbar: [
@@ -23,7 +23,7 @@ function refresh_summernote() {
         //highlightAndCreateLinks();
         doEverything();
     });
-}
+}*/
 
 function refresh_select2() {
     //$('select.form-select').select2();
@@ -31,7 +31,7 @@ function refresh_select2() {
     select.select2("destroy").select2();
 }
 
-var preview = function (sourceSel, sourceContSel, targetSel, targetContSel, timeout) {
+/*var preview = function (sourceSel, sourceContSel, targetSel, targetContSel, timeout) {
     setTimeout(function () {
         var height = $(sourceContSel).height();
         $(targetSel).html($(sourceSel).html());
@@ -52,7 +52,7 @@ var registerDelayedChange = function () {
         doEverything();
     });
 };
-
+*/
 
 var highlightAndCreateLinks = function (timeout) {
     setTimeout(function () {
@@ -115,14 +115,16 @@ var highlightAndCreateLinks = function (timeout) {
 }
 
 var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallback, errorCallback) {
-    callWS(web_service_endpoint, 'createOrUpdateLink', {
-        linkTarget: linkTarget,
-        linkText: linkText,
-        index: index
-    }, successCallback, errorCallback);
+    callWS(web_service_endpoint, 'createOrUpdateLink', 
+        'http://webservice.campaign.program.segmail/',
+        {
+            linkTarget: linkTarget,
+            linkText: linkText,
+            index: index
+        }, successCallback, errorCallback);
 };
 
-var callWS = function (url, method, data, successCallback, errorCallback) {
+/*var callWS = function (url, method, data, successCallback, errorCallback) {
     $.soap({
         url: url,
         method: method,
@@ -145,7 +147,7 @@ var callWS = function (url, method, data, successCallback, errorCallback) {
                 errorCallback();
         }
     });
-};
+};*/
 
 var logSOAPErrors = function (SOAPResponse) {
     var jsonresult = SOAPResponse.toJSON();
@@ -181,10 +183,11 @@ var processError500 = function (JsonResult) {
     }
 };
 
-var copyPreviewContent = function () {
+/*var copyPreviewContent = function () {
     var content = $('#preview').html();
     $('#pseudo-preview').val(content);
 }
+                */
 
 /**
  * To enhance performanace by caching the links that were already generated.
@@ -235,21 +238,7 @@ var GenericErrorController = function () {
     };
 }();
 
-
-/**
- * This algorithm must produce an evenly distributed list of items based on their 
- * position offset in posArray.
- * 
- * @param {type} posArray
- * @returns {undefined}
- */
-function rearrangeDivs(posArray) {
-    for (var i = 0; i < posArray.length; i++) {
-
-    }
-}
-
-function largestWidth(selector) {
+/*function largestWidth(selector) {
     var maxWidth = 1;
     var widestSpan = null;
     var $element;
@@ -262,12 +251,14 @@ function largestWidth(selector) {
     });
     return maxWidth;
 }
+                */
 
 /**
  * http://stackoverflow.com/a/14570614/5765606
  * Better listener
  * 
  */
+/*
 var observeDOM = (function () {
     var MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
             eventListenerSupported = window.addEventListener;
@@ -289,8 +280,8 @@ var observeDOM = (function () {
         }
     }
 })();
-
-
+*/
+/*
 function saveAndContinue(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
@@ -357,8 +348,8 @@ function load_activity(data) {
             break;
     }
 }
-;
-
+;*/
+/*
 function create_new_activity(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".refresh");
@@ -380,8 +371,8 @@ function create_new_activity(data) {
             break;
     }
 }
-;
-
+;*/
+/*
 function saveBasicSettings(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
@@ -427,8 +418,8 @@ function saveAssignLists(data) {
             break;
     }
 }
-;
-
+;*/
+/*
 function executeAndClose(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
@@ -449,8 +440,8 @@ function executeAndClose(data) {
             break;
     }
 }
-;
-
+;*/
+/*
 function track_activity(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
@@ -472,7 +463,7 @@ function track_activity(data) {
             break;
     }
 }
-;
+;*/
 
 function setSendInBatch(id) {
     var value = document.getElementById(id).value;
@@ -486,7 +477,9 @@ function setSendInBatch(id) {
  * 
  * @returns {undefined}
  */
-var modifyDomToGeneratePreview = function () {
+/*
+  
+ var modifyDomToGeneratePreview = function () {
     var randomNum = Math.round(Math.random() * 100000);
     $('.note-editable').append('<div id=modifyDomToGeneratePreview' + randomNum + '></div>');
     $('#modifyDomToGeneratePreview' + randomNum).remove();
@@ -511,8 +504,9 @@ var resizeContent = function (timeout) {
         $('#html-content-form').height(PREVIEW_HEIGHT);
 
     }, timeout);
-};
+};*/
 
+/*
 var renderLinksAndRefreshStats = function (timeout) {
     setTimeout(function () {
         var position = 0;
@@ -591,8 +585,8 @@ var renderLinksAndRefreshStats = function (timeout) {
             });
         });
     }, timeout);
-};
-
+};*/
+/*
 var getSentEmails = function() {
     callWS(web_service_endpoint, 'getExecutedForCampaignActivity', {
         campaignActivityId : $('#activity-id').val()
@@ -619,7 +613,7 @@ var getTopNumbers = function(timeout) {
         getSentEmails();
     },timeout);
 };
-
+*/
 var parseLink = function(label, timeout) {
     //var unsubToken = '[!unsubscribe]';
     var token = md5(label);

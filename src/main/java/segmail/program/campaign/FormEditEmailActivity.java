@@ -9,27 +9,36 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonValue;
 import seca2.js.JSUtility;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
 import segmail.component.campaign.CampaignService;
+import segmail.component.subscription.SubscriptionService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import static segmail.entity.campaign.ACTIVITY_STATUS.NEW;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
+import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
 
 /**
  *
@@ -41,13 +50,26 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     @Inject
     ProgramCampaign program;
+    @Inject
+    AutoresponderSessionContainer autoresponderCont;
 
     @EJB
     CampaignService campaignService;
+    @EJB SubscriptionService subService;
 
     List<CampaignActivityOutboundLink> links = new ArrayList<>();
 
     private String linksDelimited;
+    
+    @PostConstruct
+    public void init() {
+        if(!FacesContext.getCurrentInstance().isPostback()) {
+            loadSchedule();
+            loadTargetLists();
+            loadTargetListFields();
+            loadRandomSubscriber();
+        }   
+    }
 
     public CampaignActivitySchedule getEditingSchedule() {
         return program.getEditingSchedule();
@@ -80,6 +102,46 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void setLinksDelimited(String linksDelimited) {
         this.linksDelimited = linksDelimited;
     }
+    
+    public long getEditingCampaignId() {
+        return program.getEditingCampaignId();
+    }
+
+    public void setEditingCampaignId(long editingCampaignId) {
+        program.setEditingCampaignId(editingCampaignId);
+    }
+    
+    public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
+        return program.getMailmergeLinkTags();
+    }
+
+    public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
+        program.setMailmergeLinkTags(mailmergeLinkTags);
+    }
+    
+    public List<SubscriptionListField> getListFields() {
+        return autoresponderCont.getFields();
+    }
+
+    public void setListFields(List<SubscriptionListField> listFields) {
+        autoresponderCont.setFields(listFields);
+    }
+    
+    public Map<String, String> getRandomSubscriber() {
+        return autoresponderCont.getRandomSubscriber();
+    }
+
+    public void setRandomSubscriber(Map<String, String> randomSubscriber) {
+        autoresponderCont.setRandomSubscriber(randomSubscriber);
+    }
+    
+    public List<SubscriptionList> getTargetLists() {
+        return program.getTargetLists();
+    }
+
+    public void setTargetLists(List<SubscriptionList> targetLists) {
+        program.setTargetLists(targetLists);
+    }
 
     @Override
     public void saveAndContinue() {
@@ -87,7 +149,7 @@ public class FormEditEmailActivity implements FormEditEntity {
 
             CampaignActivity activity = campaignService.updateCampaignActivity(getEditingActivity());
             campaignService.updateCampaignActivitySchedule(getEditingSchedule());
-            loadActivity(activity.getOBJECTID());
+            //loadActivity(activity.getOBJECTID()); //is this necessary?
 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
@@ -168,6 +230,87 @@ public class FormEditEmailActivity implements FormEditEntity {
         }
 
         return links;
+    }
+    
+    public void loadTargetListFields(){
+        List<SubscriptionListField> fieldList = campaignService.getTargetedListFields(program.getEditingCampaignId());
+        
+        //Only add those fields that are common across the 2 lists
+        Collections.sort(fieldList, new Comparator<SubscriptionListField>(){
+
+            @Override
+            public int compare(SubscriptionListField o1, SubscriptionListField o2) {
+                if(o1.getMAILMERGE_TAG() == null || o1.getMAILMERGE_TAG().isEmpty())
+                    return 1;
+                
+                if(o2.getMAILMERGE_TAG() == null || o2.getMAILMERGE_TAG().isEmpty())
+                    return -1;
+                
+                return o1.getMAILMERGE_TAG().compareTo(o2.getMAILMERGE_TAG());
+            }
+        });
+        List<SubscriptionListField> sortedList = new ArrayList<>();
+        
+        SubscriptionListField lastField = null;
+        for(SubscriptionListField field : fieldList) {
+            String mailmergeTag = field.getMAILMERGE_TAG();
+            if(lastField != null 
+                    && lastField.getMAILMERGE_TAG().equals(mailmergeTag)
+                    && (sortedList.size() <= 0
+                        || !sortedList.get(sortedList.size()-1).getMAILMERGE_TAG().equals(mailmergeTag))
+                    )
+                    //sortedList.size() <= 0 //A
+                    //or sortedList.size() > 0 and !sortedList.get(sortedList.size()-1) == field //A'B
+                    //A + A'B = A + (1 - A)B = A + B - AB = AB
+                    
+                sortedList.add(field);
+            lastField = field;
+        }
+        
+        this.setListFields(sortedList);
+    }
+    
+    public void loadRandomSubscriber() {
+        //Clear it first
+        setRandomSubscriber(new HashMap<String,String>());
+        
+        if(this.getEditingActivity() == null) 
+            return;
+        
+        List<SubscriptionList> targetLists = getTargetLists();
+        if(targetLists == null || targetLists.isEmpty()) {
+            return; //Just let the WS return the labels without converting
+        }
+        //Get the first list with a valid subscriber
+        Map<Long, Map<String, String>> subscribers = new HashMap<>();
+        for(SubscriptionList targetList : targetLists) {
+            subscribers = subService.getSubscriberValuesMap(targetList.getOBJECTID(), 0, 1);
+            if(!subscribers.isEmpty())
+                break;
+        }
+        
+        for(Long id : subscribers.keySet()) {
+            setRandomSubscriber(subscribers.get(id));
+            getRandomSubscriber().put("OBJECTID", id.toString());
+        }
+    }
+    
+    public void loadTargetLists() {
+        long campaignId = program.getEditingCampaignId();
+        if(campaignId <= 0)
+            return;
+        
+        List<SubscriptionList> targetList = campaignService.getTargetedLists(campaignId);
+        setTargetLists(targetList);
+    }
+    
+    public void loadSchedule() {
+        long activityId = program.getEditingActivityId();
+        if(activityId <= 0)
+            return;
+        
+        CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
+        program.setEditingSchedule(schedule);
     }
 
 }

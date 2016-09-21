@@ -33,6 +33,7 @@ import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
+import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
 
 /**
  *
@@ -59,6 +60,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     private UserSessionContainer userContainer;
     @Inject
     private UserRequestContainer requestContainer;
+    @Inject AutoresponderSessionContainer autoresponderCont;
 
     @PostConstruct
     public void init() {
@@ -91,11 +93,11 @@ public class FormEditExistingTemplate implements FormEditEntity {
     }
     
     public List<SubscriptionListField> getListFields() {
-        return program.getListFields();
+        return autoresponderCont.getFields();
     }
 
     public void setListFields(List<SubscriptionListField> listFields) {
-        program.setListFields(listFields);
+        autoresponderCont.setFields(listFields);
     }
     
     public SubscriptionList getAssignedList() {
@@ -107,11 +109,11 @@ public class FormEditExistingTemplate implements FormEditEntity {
     }
     
     public Map<String, String> getRandomSubscriber() {
-        return program.getRandomSubscriber();
+        return autoresponderCont.getRandomSubscriber();
     }
 
     public void setRandomSubscriber(Map<String, String> randomSubscriber) {
-        program.setRandomSubscriber(randomSubscriber);
+        autoresponderCont.setRandomSubscriber(randomSubscriber);
     }
     
     public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
