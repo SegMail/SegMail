@@ -114,16 +114,21 @@
             var web_service_endpoint2 = '#{request.contextPath}/WSCampaignActivityMailMerge';
             var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
 
-            var mailmergeTagsSubscriber = [
+            var mailmergeTagsSubscriber = {
                     <c:forEach items = "#{FormEditEmailActivity.listFields}" var = "field" >
-                    '#{field.MAILMERGE_TAG}',
+                    '#{field.MAILMERGE_TAG}' : '#{field.generateKey()}',
                     </c:forEach>
-            ];
+            };
                     var mailmergeLinks = [
                             <c:forEach items = "#{FormEditEmailActivity.mailmergeLinkTags}" var = "link" >
                             '#{link.label()}',
                             </c:forEach>
                     ];
-        </script>
+            var randomSubscriber = {
+                <c:forEach items = "#{FormEditEmailActivity.randomSubscriber.keySet()}" var = "field" >
+                    #{field} : '#{FormEditEmailActivity.randomSubscriber[field]}',
+                </c:forEach>
+            }
+        </script>   
     </form>
 </html>

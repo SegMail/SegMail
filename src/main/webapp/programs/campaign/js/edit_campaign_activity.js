@@ -17,9 +17,14 @@ var refresh_summernote = function (selector) {
         MailMerge: {
             tags: function() {
                 var allTagsAndLinks = [];
-                mailmergeTagsSubscriber.forEach(function(item){
-                    allTagsAndLinks.push(item);
-                });
+                for(var key in mailmergeTagsSubscriber) {
+                    if (mailmergeTagsSubscriber.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(key);
+                    }
+                }
+                //mailmergeTagsSubscriber.forEach(function(item){
+                //    allTagsAndLinks.push(item);
+                //});
                 mailmergeLinks.forEach(function(item){
                     allTagsAndLinks.push(item);
                 });
@@ -144,13 +149,29 @@ var addHashIdToLinks = function(timeout) {
 var renderEverything = function () {
     addHashIdToLinks(0);
     renderPreview(0);
-    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber, //Actually since we already know the entire list of mailmergeTags available, why not just load it in a xhtml page as a JSON object?
-    function(){//successCallback
-        highlightAndCreateLinks(0);
-    },
-    function(){//errorCallback
-        //$('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-    });
+    highlightAndCreateLinks(0);
+    processMailmergeNoWS(0);
+    //processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber, //Actually since we already know the entire list of mailmergeTags available, why not just load it in a xhtml page as a JSON object?
+    //function(){//successCallback
+    //    highlightAndCreateLinks(0);
+    //},
+    //function(){//errorCallback
+    //    //$('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
+    //});
+};
+
+var processMailmergeNoWS = function(timeout) {
+    setTimeout(function(){
+        for(var key in mailmergeTagsSubscriber) {
+            if(mailmergeTagsSubscriber.hasOwnProperty(key)) {
+                var subscVal = randomSubscriber[mailmergeTagsSubscriber[key]];
+                var content = $('#preview').html();
+                content = content.replace(key,subscVal);
+                $('#preview').html(content);
+            }
+        }
+    },timeout);
+    
 }
 
 var modifyDomToGeneratePreview = function () {
@@ -237,8 +258,6 @@ var highlightAndCreateLinks = function (timeout) {
         //Clear all links in the #links panel
         $('#links').empty();
         //Copy the contents of editor/note-editable to processedContent
-        //var content = $('#editor').html();
-        //$('#processedContent').html(content);
         //Get all links in preview 
         var allLinks = $('#preview').find('a');
         var count = allLinks.size();
