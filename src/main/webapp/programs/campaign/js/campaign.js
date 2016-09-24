@@ -189,40 +189,6 @@ var processError500 = function (JsonResult) {
 }
                 */
 
-/**
- * To enhance performanace by caching the links that were already generated.
- * 
- * @type Function|campaign_L176.campaignAnonym$17
- */
-var linksContainer = function () {
-    var linksArray = [];
-
-    return {
-        addLink: function (redirectLink) {
-            /*var linkObj = {
-             'target' : target,
-             'text' : text,
-             'index' : index
-             };
-             linksArray.push(linkObj);
-             this.submit();*/
-            linksArray.push(redirectLink);
-        },
-        contains: function (link) {
-            for (var i = 0; i < linksArray.length; i++) {
-                if (linksArray[i] === link)
-                    return true;
-            }
-            return false;
-        },
-        submit: function () {
-            $('#pseudo-links').val(JSON.stringify(linksArray));
-        },
-        reset: function () {
-            linksArray = [];
-        }
-    }
-}();
 
 var GenericErrorController = function () {
     var id = 'soap-errors';
@@ -465,11 +431,6 @@ function track_activity(data) {
 }
 ;*/
 
-function setSendInBatch(id) {
-    var value = document.getElementById(id).value;
-    if (value <= 0)
-        document.getElementById(id).value = null;
-}
 
 /**
  * A simple hack to force-generate a preview and links by adding and subtracting
@@ -614,7 +575,7 @@ var getTopNumbers = function(timeout) {
     },timeout);
 };
 */
-var parseLink = function(label, timeout) {
+/*var parseLink = function(label, timeout) {
     //var unsubToken = '[!unsubscribe]';
     var token = md5(label);
     setTimeout(function(){
@@ -643,4 +604,4 @@ var parseLink = function(label, timeout) {
         })
                 
     },timeout);
-}
+}*/

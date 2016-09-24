@@ -28,6 +28,8 @@
                             <textarea id="editor" class="editor"
                                       jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
                             </textarea>
+                            <textarea id="processedContent" hidden="true" jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                            </textarea>
                         </div>
                         <div class="controls" >
                             <div class="row-form" style="margin-top: 10px">
@@ -96,13 +98,14 @@
                 </div>
                 <div id="preview-panel" class="block">
 
-
-                    <div id="preview" class="block-content" >
-
+                    <div class="block-content">
+                        <div class="row">
+                            <div id="preview" class="col-md-9" >
+                            </div>
+                            <div id="links" class="col-md-3" >
+                            </div>
+                            </div>
                     </div>
-                    <div id="links" class="col-md-4">
-                    </div>
-
                 </div>
             </div>
         </div>

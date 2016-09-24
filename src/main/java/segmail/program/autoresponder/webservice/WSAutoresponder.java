@@ -66,7 +66,7 @@ public class WSAutoresponder {
         
         autoemail.setSUBJECT(subject);
         autoemail.setBODY(body);
-        autoemail.setBODY_PROCESSED(bodyProcessed);
+        //autoemail.setBODY_PROCESSED(bodyProcessed);
         
         autoemail = autoemailService.saveAutoEmail(autoemail);
         

@@ -36,21 +36,9 @@ var refresh_summernote = function (selector) {
 var onEditorChange = function () {
     renderEverything();
 }
-
-var renderEverything = function () {
-    renderPreview(0);
-    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber,
-    function(){//successCallback
-        
-    },
-    function(){//errorCallback
-        $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-    });
-}
-
 /**
  * No WS calls for this one, just JSF ajax.
- * 
+ * We can't use JSF to submit changes because
  * @returns {undefined}
  */
 var onSave = function (data) {
@@ -60,6 +48,7 @@ var onSave = function (data) {
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
             reapply_textarea('editor');
+            renderEverything();
             block_refresh(block);
             break;
 
@@ -69,15 +58,19 @@ var onSave = function (data) {
         case "success": // This is called when ajax response is successfully processed.
             block_refresh(block);
             refresh_summernote('textarea.editor');
+            refresh_select2();
             modifyDomToGeneratePreview();
             noty({
-                text : 'Email saved.',
-                type : 'success'
-            });
+                text : 'Email saved at ',
+                layout : 'topCenter',
+                type : 'success',
+                timeout : true
+            }).setTimeout(2000);
             break;
         case "error":
             noty({
                 text : 'Error.',
+                layout : 'topCenter',
                 type : 'danger'
             });
     }
@@ -89,6 +82,7 @@ var renderPreview = function (timeout) {
         //Copy summernote content back to textarea
         reapply_textarea('editor');
         $('#preview').html($('.note-editable').html());
+        $('#processedContent').html($('.note-editable').html());//do this earlier
 
         //Get ratios
         var scaleY = $('#preview-panel').height() / $('#preview').height();
@@ -134,14 +128,28 @@ var adjustPreviewPanelHeight = function () {
     $('#preview-panel').height(previewHeight);
 };
 
+var addHashIdToLinks = function(timeout) {
+    setTimeout(function(){
+    //For each link, add a data-link hashed ID
+        $('.note-editable').find('a').each(function(index){
+            var obj = $(this);
+            if(obj.attr('data-link'))
+                return;
+            var hashId = md5(obj+obj.attr('href')+obj.html()+index);
+            obj.attr('data-link',hashId);
+        })
+    },timeout);
+}
+
 var renderEverything = function () {
+    addHashIdToLinks(0);
     renderPreview(0);
-    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber,
+    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber, //Actually since we already know the entire list of mailmergeTags available, why not just load it in a xhtml page as a JSON object?
     function(){//successCallback
-        
+        highlightAndCreateLinks(0);
     },
     function(){//errorCallback
-        $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
+        //$('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
     });
 }
 
@@ -156,6 +164,170 @@ var toggleMenu = function () {
     if ($(document).has('#FormEditEmailActivity').length) {
         page_navigation();
     }
+};
+
+function setSendInBatch(id) {
+    var value = document.getElementById(id).value;
+    if (value <= 0)
+        document.getElementById(id).value = null;
+}
+var highlightAndCreateLinksOld = function (timeout) {
+    setTimeout(function () {
+        //Clear the preview pane first
+        $('#links').empty();
+        //Clear the linksContainer too
+        linksContainer.reset();
+        var allLinks = $('.note-editable').find('a');
+        if (allLinks.size() <= 0)
+            return;
+
+        var count = allLinks.size();
+        var position = 0;
+        allLinks.each(function (index) {
+            //Create the badges for each link first, then call WS to get the redirectlink and fill them up in the preview pane!
+            var obj = $(this);
+            var linkText = obj.text();
+            var offset = obj.offset().top - $('#preview').offset().top;
+            var marginTop1 = offset;
+            
+            if(obj.attr('data-link'))
+                return;
+
+            if (index > 0) {
+                var lastOffset = position;
+                marginTop1 = marginTop1 - lastOffset;
+            }
+            var marginTop = Math.max(marginTop1, 0);
+            if(marginTop > 0) //It is not "sticking" to the previous button
+                marginTop -= 0.5*12; //12px is the pre-defined size of the div
+            else
+                marginTop -= 0.25*$('#links div').last().height();
+            
+            var link =
+                    '<div style="margin-top: '+marginTop+'px">'
+                    + "<span class='link-button'>"
+                    + (index + 1) //key 1
+                    + "</span> "
+                    + linkText //key 2
+                    + "</div>";
+            $('#links').append(link);
+            $('#links div').last().addClass('css-bounce');//.css('margin-top', marginTop);
+            position = position + marginTop + $('#links div').last().height();
+            
+            callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
+                    function (redirectLink) {
+                        obj.attr('href', redirectLink);
+                        //if (!--count)
+                        //    copyPreviewContent();
+                    },
+                    function (code,text,result) {
+                        noty({
+                            text : result,
+                            layout : 'topCenter',
+                            type : 'danger'
+                        });
+                    }
+            );
+        });
+    }, timeout);
+}
+
+var highlightAndCreateLinks = function (timeout) {
+    setTimeout(function () {
+        //Clear all links in the #links panel
+        $('#links').empty();
+        //Copy the contents of editor/note-editable to processedContent
+        //var content = $('#editor').html();
+        //$('#processedContent').html(content);
+        //Get all links in preview 
+        var allLinks = $('#preview').find('a');
+        var count = allLinks.size();
+        var position = 0;
+        var textareaHtml = $('<div>'+$('#processedContent').val()+'</div>');
+        //Loop through each link 
+        allLinks.each(function(index){
+        //  1) render the link labels beside the preview panel
+            var obj = $(this);
+            var linkText = obj.text();
+            var hashId = obj.attr('data-link');
+            var offset = obj.offset().top - $('#preview').offset().top;
+            var marginTop1 = offset;
+            
+            if (index > 0) {
+                var lastOffset = position;
+                marginTop1 = marginTop1 - lastOffset;
+            }
+            var marginTop = Math.max(marginTop1, 0);
+            if(marginTop > 0) //It is not "sticking" to the previous button
+                marginTop -= 0.5*12; //12px is the pre-defined size of the div
+            else
+                marginTop -= 0.25*$('#links div').last().height();
+            var link =
+                    '<div style="margin-top: '+marginTop+'px">'
+                    + "<span class='link-button'>"
+                    + (index + 1) //key 1
+                    + "</span> "
+                    + linkText //key 2
+                    + "</div>";
+            $('#links').append(link);
+            $('#links div').last().addClass('css-bounce');//.css('margin-top', marginTop);
+            position = position + marginTop + $('#links div').last().height();
+        //  2) Call WS with params: linkTarget, linkText, index
+            callWSCreateUpdateLink(
+                    obj.attr('href')
+                    ,obj.html()
+                    ,index
+                    ,function(redirectLink) {
+                        //  3) In success callback (redirectLink):
+                        //      a) replace the preview link with redirectLink
+                        $('#preview a[data-link="'+hashId+'"]').attr('href',redirectLink);
+                        //      b) replace the processedContent link with redirectLink
+                        //$('#processedContent a[data-link="'+hashId+'"]').attr('href',redirectLink);//Doesn't work
+                        //      small hack: http://stackoverflow.com/a/20430557/5765606
+                        textareaHtml.find('a[data-link="'+hashId+'"]').attr('href',redirectLink);
+                        if(!--count)
+                            $('#processedContent').val(textareaHtml.html());
+                        console.log($('#processedContent').val());
+                    },function() {
+                        
+                    })
+        
+        })
+    }, timeout);
+}
+
+var linksContainer = function () {
+    var linksArray = [];
+
+    return {
+        addLink: function (redirectLink) {
+            linksArray.push(redirectLink);
+        },
+        contains: function (link) {
+            for (var i = 0; i < linksArray.length; i++) {
+                if (linksArray[i] === link)
+                    return true;
+            }
+            return false;
+        },
+        submit: function () {
+            $('#pseudo-links').val(JSON.stringify(linksArray));
+        },
+        reset: function () {
+            linksArray = [];
+        }
+    }
+}();
+
+var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallback, errorCallback) {
+    callWS(web_service_endpoint, 'createOrUpdateLink', 
+        'http://webservice.campaign.program.segmail/',
+        {
+            linkTarget: linkTarget,
+            linkText: linkText,
+            index: index,
+            //originalHTML : originalHTML
+        }, successCallback, errorCallback);
 };
 
 $(document).ready(function () {

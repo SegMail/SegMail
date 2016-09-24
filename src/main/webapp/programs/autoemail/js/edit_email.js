@@ -70,7 +70,8 @@ var onEditorChange = function () {
 
 var onSave = function () {
     //Block button
-    $('#saveButton').prop('disabled', true);
+    //$('#saveButton').prop('disabled', true);
+    block_refresh($('#editor-panel'));
     renderEverything(); //This will get called later than the below code 
     setTimeout(function(){
         var subject = $('#subject').val();
@@ -79,16 +80,30 @@ var onSave = function () {
         callWS(
                 WSAutoresponderEndpoint,
                 'saveAutoemail', 
+                'http://webservice.autoresponder.program.segmail/',
                 {
                     'subject' : subject,
                     'body': body,
-                    'bodyProcessed': bodyProcessed
+                    //'bodyProcessed': bodyProcessed
                 }, function (result) {
-            $('#saveResults').html('Saved at ' + result); //Don't know how it will look like yet
-            $('#saveButton').prop('disabled', false);
+            //$('#saveResults').html('Saved at ' + result); //Don't know how it will look like yet
+            //$('#saveButton').prop('disabled', false);
+            block_refresh($('#editor-panel'));
+            noty({
+                text : 'Email saved at '+result,
+                layout : 'topCenter',
+                type : 'success',
+                timeout : true
+            }).setTimeout(2000);
         }, function (error) {
-            $('#saveResults').html('Error: ' + error); //Don't know how it will look like yet
-            $('#saveButton').prop('disabled', false);
+            //$('#saveResults').html('Error: ' + error); //Don't know how it will look like yet
+            //$('#saveButton').prop('disabled', false);
+            block_refresh($('#editor-panel'));
+            noty({
+                text : error,
+                layout : 'topCenter',
+                type : 'danger'
+            });
         });
     },100);
     

@@ -162,6 +162,7 @@ var processMailmerge = function(sourceSel,updateSel,links,tags,successCallback,e
         errorCallback,50);
     renderMailmergeLinks(sourceSel,updateSel,links,
         errorCallback,50);
+    successCallback();
 }
 
 $(document).ready(function(){

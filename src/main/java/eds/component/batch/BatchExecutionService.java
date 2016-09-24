@@ -5,7 +5,6 @@
  */
 package eds.component.batch;
 
-import com.google.common.base.Objects;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
@@ -13,13 +12,10 @@ import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRunError;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStep_;
-import eds.entity.batch.BatchJobTrigger;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
@@ -31,7 +27,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.jboss.logging.Logger;
-import org.joda.time.DateTime;
 
 /**
  *

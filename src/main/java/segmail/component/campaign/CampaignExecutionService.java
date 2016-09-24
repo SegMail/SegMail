@@ -117,11 +117,12 @@ public class CampaignExecutionService {
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned to any Clients.");
         
         int count = 0; //Number 
+        int maxCount = (maxSize <= 0) ? Integer.MAX_VALUE : maxSize;
         
-        while (count < maxSize) {
+        while (count < maxCount) {
             //Retrieve all subscriber emails
             List<SubscriberAccount> subscribers = 
-                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxSize-count,BATCH_SIZE)); //DB hit
+                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxCount-count,BATCH_SIZE)); //DB hit
             //Lock 'em!
             subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
             //Skip if there are no more subscribers to be sent to
@@ -160,7 +161,7 @@ public class CampaignExecutionService {
             objService.getEm().flush();
         }
         //Ugly HACK, but simplest solution
-        if(count < maxSize || count == 0) {
+        if(count < maxCount || count == 0) {
             campaignActivity.setSTATUS(ACTIVITY_STATUS.COMPLETED.name);
             objService.getEm().merge(campaignActivity);
             

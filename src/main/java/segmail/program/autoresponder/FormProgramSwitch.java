@@ -17,6 +17,7 @@ import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
+import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
 
 /**
  *
@@ -32,6 +33,8 @@ public class FormProgramSwitch {
     private UserSessionContainer userContainer;
     @Inject
     private UserRequestContainer requestContainer;
+    @Inject
+    private AutoresponderSessionContainer autoemailCont;
     
     @EJB
     private AutoresponderService autoresponderService;
@@ -58,8 +61,8 @@ public class FormProgramSwitch {
     public void loadTemplate() {
         List<String> params = requestContainer.getPathParser().getOrderedParams();
         if (params == null || params.isEmpty()) {
-            program.setEditingTemplateId(-1);
-            program.setEditingTemplate(null);
+            setEditingTemplateId(-1);
+            setEditingTemplate(null);
             program.setEdit(false);
             requestContainer.setRenderPageToolbar(true);
             requestContainer.setRenderPageBreadCrumbs(true);
@@ -70,8 +73,8 @@ public class FormProgramSwitch {
         long editingId = Long.parseLong(firstParam);
         
         AutoresponderEmail editing = objectService.getEnterpriseObjectById(editingId, AutoresponderEmail.class);
-        program.setEditingTemplate(editing);
-        program.setEditingTemplateId(editingId);
+        setEditingTemplate(editing);
+        setEditingTemplateId(editingId);
         program.setEdit(true);
         requestContainer.setRenderPageToolbar(false);
         requestContainer.setRenderPageBreadCrumbs(false);
@@ -85,4 +88,20 @@ public class FormProgramSwitch {
         program.setEdit(edit);
     }
     
+    public AutoresponderEmail getEditingTemplate() {
+        return program.getEditingTemplate();
+    }
+
+    public void setEditingTemplate(AutoresponderEmail editingTemplate) {
+        program.setEditingTemplate(editingTemplate);
+        autoemailCont.setEditingTemplate(editingTemplate);
+    }
+    
+    public long getEditingTemplateId() {
+        return program.getEditingTemplateId();
+    }
+
+    public void setEditingTemplateId(long editingTemplateId) {
+        program.setEditingTemplateId(editingTemplateId);
+    }
 }

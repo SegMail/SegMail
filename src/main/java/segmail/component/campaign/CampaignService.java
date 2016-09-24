@@ -248,6 +248,7 @@ public class CampaignService {
         validateCampaignActivity(activity);
         activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
         
+        
         return objService.getEm().merge(activity);
     }
     
@@ -486,7 +487,7 @@ public class CampaignService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) {
+    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) throws IncompleteDataException {
         
         //Get the existing link first
         List<CampaignActivityOutboundLink> allLinks = objService.getEnterpriseData(activity.getOBJECTID(), CampaignActivityOutboundLink.class);
@@ -502,7 +503,9 @@ public class CampaignService {
             }
         }
         selectedLink.setLINK_TARGET(linkTarget);
+        //selectedLink.setLINK_TARGET(this.constructLink(selectedLink));
         selectedLink.setLINK_TEXT(linkText);
+        //selectedLink.setORIGINAL_LINK_HTML(originalHTML);
         //If not found
         if(selectedLink.getLINK_KEY() == null || selectedLink.getLINK_KEY().isEmpty())
             objService.getEm().persist(selectedLink);
@@ -519,8 +522,6 @@ public class CampaignService {
      */
     public String constructLink(CampaignActivityOutboundLink link) throws IncompleteDataException {
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
-        
-        
         
         return server.getURI() + "/link/" + link.getLINK_KEY();
     }
