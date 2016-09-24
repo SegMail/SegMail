@@ -52,8 +52,9 @@ var onSave = function (data) {
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
-            reapply_textarea('editor');
             renderEverything();
+            reapply_textarea('editor');
+            
             block_refresh(block);
             break;
 
@@ -87,7 +88,7 @@ var renderPreview = function (timeout) {
         //Copy summernote content back to textarea
         reapply_textarea('editor');
         $('#preview').html($('.note-editable').html());
-        $('#processedContent').html($('.note-editable').html());//do this earlier
+        $('#processedContent').val($('.note-editable').html());//do this earlier IMPT! it's .val() not .html()!
 
         //Get ratios
         var scaleY = $('#preview-panel').height() / $('#preview').height();
@@ -138,9 +139,10 @@ var addHashIdToLinks = function(timeout) {
     //For each link, add a data-link hashed ID
         $('.note-editable').find('a').each(function(index){
             var obj = $(this);
-            if(obj.attr('data-link'))
-                return;
             var hashId = md5(obj+obj.attr('href')+obj.html()+index);
+            if(obj.attr('data-link') === hashId)
+                return;
+            
             obj.attr('data-link',hashId);
         })
     },timeout);
@@ -260,13 +262,16 @@ var highlightAndCreateLinks = function (timeout) {
         //Copy the contents of editor/note-editable to processedContent
         //Get all links in preview 
         var allLinks = $('#preview').find('a');
-        var count = allLinks.size();
+        var count = allLinks.size(); 
         var position = 0;
         var textareaHtml = $('<div>'+$('#processedContent').val()+'</div>');
         //Loop through each link 
+        //Impt! When count is 0, this entire shit doesn't get executed
+        //So textarea#processedContent doesn't get updated!
         allLinks.each(function(index){
         //  1) render the link labels beside the preview panel
             var obj = $(this);
+            var linkTarget = obj.attr('href');
             var linkText = obj.text();
             var hashId = obj.attr('data-link');
             var offset = obj.offset().top - $('#preview').offset().top;
@@ -293,10 +298,11 @@ var highlightAndCreateLinks = function (timeout) {
             position = position + marginTop + $('#links div').last().height();
         //  2) Call WS with params: linkTarget, linkText, index
             callWSCreateUpdateLink(
-                    obj.attr('href')
-                    ,obj.html()
-                    ,index
-                    ,function(redirectLink) {
+                    hashId,
+                    linkTarget,
+                    linkText,
+                    index,
+                    function(redirectLink) {
                         //  3) In success callback (redirectLink):
                         //      a) replace the preview link with redirectLink
                         $('#preview a[data-link="'+hashId+'"]').attr('href',redirectLink);
@@ -304,9 +310,11 @@ var highlightAndCreateLinks = function (timeout) {
                         //$('#processedContent a[data-link="'+hashId+'"]').attr('href',redirectLink);//Doesn't work
                         //      small hack: http://stackoverflow.com/a/20430557/5765606
                         textareaHtml.find('a[data-link="'+hashId+'"]').attr('href',redirectLink);
+                        //If it is end of the processing, update the processedContent panel
                         if(!--count)
                             $('#processedContent').val(textareaHtml.html());
-                        console.log($('#processedContent').val());
+                        //Cache this link
+                        linksContainer.addLink(hashId,redirectLink);
                     },function() {
                         
                     })
@@ -316,29 +324,32 @@ var highlightAndCreateLinks = function (timeout) {
 }
 
 var linksContainer = function () {
-    var linksArray = [];
+    var linksArray = {};
 
     return {
-        addLink: function (redirectLink) {
-            linksArray.push(redirectLink);
+        addLink: function (hashId,redirectLink) {
+            linksArray[hashId] = redirectLink;
         },
-        contains: function (link) {
-            for (var i = 0; i < linksArray.length; i++) {
-                if (linksArray[i] === link)
-                    return true;
-            }
-            return false;
+        getLink: function (hashId) {
+            return linksArray[hashId];
         },
-        submit: function () {
-            $('#pseudo-links').val(JSON.stringify(linksArray));
+        removeLink : function (hashId) {
+            delete linksArray[hashId];
+        },
+        contains: function (hashId) {
+            return linksArray[hashId];// === linkTarget;
         },
         reset: function () {
-            linksArray = [];
+            linksArray = {};
         }
     }
 }();
 
-var callWSCreateUpdateLink = function (linkTarget, linkText, index, successCallback, errorCallback) {
+var callWSCreateUpdateLink = function (hashId, linkTarget, linkText, index, successCallback, errorCallback) {
+    if(linksContainer.contains(hashId)) {
+        successCallback(linksContainer.getLink(hashId));
+        return;
+    }
     callWS(web_service_endpoint, 'createOrUpdateLink', 
         'http://webservice.campaign.program.segmail/',
         {
