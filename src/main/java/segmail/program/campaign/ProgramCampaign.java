@@ -49,6 +49,7 @@ public class ProgramCampaign extends Program{
     private List<String> selectedLists; //JSF selectMany component will store it as String.
     
     private MAILMERGE_REQUEST[] mailmergeLinkTags = MAILMERGE_REQUEST.values();
+    private Map<String,String> mailmergeLinks = new HashMap<>();
     
     /**
      * Intersection of field sets from the different targeted lists.
@@ -188,6 +189,14 @@ public class ProgramCampaign extends Program{
 
     public void setListFields(List<SubscriptionListField> listFields) {
         this.listFields = listFields;
+    }
+
+    public Map<String, String> getMailmergeLinks() {
+        return mailmergeLinks;
+    }
+
+    public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
+        this.mailmergeLinks = mailmergeLinks;
     }
     
 }

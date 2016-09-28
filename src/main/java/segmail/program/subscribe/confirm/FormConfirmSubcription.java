@@ -87,9 +87,6 @@ public class FormConfirmSubcription {
             //ex.printStackTrace(System.out);
             program.setCurrentPage(program.getPROCESSED());
             
-        } catch (IncompleteDataException ex) {
-            ex.printStackTrace(System.out);
-            program.setCurrentPage(program.getERROR());
         } catch (MalformedURLException ex) {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());

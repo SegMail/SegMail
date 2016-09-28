@@ -22,13 +22,11 @@ var refresh_summernote = function (selector) {
                         allTagsAndLinks.push(key);
                     }
                 }
-                //mailmergeTagsSubscriber.forEach(function(item){
-                //    allTagsAndLinks.push(item);
-                //});
-                mailmergeLinks.forEach(function(item){
-                    allTagsAndLinks.push(item);
-                });
-                
+                for(var key in mailmergeLinks) {
+                    if (mailmergeLinks.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(key);
+                    }
+                }
                 return allTagsAndLinks;
             }()
         }
@@ -54,7 +52,6 @@ var onSave = function (data) {
         case "begin": // This is called right before ajax request is been sent.
             renderEverything();
             reapply_textarea('editor');
-            
             block_refresh(block);
             break;
 
@@ -123,7 +120,6 @@ var adjustPreviewPanelHeight = function () {
     if($('#editor-panel').length <= 0)
         return;
     //Listen for resize on the #editor-panel
-    //$('.note-editable').resize(function(){ //seems like only for window
     //Adjust heights
     //Get actual heights and widths
     var editorBottom = $('#editor-panel').offset().top
@@ -142,7 +138,6 @@ var addHashIdToLinks = function(timeout) {
             var hashId = md5(obj+obj.attr('href')+obj.html()+index);
             if(obj.attr('data-link') === hashId)
                 return;
-            
             obj.attr('data-link',hashId);
         })
     },timeout);
@@ -153,25 +148,24 @@ var renderEverything = function () {
     renderPreview(0);
     highlightAndCreateLinks(0);
     processMailmergeNoWS(0);
-    //processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber, //Actually since we already know the entire list of mailmergeTags available, why not just load it in a xhtml page as a JSON object?
-    //function(){//successCallback
-    //    highlightAndCreateLinks(0);
-    //},
-    //function(){//errorCallback
-    //    //$('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-    //});
 };
 
 var processMailmergeNoWS = function(timeout) {
     setTimeout(function(){
+        var content = $('#preview').html();
         for(var key in mailmergeTagsSubscriber) {
             if(mailmergeTagsSubscriber.hasOwnProperty(key)) {
                 var subscVal = randomSubscriber[mailmergeTagsSubscriber[key]];
-                var content = $('#preview').html();
-                content = content.replace(key,subscVal);
-                $('#preview').html(content);
+                content = content.replace(RegExp(key,'g'),subscVal);
             }
         }
+        for(var key in mailmergeLinks) {
+            if(mailmergeLinks.hasOwnProperty(key)) {
+                var url = '<a target="_blank" href="'+mailmergeLinks[key][1]+'">'+mailmergeLinks[key][0]+'</a>';
+                content = content.replace(RegExp('<span>'+key+'</span>','g'),url);
+            }
+        }
+        $('#preview').html(content);
     },timeout);
     
 }
@@ -182,7 +176,6 @@ var modifyDomToGeneratePreview = function () {
     $('#modifyDomToGeneratePreview' + randomNum).remove();
 };
 
-// Helper functions
 var toggleMenu = function () {
     if ($(document).has('#FormEditEmailActivity').length) {
         page_navigation();
@@ -193,66 +186,6 @@ function setSendInBatch(id) {
     var value = document.getElementById(id).value;
     if (value <= 0)
         document.getElementById(id).value = null;
-}
-var highlightAndCreateLinksOld = function (timeout) {
-    setTimeout(function () {
-        //Clear the preview pane first
-        $('#links').empty();
-        //Clear the linksContainer too
-        linksContainer.reset();
-        var allLinks = $('.note-editable').find('a');
-        if (allLinks.size() <= 0)
-            return;
-
-        var count = allLinks.size();
-        var position = 0;
-        allLinks.each(function (index) {
-            //Create the badges for each link first, then call WS to get the redirectlink and fill them up in the preview pane!
-            var obj = $(this);
-            var linkText = obj.text();
-            var offset = obj.offset().top - $('#preview').offset().top;
-            var marginTop1 = offset;
-            
-            if(obj.attr('data-link'))
-                return;
-
-            if (index > 0) {
-                var lastOffset = position;
-                marginTop1 = marginTop1 - lastOffset;
-            }
-            var marginTop = Math.max(marginTop1, 0);
-            if(marginTop > 0) //It is not "sticking" to the previous button
-                marginTop -= 0.5*12; //12px is the pre-defined size of the div
-            else
-                marginTop -= 0.25*$('#links div').last().height();
-            
-            var link =
-                    '<div style="margin-top: '+marginTop+'px">'
-                    + "<span class='link-button'>"
-                    + (index + 1) //key 1
-                    + "</span> "
-                    + linkText //key 2
-                    + "</div>";
-            $('#links').append(link);
-            $('#links div').last().addClass('css-bounce');//.css('margin-top', marginTop);
-            position = position + marginTop + $('#links div').last().height();
-            
-            callWSCreateUpdateLink(obj.attr('href'), obj.html(), index,
-                    function (redirectLink) {
-                        obj.attr('href', redirectLink);
-                        //if (!--count)
-                        //    copyPreviewContent();
-                    },
-                    function (code,text,result) {
-                        noty({
-                            text : result,
-                            layout : 'topCenter',
-                            type : 'danger'
-                        });
-                    }
-            );
-        });
-    }, timeout);
 }
 
 var highlightAndCreateLinks = function (timeout) {
@@ -294,7 +227,7 @@ var highlightAndCreateLinks = function (timeout) {
                     + linkText //key 2
                     + "</div>";
             $('#links').append(link);
-            $('#links div').last().addClass('css-bounce');//.css('margin-top', marginTop);
+            $('#links div').last().addClass('css-bounce');
             position = position + marginTop + $('#links div').last().height();
         //  2) Call WS with params: linkTarget, linkText, index
             callWSCreateUpdateLink(
@@ -307,7 +240,6 @@ var highlightAndCreateLinks = function (timeout) {
                         //      a) replace the preview link with redirectLink
                         $('#preview a[data-link="'+hashId+'"]').attr('href',redirectLink);
                         //      b) replace the processedContent link with redirectLink
-                        //$('#processedContent a[data-link="'+hashId+'"]').attr('href',redirectLink);//Doesn't work
                         //      small hack: http://stackoverflow.com/a/20430557/5765606
                         textareaHtml.find('a[data-link="'+hashId+'"]').attr('href',redirectLink);
                         //If it is end of the processing, update the processedContent panel
@@ -315,8 +247,12 @@ var highlightAndCreateLinks = function (timeout) {
                             $('#processedContent').val(textareaHtml.html());
                         //Cache this link
                         linksContainer.addLink(hashId,redirectLink);
-                    },function() {
-                        
+                    },function(error) {
+                        noty({
+                            text : error,
+                            layout : 'topCenter',
+                            type : 'danger'
+                        });
                     })
         
         })
@@ -337,7 +273,7 @@ var linksContainer = function () {
             delete linksArray[hashId];
         },
         contains: function (hashId) {
-            return linksArray[hashId];// === linkTarget;
+            return linksArray[hashId];
         },
         reset: function () {
             linksArray = {};
@@ -356,7 +292,6 @@ var callWSCreateUpdateLink = function (hashId, linkTarget, linkText, index, succ
             linkTarget: linkTarget,
             linkText: linkText,
             index: index,
-            //originalHTML : originalHTML
         }, successCallback, errorCallback);
 };
 

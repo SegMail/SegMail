@@ -10,7 +10,6 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
-
         <ui:define name="main-program-panel">
             <c:choose >
                 <c:when test="#{UserSessionContainer.loggedIn}">
@@ -31,15 +30,8 @@
                 </c:when>
                 <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.SUCCESS}">
                     <div class="row">
-                        <div class="col-sm-12 col-md-12">
-                            <h4>You have been removed from the list:</h4>
-                            <p class="lead" style="color: #26b99a; margin-left: 20px">
-                                #{FormUnsubscribe.listName}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
+                        <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8">
+                            <h4>You have been removed successfully</h4>
                             <p>You will not be receiving any more emails.</p>
                         </div>
                     </div>
@@ -47,12 +39,8 @@
                 </c:when>
                 <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.PROCESSED}">
                     <div class="row">
-                        <div class="col-sm-12 col-md-12">
+                        <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8">
                             <h4>Your email has already been removed from our database</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
                             <p>You will not be receiving any more emails.</p>
                         </div>
                     </div>
@@ -60,12 +48,8 @@
                 </c:when>
                 <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.LANDING}">
                     <div class="row">
-                        <div class="col-sm-12 col-md-12">
+                        <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8">
                             <h4>Oops, seems like you have reached this place by mistake.</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
                             <p>
                                 If you were led here by some links from your email, most probably our 
                                 servers have run into some issues. Please help us to correct this problem
@@ -78,27 +62,10 @@
                     </div>
                     
                 </c:when>
-                <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.EXPIRED}">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
-                            <h4>The link that you have clicked on has already expired</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
-                            <p>Click here to request a new email: </p>
-                        </div>
-                    </div>
-                    
-                </c:when>
                 <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.ERROR}">
                     <div class="row">
                         <div class="col-sm-12 col-md-12">
                             <h4>Oops, seems like the application has encountered an error.</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
                             <p>
                                 If you were led here by some links from your email, most probably our 
                                 servers have run into some issues. Please help us to correct this problem
@@ -107,18 +74,10 @@
                         </div>
                     </div>
                 </c:when>
-
-                
             </c:choose>
-
-
         </ui:define>
-
         <ui:define name="scripts-bottom">
-            
-
         </ui:define>
-
     </ui:composition>
 </html>
 

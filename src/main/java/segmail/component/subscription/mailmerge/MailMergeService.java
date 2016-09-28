@@ -162,7 +162,7 @@ public class MailMergeService {
      * @param mmKey assume this is a SubscriptionListField.MAILMERGE_TAG 
      * @return 
      */
-    public String parseMailmergeTags(/*MailmergeTag mailmergeTag, */ 
+    public String parseMailmergeTagsSubscriber(
             String text, 
             long listId, 
             long subscriberId) {
@@ -213,8 +213,6 @@ public class MailMergeService {
             return text;
         }
         
-        
-
         // Check if key exists
         /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
          if(trans == null) {
@@ -304,8 +302,8 @@ public class MailMergeService {
         if(!testServerAddress.endsWith("/"))
             testServerAddress = testServerAddress + "/";
         
-        String name = request.name().toLowerCase();
-        String testLink = testServerAddress + name + "/" + label;
+        String name = request.program();
+        String testLink = testServerAddress + name + "/test";
         
         return testLink;
     }

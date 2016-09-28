@@ -45,7 +45,7 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivityOutboundLink_;
-import segmail.entity.campaign.LinkClick;
+import segmail.entity.campaign.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
@@ -319,7 +319,7 @@ public class CampaignExecutionService {
         if(link == null)
             throw new EntityNotFoundException("Link key "+linkKey+" not found.");
         
-        LinkClick newLinkClick = new LinkClick();
+        CampaignLinkClick newLinkClick = new CampaignLinkClick();
         newLinkClick.setLINK_KEY(linkKey);
         
         objService.getEm().persist(newLinkClick);

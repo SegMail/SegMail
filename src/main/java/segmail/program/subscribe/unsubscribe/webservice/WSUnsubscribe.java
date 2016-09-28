@@ -7,8 +7,6 @@ package segmail.program.subscribe.unsubscribe.webservice;
 
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.webservice.UnwantedAccessException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -18,7 +16,6 @@ import javax.jws.WebService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
-import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.program.subscribe.unsubscribe.client.WSUnsubscribeInterface;
 
 /**
@@ -40,7 +37,6 @@ public class WSUnsubscribe implements WSUnsubscribeInterface {
      * @param key
      * @return a JSON string of the list name and a redirect address, if any.
      * Example: { "name" : "Segmail List", "redirect" : "http://segmail.io" }
-     * @throws eds.component.data.RelationshipNotFoundException
      * @throws eds.component.webservice.UnwantedAccessException
      */
     @Override
@@ -52,8 +48,7 @@ public class WSUnsubscribe implements WSUnsubscribeInterface {
                 throw new UnwantedAccessException("Key is not provided.");
             }
             //Check if it is a testing link
-            MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(key);
-            if (label != null && label.equals(MAILMERGE_REQUEST.UNSUBSCRIBE)) {
+            if (key.equalsIgnoreCase("test")) {
                 return "This is a testing list";
             }
             

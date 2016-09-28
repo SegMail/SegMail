@@ -7,6 +7,7 @@ package segmail.program.autoresponder;
 
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -29,6 +30,7 @@ import seca2.program.FormEditEntity;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
@@ -52,6 +54,8 @@ public class FormEditExistingTemplate implements FormEditEntity {
     private ListService listService;
     @EJB
     private SubscriptionService subService;
+    @EJB
+    MailMergeService mmService;
 
     @Inject
     private ProgramAutoresponder program;
@@ -67,6 +71,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
         if (!FacesContext.getCurrentInstance().isPostback()) {
             loadListAndListFields();
             loadRandomSubscriber();
+            loadMMUrls();
         }
     }
 
@@ -118,6 +123,14 @@ public class FormEditExistingTemplate implements FormEditEntity {
     
     public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
         return program.getMailmergeLinkTags();
+    }
+    
+    public Map<String, String> getMailmergeLinks() {
+        return program.getMailmergeLinks();
+    }
+
+    public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
+        program.setMailmergeLinks(mailmergeLinks);
     }
 
     public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
@@ -208,5 +221,20 @@ public class FormEditExistingTemplate implements FormEditEntity {
             setRandomSubscriber(subscribers.get(id));
             getRandomSubscriber().put("OBJECTID", id.toString());
         }
+    }
+    
+    public void loadMMUrls() {
+
+        try {
+            for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
+                String url = mmService.getSystemTestLink(request.label());
+                this.getMailmergeLinks().put(request.label(), url);
+            }
+        } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (IncompleteDataException ex) {
+            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        }
+
     }
 }

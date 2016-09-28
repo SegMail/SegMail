@@ -42,8 +42,8 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
-import segmail.entity.campaign.LinkClick;
-import segmail.entity.campaign.LinkClick_;
+import segmail.entity.campaign.CampaignLinkClick;
+import segmail.entity.campaign.CampaignLinkClick_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -529,10 +529,10 @@ public class CampaignService {
     public long getLinkClicks(String key) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
-        Root<LinkClick> fromClicks = query.from(LinkClick.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
         
         query.select(builder.count(fromClicks));
-        query.where(builder.equal(fromClicks.get(LinkClick_.LINK_KEY), key));
+        query.where(builder.equal(fromClicks.get(CampaignLinkClick_.LINK_KEY), key));
         
         Long result = objService.getEm().createQuery(query)
                 .getSingleResult();

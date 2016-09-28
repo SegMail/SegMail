@@ -105,6 +105,25 @@ public class FormSignupCode {
         return clientCont.getClient().getOBJECTID();
     }
     
+    public List<SubscriptionListField> getFields() {
+        return program.getFields();
+    }
+
+    public void setFields(List<SubscriptionListField> fields) {
+        program.setFields(fields);
+    }
+    
+    public void loadListFields() {
+        long selectedListId = this.getSelectedListId();
+        if(selectedListId <= 0)
+            return;
+        
+        //Get all the lists fields
+        List<SubscriptionListField> fieldLists = listService.getFieldsForSubscriptionList(selectedListId);
+        
+        setFields(fieldLists);
+    }
+    
     public String generateListFields() {
         long selectedListId = this.getSelectedListId();
         if(selectedListId <= 0)

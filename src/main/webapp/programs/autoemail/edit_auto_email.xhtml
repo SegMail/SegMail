@@ -58,25 +58,30 @@
                     <div id="preview" class="block-content" style="background-color: ">
                         
                     </div>
-                    <h:inputHidden pass:id="processedContent" id="processedContent"
-                                   value="#{FormEditExistingTemplate.editingTemplate.BODY_PROCESSED}"
-                                   ></h:inputHidden>
                 </div>
             </div>
         </div>
         <script type="text/javascript" >
             var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
             
-            var mailmergeTagsSubscriber = [
-                <c:forEach items="#{FormEditExistingTemplate.listFields}" var="field">
-                    '#{field.MAILMERGE_TAG}',
+            var mailmergeTagsSubscriber = {
+                <c:forEach items = "#{FormEditExistingTemplate.listFields}" var = "field" >
+                    '#{field.MAILMERGE_TAG}' : '#{field.generateKey()}',
                 </c:forEach>
-            ];
-            var mailmergeLinks = [
-                <c:forEach items="#{FormEditExistingTemplate.mailmergeLinkTags}" var="link">
-                    '#{link.label()}',
+            };
+            var mailmergeLinks = {
+                <c:forEach items = "#{FormEditExistingTemplate.mailmergeLinkTags}" var = "link" >
+                    '#{link.label()}' : [
+                            '#{link.defaultHtmlText()}',
+                            '#{FormEditExistingTemplate.mailmergeLinks[link.label()]}'
+                    ],
                 </c:forEach>
-            ];
+            };
+            var randomSubscriber = {
+                <c:forEach items = "#{FormEditExistingTemplate.randomSubscriber.keySet()}" var = "field" >
+                    #{field} : '#{FormEditExistingTemplate.randomSubscriber[field]}',
+                </c:forEach>
+            }
         </script>
         
     </form>

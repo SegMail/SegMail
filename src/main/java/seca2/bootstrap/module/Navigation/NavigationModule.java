@@ -52,16 +52,12 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
-        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
-            return true;
-        }*/
         if (requestContainer.getPathParser().containsFileResource())
             return true;
         
         UserType userType = sessionContainer.getUserType();
         
         //For all other programs which changes menu items assignment, just nullify menu attribute of the sessionContainer
-        
         String currentProgram = requestContainer.getProgramName();
         List<MenuItemContainer> existingMenuItems = sessionContainer.getMenu();//debug
         if(sessionContainer.getMenu() == null ){

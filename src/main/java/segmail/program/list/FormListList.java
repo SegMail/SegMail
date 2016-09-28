@@ -53,7 +53,7 @@ public class FormListList {
         //Only if it is not a postback, reload everything
         if (!FacesContext.getCurrentInstance().isPostback()) {
             this.loadAllLists();
-            this.resetEditingList();
+            //this.resetEditingList();
         }
     }
 

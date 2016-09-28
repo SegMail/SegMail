@@ -353,7 +353,7 @@ public class SubscriptionService {
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedConfirmEmail.getBODY();
         newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
-        newEmailBody = mailMergeService.parseMailmergeTags(newEmailBody, sub.getTARGET().getOBJECTID(), sub.getSOURCE().getOBJECTID());
+        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getTARGET().getOBJECTID(), sub.getSOURCE().getOBJECTID());
         //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
@@ -473,19 +473,15 @@ public class SubscriptionService {
      * 
      * @param confirmKey
      * @return
-     * @throws RelationshipNotFoundException if no Subscription is found for the confirmKey
+     * @throws RelationshipNotFoundException if no such Subscription is found
+     * @throws IncompleteDataException if no "Send As" address is set for SubscriptionList
+     * @throws DataValidationException if either sender or recipient email is missing.
+     * @throws InvalidEmailException if email address is invalid
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Subscription confirmSubscriber(String confirmKey)
-            throws RelationshipNotFoundException {
-        /*List<Subscription> subscriptions = getSubscriptions(subscriberEmail,listId);
-        
-         if(subscriptions == null || subscriptions.isEmpty())
-         throw new RelationshipNotFoundException("The email "+subscriberEmail+" or list ID "+listId+" was not found.");
-        
-         //Subscriptions should be unique, so only 1 result is expected
-         Subscription subsc = subscriptions.get(0);
-         */
+            throws RelationshipNotFoundException, IncompleteDataException, DataValidationException, InvalidEmailException {
+
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
         Root<Subscription> fromSubsc = query.from(Subscription.class);
@@ -501,7 +497,7 @@ public class SubscriptionService {
         }
         
         if (results.size() > 1)
-            throw new RuntimeException("SHA-512 collision! We're all going to die!!!");
+            throw new RuntimeException("SHA-256 collision! We're all going to die!!!");
 
         Subscription sub = results.get(0);
 
@@ -509,7 +505,7 @@ public class SubscriptionService {
         //sub.setCONFIRMATION_KEY("");//remove confirmation key?
         
         //Send out welcome email (if assigned)
-        
+        sendWelcomeEmail(sub);
 
         sub = updateService.getEm().merge(sub);
 
@@ -695,4 +691,43 @@ public class SubscriptionService {
         return new AsyncResult<>(result);
     }
     
+    /**
+     * 
+     * @param sub
+     * @throws IncompleteDataException if "Send As" is not set for SubscriptionList
+     * @throws DataValidationException if email address is invalid
+     * @throws InvalidEmailException if email address is invalid
+     */
+    public void sendWelcomeEmail(Subscription sub) 
+            throws IncompleteDataException, DataValidationException, InvalidEmailException{
+        SubscriptionList list = sub.getTARGET();
+
+        String sendAs = list.getSEND_AS_EMAIL();
+        if (sendAs == null || sendAs.isEmpty()) {
+            throw new IncompleteDataException("Please set \"Send As\" address before sending welcome emails.");
+        }
+
+        //Retrieve the autoemail from list using AutoresponderService
+        List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.WELCOME);
+        AutoresponderEmail assignedWelcomeEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
+                ? null : assignedAutoEmails.get(0);
+
+        if (assignedWelcomeEmail == null) {
+            throw new IncompleteDataException("Please assign a Welcome email before adding subscribers.");
+        }
+
+        //Parse all mailmerge functions using MailMergeService
+        String newEmailBody = assignedWelcomeEmail.getBODY();
+        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getTARGET().getOBJECTID(), sub.getSOURCE().getOBJECTID());
+
+        //Send the email using MailService
+        Email welcomeEmail = new Email();
+        welcomeEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
+        welcomeEmail.setSENDER_NAME(list.getSEND_AS_NAME());
+        welcomeEmail.setBODY(newEmailBody);
+        welcomeEmail.setSUBJECT(assignedWelcomeEmail.getSUBJECT());
+        welcomeEmail.addRecipient(sub.getSOURCE().getEMAIL());
+
+        mailService.queueEmail(welcomeEmail, DateTime.now());
+    }
 }

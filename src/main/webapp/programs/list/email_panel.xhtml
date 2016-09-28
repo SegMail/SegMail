@@ -65,8 +65,8 @@
                                     </div>
 
                                     <p>Select the email that you want your users to receive to <u>confirm</u> their signup.</p>
-                                    <p><h:selectOneMenu styleClass="form-control" value="#{FormListEmail.program.selectedConfirmationEmailId}">
-                                            <f:selectItem itemValue="-1" itemLabel="Please select one" />
+                                    <p><h:selectOneMenu disabled="true" styleClass="form-control" value="#{FormListEmail.program.selectedConfirmationEmailId}">
+                                            <f:selectItem itemValue="-1" itemLabel="[None assigned]Please go to 'Autoresponders' to create one" />
                                             <f:selectItems  value="#{FormListEmail.program.confirmationEmails}" var="c"
                                                             itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
                                                             >
@@ -99,8 +99,8 @@
                                         Select the email that you want your users to receive <u>after</u> they have confirmed their signup.
                                     </p>
                                     <p>
-                                        <h:selectOneMenu styleClass="form-control" value="#{FormListEmail.program.selectedWelcomeEmailId}">
-                                            <f:selectItem itemValue="-1" itemLabel="Please select one" />
+                                        <h:selectOneMenu disabled="true" styleClass="form-control" value="#{FormListEmail.program.selectedWelcomeEmailId}">
+                                            <f:selectItem itemValue="-1" itemLabel="[None assigned]Please go to 'Autoresponders' to create one" />
                                             <f:selectItems  value="#{FormListEmail.program.welcomeEmails}" var="c"
                                                             itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
 

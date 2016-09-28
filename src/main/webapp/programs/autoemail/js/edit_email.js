@@ -47,13 +47,16 @@ var refresh_summernote = function (selector) {
         MailMerge: {
             tags: function() {
                 var allTagsAndLinks = [];
-                mailmergeTagsSubscriber.forEach(function(item){
-                    allTagsAndLinks.push(item);
-                });
-                mailmergeLinks.forEach(function(item){
-                    allTagsAndLinks.push(item);
-                });
-                
+                for(var key in mailmergeTagsSubscriber) {
+                    if (mailmergeTagsSubscriber.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(key);
+                    }
+                }
+                for(var key in mailmergeLinks) {
+                    if (mailmergeLinks.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(key);
+                    }
+                }
                 return allTagsAndLinks;
             }()
         }
@@ -166,14 +169,40 @@ var adjustPreviewPanelHeight = function () {
 
 var renderEverything = function () {
     renderPreview(0);
-    processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber,
+    processMailmergeNoWS(0);
+    /*processMailmerge('#preview','#processedContent',mailmergeLinks,mailmergeTagsSubscriber,
     function(){//successCallback
         
     },
     function(){//errorCallback
         $('#saveResults').html('<span style="color: red">Error: ' + message + '</span>');
-    });
+    });*/
 }
+
+var processMailmergeNoWS = function(timeout) {
+    setTimeout(function(){
+        var content = $('#preview').html();
+        for(var key in mailmergeTagsSubscriber) {
+            if(mailmergeTagsSubscriber.hasOwnProperty(key)) {
+                var subscVal = randomSubscriber[mailmergeTagsSubscriber[key]];
+                if(!subscVal)
+                    continue;
+                content = content.replace(RegExp(key,'g'),subscVal);
+            }
+        }
+        for(var key in mailmergeLinks) {
+            if(mailmergeLinks.hasOwnProperty(key)) {
+                if(!mailmergeLinks[key][1] || !mailmergeLinks[key][0])
+                    continue;
+                var url = '<a target="_blank" href="'+mailmergeLinks[key][1]+'">'+mailmergeLinks[key][0]+'</a>';
+                content = content.replace(RegExp('<span>'+key+'</span>','g'),url);
+            }
+        }
+        $('#preview').html(content);
+    },timeout);
+    
+}
+
 
 var modifyDomToGeneratePreview = function () {
     var randomNum = Math.round(Math.random() * 100000);

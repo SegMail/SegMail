@@ -13,8 +13,8 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author LeeKiatHaw
  */
-@StaticMetamodel(LinkClick.class)
-public class LinkClick_ extends EnterpriseTransaction_ {
+@StaticMetamodel(CampaignLinkClick.class)
+public class CampaignLinkClick_ extends EnterpriseTransaction_ {
     
-    public static volatile SingularAttribute<LinkClick,String> LINK_KEY;
+    public static volatile SingularAttribute<CampaignLinkClick,String> LINK_KEY;
 }

@@ -241,7 +241,7 @@ public class MailService {
      * 
      * @param email
      * @param scheduledTime
-     * @throws DataValidationException if validateEmail(Email) throws one.
+     * @throws DataValidationException if either sender or recipient email is missing.
      * @throws InvalidEmailException if validateEmail(Email) throws one.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -307,7 +307,7 @@ public class MailService {
     /**
      * 
      * @param email
-     * @throws DataValidationException
+     * @throws DataValidationException if email is missing
      * @throws InvalidEmailException if either Sender's email address or any of
      * the Recipients' email addresses are not valid based on org.apache.commons.validator.routines.EmailValidator
      */

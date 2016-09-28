@@ -11,6 +11,7 @@ import eds.component.user.UserService;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import eds.entity.user.UserType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -67,6 +68,8 @@ public class ProgramAutoresponder extends Program{
     private Map<String,String> randomSubscriber;
     
     private MAILMERGE_REQUEST[] mailmergeLinkTags = MAILMERGE_REQUEST.values();
+    
+    private Map<String,String> mailmergeLinks = new HashMap<>();
 
     public List<AutoresponderEmail> getConfirmationTemplates() {
         return confirmationTemplates;
@@ -162,6 +165,14 @@ public class ProgramAutoresponder extends Program{
 
     public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
         this.mailmergeLinkTags = mailmergeLinkTags;
+    }
+
+    public Map<String, String> getMailmergeLinks() {
+        return mailmergeLinks;
+    }
+
+    public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
+        this.mailmergeLinks = mailmergeLinks;
     }
 
     @Override

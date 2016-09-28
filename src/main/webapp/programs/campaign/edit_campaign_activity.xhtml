@@ -64,12 +64,9 @@
                             <a href="#{request.contextPath}/campaign/#{FormEditEmailActivity.editingCampaignId}" class="btn btn-default">Return without Saving</a>
                         </div>
                         <div class="pull-right">
-                            <span id="saveResults" >
-
-                            </span>
                             <button jsf:id="saveButton" pass:id="saveButton"
                                     class="btn btn-success"
-                                >
+                                    >
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
                                         event="click"
                                         onevent="onSave"
@@ -84,7 +81,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
             <div class="col-md-6">
                 <div class="block">
@@ -97,38 +93,39 @@
                     </div>
                 </div>
                 <div id="preview-panel" class="block">
-
                     <div class="block-content">
                         <div class="row">
                             <div id="preview" class="col-md-9" >
                             </div>
                             <div id="links" class="col-md-3" >
                             </div>
-                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         <script type="text/javascript" >
-            var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
-            var web_service_endpoint2 = '#{request.contextPath}/WSCampaignActivityMailMerge';
-            var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
-
-            var mailmergeTagsSubscriber = {
-                    <c:forEach items = "#{FormEditEmailActivity.listFields}" var = "field" >
-                    '#{field.MAILMERGE_TAG}' : '#{field.generateKey()}',
-                    </c:forEach>
-            };
-                    var mailmergeLinks = [
-                            <c:forEach items = "#{FormEditEmailActivity.mailmergeLinkTags}" var = "link" >
-                            '#{link.label()}',
-                            </c:forEach>
-                    ];
-            var randomSubscriber = {
-                <c:forEach items = "#{FormEditEmailActivity.randomSubscriber.keySet()}" var = "field" >
-                    #{field} : '#{FormEditEmailActivity.randomSubscriber[field]}',
-                </c:forEach>
-            }
+                    var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                    var web_service_endpoint2 = '#{request.contextPath}/WSCampaignActivityMailMerge';
+                    var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
+                    var mailmergeTagsSubscriber = {
+                        <c:forEach items = "#{FormEditEmailActivity.listFields}" var = "field" >
+                            '#{field.MAILMERGE_TAG}' : '#{field.generateKey()}',
+                        </c:forEach>
+                    };
+                    var mailmergeLinks = {
+                        <c:forEach items = "#{FormEditEmailActivity.mailmergeLinkTags}" var = "link" >
+                            '#{link.label()}' : [
+                                    '#{link.defaultHtmlText()}',
+                                    '#{FormEditEmailActivity.mailmergeLinks[link.label()]}'
+                            ],
+                        </c:forEach>
+                    };
+                    var randomSubscriber = {
+                        <c:forEach items = "#{FormEditEmailActivity.randomSubscriber.keySet()}" var = "field" >
+                            #{field} : '#{FormEditEmailActivity.randomSubscriber[field]}',
+                        </c:forEach>
+                    }
         </script>   
     </form>
 </html>

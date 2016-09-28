@@ -22,6 +22,7 @@ import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**

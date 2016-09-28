@@ -5,10 +5,13 @@
  */
 package segmail.program.subscribe.confirm.webservice;
 
+import eds.component.data.DataValidationException;
+import eds.component.data.IncompleteDataException;
 import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
+import eds.component.mail.InvalidEmailException;
 import eds.component.transaction.TransactionService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +24,6 @@ import javax.jws.WebParam;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
-import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
@@ -74,8 +76,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
                 throw new UnwantedAccessException("Key is not provided.");
             }
             //Check if it is a testing link
-            MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(key);
-            if (label != null && label.equals(MAILMERGE_REQUEST.CONFIRM)) {
+            if (key.equalsIgnoreCase("test")) {
                 return "This is a testing list";
             }
 
@@ -104,7 +105,17 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
 
             return list.getLIST_NAME();
         } catch (RelationshipNotFoundException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException("You received this transaction code by mistake.", ex);
+        } catch (IncompleteDataException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException("The list does not have a \"Send As\" address.", ex);
+        } catch (DataValidationException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException("Subscriber does not have an email address.", ex);
+        } catch (InvalidEmailException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException("Subscriber's or sender's email address is invalid.", ex);
         }
     }
 
@@ -126,17 +137,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
         try {
             subService.retriggerConfirmation(key);
 
-        } /*catch (IncompleteDataException ex) {
-            //Do something, log an error in admin dashboard or send an email to administrator
-            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (BatchProcessingException ex) {
-            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (DataValidationException ex) {
-            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidEmailException ex) {
-            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
         }

@@ -6,7 +6,6 @@
 package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
-import eds.component.batch.BatchProcessingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -17,10 +16,8 @@ import eds.entity.mail.Email;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -31,7 +28,6 @@ import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.joda.time.DateTime;
-import seca2.bootstrap.module.Client.ClientContainer;
 import static segmail.component.subscription.SubscriptionService.DEFAULT_EMAIL_FIELD_NAME;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
@@ -108,7 +104,7 @@ public class MassSubscriptionService {
         //Set up the return results Map
         Map<String, List<Map<String, Object>>> results = new HashMap<>();
 
-        SubscriptionList list = subContainer.getList(); //objService.getEnterpriseObjectById(listId, SubscriptionList.class); //DB hit, can be cached
+        SubscriptionList list = subContainer.getList(); //DB hit, can be cached
         if (list == null) {
             throw new EntityNotFoundException("SubscriptionList not initialized.");
         }
@@ -118,7 +114,7 @@ public class MassSubscriptionService {
             throw new EntityNotFoundException("Client not initialized.");
         }
 
-        List<SubscriptionListField> fields = subContainer.getListFields(); //listService.getFieldsForSubscriptionList(listId); //DB hit, can be cached
+        List<SubscriptionListField> fields = subContainer.getListFields(); //DB hit, can be cached
 
         //This is the list of emails to be added and checked for existing subscribers
         List<String> emails = new ArrayList<>();
@@ -133,7 +129,6 @@ public class MassSubscriptionService {
             for (SubscriptionListField field : fields) {
                 if (field.isMANDATORY()
                         && (subscriber.get((String) field.generateKey()) == null || ((String) subscriber.get((String) field.generateKey())).isEmpty())) {
-                    //throw new IncompleteDataException("Mandatory list field " + field.getFIELD_NAME() + " is missing.");
                     errorKey = "Mandatory list field " + field.getFIELD_NAME() + " is missing.";
                     break;
                 }
@@ -313,7 +308,6 @@ public class MassSubscriptionService {
             if (doubleOptin) {
                 sendConfirmationEmails(createNewSubscription);
             }
-            
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
             System.out.println("Time taken to update " + subscribers.size() + " subscribers is " + timeTaken);
@@ -325,7 +319,6 @@ public class MassSubscriptionService {
                 errorMsg = ex.getClass().getSimpleName() + ((ex.getCause() == null) ? "" : ex.getCause().getMessage());
             results.put(errorMsg, survivors);
         }
-
         return results;
     }
 
@@ -465,7 +458,7 @@ public class MassSubscriptionService {
             //Parse all mailmerge functions using MailMergeService
             String newEmailBody = assignedConfirmEmail.getBODY();
             newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, newSubscription.getCONFIRMATION_KEY());
-            newEmailBody = mailMergeService.parseMailmergeTags(newEmailBody, newSubscription.getTARGET().getOBJECTID(), newSubscription.getSOURCE().getOBJECTID());
+            newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, newSubscription.getTARGET().getOBJECTID(), newSubscription.getSOURCE().getOBJECTID());
 
              //Send the email using MailService
             Email confirmEmail = new Email();

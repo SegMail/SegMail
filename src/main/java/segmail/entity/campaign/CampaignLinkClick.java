@@ -15,8 +15,8 @@ import javax.validation.constraints.NotNull;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="LINK_CLICK")
-public class LinkClick extends EnterpriseTransaction {
+@Table(name="CAMPAIGN_LINK_CLICK")
+public class CampaignLinkClick extends EnterpriseTransaction {
     
     private String LINK_KEY;
 
