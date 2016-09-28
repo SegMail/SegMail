@@ -54,6 +54,8 @@ public class FormSignupCode {
             loadOwnLists();
             selectDefaultList();
             getListFieldsJson();
+            
+            loadListFields();
         }
     }
     

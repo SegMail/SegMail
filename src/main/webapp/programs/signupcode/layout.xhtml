@@ -67,6 +67,36 @@
                                         </f:ajax>
                                     </h:selectOneListbox>
                                 </div>
+                                <div class="form-group">
+                                    <label>Subscribe button label:</label>
+                                    <h:inputText pass:id="subscribeButtonLabel" 
+                                                 id="subscribeButtonLabel" 
+                                                 pass:placeholder="What you see on your subscribe button" 
+                                                 class="form-control">
+                                        <f:ajax event="keyup" 
+                                                render="@form" execute="@form"
+                                                onevent="refreshEverything"
+                                                delay="1000" >
+                                        </f:ajax>
+                                    </h:inputText>
+                                </div>
+                                <div class="form-group">
+                                    
+                                    <label class="switch">
+                                        <h:selectBooleanCheckbox pass:id="bootstrapStyles" 
+                                                                 >
+                                            <f:ajax event="change" 
+                                                render="@form" execute="@form"
+                                                onevent="refreshEverything"
+                                                delay="1000" >
+                                            </f:ajax>
+                                        </h:selectBooleanCheckbox>
+                                        <span></span>
+                                    </label>
+                                    <label>
+                                        Bootstrap styles
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>

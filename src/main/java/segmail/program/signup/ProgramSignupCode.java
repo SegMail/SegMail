@@ -20,6 +20,8 @@ public class ProgramSignupCode extends Program {
     //private List<String> selectedLists; //JSF selectMany component will store it as String.
     private String listFieldsJson;
     private long selectedListId;
+    
+    private List<SubscriptionListField> fields;
 
     public String getListFieldsJson() {
         return listFieldsJson;
@@ -43,6 +45,14 @@ public class ProgramSignupCode extends Program {
 
     public void setSelectedListId(long selectedListId) {
         this.selectedListId = selectedListId;
+    }
+
+    public List<SubscriptionListField> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<SubscriptionListField> fields) {
+        this.fields = fields;
     }
     
     @Override
