@@ -5,6 +5,7 @@
  */
 package segmail.component.subscription;
 
+import com.google.common.base.Predicates;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
@@ -55,6 +56,7 @@ import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriberOwnership;
@@ -137,7 +139,8 @@ public class SubscriptionService {
      * <ul>
      * <li>Any mandatory field is not provided, specified by SubscriptionListField.MANDATORY.</li>
      * <ul>
-     * @throws RelationshipExistsException if the subscriber is already subscribed to the list
+     * @throws RelationshipExistsException if the subscriber is already confirmed in the list and encapsulates
+     * the confirmation key in it
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Subscription subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
@@ -172,8 +175,10 @@ public class SubscriptionService {
         if (email == null || email.isEmpty()) {
             throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
         }
-        if (checkSubscribed(email, listId)) {
-            throw new RelationshipExistsException("Subscriber is already on this list");
+        SUBSCRIPTION_STATUS[] status = {CONFIRMED};
+        List<Subscription> existingSubscriptions = this.getSubscriptions(email, listId, status);
+        if (existingSubscriptions != null && !existingSubscriptions.isEmpty()) {//checkSubscribed(email, listId)) {
+            throw new RelationshipExistsException(existingSubscriptions.get(0).getCONFIRMATION_KEY());
         }
 
         List<Map<String, Object>> singleSubscriberMap = new ArrayList<>();
@@ -184,7 +189,7 @@ public class SubscriptionService {
             throw new SubscriptionException(key);
         }
         
-        return this.getSubscriptions(email, listId).get(0);
+        return this.getSubscriptions(email, listId, null).get(0);
     }
     
     /**
@@ -429,7 +434,7 @@ public class SubscriptionService {
         return newOrExistingAcc;
     }
 
-    public List<Subscription> getSubscriptions(String subscriberEmail, long listId) {
+    public List<Subscription> getSubscriptions(String subscriberEmail, long listId, SUBSCRIPTION_STATUS[] statusList) {
         CriteriaBuilder builder = this.objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
         Root<SubscriberAccount> fromSubscriber = query.from(SubscriberAccount.class);
@@ -437,10 +442,15 @@ public class SubscriptionService {
         Root<Subscription> fromSubscription = query.from(Subscription.class);
 
         query.select(fromSubscription);
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(builder.equal(fromSubscriber.get(SubscriberAccount_.EMAIL), subscriberEmail));
+        conditions.add(builder.equal(fromSubscription.get(Subscription_.TARGET), listId));
+        conditions.add(builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID)));
+        if(statusList != null && statusList.length > 0) {
+            conditions.add(fromSubscription.in(statusList));
+        }
         query.where(builder.and(
-                builder.equal(fromSubscriber.get(SubscriberAccount_.EMAIL), subscriberEmail),
-                builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
-                builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID))
+                conditions.toArray(new Predicate[]{})
         ));
 
         List<Subscription> results = this.objectService.getEm().createQuery(query)
@@ -592,7 +602,7 @@ public class SubscriptionService {
             IncompleteDataException, 
             DataValidationException, 
             InvalidEmailException {
-        List<Subscription> subscriptions = getSubscriptions(email, listId);
+        List<Subscription> subscriptions = getSubscriptions(email, listId, null);
         if(subscriptions == null || subscriptions.isEmpty())
             throw new RelationshipNotFoundException(email+" is not subscribed to list "+listId+" yet.");
         

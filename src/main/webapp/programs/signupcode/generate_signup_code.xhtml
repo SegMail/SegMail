@@ -9,23 +9,6 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <script type="text/javascript" >
-        var listId = #{FormSignupCode.selectedListId};
-        var clientId = #{FormSignupCode.clientId};
-        
-        var serverUrl = '#{FormSignupCode.signupLink}';
-        
-        var fieldList = [
-        <c:forEach items="#{FormSignupCode.fields}" var="field">
-            {
-                'name': '#{field.FIELD_NAME}',
-                'key' : '#{field.generateKey()}',
-                'description' : '#{field.DESCRIPTION}',
-                'mandatory' : '#{field.MANDATORY}'
-            },
-        </c:forEach>
-        ]
-        
-    </script>
+    
     
 </html>

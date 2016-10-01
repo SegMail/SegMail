@@ -5,6 +5,7 @@
  */
 package segmail.program.subscribe.subscribe;
 
+import eds.component.data.RelationshipExistsException;
 import java.io.IOException;
 import java.util.logging.Level;
 import javax.annotation.PostConstruct;
@@ -62,6 +63,10 @@ public class FormSubscribe {
                 this.setPageName(program.getPAGE_GENERIC_ERROR());
                 setErrorMessage(ex.getMessage());
             }
+        } catch (RelationshipExistsException ex) {
+            Logger.getLogger(this.getClass().getName()).log(Logger.Level.ERROR, ex);
+            this.setPageName(program.getPAGE_ALREADY_CONFIRMED());
+            this.setConfirmationKey(ex.getMessage());
         } catch (Throwable ex) {
             this.setPageName(program.getPAGE_GENERIC_ERROR());
             setErrorMessage(ex.getMessage());

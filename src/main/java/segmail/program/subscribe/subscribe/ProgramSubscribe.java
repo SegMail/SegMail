@@ -30,6 +30,7 @@ public class ProgramSubscribe extends Program {
     private final String PAGE_SUCCESS = "PAGE_SUCCESS";
     private final String PAGE_ALREADY_SUBSCRIBED_AND_RESEND = "PAGE_ALREADY_SUBSCRIBED_AND_RESEND";
     private final String PAGE_GENERIC_ERROR = "PAGE_GENERIC_ERROR";
+    private final String PAGE_ALREADY_CONFIRMED = "PAGE_ALREADY_CONFIRMED";
     
     public long getClientId() {
         return clientId;
@@ -97,6 +98,10 @@ public class ProgramSubscribe extends Program {
 
     public String getPAGE_GENERIC_ERROR() {
         return PAGE_GENERIC_ERROR;
+    }
+
+    public String getPAGE_ALREADY_CONFIRMED() {
+        return PAGE_ALREADY_CONFIRMED;
     }
 
     public String getConfirmationKey() {

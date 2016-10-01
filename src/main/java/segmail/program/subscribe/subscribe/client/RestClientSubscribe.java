@@ -57,6 +57,10 @@ public class RestClientSubscribe extends GenericRestClient {
             String redirectLink = response.readEntity(String.class);
             throw new RedirectException(redirectLink);
         }
+        if(response.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()) {
+            String confirmKey = response.readEntity(String.class);
+            throw new RelationshipExistsException(confirmKey);
+        }
         
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {
             

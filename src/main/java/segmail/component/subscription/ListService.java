@@ -28,6 +28,7 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.Assign_Client_List;
@@ -298,7 +299,17 @@ public class ListService {
      */
     public void saveList(SubscriptionList list) throws DataValidationException {
 
-        boolean validURL = true;
+        validateList(list);
+        
+        updateService.getEm().merge(list);
+
+    }
+    
+    public void validateList(SubscriptionList list) throws DataValidationException {
+        
+        if(list.getSEND_AS_EMAIL() == null || list.getSEND_AS_EMAIL().isEmpty() || !EmailValidator.getInstance().isValid(list.getSEND_AS_EMAIL()))
+            throw new DataValidationException("Empty or invalid Send As email.");
+        
         if(list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
             if(UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM()))
                 throw new DataValidationException("Redirect URL "+list.getREDIRECT_CONFIRM() +" is invalid.");
@@ -307,8 +318,7 @@ public class ListService {
             if(UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME()))
                 throw new DataValidationException("Redirect URL "+list.getREDIRECT_WELCOME() +" is invalid.");
         }
-        updateService.getEm().merge(list);
-
+        
     }
 
     /**

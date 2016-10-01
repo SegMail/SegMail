@@ -162,7 +162,7 @@ var processMailmergeNoWS = function(timeout) {
         for(var key in mailmergeLinks) {
             if(mailmergeLinks.hasOwnProperty(key)) {
                 var url = '<a target="_blank" href="'+mailmergeLinks[key][1]+'">'+mailmergeLinks[key][0]+'</a>';
-                content = content.replace(RegExp('<span>'+key+'</span>','g'),url);
+                content = content.replace(RegExp(key,'g'),url);
             }
         }
         $('#preview').html(content);

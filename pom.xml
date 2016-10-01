@@ -363,14 +363,14 @@
                             </directory>
 
                         </resource>
-                        <resource>
+                        <!--<resource>
                             <directory>src</directory>
                             <targetPath>WEB-INF</targetPath>
                             <includes>
                                 <include>jax-ws-catalog.xml</include>
                                 <include>wsdl/**</include>
                             </includes>
-                        </resource>
+                        </resource>-->
                     </webResources>
                 </configuration>
             </plugin>

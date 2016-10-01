@@ -54,17 +54,14 @@
                                         Subscribe to the following lists:
                                     </label>
                                     
-                                    <h:selectOneListbox id="slectList" pass:id="selectList" styleClass="select2" style="width: 100%;"
-                                                        value="#{FormSignupCode.selectedListId}" 
+                                    <h:selectOneListbox id="selectList" pass:id="selectList" styleClass="select2" style="width: 100%;"
+                                                        value="#{FormSignupCode.selectedListId}"
+                                                        
                                                          >
                                         <f:selectItems value="#{FormSignupCode.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
                                                        itemValue="#{list.OBJECTID}">
                                         </f:selectItems>
-                                        <f:ajax event="change" 
-                                                render="@form" execute="@form"
-                                                onevent="refreshEverything"
-                                                delay="1000" >
-                                        </f:ajax>
+                                        
                                     </h:selectOneListbox>
                                 </div>
                                 <div class="form-group">
@@ -73,11 +70,7 @@
                                                  id="subscribeButtonLabel" 
                                                  pass:placeholder="What you see on your subscribe button" 
                                                  class="form-control">
-                                        <f:ajax event="keyup" 
-                                                render="@form" execute="@form"
-                                                onevent="refreshEverything"
-                                                delay="1000" >
-                                        </f:ajax>
+                                        
                                     </h:inputText>
                                 </div>
                                 <div class="form-group">
@@ -85,11 +78,7 @@
                                     <label class="switch">
                                         <h:selectBooleanCheckbox pass:id="bootstrapStyles" 
                                                                  >
-                                            <f:ajax event="change" 
-                                                render="@form" execute="@form"
-                                                onevent="refreshEverything"
-                                                delay="1000" >
-                                            </f:ajax>
+                                            
                                         </h:selectBooleanCheckbox>
                                         <span></span>
                                     </label>
@@ -97,6 +86,16 @@
                                         Bootstrap styles
                                     </label>
                                 </div>
+                            </div>
+                            <div class="block-footer">
+                                <button jsf:id="generateCodeButton" class="btn btn-default pull-right">
+                                    Generate
+                                    <f:ajax event="click" listener="#{FormSignupCode.reloadList()}"
+                                                render="@form" execute="@form"
+                                                onevent="update"
+                                                 >
+                                        </f:ajax>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -110,7 +109,27 @@
                     </div>
                 </div>
                 
-                <ui:include src="generate_signup_code.xhtml" ></ui:include>
+                <script type="text/javascript" >
+        var listId = #{FormSignupCode.selectedListId};
+        var clientId = #{FormSignupCode.clientId};
+        
+        var serverUrl = '#{FormSignupCode.signupLink}';
+        
+        var fieldList = [
+        <c:forEach items="#{FormSignupCode.fields}" var="field">
+            {
+                'name': '#{field.FIELD_NAME}',
+                'key' : '#{field.generateKey()}',
+                'description' : '#{field.DESCRIPTION}',
+                'mandatory' : '#{field.MANDATORY}'
+            },
+        </c:forEach>
+        ];
+        
+        var sendAs = '#{FormSignupCode.selectedList.SEND_AS_EMAIL}';
+        var confirmEmailCount = #{FormSignupCode.confirmEmails.size()};
+        
+    </script>
             </form>
         </ui:define>
 
