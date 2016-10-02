@@ -174,7 +174,7 @@ public class MassSubscriptionService {
             existingSubscriberIds.add(account.getOBJECTID());
         }
         //And also all their SubscriberFieldValues
-        List<SubscriberFieldValue> existingFieldValues = subService.getSubscriberValuesBySubscribers(existingSubscriberIds); //DB hit, can be cached
+        List<SubscriberFieldValue> existingFieldValues = subService.getSubscriberValuesBySubscriberIds(existingSubscriberIds); //DB hit, can be cached
         Collections.sort(existingFieldValues); //Default sorting method for EnterpriseData
         //All existing subscriptions
         //Just in case the SubscriberAccount, Ownership and FieldValues are created but the subscription is not,

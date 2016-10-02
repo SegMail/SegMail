@@ -14,6 +14,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseRelationship_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -28,6 +29,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
+import segmail.entity.subscription.Assign_Client_List;
+import segmail.entity.subscription.Assign_Client_List_;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_Client;
@@ -353,25 +356,39 @@ public class AutoresponderService {
      * @throws EntityNotFoundException
      */
     public void deleteAutoEmail(long autoEmailId) throws EntityNotFoundException {
-        try {
-            updateService.deleteObjectDataAndRelationships(autoEmailId,AutoresponderEmail.class);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        updateService.deleteObjectDataAndRelationships(autoEmailId,AutoresponderEmail.class);
     }
 
+    /**
+     * 
+     * IMPORTANT:
+     * Client -> SubscriptionList -> AutoresponderEmail
+     * If the the AutoresponderEmail has no SubscriptionList assigned currently,
+     * meaning the SubscriptionList may have been deleted, then this AutoresponderEmail
+     * shouldn't exist anymore. 
+     * <br>
+     * When deleting objects, we only delete its own EnterpriseData and EnterpriseRelationships,
+     * never another object. If we have a good reason to also delete another object,
+     * then that object shouldn't be implemented as an object in the first place,
+     * but an EnterpriseData, that's the definition of an object - an entity that 
+     * can exist independently of other objects.
+     * 
+     * 
+     * @param clientId
+     * @param type
+     * @return 
+     */
     public List<AutoresponderEmail> getAvailableAutoEmailsForClient(long clientId, AUTO_EMAIL_TYPE type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<AutoresponderEmail> query = builder.createQuery(AutoresponderEmail.class);
         Root<AutoresponderEmail> fromAutoEmail = query.from(AutoresponderEmail.class);
-        Root<Assign_AutoresponderEmail_Client> fromAssignAutoEmailClient = query.from(Assign_AutoresponderEmail_Client.class);
+        Root<Assign_AutoresponderEmail_List> fromAssignAutoemailList = query.from(Assign_AutoresponderEmail_List.class);
+        Root<Assign_Client_List> fromClientList = query.from(Assign_Client_List.class);
 
         List<Predicate> conditions = new ArrayList<>();
-        conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)));
-        conditions.add(builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId));
+        conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoemailList.get(Assign_AutoresponderEmail_List_.SOURCE)));
+        conditions.add(builder.equal(fromAssignAutoemailList.get(Assign_AutoresponderEmail_List_.TARGET), fromClientList.get(Assign_Client_List_.TARGET)));
+        conditions.add(builder.equal(fromClientList.get(Assign_Client_List_.SOURCE), clientId));
         if(type != null)
             conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()));
         

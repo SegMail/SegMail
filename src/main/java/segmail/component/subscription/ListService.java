@@ -91,43 +91,36 @@ public class ListService {
      * @throws IncompleteDataException
      */
     public SubscriptionListField addFieldForSubscriptionList(long listId, SubscriptionListField newField) throws EntityNotFoundException, DataValidationException, IncompleteDataException {
-        try {
-            SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
-            if (list == null) {
-                throw new EntityNotFoundException(SubscriptionList.class, listId);
-            }
-            validateListField(newField);
-            List<SubscriptionListField> existingFields = getFieldsForSubscriptionList(listId);
-            List<SubscriptionListField> insertThese = new ArrayList<>();
-            List<SubscriptionListField> deleteThese = new ArrayList<>();
-            existingFields.add(newField);
-            for (int i = 1; i <= existingFields.size(); i++) {
-                SubscriptionListField field = existingFields.get(i - 1);
-                if (field.equals(newField)) {
-                    field.setOWNER(list);
-                    field.setSNO(i);
-                    insertThese.add(field);
-                    continue;
-                }
-                if (field.getSNO() != i) {
-                    deleteThese.add(field);
-                    SubscriptionListField cloneField = new SubscriptionListField(list, i, field.isMANDATORY(), field.getFIELD_NAME(), FIELD_TYPE.valueOf(field.getTYPE()), field.getDESCRIPTION());
-                    insertThese.add(cloneField);
-                }
-            }
-            for (SubscriptionListField deleteField : deleteThese) {
-                updateService.getEm().remove(updateService.getEm().contains(deleteField) ? deleteField : updateService.getEm().merge(deleteField));
-            }
-            for (SubscriptionListField insertField : insertThese) {
-                updateService.getEm().persist(insertField);
-            }
-            return newField;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+        SubscriptionList list = objectService.getEnterpriseObjectById(listId, SubscriptionList.class);
+        if (list == null) {
+            throw new EntityNotFoundException(SubscriptionList.class, listId);
         }
+        validateListField(newField);
+        List<SubscriptionListField> existingFields = getFieldsForSubscriptionList(listId);
+        List<SubscriptionListField> insertThese = new ArrayList<>();
+        List<SubscriptionListField> deleteThese = new ArrayList<>();
+        existingFields.add(newField);
+        for (int i = 1; i <= existingFields.size(); i++) {
+            SubscriptionListField field = existingFields.get(i - 1);
+            if (field.equals(newField)) {
+                field.setOWNER(list);
+                field.setSNO(i);
+                insertThese.add(field);
+                continue;
+            }
+            if (field.getSNO() != i) {
+                deleteThese.add(field);
+                SubscriptionListField cloneField = new SubscriptionListField(list, i, field.isMANDATORY(), field.getFIELD_NAME(), FIELD_TYPE.valueOf(field.getTYPE()), field.getDESCRIPTION());
+                insertThese.add(cloneField);
+            }
+        }
+        for (SubscriptionListField deleteField : deleteThese) {
+            updateService.getEm().remove(updateService.getEm().contains(deleteField) ? deleteField : updateService.getEm().merge(deleteField));
+        }
+        for (SubscriptionListField insertField : insertThese) {
+            updateService.getEm().persist(insertField);
+        }
+        return newField;
     }
 
     /**
@@ -146,34 +139,33 @@ public class ListService {
      * @throws eds.component.data.DataValidationException
      * @throws eds.component.data.IncompleteDataException
      */
-    public void fullRefreshUpdateSubscriptionListFields(List<SubscriptionListField> fieldList) 
+    public void fullRefreshUpdateSubscriptionListFields(List<SubscriptionListField> fieldList)
             throws DataValidationException, IncompleteDataException {
-        if(fieldList == null || fieldList.isEmpty())
+        if (fieldList == null || fieldList.isEmpty()) {
             return;
-        
+        }
+
         long listId = fieldList.get(0).getOWNER().getOBJECTID();
-        
+
         //If any of the fields have duplicated FIELD_NAME, do not proceed
-        
         //Delete all existing fields first
         updateService.deleteAllEnterpriseDataByType(listId, SubscriptionListField.class);
-        
+
         //Sort and fill in SNO
-        Collections.sort(fieldList,new SubscriptionListFieldComparator());
-        for(int i = 0; i< fieldList.size(); i++) {
+        Collections.sort(fieldList, new SubscriptionListFieldComparator());
+        for (int i = 0; i < fieldList.size(); i++) {
             SubscriptionListField field = fieldList.get(i);
-            field.setSNO(i+1);
+            field.setSNO(i + 1);
             validateListField(field); //Throws exception if something is wrong and rolls back the whole shit
-            
+
             updateService.getEm().persist(field);
         }
     }
 
     /**
-     * Deletes all the following relationships first:
-     * - Assign_Client_List
-     * - Subscription
-     * 
+     * Deletes all the following relationships first: - Assign_Client_List -
+     * Subscription
+     *
      * Then proceeds to delete the SubscriptionList itself. It does not delete
      * the subscribers under this list.
      *
@@ -185,106 +177,31 @@ public class ListService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteList(long listId, long clientId) throws EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
-        //int assignClientList = updateService.deleteRelationshipByTarget(listId, Assign_Client_List.class);
-        
-        //Asynchronous call, but no need for async actually, just an experiment
-        //deleteSubscriptions(listId);
-        //updateService.deleteRelationshipByTarget(listId, Subscription.class);
-        //Delete fields
-        //updateService.deleteAllEnterpriseDataByType(listId, SubscriptionListField.class);
-        //updateService.deleteAllEnterpriseDataByOwnerType(listId, SubscriptionList.class);
-        //updateService.deleteRelationshipBySourceType(listId, SubscriptionList.class);
-        //updateService.deleteRelationshipByTargetType(listId, SubscriptionList.class);
+
         updateService.deleteObjectDataAndRelationships(listId, SubscriptionList.class);
-        //Finally remove the list entity
-        //EntityManager em = updateService.getEm();
-        //em.remove(em.find(SubscriptionList.class, listId));
-        
-        //Asynchronous call
-        //For rest of the other stuff
-        //deleteOtherListDataAndRel(listId);
-    }
-    
-    /**
-     * For experimenting. Asynchronous is not really needed after all since the 
-     * underlying SQL executes relatively fast.
-     * 
-     * @param listId 
-     */
-    @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void deleteOtherListDataAndRel(long listId) throws EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
-        updateService.deleteObjectDataAndRelationships(listId,SubscriptionList.class);
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException {
-        try {
-            if (listname == null || listname.isEmpty()) {
-                throw new IncompleteDataException("List name cannot be empty.");
-            }
-            SubscriptionList newList = new SubscriptionList();
-            newList.setLIST_NAME(listname);
-            newList.setREMOTE(remote);
-            updateService.getEm().persist(newList);
-            Client client = objectService.getEnterpriseObjectById(clientId, Client.class);
-            if (client == null) {
-                throw new EnterpriseObjectNotFoundException(Client.class);
-            }
-            Assign_Client_List listAssignment = new Assign_Client_List();
-            listAssignment.setSOURCE(client);
-            listAssignment.setTARGET(newList);
-            updateService.getEm().persist(listAssignment);
-            SubscriptionListField fieldEmail = new SubscriptionListField(newList, 1, true, SubscriptionService.DEFAULT_EMAIL_FIELD_NAME, FIELD_TYPE.EMAIL, "Email of your subscriber.");
-            fieldEmail.setOWNER(newList);
-            updateService.getEm().persist(fieldEmail);
-            return newList;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+        if (listname == null || listname.isEmpty()) {
+            throw new IncompleteDataException("List name cannot be empty.");
         }
-    }
-
-    public ListType getListType(String listtypevalue) {
-        try {
-            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-            CriteriaQuery<ListType> criteria = builder.createQuery(ListType.class);
-            Root<ListType> sourceEntity = criteria.from(ListType.class);
-            criteria.select(sourceEntity);
-            criteria.where(builder.equal(sourceEntity.get(ListType_.VALUE), listtypevalue));
-            List<ListType> results = objectService.getEm().createQuery(criteria).getResultList();
-            return results.get(0);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+        SubscriptionList newList = new SubscriptionList();
+        newList.setLIST_NAME(listname);
+        newList.setREMOTE(remote);
+        updateService.getEm().persist(newList);
+        Client client = objectService.getEnterpriseObjectById(clientId, Client.class);
+        if (client == null) {
+            throw new EnterpriseObjectNotFoundException(Client.class);
         }
-    }
-
-    /**
-     * Experimental logic for EnterpriseConfiguration testing Got to build a
-     * setup EJB in the future!
-     */
-    public void setupListTypes() {
-        try {
-            List<ListType> listTypes = configService.getConfigList(ListType.class);
-            if (listTypes == null || listTypes.isEmpty()) {
-                ListType remote = new ListType();
-                ListType local = new ListType();
-                remote.setVALUE(ListType.TYPE.REMOTE.name());
-                local.setVALUE(ListType.TYPE.LOCAL.name());
-                configService.getEm().persist(remote);
-                configService.getEm().persist(local);
-            }
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        Assign_Client_List listAssignment = new Assign_Client_List();
+        listAssignment.setSOURCE(client);
+        listAssignment.setTARGET(newList);
+        updateService.getEm().persist(listAssignment);
+        SubscriptionListField fieldEmail = new SubscriptionListField(newList, 1, true, SubscriptionService.DEFAULT_EMAIL_FIELD_NAME, FIELD_TYPE.EMAIL, "Email of your subscriber.");
+        fieldEmail.setOWNER(newList);
+        updateService.getEm().persist(fieldEmail);
+        return newList;
     }
 
     /**
@@ -300,46 +217,28 @@ public class ListService {
     public void saveList(SubscriptionList list) throws DataValidationException {
 
         validateList(list);
-        
+
         updateService.getEm().merge(list);
 
     }
-    
-    public void validateList(SubscriptionList list) throws DataValidationException {
-        
-        if(list.getSEND_AS_EMAIL() == null || list.getSEND_AS_EMAIL().isEmpty() || !EmailValidator.getInstance().isValid(list.getSEND_AS_EMAIL()))
-            throw new DataValidationException("Empty or invalid Send As email.");
-        
-        if(list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
-            if(UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM()))
-                throw new DataValidationException("Redirect URL "+list.getREDIRECT_CONFIRM() +" is invalid.");
-        }
-        if(list.getREDIRECT_WELCOME()!= null && !list.getREDIRECT_WELCOME().isEmpty()) {
-            if(UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME()))
-                throw new DataValidationException("Redirect URL "+list.getREDIRECT_WELCOME() +" is invalid.");
-        }
-        
-    }
 
-    /**
-     * Checks of a particular client has no lists created. Used in the setup
-     * page.
-     *
-     * @param clientid
-     * @return
-     */
-    public boolean hasNoList(long clientid) {
-        try {
-            long count = objectService.countRelationshipsForTarget(clientid, Assign_Client_List.class);
-            return count <= 0;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        } catch (Exception ex) {
-            throw new EJBException(ex);
+    public void validateList(SubscriptionList list) throws DataValidationException {
+
+        if (list.getSEND_AS_EMAIL() == null || list.getSEND_AS_EMAIL().isEmpty() || !EmailValidator.getInstance().isValid(list.getSEND_AS_EMAIL())) {
+            throw new DataValidationException("Empty or invalid Send As email.");
         }
+
+        if (list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
+            if (UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM())) {
+                throw new DataValidationException("Redirect URL " + list.getREDIRECT_CONFIRM() + " is invalid.");
+            }
+        }
+        if (list.getREDIRECT_WELCOME() != null && !list.getREDIRECT_WELCOME().isEmpty()) {
+            if (UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME())) {
+                throw new DataValidationException("Redirect URL " + list.getREDIRECT_WELCOME() + " is invalid.");
+            }
+        }
+
     }
 
     /**
@@ -348,38 +247,38 @@ public class ListService {
      * @return SubscriptionListFieldList if there is at least 1 record available
      */
     public List<SubscriptionListField> getFieldsForSubscriptionList(long listId) {
-        
+
         List<SubscriptionListField> allFieldList = objectService.getEnterpriseData(listId, SubscriptionListField.class);
         Collections.sort(allFieldList, new SubscriptionListFieldComparator());
         return allFieldList;
-        
+
     }
-    
+
     /**
      * Temporary until we build a full blown solution in MailmergeTag.
-     * 
+     *
      * @param listId
      * @param mailmergeTag
-     * @return 
+     * @return
      */
     public List<SubscriptionListField> getFieldsForSubscriptionList(long listId, String mailmergeTag) {
-        
+
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
         Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
-        
+
         query.select(fromField);
         query.where(
                 builder.and(
                         builder.equal(fromField.get(SubscriptionListField_.OWNER), listId),
                         builder.equal(fromField.get(SubscriptionListField_.MAILMERGE_TAG), mailmergeTag)
-        ));
-        
+                ));
+
         List<SubscriptionListField> results = objectService.getEm().createQuery(query)
                 .getResultList();
-        
+
         return results;
-        
+
     }
 
     public List<String> getSubscriptionListFieldKeys(long listId) {
@@ -394,17 +293,18 @@ public class ListService {
     }
 
     public List<SubscriptionList> getAllListForClient(long clientid) {
-        try {
-            List<SubscriptionList> allList = objectService.getAllTargetObjectsFromSource(clientid, Assign_Client_List.class, SubscriptionList.class);
-            return allList;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        } catch (Exception ex) {
-            throw new EJBException(ex);
+        List<SubscriptionList> allList = objectService.getAllTargetObjectsFromSource(clientid, Assign_Client_List.class, SubscriptionList.class);
+        return allList;
+    }
+    
+    public List<SubscriptionListField> getFieldsForSubscriptionLists(List<SubscriptionList> lists) {
+        List<Long> listIds = new ArrayList<>();
+        for(SubscriptionList list : lists) {
+            listIds.add(list.getOBJECTID());
         }
+        List<SubscriptionListField> fields = objectService.getEnterpriseDataByIds(listIds, SubscriptionListField.class);
+        
+        return fields;
     }
 
 }

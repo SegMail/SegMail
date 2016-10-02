@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
@@ -358,7 +360,7 @@ public class SubscriptionService {
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedConfirmEmail.getBODY();
         newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
-        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getTARGET().getOBJECTID(), sub.getSOURCE().getOBJECTID());
+        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody,sub.getSOURCE().getOBJECTID(),list.getOBJECTID());
         //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
@@ -447,7 +449,11 @@ public class SubscriptionService {
         conditions.add(builder.equal(fromSubscription.get(Subscription_.TARGET), listId));
         conditions.add(builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID)));
         if(statusList != null && statusList.length > 0) {
-            conditions.add(fromSubscription.in(statusList));
+            String[] statusNames = new String[statusList.length];
+            for(int i = 0; i<statusList.length; i++) {
+                statusNames[i] = statusList[i].name();
+            }
+            conditions.add(fromSubscription.get(Subscription_.STATUS).in(statusNames));
         }
         query.where(builder.and(
                 conditions.toArray(new Predicate[]{})
@@ -673,8 +679,15 @@ public class SubscriptionService {
         return results;
     }
 
+    public List<SubscriberFieldValue> getSubscriberValuesBySubscriberObjects(List<SubscriberAccount> subscribers) {
+        List<Long> ids = new ArrayList<>();
+        for(SubscriberAccount subscriber : subscribers) {
+            ids.add(subscriber.getOBJECTID());
+        }
+        return getSubscriberValuesBySubscriberIds(ids);
+    }
     //
-    public List<SubscriberFieldValue> getSubscriberValuesBySubscribers(List<Long> subscribers) {
+    public List<SubscriberFieldValue> getSubscriberValuesBySubscriberIds(List<Long> subscribers) {
         List<SubscriberFieldValue> results = objectService.getEnterpriseDataByIds(subscribers, SubscriberFieldValue.class);
         return results;
     }
@@ -702,28 +715,31 @@ public class SubscriptionService {
     }
     
     /**
+     * A Welcome email is always optional.
      * 
      * @param sub
-     * @throws IncompleteDataException if "Send As" is not set for SubscriptionList
      * @throws DataValidationException if email address is invalid
      * @throws InvalidEmailException if email address is invalid
      */
     public void sendWelcomeEmail(Subscription sub) 
-            throws IncompleteDataException, DataValidationException, InvalidEmailException{
+            throws DataValidationException, InvalidEmailException{
         SubscriptionList list = sub.getTARGET();
-
-        String sendAs = list.getSEND_AS_EMAIL();
-        if (sendAs == null || sendAs.isEmpty()) {
-            throw new IncompleteDataException("Please set \"Send As\" address before sending welcome emails.");
-        }
-
+        
         //Retrieve the autoemail from list using AutoresponderService
         List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.WELCOME);
         AutoresponderEmail assignedWelcomeEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
                 ? null : assignedAutoEmails.get(0);
 
         if (assignedWelcomeEmail == null) {
-            throw new IncompleteDataException("Please assign a Welcome email before adding subscribers.");
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, null, "Please assign a Welcome email before adding subscribers.");
+            return; //Don't do anything if no welcome emails are assigned
+        }
+
+        String sendAs = list.getSEND_AS_EMAIL();
+        if (sendAs == null || sendAs.isEmpty()) {
+            //This would be a serious programming error as one could not have sent out a confirmation email 
+            //without a Send As email
+            throw new RuntimeException("Please set \"Send As\" address before sending welcome emails.");
         }
 
         //Parse all mailmerge functions using MailMergeService

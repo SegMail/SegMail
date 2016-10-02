@@ -109,7 +109,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             throw new RuntimeException("You received this transaction code by mistake.", ex);
         } catch (IncompleteDataException ex) {
             Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException("The list does not have a \"Send As\" address.", ex);
+            throw new RuntimeException(ex.getMessage(), ex);
         } catch (DataValidationException ex) {
             Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException("Subscriber does not have an email address.", ex);

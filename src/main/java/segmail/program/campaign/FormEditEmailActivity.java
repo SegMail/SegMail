@@ -269,9 +269,9 @@ public class FormEditEmailActivity implements FormEditEntity {
                 return o1.getMAILMERGE_TAG().compareTo(o2.getMAILMERGE_TAG());
             }
         });
-        List<SubscriptionListField> sortedList = new ArrayList<>();
+        List<SubscriptionListField> sortedList = fieldList;//new ArrayList<>();
 
-        SubscriptionListField lastField = null;
+        /*SubscriptionListField lastField = null;
         for (SubscriptionListField field : fieldList) {
             String mailmergeTag = field.getMAILMERGE_TAG();
             if (lastField != null
@@ -284,7 +284,7 @@ public class FormEditEmailActivity implements FormEditEntity {
                 sortedList.add(field);
             }
             lastField = field;
-        }
+        }*/
 
         this.setListFields(sortedList);
     }

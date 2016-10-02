@@ -13,6 +13,7 @@ import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -158,38 +159,64 @@ public class MailMergeService {
      * In the future, we should build a MailmergeTag EnterpriseObject class that 
      * can store the attribute and object key of its owner object.
      * @param text
-     * @param listId
-     * @param mmKey assume this is a SubscriptionListField.MAILMERGE_TAG 
+     * @param fieldValueMap //MailmergeTag => Field value
      * @return 
      */
-    public String parseMailmergeTagsSubscriber(
-            String text, 
-            long listId, 
-            long subscriberId) {
-        //Get all fields
-        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
-        //Get all values
-        Long[] subscribers = {subscriberId};
-        List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscribers(Arrays.asList(subscribers));
+    public String parseMailmergeTagsSubscriber(String text, Map<String,SubscriberFieldValue> fieldValueMap) {
+        String parsedText = text;
+        for(String mmTag : fieldValueMap.keySet()){
+            parsedText = parsedText.replace(mmTag, fieldValueMap.get(mmTag).getVALUE());
+        }
         
-        for(SubscriptionListField field : fields) {
-            String mailmergeTag = field.getMAILMERGE_TAG();
-            String key = (String) field.generateKey();
-            /**
-             * If Subscriber doesn't have certain values, it will be replaced as an empty
-             * String instead of the mailmergeTag.
-             */
-            String valueString = ""; 
-            for(SubscriberFieldValue value : values) {
-                if(value.getFIELD_KEY().equals(key)) {
-                    valueString = value.getVALUE();
+        return parsedText;
+    }
+    
+    /**
+     * 
+     * @param fields
+     * @param values
+     * @return subscriberId => {mailmerge-tag} => SubscriberFieldValue
+     */
+    public Map<Long,Map<String,SubscriberFieldValue>> createMMValueMap(List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
+        Map<Long,Map<String,SubscriberFieldValue>> results = new HashMap<>();
+        
+        for(SubscriberFieldValue value : values) {
+            long owner = value.getOWNER().getOBJECTID();
+            if(!results.containsKey(owner))
+                results.put(owner, new HashMap<String,SubscriberFieldValue>());
+            
+            Map<String,SubscriberFieldValue> subscriberMap = results.get(owner);
+            
+            //Use the value's key, find the SubscriptionListField and 
+            //get its {mailmerge-tag}
+            String key = value.getFIELD_KEY();
+            for(SubscriptionListField field : fields) {
+                if(field.generateKey() != null && field.generateKey().equals(key)) {
+                    subscriberMap.put(field.getMAILMERGE_TAG(), value);
                     break;
                 }
             }
-            text = text.replace(mailmergeTag, valueString);
         }
+        return results;
+    }
+    
+    /**
+     * For sending confirmation emails, where the listId is known.
+     * 
+     * @param text
+     * @param subscriberId
+     * @param listId
+     * @return 
+     */
+    public String parseMailmergeTagsSubscriber(String text, long subscriberId, long listId) {
+        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
+        List<Long> ids = new ArrayList<>();
+        ids.add(listId);
+        List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscriberIds(ids);
+        Map<Long,Map<String,SubscriberFieldValue>> map = this.createMMValueMap(fields, values);
         
-        return text;
+        String parsedText = this.parseMailmergeTagsSubscriber(text, map.get(subscriberId));
+        return parsedText;
     }
 
     /**
@@ -222,7 +249,7 @@ public class MailMergeService {
          trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
          updateService.getEm().persist(trans);
          }*/
-        /*ServerInstance landingServer
+        /**/ServerInstance landingServer
                 = landingService.getNextServerInstance(
                         LandingServerGenerationStrategy.ROUND_ROBIN,
                         ServerNodeType.WEB);
@@ -231,8 +258,9 @@ public class MailMergeService {
         }
 
         String unsubLink = landingServer.getURI().concat("/").concat(UNSUBSCRIBE_PROGRAM_NAME).concat("/").concat(unsubscribeKey);
-        */
-        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubscribeKey);
+        String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
+        
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
 
         return newEmailBody;
         

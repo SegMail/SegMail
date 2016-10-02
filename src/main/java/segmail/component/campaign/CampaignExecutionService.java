@@ -33,6 +33,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import org.joda.time.DateTime;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
@@ -51,10 +52,12 @@ import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.SubscriberOwnership_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.Subscription_;
 
 /**
@@ -78,6 +81,8 @@ public class CampaignExecutionService {
     MailMergeService mmService;
     @EJB
     SubscriptionService subService;
+    @EJB
+    ListService listService;
     @EJB
     MailService mailService;
 
@@ -103,16 +108,18 @@ public class CampaignExecutionService {
             throw new EntityNotFoundException(CampaignActivity.class, campaignActivityId);
         }
         
-        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class); //DB hit
         if (campaigns == null || campaigns.isEmpty())
             throw new RelationshipNotFoundException("CampaignActivity "+campaignActivityId+" is not assigned to any Campaign.");
         Campaign campaign = campaigns.get(0);
         
-        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class);
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
         if (targetLists == null || targetLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
         
-        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);
+        List<SubscriptionListField> targetListFields = listService.getFieldsForSubscriptionLists(targetLists);//DB hit
+        
+        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);//DB hit
         if (clientLists == null || clientLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned to any Clients.");
         
@@ -130,6 +137,9 @@ public class CampaignExecutionService {
                 break;
             //Retrieve all unsubscribe codes
             Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientLists.get(0).getOBJECTID()); //DB hit
+            //Retrieve all subscriber's field values
+            List<SubscriberFieldValue> fieldValues = subService.getSubscriberValuesBySubscriberObjects(subscribers); //DB hit
+            Map<Long,Map<String,SubscriberFieldValue>> fieldValuesMap = mmService.createMMValueMap(targetListFields, fieldValues);
             
             for (SubscriberAccount subscriber : subscribers) {
 
@@ -144,6 +154,8 @@ public class CampaignExecutionService {
                     //Set the body of the email
                     String content = campaignActivity.getACTIVITY_CONTENT_PROCESSED();
                     content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); //we'll use the WS method to edit unsub links [update] not now, let's stick to hardcoding as there isn't enough time
+                    content = mmService.parseMailmergeTagsSubscriber(content, fieldValuesMap.get(subscriber.getOBJECTID()));
+                    
                     email.setBODY(content);
                     
                     mailService.queueEmail(email, DateTime.now());
