@@ -162,6 +162,7 @@ public class MailMergeService {
      * @param fieldValueMap //MailmergeTag => Field value
      * @return 
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseMailmergeTagsSubscriber(String text, Map<String,SubscriberFieldValue> fieldValueMap) {
         String parsedText = text;
         for(String mmTag : fieldValueMap.keySet()){
@@ -208,10 +209,11 @@ public class MailMergeService {
      * @param listId
      * @return 
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseMailmergeTagsSubscriber(String text, long subscriberId, long listId) {
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
         List<Long> ids = new ArrayList<>();
-        ids.add(listId);
+        ids.add(subscriberId);
         List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscriberIds(ids);
         Map<Long,Map<String,SubscriberFieldValue>> map = this.createMMValueMap(fields, values);
         

@@ -679,6 +679,7 @@ public class SubscriptionService {
         return results;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberFieldValue> getSubscriberValuesBySubscriberObjects(List<SubscriberAccount> subscribers) {
         List<Long> ids = new ArrayList<>();
         for(SubscriberAccount subscriber : subscribers) {
@@ -687,6 +688,7 @@ public class SubscriptionService {
         return getSubscriberValuesBySubscriberIds(ids);
     }
     //
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberFieldValue> getSubscriberValuesBySubscriberIds(List<Long> subscribers) {
         List<SubscriberFieldValue> results = objectService.getEnterpriseDataByIds(subscribers, SubscriberFieldValue.class);
         return results;
