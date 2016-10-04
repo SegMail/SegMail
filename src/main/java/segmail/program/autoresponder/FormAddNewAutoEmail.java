@@ -69,9 +69,6 @@ public class FormAddNewAutoEmail {
             
             program.refresh();
             
-        } catch (EntityExistsException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "There is already an email with this subject, please re-enter a different subject.", null);
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (RelationshipExistsException ex) {
