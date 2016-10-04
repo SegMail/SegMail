@@ -746,7 +746,7 @@ public class SubscriptionService {
 
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedWelcomeEmail.getBODY();
-        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getTARGET().getOBJECTID(), sub.getSOURCE().getOBJECTID());
+        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), sub.getTARGET().getOBJECTID());
 
         //Send the email using MailService
         Email welcomeEmail = new Email();
