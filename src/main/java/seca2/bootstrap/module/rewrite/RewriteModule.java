@@ -5,7 +5,6 @@
  */
 package seca2.bootstrap.module.rewrite;
 
-import seca2.bootstrap.module.Path.LogicalPathParser;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -31,12 +31,24 @@ var refresh_select2 = function() {
 
 var buildSignupCodeOrDie = function() {
     var errors = [];
-    if(!sendAs || sendAs === '') {
-        errors.push('Send As is not setup for this list yet.');
+    
+    //======System errors===========
+    if(!serverUrl || serverUrl === '') {
+        errors.push('Web servers are not set up by admin yet, please send this screenshot to your admin.');
     }
     
-    if(!serverUrl || serverUrl === '') {
-        errors.push('Web servers are not set up by admin yet, please contact your admin.');
+    if(!listId || listId <= 0) {
+        errors.push('You don\'t have any lists setup yet. Start creating your lists in "Subscription Lists".');
+    }
+    
+    if(errors.length > 0){
+        die(errors);
+        return;
+    }
+    
+    //======List errors=============
+    if(!sendAs || sendAs === '') {
+        errors.push('Send As is not setup for this list yet.');
     }
     
     if(!confirmEmailCount || confirmEmailCount <= 0) {

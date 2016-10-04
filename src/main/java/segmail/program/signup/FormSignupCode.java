@@ -9,6 +9,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,11 +80,12 @@ public class FormSignupCode {
      * Select the first list as default
      */
     public void selectDefaultList() {
+        setSelectedListId(-1);
         if(getOwnedLists()== null || getOwnedLists().isEmpty())
             return;
         
         SubscriptionList firstList = getOwnedLists().get(0);
-        this.setSelectedListId(firstList.getOBJECTID());
+        setSelectedListId(firstList.getOBJECTID());
         
     }
     
@@ -156,8 +158,10 @@ public class FormSignupCode {
     }
     
     public void loadConfirmationEmails() {
+        setConfirmEmails(new ArrayList<AutoresponderEmail>());
         if(this.getSelectedListId() <= 0)
             return;
+            
         List<AutoresponderEmail> confirmEmails = autoemailService.getAssignedAutoEmailsForList(this.getSelectedListId(), AUTO_EMAIL_TYPE.CONFIRMATION);
         setConfirmEmails(confirmEmails);
     }
