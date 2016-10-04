@@ -64,7 +64,7 @@ var onSave = function (data) {
             refresh_select2();
             modifyDomToGeneratePreview();
             noty({
-                text : 'Email saved at ',
+                text : 'Email saved',
                 layout : 'topCenter',
                 type : 'success',
                 timeout : true
@@ -126,7 +126,10 @@ var adjustPreviewPanelHeight = function () {
             + $('#editor-panel').height()
             + parseInt($('#editor-panel').css('margin-bottom').replace("px", ""))
             + parseInt($('#editor-panel').css('border-bottom-width').replace("px", ""));
-    var previewHeight = editorBottom - $('#preview-panel').offset().top;
+    var previewPanelOffset = $('#preview-panel').offset().top;
+    var previewHeight = editorBottom - previewPanelOffset;
+    if(previewHeight <= 0)
+        previewHeight = $('#editor-panel').height();
     $('#preview-panel').height(previewHeight);
 };
 
