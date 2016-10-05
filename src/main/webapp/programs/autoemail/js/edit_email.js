@@ -98,7 +98,7 @@ var onSave = function () {
                 type : 'success',
                 timeout : true
             }).setTimeout(2000);
-        }, function (error) {
+        }, function (errorCode,error) {
             //$('#saveResults').html('Error: ' + error); //Don't know how it will look like yet
             //$('#saveButton').prop('disabled', false);
             block_refresh($('#editor-panel'));

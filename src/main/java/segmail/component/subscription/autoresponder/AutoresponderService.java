@@ -92,7 +92,6 @@ public class AutoresponderService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail saveAutoEmail(AutoresponderEmail autoEmail)
             throws IncompleteDataException, EntityExistsException, EntityNotFoundException {
-        try {
             //Check if autoEmail exists in the first place
             if (!objectService.checkEntityExists(autoEmail)) {
                 throw new EntityNotFoundException(AutoresponderEmail.class, autoEmail.getOBJECTID());
@@ -103,12 +102,6 @@ public class AutoresponderService {
 
             return updateService.getEm().merge(autoEmail);
 
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
     }
 
     /**
@@ -213,6 +206,10 @@ public class AutoresponderService {
 
         if (temp.getTYPE() == null || temp.getTYPE().isEmpty()) {
             throw new IncompleteDataException("Autoresponder emails must have a type.");
+        }
+        
+        if(temp.getBODY() == null || temp.getBODY().isEmpty()) {
+            throw new IncompleteDataException("Autoresponder emails must have a body.");
         }
 
         /**

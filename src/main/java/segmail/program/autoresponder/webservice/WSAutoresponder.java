@@ -34,21 +34,26 @@ import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 @HandlerChain(file = "handlers-server.xml")
 public class WSAutoresponder {
 
-    @EJB AutoresponderService autoemailService;
-    @EJB MailMergeService mmService;
+    @EJB
+    AutoresponderService autoemailService;
+    @EJB
+    MailMergeService mmService;
     @EJB
     private GenericObjectService objectService;
-    
+
     //@Inject ProgramAutoresponder program;
-    @Inject AutoresponderSessionContainer listCont;
+    @Inject
+    AutoresponderSessionContainer listCont;
+
     /**
-     * Saves the body and bodyProcessed into AutoresponderEmail BODY and BODY_PROCESSED
-     * fields for the existing editing AutoresponderEmail that is in context.
-     * 
+     * Saves the body and bodyProcessed into AutoresponderEmail BODY and
+     * BODY_PROCESSED fields for the existing editing AutoresponderEmail that is
+     * in context.
+     *
      * @param subject
      * @param body
      * @param bodyProcessed
-     * @return 
+     * @return
      * @throws eds.component.data.EntityNotFoundException
      * @throws eds.component.data.IncompleteDataException
      * @throws eds.component.data.EntityExistsException
@@ -57,65 +62,71 @@ public class WSAutoresponder {
     public String saveAutoemail(
             @WebParam(name = "subject") String subject,
             @WebParam(name = "body") String body,
-            @WebParam(name = "bodyProcessed") String bodyProcessed) 
-            throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
-        
-        AutoresponderEmail autoemail = listCont.getEditingTemplate();
-        if(autoemail == null)
-            throw new EntityNotFoundException("No AutoresponderEmail found.");
-        
-        autoemail.setSUBJECT(subject);
-        autoemail.setBODY(body);
+            @WebParam(name = "bodyProcessed") String bodyProcessed)
+        throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
+
+        try {
+            AutoresponderEmail autoemail = listCont.getEditingTemplate();
+
+            if (autoemail == null) {
+                throw new EntityNotFoundException("No AutoresponderEmail found.");
+            }
+
+            autoemail.setSUBJECT(subject);
+            autoemail.setBODY(body);
         //autoemail.setBODY_PROCESSED(bodyProcessed);
-        
-        autoemail = autoemailService.saveAutoEmail(autoemail);
-        
+
+            autoemail = autoemailService.saveAutoEmail(autoemail);
+
         //program.setEditingTemplate(autoemail);//not necessary
-        
-        DateTime now = DateTime.now();
-        
-        return now.toString("dd-MM-yyyy hh:mm:ss");
+            DateTime now = DateTime.now();
+
+            return now.toString("dd-MM-yyyy hh:mm:ss");
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
-    
+
     /**
      * Retrieves a representation of a clickable link
-     * 
+     *
      * @param label
      * @return JSON object that encompasses a name and a URL
-     * @throws DataValidationException if the input label is not recognized by MAILMERGE_REQUEST
+     * @throws DataValidationException if the input label is not recognized by
+     * MAILMERGE_REQUEST
      * @throws IncompleteDataException if the test server is not set up
      */
     @WebMethod(operationName = "createSystemMailmergeTestLink")
-    public String createSystemMailmergeTestLink(@WebParam(name = "label")String label) 
+    public String createSystemMailmergeTestLink(@WebParam(name = "label") String label)
             throws DataValidationException, IncompleteDataException {
-        
+
         String url = mmService.getSystemTestLink(label);
-        
+
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
         resultObjectBuilder.add("name", MAILMERGE_REQUEST.getByLabel(label).toCapFirstLetter());
         resultObjectBuilder.add("url", url);
-        
+
         String result = resultObjectBuilder.build().toString();
-        
+
         return result;
     }
-    
+
     /**
-     * 
+     *
      * @param label
      * @return the field value of a random subscriber from the assigned list
      */
     @WebMethod(operationName = "createSubscriberMailmergeTestValue")
-    public String createSubscriberMailmergeTestValue(@WebParam(name = "label")String label) {
+    public String createSubscriberMailmergeTestValue(@WebParam(name = "label") String label) {
         List<SubscriptionListField> fields = listCont.getFields();
-        
-        for(SubscriptionListField field : fields) {
-            if(field.getMAILMERGE_TAG().equals(label)) {
+
+        for (SubscriptionListField field : fields) {
+            if (field.getMAILMERGE_TAG().equals(label)) {
                 String value = listCont.getRandomSubscriber().get(field.generateKey());
                 return (value == null) ? label : value;
             }
         }
-        
+
         return label;
     }
 }

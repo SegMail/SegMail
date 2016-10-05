@@ -705,7 +705,12 @@ public class SubscriptionService {
         Subquery<Long> countQuery = query.subquery(Long.class);
         Root<Subscription> fromSubscription = countQuery.from(Subscription.class);
         countQuery.select(builder.count(fromSubscription));
-        countQuery.where(builder.equal(fromSubscription.get(Subscription_.TARGET), listId));
+        countQuery.where(
+                builder.and(
+                        builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
+                        builder.equal(fromSubscription.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.CONFIRMED.toString())
+                )
+        );
 
         query.set(fromList.get(SubscriptionList_.SUBSCRIBER_COUNT), countQuery);
         query.where(builder.equal(fromList.get(SubscriptionList_.OBJECTID), listId));

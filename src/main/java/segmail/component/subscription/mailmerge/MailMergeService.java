@@ -8,11 +8,9 @@ package segmail.component.subscription.mailmerge;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.data.DataValidationException;
-import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +18,6 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
@@ -32,9 +27,6 @@ import segmail.component.subscription.ListService;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.SubscriptionListField_;
-import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
-import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List_;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
@@ -104,7 +96,7 @@ public class MailMergeService {
             //long listId
             String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
-        if (!text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
+        if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
             return text;
         }
 
@@ -164,6 +156,8 @@ public class MailMergeService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseMailmergeTagsSubscriber(String text, Map<String,SubscriberFieldValue> fieldValueMap) {
+        if(text == null || text.isEmpty())
+            return "";
         String parsedText = text;
         for(String mmTag : fieldValueMap.keySet()){
             parsedText = parsedText.replace(mmTag, fieldValueMap.get(mmTag).getVALUE());
@@ -211,6 +205,9 @@ public class MailMergeService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseMailmergeTagsSubscriber(String text, long subscriberId, long listId) {
+        if(text == null || text.isEmpty())
+            return "";
+        
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
         List<Long> ids = new ArrayList<>();
         ids.add(subscriberId);
