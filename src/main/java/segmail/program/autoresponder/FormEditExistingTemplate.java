@@ -33,6 +33,8 @@ import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
@@ -226,15 +228,24 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void loadMMUrls() {
 
         try {
+            this.setMailmergeLinks(new HashMap<String, String>());
             for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
+                //For confirm emails, don't load unsubscribe links
+                //For welcome emails, don't load confirm links
+                if(request.equals(MAILMERGE_REQUEST.CONFIRM) && WELCOME.name().equals(getEditingTemplate().getTYPE())) {
+                    continue;
+                }
+                if(request.equals(MAILMERGE_REQUEST.UNSUBSCRIBE) && CONFIRMATION.name().equals(getEditingTemplate().getTYPE())) {
+                    continue;
+                }
                 String url = mmService.getSystemTestLink(request.label());
-                this.getMailmergeLinks().put(request.label(), url);
+                getMailmergeLinks().put(request.label(), url);
             }
         } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        }
+        } 
 
     }
 }

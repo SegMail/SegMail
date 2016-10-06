@@ -116,15 +116,6 @@ public class WSHttpSubscribe {
             Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         } catch (RelationshipExistsException ex) {
-            //Because ex does not contain all the emails 
-            /*List<String> hackForEmail = new ArrayList<>();
-            for(List<String> values : subscriptionMap.values()) {
-                String value = (values == null || values.isEmpty()) ? "" : values.get(0);
-                hackForEmail.add(value);
-            }
-            List<Subscription> subscriptions = subService.getSubscriptionsByEmails(hackForEmail, listId);
-            if(subscriptions == null || subscriptions.isEmpty())
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();*/
             String confirmKey = ex.getMessage();
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(confirmKey).build();
             

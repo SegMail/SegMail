@@ -41,6 +41,8 @@ import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
 
@@ -339,7 +341,12 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void loadMMUrls() {
 
         try {
+            this.setMailmergeLinks(new HashMap<String, String>());
             for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
+                //For all emails, don't load confirm links
+                if(request.equals(MAILMERGE_REQUEST.CONFIRM)) {
+                    continue;
+                }
                 String url = mmService.getSystemTestLink(request.label());
                 this.getMailmergeLinks().put(request.label(), url);
             }

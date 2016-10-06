@@ -230,7 +230,7 @@ public class MailMergeService {
      * @param text
      * @param unsubscribeKey
      * @return
-     * @throws eds.component.data.IncompleteDataException
+     * @throws eds.component.data.IncompleteDataException if landing/WEB server is not set
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseUnsubscribeLink(String text, String unsubscribeKey) throws IncompleteDataException {

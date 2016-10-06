@@ -71,10 +71,15 @@
             };
             var mailmergeLinks = {
                 <c:forEach items = "#{FormEditExistingTemplate.mailmergeLinkTags}" var = "link" >
-                    '#{link.label()}' : [
-                            '#{link.defaultHtmlText()}',
-                            '#{FormEditExistingTemplate.mailmergeLinks[link.label()]}'
-                    ],
+                    <c:choose>
+                        <c:when test="#{FormEditExistingTemplate.mailmergeLinks[link.label()] ne null and 
+                                        !FormEditExistingTemplate.mailmergeLinks[link.label()].isEmpty()}">
+                        '#{link.label()}' : [
+                                '#{link.defaultHtmlText()}',
+                                '#{FormEditExistingTemplate.mailmergeLinks[link.label()]}'
+                        ],
+                        </c:when>
+                    </c:choose>
                 </c:forEach>
             };
             var randomSubscriber = {

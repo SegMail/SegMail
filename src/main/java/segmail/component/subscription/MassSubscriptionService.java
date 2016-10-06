@@ -32,6 +32,8 @@ import static segmail.component.subscription.SubscriptionService.DEFAULT_EMAIL_F
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValueComparator;
@@ -40,6 +42,7 @@ import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
@@ -179,7 +182,7 @@ public class MassSubscriptionService {
         //All existing subscriptions
         //Just in case the SubscriberAccount, Ownership and FieldValues are created but the subscription is not,
         //this is used for checking.
-        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID());
+        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID(), null);
 
         /**
          * For each survivor: 1) Check if SubscriberAccount has already been
@@ -284,7 +287,7 @@ public class MassSubscriptionService {
 
             if (!existingSubscription.contains(subscription)) {
                 createNewSubscription.add(subscription);
-            }
+            } 
         }
 
         //Time to do db updates and inserts
@@ -297,6 +300,8 @@ public class MassSubscriptionService {
             createNewSubOwnership = createSubscriberOwnership(createNewSubOwnership);
             //Create Subscription!!!
             createNewSubscription = createSubscription(createNewSubscription);
+            //Update all existing subscriptions
+            existingSubscription = updateExistingSubscriptions(existingSubscription, doubleOptin ? NEW : CONFIRMED);
             
             //Necessary for #74
             //As inspired by http://stackoverflow.com/a/11333262/5765606
@@ -307,6 +312,7 @@ public class MassSubscriptionService {
             //Send confirmation email if double optin is turned on (must be last)
             if (doubleOptin) {
                 sendConfirmationEmails(createNewSubscription);
+                sendConfirmationEmails(existingSubscription);
             }
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
@@ -521,5 +527,21 @@ public class MassSubscriptionService {
                 
             }
         }*/
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<Subscription> updateExistingSubscriptions(List<Subscription> subscriptions, SUBSCRIPTION_STATUS status) {
+        for(int i = 0; i < subscriptions.size(); i++) {
+            Subscription sub = subscriptions.get(i);
+            sub.setSTATUS(status.name());
+            objService.getEm().merge(sub);
+            
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
+                objService.getEm().flush();
+            }
+        }
+        objService.getEm().flush();
+        
+        return subscriptions;
     }
 }

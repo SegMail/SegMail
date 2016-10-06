@@ -26,6 +26,7 @@ import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
@@ -47,10 +48,14 @@ public class FormAddNewAutoEmail {
     private String subject;
     
     private final String defaultConfirmBody = 
-            "<p><span>Dear <strong>[insert mailmerge tag using the \"Mailmerge Tag\" button on top]</strong></span>,</p>"
+            "<p><span>Dear ,</p>"
             +"<p><span></span></p>"
             + "<p><span>Please click on "+MAILMERGE_REQUEST.CONFIRM.label()+" to confirm your subscription.</span></p>";
     
+    private final String defaultWelcomeBody = 
+            "<p><span>Welcome !</p>"
+            +"<p><span></span></p>"
+            +"<p><span>You are now subscribed to us.</span></p>";
     //private AutoEmailTypeFactory.TYPE type;
     private AUTO_EMAIL_TYPE type;
     
@@ -69,7 +74,8 @@ public class FormAddNewAutoEmail {
             // Get the client associated with the user and assign it
             AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(
                     subject, 
-                    (type == CONFIRMATION) ? defaultConfirmBody : "", 
+                    (type == CONFIRMATION) ? defaultConfirmBody : 
+                            (type == WELCOME) ? defaultWelcomeBody : "", 
                     type);
             //Assign it to the selected list
             autoresponderService.assignAutoEmailToList(newTemplate.getOBJECTID(), getSelectedListId());

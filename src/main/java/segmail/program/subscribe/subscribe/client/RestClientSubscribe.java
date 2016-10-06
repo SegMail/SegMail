@@ -53,15 +53,14 @@ public class RestClientSubscribe extends GenericRestClient {
                 MediaType.APPLICATION_JSON_TYPE).post(
                         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         
-        if(response.getStatus() == Response.Status.TEMPORARY_REDIRECT.getStatusCode()) {
-            String redirectLink = response.readEntity(String.class);
-            throw new RedirectException(redirectLink);
-        }
         if(response.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()) {
             String confirmKey = response.readEntity(String.class);
             throw new RelationshipExistsException(confirmKey);
         }
-        
+        if(response.getStatus() == Response.Status.TEMPORARY_REDIRECT.getStatusCode()) {
+            String redirectLink = response.readEntity(String.class);
+            throw new RedirectException(redirectLink);
+        }
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {
             
             String error = response.readEntity(String.class);

@@ -115,10 +115,13 @@
                     };
                     var mailmergeLinks = {
                         <c:forEach items = "#{FormEditEmailActivity.mailmergeLinkTags}" var = "link" >
-                            '#{link.label()}' : [
-                                    '#{link.defaultHtmlText()}',
-                                    '#{FormEditEmailActivity.mailmergeLinks[link.label()]}'
-                            ],
+                            <c:when test="#{FormEditEmailActivity.mailmergeLinks[link.label()] ne null and 
+                                            !FormEditEmailActivity.mailmergeLinks[link.label()].isEmpty()}">
+                                '#{link.label()}' : [
+                                        '#{link.defaultHtmlText()}',
+                                        '#{FormEditEmailActivity.mailmergeLinks[link.label()]}'
+                                ],
+                            </c:when>
                         </c:forEach>
                     };
                     var randomSubscriber = {

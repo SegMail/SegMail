@@ -334,7 +334,7 @@ public class SubscriptionService {
      * <li>List object has no SEND_AS_EMAIL set.</li>
      * <li>List object has no AutoresponderEmail of the AUTO_EMAIL_TYPE CONFIRMATION</li>
      * </ul>
-     * @throws eds.component.mail.InvalidEmailException if either sender's or 
+     * @throws InvalidEmailException if either sender's or 
      * recipients' email addresses are invalid.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -465,7 +465,7 @@ public class SubscriptionService {
         return results;
     }
 
-    public List<Subscription> getSubscriptionsByEmails(List<String> subscriberEmails, long listId) {
+    public List<Subscription> getSubscriptionsByEmails(List<String> subscriberEmails, long listId, SUBSCRIPTION_STATUS[] statusList) {
         CriteriaBuilder builder = this.objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
         Root<SubscriberAccount> fromSubscriber = query.from(SubscriberAccount.class);
@@ -473,10 +473,19 @@ public class SubscriptionService {
         Root<Subscription> fromSubscription = query.from(Subscription.class);
 
         query.select(fromSubscription).distinct(true);
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(fromSubscriber.get(SubscriberAccount_.EMAIL).in(subscriberEmails));
+        conditions.add(builder.equal(fromSubscription.get(Subscription_.TARGET), listId));
+        conditions.add(builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID)));
+        if(statusList != null && statusList.length > 0) {
+            String[] statusNames = new String[statusList.length];
+            for(int i = 0; i<statusList.length; i++) {
+                statusNames[i] = statusList[i].name();
+            }
+            conditions.add(fromSubscription.get(Subscription_.STATUS).in(statusNames));
+        }
         query.where(builder.and(
-                fromSubscriber.get(SubscriberAccount_.EMAIL).in(subscriberEmails),
-                builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
-                builder.equal(fromSubscription.get(Subscription_.SOURCE), fromSubscriber.get(SubscriberAccount_.OBJECTID))
+                conditions.toArray(new Predicate[]{})
         ));
 
         List<Subscription> results = this.objectService.getEm().createQuery(query)
@@ -524,6 +533,8 @@ public class SubscriptionService {
         sendWelcomeEmail(sub);
 
         sub = updateService.getEm().merge(sub);
+        
+        updateSubscriberCount(sub.getTARGET().getOBJECTID());
 
         return sub;
 
@@ -727,9 +738,10 @@ public class SubscriptionService {
      * @param sub
      * @throws DataValidationException if email address is invalid
      * @throws InvalidEmailException if email address is invalid
+     * @throws IncompleteDataException if landing/WEB server is not set
      */
     public void sendWelcomeEmail(Subscription sub) 
-            throws DataValidationException, InvalidEmailException{
+            throws DataValidationException, InvalidEmailException, IncompleteDataException{
         SubscriptionList list = sub.getTARGET();
         
         //Retrieve the autoemail from list using AutoresponderService
@@ -746,11 +758,12 @@ public class SubscriptionService {
         if (sendAs == null || sendAs.isEmpty()) {
             //This would be a serious programming error as one could not have sent out a confirmation email 
             //without a Send As email
-            throw new RuntimeException("Please set \"Send As\" address before sending welcome emails.");
+            throw new IncompleteDataException("Please set \"Send As\" address before sending welcome emails.");
         }
 
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedWelcomeEmail.getBODY();
+        newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
         newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), sub.getTARGET().getOBJECTID());
 
         //Send the email using MailService
