@@ -37,6 +37,7 @@ public class FormServerList {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
             initServerList();
+            program.initUserAccounts();
         }
     }
     

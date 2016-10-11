@@ -14,7 +14,6 @@
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />        
             <meta http-equiv="X-UA-Compatible" content="IE=edge" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-
             <!-- AJAX Loader -->
             <link rel="stylesheet" href="#{request.contextPath}/templates/common/css/ajax-loader/spinner.css" />
             <script src="#{request.contextPath}/templates/common/js/ajax-loader/ajax-loader.js"></script> 
@@ -45,11 +44,11 @@
 
                 <div class="page-navigation">
                     <div class="page-navigation-info"><!-- navigation info block -->
-                        <a href="index.html" class="logo">Your logo text</a><!-- Your logo link -->
+                        <!-- Your logo link -->
                     </div>
                     <!--"Template-tize" this section in the future-->
                     <div class="profile">
-                        <img src="#{request.contextPath}/img/samples/users/user-30.jpg" />
+                        <img src="img/samples/users/user-30.jpg" />
                         <div class="profile-info">
                             <a href="#" class="profile-title">Howdy, #{UserSessionContainer.username}</a>
                             <span class="profile-subtitle">#{UserSessionContainer.usertypeName}</span>
@@ -106,10 +105,18 @@
                             </form>
                             <form jsf:id="PageBreadCrumbs" jsf:rendered="#{UserRequestContainer.renderPageBreadCrumbs}">
                                 <ul class="breadcrumb">
-                                    <li><a href="#">Dashboard</a></li>
-                                    <li><a href="#">UI Elements</a></li>
-                                    <li class="active">Blocks &amp; Panels</li>
-                                </ul>   
+                                    <c:choose>
+                                        <c:when test="#{UserRequestContainer.programParamsOrdered.size() le 0 }">
+                                            <li class="active">#{UserRequestContainer.programName}</li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li ><a href="#{UserRequestContainer.programName}">#{UserRequestContainer.programName}</a></li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <c:forEach items="#{UserRequestContainer.programParamsOrdered}" var="programParam" >
+                                        <li>#{programParam}</li>
+                                    </c:forEach>
+                                </ul>
                             </form>
                         </div>
                         <ui:insert name="main-program-panel" />

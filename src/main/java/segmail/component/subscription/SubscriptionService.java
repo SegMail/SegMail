@@ -5,7 +5,6 @@
  */
 package segmail.component.subscription;
 
-import com.google.common.base.Predicates;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
@@ -45,13 +44,13 @@ import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.Path;
 import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
@@ -74,7 +73,6 @@ import segmail.entity.subscription.autoresponder.AutoresponderEmail;
  */
 @Stateless
 @Interceptors({ClientResourceInterceptor.class})
-@Path("/subscription")
 public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
@@ -125,6 +123,10 @@ public class SubscriptionService {
      * SubscriberFieldValue with the correct FIELD_KEY values set in these
      * objects. There should be another method that takes in just a
      * Map<String,String> of objects.
+     * 
+     * Each email address is unique only to each Client object. For example, if 
+     * an email is subscribed to 2 lists from 2 different client, then it will
+     * have 2 different SubscriberAccount objects.
      *
      * @param clientId
      * @param listId
@@ -171,6 +173,7 @@ public class SubscriptionService {
         for (SubscriptionListField field : fields) {
             if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
                 email = (String) values.get((String) field.generateKey());
+                email = email.trim(); //for checking
                 break;
             }
         }
@@ -196,8 +199,9 @@ public class SubscriptionService {
     
     /**
      * Check if a subscriber subscriberEmail is already subscribed to a list.
-     *
-     * Might be wrong! Re-test the implementation
+     * Each SubscriberAccount object is unique to a Client. The same email will 
+     * have 2 SubscriberAccount objects created if this email is subscribed to 
+     * 2 lists from 2 different client.
      *
      * @param subscriberEmail
      * @param listId
@@ -540,35 +544,37 @@ public class SubscriptionService {
 
     }
 
+    /**
+     * 
+     * @param unsubKey
+     * @return
+     * @throws RelationshipNotFoundException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Subscription unsubscribeSubscriber(String unsubKey) throws RelationshipNotFoundException {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
-        Root<Subscription> fromSubsc = query.from(Subscription.class);
-
-        query.select(fromSubsc);
-        query.where(builder.equal(fromSubsc.get(Subscription_.UNSUBSCRIBE_KEY), unsubKey));
-
-        List<Subscription> results = objectService.getEm().createQuery(query)
-                .getResultList();
+    public List<Subscription> unsubscribeSubscriber(String unsubKey) throws RelationshipNotFoundException {
+        
+        List<Subscription> results = getSubscriptionByUnsubKey(unsubKey);
         
         if (results == null || results.isEmpty()) {
             throw new RelationshipNotFoundException("Subscription not found for unsubscribe key.");
         }
         
-        if (results.size() > 1)
-            throw new RuntimeException("SHA-512 collision! We're all going to die!!!");
-
-        Subscription sub = results.get(0);
+        //Get all subscriptions for the same subscriber and client
+        //Assuming that all subscribers are unique only to a client
+        //each subscriber ID will be unique to the client only
+        //so we will just delete all subscriptions with the subscriber ID
+        List<Long> listIds = new ArrayList<>();
+        for(Subscription sub : results) {
+            updateService.getEm().remove(sub);
+            if(!listIds.contains(sub.getTARGET().getOBJECTID()))
+                listIds.add(sub.getTARGET().getOBJECTID());
+        }
         
-        sub.setSTATUS(SUBSCRIPTION_STATUS.UNSUBSCRIBED.toString());
-        //sub.setCONFIRMATION_KEY("");//remove confirmation key?
+        for(Long listId : listIds) {
+            updateSubscriberCount(listId);
+        }
 
-        sub = updateService.getEm().merge(sub);
-        
-        updateSubscriberCount(sub.getTARGET().getOBJECTID());
-
-        return sub;
+        return results;
     }
     
     /**
@@ -632,7 +638,7 @@ public class SubscriptionService {
     /**
      * This is a helper method that should not be exposed.
      * 
-     * @param confirmOrUnsubKey
+     * @param confirmKey
      * @return 
      */
     private List<Subscription> getSubscriptionByConfirmKey(String confirmKey) {
@@ -647,15 +653,42 @@ public class SubscriptionService {
         
         return results;
     }
+    
+    private List<Subscription> getSubscriptionByUnsubKey(String unsubKey) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
+        Root<Subscription> fromSubsc = query.from(Subscription.class);
+        
+        query.where(builder.equal(fromSubsc.get(Subscription_.UNSUBSCRIBE_KEY), unsubKey));
+        
+        List<Subscription> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
 
+    /**
+     * Confirmation to each subscription for each subscriber is unique.
+     * 
+     * @param subscriberId
+     * @param listId
+     * @return 
+     */
     public String getConfirmationHashCode(long subscriberId, long listId) {
         String confirmKey = EncryptionUtility.getHash("confirm subscription of " + subscriberId + " to list " + listId, EncryptionType.SHA256);
         return confirmKey;
 
     }
 
+    /**
+     * Unsubcription to each subscription for each subscriber is the same.
+     * 
+     * @param subscriberId
+     * @param listId
+     * @return 
+     */
     public String getUnsubscribeHashCode(long subscriberId, long listId) {
-        String unsubKey = EncryptionUtility.getHash("unsubscribe " + subscriberId + " from list " + listId, EncryptionType.SHA256);
+        String unsubKey = EncryptionUtility.getHash("unsubscribe " + subscriberId, EncryptionType.SHA256);
         return unsubKey;
     }
 

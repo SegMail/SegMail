@@ -12,8 +12,8 @@ package segmail.entity.subscription;
 public enum SUBSCRIPTION_STATUS {
     NEW("NEW"),
     CONFIRMED("CONFIRMED"),
-    BOUNCED("BOUNCED"),
-    UNSUBSCRIBED("UNSUBSCRIBED");
+    BOUNCED("BOUNCED");//,
+    //UNSUBSCRIBED("UNSUBSCRIBED");
     
     final String name;
     

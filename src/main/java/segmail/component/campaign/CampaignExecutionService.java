@@ -19,6 +19,7 @@ import eds.entity.client.Client;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +140,11 @@ public class CampaignExecutionService {
             Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientLists.get(0).getOBJECTID()); //DB hit
             //Retrieve all subscriber's field values
             List<SubscriberFieldValue> fieldValues = subService.getSubscriberValuesBySubscriberObjects(subscribers); //DB hit
-            Map<Long,Map<String,SubscriberFieldValue>> fieldValuesMap = mmService.createMMValueMap(targetListFields, fieldValues);
+            List<Long> subscriberIds = new ArrayList<>();
+            for(SubscriberAccount subscriber : subscribers) {
+                subscriberIds.add(subscriber.getOBJECTID());
+            }
+            Map<Long,Map<String,String>> fieldValuesMap = mmService.createMMValueMap(subscriberIds,targetListFields, fieldValues);
             
             for (SubscriberAccount subscriber : subscribers) {
 

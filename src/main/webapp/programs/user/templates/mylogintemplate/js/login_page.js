@@ -35,6 +35,7 @@ var blockRefresh = function(block) {
         block.addClass("block-refreshing");
     }else{
         block.find(".spinner-overlay").remove();
+        block.find(".spinner").remove();
         block.removeClass("block-refreshing");
     }    
 }

@@ -15,11 +15,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import static javax.ws.rs.core.Response.Status.OK;
 import seca2.bootstrap.module.Webservice.REST.client.GenericRestClient;
 import seca2.bootstrap.module.Webservice.REST.client.RedirectException;
-import segmail.entity.subscription.Subscription;
-import segmail.entity.subscription.SubscriptionList;
 
 /**
  * Jersey REST client generated for REST resource:WSHttpSubscribe

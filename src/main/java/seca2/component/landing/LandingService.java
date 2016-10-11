@@ -7,7 +7,6 @@ package seca2.component.landing;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
-import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
@@ -22,16 +21,14 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.PersistenceException;
+import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.hibernate.exception.GenericJDBCException;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.Assign_Server_User_;
 import seca2.entity.landing.ServerInstance;
@@ -48,6 +45,8 @@ import seca2.entity.landing.ServerResource_;
 public class LandingService {
 
     public final String SERVER_NAME = "LandingService.SERVER_NAME";
+    
+    @Inject LandingServiceContainer cont;
 
     @EJB
     private GenericObjectService objectService;
@@ -55,32 +54,33 @@ public class LandingService {
     private UserService userService;
     @EJB
     private UpdateObjectService updateService;
-
     
+    /**
+     * Reads all ServerInstances directly from DB
+     * 
+     * @return 
+     */
     public List<ServerInstance> getServerInstances() {
-        try {
-            return objectService.getAllEnterpriseObjects(ServerInstance.class);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        return objectService.getAllEnterpriseObjects(ServerInstance.class);
     }
 
-    
+    /**
+     * Reads ServerInstance directly from DB.
+     * 
+     * @param serverId
+     * @return 
+     */
     public ServerInstance getServerInstance(long serverId) {
-        try {
-            return objectService.getEnterpriseObjectById(serverId, ServerInstance.class);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        return objectService.getEnterpriseObjectById(serverId, ServerInstance.class);
+
     }
 
-    
+    /**
+     * Reads all ServerInstances of type  directly from DB.
+     * 
+     * @param type
+     * @return 
+     */
     public List<ServerInstance> getServerInstances(ServerNodeType type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<ServerInstance> query = builder.createQuery(ServerInstance.class);
@@ -109,7 +109,6 @@ public class LandingService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ServerInstance addServerInstance(String name, String uri, long userId, ServerNodeType type)
             throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException, URISyntaxException {
-        try {
             if (name == null || name.isEmpty()) {
                 throw new IncompleteDataException("Name must not be empty.");
             }
@@ -139,15 +138,11 @@ public class LandingService {
             Assign_Server_User assignment = new Assign_Server_User(newInstance, user);
 
             updateService.getEm().persist(assignment);
-
+            
+            cont.addServer(newInstance);
+            
             return newInstance;
 
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
     }
 
     /**
@@ -229,17 +224,15 @@ public class LandingService {
         //This is when the user can set their own landing servers
         //List<ServerInstance> servers = objectService.getAllSourceObjectsFromTarget(userId, Assign_Server_User.class, ServerInstance.class);
         //Only the system admin can set landing servers, so no point retrieving by assignment
-        List<ServerInstance> servers = objectService.getAllEnterpriseObjects(ServerInstance.class);
-            //if(servers == null || servers.isEmpty())
-
-        for (ServerInstance server : servers) {
-            if (type.value.equals(server.getSERVER_NODE_TYPE())) {
-                return server;
-            }
+        if(cont.getTotalServerCount() <= 0) {
+            cont.addServers(getServerInstances());
         }
+        ServerInstance result = cont.getNextServerRR(type);//Only Round Robin is supported at this moment.
 
-        throw new IncompleteDataException("No Servers found, please contact your administrators to set a valid ServerInstance first.");
+        if(result == null)
+            throw new IncompleteDataException("No Servers found, please contact your administrators to set a valid ServerInstance first.");
 
+        return result;
     }
 
     /**
@@ -253,6 +246,7 @@ public class LandingService {
     public void deleteServer(long serverId)
             throws EntityNotFoundException {
         updateService.deleteObjectDataAndRelationships(serverId,ServerInstance.class);
+        cont.removeServer(serverId);
     }
 
     //Wrong return param - should return a list or use "Contains"

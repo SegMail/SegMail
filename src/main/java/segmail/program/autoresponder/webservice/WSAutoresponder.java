@@ -77,8 +77,8 @@ public class WSAutoresponder {
         //autoemail.setBODY_PROCESSED(bodyProcessed);
 
             autoemail = autoemailService.saveAutoEmail(autoemail);
-
-        //program.setEditingTemplate(autoemail);//not necessary
+            listCont.setEditingTemplate(autoemail);
+            
             DateTime now = DateTime.now();
 
             return now.toString("dd-MM-yyyy hh:mm:ss");

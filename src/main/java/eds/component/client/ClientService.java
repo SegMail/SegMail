@@ -281,6 +281,12 @@ public class ClientService {
             throw ex;
         }
     }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ContactInfo createClientContact(ContactInfo contactInfo) {
+        em.persist(contactInfo);
+        return contactInfo;
+    }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateClientContact(ContactInfo contactInfo)

@@ -7,6 +7,7 @@ package segmail.program.subscribe.unsubscribe.webservice;
 
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.webservice.UnwantedAccessException;
+import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -52,17 +53,17 @@ public class WSUnsubscribe implements WSUnsubscribeInterface {
                 return "This is a testing list";
             }
             
-            Subscription sub = subService.unsubscribeSubscriber(key);
-            SubscriptionList list = sub.getTARGET();
+            List<Subscription> sub = subService.unsubscribeSubscriber(key);
+            //SubscriptionList list = sub.getTARGET();
             
             /*JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
             resultObjectBuilder.add("name", list.getLIST_NAME());
             resultObjectBuilder.add("redirect", "");
             
             String result = resultObjectBuilder.build().toString();*/
-            String result = list.getLIST_NAME();
+            //String result = list.getLIST_NAME();
             
-            return result;
+            return key;
         } catch (RelationshipNotFoundException ex) {
             throw new UnwantedAccessException("Key doesn't match any Subscription records.");
         }

@@ -89,7 +89,7 @@ var renderPreview = function (timeout) {
 
         //Get ratios
         var scaleY = $('#preview-panel').height() / $('#preview').height();
-        var scaleX = $('#preview-panel').width() / largestWidth('#preview');//$('#preview').width();
+        var scaleX = $('#preview').width() / largestWidth('#preview');//$('#preview').width();
         //Transform
         var scaleYTransform = Math.min(1, scaleY);
         var scaleXTransform = Math.min(1, scaleX);
@@ -208,7 +208,9 @@ var highlightAndCreateLinks = function (timeout) {
         //  1) render the link labels beside the preview panel
             var obj = $(this);
             var linkTarget = obj.attr('href');
-            var linkText = obj.text();
+            var originalText = (obj.find('img').length > 0) ? '[image]' : obj.text();
+            var linkText = (obj.find('img').length > 0) ? '[image]' : 
+                    (originalText.length > 15) ? originalText.substring(0,12) + '...' : originalText;
             var hashId = obj.attr('data-link');
             var offset = obj.offset().top - $('#preview').offset().top;
             var marginTop1 = offset;
@@ -236,7 +238,7 @@ var highlightAndCreateLinks = function (timeout) {
             callWSCreateUpdateLink(
                     hashId,
                     linkTarget,
-                    linkText,
+                    originalText,
                     index,
                     function(redirectLink) {
                         //  3) In success callback (redirectLink):

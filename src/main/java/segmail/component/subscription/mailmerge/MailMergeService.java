@@ -155,12 +155,12 @@ public class MailMergeService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String parseMailmergeTagsSubscriber(String text, Map<String,SubscriberFieldValue> fieldValueMap) {
+    public String parseMailmergeTagsSubscriber(String text, Map<String,String> fieldValueMap) {
         if(text == null || text.isEmpty())
             return "";
         String parsedText = text;
         for(String mmTag : fieldValueMap.keySet()){
-            parsedText = parsedText.replace(mmTag, fieldValueMap.get(mmTag).getVALUE());
+            parsedText = parsedText.replace(mmTag, fieldValueMap.get(mmTag));
         }
         
         return parsedText;
@@ -168,14 +168,37 @@ public class MailMergeService {
     
     /**
      * 
+     * @param subscriberIds
      * @param fields
      * @param values
      * @return subscriberId => {mailmerge-tag} => SubscriberFieldValue
      */
-    public Map<Long,Map<String,SubscriberFieldValue>> createMMValueMap(List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
-        Map<Long,Map<String,SubscriberFieldValue>> results = new HashMap<>();
+    public Map<Long,Map<String,String>> createMMValueMap(List<Long> subscriberIds, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
+        Map<Long,Map<String,String>> results = new HashMap<>();
         
-        for(SubscriberFieldValue value : values) {
+        for(SubscriptionListField field : fields) {
+            String key = (String) field.generateKey();
+            String tag = field.getMAILMERGE_TAG();
+            
+            for(Long subscriberId : subscriberIds) {
+                if(!results.containsKey(subscriberId))
+                    results.put(subscriberId, new HashMap<String,String>());
+
+                Map<String,String> subscriberMap = results.get(subscriberId);
+                
+                //If the subscriber has the field value, insert into map.
+                //Else, just insert an empty field
+                subscriberMap.put(tag, "");
+                for(SubscriberFieldValue value : values) {
+                    if(value.getFIELD_KEY() != null && value.getFIELD_KEY().equals(key)) {
+                        subscriberMap.put(tag, value.getVALUE());
+                        break;
+                    }
+                }
+            }
+        }
+        
+        /*for(SubscriberFieldValue value : values) {
             long owner = value.getOWNER().getOBJECTID();
             if(!results.containsKey(owner))
                 results.put(owner, new HashMap<String,SubscriberFieldValue>());
@@ -191,7 +214,7 @@ public class MailMergeService {
                     break;
                 }
             }
-        }
+        }*/
         return results;
     }
     
@@ -212,7 +235,7 @@ public class MailMergeService {
         List<Long> ids = new ArrayList<>();
         ids.add(subscriberId);
         List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscriberIds(ids);
-        Map<Long,Map<String,SubscriberFieldValue>> map = this.createMMValueMap(fields, values);
+        Map<Long,Map<String,String>> map = this.createMMValueMap(ids, fields, values);
         
         String parsedText = this.parseMailmergeTagsSubscriber(text, map.get(subscriberId));
         return parsedText;
