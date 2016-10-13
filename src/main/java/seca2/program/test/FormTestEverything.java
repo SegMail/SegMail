@@ -65,6 +65,7 @@ public class FormTestEverything {
     private final String ADMIN_USERTYPE_CHARTJS = "ChartJS Administrator";
     private final String ADMIN_USERNAME_CHARTJS = "chartjsadmin";
     private final String ADMIN_PASSWORD_CHARTJS = "chartjsadmin";
+    private final String ADMIN_CONTACT_EMAIL = "vincent@segmail.io";
     
     private final String CLIENT_TYPE_PERSON = "Person";
     
@@ -84,6 +85,7 @@ public class FormTestEverything {
     private final String USER_NAME_TYPE_TAG = "SELECTED_USERTYPE";
     private final String USER_NAME_TAG = "USERNAME";
     private final String USER_PW_TAG = "PASSWORD";
+    private final String USER_CONTACT_TAG = "CONTACT_EMAIL";
     
     private final String PROGRAMS_TAG = "PROGRAMS";
     private final String PROGRAM_TAG = "PROGRAM";
@@ -151,9 +153,9 @@ public class FormTestEverything {
         //this.formTestUser.setUADMIN_USERNAME_SEGMAILUSERNAME);
         //this.formTestUser.setPassword("admin");
         //this.formTestUser.createUser();
-        this.formTestUser.createUserWithType(ADMIN_USERTYPE_TM, ADMIN_USERNAME_TM, ADMIN_PASSWORD_TM);
-        this.formTestUser.createUserWithType(ADMIN_USERTYPE_SEGMAIL, ADMIN_USERNAME_SEGMAIL, ADMIN_PASSWORD_SEGMAIL);
-        this.formTestUser.createUserWithType(ADMIN_USERTYPE_CHARTJS, ADMIN_USERNAME_CHARTJS, ADMIN_PASSWORD_CHARTJS);
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE_TM, ADMIN_USERNAME_TM, ADMIN_PASSWORD_TM,ADMIN_CONTACT_EMAIL);
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE_SEGMAIL, ADMIN_USERNAME_SEGMAIL, ADMIN_PASSWORD_SEGMAIL,ADMIN_CONTACT_EMAIL);
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE_CHARTJS, ADMIN_USERNAME_CHARTJS, ADMIN_PASSWORD_CHARTJS,ADMIN_CONTACT_EMAIL);
         
         //Create testing page
         this.formTestProgram.setProgramName("test");
@@ -438,8 +440,9 @@ public class FormTestEverything {
                 String usertype = element.getElementsByTagName(USER_NAME_TYPE_TAG).item(0).getTextContent();
                 String username = element.getElementsByTagName(USER_NAME_TAG).item(0).getTextContent();
                 String password = element.getElementsByTagName(USER_PW_TAG).item(0).getTextContent();
+                String contact = element.getElementsByTagName(USER_CONTACT_TAG).item(0).getTextContent();
                 
-                this.formTestUser.createUserWithType(usertype, username, password);
+                this.formTestUser.createUserWithType(usertype, username, password, contact);
             }
             
             // Create programs

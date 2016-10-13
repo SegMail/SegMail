@@ -12,14 +12,14 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
-import eds.entity.client.Client;
 import eds.entity.client.ClientType;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ContactInfo;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserType;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -38,7 +38,10 @@ import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
+import segmail.component.subscription.SubscriptionException;
 import segmail.component.subscription.SubscriptionService;
+import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.SubscriptionList;
 
 /**
  *
@@ -57,38 +60,16 @@ public class ClientAccountService {
     @EJB ClientService clientService;
     @EJB LandingService landingService;
     
-    @Path("segmail")
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public SegmailAccountContainer createSegmailAccount(SegmailAccountContainer newAccount) 
-            throws EntityNotFoundException, IncompleteDataException, EntityExistsException, RelationshipExistsException {
-        //Create user account
-        List<UserType> userTypes = userService.getUserTypeByName(SEGMAIL_USER_ACCOUNT_NAME);
-        if(userTypes == null || userTypes.isEmpty())
-            throw new EntityNotFoundException(SEGMAIL_USER_ACCOUNT_NAME+" type not created yet.");
-        long sUserTypeId = userTypes.get(0).getOBJECTID();
-        
-        UserAccount segmailAccount = userService.registerUserByUserTypeId(sUserTypeId, newAccount.getEmail(), newAccount.getPassword());
-        
-        //Create Client
-        ClientType clientType = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE);
-        if(clientType == null)
-            throw new EntityNotFoundException(SEGMAIL_CLIENT_TYPE+" type not created yet.");
-        long clientId = clientType.getOBJECTID();
-        
-        ClientUserAssignment clientAssign = clientService.registerClientForUser(segmailAccount.getOWNER(), clientId);
-        
-        //If help is true, send admin an email 
-        //or use SubscriberFieldValue to store it and MailTriggers(new module) to trigger
-        
-        
-        newAccount.setClientAssignment(clientAssign);
-        
-        return newAccount;
-    }
-    
+    /**
+     * 1) Create the UserAccount (username, password, email)
+     * 2) Subscribe to the Segmail list (email, listid, clientid)
+     * 
+     * If the user 
+     * 
+     * @param subscriptionMap
+     * @return
+     * @throws IncompleteDataException 
+     */
     @Path("segmail/create")
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -100,13 +81,14 @@ public class ClientAccountService {
         //To be used in case of EntityExistsException or RelationshipExistsException
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
         try {
+            
             //Create user account
             List<UserType> userTypes = userService.getUserTypeByName(SEGMAIL_USER_ACCOUNT_NAME);
             if(userTypes == null || userTypes.isEmpty())
                 throw new EntityNotFoundException(SEGMAIL_USER_ACCOUNT_NAME+" type not created yet.");
             long sUserTypeId = userTypes.get(0).getOBJECTID();
             
-            UserAccount segmailAccount = userService.registerUserByUserTypeId(sUserTypeId, subscriptionMap.getFirst("username"), subscriptionMap.getFirst("password"));
+            UserAccount segmailAccount = userService.registerUserByUserTypeId(sUserTypeId, subscriptionMap.getFirst("username"), subscriptionMap.getFirst("password"), subscriptionMap.getFirst("email"));
             
             //Create Client
             ClientType clientType = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE);
@@ -124,6 +106,43 @@ public class ClientAccountService {
             newContactInfo.setOWNER(clientAssign.getSOURCE());
             clientService.createClientContact(newContactInfo);
             
+            //Call subscription service here instead of having the client to call 2 separate transactions
+            List<String> listIds = subscriptionMap.get("list");
+                if(listIds == null || listIds.isEmpty())
+                    throw new IncompleteDataException("No list IDs provided.");
+
+            long listId = Long.parseLong(listIds.get(0));
+            
+            List<String> clientIds = subscriptionMap.get("client");
+            if(clientIds == null || clientIds.isEmpty())
+                throw new IncompleteDataException("No client IDs provided.");
+            
+            clientId = Long.parseLong(clientIds.get(0));
+            
+            Map<String,Object> subscriberMap = new HashMap<>();
+            for(String key : subscriptionMap.keySet()) {
+                if(subscriptionMap.get(key) == null)
+                    continue;
+                
+                List<String> values = subscriptionMap.get(key);
+                if(values.isEmpty())
+                    continue;
+                
+                subscriberMap.put(key, values.get(0));
+            }
+            
+            //Get the list from listKey
+            Subscription subscription = subService.subscribe(clientId, listId, subscriberMap, true);
+            
+            SubscriptionList list = subscription.getTARGET();
+            if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
+                String redirectUrl = list.getREDIRECT_CONFIRM();
+                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("https://"))
+                    redirectUrl = "http://"+redirectUrl;
+                
+                return "Redirect : "+redirectUrl;
+            }
+            
             return Long.toString(clientAssign.getSOURCE().getOBJECTID());
         } catch (EntityNotFoundException ex) {
             Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
@@ -134,7 +153,15 @@ public class ClientAccountService {
         } catch (EntityExistsException | RelationshipExistsException ex) {
             Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
             return "Exist : Your account was already created. Please check your email for our confirmation emails and visit <a target=\"_blank\" href=\""+server.getURI()+"\">Our login page</a>";
+        } catch (DataValidationException ex) {
+            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            return "Error : "+ex.getMessage();
+        } catch (SubscriptionException ex) {
+            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            return "Error : "+ex.getMessage();
         } 
     }
-            
+         
+    
+    
 }

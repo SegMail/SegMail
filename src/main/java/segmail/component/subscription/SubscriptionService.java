@@ -618,7 +618,6 @@ public class SubscriptionService {
      * @throws InvalidEmailException if either sender's or recipients' email 
      * addresses are invalid.
      */
-    
     public void retriggerConfirmation(@FormParam("listId") long listId, @FormParam("email") String email) 
             throws 
             RelationshipNotFoundException, 

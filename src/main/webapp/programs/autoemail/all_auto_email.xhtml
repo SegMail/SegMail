@@ -40,9 +40,8 @@
                             <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
                                 <a href="#{request.contextPath}/#{UserRequestContainer.programName}/#{confirm.OBJECTID}" class="list-group-item" data-toggle="modal"
                                    >
-                                    
                                     #{confirm.SUBJECT}
-                                    <span class="pull-right">#{confirm.SUBJECT}</span>
+                                    <span class="pull-right">#{FormAllAutoEmail.assignedToLists[confirm.OBJECTID].LIST_NAME}</span>
                                 </a>
                             </form>
                         </c:forEach>

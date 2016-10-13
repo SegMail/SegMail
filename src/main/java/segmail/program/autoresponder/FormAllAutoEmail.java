@@ -5,8 +5,11 @@
  */
 package segmail.program.autoresponder;
 
+import eds.component.GenericObjectService;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -15,7 +18,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /**
@@ -29,6 +34,7 @@ public class FormAllAutoEmail {
     @Inject ProgramAutoresponder program;
     
     @EJB AutoresponderService autoRespService;
+    @EJB GenericObjectService objService;
     
     @Inject ClientContainer clientContainer;
     
@@ -36,6 +42,7 @@ public class FormAllAutoEmail {
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()) {
             loadAllEmails();
+            loadAssignedLists();
         }
     }
     
@@ -57,6 +64,24 @@ public class FormAllAutoEmail {
         }
     }
     
+    public void loadAssignedLists() {
+        
+        this.setAssignedToLists(new HashMap<Long,SubscriptionList>());
+        
+        List<AutoresponderEmail> allEmails = new ArrayList<>();
+        allEmails.addAll(getConfirmationTemplates());
+        allEmails.addAll(getWelcomeTemplates());
+        
+        List<Long> ids = new ArrayList<>();
+        for(AutoresponderEmail email : allEmails) {
+            ids.add(email.getOBJECTID());
+        }
+        List<Assign_AutoresponderEmail_List> assignments = objService.getRelationshipsForSourceObjects(ids, Assign_AutoresponderEmail_List.class);
+        for(Assign_AutoresponderEmail_List assignment : assignments) {
+            getAssignedToLists().put(assignment.getSOURCE().getOBJECTID(), assignment.getTARGET());
+        }
+    }
+    
     public List<AutoresponderEmail> getConfirmationTemplates() {
         return program.getConfirmationTemplates();
     }
@@ -71,5 +96,13 @@ public class FormAllAutoEmail {
 
     public void setWelcomeTemplates(List<AutoresponderEmail> welcomeTemplates) {
         program.setWelcomeTemplates(welcomeTemplates);
+    }
+    
+    public Map<Long, SubscriptionList> getAssignedToLists() {
+        return program.getAssignedToLists();
+    }
+
+    public void setAssignedToLists(Map<Long, SubscriptionList> assignedToLists) {
+        program.setAssignedToLists(assignedToLists);
     }
 }

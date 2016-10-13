@@ -36,22 +36,17 @@ import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 @SessionScoped
 public class ProgramAutoresponder extends Program{
     
-    @EJB 
-    private AutoresponderService autoresponderService;
-    @EJB
-    private UserService userService;
     
     @Inject private UserSessionContainer userContainer;
     
-    @Inject private ClientFacade clientFacade;
     
     private List<AutoresponderEmail> confirmationTemplates;
     
     private List<AutoresponderEmail> welcomeTemplates;
     
-    private List<UserType> allUserTypes;
-    
     private AutoresponderEmail editingTemplate;
+    
+    private Map<Long,SubscriptionList> assignedToLists;
     
     private long editingTemplateId;
     
@@ -173,6 +168,14 @@ public class ProgramAutoresponder extends Program{
 
     public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
         this.mailmergeLinks = mailmergeLinks;
+    }
+
+    public Map<Long, SubscriptionList> getAssignedToLists() {
+        return assignedToLists;
+    }
+
+    public void setAssignedToLists(Map<Long, SubscriptionList> assignedToLists) {
+        this.assignedToLists = assignedToLists;
     }
 
     @Override
