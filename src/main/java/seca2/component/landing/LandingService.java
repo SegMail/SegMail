@@ -379,7 +379,7 @@ public class LandingService {
      * @return
      * @throws MissingOwnerException
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    /*@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ServerResource updateOrAddResourceForServer(ServerResource resource) throws MissingOwnerException {
         if (resource.getOWNER() == null) {
             throw new MissingOwnerException(resource);
@@ -394,7 +394,7 @@ public class LandingService {
 
         updateService.getEm().persist(resource);
         return resource;
-    }
+    }*/
 
     public List<ServerResource> getServerResource(long serverId, ServerResourceType type) {
         CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
@@ -420,7 +420,7 @@ public class LandingService {
      * @param serverId
      * @return
      */
-    public ServerResource getServerJMSConnection(long serverId) {
+    /*public ServerResource getServerJMSConnection(long serverId) {
         List<ServerResource> results = getServerResource(serverId, ServerResourceType.JMS_CONNECTION);
         if (results == null || results.isEmpty()) {
             ServerResource newJMSConn = new ServerResource();
@@ -430,7 +430,7 @@ public class LandingService {
         }
 
         return results.get(0); //Assume there's only 1
-    }
+    }*/
 
     public String getOwnServerName() {
         return System.getProperty(SERVER_NAME);

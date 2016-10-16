@@ -21,14 +21,14 @@ import javax.persistence.Table;
 @Table(name="API_ACCOUNT")
 public class APIAccount extends EnterpriseData<User> {
 
-    private String APIKey;
+    private String APIKEY;
 
-    public String getAPIKey() {
-        return APIKey;
+    public String getAPIKEY() {
+        return APIKEY;
     }
 
-    public void setAPIKey(String APIKey) {
-        this.APIKey = APIKey;
+    public void setAPIKEY(String APIKEY) {
+        this.APIKEY = APIKEY;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class APIAccount extends EnterpriseData<User> {
         User owner = getOWNER();
         String keyToBeEncrypted = owner.getOBJECTID() + owner.getOBJECT_NAME() + getSTART_DATE() + getEND_DATE() + getDATE_CHANGED() + getSNO() + getVersion() + this;
         String key = EncryptionUtility.getHash(keyToBeEncrypted, EncryptionType.SHA256);
-        setAPIKey(key);
+        setAPIKEY(key);
         
         return key;
     }

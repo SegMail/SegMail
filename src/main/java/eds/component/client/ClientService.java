@@ -5,6 +5,20 @@
  */
 package eds.component.client;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
+import com.amazonaws.services.identitymanagement.model.AccessKey;
+import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
+import com.amazonaws.services.identitymanagement.model.CreateAccessKeyRequest;
+import com.amazonaws.services.identitymanagement.model.CreateAccessKeyResult;
+import com.amazonaws.services.identitymanagement.model.CreateUserRequest;
+import com.amazonaws.services.identitymanagement.model.CreateUserResult;
+import com.amazonaws.services.identitymanagement.model.DeleteAccessKeyRequest;
+import com.amazonaws.services.identitymanagement.model.GetUserRequest;
+import com.amazonaws.services.identitymanagement.model.GetUserResult;
+import com.amazonaws.services.identitymanagement.model.ListAccessKeysRequest;
+import com.amazonaws.services.identitymanagement.model.ListAccessKeysResult;
+import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
 import eds.component.GenericObjectService;
 import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
@@ -12,8 +26,10 @@ import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.mail.Password;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
+import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientResource;
 import eds.entity.client.ClientResourceAssignment;
@@ -42,157 +58,103 @@ import org.joda.time.DateTime;
 public class ClientService {
 
     @EJB
-    private GenericObjectService genericEnterpriseObjectService;
+    private GenericObjectService objService;
     @EJB
     private UserService userService;
-
-    @PersistenceContext(name = "HIBERNATE")
-    private EntityManager em;
 
     @Inject
     private ClientFacade clientFacade;
 
-    public Client getClientById(long clientid) throws DBConnectionException {
-        try {
+    @Inject
+    @Password
+    BasicAWSCredentials awsCredentials;
+
+    public Client getClientById(long clientid) {
             //Try the shorter JPA way
-            //Client result = em.find(Client.class, clientid);
+        //Client userResult = em.find(Client.class, clientid);
 
-            Client result = this.genericEnterpriseObjectService.getEnterpriseObjectById(clientid, Client.class);
-            return result;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
-    }
-    
-    public ClientType getClientTypeById(long clienttypeid) throws DBConnectionException {
-        try {
-
-            ClientType result = this.genericEnterpriseObjectService.getEnterpriseObjectById(clienttypeid, ClientType.class);
-
-            return result;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        Client result = this.objService.getEnterpriseObjectById(clientid, Client.class);
+        return result;
     }
 
-    public Client getClientByClientname(String clientname) throws DBConnectionException {
-        try {
+    public ClientType getClientTypeById(long clienttypeid) {
+        ClientType result = this.objService.getEnterpriseObjectById(clienttypeid, ClientType.class);
+
+        return result;
+    }
+
+    public Client getClientByClientname(String clientname) {
             //Try the shorter JPA way
-            //Client result = em.find(Client.class, clientid);
+        //Client userResult = em.find(Client.class, clientid);
 
-            List<Client> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(clientname, Client.class);
+        List<Client> results = this.objService.getEnterpriseObjectsByName(clientname, Client.class);
 
-            return (results == null || results.size() <= 0) ? null : results.get(0);
+        return (results == null || results.size() <= 0) ? null : results.get(0);
 
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
     }
 
-    public ClientType getClientTypeByName(String clienttypename) throws DBConnectionException {
-        try {
+    public ClientType getClientTypeByName(String clienttypename) {
 
-            List<ClientType> results = this.genericEnterpriseObjectService.getEnterpriseObjectsByName(clienttypename, ClientType.class);
+        List<ClientType> results = this.objService.getEnterpriseObjectsByName(clienttypename, ClientType.class);
 
-            if (results == null || results.isEmpty()) {
-                return null;
-            }
-
-            //Return only the first matching result            
-            return results.get(0);
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
+        if (results == null || results.isEmpty()) {
+            return null;
         }
+
+        //Return only the first matching userResult            
+        return results.get(0);
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void registerClientType(String clienttypename, String clienttypedesc)
-            throws DBConnectionException, EntityExistsException, IncompleteDataException {
-
-        try {
-            //Validate the inputted clienttypename
-            if (clienttypename == null || clienttypename.isEmpty()) {
-                throw new IncompleteDataException("Client type name cannot be empty!");
-            }
-
-            //Validate if client type already exist
-            ClientType existingClientType = this.getClientTypeByName(clienttypename);
-            if (existingClientType != null) {
-                throw new EntityExistsException(existingClientType);
-            }
-
-            ClientType newClientType = new ClientType();
-            newClientType.setCLIENT_TYPE_NAME(clienttypename);
-            newClientType.setDESCRIPTION(clienttypedesc);
-
-            this.em.persist(newClientType);
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
+            throws EntityExistsException, IncompleteDataException {
+        //Validate the inputted clienttypename
+        if (clienttypename == null || clienttypename.isEmpty()) {
+            throw new IncompleteDataException("Client type name cannot be empty!");
         }
+
+        //Validate if client type already exist
+        ClientType existingClientType = this.getClientTypeByName(clienttypename);
+        if (existingClientType != null) {
+            throw new EntityExistsException(existingClientType);
+        }
+
+        ClientType newClientType = new ClientType();
+        newClientType.setCLIENT_TYPE_NAME(clienttypename);
+        newClientType.setDESCRIPTION(clienttypedesc);
+
+        objService.getEm().persist(newClientType);
+
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void registerClient(long clienttypeid, String clientname)
             throws IncompleteDataException, EntityExistsException, EntityNotFoundException {
-        try {
-            if (clientname == null || clientname.isEmpty()) {
-                throw new IncompleteDataException("Client name cannot be empty.");
-            }
-
-            Client existingClient = this.getClientByClientname(clientname);
-
-            if (existingClient != null) {
-                throw new EntityExistsException(existingClient);
-            }
-
-            ClientType clientType = this.getClientTypeById(clienttypeid);
-
-            if (clientType == null) {
-                throw new EntityNotFoundException(ClientType.class, clienttypeid);
-            }
-
-            Client newClient = new Client();
-            newClient.setCLIENT_NAME(clientname);
-            newClient.setCLIENTTYPE(clientType);
-
-            em.persist(newClient);
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
+        if (clientname == null || clientname.isEmpty()) {
+            throw new IncompleteDataException("Client name cannot be empty.");
         }
+
+        Client existingClient = this.getClientByClientname(clientname);
+
+        if (existingClient != null) {
+            throw new EntityExistsException(existingClient);
+        }
+
+        ClientType clientType = this.getClientTypeById(clienttypeid);
+
+        if (clientType == null) {
+            throw new EntityNotFoundException(ClientType.class, clienttypeid);
+        }
+
+        Client newClient = new Client();
+        newClient.setCLIENT_NAME(clientname);
+        newClient.setCLIENTTYPE(clientType);
+
+        objService.getEm().persist(newClient);
     }
 
     /**
-     * Creates a Client object based on the user.alias() name.
+     * Creates a Client object based on the newOrExistingUser.alias() name.
      *
      * @param user
      * @param clienttypeid
@@ -222,7 +184,7 @@ public class ClientService {
         }
 
         List<ClientUserAssignment> existingAssignments
-                = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientUserAssignment.class);
+                = this.objService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientUserAssignment.class);
 
         if (existingAssignments != null && existingAssignments.size() > 0) {
             throw new RelationshipExistsException(existingAssignments.get(0));
@@ -233,58 +195,49 @@ public class ClientService {
         newClient.setCLIENT_NAME(user.alias());
         newClient.setCLIENTTYPE(clientType);
 
-        this.em.persist(newClient);
+        objService.getEm().persist(newClient);
 
         //Assign the client object to the enterpriseobject
         ClientUserAssignment newAssignment = new ClientUserAssignment(newClient, user);
 
-        this.em.persist(newAssignment);
+        objService.getEm().persist(newAssignment);
 
         return newAssignment;
 
     }
-    
-    public ContactInfo getContactInfoForUser(long userid) throws DBConnectionException {
-        try {
-            List<ClientUserAssignment> clientAssignment
-                    = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
 
-            //Cannot find Client object
-            if (clientAssignment == null || clientAssignment.isEmpty()) {
-                return null;
-            }
+    public ContactInfo getContactInfoForUser(long userid) {
+        List<ClientUserAssignment> clientAssignment
+                = this.objService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
 
-            //Only get the first result
-            Client client = clientAssignment.get(0).getSOURCE();
+        //Cannot find Client object
+        if (clientAssignment == null || clientAssignment.isEmpty()) {
+            return null;
+        }
 
-            DateTime today = new DateTime();
-            java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
+        //Only get the first userResult
+        Client client = clientAssignment.get(0).getSOURCE();
 
-            List<ContactInfo> contactInfos
-                    = this.genericEnterpriseObjectService
-                    .getEnterpriseDataForObject(client.getOBJECTID(), todaySQL, todaySQL, ContactInfo.class);
+        DateTime today = new DateTime();
+        java.sql.Date todaySQL = new java.sql.Date(today.getMillis());
 
-            if (contactInfos == null || contactInfos.isEmpty()) {
-                return null;
-            }
+        List<ContactInfo> contactInfos
+                = this.objService
+                .getEnterpriseDataForObject(client.getOBJECTID(), null, null, ContactInfo.class);
+
+        if (contactInfos == null || contactInfos.isEmpty()) {
+            return null;
+        }
 
             //At this point, we tend to just return the 1st object in the list,
-            //disregarding the sequence number, time constraints, etc.
-            return contactInfos.get(0);
+        //disregarding the sequence number, time constraints, etc.
+        return contactInfos.get(0);
 
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
     }
-    
+
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ContactInfo createClientContact(ContactInfo contactInfo) {
-        em.persist(contactInfo);
+        objService.getEm().persist(contactInfo);
         return contactInfo;
     }
 
@@ -297,10 +250,10 @@ public class ClientService {
         if (!EmailValidator.getInstance().isValid(email)) {
             throw new DataValidationException("Email address is invalid.");
         }
-            //em.merge() will insert new if doesn't exist, but need to set
+        //em.merge() will insert new if doesn't exist, but need to set
         //the owner with the managed instance
 
-        ContactInfo ci = this.em.merge(contactInfo); //ci is the one getting persisted and managed actually
+        ContactInfo ci = objService.getEm().merge(contactInfo); //ci is the one getting persisted and managed actually
 
         //For newly created ContactInfo
         if (ci.getOWNER() == null) {
@@ -308,54 +261,118 @@ public class ClientService {
         }
 
     }
-    
-    public Client getClientByAssignedUser(long userid) throws DBConnectionException {
-        try {
-            List<ClientUserAssignment> results = this.genericEnterpriseObjectService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
 
-            if (results == null || results.isEmpty()) {
-                return null;
-            }
+    public Client getClientByAssignedUser(long userid) {
+        List<ClientUserAssignment> results = this.objService.getRelationshipsForTargetObject(userid, ClientUserAssignment.class);
 
-            return results.get(0).getSOURCE();
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
+        if (results == null || results.isEmpty()) {
+            return null;
         }
+
+        return results.get(0).getSOURCE();
+
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ClientResourceAssignment assignClientResource(Client client, EnterpriseObject clientResource) {
-        try {
-            if (client == null) {
-                throw new RuntimeException("Client is null.");
-            }
-            if (clientResource == null) {
-                throw new RuntimeException("ClientResource is null.");
-            }
-            if (!clientResource.getClass().isAnnotationPresent(ClientResource.class)) {
-                throw new RuntimeException("EntepriseObject type " + clientResource.getClass().getSimpleName() + " is not a Client Resource.");
-            }
-
-            ClientResourceAssignment newAssign = new ClientResourceAssignment();
-            newAssign.setSOURCE(client);
-            newAssign.setTARGET(clientResource);
-
-            em.persist(newAssign);
-            return newAssign;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
+        if (client == null) {
+            throw new RuntimeException("Client is null.");
         }
+        if (clientResource == null) {
+            throw new RuntimeException("ClientResource is null.");
+        }
+        if (!clientResource.getClass().isAnnotationPresent(ClientResource.class)) {
+            throw new RuntimeException("EntepriseObject type " + clientResource.getClass().getSimpleName() + " is not a Client Resource.");
+        }
+
+        ClientResourceAssignment newAssign = new ClientResourceAssignment();
+        newAssign.setSOURCE(client);
+        newAssign.setTARGET(clientResource);
+
+        objService.getEm().persist(newAssign);
+        return newAssign;
+
+    }
+
+    /**
+     * Only 1 credential record is required and allowed.
+     *
+     * @param client
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ClientAWSAccount registerAWSForClient(Client client) {
+        
+        //1) Call CreateUser API http://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateUser.html
+        //Assume that this would only be called once for each client at this moment
+        /*AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
+        CreateUserRequest userReq = new CreateUserRequest(client.getCLIENT_NAME()).withPath("/segmail/");
+        CreateUserResult userResult = awsClient.createUser(userReq);*/
+        com.amazonaws.services.identitymanagement.model.User newOrExistingUser = this.retrieveOrRegisterAWSUser(client);
+        
+        //2) Call CreateAccessKey API http://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateAccessKey.html
+        /*CreateAccessKeyRequest accessKeyReq = new CreateAccessKeyRequest();
+        accessKeyReq.setRequestCredentials(awsCredentials);
+        accessKeyReq.setUserName(client.getCLIENT_NAME());
+        CreateAccessKeyResult accessKeyResult = awsClient.createAccessKey(accessKeyReq);*/
+        AccessKey newAccessKey = registerNewAWSAccessKey(client);
+        
+        ClientAWSAccount newAccount = new ClientAWSAccount();
+        
+        //newAccount.setOWNER(client);
+        newAccount.setUSERID(newOrExistingUser.getUserId());
+        newAccount.setUSERNAME(newOrExistingUser.getUserName());
+        newAccount.setARN(newOrExistingUser.getArn());
+        newAccount.setAWS_ACCESS_KEY_ID(newAccessKey.getAccessKeyId());
+        newAccount.setAWS_SECRET_ACCESS_KEY(newAccessKey.getSecretAccessKey());
+        
+        objService.getEm().persist(newAccount);
+        newAccount.setOWNER(client);
+        
+        return newAccount;
+    }
+
+    public com.amazonaws.services.identitymanagement.model.User retrieveOrRegisterAWSUser(Client client) {
+        com.amazonaws.services.identitymanagement.model.User result = null;
+        AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
+        
+        try {
+            //1) Call CreateUser API http://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateUser.html
+            //Assume that this would only be called once for each client at this moment
+            //Get the newOrExistingUser first
+            GetUserRequest getReq = new GetUserRequest();
+            //getReq.setRequestCredentials(awsCredentials);
+            getReq.setUserName(client.getCLIENT_NAME());
+            GetUserResult getResult = awsClient.getUser(getReq);
+            result = getResult.getUser();
+            
+        } catch(NoSuchEntityException ex) {
+            CreateUserRequest userReq = new CreateUserRequest(client.getCLIENT_NAME()).withPath("/segmail/");
+            CreateUserResult userResult = awsClient.createUser(userReq);
+            result = userResult.getUser();
+        } finally {
+            return result;
+        }
+    }
+    
+    public AccessKey registerNewAWSAccessKey(Client client) {
+        AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
+        
+        //Delete all existing access keys first
+        ListAccessKeysRequest listReq = new ListAccessKeysRequest();
+        listReq.setUserName(client.getCLIENT_NAME());
+        ListAccessKeysResult listResult = awsClient.listAccessKeys(listReq);
+        for(AccessKeyMetadata key : listResult.getAccessKeyMetadata()){
+            DeleteAccessKeyRequest delReq = new DeleteAccessKeyRequest();
+            delReq.setUserName(key.getUserName());
+            delReq.setAccessKeyId(key.getAccessKeyId());
+            awsClient.deleteAccessKey(delReq);
+        }
+        //Then create a new access key
+        CreateAccessKeyRequest accessKeyReq = new CreateAccessKeyRequest();
+        accessKeyReq.setRequestCredentials(awsCredentials);
+        accessKeyReq.setUserName(client.getCLIENT_NAME());
+        CreateAccessKeyResult accessKeyResult = awsClient.createAccessKey(accessKeyReq);
+        
+        return accessKeyResult.getAccessKey();
     }
 }

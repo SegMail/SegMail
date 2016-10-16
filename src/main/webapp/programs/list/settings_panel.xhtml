@@ -54,7 +54,8 @@
                 <div class="form-group">
                     <label>Send as (Email): </label>
                     <span class="help-block">
-                        The address your subscribers would see.
+                        The address your subscribers would see in FROM of their emails.
+                        You can only use addresses that have been verified in <a href="#{request.contextPath}/mysettings#">here</a>.
                     </span>
                     <input type="text" class="form-control validate[required,custom[email]]"
                            jsf:value="#{FormListSettings.list.SEND_AS_EMAIL}"

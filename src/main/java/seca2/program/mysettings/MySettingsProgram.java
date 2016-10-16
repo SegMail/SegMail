@@ -25,11 +25,8 @@ public class MySettingsProgram implements Serializable {
     
     private final String pageName = "my_settings_program";
     
-    @Inject private UserSessionContainer userContainer;
-    
-    @EJB private ClientService clientService;
-    
     private ContactInfo contactInfo;
+    private String userEmail;
     
     @PostConstruct
     public void init(){
@@ -47,6 +44,14 @@ public class MySettingsProgram implements Serializable {
 
     public void setContactInfo(ContactInfo contactInfo) {
         this.contactInfo = contactInfo;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
     
     

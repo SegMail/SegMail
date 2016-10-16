@@ -544,9 +544,7 @@ public class UserService extends DBService {
     }
 
     
-    public UserAccount getUserAccountById(long userid)
-            throws DBConnectionException {
-        try {
+    public UserAccount getUserAccountById(long userid) {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
@@ -566,15 +564,6 @@ public class UserService extends DBService {
             }
 
             return results.get(0);
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
     }
 
     

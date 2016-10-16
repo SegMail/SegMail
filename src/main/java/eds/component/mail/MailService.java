@@ -95,12 +95,14 @@ public class MailService {
             }
             
             // Get the sender, subject and body from email
-            String FROM_ADDRESS = email.getSENDER_ADDRESS();
+            String FROM_ADDRESS = "hareluya86@hotmail.com";//email.getSENDER_ADDRESS();
             String FROM_NAME = email.getSENDER_NAME();
             String SUBJECT = email.getSUBJECT();
             String BODY = email.getBODY();
             Set<String> TO = email.getRECIPIENTS();
             String FROM = (FROM_NAME == null) ? FROM_ADDRESS : FROM_NAME + " <" + FROM_ADDRESS + ">";
+            
+            email.addReplyTo(email.getSENDER_ADDRESS());
             Set<String> REPLY_TO = email.getREPLY_TO_ADDRESSES();
 
             // Validate all email addresses before sending

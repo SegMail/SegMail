@@ -77,11 +77,12 @@ public class LandingServiceContainer {
         //Initialize first
         if(!POINTER_NEXT.containsKey(type.value) || POINTER_NEXT.get(type.value) == null)
             POINTER_NEXT.put(type.value, 0);
-        int pointer = POINTER_NEXT.get(type.value);
-        int size = SERVERS.get(type.value).size();
-        POINTER_NEXT.put(type.value, (pointer+1) % size);
         
-        return SERVERS.get(type.value).get(pointer);
+        int pointer = POINTER_NEXT.get(type.value);
+        int size = (SERVERS.get(type.value) == null) ? 0 : SERVERS.get(type.value).size();
+        POINTER_NEXT.put(type.value, (size > 0) ? (pointer+1) % size : 0);
+        
+        return (SERVERS.get(type.value) == null) ? null : SERVERS.get(type.value).get(pointer);
     }
     
     public void resetPointers() {

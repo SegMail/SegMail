@@ -47,10 +47,10 @@ public class FormEditExistingServer implements FormEditEntity {
             //Save server to user relationship
             landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
             //Save JMS Connection resource
-            ServerResource jmsResource = this.getJMSConnection();
+            /*ServerResource jmsResource = this.getJMSConnection();
             jmsResource.setOWNER(getServerEditing());
             jmsResource.setRESOURCE_TYPE(ServerResourceType.JMS_CONNECTION);
-            landingService.updateOrAddResourceForServer(jmsResource);
+            landingService.updateOrAddResourceForServer(jmsResource);*/
             
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
         } catch (Exception ex) {

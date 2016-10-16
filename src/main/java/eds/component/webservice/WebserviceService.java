@@ -118,11 +118,11 @@ public class WebserviceService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String issueNewToken(User user) {
         DateTime now = DateTime.now();
-        List<APIAccount> accounts =  getAPIAccounts(user.getOBJECTID(),now,now);
+        List<APIAccount> accounts =  objService.getEnterpriseDataForObject(user.getOBJECTID(), now, now, APIAccount.class);// getAPIAccounts(user.getOBJECTID(),now,now);
         
         //If there is an existing API key, delimit it and create a new one
         if(accounts != null && !accounts.isEmpty()) {
-            return accounts.get(0).getAPIKey();
+            return accounts.get(0).getAPIKEY();
         }
         
         //Create new API key
@@ -131,7 +131,7 @@ public class WebserviceService {
         objService.getEm().persist(newAccount);
         newAccount.generateKey();
         
-        return newAccount.getAPIKey();
+        return newAccount.getAPIKEY();
     }
     
     public List<APIAccount> getAPIAccounts(long userId, DateTime start, DateTime end) {
@@ -145,6 +145,7 @@ public class WebserviceService {
         query.select(fromAPI);
         query.where(
                 builder.and(
+                        builder.equal(fromAPI.get(APIAccount_.OWNER), userId),
                         builder.lessThanOrEqualTo(fromAPI.get(APIAccount_.START_DATE), endDate),
                         builder.greaterThanOrEqualTo(fromAPI.get(APIAccount_.END_DATE), startDate)
                 )
@@ -172,7 +173,7 @@ public class WebserviceService {
         Root<APIAccount> fromAPI = query.from(APIAccount.class);
         
         query.select(fromAPI);
-        query.where(builder.equal(fromAPI.get(APIAccount_.APIKey), token));
+        query.where(builder.equal(fromAPI.get(APIAccount_.APIKEY), token));
         
         List<APIAccount> results = objService.getEm().createQuery(query)
                 .getResultList();

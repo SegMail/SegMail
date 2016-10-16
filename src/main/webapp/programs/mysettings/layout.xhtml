@@ -45,14 +45,25 @@
                                            placeholder="Your last name"></input>
                                 </div>
                                 <div class="form-group">
-                                    <label>Your email:</label>
+                                    <label>Your contact email:</label>
                                     <span class="help-block">
-                                        This is how we will contact you.
+                                        This is how we will contact you for billings and announcements.
                                     </span>
                                     <input type="email" jsf:id="contact_email" class="validate[required,custom[email]] form-control"
                                            required="true"
                                            jsf:value="#{ContactDetailsForm.contactInfo.EMAIL}"
                                            placeholder="Your email"></input>
+                                </div>
+                                <div class="form-group">
+                                    <label>Your user reset email:</label>
+                                    <span class="help-block">
+                                        This is the address that we will send password reset/unlock requests. 
+                                        It was registered when your account was created and it is not editable.
+                                    </span>
+                                    <input type="email" jsf:id="user_email" class="form-control"
+                                           disabled="disabled"
+                                           jsf:value="#{ContactDetailsForm.userEmail}"
+                                           placeholder="Your username email"></input>
                                 </div>
                             </div>
                             <div class="block-footer">

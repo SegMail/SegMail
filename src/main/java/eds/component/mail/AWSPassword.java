@@ -18,7 +18,11 @@ public class AWSPassword extends BasicAWSCredentials {
     private static final String AWS_SECRET_ACCESS_KEY = "ToqHHbIcO8UEgJoolf5czBxm9bMmNay8GTspA50z";
 
     public AWSPassword() {
-        super(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY);
+        super(
+                System.getProperty("AWSPassword.AWS_ACCESS_KEY_ID",AWS_ACCESS_KEY_ID),
+                System.getProperty("AWSPassword.AWS_SECRET_ACCESS_KEY",AWS_SECRET_ACCESS_KEY)
+        );
+        
     }
     
 }

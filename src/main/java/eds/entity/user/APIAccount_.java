@@ -17,5 +17,5 @@ import javax.persistence.metamodel.StaticMetamodel;
  */
 @StaticMetamodel(APIAccount.class)
 public class APIAccount_ extends EnterpriseData_ {
-    public static volatile SingularAttribute<APIAccount,String> APIKey;
+    public static volatile SingularAttribute<APIAccount,String> APIKEY;
 }

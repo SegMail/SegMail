@@ -12,6 +12,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
+import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.ClientType;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ContactInfo;
@@ -94,9 +95,9 @@ public class ClientAccountService {
             ClientType clientType = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE);
             if(clientType == null)
                 throw new EntityNotFoundException(SEGMAIL_CLIENT_TYPE+" type not created yet.");
-            long clientId = clientType.getOBJECTID();
+            long clientTypeId = clientType.getOBJECTID();
             
-            ClientUserAssignment clientAssign = clientService.registerClientForUser(segmailAccount.getOWNER(), clientId);
+            ClientUserAssignment clientAssign = clientService.registerClientForUser(segmailAccount.getOWNER(), clientTypeId);
             
             //Update Client attribute
             ContactInfo newContactInfo = new ContactInfo();
@@ -105,6 +106,9 @@ public class ClientAccountService {
             newContactInfo.setLASTNAME(subscriptionMap.getFirst("lastname") == null ? "" : subscriptionMap.getFirst("lastname"));
             newContactInfo.setOWNER(clientAssign.getSOURCE());
             clientService.createClientContact(newContactInfo);
+            
+            //Create an AWS IAM user for the new user
+            ClientAWSAccount awsAccount = clientService.registerAWSForClient(clientAssign.getSOURCE());
             
             //Call subscription service here instead of having the client to call 2 separate transactions
             List<String> listIds = subscriptionMap.get("list");
@@ -117,7 +121,7 @@ public class ClientAccountService {
             if(clientIds == null || clientIds.isEmpty())
                 throw new IncompleteDataException("No client IDs provided.");
             
-            clientId = Long.parseLong(clientIds.get(0));
+            clientTypeId = Long.parseLong(clientIds.get(0));
             
             Map<String,Object> subscriberMap = new HashMap<>();
             for(String key : subscriptionMap.keySet()) {
@@ -132,7 +136,7 @@ public class ClientAccountService {
             }
             
             //Get the list from listKey
-            Subscription subscription = subService.subscribe(clientId, listId, subscriberMap, true);
+            Subscription subscription = subService.subscribe(clientTypeId, listId, subscriberMap, true);
             
             SubscriptionList list = subscription.getTARGET();
             if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
