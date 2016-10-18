@@ -7,16 +7,17 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <form jsf:id="FormListSettings" >
 
         <div class="row">
             <div class="col-md-8">
-                These are general information about your list. Mostly display stuff.
+                Key configuration for your list before you can start sending.
             </div>
             <div class="page-toolbar-block pull-right">
                 <button jsf:id="save_settings_button" class="btn btn-primary"
-
+                        jsf:onclick="return FormListSettings.form()"
                         >
                     <!--f:ajax won't append its code to the onclick attribute of the button element-->
                     <f:ajax execute="@form" render="@form :FormListList :FormEditListHeader" 
@@ -28,8 +29,7 @@
                     Save
                 </button>
                 <button class="btn btn-default" type="button"
-                        onclick="$('#FormListSettings').validationEngine('hideAll');
-                                document.getElementById('FormListSettings').reset()">
+                        onclick="document.getElementById('FormListSettings').reset()">
                     <i class="fa fa-refresh"></i>
                     Reset
                 </button>
@@ -47,7 +47,7 @@
                     <span class="help-block">
                         The name only you will see, not the subscriber.
                     </span>
-                    <input type="text" class="form-control validate[required]"
+                    <input type="text" class="form-control" name="listname" required="true"
                            jsf:value="#{FormListSettings.list.LIST_NAME}"
                            data-prompt-position="topRight:-100"></input>
                 </div>
@@ -57,16 +57,21 @@
                         The address your subscribers would see in FROM of their emails.
                         You can only use addresses that have been verified in <a href="#{request.contextPath}/mysettings#">here</a>.
                     </span>
-                    <input type="text" class="form-control validate[required,custom[email]]"
-                           jsf:value="#{FormListSettings.list.SEND_AS_EMAIL}"
-                           data-prompt-position="topRight:-100"></input>
+                    <h:selectOneListbox id="selectVerifiedEmail" pass:id="selectVerifiedEmail" styleClass="select2" style="width: 100%;"
+                                        required="true"
+                                        value="#{FormListSettings.list.SEND_AS_EMAIL}" 
+                                        >
+                        <f:selectItems value="#{FormListSettings.verifiedAddresses}" var="add" itemLabel="#{add.VERIFIED_ADDRESS}"
+                                       itemValue="#{add.VERIFIED_ADDRESS}">
+                        </f:selectItems>
+                    </h:selectOneListbox>   
                 </div>
                 <div class="form-group">
                     <label>Send as (Name): </label>
                     <span class="help-block">
                         The name your subscribers would see.
                     </span>
-                    <input type="text" class="form-control validate[required]"
+                    <input type="text" class="form-control" required="true" name="sendasname"
                            jsf:value="#{FormListSettings.list.SEND_AS_NAME}"
                            data-prompt-position="topRight:-100"></input>
                 </div>
@@ -83,6 +88,6 @@
             </div>
         </div>
     </form>
-    
+
 
 </html>

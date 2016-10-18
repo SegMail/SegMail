@@ -91,7 +91,27 @@
                         </form>
                     </div>
                 </div>
+                <div class="col-md-6 col-xs-12">
+                    <div class="block">
+                        <div class="block-head">
+                            <h2>Your Verified Sending Addresses</h2>
+                            
+                            <ul class="buttons">
+                                <li>
+                                    <a href="#verify_new_address" data-toggle="modal"
+                                       >
+                                        <span class="fa fa-plus"></span>
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                        <ui:include src="verified.xhtml" ></ui:include>
+                    </div>
+                </div>
                 
+            </div>
+            <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div jsf:id="billing_block" class="block">
                         <form jsf:id="billing_form" class="validate-form">
@@ -104,13 +124,19 @@
                     </div>
                 </div>
             </div>
-
+            <div jsf:id="verify_new_address" class="modal fade">
+                <ui:include src="verify_new_address.xhtml"></ui:include>
+            </div>
+            <div jsf:id="delete_verified_address" class="modal fade">
+                <ui:include src="delete_verified_address.xhtml"></ui:include>
+            </div>
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
             <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/mysettings.js" />
-
+            <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/verify_new_address.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/delete_verified_address.js" />
         </ui:define>
 
     </ui:composition>

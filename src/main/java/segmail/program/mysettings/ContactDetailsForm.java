@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package seca2.program.mysettings;
+package segmail.program.mysettings;
 
 import eds.component.client.ClientService;
-import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
@@ -18,8 +17,6 @@ import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
 import eds.entity.user.UserAccount;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;

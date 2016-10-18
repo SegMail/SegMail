@@ -1,5 +1,6 @@
 package segmail.program.list;
 
+import eds.entity.client.VerifiedSendingAddress;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import java.io.Serializable;
@@ -54,6 +55,10 @@ public class ProgramList extends Program implements Serializable {
     
     //For import
     private Map<Integer,String> listFieldMapping = new HashMap<>();
+    
+    //For Verified Addresses
+    private List<VerifiedSendingAddress> verifiedAddresses;
+    private String sendingAddress;
     
     private final String formName = "ProgramList";
     
@@ -221,8 +226,23 @@ public class ProgramList extends Program implements Serializable {
     public void setListFieldMapping(Map<Integer, String> listFieldMapping) {
         this.listFieldMapping = listFieldMapping;
     }
-    
 
+    public List<VerifiedSendingAddress> getVerifiedAddresses() {
+        return verifiedAddresses;
+    }
+
+    public void setVerifiedAddresses(List<VerifiedSendingAddress> verifiedAddresses) {
+        this.verifiedAddresses = verifiedAddresses;
+    }
+
+    public String getSendingAddress() {
+        return sendingAddress;
+    }
+
+    public void setSendingAddress(String sendingAddress) {
+        this.sendingAddress = sendingAddress;
+    }
+    
     @Override
     public void initRequestParams() {
         

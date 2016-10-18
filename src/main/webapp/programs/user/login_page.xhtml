@@ -42,22 +42,22 @@
         </ui:define>
         <ui:define name="login-block">
             <form jsf:id="FormUserLogin">
-            <div class="login" style="background: none; padding: 0" > <!--hack to cover the whole screen with the canvas colour-->
-                <div class="login-screen" style="padding: 120px 10px 30px 150px; min-height: 0">
-                    
-                    <div class="login-icon" style="left: 30px; top: 120px;">
-                        <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/css/images/login/icon.png"/>
-                        <h4>Login to <small>Segmail</small></h4>
-                    </div>
-                    <div class="login-form block">
-                        
+                <div class="login" style="background: none; padding: 0" > <!--hack to cover the whole screen with the canvas colour-->
+                    <div class="login-screen" style="padding: 120px 10px 30px 150px; min-height: 0">
+
+                        <div class="login-icon" style="left: 30px; top: 120px;">
+                            <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/css/images/login/icon.png"/>
+                            <h4>Login to <small>Segmail</small></h4>
+                        </div>
+                        <div class="login-form block">
+
                             <div class="form-group">
                                 <input type="text" id="login-username"
                                        class="form-control login-field"
                                        jsf:value="#{FormUserLogin.username}"
                                        placeholder="Enter your username" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
-                                
+
                             </div>
                             <div class="form-group">
                                 <input type="password" id="login-password"
@@ -66,25 +66,24 @@
                                        placeholder="Password" />
                                 <label class="login-field-icon fui-lock" for="login-password"></label>
                             </div>
-                            <h:commandLink styleClass="btn btn-lg btn-primary btn-block"
-                               >
+                            <button jsf:id="loginButton" type="submit" class="btn btn-lg btn-primary btn-block"
+                                    >
                                 <f:ajax listener="#{FormUserLogin.login()}"
                                         render="@form" execute="@form"
-                                        event="click" onevent="login"
+                                        onevent="login"
                                         ></f:ajax>
-                                   Log in
-                            </h:commandLink>
-                        
+                                Log in
+                            </button>
+                        </div>
+
                     </div>
-                    
-                </div>
-                <div class="form-group" style="margin-top: 10px">
+                    <div class="form-group" style="margin-top: 10px">
                         <s2:messenger for="FormUserLogin" showDetail="true" showSummary="true"
                                       class="form-group"></s2:messenger>
                     </div>
-                <!-- /.row -->
-            </div>
-                </form>
+                    <!-- /.row -->
+                </div>
+            </form>
         </ui:define>
 
     </ui:composition>

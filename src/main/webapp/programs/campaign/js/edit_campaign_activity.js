@@ -60,6 +60,7 @@ var onSave = function (data) {
 
         case "success": // This is called when ajax response is successfully processed.
             block_refresh(block);
+            setSendInBatch('sendInBatch')
             refresh_summernote('textarea.editor');
             refresh_select2();
             modifyDomToGeneratePreview();
@@ -304,6 +305,7 @@ $(document).ready(function () {
     
     toggleMenu();
     refresh_summernote('textarea.editor');
+    setSendInBatch('sendInBatch');
     adjustPreviewPanelHeight();
     modifyDomToGeneratePreview();
 });

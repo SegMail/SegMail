@@ -5,6 +5,7 @@
  */
 package segmail.program.campaign;
 
+import eds.entity.client.VerifiedSendingAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class ProgramCampaign extends Program{
     
     private MAILMERGE_REQUEST[] mailmergeLinkTags = MAILMERGE_REQUEST.values();
     private Map<String,String> mailmergeLinks = new HashMap<>();
+    
+    private List<VerifiedSendingAddress> verifiedAddresses;
     
     /**
      * Intersection of field sets from the different targeted lists.
@@ -197,6 +200,14 @@ public class ProgramCampaign extends Program{
 
     public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
         this.mailmergeLinks = mailmergeLinks;
+    }
+
+    public List<VerifiedSendingAddress> getVerifiedAddresses() {
+        return verifiedAddresses;
+    }
+
+    public void setVerifiedAddresses(List<VerifiedSendingAddress> verifiedAddresses) {
+        this.verifiedAddresses = verifiedAddresses;
     }
     
 }
