@@ -52,6 +52,15 @@ public class FormCampaignActivities {
         program.setActivityStatusMapping(activityStatusMapping);
     }
     
+    public Map<Long, Integer> getClickthroughRates() {
+        return program.getClickthroughRates();
+    }
+
+    public void setClickthroughRates(Map<Long, Integer> clickthroughRates) {
+        program.setClickthroughRates(clickthroughRates);
+    }
+    
+    
     public void loadAllActivities() {
         if(program.getEditingCampaign() == null)
             return;

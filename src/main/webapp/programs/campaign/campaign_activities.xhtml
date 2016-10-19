@@ -16,7 +16,13 @@
         <div class="block-content">
             <h2 class="pull-left">Campaign Activites</h2>
             <div class="pull-right">
-
+                <button jsf:id="refreshCampaigns"
+                   class="btn btn-default nm" data-toggle="modal">
+                    <span class="fa fa-refresh"></span>
+                    <f:ajax onevent="refreshCampaignActivities">
+                        
+                    </f:ajax>
+                </button>
                 <a href="#create_new_activity" 
                    class="btn btn-default nm" data-toggle="modal">
                     <span class="fa fa-plus"></span>
@@ -49,7 +55,7 @@
                                         #{activity.ACTIVITY_NAME}
                                     </td>
                                     <td>
-                                        4.55% (fake)
+                                        <div id="ct_activity_#{activity.OBJECTID}"></div>
                                     </td>
                                     <td>
                                         <div class="pull-right">

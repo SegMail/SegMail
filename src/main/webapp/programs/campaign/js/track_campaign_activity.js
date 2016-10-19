@@ -3,7 +3,6 @@ function track_activity(data) {
     var block = $(data.source).parents(".block");
     //var ajaxloader = document.getElementById("ajaxloader");
 
-
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
 
@@ -13,9 +12,7 @@ function track_activity(data) {
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            getTopNumbers(0);
-            resizeContent(100);
-            renderLinksAndRefreshStats(100);
+            refresh();
             break;
     }
 }
@@ -59,7 +56,9 @@ var renderLinksAndRefreshStats = function (timeout) {
             //console.log(index+' done');
 
             //Call webservice to get counts and update 
-            callWS(web_service_endpoint, 'getClickCountForActivity', {
+            callWS(web_service_endpoint, 
+                'getClickCountForActivity', 
+                'http://webservice.campaign.program.segmail/',{
                 'redirectLink': redirectLink
             }, function (result) {
                 //Add result to table
@@ -101,7 +100,9 @@ var renderLinksAndRefreshStats = function (timeout) {
 };
 
 var getSentEmails = function() {
-    callWS(web_service_endpoint, 'getExecutedForCampaignActivity', {
+    callWS(web_service_endpoint, 
+        'getExecutedForCampaignActivity', 
+        'http://webservice.campaign.program.segmail/', {
         campaignActivityId : $('#activity-id').val()
     }, function(result){
         $('#sent').html(result);
@@ -111,7 +112,9 @@ var getSentEmails = function() {
 };
 
 var getTotalTargeted = function() {
-    callWS(web_service_endpoint, 'getTotalTargetedForCampaignActivity', {
+    callWS(web_service_endpoint, 
+        'getTotalTargetedForCampaignActivity', 
+        'http://webservice.campaign.program.segmail/', {
         campaignActivityId : $('#activity-id').val()
     }, function(result){
         $('#targeted').html(result);
@@ -126,3 +129,14 @@ var getTopNumbers = function(timeout) {
         getSentEmails();
     },timeout);
 };
+
+var refresh = function() {
+    block_refresh($('#FormTrackEmailActivity'));
+    getTopNumbers(0);
+    renderLinksAndRefreshStats(100);
+    block_refresh($('#FormTrackEmailActivity'));
+}
+
+$(document).ready(function () {
+    
+});

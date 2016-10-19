@@ -121,20 +121,18 @@
                                 </div>
                             </div>
                         </div>
-                        <h:inputHidden id="pseudo-preview" pass:id="pseudo-preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
-                        </h:inputHidden>
                         <h:inputHidden id="activity-id" pass:id="activity-id" value="#{FormEditEmailActivity.editingActivity.OBJECTID}" >
                         </h:inputHidden>
                         <script type="text/javascript" >
                             var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
+                            var web_service_endpoint2 = '#{request.contextPath}/WSCampaignActivityMailMerge';
+                            var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
                         </script>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary"
-                            onclick="getTopNumbers(0);
-                                     resizeContent(100);
-                                     renderLinksAndRefreshStats(100);
+                            onclick="refresh();
                                      return false;">
                         Refresh
                     </button>
