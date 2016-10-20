@@ -62,7 +62,7 @@ var onSave = function (data) {
             block_refresh(block);
             setSendInBatch('sendInBatch')
             refresh_summernote('textarea.editor');
-            refresh_select2();
+            $('.select2').select2();
             modifyDomToGeneratePreview();
             noty({
                 text : 'Email saved',

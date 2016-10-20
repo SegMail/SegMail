@@ -82,14 +82,17 @@ var renderLinksAndRefreshStats = function (timeout) {
                                      '<td>' + totalClickthrough + '%</td>' +
                                      '</tr>';
                     $('#stats-table').find('tfoot').append(summaryRow);
-                                     
-                    $('#stats-table').dataTable({
-                        'destroy': true,
-                        'filter': false,
-                        'paging': false,
-                        'searching': false,
-                        'info': false
-                    });
+                                
+                    if(!$.fn.dataTable.isDataTable('#stats-table')) {
+                        $('#stats-table').dataTable({
+                            //'destroy': false,
+                            //'filter': false,
+                            'paging': false,
+                            'searching': false,
+                            'info': false
+                        });
+                    }
+                    
                     $('#clicked').html(totalClicks);
                 }
             }, function () {

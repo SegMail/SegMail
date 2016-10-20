@@ -54,7 +54,7 @@ public class ProgramCampaign extends Program{
     
     private List<VerifiedSendingAddress> verifiedAddresses;
     
-    private Map<Long,Integer> clickthroughRates = new HashMap<>();
+    private Map<Long,Double> clickthroughRates = new HashMap<>();
     
     /**
      * Intersection of field sets from the different targeted lists.
@@ -212,11 +212,11 @@ public class ProgramCampaign extends Program{
         this.verifiedAddresses = verifiedAddresses;
     }
 
-    public Map<Long, Integer> getClickthroughRates() {
+    public Map<Long, Double> getClickthroughRates() {
         return clickthroughRates;
     }
 
-    public void setClickthroughRates(Map<Long, Integer> clickthroughRates) {
+    public void setClickthroughRates(Map<Long, Double> clickthroughRates) {
         this.clickthroughRates = clickthroughRates;
     }
     

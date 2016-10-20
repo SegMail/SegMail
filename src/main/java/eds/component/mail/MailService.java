@@ -95,7 +95,7 @@ public class MailService {
             }
             
             // Get the sender, subject and body from email
-            String FROM_ADDRESS = "hareluya86@hotmail.com";//email.getSENDER_ADDRESS();
+            String FROM_ADDRESS = email.getSENDER_ADDRESS();
             String FROM_NAME = email.getSENDER_NAME();
             String SUBJECT = email.getSUBJECT();
             String BODY = email.getBODY();
