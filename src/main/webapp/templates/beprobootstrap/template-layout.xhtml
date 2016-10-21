@@ -110,7 +110,7 @@
                                             <li class="active">#{UserRequestContainer.programName}</li>
                                         </c:when>
                                         <c:otherwise>
-                                            <li ><a href="#{UserRequestContainer.programName}">#{UserRequestContainer.programName}</a></li>
+                                            <li ><a href="#{request.contextPath}/#{UserRequestContainer.programName}">#{UserRequestContainer.programName}</a></li>
                                         </c:otherwise>
                                     </c:choose>
                                     <c:forEach items="#{UserRequestContainer.programParamsOrdered}" var="programParam" >
