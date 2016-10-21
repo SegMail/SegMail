@@ -39,7 +39,7 @@ function saveAssignLists(data) {
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            refresh_select2();
+            $('select.select2').select2();
             break;
     }
 }
