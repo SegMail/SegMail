@@ -6,6 +6,7 @@
 package eds.component.mail;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import eds.component.mail.Password;
 
 /**
  *

@@ -156,6 +156,7 @@ public class MailService {
         }
     }
 
+    /*
     public void sendEmailBySMTP(Email email) {
 
         try {
@@ -221,7 +222,7 @@ public class MailService {
             //transport.close();
         }
     }
-
+    */
     /**
      *
      * @param emailContent

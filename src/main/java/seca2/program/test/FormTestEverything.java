@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.server.FormAddNewServer;
+import seca2.program.test.client.FormCreateAWSAccountForUser;
 import seca2.program.test.client.FormRegisterClientForUsername;
 import seca2.program.test.client.FormRegisterClientType;
 import seca2.program.test.layout.FormAssignLayoutProgram;
@@ -51,6 +52,7 @@ public class FormTestEverything {
     @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     @Inject private FormRegisterClientType formRegisterClientType;
     @Inject private FormRegisterClientForUsername formRegisterClientForObjectname;
+    @Inject private FormCreateAWSAccountForUser formCreateAWSAccountForUser;
     
     // Setup variables
     
@@ -128,6 +130,9 @@ public class FormTestEverything {
     private final String CLIENT_ASSIGN_TAG = "CLIENT_ASSIGN";
     private final String CLIENT_ASSIGN_TYPE_NAME_TAG = "CLIENT_ASSIGN_TYPE_NAME";
     private final String CLIENT_ASSIGN_USERNAME_TAG = "CLIENT_ASSIGN_USERNAME";
+    
+    private final String CLIENT_AWS_ACCOUNT_TAG = "CLIENT_AWS_ACCOUNT";
+    private final String CLIENT_AWS_ACCOUNT_CLIENTNAME_TAG = "CLIENT_AWS_ACCOUNT_CLIENTNAME";
     
     public void init(){
         System.out.println("Test everything init");
@@ -603,6 +608,19 @@ public class FormTestEverything {
                 formAddNewServer.setUserId(username);
                 
                 formAddNewServer.addServer();
+            }
+            
+            // Create clients
+            NodeList awsAccounts = doc.getElementsByTagName(CLIENT_AWS_ACCOUNT_TAG);
+            
+            for(int n=0; n<awsAccounts.getLength(); n++){
+                Node nNode = awsAccounts.item(n);
+                Element element = (Element) nNode;
+                String clientname = element.getElementsByTagName(CLIENT_AWS_ACCOUNT_CLIENTNAME_TAG).item(0).getTextContent();
+                
+                this.formCreateAWSAccountForUser.setClientname(clientname);
+                this.formCreateAWSAccountForUser.create();
+                
             }
             
         } catch (ParserConfigurationException ex) {
