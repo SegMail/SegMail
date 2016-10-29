@@ -79,6 +79,7 @@ public class FormJobList {
         Timestamp highTS = new Timestamp(highDateTime.getMillis());
         getJobRunDrip().setEnd(highTS);
         
+        getJobRunDrip().init(); //Here we want to re-initialize because the refresh button supposed to re-hit the DB
         loadBatchJobs(1); //reset the page number if there's a change in time range
         loadPageNumbers();
     }
@@ -101,6 +102,7 @@ public class FormJobList {
             getJobRunDrip().setStatuses(statusString);
         }
         
+        getJobRunDrip().init(); //Here we want to re-initialize because the criteria has been changed
         loadBatchJobs(1);
         loadPageNumbers();
     }
