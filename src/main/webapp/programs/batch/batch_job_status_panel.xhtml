@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+    xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <div class="row-form">
+        <div class="col-md-12">
+            <form jsf:id="FormJobStatus" jsf:prependId="false">
+                
+                <div class="btn-group" data-toggle="buttons">
+                    
+                    <label id="label-waiting" class="btn btn-default">
+                        <h:selectBooleanCheckbox id="waiting" value="#{FormJobList.statuses['WAITING']}"
+                                                 styleClass="statusCheckbox">
+                            <f:ajax event="change" render=":all_batch_job_block"
+                                    execute="@form" listener="#{FormJobList.loadBatchJobsStatus()}"
+                                    onevent="refresh_status"
+                                    >
+                            </f:ajax>
+                        </h:selectBooleanCheckbox>
+                         WAITING 
+                    </label>
+                    <label id="label-scheduled" class="btn btn-default">
+                        <h:selectBooleanCheckbox id="scheduled" value="#{FormJobList.statuses['SCHEDULED']}"
+                                                 styleClass="statusCheckbox">
+                            <f:ajax event="change" render=":all_batch_job_block"
+                                    execute="@form" listener="#{FormJobList.loadBatchJobsStatus()}"
+                                    onevent="refresh_status"
+                                    >
+                            </f:ajax>
+                        </h:selectBooleanCheckbox>
+                         SCHEDULED 
+                    </label>
+                    <label id="label-in_process" class="btn btn-default">
+                        <h:selectBooleanCheckbox id="in_process" value="#{FormJobList.statuses['IN_PROCESS']}"
+                                                 styleClass="statusCheckbox">
+                            <f:ajax event="change" render=":all_batch_job_block"
+                                    execute="@form" listener="#{FormJobList.loadBatchJobsStatus()}"
+                                    onevent="refresh_status"
+                                    >
+                            </f:ajax>
+                        </h:selectBooleanCheckbox>
+                         IN_PROCESS 
+                    </label>
+                    <label id="label-completed" class="btn btn-default">
+                        <h:selectBooleanCheckbox id="completed" value="#{FormJobList.statuses['COMPLETED']}"
+                                                 styleClass="statusCheckbox">
+                            <f:ajax event="change" render=":all_batch_job_block"
+                                    execute="@form" listener="#{FormJobList.loadBatchJobsStatus()}"
+                                    onevent="refresh_status"
+                                    >
+                            </f:ajax>
+                        </h:selectBooleanCheckbox>
+                         COMPLETED 
+                    </label>
+                    <label id="label-failed" class="btn btn-default">
+                        <h:selectBooleanCheckbox id="failed" value="#{FormJobList.statuses['FAILED']}"
+                                                 styleClass="statusCheckbox">
+                            <f:ajax event="change" render=":all_batch_job_block"
+                                    execute="@form" listener="#{FormJobList.loadBatchJobsStatus()}"
+                                    onevent="refresh_status"
+                                    >
+                            </f:ajax>
+                        </h:selectBooleanCheckbox>
+                         FAILED 
+                    </label>
+                    <label id="label-cancelled" class="btn btn-default">
+                        <h:selectBooleanCheckbox id="cancelled" value="#{FormJobList.statuses['CANCELLED']}"
+                                                 styleClass="statusCheckbox">
+                            <f:ajax event="change" render=":all_batch_job_block"
+                                    execute="@form" listener="#{FormJobList.loadBatchJobsStatus()}"
+                                    onevent="refresh_list"
+                                    >
+                            </f:ajax> 
+                        </h:selectBooleanCheckbox>
+                         CANCELLED 
+                    </label>
+                </div>
+            </form>
+        </div>
+    </div>
+    <style>
+        #label-scheduled.active {background: #2f9fe0; border: 1px solid #2299de; color: #fff;}
+        #label-in_process.active {background: #428bca; border: 1px solid #3784c5; color: #fff;}
+        #label-completed.active {background: #95b75d; border: 1px solid #8eb252; color: #fff;}
+        #label-failed.active {background: #d9534f; border: 1px solid #d64742; color: #fff;}
+        #label-cancelled.active {background: #f3c022; border: 1px solid #f2bc13; color: #fff;}
+        
+    </style>
+</html>

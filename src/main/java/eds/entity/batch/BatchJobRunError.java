@@ -60,6 +60,7 @@ public class BatchJobRunError extends EnterpriseTransaction {
         this.EXCEPTION_CLASS = EXCEPTION_CLASS;
     }
 
+    @Column(columnDefinition="MEDIUMTEXT")
     public String getEXCEPTION_MESSAGE() {
         return EXCEPTION_MESSAGE;
     }
@@ -75,6 +76,22 @@ public class BatchJobRunError extends EnterpriseTransaction {
 
     public void setSTACK_TRACE(String STACK_TRACE) {
         this.STACK_TRACE = STACK_TRACE;
+    }
+
+    public long getBATCH_JOB_ID() {
+        return BATCH_JOB_ID;
+    }
+
+    public void setBATCH_JOB_ID(long BATCH_JOB_ID) {
+        this.BATCH_JOB_ID = BATCH_JOB_ID;
+    }
+
+    public String getBATCH_JOB_RUN_KEY() {
+        return BATCH_JOB_RUN_KEY;
+    }
+
+    public void setBATCH_JOB_RUN_KEY(String BATCH_JOB_RUN_KEY) {
+        this.BATCH_JOB_RUN_KEY = BATCH_JOB_RUN_KEY;
     }
     
     

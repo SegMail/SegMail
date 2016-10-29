@@ -52,7 +52,7 @@ public class BatchJobRun implements Serializable {
      * it would be updated as B, in the previous completed runs for BatchJobRun
      * it should read A but all future runs will read B.
      */
-    private ServerInstance SERVER;
+    //private ServerInstance SERVER;
     
     private String SERVER_NAME;
 
@@ -121,7 +121,7 @@ public class BatchJobRun implements Serializable {
         this.STATUS = STATUS;
     }
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name="SERVER",
             referencedColumnName="OBJECTID",
             foreignKey=@ForeignKey(name="SERVER",value=NO_CONSTRAINT))
@@ -131,12 +131,12 @@ public class BatchJobRun implements Serializable {
 
     public void setSERVER(ServerInstance SERVER) {
         this.SERVER = SERVER;
-    }
+    }*/
 
-    public void setSCHEDULED_TIME(DateTime nextExecution) {
+    /*public void setSCHEDULED_TIME(DateTime nextExecution) {
         Timestamp ts = new Timestamp(nextExecution.getMillis());
         this.setSCHEDULED_TIME(ts);
-    }
+    }*/
 
     public Timestamp getDATETIME_CREATED() {
         return DATETIME_CREATED;
@@ -170,5 +170,77 @@ public class BatchJobRun implements Serializable {
         this.SERVER_NAME = SERVER_NAME;
     }
     
+    //Lifecycle methods
     
+    /**
+     * Don't do shit.
+     * 
+     * @param changeDateTime 
+     */
+    public void wait(DateTime changeDateTime) {
+        //Create high end date
+        DateTime high = new DateTime(9999,12,31,23,59,59);
+        this.setSCHEDULED_TIME(null);
+        this.setSTART_TIME(null);
+        this.setEND_TIME(new Timestamp(high.getMillis()));
+        this.setCANCEL_TIME(null);
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.SCHEDULED.label);
+    }
+    
+    /**
+     * Do shit when I say it's time to do shit.
+     * 
+     * @param changeDateTime 
+     */
+    public void schedule(DateTime changeDateTime){
+        //Create high end date
+        DateTime high = new DateTime(9999,12,31,23,59);
+        this.setSCHEDULED_TIME(new Timestamp(changeDateTime.getMillis()));
+        this.setSTART_TIME(null);
+        this.setEND_TIME(new Timestamp(high.getMillis()));
+        this.setCANCEL_TIME(null);
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.SCHEDULED.label);
+    }
+    
+    /**
+     * Do it.
+     * 
+     * @param changeDateTime 
+     */
+    public void start(DateTime changeDateTime) {
+        //Create high end date
+        DateTime high = new DateTime(9999,12,31,23,59);
+        this.setSTART_TIME(new Timestamp(changeDateTime.getMillis()));
+        this.setEND_TIME(new Timestamp(high.getMillis()));
+        this.setCANCEL_TIME(null);
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
+    }
+    
+    /**
+     * It's off. 
+     * 
+     * @param changeDateTime 
+     */
+    public void cancel(DateTime changeDateTime) {
+        this.setCANCEL_TIME(new Timestamp(changeDateTime.getMillis()));
+        this.setEND_TIME(this.getCANCEL_TIME());
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.CANCELLED.label);
+    }
+    
+    /**
+     * It's done.
+     * 
+     * @param changeDateTime 
+     */
+    public void complete(DateTime changeDateTime) {
+        this.setEND_TIME(new Timestamp(changeDateTime.getMillis()));
+        this.setCANCEL_TIME(null);
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
+    }
+    
+    public void fail(DateTime changeDateTime) {
+        this.setEND_TIME(new Timestamp(changeDateTime.getMillis()));
+        this.setCANCEL_TIME(null);
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
+    }
 }

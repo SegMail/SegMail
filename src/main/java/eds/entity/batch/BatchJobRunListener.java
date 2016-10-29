@@ -27,7 +27,7 @@ public class BatchJobRunListener {
     public void PrePersist(BatchJobRun run) {
         this.recordCreated(run);
         this.generateTransactionKey(run);
-        this.setServerName(run);
+        //this.setServerName(run);
     }
     
     @PostPersist
@@ -39,7 +39,7 @@ public class BatchJobRunListener {
     public void PreUpdate(BatchJobRun run) {
         this.recordCreated(run);
         this.generateTransactionKey(run);
-        this.setServerName(run);
+        //this.setServerName(run);
     }
     
     //@PostUpdate
@@ -71,13 +71,17 @@ public class BatchJobRunListener {
         run.setRUN_KEY(hash);
     }
     
-    private void setServerName(BatchJobRun run) {
+    /*private void setServerName(BatchJobRun run) {
         if(run == null || run.getSERVER() == null)
             return;
         
         ServerInstance server = run.getSERVER();
         run.setSERVER_NAME(server.getNAME());
             
+    }*/
+    
+    public void updateDates(BatchJobRun run) {
+        
     }
     
 }

@@ -5,9 +5,12 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -53,6 +56,8 @@ public class FormCancelJobFutureRun implements FormEditEntity {
             ///scheduleService.triggerNextBatchJobRun(current,program.getFirstAndOnlyTrigger());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "All batch job runs have been cancelled.", "");
             closeWithoutSaving();
+        } catch (BatchProcessingException ex) {
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } 

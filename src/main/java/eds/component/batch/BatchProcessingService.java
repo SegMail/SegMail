@@ -100,8 +100,9 @@ public class BatchProcessingService {
             try {
                 //Update the status first
                 DateTime start = DateTime.now();
-                run.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
-                run.setSTART_TIME(new Timestamp(start.getMillis()));
+                //run.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
+                //run.setSTART_TIME(new Timestamp(start.getMillis()));
+                run.start(start);
                 run.getBATCH_JOB().setLAST_RUN(new Timestamp(start.getMillis()));
                 run = updService.getEm().merge(run);
                 updService.getEm().flush();
@@ -115,13 +116,15 @@ public class BatchProcessingService {
                     BatchJobRunError newError = new BatchJobRunError(run, (Throwable) ret);
                     updService.getEm().persist(newError);
                     
-                    run.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
+                    //run.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
+                    run.fail(DateTime.now());
                     updService.getEm().persist(run);
                     continue;
                 }
                 
-                run.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
-                run.setEND_TIME(new Timestamp(DateTime.now().getMillis()));
+                //run.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
+                //run.setEND_TIME(new Timestamp(DateTime.now().getMillis()));
+                run.complete(DateTime.now());
                 run = updService.getEm().merge(run);
                 updService.getEm().flush();
                 

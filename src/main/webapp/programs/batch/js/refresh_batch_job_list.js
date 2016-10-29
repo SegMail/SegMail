@@ -7,16 +7,19 @@ function refresh_list(data) {
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
             //ajaxloader.style.display = 'block';
-            block_refresh(block);
+            //block_refresh(block);
+            block_refresh($('#all_batch_job_block'));
             break;
 
         case "complete": // This is called right after ajax response is received.
             //ajaxloader.style.display = 'none';
-            block_refresh(block);
+            //block_refresh(block);
+            block_refresh($('#all_batch_job_block'));
             break;
 
         case "success": // This is called when ajax response is successfully processed.
             //block_refresh(block);
+            //filterByStatus();
             break;
     }
 }

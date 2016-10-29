@@ -12,7 +12,7 @@ function login(data) {
             break;
 
         case "complete": // This is called right after ajax response is received.
-            blockRefresh(block);
+            //blockRefresh(block);
             //$('.btn-block');
             break;
 

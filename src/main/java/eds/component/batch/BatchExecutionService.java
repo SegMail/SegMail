@@ -147,13 +147,6 @@ public class BatchExecutionService {
         return results;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setInProcess(BatchJobRun job) {
-        job.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
-        updService.getEm().merge(job);
-        updService.getEm().flush();
-    }
-
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void logErrors(BatchJobRun job, Throwable ex) {
         BatchJobRunError newError = new BatchJobRunError(job, ex);
