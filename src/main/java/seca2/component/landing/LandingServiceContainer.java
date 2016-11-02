@@ -21,19 +21,10 @@ import seca2.entity.landing.ServerInstance;
 public class LandingServiceContainer {
     
     private Map<String,Integer> POINTER_NEXT = new HashMap<>();
-    private int POINTER_OWN;
     private Map<String,List<ServerInstance>> SERVERS = new HashMap<>();
     
-    public int getPOINTER_OWN() {
-        return POINTER_OWN;
-    }
-
-    public void setPOINTER_OWN(int POINTER_OWN) {
-        this.POINTER_OWN = POINTER_OWN;
-    }
-    
     public void addServer(ServerInstance server) {
-        List<ServerInstance> servers = new ArrayList<ServerInstance>();
+        List<ServerInstance> servers = new ArrayList<>();
         servers.add(server);
         this.addServers(servers);
     }
@@ -44,9 +35,9 @@ public class LandingServiceContainer {
             if(!SERVERS.containsKey(server.getSERVER_NODE_TYPE())) {
                 SERVERS.put(server.getSERVER_NODE_TYPE(), new ArrayList<ServerInstance>());
             }
-            //Do not add duplicates
+            //If there's a duplicate, remove it first
             if(SERVERS.get(server.getSERVER_NODE_TYPE()).contains(server)) {
-                continue;
+                SERVERS.get(server.getSERVER_NODE_TYPE()).remove(server);
             }
             SERVERS.get(server.getSERVER_NODE_TYPE()).add(server);
         }
@@ -61,7 +52,7 @@ public class LandingServiceContainer {
     }
     
     public void removeServer(ServerInstance server) {
-        List<ServerInstance> servers = new ArrayList<ServerInstance>();
+        List<ServerInstance> servers = new ArrayList<>();
         servers.add(server);
         this.removeServers(servers);
     }

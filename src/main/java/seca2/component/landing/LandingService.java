@@ -204,7 +204,8 @@ public class LandingService {
     public void saveServer(ServerInstance server)
             throws DataValidationException, URISyntaxException, EntityExistsException {
         this.validateServer(server);
-        updateService.getEm().merge(server);
+        server = updateService.getEm().merge(server);
+        cont.addServer(server); //To reload it
     }
 
     /**
