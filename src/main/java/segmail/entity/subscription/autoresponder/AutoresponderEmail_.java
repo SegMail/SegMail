@@ -19,4 +19,5 @@ public class AutoresponderEmail_ extends EnterpriseObject_ {
     public static volatile SingularAttribute<AutoresponderEmail,String> TYPE;
     public static volatile SingularAttribute<AutoresponderEmail,String> SUBJECT;
     public static volatile SingularAttribute<AutoresponderEmail,String> BODY;
+    public static volatile SingularAttribute<AutoresponderEmail,String> BODY_PROCESSED;
 }

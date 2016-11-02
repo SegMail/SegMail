@@ -6,15 +6,10 @@
 package segmail.entity.campaign;
 
 import eds.entity.data.EnterpriseObject;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.JAXBException;
 
 /**
  * Can more than 1 Campaign share the same activity???

@@ -63,7 +63,7 @@ public class LayoutModule extends BootstrapModule implements Serializable {
         List<Layout> layouts = layoutService.getLayoutsByProgram(requestContainer.getProgramName());
         
         if(layouts == null || layouts.isEmpty())
-            layouts = layoutService.getLayoutsByUser(sessionContainer.getUser());
+            layouts = layoutService.getLayoutsByUserOrType(sessionContainer.getUser());
         
         if(layouts == null || layouts.isEmpty()) {
             String defaultTemplateLocation = request.getServletContext().getInitParameter(defaults.DEFAULT_TEMPLATE_LOCATION);

@@ -11,18 +11,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 /**
@@ -52,20 +50,22 @@ public class BatchJobStepParam implements Serializable {
 
     @Id
     @ManyToOne(cascade = {
-                CascadeType.PERSIST,
+                //CascadeType.PERSIST,
                 CascadeType.MERGE,
                 CascadeType.REFRESH
             })
-    /*@JoinColumns({
+    @JoinColumns({
         @JoinColumn(
                 name="BATCH_JOB",
-                referencedColumnName="BATCH_JOB"
+                referencedColumnName="BATCH_JOB",
+                foreignKey = @ForeignKey(name = "BATCH_JOB", value = NO_CONSTRAINT)
         ),
         @JoinColumn(
-                name="BATCH_JOB_STEP_NO",
-                referencedColumnName="STEP_NO"
+                name="BATCH_JOB_STEP_ORDER",
+                referencedColumnName="STEP_ORDER",
+                foreignKey = @ForeignKey(name = "BATCH_JOB_STEP_ORDER", value = NO_CONSTRAINT)
         )
-    })*/
+    })
     public BatchJobStep getBATCH_JOB_STEP() {
         return BATCH_JOB_STEP;
     }

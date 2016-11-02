@@ -240,7 +240,7 @@ public class LayoutService implements Serializable {
 
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Layout getLayoutById(long layoutid) {
 
         try {
@@ -254,7 +254,7 @@ public class LayoutService implements Serializable {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Layout getLayoutByName(String layoutName) {
 
         try {
@@ -271,12 +271,12 @@ public class LayoutService implements Serializable {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String getLayoutViewRootByName(String layoutName) {
         return getLayoutByName(layoutName).getVIEW_ROOT();
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Layout> getLayoutsByProgram(String programName) {
         try {
 
@@ -318,8 +318,8 @@ public class LayoutService implements Serializable {
      * @return
      * @
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<Layout> getLayoutsByUser(User user) {
+    
+    public List<Layout> getLayoutsByUserOrType(User user) {
         try {
             if (user == null) {
                 return new ArrayList<Layout>();
@@ -347,7 +347,7 @@ public class LayoutService implements Serializable {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Layout> getAllLayouts() {
         try {
             return objectService.getAllEnterpriseObjects(Layout.class);

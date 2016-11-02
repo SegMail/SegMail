@@ -7,10 +7,11 @@ package segmail.component.subscription.mailmerge;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
-import eds.component.webservice.TransactionProcessedException;
-import eds.component.webservice.UnwantedAccessException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -22,7 +23,10 @@ import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
+import segmail.component.subscription.ListService;
 import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriberFieldValue;
+import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
@@ -52,7 +56,9 @@ public class MailMergeService {
     private SubscriptionService subscriptionService;
     @EJB
     private LandingService landingService;
-
+    @EJB
+    private ListService listService;
+    
     /**
      *
      * @param content
@@ -60,7 +66,7 @@ public class MailMergeService {
      * @param subscribers
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String parseMultipleContent(String content, long listId, List<SubscriberAccount> subscribers) {
 
         return "";
@@ -90,7 +96,7 @@ public class MailMergeService {
             //long listId
             String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
-        if (!text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
+        if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
             return text;
         }
 
@@ -98,7 +104,8 @@ public class MailMergeService {
         MailMergeRequest trans = transService.getTransactionByKey(confirmationKey, MailMergeRequest.class);
         if (trans == null) {
             trans = new MailMergeRequest();
-            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
+            //trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
+            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.program());
             trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
             trans.setMAILMERGE_LABEL(MAILMERGE_REQUEST.CONFIRM.name());
             trans.setTRANSACTION_KEY(confirmationKey); //More like an override
@@ -133,22 +140,105 @@ public class MailMergeService {
         }
 
         String confirmLink = landingServer.getURI().concat("/").concat(trans.getPROGRAM()).concat("/").concat(trans.getTRANSACTION_KEY());
-
-        String newEmailBody = text.replace(MAILMERGE_REQUEST.CONFIRM.label(), confirmLink);
+        String confirmLinkHtml = "<a target='_blank' href='"+confirmLink+"'>"+MAILMERGE_REQUEST.CONFIRM.defaultHtmlText()+"</a>";
+        
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.CONFIRM.label(), confirmLinkHtml);
 
         return newEmailBody;
     }
 
     /**
-     * Not implemented yet.
-     *
+     * In the future, we should build a MailmergeTag EnterpriseObject class that 
+     * can store the attribute and object key of its owner object.
      * @param text
-     * @param listId
-     * @return
+     * @param fieldValueMap //MailmergeTag => Field value
+     * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String parseListAttributes(String text, long listId) {
-        return text;
+    public String parseMailmergeTagsSubscriber(String text, Map<String,String> fieldValueMap) {
+        if(text == null || text.isEmpty())
+            return "";
+        String parsedText = text;
+        for(String mmTag : fieldValueMap.keySet()){
+            parsedText = parsedText.replace(mmTag, fieldValueMap.get(mmTag));
+        }
+        
+        return parsedText;
+    }
+    
+    /**
+     * 
+     * @param subscriberIds
+     * @param fields
+     * @param values
+     * @return subscriberId => {mailmerge-tag} => SubscriberFieldValue
+     */
+    public Map<Long,Map<String,String>> createMMValueMap(List<Long> subscriberIds, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
+        Map<Long,Map<String,String>> results = new HashMap<>();
+        
+        for(SubscriptionListField field : fields) {
+            String key = (String) field.generateKey();
+            String tag = field.getMAILMERGE_TAG();
+            
+            for(Long subscriberId : subscriberIds) {
+                if(!results.containsKey(subscriberId))
+                    results.put(subscriberId, new HashMap<String,String>());
+
+                Map<String,String> subscriberMap = results.get(subscriberId);
+                
+                //If the subscriber has the field value, insert into map.
+                //Else, just insert an empty field
+                subscriberMap.put(tag, "");
+                for(SubscriberFieldValue value : values) {
+                    if(value.getFIELD_KEY() != null && value.getFIELD_KEY().equals(key)) {
+                        subscriberMap.put(tag, value.getVALUE());
+                        break;
+                    }
+                }
+            }
+        }
+        
+        /*for(SubscriberFieldValue value : values) {
+            long owner = value.getOWNER().getOBJECTID();
+            if(!results.containsKey(owner))
+                results.put(owner, new HashMap<String,SubscriberFieldValue>());
+            
+            Map<String,SubscriberFieldValue> subscriberMap = results.get(owner);
+            
+            //Use the value's key, find the SubscriptionListField and 
+            //get its {mailmerge-tag}
+            String key = value.getFIELD_KEY();
+            for(SubscriptionListField field : fields) {
+                if(field.generateKey() != null && field.generateKey().equals(key)) {
+                    subscriberMap.put(field.getMAILMERGE_TAG(), value);
+                    break;
+                }
+            }
+        }*/
+        return results;
+    }
+    
+    /**
+     * For sending confirmation emails, where the listId is known.
+     * 
+     * @param text
+     * @param subscriberId
+     * @param listId
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String parseMailmergeTagsSubscriber(String text, long subscriberId, long listId) {
+        if(text == null || text.isEmpty())
+            return "";
+        
+        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
+        List<Long> ids = new ArrayList<>();
+        ids.add(subscriberId);
+        List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscriberIds(ids);
+        Map<Long,Map<String,String>> map = this.createMMValueMap(ids, fields, values);
+        
+        String parsedText = this.parseMailmergeTagsSubscriber(text, map.get(subscriberId));
+        return parsedText;
     }
 
     /**
@@ -163,7 +253,7 @@ public class MailMergeService {
      * @param text
      * @param unsubscribeKey
      * @return
-     * @throws eds.component.data.IncompleteDataException
+     * @throws eds.component.data.IncompleteDataException if landing/WEB server is not set
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseUnsubscribeLink(String text, String unsubscribeKey) throws IncompleteDataException {
@@ -172,8 +262,6 @@ public class MailMergeService {
             return text;
         }
         
-        
-
         // Check if key exists
         /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
          if(trans == null) {
@@ -183,7 +271,7 @@ public class MailMergeService {
          trans.setTRANSACTION_KEY(unsubscribeKey); //More like an override
          updateService.getEm().persist(trans);
          }*/
-        /*ServerInstance landingServer
+        /**/ServerInstance landingServer
                 = landingService.getNextServerInstance(
                         LandingServerGenerationStrategy.ROUND_ROBIN,
                         ServerNodeType.WEB);
@@ -192,8 +280,9 @@ public class MailMergeService {
         }
 
         String unsubLink = landingServer.getURI().concat("/").concat(UNSUBSCRIBE_PROGRAM_NAME).concat("/").concat(unsubscribeKey);
-        */
-        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubscribeKey);
+        String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
+        
+        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
 
         return newEmailBody;
         
@@ -243,4 +332,29 @@ public class MailMergeService {
         
         return trans;
     }*/
+    
+    /**
+     * Gets a test link for the mailmerge label
+     * 
+     * @param label
+     * @return 
+     */
+    public String getSystemTestLink(String label) throws DataValidationException, IncompleteDataException{
+        MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
+        if(request == null)
+            throw new DataValidationException("Invalid label");
+        
+        ServerInstance testServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+        if(testServer == null || testServer.getURI() == null || testServer.getURI().isEmpty())
+            throw new IncompleteDataException("Test server is not setup properly. Please contact your system admin.");
+        
+        String testServerAddress = testServer.getURI();
+        if(!testServerAddress.endsWith("/"))
+            testServerAddress = testServerAddress + "/";
+        
+        String name = request.program();
+        String testLink = testServerAddress + name + "/test";
+        
+        return testLink;
+    }
 }

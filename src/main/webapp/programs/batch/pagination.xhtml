@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="pagination pull-right">
+                    <ui:repeat value="#{FormJobList.pageNumbers}" var="page">
+                        
+                                <li class="#{(FormJobList.currentPage eq page) ? 'active' : ''}">
+                                    <h:commandLink value="#{page}">
+                                        <f:ajax listener="#{FormJobList.loadBatchJobs(page)}"
+                                                render="@form"
+                                                execute="@form"
+                                                event="click" onevent="refresh_list"
+                                                >
+                                        </f:ajax>
+                                    </h:commandLink>
+                                </li>
+                    </ui:repeat>
+                </ul>
+            </div>
+        </div>
+    
+</html>

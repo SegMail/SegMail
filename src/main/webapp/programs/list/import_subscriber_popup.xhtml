@@ -42,11 +42,6 @@
                                         <span class="fileinput-exists">Change</span>
                                         <h:inputFile id="fileUploaded" value="#{FormImportSubscriber.file}" 
                                                      >
-                                            <!--<f:ajax listener="#{FormImportSubscriber.setColumns()}"
-                                                    event="valueChange"
-                                                    onevent="saveSettings"
-                                                    render="field_selector" execute="field_selector">
-                                            </f:ajax>-->
                                         </h:inputFile>
                                     </span>
                                     <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
@@ -107,6 +102,8 @@
                 </div>
             </div>
         </div>
-        
+        <script type="text/javascript" >
+            var web_service_endpoint = '#{request.contextPath}/WSImportSubscriber';
+        </script>
     </form>
 </html>

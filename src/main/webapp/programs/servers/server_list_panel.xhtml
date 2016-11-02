@@ -17,7 +17,7 @@
                    >
                     <f:ajax render=":FormEditExistingServer"  event="click"
                             listener="#{FormServerList.loadServerAndUserAccount(server.OBJECTID)}"
-                            
+                            execute="@form"
                             />
                     <strong>#{server.NAME}</strong> -  #{server.URI} [#{server.IP_ADDRESS}]
                 </a>

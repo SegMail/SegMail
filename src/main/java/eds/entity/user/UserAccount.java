@@ -26,6 +26,7 @@ public class UserAccount extends EnterpriseData<User> {
     private boolean USER_LOCKED;
     private int UNSUCCESSFUL_ATTEMPTS;
     private java.util.Date LAST_UNSUCCESS_ATTEMPT; //Timestamp
+    private String CONTACT_EMAIL; //Important!
     
     //[20150314] Put this here temporarily until there is a need to put it somewhere else
     private String PROFILE_PIC_URL;
@@ -87,6 +88,14 @@ public class UserAccount extends EnterpriseData<User> {
 
     public void setAPI_KEY(String API_KEY) {
         this.API_KEY = API_KEY;
+    }
+
+    public String getCONTACT_EMAIL() {
+        return CONTACT_EMAIL;
+    }
+
+    public void setCONTACT_EMAIL(String CONTACT_EMAIL) {
+        this.CONTACT_EMAIL = CONTACT_EMAIL;
     }
 
     @Override

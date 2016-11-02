@@ -57,7 +57,9 @@ public class BatchJob implements Serializable {
     
     private String STATUS;
     
-    private ServerInstance SERVER;
+    //private ServerInstance SERVER;
+    
+    private String SERVER_NAME;
     
     /**
      * Over-simplification of BatchJobTrigger
@@ -133,7 +135,7 @@ public class BatchJob implements Serializable {
         this.END_TIME = END_TIME;
     }*/
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name="SERVER",
             referencedColumnName="OBJECTID",
             foreignKey=@ForeignKey(name="SERVER",value=NO_CONSTRAINT))
@@ -143,7 +145,7 @@ public class BatchJob implements Serializable {
 
     public void setSERVER(ServerInstance SERVER) {
         this.SERVER = SERVER;
-    }
+    }*/
 
     public Timestamp getDATETIME_CREATED() {
         return DATETIME_CREATED;
@@ -205,6 +207,14 @@ public class BatchJob implements Serializable {
 
     public void setLAST_RUN(Timestamp LAST_RUN) {
         this.LAST_RUN = LAST_RUN;
+    }
+
+    public String getSERVER_NAME() {
+        return SERVER_NAME;
+    }
+
+    public void setSERVER_NAME(String SERVER_NAME) {
+        this.SERVER_NAME = SERVER_NAME;
     }
     
     

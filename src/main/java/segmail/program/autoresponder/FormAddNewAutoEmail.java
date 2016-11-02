@@ -6,36 +6,40 @@
 package segmail.program.autoresponder;
 
 import eds.component.client.ClientFacade;
-import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
-import java.io.IOException;
+import java.util.List;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@Named("FormAddNewTemplate")
+@Named("FormAddNewAutoEmail")
 @RequestScoped
 public class FormAddNewAutoEmail {
     
     @EJB private AutoresponderService autoresponderService;
     @EJB private UserService userService;
+    @EJB private ListService listService;
     
     @Inject private ProgramAutoresponder program;
     @Inject private ClientFacade clientFacade;
@@ -43,52 +47,60 @@ public class FormAddNewAutoEmail {
     
     private String subject;
     
-    private String body;
+    private final String defaultConfirmBody = 
+            "<p><span>Dear ,</p>"
+            +"<p><span></span></p>"
+            + "<p><span>Please click on "+MAILMERGE_REQUEST.CONFIRM.label()+" to confirm your subscription.</span></p>";
     
+    private final String defaultWelcomeBody = 
+            "<p><span>Welcome !</p>"
+            +"<p><span></span></p>"
+            +"<p><span>You are now subscribed to us.</span></p>";
     //private AutoEmailTypeFactory.TYPE type;
     private AUTO_EMAIL_TYPE type;
     
-    private final String formName = "add_new_auto_email_form";
-    
     @PostConstruct
     public void init(){
-        
+        if(!FacesContext.getCurrentInstance().isPostback()) {
+            loadLists();
+        }
     }
     
     public void addNewAutoEmail(){
         try {
+            if(getSelectedListId() <= 0)
+                throw new IncompleteDataException("Please select a list.");
             // Create the new template
             // Get the client associated with the user and assign it
-            AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(subject, body, type);
+            AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(
+                    subject, 
+                    (type == CONFIRMATION) ? defaultConfirmBody : 
+                            (type == WELCOME) ? defaultWelcomeBody : "", 
+                    type);
+            //Assign it to the selected list
+            autoresponderService.assignAutoEmailToList(newTemplate.getOBJECTID(), getSelectedListId());
             
-            //Refresh the list of email templates on the page
-            //program.initializeAllTemplates(); //no need because ProgramTemplateLoader is loading all the shit
+            program.refresh();
             
-            //redirect to itself after setting list editing
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-            //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            //ec.redirect(programContainer.getCurrentURL());
-            ec.redirect(ec.getRequestContextPath()+"/".concat(reqContainer.getProgramName()));
-            
-        } catch (EntityExistsException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "There is already an email with this subject, please re-enter a different subject.", null);
-        } catch (IOException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "Please contact administrator.");
         } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (RelationshipExistsException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "There is already an email created and assigned to your account.", 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "There is already an email created and assigned to your account.", 
                     "Please click the refresh button on the top right hand corner to see if it's already there. "
                             + "Autoresponder emails are distinguished by their type and subject title."
                             + "If this problem persist, please contact your administrator. ");
         } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Oops..but this shouldn't happen.", 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Oops..but this shouldn't happen.", 
                     "Please raise an issue to our administrator, we will try to resolve it shortly!");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, 
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, 
                     ex.getClass().getSimpleName()+": "+ex.getMessage(), "Please raise an issue to our administrator, we will try to resolve it shortly!");
         }
+    }
+    
+    public void loadLists() {
+        List<SubscriptionList> lists = listService.getAllListForClient(clientFacade.getClient().getOBJECTID());
+        setLists(lists);
     }
 
     public String getSubject() {
@@ -99,12 +111,8 @@ public class FormAddNewAutoEmail {
         this.subject = subject;
     }
 
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
+    public String getDefaultConfirmBody() {
+        return defaultConfirmBody;
     }
 
     /*
@@ -122,6 +130,22 @@ public class FormAddNewAutoEmail {
 
     public void setType(AUTO_EMAIL_TYPE type) {
         this.type = type;
+    }
+    
+    public List<SubscriptionList> getLists() {
+        return program.getLists();
+    }
+
+    public void setLists(List<SubscriptionList> lists) {
+        program.setLists(lists);
+    }
+    
+    public long getSelectedListId() {
+        return program.getSelectedListId();
+    }
+
+    public void setSelectedListId(long selectedListId) {
+        program.setSelectedListId(selectedListId);
     }
     
 }

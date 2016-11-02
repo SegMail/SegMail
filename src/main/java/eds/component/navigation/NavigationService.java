@@ -193,7 +193,7 @@ public class NavigationService implements Serializable {
         } 
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public MenuItem getMenuItemById(long menuItemId) throws DBConnectionException{
         
         try {
@@ -219,7 +219,7 @@ public class NavigationService implements Serializable {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<MenuItem> getAllMenuItems() throws DBConnectionException {
         
         try {
@@ -237,7 +237,7 @@ public class NavigationService implements Serializable {
         }
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public TreeBranch<MenuItem> buildMenuTree(long rootMenuItemId) {
         
         
@@ -251,7 +251,7 @@ public class NavigationService implements Serializable {
      * @return a list of all MenuItems assigned to the user type unordered, or 
      * an empty list if there is none found.
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<MenuItem> getAllMenuItemsForUsertype(long usertypeid) {
         
         //List<MenuItem> results = this.objectService.getAllSourceObjectsFromTarget(usertypeid, MenuItemAccess.class, MenuItem.class);
@@ -267,7 +267,7 @@ public class NavigationService implements Serializable {
         return results;
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<MenuItem> getAllMenuItemsByName(String menuitemname) {
         
         try {
@@ -284,7 +284,7 @@ public class NavigationService implements Serializable {
         }
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<MenuItem> getAllPublicMenuItems(){
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();

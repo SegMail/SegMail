@@ -16,7 +16,9 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 /**
- *
+ * Any extension module can write a NonCoreModule to do shit in the bootstrapping 
+ * process.
+ * 
  * @author vincent.a.lee
  */
 @Qualifier

@@ -7,59 +7,68 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="add_new_auto_email_form">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        X
-                    </button>
-                    <h4 id="popup_title" class="modal-title"></h4>
-                    <input type="hidden" jsf:value="#{FormAddNewTemplate.type}" id="email_type" />
-                </div>
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <form jsf:id="FormAddNewAutoEmail">
 
-                <div class="modal-body">
-                    <div class="form-group">
-                        <s2:messenger id="FormAddTemp_messenger" for="add_new_auto_email_form" showDetail="true" showSummary="true"
-                                      class="form-group"></s2:messenger>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                            X
+                        </button>
+                        <h4 id="popup_title" class="modal-title"></h4>
+                        
                     </div>
-                    <div class="form-group">
-                        <label>
-                            Subject:
-                        </label>
-                        <input type="text" class="form-control" id="subject"
-                               jsf:value="#{FormAddNewTemplate.subject}"
-                               name="email"
-                               />
+
+                    <div jsf:id="modal-body" class="modal-body">
+                        <input type="hidden" jsf:value="#{FormAddNewAutoEmail.type}" id="email_type" />
+                        <div class="form-group">
+                            <s2:messenger id="FormAddNewAutoEmail_messenger" for="FormAddNewAutoEmail" showDetail="true" showSummary="true"
+                                          class="form-group"></s2:messenger>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                Subject:
+                            </label>
+                            <input type="text" class="form-control validate[required]" id="subject"
+                                   jsf:value="#{FormAddNewAutoEmail.subject}"
+                                   name="email"
+                                   />
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                Select list:
+                            </label>
+                            <h:selectOneListbox id="slectList" pass:id="selectList" styleClass="select2 validate[required]" style="width: 100%;"
+                                                        value="#{FormAddNewAutoEmail.selectedListId}" 
+                                                         >
+                                <f:selectItems value="#{FormAddNewAutoEmail.lists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                               itemValue="#{list.OBJECTID}">
+                                </f:selectItems>
+                            </h:selectOneListbox>
+                        </div>
+                        <div class="form-group">
+                            <p>We'll show you a nicer editor later so you can edit the body of the email.</p>
+                        </div>
+
                     </div>
-                    <div class="form-group">
-                        <textarea id="body_add" class="editor" jsf:value="#{FormAddNewTemplate.body}"></textarea>
+                    <div class="modal-footer">
+
+                        <button jsf:id="add_new_auto_email_button" class="btn btn-success"
+                                >
+                            <f:ajax render="modal-body" execute="@form"
+                                    
+                                    listener="#{FormAddNewAutoEmail.addNewAutoEmail()}"
+                                    event="click"
+                                    onevent="addNew"
+                                    ></f:ajax>
+                            Create
+                        </button>
                     </div>
-                    
+
                 </div>
-                <div class="modal-footer">
-
-                    <p:commandButton id="add_new_auto_email_button" styleClass="btn btn-success" 
-                                     value="Add Template" 
-                                     update="FormAddTemp_messenger"
-                                     oncomplete="
-                                        popup.popup();
-                                        "
-                                     actionListener="#{FormAddNewTemplate.addNewAutoEmail()}"
-                                     onstart="reapply_textarea('body_add')"
-                                     >
-
-                    </p:commandButton>
-                </div>
-                <p:blockUI block="add_new_auto_email_form" trigger="add_new_auto_email_form:add_new_auto_email_button"
-                           >
-                    <p id="spinner"></p>
-                </p:blockUI>
-
             </div>
-        </div>
-        
     </form>
 
 

@@ -23,8 +23,8 @@
                 </div>
             </div>
             <c:choose>
-                <c:when test="#{FormListList.programList.allLists eq null or 
-                                FormListList.programList.allLists.size() le 0}">
+                <c:when test="#{FormListList.allLists eq null or 
+                                FormListList.allLists.size() le 0}">
 
                     <div class="jumbotron" style="text-align: center;">
                         <h1 style="margin-top: 30px;">You have no list yet</h1>
@@ -37,81 +37,90 @@
 
                 </c:when>
                 <c:otherwise>
+                    <c:choose> 
+                        <c:when test="#{not FormProgramListSwitch.editListMode}" >
+                            <div class="row">
+                                <div class="col-md-12"><!--Lists block-->
 
-                    <div class="row">
-                        <div class="col-md-4"><!--Lists block-->
-
-                            <div class="block nb">
-                                <div class="block-head">
-                                    <h2>Your lists</h2>
-                                    <ul class="buttons">
-                                        <li>
-                                            <a href="#add_list_popup" data-toggle="modal"
-                                               >
-                                                <span class="fa fa-plus"></span>
-                                            </a>
+                                    <div class="block nb">
+                                        <div class="block-head">
+                                            <h2>Your lists</h2>
+                                            <ul class="buttons">
+                                                <li>
+                                                    <a href="#add_list_popup" data-toggle="modal"
+                                                       >
+                                                        <span class="fa fa-plus"></span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <ui:include src="all_list_panel.xhtml" ></ui:include>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div jsf:id="list_editing_block" class="col-md-12" jsf:rendered="#{ProgramList.listEditing ne null}">
+                                <ui:include src="editing_panel_header.xhtml"></ui:include>
+                                <div class="block" >
+                                    <ul class="nav nav-tabs">
+                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('settings_panel') ? 'active' : '')} active">
+                                            <a href="#settings_panel" data-toggle="tab">Settings</a>
+                                        </li>
+                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('fieldset_panel') ? 'active' : '')}">
+                                            <a href="#fieldset_panel" data-toggle="tab">Define fields</a>
+                                        </li>
+                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('email_panel') ? 'active' : '')}">
+                                            <a href="#email_panel" data-toggle="tab">Confirmation &amp; Welcome Emails</a>
+                                        </li>
+                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('subscribers_panel') ? 'active' : '')}">
+                                            <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
                                         </li>
                                     </ul>
-                                </div>
-                                <ui:include src="all_list_panel.xhtml" ></ui:include>
-                            </div>
-                        </div>
-
-                        <div jsf:id="list_editing_block" class="col-md-8" jsf:rendered="#{ProgramList.listEditing ne null}">
-                            <ui:include src="editing_panel_header.xhtml"></ui:include>
-                            <div class="block" >
-                                <ul class="nav nav-tabs">
-                                    <li class="#{(FormTabController.showActiveTabs.get('settings_panel') ? 'active' : '')}">
-                                        <a href="#settings_panel" data-toggle="tab">Settings</a>
-                                    </li>
-                                    <li class="#{(FormTabController.showActiveTabs.get('fieldset_panel') ? 'active' : '')}">
-                                        <a href="#fieldset_panel" data-toggle="tab">Define fields</a>
-                                    </li>
-                                    <li class="#{(FormTabController.showActiveTabs.get('email_panel') ? 'active' : '')}">
-                                        <a href="#email_panel" data-toggle="tab">Confirmation &amp; Welcome Emails</a>
-                                    </li>
-                                    <li class="#{(FormTabController.showActiveTabs.get('subscribers_panel') ? 'active' : '')}">
-                                        <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
-                                    </li>
-                                </ul>
-                                <div class="block-content tab-content">
-                                    <div class="tab-pane #{(FormTabController.showActiveTabs.get('subscribers_panel') ? 'active' : '')}" id="subscribers_panel">
-                                        <ui:include src="subscribers_panel.xhtml"></ui:include>
-                                    </div>
-                                    <div class="tab-pane #{(FormTabController.showActiveTabs.get('fieldset_panel') ? 'active' : '')}" id="fieldset_panel">
-                                        <ui:include src="fieldset_panel.xhtml"></ui:include>
-                                    </div>
-                                    <div class="tab-pane #{(FormTabController.showActiveTabs.get('email_panel') ? 'active' : '')}" id="email_panel">
-                                        <ui:include src="email_panel.xhtml"></ui:include>
-                                    </div>
-                                    <div class="tab-pane #{(FormTabController.showActiveTabs.get('settings_panel') ? 'active' : '')}" id="settings_panel">
-                                        <ui:include src="settings_panel.xhtml"></ui:include>
+                                    <div class="block-content tab-content">
+                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('subscribers_panel') ? 'active' : '')}" id="subscribers_panel">
+                                            <ui:include src="subscribers_panel.xhtml"></ui:include>
+                                        </div>
+                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('fieldset_panel') ? 'active' : '')}" id="fieldset_panel">
+                                            <ui:include src="fieldset_panel.xhtml"></ui:include>
+                                        </div>
+                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('email_panel') ? 'active' : '')}" id="email_panel">
+                                            <ui:include src="email_panel.xhtml"></ui:include>
+                                        </div>
+                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('settings_panel') ? 'active' : '')} active" id="settings_panel">
+                                            <ui:include src="settings_panel.xhtml"></ui:include>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </c:otherwise>
+                    </c:choose>
                 </c:otherwise>
             </c:choose>
-            <!--popups and modals-->
-            <!--All modals and popups must be declared in the main page. For some reason, declaring them in the 
-                higher level ui:includes make them malfunction-->
-            <div class="modal fade" id="add_list_popup"
-                 >
-                <ui:include src="add_new_list.xhtml" ></ui:include>
-            </div>
-            <div class="modal fade" id="add_subscriber_popup">
-                <ui:include src="add_new_subscriber.xhtml"></ui:include>
-            </div>
-            <div class="modal fade" id="import_subscriber_popup">
-                <ui:include src="import_subscriber_popup.xhtml"></ui:include>
-            </div>
+                <!--popups and modals-->
+                <!--All modals and popups must be declared in the main page. For some reason, declaring them in the 
+                    higher level ui:includes make them malfunction-->
+                <div class="modal fade" id="add_list_popup">
+                    <ui:include src="add_new_list.xhtml" ></ui:include>
+                </div>
+                <div class="modal fade" id="add_subscriber_popup">
+                    <ui:include src="add_new_subscriber.xhtml"></ui:include>
+                </div>
+                <div class="modal fade" id="import_subscriber_popup">
+                    <ui:include src="import_subscriber_popup.xhtml"></ui:include>
+                </div>
+                <div class="modal fade" id="delete_list_confirmation">
+                    <ui:include src="delete_list_popup.xhtml"></ui:include>
+                </div>
 
+        </ui:define>
+        
+        <ui:define name="toolbar-right"  >
+            <ui:include src="edit_list_controls.xhtml" ></ui:include>
         </ui:define>
 
         <ui:define name="scripts-bottom">
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jasny-bootstrap/js/jasny-bootstrap.min.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/list/js/list.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/client-line-navigator-master/file-navigator.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/client-line-navigator-master/line-navigator.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery.soap/jquery.soap.js" />
@@ -119,20 +128,15 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/jquery.dataTables.min.js"></script>
-
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/codemirror.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/addon/edit/matchbrackets.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/htmlmixed/htmlmixed.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/xml/xml.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/javascript/javascript.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/css/css.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/clike/clike.js"></script>
-            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/php/php.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/jquery-validation/jquery.validate.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/jquery-validation/additional-methods..min.js"></script>
             <script>
 
-                
 
-            </script>        
+
+            </script>  
+            <script type="text/javascript" src="#{request.contextPath}/programs/list/js/list.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/list/js/import.js" />
         </ui:define>
 
         <ui:define name="head">

@@ -13,6 +13,8 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseData_;
+import eds.entity.data.EnterpriseRelationship_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -34,19 +36,23 @@ import segmail.component.subscription.SubscriptionService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
 import segmail.entity.campaign.Assign_Campaign_Activity;
+import segmail.entity.campaign.Assign_Campaign_Activity_;
 import segmail.entity.campaign.Assign_Campaign_Client;
 import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
+import segmail.entity.campaign.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignActivitySchedule;
-import segmail.entity.campaign.LinkClick;
-import segmail.entity.campaign.LinkClick_;
+import segmail.entity.campaign.CampaignLinkClick;
+import segmail.entity.campaign.CampaignLinkClick_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.SubscriptionListField_;
 import segmail.entity.subscription.Subscription_;
 
 /**
@@ -66,13 +72,13 @@ public class CampaignService {
     @EJB LandingService landingService;
     @EJB ListService listService;
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public Campaign getCampaign(long campaignId) {
         Campaign campaign = objService.getEnterpriseObjectById(campaignId, Campaign.class);
         return campaign;
     }
     
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Campaign> getAllCampaignForClient(long clientId) {
         List<Campaign> results = objService.getAllSourceObjectsFromTarget(clientId, Assign_Campaign_Client.class, Campaign.class);
         return results;
@@ -245,6 +251,7 @@ public class CampaignService {
         validateCampaignActivity(activity);
         activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
         
+        
         return objService.getEm().merge(activity);
     }
     
@@ -263,7 +270,7 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int deleteCampaignActivity(long campaignActivityId) throws EntityNotFoundException {
-        int deleted = updService.deleteObjectDataAndRelationships(campaignActivityId);
+        int deleted = updService.deleteObjectDataAndRelationships(campaignActivityId,CampaignActivity.class);
         return deleted;
     }
     
@@ -294,6 +301,24 @@ public class CampaignService {
     public List<SubscriptionList> getTargetedLists(long campaignId) {
         List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaignId, Assign_Campaign_List.class, SubscriptionList.class);
         return targetLists;
+    }
+    
+    public List<SubscriptionListField> getTargetedListFields(long campaignId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromFields = query.from(SubscriptionListField.class);
+        Root<Assign_Campaign_List> fromAssign = query.from(Assign_Campaign_List.class);
+        
+        query.select(fromFields);
+        query.where(builder.and(
+                builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), campaignId),
+                builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromFields.get(SubscriptionListField_.OWNER))
+                ));
+        
+        List<SubscriptionListField> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -465,7 +490,7 @@ public class CampaignService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) {
+    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) throws IncompleteDataException {
         
         //Get the existing link first
         List<CampaignActivityOutboundLink> allLinks = objService.getEnterpriseData(activity.getOBJECTID(), CampaignActivityOutboundLink.class);
@@ -481,7 +506,9 @@ public class CampaignService {
             }
         }
         selectedLink.setLINK_TARGET(linkTarget);
+        //selectedLink.setLINK_TARGET(this.constructLink(selectedLink));
         selectedLink.setLINK_TEXT(linkText);
+        //selectedLink.setORIGINAL_LINK_HTML(originalHTML);
         //If not found
         if(selectedLink.getLINK_KEY() == null || selectedLink.getLINK_KEY().isEmpty())
             objService.getEm().persist(selectedLink);
@@ -499,18 +526,16 @@ public class CampaignService {
     public String constructLink(CampaignActivityOutboundLink link) throws IncompleteDataException {
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
         
-        
-        
         return server.getURI() + "/link/" + link.getLINK_KEY();
     }
     
     public long getLinkClicks(String key) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
-        Root<LinkClick> fromClicks = query.from(LinkClick.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
         
         query.select(builder.count(fromClicks));
-        query.where(builder.equal(fromClicks.get(LinkClick_.LINK_KEY), key));
+        query.where(builder.equal(fromClicks.get(CampaignLinkClick_.LINK_KEY), key));
         
         Long result = objService.getEm().createQuery(query)
                 .getSingleResult();
@@ -518,5 +543,45 @@ public class CampaignService {
         return result;
     }
     
+    public long getTotalLinkClicksForActivity(long activityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
+        Root<CampaignActivityOutboundLink> fromLinks = query.from(CampaignActivityOutboundLink.class);
+        
+        query.select(builder.count(fromClicks));
+        query.where(
+                builder.and(
+                        builder.equal(fromLinks.get(CampaignActivityOutboundLink_.OWNER), activityId),
+                        builder.equal(fromLinks.get(CampaignActivityOutboundLink_.LINK_KEY),fromClicks.get(CampaignLinkClick_.LINK_KEY))
+                )
+        );
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    } 
     
+    public long getTotalLinkClicksForCampaign(long campaignId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
+        Root<CampaignActivityOutboundLink> fromLinks = query.from(CampaignActivityOutboundLink.class);
+        Root<Assign_Campaign_Activity> fromAssign = query.from(Assign_Campaign_Activity.class);
+        
+        query.select(builder.count(fromClicks));
+        query.where(
+                builder.and(
+                        builder.equal(fromAssign.get(Assign_Campaign_Activity_.SOURCE), campaignId),
+                        builder.equal(fromLinks.get(CampaignActivityOutboundLink_.OWNER), fromAssign.get(Assign_Campaign_Activity_.TARGET)),
+                        builder.equal(fromLinks.get(CampaignActivityOutboundLink_.LINK_KEY),fromClicks.get(CampaignLinkClick_.LINK_KEY))
+                )
+        );
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    } 
 }

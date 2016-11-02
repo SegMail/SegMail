@@ -20,7 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import seca2.bootstrap.DefaultKeys;
-import seca2.bootstrap.RunMode;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 
@@ -49,7 +48,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
     
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
-    @Inject DefaultKeys defaults;
 
     @EJB ProgramService programService;
 
@@ -107,6 +105,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         
         //If no matching program is found and no default program, stop processing and 
         //show the error page
+        //This could also mean that the user has no permission to view the page 
         if (program == null) {
             String errorViewRoot = request.getServletContext().getInitParameter(defaults.ERROR_VIEWROOT);
             requestContainer.setViewLocation(errorViewRoot);
@@ -127,7 +126,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         
         //Set params
         requestContainer.setProgramParamsOrdered(requestContainer.getPathParser().getOrderedParams());
-        //requestContainer.setPogramParamsNamed(request.getParameterMap());
         //Must return true no matter what, else FacesServlet will not get called
         return true;
     }
@@ -195,7 +193,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         //If it's a found public program
         if(newProgram == null){
             Program publicProgram = programService.getSingleProgramByName(programName);
-            if(publicProgram != null && publicProgram.isIS_PUBLIC())
+            if(publicProgram != null && publicProgram.isIS_PUBLIC()) 
                 newProgram = publicProgram;
         }
         
@@ -205,7 +203,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean bypassDuringInstall() {
-        return true; //To change body of generated methods, choose Tools | Templates.
+        return true; 
     }
 
     @Override

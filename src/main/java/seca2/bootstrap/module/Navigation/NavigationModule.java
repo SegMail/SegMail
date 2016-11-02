@@ -32,10 +32,6 @@ import seca2.bootstrap.module.Path.LogicalPathParser;
  *
  * @author KH
  */
-//@Named("NavigationModule")
-//@SessionScoped
-//@BootstrapSession
-//@BootstrapType(postback=false)
 @CoreModule
 public class NavigationModule extends BootstrapModule implements Serializable {
 
@@ -43,8 +39,6 @@ public class NavigationModule extends BootstrapModule implements Serializable {
     
     @Inject private UserSessionContainer sessionContainer;
     @Inject private UserRequestContainer requestContainer;
-    
-    private final String menuRoot = "/programs/menu/top_menu.xhtml";
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
@@ -58,16 +52,12 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         servletPath = (servletPath == null) ? "" : servletPath;
         pathInfo = (pathInfo == null) ? "" : pathInfo;
         
-        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
-            return true;
-        }*/
         if (requestContainer.getPathParser().containsFileResource())
             return true;
         
         UserType userType = sessionContainer.getUserType();
         
         //For all other programs which changes menu items assignment, just nullify menu attribute of the sessionContainer
-        
         String currentProgram = requestContainer.getProgramName();
         List<MenuItemContainer> existingMenuItems = sessionContainer.getMenu();//debug
         if(sessionContainer.getMenu() == null ){
@@ -75,7 +65,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
                     navigationService.getAllMenuItemsForUsertype(userType.getOBJECTID()));
             List<MenuItem> publicMenuItems = navigationService.getAllPublicMenuItems();
             
-            List<MenuItemContainer> menuItemContainers = new ArrayList<MenuItemContainer>();
+            List<MenuItemContainer> menuItemContainers = new ArrayList<>();
             
             //Add all private menuitems
             for(MenuItem menuItem : privateMenuItems){
@@ -107,6 +97,8 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             menuItemCont.setActive(newParser.getProgram().equals(requestContainer.getProgramName()));
         }
         
+        String menuRoot = request.getServletContext().getInitParameter(defaults.DEFAULT_MENU_LOCATION);
+        
         requestContainer.setMenuLocation(menuRoot);
         
         return true;
@@ -114,12 +106,12 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @Override
     protected void ifFail(ServletRequest request, ServletResponse response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     protected void ifException(ServletRequest request, ServletResponse response, Exception ex) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override

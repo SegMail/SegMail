@@ -9,6 +9,7 @@ import java.util.List;
 import seca2.program.Program;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /**
  *
@@ -20,6 +21,12 @@ public class ProgramSignupCode extends Program {
     //private List<String> selectedLists; //JSF selectMany component will store it as String.
     private String listFieldsJson;
     private long selectedListId;
+    
+    private List<SubscriptionListField> fields;
+    
+    private List<AutoresponderEmail> confirmEmails;
+    
+    private SubscriptionList selectedList;
 
     public String getListFieldsJson() {
         return listFieldsJson;
@@ -43,6 +50,30 @@ public class ProgramSignupCode extends Program {
 
     public void setSelectedListId(long selectedListId) {
         this.selectedListId = selectedListId;
+    }
+
+    public List<SubscriptionListField> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<SubscriptionListField> fields) {
+        this.fields = fields;
+    }
+
+    public List<AutoresponderEmail> getConfirmEmails() {
+        return confirmEmails;
+    }
+
+    public void setConfirmEmails(List<AutoresponderEmail> confirmEmails) {
+        this.confirmEmails = confirmEmails;
+    }
+
+    public SubscriptionList getSelectedList() {
+        return selectedList;
+    }
+
+    public void setSelectedList(SubscriptionList selectedList) {
+        this.selectedList = selectedList;
     }
     
     @Override

@@ -47,7 +47,7 @@ public class RestServerAuthEndpoint {
 
         } catch (Exception e) {
             return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity(e).build();
+                    .entity(e.getMessage()).build();
         }      
     }
 

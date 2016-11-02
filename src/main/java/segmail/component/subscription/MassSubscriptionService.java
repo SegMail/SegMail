@@ -6,7 +6,6 @@
 package segmail.component.subscription;
 
 import eds.component.GenericObjectService;
-import eds.component.batch.BatchProcessingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -17,10 +16,8 @@ import eds.entity.mail.Email;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -31,11 +28,12 @@ import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.joda.time.DateTime;
-import seca2.bootstrap.module.Client.ClientContainer;
 import static segmail.component.subscription.SubscriptionService.DEFAULT_EMAIL_FIELD_NAME;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValueComparator;
@@ -44,6 +42,7 @@ import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
@@ -108,7 +107,7 @@ public class MassSubscriptionService {
         //Set up the return results Map
         Map<String, List<Map<String, Object>>> results = new HashMap<>();
 
-        SubscriptionList list = subContainer.getList(); //objService.getEnterpriseObjectById(listId, SubscriptionList.class); //DB hit, can be cached
+        SubscriptionList list = subContainer.getList(); //DB hit, can be cached
         if (list == null) {
             throw new EntityNotFoundException("SubscriptionList not initialized.");
         }
@@ -118,7 +117,7 @@ public class MassSubscriptionService {
             throw new EntityNotFoundException("Client not initialized.");
         }
 
-        List<SubscriptionListField> fields = subContainer.getListFields(); //listService.getFieldsForSubscriptionList(listId); //DB hit, can be cached
+        List<SubscriptionListField> fields = subContainer.getListFields(); //DB hit, can be cached
 
         //This is the list of emails to be added and checked for existing subscribers
         List<String> emails = new ArrayList<>();
@@ -133,7 +132,6 @@ public class MassSubscriptionService {
             for (SubscriptionListField field : fields) {
                 if (field.isMANDATORY()
                         && (subscriber.get((String) field.generateKey()) == null || ((String) subscriber.get((String) field.generateKey())).isEmpty())) {
-                    //throw new IncompleteDataException("Mandatory list field " + field.getFIELD_NAME() + " is missing.");
                     errorKey = "Mandatory list field " + field.getFIELD_NAME() + " is missing.";
                     break;
                 }
@@ -179,12 +177,12 @@ public class MassSubscriptionService {
             existingSubscriberIds.add(account.getOBJECTID());
         }
         //And also all their SubscriberFieldValues
-        List<SubscriberFieldValue> existingFieldValues = subService.getSubscriberValuesBySubscribers(existingSubscriberIds); //DB hit, can be cached
+        List<SubscriberFieldValue> existingFieldValues = subService.getSubscriberValuesBySubscriberIds(existingSubscriberIds); //DB hit, can be cached
         Collections.sort(existingFieldValues); //Default sorting method for EnterpriseData
         //All existing subscriptions
         //Just in case the SubscriberAccount, Ownership and FieldValues are created but the subscription is not,
         //this is used for checking.
-        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID());
+        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID(), null);
 
         /**
          * For each survivor: 1) Check if SubscriberAccount has already been
@@ -289,7 +287,7 @@ public class MassSubscriptionService {
 
             if (!existingSubscription.contains(subscription)) {
                 createNewSubscription.add(subscription);
-            }
+            } 
         }
 
         //Time to do db updates and inserts
@@ -302,14 +300,20 @@ public class MassSubscriptionService {
             createNewSubOwnership = createSubscriberOwnership(createNewSubOwnership);
             //Create Subscription!!!
             createNewSubscription = createSubscription(createNewSubscription);
+            //Update all existing subscriptions
+            existingSubscription = updateExistingSubscriptions(existingSubscription, doubleOptin ? NEW : CONFIRMED);
+            
+            //Necessary for #74
+            //As inspired by http://stackoverflow.com/a/11333262/5765606
+            //objService.getEm().clear();
             //Update the number of subscribers (async call)
             subService.updateSubscriberCount(list.getOBJECTID());
             
             //Send confirmation email if double optin is turned on (must be last)
             if (doubleOptin) {
                 sendConfirmationEmails(createNewSubscription);
+                sendConfirmationEmails(existingSubscription);
             }
-            
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
             System.out.println("Time taken to update " + subscribers.size() + " subscribers is " + timeTaken);
@@ -321,20 +325,20 @@ public class MassSubscriptionService {
                 errorMsg = ex.getClass().getSimpleName() + ((ex.getCause() == null) ? "" : ex.getCause().getMessage());
             results.put(errorMsg, survivors);
         }
-
         return results;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberAccount> createNewSubscriberAccounts(List<SubscriberAccount> newSubAccList) {
         for (int i = 0; i < newSubAccList.size(); i++) {
             SubscriberAccount acc = newSubAccList.get(i);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= newSubAccList.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return newSubAccList;
     }
 
@@ -361,37 +365,43 @@ public class MassSubscriptionService {
             results += objService.getEm().createQuery(query)
                     .executeUpdate();
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= fieldValueList.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return results;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberFieldValue> createFieldValueList(List<SubscriberFieldValue> fieldValueList) {
         for (int i = 0; i < fieldValueList.size(); i++) {
             SubscriberFieldValue acc = fieldValueList.get(i);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= fieldValueList.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return fieldValueList;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberOwnership> createSubscriberOwnership(List<SubscriberOwnership> createNewSubOwnership) {
         for (int i = 0; i < createNewSubOwnership.size(); i++) {
             SubscriberOwnership acc = createNewSubOwnership.get(i);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= createNewSubOwnership.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return createNewSubOwnership;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Subscription> createSubscription(List<Subscription> createNewSubscription) {
         for (int i = 0; i < createNewSubscription.size(); i++) {
             Subscription acc = createNewSubscription.get(i);
@@ -402,10 +412,11 @@ public class MassSubscriptionService {
             acc.setUNSUBSCRIBE_KEY(unsubKey);
             objService.getEm().persist(acc);
 
-            if (i >= MAX_RECORDS_PER_FLUSH || i >= createNewSubscription.size() - 1) {
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
                 objService.getEm().flush();
             }
         }
+        objService.getEm().flush();
         return createNewSubscription;
     }
 
@@ -424,20 +435,49 @@ public class MassSubscriptionService {
      * See SubscriptionService.subscribe() and 
      * MassSubscriptionService.massSubscribe()
      * 
+     * Potential performance issue but we'll deal with it when we get there
+     * 
      * @param newSubscriptions
-     * @throws IncompleteDataException
-     * @throws BatchProcessingException
-     * @throws DataValidationException
-     * @throws InvalidEmailException 
      */
-    @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void sendConfirmationEmails(List<Subscription> newSubscriptions)
-            throws IncompleteDataException,
-            DataValidationException,
-            InvalidEmailException {
+    //@Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void sendConfirmationEmails(List<Subscription> newSubscriptions) throws IncompleteDataException, DataValidationException, InvalidEmailException
+             {
+        for(Subscription newSubscription : newSubscriptions) {
+            
+            SubscriptionList list = newSubscription.getTARGET();
+            String sendAs = list.getSEND_AS_EMAIL();
+            
+            if (sendAs == null || sendAs.isEmpty()) {
+                throw new IncompleteDataException("Please set \"Send As\" address before sending confirmation emails.");
+            }
+            
+            //Retrieve the autoemail from list using AutoresponderService
+            List<AutoresponderEmail> assignedAutoEmails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
+            AutoresponderEmail assignedConfirmEmail = (assignedAutoEmails == null || assignedAutoEmails.isEmpty())
+                    ? null : assignedAutoEmails.get(0);
+
+            if (assignedConfirmEmail == null) {
+                throw new IncompleteDataException("Please assign a Confirmation email before adding subscribers.");
+            }
+            
+            //Parse all mailmerge functions using MailMergeService
+            String newEmailBody = assignedConfirmEmail.getBODY();
+            newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, newSubscription.getCONFIRMATION_KEY());
+            newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, newSubscription.getSOURCE().getOBJECTID(), newSubscription.getTARGET().getOBJECTID());
+
+             //Send the email using MailService
+            Email confirmEmail = new Email();
+            confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
+            confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
+            confirmEmail.setBODY(newEmailBody);
+            confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
+            confirmEmail.addRecipient(newSubscription.getSOURCE().getEMAIL());
+
+            mailService.queueEmail(confirmEmail, DateTime.now());
+        }
         //Group the SubscriberAccounts together by SubscriptionList
-        Map<SubscriptionList, List<SubscriberAccount>> groupedByLists = new HashMap<>();
+        /*Map<SubscriptionList, List<SubscriberAccount>> groupedByLists = new HashMap<>();
         for (Subscription subscription : newSubscriptions) {
             List<SubscriberAccount> subscribers = groupedByLists.get(subscription.getTARGET());
             if (subscribers == null) {
@@ -460,7 +500,6 @@ public class MassSubscriptionService {
             Email confirmEmail = new Email();
             confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
             confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
-            confirmEmail.setBODY(assignedConfirmEmail.getBODY());
             confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
 
             for (SubscriberAccount subscriber : groupedByLists.get(list)) {
@@ -487,6 +526,22 @@ public class MassSubscriptionService {
                 mailService.queueEmail(confirmEmail, DateTime.now());
                 
             }
+        }*/
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<Subscription> updateExistingSubscriptions(List<Subscription> subscriptions, SUBSCRIPTION_STATUS status) {
+        for(int i = 0; i < subscriptions.size(); i++) {
+            Subscription sub = subscriptions.get(i);
+            sub.setSTATUS(status.name());
+            objService.getEm().merge(sub);
+            
+            if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {
+                objService.getEm().flush();
+            }
         }
+        objService.getEm().flush();
+        
+        return subscriptions;
     }
 }

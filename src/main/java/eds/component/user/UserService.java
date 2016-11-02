@@ -27,6 +27,7 @@ import org.joda.time.DateTime;
 import eds.component.DBService;
 import eds.component.UpdateObjectService;
 import eds.component.data.DBConnectionException;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.HibernateHelper;
@@ -36,13 +37,12 @@ import eds.component.encryption.EncryptionUtility;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserAccount_;
-import eds.entity.user.UserPreferenceSet;
-import eds.entity.user.UserPreferenceSet_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
 import eds.entity.user.User_;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import org.apache.commons.validator.routines.EmailValidator;
 
 /**
  *
@@ -130,9 +130,21 @@ public class UserService extends DBService {
         }
     }
 
+    /**
+     * 
+     * @param userTypeId
+     * @param username
+     * @param password
+     * @param contact email contact
+     * @return
+     * @throws EntityNotFoundException 
+     * @throws IncompleteDataException
+     * @throws EntityExistsException if email was already registered
+     * @throws DataValidationException if contact email is invalid or username is taken
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public UserAccount registerUserByUserTypeId(long userTypeId, String username, String password)
-            throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
+    public UserAccount registerUserByUserTypeId(long userTypeId, String username, String password, String contact)
+            throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException {
         //Check if username is null
         if (username == null || username.isEmpty()) {
             throw new IncompleteDataException("Username cannot be empty.");
@@ -142,11 +154,27 @@ public class UserService extends DBService {
         if (password == null || password.isEmpty()) {
             throw new IncompleteDataException("Password cannot be empty.");
         }
+        
+        if (contact == null || contact.isEmpty()) {
+            throw new IncompleteDataException("Contact email cannot be empty.");
+        }
+        
+        if (!EmailValidator.getInstance().isValid(contact)) {
+            throw new DataValidationException("Contact email is invalid.");
+        }
+        
+        //Important! Check if the user already has an account by using email,
+        //not username, because email is an external identifier while username is
+        //internal. 
+        UserAccount existingUser = this.getUserAccountByContactEmail(contact);
+        if (existingUser != null) {
+            throw new EntityExistsException("An account with this email address has already been registered.");
+        }
 
         //Check if username has been used
-        User existingUser = this.getUserByUsername(username);
+        existingUser = this.getUserAccountByUsername(username);
         if (existingUser != null) {
-            throw new EntityExistsException(existingUser);
+            throw new DataValidationException("Username is already taken.");
         }
 
         //Create a new User object first
@@ -164,6 +192,7 @@ public class UserService extends DBService {
         userAccount.setPASSWORD(hashedPassword);
         userAccount.setOWNER(newUser);
         userAccount.setAPI_KEY(generateUserAPIKey(newUser));
+        userAccount.setCONTACT_EMAIL(contact);
 
         //Persist and throw any errors
         objectService.getEm().persist(userAccount);
@@ -172,7 +201,7 @@ public class UserService extends DBService {
     }
     
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<UserType> getAllUserTypes() throws DBConnectionException {
 
         try {
@@ -199,7 +228,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public UserType getUserTypeById(long userTypeId) throws DBConnectionException {
 
         try {
@@ -227,7 +256,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<UserType> getUserTypeByName(String userTypeName) {
 
         try {
@@ -262,7 +291,7 @@ public class UserService extends DBService {
      * @return
      * @throws DBConnectionException
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public UserType getSingleUserTypeByName(String userTypeName) {
 
         try {
@@ -283,7 +312,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public User getUserById(long userId) throws DBConnectionException {
         try {
             /*CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -309,26 +338,15 @@ public class UserService extends DBService {
             throw ex;
         }
     }
+    
+    public User getUserByUsername(String username) {
+        UserAccount userAccount = this.getUserAccountByUsername(username);
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public User getUserByUsername(String username) throws DBConnectionException {
-        try {
-            UserAccount userAccount = this.getUserAccountByUsername(username);
-
-            if (userAccount == null) {
-                return null;
-            }
-
-            return userAccount.getOWNER();
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
+        if (userAccount == null) {
+            return null;
         }
+
+        return userAccount.getOWNER();
     }
 
     /**
@@ -406,15 +424,15 @@ public class UserService extends DBService {
 
                 User user = (User) HibernateHelper.initializeAndUnproxy(owner);
 
-                List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
+                //List<UserPreferenceSet> preferences = this.getUserPreferences(user.getOBJECTID());
 
-                userValues.put(this.US_USER, user);
+                //userValues.put(this.US_USER, user);
                 /*
                  userValues.put(USER, user);
                  userValues.put(USER_TYPE, user.getUSERTYPE());
                  userValues.put(USER_ATTRIBUTES, preferences);
                  */
-                System.out.println("");//debug
+                //System.out.println("");//debug
 
             } else {
                 throw new UserLoginException("UserService: Something not handled yet!");
@@ -501,33 +519,9 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<UserPreferenceSet> getUserPreferences(long userid) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<UserPreferenceSet> criteria = builder.createQuery(UserPreferenceSet.class);
-
-        Root<UserPreferenceSet> sourceEntity = criteria.from(UserPreferenceSet.class); //FROM UserAccount
-        criteria.select(sourceEntity);
-
-        criteria.where(builder.equal(sourceEntity.get(UserPreferenceSet_.OWNER), userid));
-
-        /* Faulty assumption to use getSingleResult()
-         * getSingleResult() throws exception as long as there is no 1 single result 
-         * returned!
-         *
-         *UserPreferenceSet result = em.createQuery(criteria)
-         *       .getSingleResult();
-         */
-        List<UserPreferenceSet> results = objectService.getEm().createQuery(criteria)
-                .getResultList();
-
-        return results;
-    }
-
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public UserAccount getUserAccountByUsername(String username)
-            throws DBConnectionException {
-        try {
+    
+    public UserAccount getUserAccountByUsername(String username) {
+        
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
@@ -546,22 +540,11 @@ public class UserService extends DBService {
                 return null;
             }
 
-            return results.get(0);
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+            return results.get(0); 
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public UserAccount getUserAccountById(long userid)
-            throws DBConnectionException {
-        try {
+    
+    public UserAccount getUserAccountById(long userid) {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
             CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
             Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
@@ -581,18 +564,9 @@ public class UserService extends DBService {
             }
 
             return results.get(0);
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public boolean checkUsernameExist(String username) throws DBConnectionException {
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -617,7 +591,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public long getUserCount() throws DBConnectionException {
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -641,7 +615,7 @@ public class UserService extends DBService {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String getUserProfilePicLocation(long userid) throws DBConnectionException {
 
         try {
@@ -742,7 +716,7 @@ public class UserService extends DBService {
         return hashedPassword;
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<UserAccount> getWebServiceUserAccounts() {
         try {
             CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -811,5 +785,37 @@ public class UserService extends DBService {
         account = objectService.getEm().merge(account);
         
         return account;
+    }
+    
+    /**
+     * A very important design principle - each user should be identified by their 
+     * email contact, not username. Username should only be just an unique attribute
+     * but email should be primarily used to identify the person because it is an
+     * external source.
+     * 
+     * @param email
+     * @return 
+     */
+    public UserAccount getUserAccountByContactEmail(String email) {
+        
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
+        Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
+
+        criteria.select(sourceEntity); // SELECT *
+        criteria.where(builder.equal(sourceEntity.get(UserAccount_.CONTACT_EMAIL), email)); //WHERE USERTYPENAME = userTypeName
+
+        //Temporary measure before we find a better way to define the underlying
+        //data of UserAccount object and subsequently how to retrieve the correct
+        //result.
+        //
+        List<UserAccount> results = objectService.getEm().createQuery(criteria)
+                .getResultList();
+
+        if (results == null || results.size() <= 0) {
+            return null;
+        }
+
+        return results.get(0); 
     }
 }

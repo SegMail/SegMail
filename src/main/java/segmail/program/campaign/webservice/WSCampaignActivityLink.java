@@ -13,10 +13,7 @@ import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
-import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
-import seca2.entity.landing.ServerInstance;
 import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
@@ -44,6 +41,7 @@ public class WSCampaignActivityLink {
      * @param linkTarget
      * @param linkText
      * @param index
+     * @param originalHTML
      * @return a generated redirect link
      * @throws eds.component.data.IncompleteDataException
      */
@@ -51,14 +49,17 @@ public class WSCampaignActivityLink {
     public String createOrUpdateLink(
             @WebParam(name = "linkTarget") String linkTarget, 
             @WebParam(name = "linkText") String linkText, 
-            @WebParam(name = "index") int index) throws IncompleteDataException {
+            @WebParam(name = "index") int index
+            ) throws IncompleteDataException {
         
         if(program == null || program.getEditingCampaignId() <= 0)
             throw new RuntimeException("Program is not set, this service was not called from the correct page.");
         
-        //long listId = program.getEditingCampaignId();
-        
-        CampaignActivityOutboundLink link = campService.createOrUpdateLink(program.getEditingActivity(), linkTarget, linkText, index);
+        CampaignActivityOutboundLink link = campService.createOrUpdateLink(
+                program.getEditingActivity(), 
+                linkTarget, 
+                linkText,
+                index);
         
         String redirectLink = campService.constructLink(link);
         

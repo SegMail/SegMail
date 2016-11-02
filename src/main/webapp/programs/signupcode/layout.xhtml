@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <form jsf:id="FormSignupCode">
+            <form jsf:id="FormSignupCode" >
                 <div class="row">
                     <div class="col-md-4">
                         <div class="block nb">
@@ -54,19 +54,49 @@
                                         Subscribe to the following lists:
                                     </label>
                                     
-                                    <h:selectOneListbox id="slectList" pass:id="selectList" styleClass="select2" style="width: 100%;"
-                                                        value="#{FormSignupCode.selectedListId}" 
+                                    <h:selectOneListbox id="selectList" pass:id="selectList" styleClass="select2" style="width: 100%;"
+                                                        value="#{FormSignupCode.selectedListId}"
+                                                        
                                                          >
                                         <f:selectItems value="#{FormSignupCode.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
                                                        itemValue="#{list.OBJECTID}">
                                         </f:selectItems>
-                                        <f:ajax event="change" 
-                                                render="@form" execute="@form"
-                                                onevent="refreshEverything"
-                                                delay="1000" >
-                                        </f:ajax>
+                                        
                                     </h:selectOneListbox>
                                 </div>
+                                <div class="form-group">
+                                    <label>Subscribe button label:</label>
+                                    <h:inputText pass:id="subscribeButtonLabel" 
+                                                 id="subscribeButtonLabel" 
+                                                 pass:placeholder="What you see on your subscribe button" 
+                                                 class="form-control">
+                                        
+                                    </h:inputText>
+                                </div>
+                                <div class="form-group">
+                                    
+                                    <label class="switch">
+                                        <h:selectBooleanCheckbox pass:id="bootstrapStyles" 
+                                                                 >
+                                            
+                                        </h:selectBooleanCheckbox>
+                                        <span></span>
+                                    </label>
+                                    <label>
+                                        Bootstrap styles
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="block-footer">
+                                <button jsf:id="generateCodeButton" class="btn btn-default pull-right"
+                                        jsf:rendered="#{FormSignupCode.selectedListId gt 0}">
+                                    Generate
+                                    <f:ajax event="click" listener="#{FormSignupCode.reloadList()}"
+                                                render="@form" execute="@form"
+                                                onevent="update"
+                                                 >
+                                        </f:ajax>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -79,7 +109,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <ui:include src="generate_signup_code.xhtml" ></ui:include>
             </form>
         </ui:define>

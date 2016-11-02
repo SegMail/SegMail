@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="FormDeleteVerifiedAddress" class="">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 id="popup_title" class="modal-title">Are you sure you want to remove this verified address</h4>
+                </div>
+                <h:inputHidden value="#{FormDeleteVerifiedAddress.deleteAddress}" ></h:inputHidden>
+                <div class="modal-body refresh">
+                    <p>
+                        Once removed, you will not be able to send out emails with this address again and you 
+                        might need to wait for a while to add this address back.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button jsf:id="DeleteVerifiedAddressButton" class="btn btn-danger">
+                        <f:ajax render="@form"
+                                execute="@form"
+                                onevent="deleteAddress"
+                                listener="#{FormDeleteVerifiedAddress.delete()}"
+                                >
+                        </f:ajax>
+                        Delete address
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</html>

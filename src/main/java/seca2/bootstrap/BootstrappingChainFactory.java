@@ -44,12 +44,10 @@ public class BootstrappingChainFactory implements Serializable {
         //All core modules
         coreBootstrapModuleList = new ArrayList<BootstrapModule>();
         coreBootstrapModuleList.addAll(this.generateBootstrapList(this.cModules));
-        //coreHead = this.constructBoostrapChain(this.coreBootstrapModuleList);
         
         //All noncore modules
         nonCoreBootstrapModuleList = new ArrayList<BootstrapModule>();
         nonCoreBootstrapModuleList.addAll(this.generateBootstrapList(this.Modules));
-        //nonCoreHead = this.constructBoostrapChain(this.nonCoreBootstrapModuleList);
         
     }
 
@@ -113,33 +111,6 @@ public class BootstrappingChainFactory implements Serializable {
         }
         return null;
     }
-    
-    /**
-     * A non-Java EE method to get all instances of BoostrapModule class.
-     * Not recommended, as components are not injected automatically.
-     * 
-     * @return
-     */
-    /*public List<BootstrapModule> generateBootstrapList() {
-        try{
-            eds.utilities.Package root = new eds.utilities.Package();
-            root.push("seca2").push("bootstrap");
-            List<BootstrapModule> result = new ArrayList<>();
-            List<Class> allBootstrapClasses = 
-                EntityExplorer.collectClasses(root, EntityExplorer.getClassLoader());
-
-            for(Class c : allBootstrapClasses){
-                if(BootstrapModule.class.isAssignableFrom(c)){
-                    BootstrapModule newInstance = (BootstrapModule) c.getConstructor().newInstance();
-                    result.add(newInstance);
-                }
-
-            }
-            return result;
-        } catch (Exception ex) {
-            return new ArrayList<>();
-        }
-    }*/
     
     public BootstrapModuleComparator getComparator(){
         return new BootstrapModuleComparator();

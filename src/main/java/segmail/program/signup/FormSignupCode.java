@@ -5,9 +5,11 @@
  */
 package segmail.program.signup;
 
+import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
 import eds.entity.user.UserAccount;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,8 +30,11 @@ import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /**
  *
@@ -47,14 +52,23 @@ public class FormSignupCode {
     @EJB LandingService landingService;
     @EJB SubscriptionService subService;
     @EJB UserService userService;
+    @EJB AutoresponderService autoemailService;
     
     @PostConstruct
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()) {
             loadOwnLists();
             selectDefaultList();
-            getListFieldsJson();
+            //getListFieldsJson();
+            reloadList();
         }
+        
+    }
+    
+    public void reloadList() {
+        loadSelectedList();
+        loadConfirmationEmails();
+        loadListFields();
     }
     
     public void loadOwnLists() {
@@ -66,11 +80,12 @@ public class FormSignupCode {
      * Select the first list as default
      */
     public void selectDefaultList() {
+        setSelectedListId(-1);
         if(getOwnedLists()== null || getOwnedLists().isEmpty())
             return;
         
         SubscriptionList firstList = getOwnedLists().get(0);
-        this.setSelectedListId(firstList.getOBJECTID());
+        setSelectedListId(firstList.getOBJECTID());
         
     }
     
@@ -103,6 +118,63 @@ public class FormSignupCode {
     
     public long getClientId() {
         return clientCont.getClient().getOBJECTID();
+    }
+    
+    public List<SubscriptionListField> getFields() {
+        return program.getFields();
+    }
+
+    public void setFields(List<SubscriptionListField> fields) {
+        program.setFields(fields);
+    }
+    
+    public List<AutoresponderEmail> getConfirmEmails() {
+        return program.getConfirmEmails();
+    }
+
+    public void setConfirmEmails(List<AutoresponderEmail> confirmEmails) {
+        program.setConfirmEmails(confirmEmails);
+    }
+    
+    public SubscriptionList getSelectedList() {
+        return program.getSelectedList();
+    }
+
+    public void setSelectedList(SubscriptionList selectedList) {
+        program.setSelectedList(selectedList);
+    }
+    
+    public void loadSelectedList() {
+        long selectedListId = this.getSelectedListId();
+        if(selectedListId <= 0)
+            return;
+        
+        for(SubscriptionList list : getOwnedLists()) {
+            if(list.getOBJECTID() == selectedListId){
+                setSelectedList(list);
+                return;
+            }
+        }
+    }
+    
+    public void loadConfirmationEmails() {
+        setConfirmEmails(new ArrayList<AutoresponderEmail>());
+        if(this.getSelectedListId() <= 0)
+            return;
+            
+        List<AutoresponderEmail> confirmEmails = autoemailService.getAssignedAutoEmailsForList(this.getSelectedListId(), AUTO_EMAIL_TYPE.CONFIRMATION);
+        setConfirmEmails(confirmEmails);
+    }
+    
+    public void loadListFields() {
+        long selectedListId = this.getSelectedListId();
+        if(selectedListId <= 0)
+            return;
+        
+        //Get all the lists fields
+        List<SubscriptionListField> fieldLists = listService.getFieldsForSubscriptionList(selectedListId);
+        
+        setFields(fieldLists);
     }
     
     public String generateListFields() {

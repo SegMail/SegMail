@@ -38,7 +38,7 @@ public class FormListList {
     private ClientContainer clientContainer;
 
     @Inject
-    private ProgramList programList;
+    private ProgramList program;
 
     @EJB
     private ClientService clientService;
@@ -53,7 +53,7 @@ public class FormListList {
         //Only if it is not a postback, reload everything
         if (!FacesContext.getCurrentInstance().isPostback()) {
             this.loadAllLists();
-            this.resetEditingList();
+            //this.resetEditingList();
         }
     }
 
@@ -78,18 +78,18 @@ public class FormListList {
 
             List<SubscriptionList> allLists = listService.getAllListForClient(client.getOBJECTID());
 
-            this.programList.setAllLists(allLists);
+            this.program.setAllLists(allLists);
         } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.programList.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.programList.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
 
     }
 
     public void loadList(SubscriptionList list) {
-        programList.setListEditing(list);
-        programList.refresh();
+        program.setListEditing(list);
+        program.refresh();
     }
 
     /**
@@ -97,27 +97,35 @@ public class FormListList {
      * edited, the List panel will also be updated.
      */
     public void resetEditingList() {
-        SubscriptionList listEditing = programList.getListEditing();
+        SubscriptionList listEditing = program.getListEditing();
         if(listEditing == null) return;
         
-        if(programList.getAllLists() == null || programList.getAllLists().isEmpty())
+        if(program.getAllLists() == null || program.getAllLists().isEmpty())
             loadAllLists();
         
-        for(SubscriptionList l : programList.getAllLists()){
+        for(SubscriptionList l : program.getAllLists()){
             if(l.equals(listEditing)){
-                programList.setListEditing(l);
+                program.setListEditing(l);
                 return;
             }
         }
-        this.programList.setListEditing(null);
+        this.program.setListEditing(null);
     }
 
-    public ProgramList getProgramList() {
-        return programList;
+    public ProgramList getProgram() {
+        return program;
     }
 
-    public void setProgramList(ProgramList programList) {
-        this.programList = programList;
+    public void setProgram(ProgramList program) {
+        this.program = program;
+    }
+    
+    public List<SubscriptionList> getAllLists() {
+        return program.getAllLists();
+    }
+
+    public void setAllLists(List<SubscriptionList> allLists) {
+        program.setAllLists(allLists);
     }
 
 }

@@ -5,8 +5,11 @@
  */
 package segmail.entity.subscription;
 
+import eds.entity.audit.AuditedObjectListener;
 import eds.entity.data.EnterpriseData;
+import eds.entity.data.EnterpriseDataListener;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**
@@ -15,6 +18,9 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST_FIELD")
+@EntityListeners({
+    SubscriptionListFieldListener.class
+})
 public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     
     private boolean MANDATORY;
@@ -22,6 +28,8 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     private String KEY_NAME; //Immutable name to retrieve for a SubscriberFieldValue
     private String TYPE;
     private String DESCRIPTION;
+    
+    private String MAILMERGE_TAG;
 
     //A must for all JPA entities
     public SubscriptionListField() {
@@ -79,6 +87,14 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
 
     public void setKEY_NAME(String KEY_NAME) {
         this.KEY_NAME = KEY_NAME;
+    }
+
+    public String getMAILMERGE_TAG() {
+        return MAILMERGE_TAG;
+    }
+
+    public void setMAILMERGE_TAG(String MAILMERGE_TAG) {
+        this.MAILMERGE_TAG = MAILMERGE_TAG;
     }
     
     /**

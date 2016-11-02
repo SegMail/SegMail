@@ -22,6 +22,7 @@ import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -53,7 +54,7 @@ public class FormUserLogin {
             && !userContainer.isLoggedIn()
                 && (userContainer.getLastProgram() != null && !userContainer.getLastProgram().isEmpty())
                 ){
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
         }
     }
 
@@ -61,7 +62,7 @@ public class FormUserLogin {
         try {
             Map<String,Object> userValues = new HashMap<String,Object>();
             User authenticatedUser = userService.login(this.username, this.password);
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Login successful!", null);
             
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Initialize userValues into userContainer
@@ -91,84 +92,16 @@ public class FormUserLogin {
                 ec.redirect(ec.getRequestContextPath());//go to home
             }
         } catch (UserLoginException esliex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
         } catch (DBConnectionException dbex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (UserAccountLockedException ualex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }
 
-    /*
-     public void login2() throws IOException {
-
-     //Check if username and password are present
-     if (username == null || username.isEmpty()) {
-     FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR,
-     "Please enter username", null);
-     return;
-     }
-     if (password == null || password.isEmpty()) {
-     FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR,
-     "Please enter password", null);
-     return;
-     }
-     UserSessionContainer uc = null;
-     try {
-     //use UserService to login
-     uc = userService.login(username, password);
-            
-     } catch (UserAccountLockedException usalex) {
-     FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR,
-     "Oops...Your account has been locked. Please contact administrator to unlock it.", null);
-     return;
-     } catch (DBConnectionException dbex) {
-     FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, dbex.getMessage(), null);
-     return;
-     } catch (Exception ex) {
-     FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-     return;
-     }
-
-     if (uc == null) {
-     FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR,
-     "Wrong credentials. Are you sure you entered the correct credentials?",
-     "Alternatively, would you like to created a new account? ");
-     return;
-     }
-
-     ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-     HttpServletRequest req = (HttpServletRequest) ec.getRequest();
-     HttpServletResponse resp = (HttpServletResponse) ec.getResponse();
-
-     //HttpSession session = req.getSession(true);
-     //session.setAttribute("user", 1);
-     //userModule.setsSessionId(sessionId);
-     //sSessionId = session.getId();
-     DateTime sessionStarttime = new DateTime();
-     //System.out.println("Session " + userModule.getsSessionId() + " started at " + sessionStarttime);
-     password = "";
-     username = "";
-        
-     //Regenerate session ID
-     HttpSession session = req.getSession(true);
-     //Set UserSessionContainer with session ID
-     String sessionId = session.getId();
-     uc.setSessionId(sessionId);
-        
-     //do a redirect to refresh the view
-     String previousURI = uc.getLastURL();
-     if (previousURI != null && !previousURI.isEmpty()) {
-     ec.redirect(previousURI);
-     } else {
-     ec.redirect(ec.getRequestContextPath());//go to home
-     }
-
-     //Remember to construct the UserSession before redirecting!
-     }
-     */
     public String getUsername() {
         return username;
     }

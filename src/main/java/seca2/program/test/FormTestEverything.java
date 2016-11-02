@@ -24,13 +24,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.server.FormAddNewServer;
+import seca2.program.test.client.FormCreateAWSAccountForUser;
 import seca2.program.test.client.FormRegisterClientForUsername;
 import seca2.program.test.client.FormRegisterClientType;
 import seca2.program.test.layout.FormAssignLayoutProgram;
 import seca2.program.test.layout.FormAssignLayoutUserType;
 import seca2.program.test.layout.FormAssignLayoutUsername;
 import seca2.program.test.layout.FormCreateLayout;
-import segmail.program.list.FormSetupListTypes;
 
 /**
  * Note: This is not a test, but a setup!
@@ -52,7 +52,7 @@ public class FormTestEverything {
     @Inject private FormAssignLayoutProgram formAssignLayoutProgram;
     @Inject private FormRegisterClientType formRegisterClientType;
     @Inject private FormRegisterClientForUsername formRegisterClientForObjectname;
-    @Inject private FormSetupListTypes formSetupListTypes;
+    @Inject private FormCreateAWSAccountForUser formCreateAWSAccountForUser;
     
     // Setup variables
     
@@ -67,6 +67,7 @@ public class FormTestEverything {
     private final String ADMIN_USERTYPE_CHARTJS = "ChartJS Administrator";
     private final String ADMIN_USERNAME_CHARTJS = "chartjsadmin";
     private final String ADMIN_PASSWORD_CHARTJS = "chartjsadmin";
+    private final String ADMIN_CONTACT_EMAIL = "vincent@segmail.io";
     
     private final String CLIENT_TYPE_PERSON = "Person";
     
@@ -86,6 +87,7 @@ public class FormTestEverything {
     private final String USER_NAME_TYPE_TAG = "SELECTED_USERTYPE";
     private final String USER_NAME_TAG = "USERNAME";
     private final String USER_PW_TAG = "PASSWORD";
+    private final String USER_CONTACT_TAG = "CONTACT_EMAIL";
     
     private final String PROGRAMS_TAG = "PROGRAMS";
     private final String PROGRAM_TAG = "PROGRAM";
@@ -129,6 +131,9 @@ public class FormTestEverything {
     private final String CLIENT_ASSIGN_TYPE_NAME_TAG = "CLIENT_ASSIGN_TYPE_NAME";
     private final String CLIENT_ASSIGN_USERNAME_TAG = "CLIENT_ASSIGN_USERNAME";
     
+    private final String CLIENT_AWS_ACCOUNT_TAG = "CLIENT_AWS_ACCOUNT";
+    private final String CLIENT_AWS_ACCOUNT_CLIENTNAME_TAG = "CLIENT_AWS_ACCOUNT_CLIENTNAME";
+    
     public void init(){
         System.out.println("Test everything init");
     }
@@ -153,9 +158,9 @@ public class FormTestEverything {
         //this.formTestUser.setUADMIN_USERNAME_SEGMAILUSERNAME);
         //this.formTestUser.setPassword("admin");
         //this.formTestUser.createUser();
-        this.formTestUser.createUserWithType(ADMIN_USERTYPE_TM, ADMIN_USERNAME_TM, ADMIN_PASSWORD_TM);
-        this.formTestUser.createUserWithType(ADMIN_USERTYPE_SEGMAIL, ADMIN_USERNAME_SEGMAIL, ADMIN_PASSWORD_SEGMAIL);
-        this.formTestUser.createUserWithType(ADMIN_USERTYPE_CHARTJS, ADMIN_USERNAME_CHARTJS, ADMIN_PASSWORD_CHARTJS);
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE_TM, ADMIN_USERNAME_TM, ADMIN_PASSWORD_TM,ADMIN_CONTACT_EMAIL);
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE_SEGMAIL, ADMIN_USERNAME_SEGMAIL, ADMIN_PASSWORD_SEGMAIL,ADMIN_CONTACT_EMAIL);
+        this.formTestUser.createUserWithType(ADMIN_USERTYPE_CHARTJS, ADMIN_USERNAME_CHARTJS, ADMIN_PASSWORD_CHARTJS,ADMIN_CONTACT_EMAIL);
         
         //Create testing page
         this.formTestProgram.setProgramName("test");
@@ -371,8 +376,6 @@ public class FormTestEverything {
         this.formRegisterClientForObjectname.registerClientForUser(CLIENT_TYPE_PERSON, ADMIN_USERTYPE_TM);
         this.formRegisterClientForObjectname.registerClientForUser(CLIENT_TYPE_PERSON, ADMIN_USERTYPE_CHARTJS);
         
-        //Setup list types
-        formSetupListTypes.setupListType();
     }
     
     public void uploadXMLPlain(){
@@ -442,8 +445,9 @@ public class FormTestEverything {
                 String usertype = element.getElementsByTagName(USER_NAME_TYPE_TAG).item(0).getTextContent();
                 String username = element.getElementsByTagName(USER_NAME_TAG).item(0).getTextContent();
                 String password = element.getElementsByTagName(USER_PW_TAG).item(0).getTextContent();
+                String contact = element.getElementsByTagName(USER_CONTACT_TAG).item(0).getTextContent();
                 
-                this.formTestUser.createUserWithType(usertype, username, password);
+                this.formTestUser.createUserWithType(usertype, username, password, contact);
             }
             
             // Create programs
@@ -586,9 +590,6 @@ public class FormTestEverything {
                     this.formRegisterClientForObjectname.registerClientForUser(clientname, username);
                 }
                 
-                //Setup list types
-                formSetupListTypes.setupListType();
-                
             }
             
             // Create landing servers 
@@ -607,6 +608,19 @@ public class FormTestEverything {
                 formAddNewServer.setUserId(username);
                 
                 formAddNewServer.addServer();
+            }
+            
+            // Create clients
+            NodeList awsAccounts = doc.getElementsByTagName(CLIENT_AWS_ACCOUNT_TAG);
+            
+            for(int n=0; n<awsAccounts.getLength(); n++){
+                Node nNode = awsAccounts.item(n);
+                Element element = (Element) nNode;
+                String clientname = element.getElementsByTagName(CLIENT_AWS_ACCOUNT_CLIENTNAME_TAG).item(0).getTextContent();
+                
+                this.formCreateAWSAccountForUser.setClientname(clientname);
+                this.formCreateAWSAccountForUser.create();
+                
             }
             
         } catch (ParserConfigurationException ex) {

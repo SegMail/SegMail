@@ -9,14 +9,17 @@
  */
 function reapply_textarea(id){
     var realTextboxParent = document.getElementById(id).nextSibling;
-    var realContent;
+    /*var realContent;
     for (var i=0; i<realTextboxParent.childNodes.length; i++){
         var child = realTextboxParent.childNodes[i];
         if(child.className === 'note-editable'){
             document.getElementById(id).innerHTML = child.innerHTML;
             break;
         }
-    }
+    }*/
+    //Use jquery
+    var editingBox = $(realTextboxParent).find('.note-editable');
+    $('#'+id).html(editingBox.html());
     
     /*
     var jsfTextbox = document.getElementById(id);

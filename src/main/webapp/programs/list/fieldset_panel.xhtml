@@ -9,7 +9,7 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
 
-    <form jsf:id="form_list_fieldset">
+    <form jsf:id="FormListFieldSet">
         <div class="row">
             <div class="col-md-12">
                 <div class="row">
@@ -24,9 +24,9 @@
                         <button jsf:id="save_settings_button" class="btn btn-primary"
                         >
                             <!--f:ajax won't append its code to the onclick attribute of the button element-->
-                            <f:ajax execute="@form" render="@form :FormListList :FormEditListHeader" 
+                            <f:ajax execute="@form" render="@form :FormEditListHeader" 
                                     onevent="saveSettings"
-                                    listener="#{FormListFieldSet.save()}"
+                                    listener="#{FormListFieldSet.saveFields()}"
                                     event="click">
                             </f:ajax>
                             <i class="fa fa-floppy-o"></i>
@@ -36,7 +36,7 @@
                 </div>
                 <div class="row" style="margin-bottom: 12px;">
                     <div class="col-md-12">
-                        <s2:messenger id="form_list_fieldset_message" for="form_list_fieldset" showDetail="true" showSummary="true"></s2:messenger>
+                        <s2:messenger id="FormListFieldSet_message" for="FormListFieldSet" showDetail="true" showSummary="true"></s2:messenger>
                     </div>
                 </div>
                 <!--Test the timeline gadget-->
@@ -46,6 +46,7 @@
                             <tr><!--column headers-->
                                 <th>Order</th>
                                 <th>Field name</th>
+                                <th>Mailmerge name</th>
                                 <th>Field type</th>
                                 <th>Mandatory</th>
                                 <th>Description</th>
@@ -56,9 +57,10 @@
 
                                 <tr>
                                     <c:choose>
-                                        <c:when test="#{field.SNO == 1}">
+                                        <c:when test="#{field.SNO == 1 and field.FIELD_NAME == 'Email'}">
                                             <td>#{field.SNO}</td>
                                             <td>#{field.FIELD_NAME}</td>
+                                            <td>#{field.MAILMERGE_TAG}</td>
                                             <td>#{field.TYPE}</td>
                                             <td>
                                                 <div class="checkbox" style="">
@@ -79,8 +81,12 @@
                                                 <div class="form-group">
                                                     <input type="text" style=""
                                                            class="form-control"
-                                                           id="field-id-#{field.HTMLName()}"  
                                                            jsf:value="#{field.FIELD_NAME}" />
+                                                </div>
+                                            </td>
+                                            <td style="width:100px">
+                                                <div class="form-group">
+                                                    #{field.MAILMERGE_TAG}
                                                 </div>
                                             </td>
                                             <td style="width:80px">
@@ -136,6 +142,7 @@
                                                class="form-control"
                                                jsf:value="#{FormListFieldSet.newField.FIELD_NAME}"/></div>
                                 </td>
+                                <td></td>
                                 <td>
                                     <div class="form-group">
                                         <h:selectOneMenu styleClass="form-control" style=""
@@ -160,7 +167,7 @@
                                 </td>
                                 <td>
                                     <div class="form-group">
-                                        <input class="form-control" type="text" value=""
+                                        <input class="form-control" type="text" 
                                                jsf:value="#{FormListFieldSet.newField.DESCRIPTION}"/>
                                     </div>
                                 </td>

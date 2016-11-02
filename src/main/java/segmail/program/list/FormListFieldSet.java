@@ -6,25 +6,21 @@
 package segmail.program.list;
 
 import eds.component.data.DataValidationException;
-import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
-import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.SubscriptionListFieldComparator;
 
 /**
  *
@@ -36,94 +32,67 @@ public class FormListFieldSet {
 
     @Inject
     private ProgramList program;
-    @Inject
-    private ClientContainer clientContainer;
-
-    @EJB
-    private SubscriptionService subscriptionService;
     @EJB
     private ListService listService;
 
     private final String formName = "form_list_fieldset";
+    
+    private SubscriptionListField newField;
 
     @PostConstruct
     public void init() {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
-            //loadListFields(); 
-            initNewEmptyField();
+            loadExistingFields();
+            
         }
+        loadNewField();
     }
-
-    public void save() {
-        updateExistingFields();
-        //Don't do page refresh, just update the field list
-        loadListFields();
-        addNewField();
+    
+    public void loadNewField() {
         
+        this.newField = new SubscriptionListField(
+                program.getListEditing(),
+                getFieldList().size() + 1,
+                false,
+                "",
+                FIELD_TYPE.TEXT,
+                ""
+        );
     }
-
-    public void initNewEmptyField() {
-        try {
-            int initSNO = (getFieldList() == null) ? 1 : getFieldList().size();
-            this.setNewField(new SubscriptionListField(program.getListEditing(),initSNO + 1, false, "", FIELD_TYPE.TEXT, ""));
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
+    
+    public void loadExistingFields() {
+        if(getListEditing() == null )
+            return;
+        
+        List<SubscriptionListField> existingFields = listService.getFieldsForSubscriptionList(getListEditing().getOBJECTID());
+        setFieldList(existingFields);
     }
-
-    public void loadListFields() {
+    
+    public void saveFields() {
         try {
-            long listId = program.getListEditingId();
-            //to improve performance
-            //no! it's necessary else there will be nullpointerexception :p
-            if (listId <= 0) {
-                return;
-            }
-            List<SubscriptionListField> fieldList = listService.getFieldsForSubscriptionList(listId);
+            //Add the new field into the mix
+            if(newField.getFIELD_NAME() != null && !newField.getFIELD_NAME().isEmpty())
+                getFieldList().add(newField);
             
-            this.program.setFieldList(fieldList);
-
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-
-    public void addNewField() {
-        try {
-
-            long currentList = program.getListEditingId();
-            SubscriptionListField newField = program.getNewField();
-            //If no field name is set, take it as user did not intend to add a new field
-            if (newField.getFIELD_NAME() == null || newField.getFIELD_NAME().isEmpty()) {
-                return;
+            //Remove fields that have no FIELD_NAME to delete them
+            List<SubscriptionListField> fields = new ArrayList<>();
+            for(SubscriptionListField field : getFieldList()) {
+                if(field.getFIELD_NAME() != null && !field.getFIELD_NAME().isEmpty())
+                    fields.add(field);
             }
-            newField = listService.addFieldForSubscriptionList(currentList, newField);
             
-            loadListFields();
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "New field "+newField.getFIELD_NAME()+" added.", null);
-        } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            listService.fullRefreshUpdateSubscriptionListFields(fields);
+            loadExistingFields();
+            loadNewField();
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Fields updated.", "");
         } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            loadExistingFields();
         } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-
-    public void updateExistingFields() {
-        try {
-            listService.updateSubscriptionListFields(program.getFieldList());
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "List fields updated.", null);
-        } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            loadExistingFields();
+        } 
     }
 
     /**
@@ -147,10 +116,18 @@ public class FormListFieldSet {
     }
 
     public SubscriptionListField getNewField() {
-        return program.getNewField();
+        return this.newField;
     }
 
     public void setNewField(SubscriptionListField newField) {
-        program.setNewField(newField);
+        this.newField = newField;
     }
+    
+    public SubscriptionList getListEditing() {
+        return program.getListEditing();
+    }
+
+    public void setListEditing(SubscriptionList listEditing) {
+        program.setListEditing(listEditing);
+    }  
 }

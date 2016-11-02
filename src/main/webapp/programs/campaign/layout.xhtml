@@ -12,7 +12,7 @@
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
         <ui:define name="main-program-panel">
-
+            
             <div class="row"><!--For the message-->
                 <div class="col-md-12">
                     <form jsf:id="ProgramCampaign">
@@ -24,13 +24,18 @@
             <div id="stats_panel"> <!--stats widget-->
 
             </div>
-
             <c:choose>
-                <c:when test="#{FormProgramModeSwitch.editCampaignMode}"> <!--Individual Campaign mode-->
-                    <ui:include src="edit_campaign.xhtml"></ui:include>
+                <c:when test="#{FormProgramModeSwitch.programLevel() == 0}" >
+                    <ui:include src="campaign_list_panel.xhtml" rendered="#{FormProgramModeSwitch.programLevel() == 0}"></ui:include>
                 </c:when>
-                <c:otherwise><!--List Campaign mode-->
-                    <ui:include src="campaign_list_panel.xhtml" ></ui:include>
+                <c:when test="#{FormProgramModeSwitch.programLevel() == 1}" >
+                    <ui:include src="edit_campaign.xhtml" rendered="#{FormProgramModeSwitch.programLevel() == 1}"></ui:include>
+                </c:when>
+                <c:when test="#{FormProgramModeSwitch.programLevel() == 2}" >
+                    <ui:include src="edit_campaign_activity.xhtml" rendered="#{FormProgramModeSwitch.programLevel() == 2}"></ui:include>
+                </c:when>
+                <c:otherwise>
+                    
                 </c:otherwise>
             </c:choose>
 
@@ -42,14 +47,8 @@
             <div class="modal fade" id="create_new_campaign">
                 <ui:include src="create_new_campaign.xhtml"></ui:include>
             </div>
-            <!--<div jsf:rendered="#{FormEditCampaign.editingCampaign ne null}" class="modal fade" id="edit_campaign">
-                <ui:include src="edit_campaign.xhtml"></ui:include>
-            </div>-->
             <div class="modal fade" id="create_new_activity">
                 <ui:include src="create_new_activity.xhtml"></ui:include>
-            </div>
-            <div class="modal fade" id="edit_campaign_activity" >
-                <ui:include src="edit_campaign_activity.xhtml" ></ui:include>
             </div>
             <div class="modal fade" id="execute_campaign_activity" >
                 <ui:include src="execute_campaign_activity.xhtml" ></ui:include>
@@ -60,7 +59,7 @@
         </ui:define>
 
         <ui:define name="scripts-bottom" id="scripts-bottom">
-            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/campaign.js" />
+            <!--dependencies-->
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/custom/summernote_hack.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/select2/select2.min.js"></script>
@@ -69,7 +68,21 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery-delayedchange/jquery.delayedchange.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/observe-DOM/observe-DOM.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/datatables.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/mailmerge/mailmerge.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery.soap/soap_calls.js" />
+            
+            <!--page specific JS-->
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/campaign.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/create_new_activity.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/edit_campaign.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/edit_campaign_activity.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/execute_campaign_activity.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/campaign/js/track_campaign_activity.js" />
         </ui:define>
 
         <ui:define name="toolbar-right"  >

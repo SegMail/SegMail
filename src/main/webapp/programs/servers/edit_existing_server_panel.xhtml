@@ -75,17 +75,6 @@
 
                                 </h:selectOneMenu>
                             </div>
-                            <div class="form-group">
-                                <label>
-                                    JMS Queue Name:
-                                </label>
-                                <span class="help-block">
-                                    For the server to process batch jobs, it needs a unique JNDI name.
-                                </span>
-                                <input type="text" class="form-control"
-                                       jsf:value="#{FormEditExistingServer.JMSConnection.JNDI_NAME}"
-                                       />
-                            </div>
                         </div>
                         
                         <div class="modal-footer">
@@ -120,7 +109,7 @@
                         <div class="modal-footer">
                             <p:commandButton id="delete_confirm_button" styleClass="btn btn-danger" 
                                              value="Confirm delete"
-                                             actionListener="#{FormEditExistingServer.deleteTemplate()}"
+                                             actionListener="#{FormEditExistingServer.delete()}"
                                              >
                             </p:commandButton>
                             <p:commandButton id="cancel_delete_button"  styleClass="btn btn-default"

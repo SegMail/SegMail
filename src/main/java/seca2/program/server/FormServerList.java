@@ -5,6 +5,7 @@
  */
 package seca2.program.server;
 
+import eds.entity.user.User;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -37,6 +38,7 @@ public class FormServerList {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
             initServerList();
+            program.initUserAccounts();
         }
     }
     
@@ -61,7 +63,9 @@ public class FormServerList {
     public void loadServer(long serverId) {
         try {
             program.setServerEditing(landingService.getServerInstance(serverId));
-            program.setJMSConnection(landingService.getServerJMSConnection(serverId));
+            User assignedUser = landingService.getUserFromServerName(program.getServerEditing().getOBJECT_NAME());
+            program.setUserIdExisting(assignedUser.getOBJECTID());
+            //program.setJMSConnection(landingService.getServerJMSConnection(serverId));
             //program.setShowEditingPanel(true);
         } catch (EJBException ex) { //Transaction did not go through
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());

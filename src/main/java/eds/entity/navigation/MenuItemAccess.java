@@ -28,19 +28,6 @@ public class MenuItemAccess extends EnterpriseRelationship<MenuItem,UserType> {
         super(s, t);
         this.MENU_ORDER = order;
     }
-
-    //Any additional attributes to be maintained for this relationship?
-    //protected String REL_TYPE = "MENU_ITEM_ACCESS"; no need to redefine it here
-    
-    /*@PrePersist
-    public void prePersist(){
-        this.REL_TYPE = "MENU_ITEM_ACCESS";
-    }
-    
-    @PreUpdate
-    public void preUpdate(){
-        this.REL_TYPE = "MENU_ITEM_ACCESS";
-    }*/
     
     @Override
     public void randInit() {
@@ -59,8 +46,4 @@ public class MenuItemAccess extends EnterpriseRelationship<MenuItem,UserType> {
     public void setMENU_ORDER(int MENU_ORDER) {
         this.MENU_ORDER = MENU_ORDER;
     }
-
-    
-    
-    
 }

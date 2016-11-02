@@ -13,6 +13,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -24,6 +25,8 @@ public abstract class Program implements Serializable {
     
     @Inject
     protected UserRequestContainer reqContainer;
+    @Inject
+    protected UserSessionContainer sessContainer;
     
     @PostConstruct
     public void init() {

@@ -20,7 +20,8 @@ public class BatchJob_ {
     public static volatile ListAttribute<BatchJob,BatchJobStep> STEPS;
     public static volatile ListAttribute<BatchJob,BatchJobStep> TRIGGERS;
     public static volatile SingularAttribute<BatchJob,String> STATUS;
-    public static volatile SingularAttribute<BatchJob,ServerInstance> SERVER;
+    //public static volatile SingularAttribute<BatchJob,ServerInstance> SERVER;
+    public static volatile SingularAttribute<BatchJob,String> SERVER_NAME;
     public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> DATETIME_CREATED;
     public static volatile SingularAttribute<BatchJob,java.sql.Timestamp> DATETIME_CHANGED;
     public static volatile SingularAttribute<BatchJob,String> CREATED_BY;

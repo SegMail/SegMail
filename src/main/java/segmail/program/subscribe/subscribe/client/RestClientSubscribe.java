@@ -15,11 +15,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import static javax.ws.rs.core.Response.Status.OK;
 import seca2.bootstrap.module.Webservice.REST.client.GenericRestClient;
 import seca2.bootstrap.module.Webservice.REST.client.RedirectException;
-import segmail.entity.subscription.Subscription;
-import segmail.entity.subscription.SubscriptionList;
 
 /**
  * Jersey REST client generated for REST resource:WSHttpSubscribe
@@ -53,11 +50,14 @@ public class RestClientSubscribe extends GenericRestClient {
                 MediaType.APPLICATION_JSON_TYPE).post(
                         Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         
+        if(response.getStatus() == Response.Status.NOT_ACCEPTABLE.getStatusCode()) {
+            String confirmKey = response.readEntity(String.class);
+            throw new RelationshipExistsException(confirmKey);
+        }
         if(response.getStatus() == Response.Status.TEMPORARY_REDIRECT.getStatusCode()) {
             String redirectLink = response.readEntity(String.class);
             throw new RedirectException(redirectLink);
         }
-        
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {
             
             String error = response.readEntity(String.class);

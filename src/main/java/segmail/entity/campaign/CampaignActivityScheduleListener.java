@@ -22,8 +22,9 @@ public class CampaignActivityScheduleListener {
     }
     
     public void validateSendInBatch(CampaignActivitySchedule object) throws DataValidationException {
-        if(object.getSEND_IN_BATCH() <= 0) {
-            object.setSEND_IN_BATCH(CampaignActivitySchedule.MAX_SEND_IN_BATCH);
+        if(object.getSEND_IN_BATCH() < 0) {
+            //object.setSEND_IN_BATCH(CampaignActivitySchedule.MAX_SEND_IN_BATCH);
+            object.setSEND_IN_BATCH(0);
         }
         
         if(object.getSEND_IN_BATCH() > CampaignActivitySchedule.MAX_SEND_IN_BATCH) {

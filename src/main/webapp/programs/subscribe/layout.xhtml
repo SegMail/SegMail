@@ -19,12 +19,12 @@
                     <c:when test="#{FormSubscribe.pageName eq ProgramSubscribe.PAGE_GENERIC_ERROR}">
                         <div class="row">
                             <div class="col-sm-12 col-md-8 col-md-offset-2">
-                                <h4>Oops there was an error with your request.</h4>
-                                <p>You can notify the administrators of the site.</p>
-                                <!--<p>You might want to tell them this was what happened:</p>
-                                <p class="lead" style="color: #26b99a; margin-left: 20px">
-                                    #{FormSubscribe.errorMessage}
-                                </p>-->
+                                <h4>Oops, seems like the application has encountered an error.</h4>
+                                <p>
+                                    If you were led here by some links from your email, most probably our 
+                                    servers have run into some issues. Please help us to correct this problem
+                                    by submitting a help request to <u>help [at] segmail.io</u>
+                                </p>
                             </div>
                         </div>
 
@@ -58,6 +58,20 @@
                             </div>
                         </div>
                 </c:when>
+                    
+                    <c:when test="#{FormSubscribe.pageName eq ProgramSubscribe.PAGE_ALREADY_CONFIRMED}">
+                            <div class="row">
+                            <div class="col-sm-12 col-md-8 col-md-offset-2">
+                                <h4>Your subscription was already confirmed some time ago.</h4>
+                                <p>
+                                    This could happen if you have already clicked on confirmation
+                                    link before or the site administrator has confirmed you manually.
+                                    Either way, you should be receiving an email from your site soon.
+                                </p>
+                            </div>
+                        </div>
+                </c:when>
+                    
                     <c:otherwise>
 
                         <div class="row">

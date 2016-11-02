@@ -41,21 +41,23 @@
             </nav>
         </ui:define>
         <ui:define name="login-block">
-            <div class="login" > <!--hack to cover the whole screen with the canvas colour-->
-                <div class="login-screen block">
-                    <div class="login-icon">
-                        <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/css/images/login/icon.png"/>
-                        <h4>Login to <small>Segmail</small></h4>
-                    </div>
-                    <div class="login-form">
-                        <form jsf:id="form-user-login">
+            <form jsf:id="FormUserLogin">
+                <div class="login" style="background: none; padding: 0" > <!--hack to cover the whole screen with the canvas colour-->
+                    <div class="login-screen" style="padding: 120px 10px 30px 150px; min-height: 0">
+
+                        <div class="login-icon" style="left: 30px; top: 120px;">
+                            <img src="#{request.contextPath}/programs/user/templates/mylogintemplate/css/images/login/icon.png"/>
+                            <h4>Login to <small>Segmail</small></h4>
+                        </div>
+                        <div class="login-form block">
+
                             <div class="form-group">
                                 <input type="text" id="login-username"
                                        class="form-control login-field"
                                        jsf:value="#{FormUserLogin.username}"
                                        placeholder="Enter your username" />
                                 <label class="login-field-icon fui-user" for="login-username"></label>
-                                
+
                             </div>
                             <div class="form-group">
                                 <input type="password" id="login-password"
@@ -64,29 +66,24 @@
                                        placeholder="Password" />
                                 <label class="login-field-icon fui-lock" for="login-password"></label>
                             </div>
-                            <h:commandLink styleClass="btn btn-lg btn-primary btn-block"
-                               >
+                            <button jsf:id="loginButton" type="submit" class="btn btn-lg btn-primary btn-block"
+                                    >
                                 <f:ajax listener="#{FormUserLogin.login()}"
                                         render="@form" execute="@form"
-                                        event="click"
+                                        onevent="login"
                                         ></f:ajax>
-                                   Log in
-                            </h:commandLink>
-                            <!--<p:commandButton id="login-button" styleClass="btn btn-lg btn-primary btn-block"
-                                             value="Log in" action="#{FormUserLogin.login()}"
-                                             update="@form" process="@form"/>
-                            <h:commandLink styleClass="login-link" value="Lost your password?" />
+                                Log in
+                            </button>
+                        </div>
 
-                            <s2:messenger id="login-messenger" for="form-user-login" showSummary="true" showDetail="true"/>
-
-                            <p:blockUI id="loginFormBlock" block="form-user-login" trigger="form-user-login:login-button">
-                                <p id="spinner">Please wait while we do what we do best.</p>
-                            </p:blockUI>-->
-                        </form>
                     </div>
+                    <div class="form-group" style="margin-top: 10px">
+                        <s2:messenger for="FormUserLogin" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <!-- /.row -->
                 </div>
-                <!-- /.row -->
-            </div>
+            </form>
         </ui:define>
 
     </ui:composition>

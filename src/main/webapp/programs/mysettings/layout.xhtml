@@ -14,12 +14,12 @@
             <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div jsf:id="contact_details_block" class="block">
-                        <form jsf:id="contact_details_form" class="validate-form">
+                        <form jsf:id="ContactDetailsForm" class="validate-form">
                             <div class="block-content">
                                 <h2>My Contact Details</h2>
                                 <p></p>
                                 <div class="form-group">
-                                    <s2:messenger id="contact_form_message" for="contact_details_form" 
+                                    <s2:messenger id="ContactDetailsForm_message" for="ContactDetailsForm" 
                                         showDetail="true" showSummary="true">
                                     </s2:messenger>
                                     
@@ -45,14 +45,25 @@
                                            placeholder="Your last name"></input>
                                 </div>
                                 <div class="form-group">
-                                    <label>Your email:</label>
+                                    <label>Your contact email:</label>
                                     <span class="help-block">
-                                        This is how we will contact you.
+                                        This is how we will contact you for billings and announcements.
                                     </span>
                                     <input type="email" jsf:id="contact_email" class="validate[required,custom[email]] form-control"
                                            required="true"
                                            jsf:value="#{ContactDetailsForm.contactInfo.EMAIL}"
                                            placeholder="Your email"></input>
+                                </div>
+                                <div class="form-group">
+                                    <label>Your user reset email:</label>
+                                    <span class="help-block">
+                                        This is the address that we will send password reset/unlock requests. 
+                                        It was registered when your account was created and it is not editable.
+                                    </span>
+                                    <input type="email" jsf:id="user_email" class="form-control"
+                                           disabled="disabled"
+                                           jsf:value="#{ContactDetailsForm.userEmail}"
+                                           placeholder="Your username email"></input>
                                 </div>
                             </div>
                             <div class="block-footer">
@@ -64,16 +75,8 @@
                                     </button>
                                 </div>
                                 <div class="pull-right">
-                                    <p:commandButton styleClass="btn btn-success"
-                                                     actionListener="#{ContactDetailsForm.update()}" value="Update"
-                                                     update="contact_form_message" 
-                                                     onclick="$('#contact_details_form').validationEngine('validate')"
-                                                     
-                                                     >
-                                        
-                                    </p:commandButton>
                                     <button jsf:id="update_contact_button" class="btn btn-success"
-                                            onclick="$('#contact_details_form').validationEngine('validate');">
+                                            >
                                         <f:ajax listener="#{ContactDetailsForm.update()}"
                                                 event="click" onevent="updateSettings"
                                                 render="@form"
@@ -85,14 +88,30 @@
                                             
                                 </div>
                             </div>
-                            <p:blockUI block="contact_details_form" trigger="contact_details_form:update_contact_button"
-                                       >
-                                <p id="spinner"></p>
-                            </p:blockUI>
                         </form>
                     </div>
                 </div>
+                <div class="col-md-6 col-xs-12">
+                    <div class="block">
+                        <div class="block-head">
+                            <h2>Your Verified Sending Addresses</h2>
+                            
+                            <ul class="buttons">
+                                <li>
+                                    <a href="#verify_new_address" data-toggle="modal"
+                                       >
+                                        <span class="fa fa-plus"></span>
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                        <ui:include src="verified.xhtml" ></ui:include>
+                    </div>
+                </div>
                 
+            </div>
+            <div class="row">
                 <div class="col-md-6 col-xs-12">
                     <div jsf:id="billing_block" class="block">
                         <form jsf:id="billing_form" class="validate-form">
@@ -105,13 +124,19 @@
                     </div>
                 </div>
             </div>
-
+            <div jsf:id="verify_new_address" class="modal fade">
+                <ui:include src="verify_new_address.xhtml"></ui:include>
+            </div>
+            <div jsf:id="delete_verified_address" class="modal fade">
+                <ui:include src="delete_verified_address.xhtml"></ui:include>
+            </div>
 
         </ui:define>
 
         <ui:define name="scripts-bottom">
             <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/mysettings.js" />
-
+            <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/verify_new_address.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/mysettings/js/delete_verified_address.js" />
         </ui:define>
 
     </ui:composition>

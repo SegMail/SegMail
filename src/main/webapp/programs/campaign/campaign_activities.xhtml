@@ -16,16 +16,17 @@
         <div class="block-content">
             <h2 class="pull-left">Campaign Activites</h2>
             <div class="pull-right">
-
+                <button jsf:id="refreshCampaigns"
+                   class="btn btn-default nm" data-toggle="modal">
+                    <span class="fa fa-refresh"></span>
+                    <f:ajax onevent="refreshCampaignActivities">
+                        
+                    </f:ajax>
+                </button>
                 <a href="#create_new_activity" 
                    class="btn btn-default nm" data-toggle="modal">
                     <span class="fa fa-plus"></span>
                 </a>
-                <button type="button" class="btn btn-default nm">
-                    <span class="fa fa-refresh">
-
-                    </span>
-                </button>
             </div>
         </div>
         <div class="block-content np">
@@ -54,28 +55,20 @@
                                         #{activity.ACTIVITY_NAME}
                                     </td>
                                     <td>
-                                        4.55% (fake)
+                                        #{FormCampaignActivities.clickthroughRates[activity.OBJECTID]} %
                                     </td>
                                     <td>
                                         <div class="pull-right">
                                             <c:choose>
-                                                <c:when test="#{activity.STATUS eq 'NEW'}">
-                                                    <button
-
-                                                        jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
-                                                        href="#edit_campaign_activity"
-                                                        data-toggle="modal"
-                                                        style="margin-right: 3px;"
-                                                        class="btn btn-success list-item-trigger"
-                                                        title="Edit Activity"
-                                                        >
-                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
-                                                                render="FormEditEmailActivity"
-                                                                onevent="load_activity"
-                                                                >
-                                                        </f:ajax>
+                                                <c:when test="#{activity.STATUS eq 'NEW' or activity.STATUS eq 'EDITING'}">
+                                                    <a class="btn btn-success list-item-trigger"
+                                                       style="margin-right: 3px;"
+                                                       href="
+                                                       #{request.contextPath}#{UserRequestContainer.printFullPathWithoutContext()}/#{activity.OBJECTID}"
+                                                       title="Edit Activity"
+                                                       >
                                                         <i class="fa fa-pencil"></i>
-                                                    </button>
+                                                    </a>
                                                 </c:when>
                                                 <c:when test="#{activity.STATUS eq 'EDITING'}">
                                                     <button

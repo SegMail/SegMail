@@ -51,11 +51,11 @@ public class BatchJobStep implements Serializable {
         this.SERVICE_NAME = SERVICE_NAME;
     }
 
-    @OneToMany
-    @JoinColumns({
+    @OneToMany(mappedBy="BATCH_JOB_STEP")
+    /*@JoinColumns({
         @JoinColumn(name = "BATCH_JOB_STEP"),
         @JoinColumn(name = "BATCH_JOB_STEP_ORDER")
-    })
+    })*/
     @OrderColumn(name = "PARAM_ORDER")
     public List<BatchJobStepParam> getPARAMS() {
         return PARAMS;
@@ -78,6 +78,12 @@ public class BatchJobStep implements Serializable {
         return BATCH_JOB;
     }
 
+    /**
+     * It doesn't matter now whether this field is auto-generated because all 
+     * batch jobs only have 1 step.
+     * 
+     * @return 
+     */
     @Id
     public int getSTEP_ORDER() {
         return STEP_ORDER;

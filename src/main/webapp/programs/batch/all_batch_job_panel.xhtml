@@ -9,7 +9,7 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <div class="block-content list nbfc">
+    
         <c:choose>
             <c:when test="#{FormJobList.batchJobRuns eq null or FormJobList.batchJobRuns.size() le 0}">
                 <div style="text-align: center">
@@ -21,12 +21,11 @@
 
 
         <c:forEach items="#{FormJobList.batchJobRuns}" var="job">
-            <form jsf:id="job_list_item_#{job.RUN_KEY}" name="job_list_item_#{job.RUN_KEY}">
                 <div class="list-item">
                     <div class="list-item-content">
                         <div class="list-item-container list-item-container-small">
                             <p>
-                                <span class="label label-#{FormJobList.batchJobStatusMapping.get(job.STATUS)}">
+                                <span class="status label label-#{FormJobList.batchJobStatusMapping.get(job.STATUS)}">
                                     #{job.STATUS}
                                 </span>
                             </p>
@@ -50,22 +49,82 @@
                         <div class="list-item-container">
 
                             <c:choose>
-                                <c:when test="#{job.CANCEL_TIME != null}">
-                                    <h4 class="">
-                                        Cancelled on #{job.CANCEL_TIME}
-                                    </h4>
+                                <c:when test="#{job.STATUS eq 'WAITING'}">
                                 </c:when>
-                                <c:when test="#{job.END_TIME != null}">
+                                <c:when test="#{job.STATUS eq 'SCHEDULED'}">
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'IN_PROCESS'}">
                                     <h4>
-                                        <i class="fa fa-clock-o"></i>
-                                        Ran for #{(job.END_TIME.getTime() - job.START_TIME.getTime())/1000.0} seconds
+                                        Running since
                                     </h4>
+                                    <p class="text-muted">
+                                        #{job.START_TIME}
+                                    </p>
                                 </c:when>
-                                <c:when test="#{job.START_TIME != null}">
+                                <c:when test="#{job.STATUS eq 'COMPLETED'}">
+                                    <h4>
+                                        Started
+                                    </h4>
+                                    <p class="text-muted">
+                                        #{job.START_TIME}
+                                    </p>
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'FAILED'}">
+                                    <h4>
+                                        Started
+                                    </h4>
+                                    <p class="text-muted">
+                                        #{job.START_TIME}
+                                    </p>
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'CANCELLED'}">
+                                    <h4>
+                                        #{(job.START_TIME == null) ? 'Never started' : 'Started'}
+                                    </h4>
+                                    <p class="text-muted">
+                                        #{job.START_TIME}
+                                    </p>
+                                </c:when>
+                                <c:otherwise>
+
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        <div class="list-item-container">
+
+                            <c:choose>
+                                <c:when test="#{job.STATUS eq 'WAITING'}">
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'SCHEDULED'}">
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'IN_PROCESS'}">
                                     <h4 class="text-muted">
-                                        <i class="fa fa-clock-o"></i>
                                         Running for #{FormJobList.getRunTime(job.START_TIME)} seconds
                                     </h4>
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'COMPLETED'}">
+                                    <h4>
+                                        End
+                                    </h4>
+                                    <p class="text-muted">
+                                        #{job.END_TIME}
+                                    </p>
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'FAILED'}">
+                                    <h4>
+                                        Stopped
+                                    </h4>
+                                    <p class="text-muted">
+                                        #{job.END_TIME}
+                                    </p>
+                                </c:when>
+                                <c:when test="#{job.STATUS eq 'CANCELLED'}">
+                                    <h4>
+                                        Cancelled
+                                    </h4>
+                                    <p class="text-muted">
+                                        #{job.CANCEL_TIME}
+                                    </p>
                                 </c:when>
                                 <c:otherwise>
 
@@ -126,10 +185,8 @@
                         </div>
                     </div>
                 </div>
-            </form>
         </c:forEach>
 
-    </div>
     <ui:include src="javascript.xhtml" />
 
 </html>

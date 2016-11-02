@@ -350,8 +350,8 @@ $(document).ready(function(){
 
 function gPlugins(container){    
     gDateRangePicker.init(container);
-    gSummernote.init(container);
-    gSummernoteEditor.init(container);
+    //gSummernote.init(container);
+    //gSummernoteEditor.init(container);
     gFancybox.init(container);
     gDatepicker.init(container);
     gMDatepicker.init(container);

@@ -5,9 +5,13 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchJobDripDataSource;
 import eds.component.batch.BatchSchedulingService;
+import eds.component.data.DripFeederService;
 import eds.entity.batch.BatchJobRun;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -17,6 +21,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  *
@@ -25,14 +31,21 @@ import org.joda.time.DateTime;
 @RequestScoped
 @Named("FormJobList")
 public class FormJobList {
+    
+    private final int RECORDS_PER_PAGE = 20;
+    
     @Inject ProgramBatch program;
     
-    @EJB BatchSchedulingService scheduleService;
+    @EJB BatchSchedulingService batchScheduleService;
+    
     
     @PostConstruct
     public void init(){
         if(!FacesContext.getCurrentInstance().isPostback()) {
-            loadBatchJobs();
+            getJobRunDrip().init(RECORDS_PER_PAGE);
+            setCurrentPage(1);
+            loadBatchJobs(getCurrentPage());
+            
         }
     }
     
@@ -52,8 +65,59 @@ public class FormJobList {
         program.setBatchJobStatusMapping(batchJobStatusMapping);
     }
     
-    public void loadBatchJobs(){
-        program.loadBatchJobs();
+    public void loadBatchJobsChangeTime() {
+        if(program.getStartString() == null || program.getStartString().isEmpty() 
+                || program.getEndString() == null || program.getEndString().isEmpty())
+            return;
+        
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM YYYY, HH:mm:ss");
+        
+        DateTime lowDateTime = formatter.parseDateTime(program.getStartString());
+        Timestamp lowTS = new Timestamp(lowDateTime.getMillis());
+        getJobRunDrip().setStart(lowTS);
+        DateTime highDateTime = formatter.parseDateTime(program.getEndString());
+        Timestamp highTS = new Timestamp(highDateTime.getMillis());
+        getJobRunDrip().setEnd(highTS);
+        
+        getJobRunDrip().init(); //Here we want to re-initialize because the refresh button supposed to re-hit the DB
+        loadBatchJobs(1); //reset the page number if there's a change in time range
+        loadPageNumbers();
+    }
+    
+    public void loadBatchJobsStatus() {
+        //Get statuses
+        List<String> statusString = new ArrayList<>();
+        Map<String,Boolean> status = this.getStatuses();
+        for(String key : getStatuses().keySet()) {
+            if(getStatuses().get(key))
+                statusString.add(key);
+        }
+        //If no statuses are selected then don't bother
+        if(statusString.isEmpty()) {
+            setBatchJobRuns(new ArrayList<BatchJobRun>());
+            return;
+        }
+        
+        if(!getJobRunDrip().compareStatuses(statusString)) {
+            getJobRunDrip().setStatuses(statusString);
+        }
+        
+        getJobRunDrip().init(); //Here we want to re-initialize because the criteria has been changed
+        loadBatchJobs(1);
+        loadPageNumbers();
+    }
+    
+    public void loadBatchJobs(int page) {
+        
+        List<BatchJobRun> batchJobRuns = getJobRunDrip().drip(page);
+        this.setBatchJobRuns(batchJobRuns);
+        
+        this.setCurrentPage(page);
+    }
+    
+    public void loadPageNumbers() {
+        List<Integer> pageNumbers = getJobRunDrip().loadPageNumbers();
+        this.setPageNumbers(pageNumbers);
     }
     
     public String getStartString() {
@@ -92,5 +156,41 @@ public class FormJobList {
         DateTime now = DateTime.now();
         long seconds = (now.getMillis() - start.getTime())/1000;
         return Long.toString(seconds);
+    }
+    
+    public Map<String, Boolean> getStatuses() {
+        return program.getStatuses();
+    }
+
+    public void setStatuses(Map<String, Boolean> statuses) {
+        program.setStatuses(statuses);
+    }
+    
+    public List<Integer> getPageNumbers() {
+        return program.getPageNumbers();
+    }
+
+    public void setPageNumbers(List<Integer> pageNumbers) {
+        program.setPageNumbers(pageNumbers);
+    }
+
+    public int getRECORDS_PER_PAGE() {
+        return RECORDS_PER_PAGE;
+    }
+    
+    public int getCurrentPage() {
+        return program.getCurrentPage();
+    }
+
+    public void setCurrentPage(int currentPage) {
+        program.setCurrentPage(currentPage);
+    }
+    
+    public BatchJobDripDataSource getJobRunDrip() {
+        return program.getJobRunDrip();
+    }
+
+    public void setJobRunDrip(BatchJobDripDataSource jobRunDrip) {
+        program.setJobRunDrip(jobRunDrip);
     }
 }

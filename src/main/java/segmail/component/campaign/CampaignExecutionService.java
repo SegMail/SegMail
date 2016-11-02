@@ -19,6 +19,7 @@ import eds.entity.client.Client;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import org.joda.time.DateTime;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
@@ -45,16 +47,18 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivityOutboundLink_;
-import segmail.entity.campaign.LinkClick;
+import segmail.entity.campaign.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.SubscriberOwnership_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.Subscription_;
 
 /**
@@ -78,6 +82,8 @@ public class CampaignExecutionService {
     MailMergeService mmService;
     @EJB
     SubscriptionService subService;
+    @EJB
+    ListService listService;
     @EJB
     MailService mailService;
 
@@ -103,25 +109,28 @@ public class CampaignExecutionService {
             throw new EntityNotFoundException(CampaignActivity.class, campaignActivityId);
         }
         
-        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class); //DB hit
         if (campaigns == null || campaigns.isEmpty())
             throw new RelationshipNotFoundException("CampaignActivity "+campaignActivityId+" is not assigned to any Campaign.");
         Campaign campaign = campaigns.get(0);
         
-        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class);
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
         if (targetLists == null || targetLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
         
-        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);
+        List<SubscriptionListField> targetListFields = listService.getFieldsForSubscriptionLists(targetLists);//DB hit
+        
+        List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);//DB hit
         if (clientLists == null || clientLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned to any Clients.");
         
         int count = 0; //Number 
+        int maxCount = (maxSize <= 0) ? Integer.MAX_VALUE : maxSize;
         
-        while (count < maxSize) {
+        while (count < maxCount) {
             //Retrieve all subscriber emails
             List<SubscriberAccount> subscribers = 
-                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxSize-count,BATCH_SIZE)); //DB hit
+                    getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxCount-count,BATCH_SIZE)); //DB hit
             //Lock 'em!
             subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
             //Skip if there are no more subscribers to be sent to
@@ -129,6 +138,13 @@ public class CampaignExecutionService {
                 break;
             //Retrieve all unsubscribe codes
             Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientLists.get(0).getOBJECTID()); //DB hit
+            //Retrieve all subscriber's field values
+            List<SubscriberFieldValue> fieldValues = subService.getSubscriberValuesBySubscriberObjects(subscribers); //DB hit
+            List<Long> subscriberIds = new ArrayList<>();
+            for(SubscriberAccount subscriber : subscribers) {
+                subscriberIds.add(subscriber.getOBJECTID());
+            }
+            Map<Long,Map<String,String>> fieldValuesMap = mmService.createMMValueMap(subscriberIds,targetListFields, fieldValues);
             
             for (SubscriberAccount subscriber : subscribers) {
 
@@ -143,6 +159,8 @@ public class CampaignExecutionService {
                     //Set the body of the email
                     String content = campaignActivity.getACTIVITY_CONTENT_PROCESSED();
                     content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); //we'll use the WS method to edit unsub links [update] not now, let's stick to hardcoding as there isn't enough time
+                    content = mmService.parseMailmergeTagsSubscriber(content, fieldValuesMap.get(subscriber.getOBJECTID()));
+                    
                     email.setBODY(content);
                     
                     mailService.queueEmail(email, DateTime.now());
@@ -160,7 +178,7 @@ public class CampaignExecutionService {
             objService.getEm().flush();
         }
         //Ugly HACK, but simplest solution
-        if(count < maxSize || count == 0) {
+        if(count < maxCount || count == 0) {
             campaignActivity.setSTATUS(ACTIVITY_STATUS.COMPLETED.name);
             objService.getEm().merge(campaignActivity);
             
@@ -318,7 +336,7 @@ public class CampaignExecutionService {
         if(link == null)
             throw new EntityNotFoundException("Link key "+linkKey+" not found.");
         
-        LinkClick newLinkClick = new LinkClick();
+        CampaignLinkClick newLinkClick = new CampaignLinkClick();
         newLinkClick.setLINK_KEY(linkKey);
         
         objService.getEm().persist(newLinkClick);

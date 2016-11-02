@@ -14,6 +14,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.data.EnterpriseRelationship_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -25,8 +26,11 @@ import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.hibernate.exception.GenericJDBCException;
+import segmail.entity.subscription.Assign_Client_List;
+import segmail.entity.subscription.Assign_Client_List_;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_Client;
@@ -62,26 +66,18 @@ public class AutoresponderService {
      * @throws IncompleteDataException
      */
     public AutoresponderEmail createAutoEmailWithoutAssignment(String subject, String body, AUTO_EMAIL_TYPE type)
-            throws EntityExistsException, IncompleteDataException {
-        try {
-            AutoresponderEmail newAutoEmail = new AutoresponderEmail();//AutoEmailTypeFactory.getAutoEmailTypeInstance(type);
-            newAutoEmail.setTYPE(type);
-            newAutoEmail.setBODY(body);
-            newAutoEmail.setSUBJECT(subject);
+            throws IncompleteDataException {
+        AutoresponderEmail newAutoEmail = new AutoresponderEmail();//AutoEmailTypeFactory.getAutoEmailTypeInstance(type);
+        newAutoEmail.setTYPE(type);
+        newAutoEmail.setBODY(body);
+        newAutoEmail.setSUBJECT(subject);
 
-            //validate first
-            checkAutoEmail(newAutoEmail, clientFacade.getClient().getOBJECTID());
+        //validate first
+        checkAutoEmail(newAutoEmail, clientFacade.getClient().getOBJECTID());
 
-            updateService.getEm().persist(newAutoEmail);
+        updateService.getEm().persist(newAutoEmail);
 
-            return newAutoEmail;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        return newAutoEmail;
     }
 
     /**
@@ -96,7 +92,6 @@ public class AutoresponderService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail saveAutoEmail(AutoresponderEmail autoEmail)
             throws IncompleteDataException, EntityExistsException, EntityNotFoundException {
-        try {
             //Check if autoEmail exists in the first place
             if (!objectService.checkEntityExists(autoEmail)) {
                 throw new EntityNotFoundException(AutoresponderEmail.class, autoEmail.getOBJECTID());
@@ -107,14 +102,8 @@ public class AutoresponderService {
 
             return updateService.getEm().merge(autoEmail);
 
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
     }
-    
+
     /**
      * Assigns an AutoresponderEmail to a Client.
      *
@@ -207,10 +196,9 @@ public class AutoresponderService {
      *
      * @param temp
      * @throws IncompleteDataException
-     * @throws EntityExistsException
      */
     private void checkAutoEmail(AutoresponderEmail temp, long clientId)
-            throws IncompleteDataException, EntityExistsException {
+            throws IncompleteDataException {
 
         if (temp.getSUBJECT() == null || temp.getSUBJECT().isEmpty()) {
             throw new IncompleteDataException("Autoresponder emails must have a subject.");
@@ -219,19 +207,26 @@ public class AutoresponderService {
         if (temp.getTYPE() == null || temp.getTYPE().isEmpty()) {
             throw new IncompleteDataException("Autoresponder emails must have a type.");
         }
-
-        List<AutoresponderEmail> results = this.getAutoEmailsBySubjectAndTypeForClient(temp.getSUBJECT(), AUTO_EMAIL_TYPE.valueOf(temp.getTYPE()), clientId);
-
-        if (results != null && !results.isEmpty()) {
-            //Must check if the retrieved email is the same one as temp because update methods will 
-            //also use this method to check. New emails will not have any ID and therefore hit the 
-            //exception
-            for (AutoresponderEmail result : results) {
-                if (!result.equals(temp)) {
-                    throw new EntityExistsException(temp);
-                }
-            }
+        
+        if(temp.getBODY() == null || temp.getBODY().isEmpty()) {
+            throw new IncompleteDataException("Autoresponder emails must have a body.");
         }
+
+        /**
+         * Meaningless validation - client can create as many emails with the
+         * same subject as they want to.
+         *
+         * List<AutoresponderEmail> results =
+         * this.getAutoEmailsBySubjectAndTypeForClient(temp.getSUBJECT(),
+         * AUTO_EMAIL_TYPE.valueOf(temp.getTYPE()), clientId);
+         *
+         * if (results != null && !results.isEmpty()) { //Must check if the
+         * retrieved email is the same one as temp because update methods will
+         * //also use this method to check. New emails will not have any ID and
+         * therefore hit the //exception for (AutoresponderEmail result :
+         * results) { if (!result.equals(temp)) { throw new
+         * EntityExistsException(temp); } } }
+         */
     }
 
     /**
@@ -255,7 +250,6 @@ public class AutoresponderService {
         }
     }
 
-    
     public void removeAllAssignedWelcomeEmailFromList(long listId) {
         try {
             List<Assign_AutoresponderEmail_List> existingAssignments = this.getAssignedAutoEmailsAssignmentsForList(listId, AUTO_EMAIL_TYPE.WELCOME);
@@ -310,7 +304,7 @@ public class AutoresponderService {
             throw new EJBException(pex);
         }
     }
-    
+
     /**
      * Creates a new AutoresponderEmail and assigns it to the ClientFacade in
      * context. If no ClientFacade is available in context, then an
@@ -326,24 +320,16 @@ public class AutoresponderService {
      * @throws EntityNotFoundException
      */
     public AutoresponderEmail createAndAssignAutoEmail(String subject, String body, AUTO_EMAIL_TYPE type)
-            throws EntityExistsException, IncompleteDataException, RelationshipExistsException, EntityNotFoundException {
-        try {
-            AutoresponderEmail newAutoEmail = this.createAutoEmailWithoutAssignment(subject, body, type);
-            Client client = clientFacade.getClient();
-            if (client == null) {
-                throw new IncompleteDataException("No client id provided.");
-            }
-
-            this.assignAutoEmailToClient(newAutoEmail.getOBJECTID(), client.getOBJECTID());
-
-            return newAutoEmail;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+            throws IncompleteDataException, RelationshipExistsException, EntityNotFoundException {
+        AutoresponderEmail newAutoEmail = this.createAutoEmailWithoutAssignment(subject, body, type);
+        Client client = clientFacade.getClient();
+        if (client == null) {
+            throw new IncompleteDataException("No client id provided.");
         }
+
+        this.assignAutoEmailToClient(newAutoEmail.getOBJECTID(), client.getOBJECTID());
+
+        return newAutoEmail;
     }
 
     /**
@@ -352,28 +338,45 @@ public class AutoresponderService {
      * @throws EntityNotFoundException
      */
     public void deleteAutoEmail(long autoEmailId) throws EntityNotFoundException {
-        try {
-            updateService.deleteObjectDataAndRelationships(autoEmailId);
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        updateService.deleteObjectDataAndRelationships(autoEmailId, AutoresponderEmail.class);
     }
 
+    /**
+     *
+     * IMPORTANT: Client -> SubscriptionList -> AutoresponderEmail If the the
+     * AutoresponderEmail has no SubscriptionList assigned currently, meaning
+     * the SubscriptionList may have been deleted, then this AutoresponderEmail
+     * shouldn't exist anymore.
+     * <br>
+     * When deleting objects, we only delete its own EnterpriseData and
+     * EnterpriseRelationships, never another object. If we have a good reason
+     * to also delete another object, then that object shouldn't be implemented
+     * as an object in the first place, but an EnterpriseData, that's the
+     * definition of an object - an entity that can exist independently of other
+     * objects.
+     *
+     *
+     * @param clientId
+     * @param type
+     * @return
+     */
     public List<AutoresponderEmail> getAvailableAutoEmailsForClient(long clientId, AUTO_EMAIL_TYPE type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<AutoresponderEmail> query = builder.createQuery(AutoresponderEmail.class);
         Root<AutoresponderEmail> fromAutoEmail = query.from(AutoresponderEmail.class);
-        Root<Assign_AutoresponderEmail_Client> fromAssignAutoEmailClient = query.from(Assign_AutoresponderEmail_Client.class);
+        Root<Assign_AutoresponderEmail_List> fromAssignAutoemailList = query.from(Assign_AutoresponderEmail_List.class);
+        Root<Assign_Client_List> fromClientList = query.from(Assign_Client_List.class);
+
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoemailList.get(Assign_AutoresponderEmail_List_.SOURCE)));
+        conditions.add(builder.equal(fromAssignAutoemailList.get(Assign_AutoresponderEmail_List_.TARGET), fromClientList.get(Assign_Client_List_.TARGET)));
+        conditions.add(builder.equal(fromClientList.get(Assign_Client_List_.SOURCE), clientId));
+        if (type != null) {
+            conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()));
+        }
 
         query.select(fromAutoEmail);
-        query.where(builder.and(
-                builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()),
-                builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)),
-                builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId)
-        ));
+        query.where(builder.and(conditions.toArray(new Predicate[]{})));
 
         List<AutoresponderEmail> results = objectService.getEm().createQuery(query)
                 .getResultList();
@@ -381,14 +384,13 @@ public class AutoresponderService {
     }
 
     /**
-     * Retrieves all assigned AutoresponderEmails for a SubscriptionList using 
+     * Retrieves all assigned AutoresponderEmails for a SubscriptionList using
      * the Assign_AutoresponderEmail_List relationship.
-     * 
+     *
      * @param listId
      * @param type
-     * @return 
+     * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<AutoresponderEmail> getAssignedAutoEmailsForList(long listId, AUTO_EMAIL_TYPE type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<AutoresponderEmail> query = builder.createQuery(AutoresponderEmail.class);
@@ -407,14 +409,13 @@ public class AutoresponderService {
     }
 
     /**
-     * Retrieves all assigned Assign_AutoresponderEmail_List relationship for a 
+     * Retrieves all assigned Assign_AutoresponderEmail_List relationship for a
      * SubscriptionList.
-     * 
+     *
      * @param listId
      * @param type
-     * @return 
+     * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<Assign_AutoresponderEmail_List> getAssignedAutoEmailsAssignmentsForList(long listId, AUTO_EMAIL_TYPE type) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<Assign_AutoresponderEmail_List> query = builder.createQuery(Assign_AutoresponderEmail_List.class);
@@ -431,4 +432,5 @@ public class AutoresponderService {
                 .getResultList();
         return results;
     }
+
 }

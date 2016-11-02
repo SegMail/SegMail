@@ -14,10 +14,9 @@
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />        
             <meta http-equiv="X-UA-Compatible" content="IE=edge" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-
             <!-- AJAX Loader -->
-            <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/spinner/spinner.css" />
-            <script src="#{request.contextPath}/templates/beprobootstrap/js/ajax/ajax-loader.js"></script> 
+            <link rel="stylesheet" href="#{request.contextPath}/templates/common/css/ajax-loader/spinner.css" />
+            <script src="#{request.contextPath}/templates/common/js/ajax-loader/ajax-loader.js"></script> 
 
             <!--custom hacks-->
             <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/hacks/primefaces-hacks.css" />
@@ -33,7 +32,7 @@
                 <div class="page-head">
                     <ul class="page-head-elements"><!-- Head elements such as buttons -->
                         <li><!-- nem element -->
-                            <a href="#"><!-- link(button) -->
+                            <a href="#" class="page-navigation-toggle"><!-- link(button) -->
                                 <span class="fa fa-bars"></span><!-- icon -->
                             </a>
                         </li><!-- end of element -->
@@ -45,11 +44,11 @@
 
                 <div class="page-navigation">
                     <div class="page-navigation-info"><!-- navigation info block -->
-                        <a href="index.html" class="logo">Your logo text</a><!-- Your logo link -->
+                        <!-- Your logo link -->
                     </div>
                     <!--"Template-tize" this section in the future-->
                     <div class="profile">
-                        <img src="#{request.contextPath}/img/samples/users/user-30.jpg" />
+                        <img src="img/samples/users/user-30.jpg" />
                         <div class="profile-info">
                             <a href="#" class="profile-title">Howdy, #{UserSessionContainer.username}</a>
                             <span class="profile-subtitle">#{UserSessionContainer.usertypeName}</span>
@@ -82,7 +81,7 @@
                 <div class="page-content">
                     <div class="container" style="height:100%;">
                         <div class="page-toolbar">
-                            <form jsf:id="PageToolbar">
+                            <form jsf:id="PageToolbar" jsf:rendered="#{UserRequestContainer.renderPageToolbar}">
                                 <c:if test="#{not empty UserSessionContainer.currentProgram }" >
                                     <div class="page-toolbar-block">
                                         <div jsf:id="page-toolbar-title" class="page-toolbar-title">#{UserSessionContainer.currentProgram.DISPLAY_TITLE}</div>
@@ -104,12 +103,20 @@
                                     </div>
                                 </c:if>
                             </form>
-                            <form jsf:id="PageBreadCrumbs">
+                            <form jsf:id="PageBreadCrumbs" jsf:rendered="#{UserRequestContainer.renderPageBreadCrumbs}">
                                 <ul class="breadcrumb">
-                                    <li><a href="#">Dashboard</a></li>
-                                    <li><a href="#">UI Elements</a></li>
-                                    <li class="active">Blocks &amp; Panels</li>
-                                </ul>   
+                                    <c:choose>
+                                        <c:when test="#{UserRequestContainer.programParamsOrdered.size() le 0 }">
+                                            <li class="active">#{UserRequestContainer.programName}</li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li ><a href="#{request.contextPath}/#{UserRequestContainer.programName}">#{UserRequestContainer.programName}</a></li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <c:forEach items="#{UserRequestContainer.programParamsOrdered}" var="programParam" >
+                                        <li>#{programParam}</li>
+                                    </c:forEach>
+                                </ul>
                             </form>
                         </div>
                         <ui:insert name="main-program-panel" />

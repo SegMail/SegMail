@@ -101,6 +101,8 @@ public class MailService {
             String BODY = email.getBODY();
             Set<String> TO = email.getRECIPIENTS();
             String FROM = (FROM_NAME == null) ? FROM_ADDRESS : FROM_NAME + " <" + FROM_ADDRESS + ">";
+            
+            email.addReplyTo(email.getSENDER_ADDRESS());
             Set<String> REPLY_TO = email.getREPLY_TO_ADDRESSES();
 
             // Validate all email addresses before sending
@@ -154,6 +156,7 @@ public class MailService {
         }
     }
 
+    /*
     public void sendEmailBySMTP(Email email) {
 
         try {
@@ -219,14 +222,14 @@ public class MailService {
             //transport.close();
         }
     }
-
+    */
     /**
      *
      * @param emailContent
      * @param listId
      * @return
      */
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public String parseEmailContent(String emailContent, long listId) {
 
         //1. Parse global codes
@@ -241,7 +244,7 @@ public class MailService {
      * 
      * @param email
      * @param scheduledTime
-     * @throws DataValidationException if validateEmail(Email) throws one.
+     * @throws DataValidationException if either sender or recipient email is missing.
      * @throws InvalidEmailException if validateEmail(Email) throws one.
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -255,7 +258,7 @@ public class MailService {
         updateService.getEm().persist(email);
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    
     public List<Email> getNextNEmailsInQueue(DateTime processTime, int nextNEmails) {
         Timestamp nowTS = new Timestamp(processTime.getMillis());
         // Get all queued email sorted by their DATE_CHANGED
@@ -307,7 +310,7 @@ public class MailService {
     /**
      * 
      * @param email
-     * @throws DataValidationException
+     * @throws DataValidationException if email is missing
      * @throws InvalidEmailException if either Sender's email address or any of
      * the Recipients' email addresses are not valid based on org.apache.commons.validator.routines.EmailValidator
      */

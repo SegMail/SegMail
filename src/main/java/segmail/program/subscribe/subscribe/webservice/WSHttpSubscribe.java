@@ -9,10 +9,8 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,15 +114,8 @@ public class WSHttpSubscribe {
             Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         } catch (RelationshipExistsException ex) {
-            List<String> hackForEmail = new ArrayList<>();
-            for(List<String> values : subscriptionMap.values()) {
-                String value = (values == null || values.isEmpty()) ? "" : values.get(0);
-                hackForEmail.add(value);
-            }
-            List<Subscription> subscriptions = subService.getSubscriptionsByEmails(hackForEmail, listId);
-            if(subscriptions == null || subscriptions.isEmpty())
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
-            return Response.status(Response.Status.OK).entity(subscriptions.get(0).getCONFIRMATION_KEY()).build();
+            String confirmKey = ex.getMessage();
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(confirmKey).build();
             
         }  
     }
@@ -150,5 +141,52 @@ public class WSHttpSubscribe {
             Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
             return Response.ok(Response.Status.BAD_REQUEST).entity(ex.getMessage()).build();
         }
+    }
+    
+    /**
+     * 
+     * @param listId
+     * @param email
+     * @return String that represent the results:
+     * <ul>
+     * <li>Success</li>
+     * <li>Not_found: if Subscriber doesn't exist yet</li>
+     * <li>System_error: if No confirmation email assigned, or Send As not set for list, or Invalid sender email</li>
+     * <li>Error: if the subscriber's email is invalid</li>
+     */
+    @Path("segmail/retriggerConfirmation")
+    @POST
+    @RestSecured
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Response retriggerConfirmation(MultivaluedMap<String,String> subscriptionMap) {
+        try {
+            List<String> listIds = subscriptionMap.get("list");
+            if(listIds == null || listIds.isEmpty())
+                return Response.ok(Response.Status.OK).entity("Error : No list IDs provided.").build();
+            
+            long listId = Long.parseLong(listIds.get(0));
+            
+            List<String> emails = subscriptionMap.get("email");
+            if(emails == null || emails.isEmpty() || emails.get(0) == null || emails.get(0).isEmpty())
+                return Response.ok(Response.Status.OK).entity("Error : Please provide your email address that was registered with us.").build();
+            
+            subService.retriggerConfirmation(listId,emails.get(0));
+            return Response.ok(Response.Status.OK).entity("Success").build();
+        } catch (RelationshipNotFoundException ex) { //Subscriber doesn't exist yet
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.OK).entity("Not_found : "+ex.getMessage()).build();
+        } catch (IncompleteDataException ex) { //No confirmation email assigned or Send As not set for list
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.OK).entity("System_error : "+ex.getMessage()).build();
+        } catch (DataValidationException ex) { //Invalid sender email
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.OK).entity("System_error : "+ex.getMessage()).build();
+        } catch (InvalidEmailException ex) { //Invalid recipient email
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.ok(Response.Status.OK).entity("System_error : "+ex.getMessage()).build();
+        }
+        
     }
 }

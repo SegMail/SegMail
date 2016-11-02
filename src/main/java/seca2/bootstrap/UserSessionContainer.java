@@ -12,6 +12,8 @@ import java.io.Serializable;
 import javax.enterprise.context.SessionScoped;
 import eds.entity.user.User;
 import eds.entity.user.UserType;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
@@ -38,11 +40,27 @@ public class UserSessionContainer implements Serializable, ActiveUser {
     private Program overrideProgram;
     private Layout currentLayout;
     
-    
-    private List<MenuItemContainer> menu; //Shoukd it be a session object?
+    private List<MenuItemContainer> menu;
     
     @PostConstruct
     public void init(){
+        user = null;
+        userType = null;
+        lastProgram = "";
+        loggedIn = false;
+        sessionId = "";
+        contextPath = "";
+        servletPath = "";
+        currentProgram = null;
+        overrideProgram = null;
+        currentLayout = null;
+        /**
+         * Not a good practice but NavigationModule identifies new sessions by 
+         * checking if menu is null. An empty List doesn't quite make it because
+         * some users can have an empty menu.
+         * 
+         */
+        menu = null;
         
     }
     

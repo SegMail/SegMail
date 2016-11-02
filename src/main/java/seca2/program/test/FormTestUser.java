@@ -50,6 +50,7 @@ public class FormTestUser implements Serializable {
     private long chosenUserType;
     private String username;
     private String password;
+    private String contact;
     
     private final String createUserFormName = "createUserForm";
     
@@ -89,7 +90,7 @@ public class FormTestUser implements Serializable {
     
     public void createUser(){
         try{
-            userService.registerUserByUserTypeId(chosenUserType, username, password);
+            userService.registerUserByUserTypeId(chosenUserType, username, password, contact);
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_FATAL, "User "+username+" has been created!", null);
             
         } catch(DBConnectionException dbex){
@@ -246,8 +247,16 @@ public class FormTestUser implements Serializable {
     public void setWsAccess(boolean wsAccess) {
         this.wsAccess = wsAccess;
     }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
     
-    public void createUserWithType(String usertypename, String username, String password){
+    public void createUserWithType(String usertypename, String username, String password, String contact){
         
         List<UserType> usertypeList = this.userService.getUserTypeByName(usertypename);
         if(usertypeList == null || usertypeList.isEmpty())
@@ -257,6 +266,7 @@ public class FormTestUser implements Serializable {
         this.setChosenUserType(type.getOBJECTID());
         this.setUsername(username);
         this.setPassword(password);
+        this.setContact(contact);
         this.createUser();
         
     }

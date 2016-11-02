@@ -5,11 +5,8 @@
  */
 package eds.entity.mail;
 
-import eds.entity.data.EnterpriseObject;
 import eds.entity.transaction.EnterpriseTransaction;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -75,12 +72,16 @@ public class Email extends EnterpriseTransaction {
     }
     
     public void addRecipient(String TO) {
-        this.RECIPIENTS.add(TO);
+        getRECIPIENTS().add(TO);
     }
     
     public void addSingleRecipient(String TO) {
-        this.RECIPIENTS = new HashSet();
+        setRECIPIENTS(new HashSet());
         this.addRecipient(TO);
+    }
+    
+    public void addReplyTo(String replyTo) {
+        getREPLY_TO_ADDRESSES().add(replyTo);
     }
 
     public String getSENDER_NAME() {

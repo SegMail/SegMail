@@ -36,9 +36,14 @@
                 <label>
                     Send as email:
                 </label>
-                <input type="text" class="form-control"
-                       jsf:value="#{FormCampaignSenderAttribute.editingCampaign.OVERRIDE_SEND_AS_EMAIL}"
-                       />
+                <h:selectOneListbox id="selectVerifiedEmail" pass:id="selectVerifiedEmail" styleClass="select2" style="width: 100%;"
+                                    required="true"
+                                    value="#{FormCampaignSenderAttribute.editingCampaign.OVERRIDE_SEND_AS_EMAIL}" 
+                                    >
+                    <f:selectItems value="#{FormCampaignSenderAttribute.verifiedAddresses}" var="add" itemLabel="#{add.VERIFIED_ADDRESS}"
+                                   itemValue="#{add.VERIFIED_ADDRESS}">
+                    </f:selectItems>
+                </h:selectOneListbox> 
             </div>
         </div>
         <div class="block-footer">

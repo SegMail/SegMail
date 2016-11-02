@@ -5,6 +5,7 @@
  */
 package seca2.program.batch;
 
+import eds.component.batch.BatchJobDripDataSource;
 import eds.component.batch.BatchProcessingService;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
@@ -13,6 +14,7 @@ import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobTrigger;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -55,6 +58,12 @@ public class ProgramBatch extends Program {
     private final String SCHEDULE_JS_DATE_STRING_FORMAT = "yy-mm-dd";
     private final String SCHEDULE_JS_TIME_STRING_FORMAT = "HH:mm";
     
+    private Map<String,Boolean> statuses = new HashMap<>();
+    
+    private List<Integer> pageNumbers = new ArrayList<>();
+    private int currentPage;
+    
+    @Inject BatchJobDripDataSource jobRunDrip;
 
     @EJB LandingService landingService;
     @EJB BatchSchedulingService batchScheduleService;
@@ -81,6 +90,16 @@ public class ProgramBatch extends Program {
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.COMPLETED.label, "success");
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.CANCELLED.label, "warning");
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.FAILED.label, "danger");
+        
+        /*for(BATCH_JOB_RUN_STATUS status : BATCH_JOB_RUN_STATUS.values()) {
+            statuses.put(status.label, false);
+        }*/
+        statuses.put(BATCH_JOB_RUN_STATUS.WAITING.label, false);
+        statuses.put(BATCH_JOB_RUN_STATUS.SCHEDULED.label, false);
+        statuses.put(BATCH_JOB_RUN_STATUS.IN_PROCESS.label, true);
+        statuses.put(BATCH_JOB_RUN_STATUS.COMPLETED.label, false);
+        statuses.put(BATCH_JOB_RUN_STATUS.FAILED.label, true);
+        statuses.put(BATCH_JOB_RUN_STATUS.CANCELLED.label, true);
     }
 
     public List<BatchJobRun> getBatchJobRuns() {
@@ -109,23 +128,6 @@ public class ProgramBatch extends Program {
     
     public void loadServers(){
         setServers(landingService.getServerInstances(ERP));
-    }
-    
-    public void loadBatchJobs(){
-        
-        if(startString == null || startString.isEmpty() 
-                || endString == null || endString.isEmpty())
-            return;
-        
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM YYYY, HH:mm:ss");
-        
-        DateTime lowDateTime = formatter.parseDateTime(startString);
-        Timestamp lowTS = new Timestamp(lowDateTime.getMillis());
-        DateTime highDateTime = formatter.parseDateTime(endString);
-        Timestamp highTS = new Timestamp(highDateTime.getMillis());
-        
-        this.setBatchJobRuns(batchScheduleService.getBatchRuns(lowTS, highTS, null));
-        
     }
 
     public BatchJobRun getEditingBatchJobRun() {
@@ -270,8 +272,8 @@ public class ProgramBatch extends Program {
         if(steps != null && !steps.isEmpty())
             this.setFirstAndOnlyStep(steps.get(0));
         
-        this.setSelectedServerIdBatchJob(this.getEditingBatchJobRun().getBATCH_JOB().getSERVER().getOBJECTID());
-        this.setSelectedServerIdBatchJobRun(getEditingBatchJobRun().getSERVER().getOBJECTID());
+        //this.setSelectedServerIdBatchJob(this.getEditingBatchJobRun().getBATCH_JOB().getSERVER().getOBJECTID());
+        //this.setSelectedServerIdBatchJobRun(getEditingBatchJobRun().getSERVER().getOBJECTID());
         
         updateEditable();
     }
@@ -302,6 +304,38 @@ public class ProgramBatch extends Program {
 
     public void setSelectedServerIdBatchJobRun(long selectedServerIdBatchJobRun) {
         this.selectedServerIdBatchJobRun = selectedServerIdBatchJobRun;
+    }
+
+    public Map<String, Boolean> getStatuses() {
+        return statuses;
+    }
+
+    public void setStatuses(Map<String, Boolean> statuses) {
+        this.statuses = statuses;
+    }
+
+    public BatchJobDripDataSource getJobRunDrip() {
+        return jobRunDrip;
+    }
+
+    public void setJobRunDrip(BatchJobDripDataSource jobRunDrip) {
+        this.jobRunDrip = jobRunDrip;
+    }
+
+    public List<Integer> getPageNumbers() {
+        return pageNumbers;
+    }
+
+    public void setPageNumbers(List<Integer> pageNumbers) {
+        this.pageNumbers = pageNumbers;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
     }
     
     

@@ -11,16 +11,20 @@ import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.IncompleteDataException;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
+import eds.entity.client.VerifiedSendingAddress;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
 
@@ -37,20 +41,23 @@ public class FormAddList {
     private boolean remote;
     
     @Inject private UserSessionContainer userContainer;
+    @Inject private ClientContainer clientCont;
     
-    @Inject private ProgramList programList;
+    @Inject private ProgramList program;
     
-    @EJB private SubscriptionService subscriptionService;
+    @EJB private GenericObjectService objService;
     @EJB private ListService listService;
     @EJB private ClientService clientService;
-    @EJB private GenericObjectService genericDBService;
     private boolean startFirstList;
     
     private final String formName = "FormAddList";
     
     @PostConstruct
     public void init(){
-        this.checkNoListYet();
+        checkNoListYet();
+        if(!FacesContext.getCurrentInstance().isPostback()) {
+            loadVerifiedAddresses();
+        }
     }
     
     public void addList(){
@@ -70,9 +77,9 @@ public class FormAddList {
             //redirect to itself after setting list editing
             //ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI()); can't do this else it will show .xhtml
-            FacesMessenger.setFacesMessage(programList.getFormName(), FacesMessage.SEVERITY_FATAL, "List added. ", "You can set up your list now!");
-            this.programList.setListEditing(SubscriptionList);
-            programList.refresh();
+            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_FATAL, "List added. ", "You can set up your list now!");
+            this.program.setListEditing(SubscriptionList);
+            program.refresh();
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EnterpriseObjectNotFoundException ex) {
@@ -103,18 +110,7 @@ public class FormAddList {
     }
     
     public void checkNoListYet() {
-        /*User user = userContainer.getUser();
-
-        if (user == null) {
-            throw new RuntimeException("No user object found for this session " + userContainer);
-        }
-
-        Client client = clientService.getClientByAssignedUser(user.getOBJECTID());
-        if (client == null) {
-            throw new RuntimeException("No client object found for this user " + user);
-        }*/
-
-        startFirstList = (programList.getAllLists() == null || programList.getAllLists().isEmpty());
+        startFirstList = (program.getAllLists() == null || program.getAllLists().isEmpty());
     }
 
     public boolean isStartFirstList() {
@@ -125,5 +121,24 @@ public class FormAddList {
         this.startFirstList = startFirstList;
     }
     
+    public List<VerifiedSendingAddress> getVerifiedAddresses() {
+        return program.getVerifiedAddresses();
+    }
     
+    public String getSendingAddress() {
+        return program.getSendingAddress();
+    }
+
+    public void setSendingAddress(String sendingAddress) {
+        program.setSendingAddress(sendingAddress);
+    }
+
+    public void setVerifiedAddresses(List<VerifiedSendingAddress> verifiedAddresses) {
+        program.setVerifiedAddresses(verifiedAddresses);
+    }
+    
+    public void loadVerifiedAddresses() {
+        List<VerifiedSendingAddress> verifiedAddresses = objService.getEnterpriseData(clientCont.getClient().getOBJECTID(), VerifiedSendingAddress.class);
+        setVerifiedAddresses(verifiedAddresses);
+    }
 }

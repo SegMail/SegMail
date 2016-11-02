@@ -26,6 +26,9 @@ public class CampaignActivityOutboundLink extends EnterpriseData<CampaignActivit
     private String LINK_TARGET;
     
     private String LINK_TEXT;
+    
+    private String ORIGINAL_LINK_HTML;
+    
 
     public String getLINK_TARGET() {
         return LINK_TARGET;
@@ -50,20 +53,31 @@ public class CampaignActivityOutboundLink extends EnterpriseData<CampaignActivit
     public void setLINK_TEXT(String LINK_TEXT) {
         this.LINK_TEXT = LINK_TEXT;
     }
+
+    public String getORIGINAL_LINK_HTML() {
+        return ORIGINAL_LINK_HTML;
+    }
+
+    public void setORIGINAL_LINK_HTML(String ORIGINAL_LINK_HTML) {
+        this.ORIGINAL_LINK_HTML = ORIGINAL_LINK_HTML;
+    }
     
     @Override
     public void randInit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public Object generateKey() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return super.OWNER;
     }
 
     @Override
     public String HTMLName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return super.OWNER.getOBJECT_NAME();
     }
     
+    public String constructLink() {
+        return "<a target='_blank' href='"+this.LINK_TARGET+"' >"+this.LINK_TEXT+"</a>";
+    }
 }

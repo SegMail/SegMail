@@ -15,17 +15,6 @@
     </properties>
     
     <dependencies>
-        <!--<dependency>
-            <groupId>org.primefaces</groupId>
-            <artifactId>primefaces</artifactId>
-            <version>4.0</version>
-        </dependency>-->
-        
-        <dependency>
-            <groupId>org.primefaces.extensions</groupId>
-            <artifactId>all-themes</artifactId>
-            <version>1.0.8</version>
-        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -41,11 +30,11 @@
             <artifactId>joda-time</artifactId>
             <version>2.3</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.35</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -341,47 +330,10 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>org.ocpsoft.rewrite</groupId>
-            <artifactId>rewrite-servlet</artifactId>
-            <version>2.0.12.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ocpsoft.rewrite</groupId>
-            <artifactId>rewrite-config-prettyfaces</artifactId>
-            <version>2.0.11.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ocpsoft.rewrite</groupId>
-            <artifactId>rewrite-integration-faces</artifactId>
-            <version>2.0.11.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ocpsoft.rewrite</groupId>
-            <artifactId>rewrite-integration-cdi</artifactId>
-            <version>2.0.11.Final</version>
-        </dependency>--><!---->
-            
-        <!--<dependency>
-            <groupId>org.jboss.weld.servlet</groupId>
-            <artifactId>weld-servlet-core</artifactId>
-            <version>2.1.2.Final</version>
-        </dependency>-->
-        
-        <!--Test over-writing hibernate in EDS
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.3.9.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.3.9.Final</version>
-        </dependency>-->
     </dependencies>
     
     <build>
+        <!--<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -401,6 +353,8 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
+                    <attachClasses>true</attachClasses>
+                    <classesClassifier>classes</classesClassifier>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
@@ -409,14 +363,14 @@
                             </directory>
 
                         </resource>
-                        <resource>
+                        <!--<resource>
                             <directory>src</directory>
                             <targetPath>WEB-INF</targetPath>
                             <includes>
                                 <include>jax-ws-catalog.xml</include>
                                 <include>wsdl/**</include>
                             </includes>
-                        </resource>
+                        </resource>-->
                     </webResources>
                 </configuration>
             </plugin>

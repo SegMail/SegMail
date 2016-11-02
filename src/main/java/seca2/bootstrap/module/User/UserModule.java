@@ -5,8 +5,6 @@
  */
 package seca2.bootstrap.module.User;
 
-import eds.component.user.UserAccountLockedException;
-import eds.component.user.UserLoginException;
 import seca2.bootstrap.UserSessionContainer;
 import java.io.Serializable;
 import javax.ejb.EJB;
@@ -89,7 +87,6 @@ public class UserModule extends BootstrapModule implements Serializable {
 
         //Authenticate a webservice call
         if (requestContainer.isWebservice()) {
-            //authenticateWSCall(request, response);
             return true;
         }
 
@@ -192,38 +189,6 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean bypassDuringWeb() {
-        return true;
-    }
-
-    /**
-     * This method is a HTTP-based solution, not a SOAP one. If the
-     * authentication fails, UserModule should subtly throw an exception and the
-     * client should interpret it implicitly that the login has failed. A more
-     * explicity way should be to use SOAP Handlers, which I have not yet made
-     * it work. If we were to use SOAP Handlers, UserModule will not need to
-     * even authenticate WS SOAP requests in the first place.
-     *
-     * @param request
-     * @param response
-     * @return
-     */
-    private boolean authenticateWSCall(ServletRequest request, ServletResponse response)
-            throws UserLoginException, UserAccountLockedException {
-
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        String queryString = req.getQueryString();
-        if ("wsdl".equals(queryString)) //Because there is an interface call and a implementation call,
-        //That's why using fitlers to authenticate SOAP messages is not good.
-        {
-            return true;
-        }
-
-        String username = req.getHeader("username");
-        String password = req.getHeader("password");
-
-        userService.login(username, password);
-
         return true;
     }
 }

@@ -3,7 +3,6 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui"
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
@@ -11,112 +10,45 @@
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
         <ui:define name="main-program-panel">
-
-            <div class="row"><!--For the message-->
-                <div class="col-md-12">
-                    <form jsf:id="ProgramTemplate">
-                        <s2:messenger for="ProgramTemplate" showDetail="true" showSummary="true" closable="true" />
-                    </form>
-                </div>
-
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="block">
-                        <div class="block-content">
-                            <h2><strong>Confirmation emails</strong></h2>
-
-                            <p>
-                                Confirmation emails are sent to your subscribers upon the first time they 
-                                signup to confirm that the email address that they have provided belongs
-                                to them. You can create your own confirmation emails here that can be 
-                                <u>shared across different lists</u>.
-                            </p>
-                            <div class="form-group">
-                                <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
-                                   onclick="
-                                           popup.init('popup_title', 'Add new confirmation template', 'email_type', 'CONFIRMATION');
-                                           popup.popup();"
-                                   >
-
-                                    Create new confirmation email
-                                </a>
-                            </div>
-                            <div class="list-group">
-
-                                <!--<a href="#" class="list-group-item">Default</a>-->
-                                <c:forEach items="#{ProgramTemplateLoader.program.confirmationTemplates}" var="confirm">
-                                    <form jsf:id="edit_confirmation_popup_form_#{confirm.OBJECTID}" name="confirmation_#{confirm.OBJECTID}">
-                                        <a href="#edit_auto_email_popup" class="list-group-item" data-toggle="modal"
-                                           >
-                                            <f:ajax render="edit_auto_email_form"  event="click"
-                                                    listener="#{FormEditExistingTemplate.loadTemplate(confirm.OBJECTID)}"
-                                                    onevent="edit"
-                                                    />
-                                            #{confirm.SUBJECT}
-                                        </a>
-                                    </form>
-                                </c:forEach>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="block">
-                        <div class="block-content">
-
-                            <h2><strong>Welcome emails</strong></h2>
-
-                            <p>
-                                Welcome emails are sent to your subscribers upon confirmation of their subscription.
-                            </p>
-                            <div class="form-group">
-                                <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
-                                   onclick="popup.init('popup_title', 'Add new welcome template', 'email_type', 'WELCOME');
-                                           popup.popup();
-                                   ">
-
-                                    Create new welcome email
-                                </a>
-                            </div>
-                            <div class="list-group">
-                                <!--<a href="#" class="list-group-item">Default</a>-->
-
-                                <c:forEach items="#{ProgramTemplateLoader.program.welcomeTemplates}" var="newsletter">
-                                    <form jsf:id="edit_newsletter_popup_link_#{newsletter.OBJECTID}" name="newsletter_#{newsletter.OBJECTID}" >
-                                        <a href="#edit_auto_email_popup" class="list-group-item" data-toggle="modal"
-
-                                           >
-                                            <f:ajax event="click" render="edit_auto_email_form"
-                                                    listener="#{FormEditExistingTemplate.loadTemplate(newsletter.OBJECTID)}"
-                                                    onevent="edit"
-                                                    />
-                                            #{newsletter.SUBJECT}
-                                        </a>
-                                    </form>
-                                </c:forEach>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+            #{FormProgramSwitch.activate}
+            <c:choose>
+                <c:when test="#{FormProgramSwitch.edit}" rendered="#{FormProgramSwitch.edit}" >
+                    <ui:include rendered="#{FormProgramSwitch.edit}" src="edit_auto_email.xhtml" ></ui:include>
+                </c:when>
+                <c:otherwise>
+                    <ui:include rendered="#{not FormProgramSwitch.edit}" src="all_auto_email.xhtml" ></ui:include>
+                </c:otherwise>
+            </c:choose>
+            
             <div class="modal fade" id="add_new_auto_email_popup">
                 <ui:include src="add_new_auto_email_popup.xhtml"></ui:include>
-            </div>
-            <div class="modal fade" id="edit_auto_email_popup">
-                <ui:include src="edit_auto_email_popup.xhtml"></ui:include>
             </div>
         </ui:define>
 
         <ui:define name="scripts-bottom" id="scripts-bottom">
-            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/template_popup.js" />
+            
             <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/validation.js" />
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/custom/summernote_hack.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/delete_confirmation.js" />
-            <!----><script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.js"></script>
+            <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote-ext-template.js"></script>-->
+            
+            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/add_new_auto_email_popup.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/autoemail/js/edit_email.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/observe-DOM/observe-DOM.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery.soap/jquery.soap.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery.soap/soap_calls.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>  
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/md5/md5.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/mailmerge/mailmerge.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
+        </ui:define>
+        
+        <ui:define name="head" >
+        
         </ui:define>
 
     </ui:composition>

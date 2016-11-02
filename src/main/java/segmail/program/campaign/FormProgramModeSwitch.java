@@ -6,8 +6,6 @@
 package segmail.program.campaign;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -16,8 +14,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
+import seca2.program.FormNavigation;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.Campaign;
+import segmail.entity.campaign.CampaignActivity;
+import segmail.program.campaign.ProgramCampaign;
 
 /**
  * Impt! If this request scoped bean loads the editing Campaign, then it must be
@@ -31,6 +32,11 @@ import segmail.entity.campaign.Campaign;
 @RequestScoped
 @Named("FormProgramModeSwitch")
 public class FormProgramModeSwitch {
+    
+    /**
+     * Small trick to init this bean a little earlier than the rest
+     */
+    private String activate = "";
 
     @EJB
     CampaignService campaignService;
@@ -46,8 +52,8 @@ public class FormProgramModeSwitch {
     @PostConstruct
     public void init() {
         if (!FacesContext.getCurrentInstance().isPostback()) {
-            reloadCampaign();
-            initEditCampaignMode();
+            reloadEntities();
+            //initEditCampaignMode();
             modifySessionContainer();
         }
     }
@@ -75,48 +81,86 @@ public class FormProgramModeSwitch {
     public void setEditingCampaignId(long editingCampaignId) {
         program.setEditingCampaignId(editingCampaignId);
     }
-
-    public void reloadCampaign() {
-
-        List<String> params = reqCont.getProgramParamsOrdered();
-        if (params == null || params.isEmpty()) {
-            setEditingCampaignId(-1);
-            setEditingCampaign(null);
-            return;
-        }
-        if (params != null && !params.isEmpty()) {
-            long newId = Long.parseLong(params.get(0));
-            if (getEditingCampaignId() == newId) {
-                return;
-            }
-            setEditingCampaignId(newId);
-        }
-
-        Campaign editingCampaign = campaignService.getCampaign(getEditingCampaignId());
-        setEditingCampaign(editingCampaign);
+    
+    public long getEditingActivityId() {
+        return program.getEditingActivityId();
     }
 
-    public void initEditCampaignMode() {
-        //Initialize the campaign ID, if exist and decide whether to load the campaign or not.
-        if (this.getEditingCampaignId() > 0) {
-            this.setEditCampaignMode(true);
-            return;
+    public void setEditingActivityId(long editingActivityId) {
+        program.setEditingActivityId(editingActivityId);
+    }
+    
+    public CampaignActivity getEditingActivity() {
+        return program.getEditingActivity();
+    }
+
+    public void setEditingActivity(CampaignActivity editingActivity) {
+        program.setEditingActivity(editingActivity);
+    }
+
+    public String getActivate() {
+        return activate;
+    }
+
+    public void setActivate(String activate) {
+        this.activate = activate;
+    }
+    
+    public void reloadEntities() {
+
+        List<String> params = reqCont.getProgramParamsOrdered();
+        
+        if(params.size() >= 1) {
+            long newCampaignId = Long.parseLong(params.get(0));
+            if (getEditingCampaignId() != newCampaignId) { 
+                setEditingCampaignId(newCampaignId);
+
+                Campaign editingCampaign = campaignService.getCampaign(getEditingCampaignId());
+                setEditingCampaign(editingCampaign);
+            }
         }
-        this.setEditCampaignMode(false);
+        
+        if(params.size() >= 2) {
+            long newActivityId = Long.parseLong(params.get(1));
+            if (getEditingActivityId() != newActivityId) { 
+                setEditingActivityId(newActivityId);
+
+                CampaignActivity editingActivy = campaignService.getCampaignActivity(newActivityId);
+                setEditingActivity(editingActivy);
+            }
+        }
     }
 
     /**
-     * First of its kind...of a stupid modification. It's only because we
-     * hard-coded the program layout page.
-     *
+     * Gets the "level" of the program based on the request URL in UserRequestContainer.
+     * Eg. "/campaign" is 0, "/campaign/32/112" is 2.
+     * 
+     * @return 
      */
+    public int programLevel() {
+        return reqCont.getProgramParamsOrdered().size();
+    }
+    
     public void modifySessionContainer() {
-        if (isEditCampaignMode()) {
+        List<String> params = reqCont.getProgramParamsOrdered();
+        if(params.size() >= 2) {
+            reqCont.setRenderPageToolbar(false);
+            reqCont.setRenderPageBreadCrumbs(false);
+        }
+        
+        if(params.size() >= 1) {
             sessCont.overwriteProgramTitle(this.getEditingCampaign().getCAMPAIGN_NAME());
             sessCont.overwriteProgramDescription(this.getEditingCampaign().getCAMPAIGN_GOALS());
-            return;
         }
-        sessCont.revertProgramOverwrite();
-
+        
+        if(params.size() <= 0) {
+            reqCont.setRenderPageToolbar(true);
+            reqCont.setRenderPageBreadCrumbs(true);
+            sessCont.revertProgramOverwrite();
+        }
+        
+        
     }
+
+    
 }

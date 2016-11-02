@@ -13,6 +13,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivitySchedule;
@@ -28,11 +29,13 @@ public class FormCampaignActivities {
     @Inject ProgramCampaign program;
     
     @EJB CampaignService campaignService;
+    @EJB CampaignExecutionService campExeService;
     
     @PostConstruct
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()){
-            this.loadAllActivities();
+            loadAllActivities();
+            loadClickthroughRates();
         }
     }
     
@@ -50,6 +53,14 @@ public class FormCampaignActivities {
 
     public void setActivityStatusMapping(Map<String, String> activityStatusMapping) {
         program.setActivityStatusMapping(activityStatusMapping);
+    }
+    
+    public Map<Long, Double> getClickthroughRates() {
+        return program.getClickthroughRates();
+    }
+
+    public void setClickthroughRates(Map<Long, Double> clickthroughRates) {
+        program.setClickthroughRates(clickthroughRates);
     }
     
     public void loadAllActivities() {
@@ -74,11 +85,14 @@ public class FormCampaignActivities {
         return readableStatus;
     }
     
-    /*public void loadActivity(long activityId) {
-        CampaignActivity act = campaignService.getCampaignActivity(activityId);
-        program.setEditingActivity(act);
-        
-        CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
-        program.setEditingSchedule(schedule);
-    }*/
+    public void loadClickthroughRates() {
+        List<CampaignActivity> allActivities = getAllActivities();
+        for(CampaignActivity activity : allActivities) {
+            long totalClicks = campaignService.getTotalLinkClicksForActivity(activity.getOBJECTID());
+            long totalSent = campExeService.countEmailsSentForActivity(activity.getOBJECTID());
+            
+            double clickthrough = (totalSent <= 0) ? 0.0 : (totalClicks/totalSent) * 100;
+            getClickthroughRates().put(activity.getOBJECTID(), clickthrough);
+        }
+    }
 }

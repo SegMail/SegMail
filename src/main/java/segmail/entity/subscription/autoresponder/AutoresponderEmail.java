@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A template is actually different from the actual email sent. It has to exist
@@ -27,6 +28,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="AUTORESPONDER_EMAIL")
 //@DiscriminatorValue("AutoresponderEmail")
+@XmlRootElement
 public class AutoresponderEmail extends EnterpriseObject {
     
     /**
@@ -43,6 +45,8 @@ public class AutoresponderEmail extends EnterpriseObject {
     protected String SUBJECT;
     
     protected String BODY;
+    
+    protected String BODY_PROCESSED;
     
     public String getTYPE() {
         return TYPE;
@@ -82,6 +86,17 @@ public class AutoresponderEmail extends EnterpriseObject {
     public void setBODY(String BODY) {
         this.BODY = BODY;
     }
+
+    @Column(columnDefinition="MEDIUMTEXT")
+    public String getBODY_PROCESSED() {
+        return BODY_PROCESSED;
+    }
+
+    public void setBODY_PROCESSED(String BODY_PROCESSED) {
+        this.BODY_PROCESSED = BODY_PROCESSED;
+    }
+    
+    
     
     @Override
     public void randInit() {

@@ -18,6 +18,7 @@ import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.ServerInstance;
+import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
@@ -28,6 +29,7 @@ import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 public class WSCampaignActivityMailMerge {
 
     @EJB LandingService landingService;
+    @EJB MailMergeService mmService;
     /**
      * This is a sample web service operation
      */
@@ -49,8 +51,8 @@ public class WSCampaignActivityMailMerge {
      */
     @WebMethod(operationName = "getTestLink")
     public String getTestLink(@WebParam(name = "label") String label) throws DataValidationException, IncompleteDataException {
-        MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
-            if(request == null)
+        /*MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
+        if(request == null)
             throw new DataValidationException("Invalid label");
         
         String testServerAddress = this.getWebserverAddress();
@@ -62,10 +64,11 @@ public class WSCampaignActivityMailMerge {
         
         String name = request.name().toLowerCase();
         
-        String testLink = testServerAddress + name + "/" + label;
+        String testLink = testServerAddress + name + "/" + label;*/
+        String testLink = mmService.getSystemTestLink(label);
         
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
-        resultObjectBuilder.add("name", name);
+        resultObjectBuilder.add("name", MAILMERGE_REQUEST.getByLabel(label).defaultHtmlText());
         resultObjectBuilder.add("testLink", testLink);
         
         String result = resultObjectBuilder.build().toString();

@@ -11,17 +11,21 @@ package segmail.entity.subscription.email.mailmerge;
  */
 
 public enum MAILMERGE_REQUEST {
-    CONFIRM("CONFIRM","[!confirm]",86400000),
-    UNSUBSCRIBE("UNSUBSCRIBE","!unsubscribe",-1);
+    CONFIRM("CONFIRM","{!confirm}",86400000,"confirm","Confirm"),
+    UNSUBSCRIBE("UNSUBSCRIBE","{!unsubscribe}",-1,"unsubscribe","Unsubscribe");
     
     final String name;
     final String label;
     final int expiry; //-1 for no expiry
+    final String program;
+    final String defaultHtmlText;
     
-    private MAILMERGE_REQUEST(String name, String label, int expiry){
+    private MAILMERGE_REQUEST(String name, String label, int expiry, String program, String htmlText){
         this.name = name;
         this.label = label;
         this.expiry = expiry;
+        this.program = program;
+        this.defaultHtmlText = htmlText;
     }
     
     public String label() {
@@ -31,10 +35,25 @@ public enum MAILMERGE_REQUEST {
     public int expiry() {
         return this.expiry;
     }
+    
+    public String program() {
+        return this.program;
+    }
+    
+    public String defaultHtmlText() {
+        return this.defaultHtmlText;
+    }
 
     @Override
     public String toString() {
         return this.name; //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public String toCapFirstLetter() {
+        String firstLetter = this.name.substring(0, 1);
+        String theRest = this.name.toLowerCase().substring(1);
+        theRest = firstLetter + theRest;
+        return theRest;
     }
     
     public static MAILMERGE_REQUEST getByLabel(String label) {
