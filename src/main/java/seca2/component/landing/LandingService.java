@@ -198,14 +198,19 @@ public class LandingService {
      * Update method for ServerInstance. Validates first with validateServer().
      *
      * @param server
-     * @throws DataValidationException
+     * @return the JPA managed instance
+     * @throws DataValidationException If ServerInstance data is invalid
+     * @throws java.net.URISyntaxException If ServerInstance URL is invalid
+     * @throws eds.component.data.EntityExistsException If ServerInstance.NAME is already taken
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveServer(ServerInstance server)
+    public ServerInstance saveServer(ServerInstance server)
             throws DataValidationException, URISyntaxException, EntityExistsException {
         this.validateServer(server);
         server = updateService.getEm().merge(server);
         cont.addServer(server); //To reload it
+        
+        return server;
     }
 
     /**
