@@ -5,6 +5,7 @@
  */
 package seca2.program.test.client;
 
+import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import eds.component.data.EntityNotFoundException;
 import eds.entity.client.Client;
@@ -24,6 +25,7 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 public class FormCreateAWSAccountForUser {
     
     @EJB private ClientService clientService;
+    @EJB private ClientAWSService clientAWSService;
     
     private String clientname;
 
@@ -41,7 +43,7 @@ public class FormCreateAWSAccountForUser {
             if(client == null)
                 throw new EntityNotFoundException("Client name not found.");
             
-            ClientAWSAccount account = clientService.registerAWSForClient(client);
+            ClientAWSAccount account = clientAWSService.registerAWSForClient(client);
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Account registered with ARN "+account.getARN(), "");
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

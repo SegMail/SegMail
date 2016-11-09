@@ -5,6 +5,7 @@
  */
 package segmail.component.account;
 
+import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
@@ -59,6 +60,7 @@ public class ClientAccountService {
     @EJB ListService listService;
     @EJB SubscriptionService subService;
     @EJB ClientService clientService;
+    @EJB ClientAWSService clientAWSService;
     @EJB LandingService landingService;
     
     /**
@@ -108,7 +110,7 @@ public class ClientAccountService {
             clientService.createClientContact(newContactInfo);
             
             //Create an AWS IAM user for the new user
-            ClientAWSAccount awsAccount = clientService.registerAWSForClient(clientAssign.getSOURCE());
+            ClientAWSAccount awsAccount = clientAWSService.registerAWSForClient(clientAssign.getSOURCE());
             
             //Call subscription service here instead of having the client to call 2 separate transactions
             List<String> listIds = subscriptionMap.get("list");

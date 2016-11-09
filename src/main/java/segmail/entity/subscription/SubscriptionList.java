@@ -26,11 +26,15 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     
     /**
      * The email displayed in the From field when viewed by the recipient.
+     * 
+     * This is only used in sending AutoresponderEmails, not CampaignEmailActivity.
      */
     private String SEND_AS_EMAIL;
     
     /**
      * The name displayed in the From field when viewed by the recipient.
+     * 
+     * This is only used in sending AutoresponderEmails, not CampaignEmailActivity.
      */
     private String SEND_AS_NAME;
     

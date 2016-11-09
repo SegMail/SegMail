@@ -5,6 +5,7 @@
  */
 package segmail.program.mysettings;
 
+import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import eds.component.data.DataValidationException;
 import eds.entity.client.VerifiedSendingAddress;
@@ -29,6 +30,7 @@ public class FormVerifyNewAddress {
     @Inject MySettingsProgram program;
     
     @EJB ClientService clientService;
+    @EJB ClientAWSService clientAWSService;
     
     @Inject ClientContainer clientCont;
     
@@ -44,12 +46,13 @@ public class FormVerifyNewAddress {
     
     public void verifyNewEmailAddress() {
         try {
-            VerifiedSendingAddress newAddress = clientService.verifyNewSendingAddress(clientCont.getClient(), newEmailAddress);
+            VerifiedSendingAddress newAddress = clientAWSService.verifyNewSendingAddress(clientCont.getClient(), newEmailAddress);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "A confirmation email from Amazon Web Services will be sent to your address shortly. Please click on the confirmation link in that email to activate your sending address.", "");
+            
+            program.refresh();
         } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
-        program.refresh();
     }
     
     

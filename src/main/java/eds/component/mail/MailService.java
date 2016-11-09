@@ -15,27 +15,21 @@ import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.client.ClientAWSService;
 import eds.component.data.DataValidationException;
-import eds.component.data.IncompleteDataException;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -53,6 +47,8 @@ public class MailService {
     private GenericObjectService objectService;
     @EJB
     private UpdateObjectService updateService;
+    @EJB
+    private ClientAWSService clientAWSService;
 
     @Inject
     @Password
@@ -63,10 +59,6 @@ public class MailService {
      *
      */
     public static final int UPDATE_BATCH_SIZE = 100;
-
-    public static final String DEFAULT_SMTP_ENDPOINT = "email-smtp.us-east-1.amazonaws.com";
-    public static final String DEFAULT_HTTPS_ENDPOINT_PROD = "email.us-east-1.amazonaws.com"; //Current production
-    public static final String DEFAULT_HTTPS_ENDPOINT_SANDBOX = "email.us-west-2.amazonaws.com"; //Sandbox
 
     /**
      * Sends 1 email and logs it in the database depending on the logging flag.
@@ -132,7 +124,7 @@ public class MailService {
             // You will need to have AWS_ACCESS_KEY_ID and AWS_SECRET_KEY in your1111 
             // web.xml environmental variables
             AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
-            client.setEndpoint(DEFAULT_HTTPS_ENDPOINT_PROD);
+            client.setEndpoint(clientAWSService.getSESEndpoint());
 
             client.sendEmail(request);
 
@@ -338,4 +330,6 @@ public class MailService {
             }
         }
     }
+    
+    
 }

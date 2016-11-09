@@ -20,5 +20,6 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class VerifiedSendingAddress_ extends EnterpriseData_ {
     
     public static volatile SingularAttribute<VerifiedSendingAddress,String> VERIFIED_ADDRESS;
-    
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SQS_BOUNCE_QUEUE_NAME;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SNS_BOUNCE_TOPIC_NAME;
 }

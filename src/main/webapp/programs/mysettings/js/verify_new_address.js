@@ -22,7 +22,7 @@ var FormVerifyNewAddress;
 var initSignup = function() {
     FormVerifyNewAddress = $('#FormVerifyNewAddress').validate({
         rules: {
-            email: {
+            'FormVerifyNewAddress:email': {
                 required: true,
                 email: true
             }

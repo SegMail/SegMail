@@ -15,6 +15,9 @@ import eds.component.mail.Password;
 @Password
 public class AWSPassword extends BasicAWSCredentials {
     
+    /**
+     * This is "Segmail-test-macbook-1"
+     */
     private static final String AWS_ACCESS_KEY_ID = "AKIAJLE37WT3UJIL3VEQ";
     private static final String AWS_SECRET_ACCESS_KEY = "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";
 
