@@ -19,7 +19,7 @@ import eds.component.data.RelationshipNotFoundException;
 import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
-import eds.component.mail.MailService;
+import eds.component.mail.MailServiceOutbound;
 import eds.entity.mail.Email;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -98,7 +98,7 @@ public class SubscriptionService {
     @EJB
     private MailMergeService mailMergeService;
     @EJB
-    private MailService mailService;
+    private MailServiceOutbound mailService;
 
     /**
      * [2015.07.12] Because the EJB Interceptor way failed, so this is a very
@@ -368,7 +368,7 @@ public class SubscriptionService {
         //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
-        //Send the email using MailService
+        //Send the email using MailServiceOutbound
         Email confirmEmail = new Email();
         confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
         confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
@@ -798,7 +798,7 @@ public class SubscriptionService {
         newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
         newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), sub.getTARGET().getOBJECTID());
 
-        //Send the email using MailService
+        //Send the email using MailServiceOutbound
         Email welcomeEmail = new Email();
         welcomeEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
         welcomeEmail.setSENDER_NAME(list.getSEND_AS_NAME());

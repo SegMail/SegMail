@@ -13,6 +13,7 @@ import com.amazonaws.services.simpleemail.model.Content;
 import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
+import com.amazonaws.services.simpleemail.model.SendEmailResult;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
@@ -41,7 +42,7 @@ import org.joda.time.DateTime;
  * @author LeeKiatHaw
  */
 @Stateless
-public class MailService {
+public class MailServiceOutbound {
 
     @EJB
     private GenericObjectService objectService;
@@ -126,18 +127,20 @@ public class MailService {
             AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
             client.setEndpoint(clientAWSService.getSESEndpoint());
 
-            client.sendEmail(request);
+            SendEmailResult result = client.sendEmail(request);
+            String messageId = result.getMessageId();
+            email.setAWS_SES_MESSAGE_ID(messageId);
 
         } catch (InvalidEmailException | IllegalArgumentException ex) {
-            Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
         } catch (AmazonClientException ex) {
-            Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             //Retry
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
             email.setRETRIES(email.getRETRIES() + 1);
         } catch (Throwable ex) {
-            Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
             //must log an error entity here
         } finally {

@@ -37,6 +37,8 @@ public class Email extends EnterpriseTransaction {
     
     private int RETRIES;
     
+    private String AWS_SES_MESSAGE_ID;
+    
     public String getSUBJECT() {
         return SUBJECT;
     }
@@ -111,6 +113,14 @@ public class Email extends EnterpriseTransaction {
 
     public void setRETRIES(int RETRIES) {
         this.RETRIES = RETRIES;
+    }
+
+    public String getAWS_SES_MESSAGE_ID() {
+        return AWS_SES_MESSAGE_ID;
+    }
+
+    public void setAWS_SES_MESSAGE_ID(String AWS_SES_MESSAGE_ID) {
+        this.AWS_SES_MESSAGE_ID = AWS_SES_MESSAGE_ID;
     }
     
 }

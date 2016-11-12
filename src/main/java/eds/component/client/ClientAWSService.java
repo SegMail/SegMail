@@ -6,6 +6,15 @@
 package eds.component.client;
 
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.policy.Action;
+import com.amazonaws.auth.policy.Condition;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.actions.SQSActions;
+import com.amazonaws.auth.policy.conditions.StringCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
@@ -35,10 +44,14 @@ import com.amazonaws.services.sns.model.CreateTopicResult;
 import com.amazonaws.services.sns.model.SubscribeRequest;
 import com.amazonaws.services.sns.model.SubscribeResult;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import com.amazonaws.services.sqs.model.AddPermissionRequest;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.CreateQueueResult;
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
 import com.amazonaws.services.sqs.model.GetQueueAttributesResult;
+import com.amazonaws.services.sqs.model.GetQueueUrlRequest;
+import com.amazonaws.services.sqs.model.GetQueueUrlResult;
+import com.amazonaws.services.sqs.model.SetQueueAttributesRequest;
 import eds.component.GenericObjectService;
 import eds.component.data.DataValidationException;
 import eds.component.mail.Password;
@@ -48,6 +61,8 @@ import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.client.VerifiedSendingAddress_;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -169,6 +184,7 @@ public class ClientAWSService {
      * sender with the various ARN.
      *
      * @param sender
+     * @param type
      */
     public void registerNotifProcessingForSender(VerifiedSendingAddress sender,NotificationType type) {
         List<ClientAWSAccount> accounts = objService.getEnterpriseData(sender.getOWNER().getOBJECTID(), ClientAWSAccount.class);
@@ -186,14 +202,14 @@ public class ClientAWSService {
         //1. Create SQS message Queue
         String queueARN = sender.getQueueARN(type);
         if (queueARN == null || queueARN.isEmpty()) {
-            queueARN = registerSQSForSender(type.name()+"-sqs-"+sender.getOWNER().getOBJECTID(),sender.getVERIFIED_ADDRESS(), sqsClient);
+            queueARN = registerSQSForSender(getSQSNameForAddress(sender, type),sender.getVERIFIED_ADDRESS(), sqsClient);
             sender.setQueueARN(queueARN,type);
         }
         
         //2. Create SNS Topic
         String topicARN = sender.getTopicARN(type);
         if (topicARN == null || topicARN.isEmpty()) {
-            topicARN = registerSNSTopicForSender(type.name()+"-sns-"+sender.getOWNER().getOBJECTID(),sender.getVERIFIED_ADDRESS(), snsClient);
+            topicARN = registerSNSTopicForSender(getSNSNameForAddress(sender,type),sender.getVERIFIED_ADDRESS(), snsClient);
             sender.setTopicARN(topicARN,type);
         }
         
@@ -202,6 +218,9 @@ public class ClientAWSService {
         if (subscriptionARN == null || subscriptionARN.isEmpty()) {
             subscriptionARN = subsribeToSNSTopic(topicARN, queueARN, snsClient);
             sender.setSubsriptionARN(subscriptionARN,type);
+            
+            //Set permission for SNS to post to SQS
+            addPermissionForQueue(getSQSNameForAddress(sender, type), queueARN, topicARN, sqsClient);
         }
         
         //4. SES publish notifications to SNS Topic
@@ -332,6 +351,58 @@ public class ClientAWSService {
         
         return subscriptionARN;
     }
+    
+    /**
+     * https://forums.aws.amazon.com/message.jspa?messageID=202798#202798
+     * 
+     * @param queueName
+     * @param topicARN
+     * @param sqsClient 
+     */
+    public void addPermissionForQueue(String queueName, String queueARN, String topicARN, AmazonSQSClient sqsClient) {
+        //Get queueURL first
+        GetQueueUrlRequest req1 = new GetQueueUrlRequest();
+        req1.setQueueName(queueName);
+        GetQueueUrlResult res1 = sqsClient.getQueueUrl(req1);
+        String queueURL = res1.getQueueUrl();
+        
+        /*AddPermissionRequest req = new AddPermissionRequest();
+        req.setQueueUrl(queueURL);
+        //req.setAWSAccountIds(Arrays.asList(new String[]{"*"}));
+        req.setActions(Arrays.asList(new String[]{"*"}));
+        req.setLabel(queueName);
+        sqsClient.addPermission(req);*/
+        
+        Policy queuePolicy = new Policy();
+        queuePolicy.setId(queueURL);
+        queuePolicy.setStatements(new ArrayList<Statement>());
+        Statement statement = new Statement(Statement.Effect.Allow);
+        
+        statement.setPrincipals(new ArrayList<Principal>());
+        statement.getPrincipals().add(Principal.AllUsers);
+        
+        statement.setActions(new ArrayList<Action>());
+        statement.getActions().add(SQSActions.AllSqsActions);
+        
+        statement.setResources(new ArrayList<Resource>());
+        statement.getResources().add(new Resource(queueARN));
+        
+        statement.setConditions(new ArrayList<Condition>());
+        statement.getConditions().add(new StringCondition(
+                StringComparisonType.StringEquals,
+                "aws:SourceARN" ,
+                topicARN
+        ));
+        queuePolicy.getStatements().add(statement);
+        
+        SetQueueAttributesRequest req2 = new SetQueueAttributesRequest();
+        req2.setQueueUrl(queueURL);
+        req2.setAttributes(new HashMap<String,String>());
+        //req2.getAttributes().put("Name", "Policy");
+        req2.getAttributes().put("Policy", queuePolicy.toJson());
+        
+        sqsClient.setQueueAttributes(req2);
+    }
 
     /**
      * Heavy operation with lots of Internet round trips.
@@ -407,4 +478,21 @@ public class ClientAWSService {
         }
     }
     
+    public String getSQSNameForAddress(VerifiedSendingAddress address, NotificationType type) {
+        String name = type.name()+"-sqs-"+address.getOWNER().getOBJECTID()+"-"+address.getSNO();
+        
+        return name;
+    }
+    
+    public String getSNSNameForAddress(VerifiedSendingAddress address, NotificationType type) {
+        String name = type.name()+"-sns-"+address.getOWNER().getOBJECTID()+"-"+address.getSNO();
+        
+        return name;
+    }
+    
+    public void assignPolicySNSToSQS(String queueARN, String topicARN) {
+        AmazonIdentityManagementClient client = new AmazonIdentityManagementClient(awsCredentials);
+        client.setEndpoint(getIAMEndpoint());
+        
+    }
 }

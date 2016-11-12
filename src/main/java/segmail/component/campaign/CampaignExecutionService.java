@@ -14,7 +14,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
-import eds.component.mail.MailService;
+import eds.component.mail.MailServiceOutbound;
 import eds.entity.client.Client;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
@@ -85,7 +85,7 @@ public class CampaignExecutionService {
     @EJB
     ListService listService;
     @EJB
-    MailService mailService;
+    MailServiceOutbound mailService;
 
     /**
      * Executes the campaign activity from the [start]th subscriber to

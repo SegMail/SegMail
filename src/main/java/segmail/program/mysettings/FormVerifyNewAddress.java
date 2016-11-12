@@ -9,8 +9,6 @@ import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import eds.component.data.DataValidationException;
 import eds.entity.client.VerifiedSendingAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -51,6 +49,8 @@ public class FormVerifyNewAddress {
             
             program.refresh();
         } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (Exception ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }

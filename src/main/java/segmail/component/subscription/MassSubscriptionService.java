@@ -10,7 +10,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.mail.InvalidEmailException;
-import eds.component.mail.MailService;
+import eds.component.mail.MailServiceOutbound;
 import eds.entity.client.Client;
 import eds.entity.mail.Email;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class MassSubscriptionService {
     @EJB
     private MailMergeService mailMergeService;
     @EJB
-    private MailService mailService;
+    private MailServiceOutbound mailService;
 
     @Inject
     SubscriptionContainer subContainer;
@@ -466,7 +466,7 @@ public class MassSubscriptionService {
             newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, newSubscription.getCONFIRMATION_KEY());
             newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, newSubscription.getSOURCE().getOBJECTID(), newSubscription.getTARGET().getOBJECTID());
 
-             //Send the email using MailService
+             //Send the email using MailServiceOutbound
             Email confirmEmail = new Email();
             confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
             confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
@@ -496,7 +496,7 @@ public class MassSubscriptionService {
 
             AutoresponderEmail assignedConfirmEmail = emails.get(0);
 
-            //Send the email using MailService
+            //Send the email using MailServiceOutbound
             Email confirmEmail = new Email();
             confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
             confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
