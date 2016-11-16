@@ -18,6 +18,8 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
 import eds.component.data.DataValidationException;
+import eds.entity.client.Client;
+import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
@@ -45,7 +47,7 @@ import org.joda.time.DateTime;
 public class MailServiceOutbound {
 
     @EJB
-    private GenericObjectService objectService;
+    private GenericObjectService objService;
     @EJB
     private UpdateObjectService updateService;
     @EJB
@@ -121,7 +123,12 @@ public class MailServiceOutbound {
                     .withReplyToAddresses(REPLY_TO)
                     .withDestination(destination)
                     .withMessage(message);
-
+            
+            String defaultBounceAddress = getDefaultBounceAddress();
+            if(defaultBounceAddress != null && !defaultBounceAddress.isEmpty()) {
+                request = request.withReturnPath(defaultBounceAddress);
+            }
+            
             // You will need to have AWS_ACCESS_KEY_ID and AWS_SECRET_KEY in your1111 
             // web.xml environmental variables
             AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
@@ -334,5 +341,20 @@ public class MailServiceOutbound {
         }
     }
     
-    
+    public String getDefaultBounceAddress() {
+        List<Client> bounceClients = objService.getEnterpriseObjectsByName("bounce", Client.class);
+        if(bounceClients == null || bounceClients.isEmpty()) {
+            return null;
+        }
+        
+        Client bounceClient = bounceClients.get(0);
+        List<VerifiedSendingAddress> bounceAddresses = objService.getEnterpriseData(bounceClient.getOBJECTID(), VerifiedSendingAddress.class);
+        if(bounceAddresses == null || bounceAddresses.isEmpty()) {
+            return null;
+        }
+        
+        VerifiedSendingAddress add = bounceAddresses.get(0);
+        
+        return add.getVERIFIED_ADDRESS();
+    }
 }

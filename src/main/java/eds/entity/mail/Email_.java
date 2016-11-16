@@ -22,6 +22,6 @@ public class Email_ extends EnterpriseTransaction_ {
     public static volatile SingularAttribute<Email,String> SENDER_NAME;
     public static volatile SetAttribute<Email,String> RECIPIENTS;
     public static volatile SetAttribute<Email,String> REPLY_TO_ADDRESSES;
-    public static volatile SetAttribute<Email,Integer> RETRIES;
-    
+    public static volatile SingularAttribute<Email,Integer> RETRIES;
+    public static volatile SingularAttribute<Email,String> AWS_SES_MESSAGE_ID;
 }

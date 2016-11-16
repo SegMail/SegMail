@@ -17,4 +17,5 @@ import javax.persistence.metamodel.StaticMetamodel;
 public class SubscriberAccount_ extends EnterpriseObject_{
     
     public static volatile SingularAttribute<SubscriberAccount,String> EMAIL;
+    public static volatile SingularAttribute<SubscriberAccount,String> SUBSCRIBER_STATUS;
 }

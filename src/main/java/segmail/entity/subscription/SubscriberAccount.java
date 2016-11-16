@@ -13,11 +13,13 @@ import javax.persistence.Table;
  *
  * @author LeeKiatHaw
  */
-    @Entity
+@Entity
 @Table(name="SUBSCRIBER_ACCOUNT")
 public class SubscriberAccount extends EnterpriseObject {
 
     private String EMAIL;
+    
+    private String SUBSCRIBER_STATUS;
     
     public String getEMAIL() {
         return EMAIL;
@@ -25,6 +27,14 @@ public class SubscriberAccount extends EnterpriseObject {
 
     public void setEMAIL(String EMAIL) {
         this.EMAIL = EMAIL;
+    }
+
+    public String getSUBSCRIBER_STATUS() {
+        return SUBSCRIBER_STATUS;
+    }
+
+    public void setSUBSCRIBER_STATUS(String SUBSCRIBER_STATUS) {
+        this.SUBSCRIBER_STATUS = SUBSCRIBER_STATUS;
     }
     
     @Override

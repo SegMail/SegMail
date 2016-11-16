@@ -20,6 +20,7 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
+import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.mail.Email;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +57,9 @@ import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.subscription.Assign_Client_List;
+import segmail.entity.subscription.Assign_Client_List_;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
@@ -765,6 +770,30 @@ public class SubscriptionService {
     }
     
     /**
+     * Updates all SubscriptionList of a single client.
+     * Sometimes it's better to have more simple queries than to have fewer complex queries 
+     * and overload the DB.
+     * 
+     * @param subscribers
+     * @return 
+     */
+    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int updateAllSubscriberCountForClient(long clientId) {
+        List<SubscriptionList> lists = listService.getAllListForClient(clientId);
+        int result = 0;
+        for(SubscriptionList list : lists) {
+            try {
+                result += updateSubscriberCount(list.getOBJECTID()).get();
+            } catch (InterruptedException | ExecutionException ex) {
+                Logger.getLogger(SubscriptionService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
      * A Welcome email is always optional.
      * 
      * @param sub
@@ -807,5 +836,67 @@ public class SubscriptionService {
         welcomeEmail.addRecipient(sub.getSOURCE().getEMAIL());
 
         mailService.queueEmail(welcomeEmail, DateTime.now());
+    }
+    
+    /**
+     * 1) Updates SubscriberAccount.SUBSCRIBER_STATUS
+     * @param subscribers
+     * @param clientId
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int updateSubscriberBounceStatus(List<String> subscribers, long clientId) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaUpdate<SubscriberAccount> update = builder.createCriteriaUpdate(SubscriberAccount.class);
+        Root<SubscriberAccount> updateAccount = update.from(SubscriberAccount.class);
+        
+        Subquery<Long> selectQuery = update.subquery(Long.class);
+        Root<SubscriberAccount> fromSubscAcc = selectQuery.from(SubscriberAccount.class);
+        Root<SubscriberOwnership> fromOwner = selectQuery.from(SubscriberOwnership.class);
+        
+        selectQuery.select(fromSubscAcc.get(SubscriberAccount_.OBJECTID));
+        selectQuery.where(builder.and(
+                builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId),
+                builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscAcc.get(SubscriberAccount_.OBJECTID)),
+                fromSubscAcc.get(SubscriberAccount_.EMAIL).in(subscribers)));
+        
+        update.set(updateAccount.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.BOUNCED.name());
+        update.where(updateAccount.get(SubscriberAccount_.OBJECTID).in(selectQuery));
+        
+        int result = objectService.getEm().createQuery(update)
+                .executeUpdate();
+        
+        return result;
+    }
+    
+    /**
+     * 2) Updates all Subscription.SUBSCRIPTION_STATUS
+     * @param subscribers
+     * @param clientId
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int updateSubscriptionBounceStatus(List<String> subscribers, long clientId) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaUpdate<Subscription> update = builder.createCriteriaUpdate(Subscription.class);
+        Root<Subscription> updateAccount = update.from(Subscription.class);
+        
+        Subquery<Long> accQuery = update.subquery(Long.class);
+        Root<SubscriberAccount> fromAcc = accQuery.from(SubscriberAccount.class);
+        Root<SubscriberOwnership> fromOwner = accQuery.from(SubscriberOwnership.class);
+        accQuery.select(fromAcc.get(SubscriberAccount_.OBJECTID));
+        accQuery.where(builder.and(
+                builder.equal(fromAcc.get(SubscriberAccount_.OBJECTID),fromOwner.get(SubscriberOwnership_.SOURCE)),
+                builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId),
+                fromAcc.get(SubscriberAccount_.EMAIL).in(subscribers)
+        ));
+        
+        update.set(updateAccount.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.BOUNCED.name());
+        update.where(updateAccount.get(Subscription_.SOURCE).in(accQuery));
+        
+        int result = objectService.getEm().createQuery(update)
+                .executeUpdate();
+        
+        return result;
     }
 }

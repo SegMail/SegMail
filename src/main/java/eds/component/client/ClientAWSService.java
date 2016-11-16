@@ -280,7 +280,7 @@ public class ClientAWSService {
     public User retrieveOrRegisterAWSUser(Client client) {
         User result = null;
         AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
-        awsClient.setEndpoint(getIAMEndpoint());
+        //awsClient.setEndpoint(getIAMEndpoint()); //IAM does not need endpoint
         try {
             GetUserRequest getReq = new GetUserRequest();
             getReq.setUserName(client.getCLIENT_NAME());
@@ -409,10 +409,11 @@ public class ClientAWSService {
      * 
      * @param client
      * @param sendingAddress
+     * @param registerBounce true if this same sendingAddress would be the bounce address.
      * @return
      * @throws DataValidationException 
      */
-    public VerifiedSendingAddress verifyNewSendingAddress(Client client, String sendingAddress) 
+    public VerifiedSendingAddress verifyNewSendingAddress(Client client, String sendingAddress, boolean registerBounce) 
             throws DataValidationException {
         
         if (!EmailValidator.getInstance().isValid(sendingAddress)) {
@@ -449,8 +450,13 @@ public class ClientAWSService {
         VerifyEmailIdentityRequest verifyReq = new VerifyEmailIdentityRequest().withEmailAddress(sendingAddress);
         VerifyEmailIdentityResult verifyResult = awsClient.verifyEmailIdentity(verifyReq);
         
-        registerNotifProcessingForSender(newVerifiedAddress,NotificationType.Bounce);
-        registerNotifProcessingForSender(newVerifiedAddress,NotificationType.Complaint);
+        /**
+         * Do this only for certain system email addresses.
+         */
+        if(registerBounce) {
+            registerNotifProcessingForSender(newVerifiedAddress,NotificationType.Bounce);
+            registerNotifProcessingForSender(newVerifiedAddress,NotificationType.Complaint);
+        }
         
         return newVerifiedAddress;
     }

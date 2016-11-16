@@ -14,6 +14,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
@@ -31,6 +32,7 @@ public class FormVerifyNewAddress {
     @EJB ClientAWSService clientAWSService;
     
     @Inject ClientContainer clientCont;
+    @Inject UserSessionContainer userCont;
     
     private String newEmailAddress;
 
@@ -44,7 +46,11 @@ public class FormVerifyNewAddress {
     
     public void verifyNewEmailAddress() {
         try {
-            VerifiedSendingAddress newAddress = clientAWSService.verifyNewSendingAddress(clientCont.getClient(), newEmailAddress);
+            //Only set up bounce for system accounts
+            //boolean registerBounce = "Segmail Administrator".equals(userCont.getUserType().getUSERTYPENAME());
+            //Let's just register bounce for all senders first, then add a global bounce. 
+            //This way, if the global bounce is not set up, there is still a sender bounce backup.
+            VerifiedSendingAddress newAddress = clientAWSService.verifyNewSendingAddress(clientCont.getClient(), newEmailAddress, true);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "A confirmation email from Amazon Web Services will be sent to your address shortly. Please click on the confirmation link in that email to activate your sending address.", "");
             
             program.refresh();

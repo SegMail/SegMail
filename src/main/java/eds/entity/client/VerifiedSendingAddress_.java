@@ -22,4 +22,10 @@ public class VerifiedSendingAddress_ extends EnterpriseData_ {
     public static volatile SingularAttribute<VerifiedSendingAddress,String> VERIFIED_ADDRESS;
     public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SQS_BOUNCE_QUEUE_NAME;
     public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SNS_BOUNCE_TOPIC_NAME;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SNS_BOUNCE_SUBSCRIPTION_ARN;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SQS_BOUNCE_QUEUE_URL;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SQS_COMPLAINT_QUEUE_ARN;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SNS_COMPLAINT_TOPIC_ARN;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SNS_COMPLAINT_SUBSCRIPTION_ARN;
+    public static volatile SingularAttribute<VerifiedSendingAddress,String> AWS_SQS_COMPLAINT_QUEUE_URL;
 }

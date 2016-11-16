@@ -26,11 +26,15 @@ public class VerifiedSendingAddress extends EnterpriseData<Client> {
     
     private String AWS_SNS_BOUNCE_SUBSCRIPTION_ARN;
     
+    private String AWS_SQS_BOUNCE_QUEUE_URL;
+    
     private String AWS_SQS_COMPLAINT_QUEUE_ARN;
     
     private String AWS_SNS_COMPLAINT_TOPIC_ARN;
     
     private String AWS_SNS_COMPLAINT_SUBSCRIPTION_ARN;
+    
+    private String AWS_SQS_COMPLAINT_QUEUE_URL;
 
     public String getVERIFIED_ADDRESS() {
         return VERIFIED_ADDRESS;
@@ -86,6 +90,22 @@ public class VerifiedSendingAddress extends EnterpriseData<Client> {
 
     public void setAWS_SNS_COMPLAINT_TOPIC_ARN(String AWS_SNS_COMPLAINT_TOPIC_ARN) {
         this.AWS_SNS_COMPLAINT_TOPIC_ARN = AWS_SNS_COMPLAINT_TOPIC_ARN;
+    }
+
+    public String getAWS_SQS_BOUNCE_QUEUE_URL() {
+        return AWS_SQS_BOUNCE_QUEUE_URL;
+    }
+
+    public void setAWS_SQS_BOUNCE_QUEUE_URL(String AWS_SQS_BOUNCE_QUEUE_URL) {
+        this.AWS_SQS_BOUNCE_QUEUE_URL = AWS_SQS_BOUNCE_QUEUE_URL;
+    }
+
+    public String getAWS_SQS_COMPLAINT_QUEUE_URL() {
+        return AWS_SQS_COMPLAINT_QUEUE_URL;
+    }
+
+    public void setAWS_SQS_COMPLAINT_QUEUE_URL(String AWS_SQS_COMPLAINT_QUEUE_URL) {
+        this.AWS_SQS_COMPLAINT_QUEUE_URL = AWS_SQS_COMPLAINT_QUEUE_URL;
     }
     
     public String getQueueARN(NotificationType type) {
