@@ -286,7 +286,7 @@ public class AutoresponderService {
             query.where(
                     builder.and(
                             builder.equal(fromAutoEmail.get(AutoresponderEmail_.SUBJECT), subject),
-                            builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()),
+                            builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name),
                             builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)),
                             builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId)
                     )
@@ -372,7 +372,7 @@ public class AutoresponderService {
         conditions.add(builder.equal(fromAssignAutoemailList.get(Assign_AutoresponderEmail_List_.TARGET), fromClientList.get(Assign_Client_List_.TARGET)));
         conditions.add(builder.equal(fromClientList.get(Assign_Client_List_.SOURCE), clientId));
         if (type != null) {
-            conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()));
+            conditions.add(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name));
         }
 
         query.select(fromAutoEmail);
@@ -398,7 +398,7 @@ public class AutoresponderService {
         Root<Assign_AutoresponderEmail_List> fromAssignAutoEmailList = query.from(Assign_AutoresponderEmail_List.class);
 
         query.select(fromAutoEmail);
-        query.where(builder.and(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()),
+        query.where(builder.and(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name),
                 builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailList.get(Assign_AutoresponderEmail_Client_.SOURCE)),
                 builder.equal(fromAssignAutoEmailList.get(Assign_AutoresponderEmail_List_.TARGET), listId)
         ));
@@ -423,7 +423,7 @@ public class AutoresponderService {
         Root<Assign_AutoresponderEmail_List> fromAssignAutoEmailList = query.from(Assign_AutoresponderEmail_List.class);
 
         query.select(fromAssignAutoEmailList);
-        query.where(builder.and(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name()),
+        query.where(builder.and(builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name),
                 builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailList.get(Assign_AutoresponderEmail_Client_.SOURCE)),
                 builder.equal(fromAssignAutoEmailList.get(Assign_AutoresponderEmail_List_.TARGET), listId)
         ));

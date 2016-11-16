@@ -16,7 +16,7 @@ public enum ServerNodeType {
     ERP("ERP"),
     WEB("WEB");
     
-    String value;
+    public String value;
     
     private ServerNodeType(String value){
         this.value = value;

@@ -59,7 +59,7 @@ public class ListService {
     private GenericConfigService configService;
 
     public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
-        if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name()) && !field.getFIELD_NAME().equalsIgnoreCase(FIELD_TYPE.EMAIL.name())) {
+        if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name) && !field.getFIELD_NAME().equalsIgnoreCase(FIELD_TYPE.EMAIL.name)) {
             throw new DataValidationException("Only the \"Email\" field can have order number 1");
         }
         if (field.getSNO() < 1) {

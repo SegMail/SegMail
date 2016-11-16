@@ -460,7 +460,7 @@ public class SubscriptionService {
         if(statusList != null && statusList.length > 0) {
             String[] statusNames = new String[statusList.length];
             for(int i = 0; i<statusList.length; i++) {
-                statusNames[i] = statusList[i].name();
+                statusNames[i] = statusList[i].name;
             }
             conditions.add(fromSubscription.get(Subscription_.STATUS).in(statusNames));
         }
@@ -489,7 +489,7 @@ public class SubscriptionService {
         if(statusList != null && statusList.length > 0) {
             String[] statusNames = new String[statusList.length];
             for(int i = 0; i<statusList.length; i++) {
-                statusNames[i] = statusList[i].name();
+                statusNames[i] = statusList[i].name;
             }
             conditions.add(fromSubscription.get(Subscription_.STATUS).in(statusNames));
         }
@@ -860,7 +860,7 @@ public class SubscriptionService {
                 builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscAcc.get(SubscriberAccount_.OBJECTID)),
                 fromSubscAcc.get(SubscriberAccount_.EMAIL).in(subscribers)));
         
-        update.set(updateAccount.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.BOUNCED.name());
+        update.set(updateAccount.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.BOUNCED.name);
         update.where(updateAccount.get(SubscriberAccount_.OBJECTID).in(selectQuery));
         
         int result = objectService.getEm().createQuery(update)
@@ -891,7 +891,7 @@ public class SubscriptionService {
                 fromAcc.get(SubscriberAccount_.EMAIL).in(subscribers)
         ));
         
-        update.set(updateAccount.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.BOUNCED.name());
+        update.set(updateAccount.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.BOUNCED.name);
         update.where(updateAccount.get(Subscription_.SOURCE).in(accQuery));
         
         int result = objectService.getEm().createQuery(update)

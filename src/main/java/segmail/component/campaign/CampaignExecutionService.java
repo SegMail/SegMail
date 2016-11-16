@@ -50,6 +50,7 @@ import segmail.entity.campaign.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -378,7 +379,10 @@ public class CampaignExecutionService {
         query.where(builder.and(
                 builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), activityId),
                 builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERED_TRANSACTION), fromEmail.get(Email_.TRANSACTION_ID)),
-                builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.SENT.label)
+                fromEmail.get(Email_.PROCESSING_STATUS).in(
+                        EMAIL_PROCESSING_STATUS.SENT.label,
+                        EMAIL_PROCESSING_STATUS.BOUNCED.label
+                )
                 ));
         
         Long result = objService.getEm().createQuery(query)
@@ -421,6 +425,34 @@ public class CampaignExecutionService {
                 total += countUnsentSubscriberEmailsForCampaign(campaignActivityId);
         
         return total;
+        /*
+         * You can't use this method because some Subscribers would have bounced before
+         * this campaign was executed and some after, so there is no absolute way of knowing
+         * how many subscribers were targeted only for this campaign.
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        Root<SubscriberAccount> fromAcc = countQuery.from(SubscriberAccount.class);
+        Root<Subscription> fromSubsc = countQuery.from(Subscription.class);
+        Root<Assign_Campaign_List> fromCampList = countQuery.from(Assign_Campaign_List.class);
+        Root<Assign_Campaign_Activity> fromCampAct = countQuery.from(Assign_Campaign_Activity.class);
+        
+        countQuery.select(builder.count(fromAcc));
+        countQuery.where(
+                builder.and(
+                        builder.equal(fromCampAct.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        builder.equal(fromCampAct.get(Assign_Campaign_Activity_.SOURCE), fromCampList.get(Assign_Campaign_List_.SOURCE)),
+                        builder.equal(fromSubsc.get(Subscription_.TARGET), fromCampList.get(Assign_Campaign_List_.TARGET)),
+                        builder.equal(fromSubsc.get(Subscription_.SOURCE), fromAcc.get(SubscriberAccount_.OBJECTID)),
+                        fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(
+                                SUBSCRIBER_STATUS.ACTIVE.name
+                        )
+                )
+        );
+        
+        long result = objService.getEm().createQuery(countQuery)
+                .getSingleResult();
+        
+        return result;*/
     }
     
     /**

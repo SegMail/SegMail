@@ -232,10 +232,10 @@ public class FormEditExistingTemplate implements FormEditEntity {
             for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
                 //For confirm emails, don't load unsubscribe links
                 //For welcome emails, don't load confirm links
-                if(request.equals(MAILMERGE_REQUEST.CONFIRM) && WELCOME.name().equals(getEditingTemplate().getTYPE())) {
+                if(request.equals(MAILMERGE_REQUEST.CONFIRM) && WELCOME.name.equals(getEditingTemplate().getTYPE())) {
                     continue;
                 }
-                if(request.equals(MAILMERGE_REQUEST.UNSUBSCRIBE) && CONFIRMATION.name().equals(getEditingTemplate().getTYPE())) {
+                if(request.equals(MAILMERGE_REQUEST.UNSUBSCRIBE) && CONFIRMATION.name.equals(getEditingTemplate().getTYPE())) {
                     continue;
                 }
                 String url = mmService.getSystemTestLink(request.label());

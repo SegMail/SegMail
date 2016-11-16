@@ -13,7 +13,7 @@ public enum FIELD_TYPE {
     TEXT("TEXT"),
     EMAIL("EMAIL");
     
-    final String name;
+    public final String name;
     
     private FIELD_TYPE(String name){
         this.name = name;

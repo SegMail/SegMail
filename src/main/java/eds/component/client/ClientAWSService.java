@@ -382,7 +382,7 @@ public class ClientAWSService {
         statement.getPrincipals().add(Principal.AllUsers);
         
         statement.setActions(new ArrayList<Action>());
-        statement.getActions().add(SQSActions.AllSqsActions);
+        statement.getActions().add(SQSActions.AllSQSActions);
         
         statement.setResources(new ArrayList<Resource>());
         statement.getResources().add(new Resource(queueARN));

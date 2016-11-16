@@ -70,7 +70,7 @@ public class MailServiceInbound {
         String queueName = clientAWSService.getSQSNameForAddress(sender, type);
         
         //Get the queueURL first
-        AmazonSQSClient sqsClient = new AmazonSQSClient(awsCredentials);
+        AmazonSQSClient sqsClient = new AmazonSQSClient(awsCredentials); //or use client credentials?
         sqsClient.setEndpoint(endpoint);
         GetQueueUrlRequest urlReq = new GetQueueUrlRequest();
         urlReq.setQueueName(queueName);
@@ -88,10 +88,13 @@ public class MailServiceInbound {
         
         List<Email> emails = new ArrayList<>();
         List<String> messageIds = new ArrayList<>();
+        List<String> receiptHandles = new ArrayList<>();
         
         for(Message message : messages) {
             JsonReader reader = Json.createReader(new StringReader(message.getBody()));
             JsonObject body = reader.readObject();
+            String receiptHandle = message.getReceiptHandle();
+            receiptHandles.add(receiptHandle);
             
             JsonObject msgBody = Json.createReader(new StringReader(body.getJsonString("Message").getString())).readObject();
             JsonString notifType = msgBody.getJsonString("notificationType");
@@ -111,9 +114,10 @@ public class MailServiceInbound {
         }
         emails.addAll(getEmailsBySESMessageId(messageIds));
         
-        /*DeleteMessageRequest delReq = new DeleteMessageRequest();
-        delReq.setQueueUrl(queueURL);
-        sqsClient.deleteMessage(delReq);*/
+        //Delete messages that have been read
+        for(String receiptHandle : receiptHandles) {
+            sqsClient.deleteMessage(queueURL, receiptHandle);
+        }
         
         return emails;
     }
@@ -151,10 +155,10 @@ public class MailServiceInbound {
         
         for(VerifiedSendingAddress sender : senders) {
             //A stud
-            List<Email> emails = new ArrayList<>();//retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
-            Email studEmail = new Email();
+            List<Email> emails = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
+            /*Email studEmail = new Email();
             studEmail.addSingleRecipient("kiathaw@segmail.io");
-            emails.add(studEmail);
+            emails.add(studEmail);*/
             updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
         }
         

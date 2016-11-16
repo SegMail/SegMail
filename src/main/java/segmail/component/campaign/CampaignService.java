@@ -183,7 +183,7 @@ public class CampaignService {
         CampaignActivity newActivity = new CampaignActivity();
         newActivity.setACTIVITY_NAME(name);
         newActivity.setACTIVITY_GOALS(goals);
-        newActivity.setACTIVITY_TYPE(type.name());
+        newActivity.setACTIVITY_TYPE(type.name);
         newActivity.setSTATUS(ACTIVITY_STATUS.NEW.name);
         
         validateCampaignActivity(newActivity);

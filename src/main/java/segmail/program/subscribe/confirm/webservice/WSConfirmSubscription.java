@@ -86,13 +86,13 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
                 throw new UnwantedAccessException();
             }
 
-            if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
+            if (MAILMERGE_STATUS.PROCESSED.name.equals(trans.getPROCESSING_STATUS())) {
                 throw new TransactionProcessedException();
             }
             
             Subscription confirmedSubsc = subService.confirmSubscriber(key);
 
-            int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name());
+            int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name);
 
             if (updateResults <= 0) {
                 throw new RuntimeException("No Transaction was udpated.");
@@ -131,7 +131,7 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             throw new UnwantedAccessException();
         }
 
-        if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
+        if (MAILMERGE_STATUS.PROCESSED.name.equals(trans.getPROCESSING_STATUS())) {
             throw new TransactionProcessedException();
         }
         try {

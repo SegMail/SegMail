@@ -14,11 +14,11 @@ public enum MAILMERGE_REQUEST {
     CONFIRM("CONFIRM","{!confirm}",86400000,"confirm","Confirm"),
     UNSUBSCRIBE("UNSUBSCRIBE","{!unsubscribe}",-1,"unsubscribe","Unsubscribe");
     
-    final String name;
-    final String label;
-    final int expiry; //-1 for no expiry
-    final String program;
-    final String defaultHtmlText;
+    public final String name;
+    public final String label;
+    public final int expiry; //-1 for no expiry
+    public final String program;
+    public final String defaultHtmlText;
     
     private MAILMERGE_REQUEST(String name, String label, int expiry, String program, String htmlText){
         this.name = name;

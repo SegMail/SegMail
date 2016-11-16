@@ -92,7 +92,7 @@ public class ServerInstance extends EnterpriseObject {
     }
     
     public void setSERVER_NODE_TYPE(ServerNodeType SERVER_NODE_TYPE) {
-        this.SERVER_NODE_TYPE = SERVER_NODE_TYPE.name();
+        this.SERVER_NODE_TYPE = SERVER_NODE_TYPE.value;
     }
 
     public String getURI() {

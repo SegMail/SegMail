@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.3.21</version><!--must update!!-->
+            <version>1.11.53</version><!--must update!!-->
         </dependency>
         <!--<dependency>
             <groupId>org.glassfish.main.extras</groupId>

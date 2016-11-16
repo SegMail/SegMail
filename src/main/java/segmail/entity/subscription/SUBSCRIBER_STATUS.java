@@ -14,7 +14,7 @@ public enum SUBSCRIBER_STATUS {
     INACTIVE("INACTIVE"),
     BOUNCED("BOUNCED");
     
-    final String name;
+    public final String name;
     
     private SUBSCRIBER_STATUS(String name){
         this.name = name;

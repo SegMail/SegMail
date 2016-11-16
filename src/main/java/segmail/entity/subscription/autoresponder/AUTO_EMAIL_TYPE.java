@@ -14,7 +14,7 @@ public enum AUTO_EMAIL_TYPE {
     WELCOME("WELCOME"),
     AUTORESPONDER("AUTORESPONDER");
     
-    final String name;
+    public final String name;
     
     private AUTO_EMAIL_TYPE(String name){
         this.name = name;

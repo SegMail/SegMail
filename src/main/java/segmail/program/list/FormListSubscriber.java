@@ -172,11 +172,11 @@ public class FormListSubscriber {
     }
 
     public String getEmailType() {
-        return FIELD_TYPE.EMAIL.name();
+        return FIELD_TYPE.EMAIL.name;
     }
 
     public String getTextType() {
-        return FIELD_TYPE.TEXT.name();
+        return FIELD_TYPE.TEXT.name;
     }
 
     public Map<String,Object> getFieldValues() {

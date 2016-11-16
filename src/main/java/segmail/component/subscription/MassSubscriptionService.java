@@ -31,6 +31,7 @@ import org.joda.time.DateTime;
 import static segmail.component.subscription.SubscriptionService.DEFAULT_EMAIL_FIELD_NAME;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
@@ -253,6 +254,7 @@ public class MassSubscriptionService {
                     if (account == null) {
                         account = new SubscriberAccount();
                         account.setEMAIL(email);
+                        account.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.ACTIVE.name);
                         createNewSubAccList.add(account);
                         //Create SubscriberOwnership!!!
                         SubscriberOwnership ownership = new SubscriberOwnership();
@@ -533,7 +535,7 @@ public class MassSubscriptionService {
     public List<Subscription> updateExistingSubscriptions(List<Subscription> subscriptions, SUBSCRIPTION_STATUS status) {
         for(int i = 0; i < subscriptions.size(); i++) {
             Subscription sub = subscriptions.get(i);
-            sub.setSTATUS(status.name());
+            sub.setSTATUS(status.name);
             objService.getEm().merge(sub);
             
             if (i > 0 && i % MAX_RECORDS_PER_FLUSH == 0) {

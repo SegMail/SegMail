@@ -57,7 +57,7 @@ public class AutoresponderEmail extends EnterpriseObject {
     }
     
     public void setTYPE(AUTO_EMAIL_TYPE TYPE) {
-        this.TYPE = TYPE.name();
+        this.TYPE = TYPE.name;
     }
 
     public String getSUBJECT() {

@@ -39,7 +39,7 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
         this.OWNER = OWNER;
         this.FIELD_NAME = FIELD_NAME;
         this.MANDATORY = MANDATORY;
-        this.TYPE = TYPE.name();
+        this.TYPE = TYPE.name;
         this.DESCRIPTION = DESCRIPTION;
         this.SNO = order;
     }
@@ -61,7 +61,7 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     }
 
     public void setTYPE(FIELD_TYPE TYPE) {
-        this.TYPE = TYPE.name();
+        this.TYPE = TYPE.name;
     }
 
 
