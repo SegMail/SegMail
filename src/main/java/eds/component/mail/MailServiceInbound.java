@@ -101,7 +101,7 @@ public class MailServiceInbound {
             
             if(!"Bounce".equals(notifType.getString()))
                 continue;
-                        JsonObject bounce = msgBody.getJsonObject("bounce");
+            JsonObject bounce = msgBody.getJsonObject("bounce");
             JsonString bounceType = bounce.getJsonString("bounceType");
             JsonObject mail = msgBody.getJsonObject("mail");
             JsonString messageId = mail.getJsonString("messageId");
@@ -154,11 +154,8 @@ public class MailServiceInbound {
         }
         
         for(VerifiedSendingAddress sender : senders) {
-            //A stud
+            
             List<Email> emails = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
-            /*Email studEmail = new Email();
-            studEmail.addSingleRecipient("kiathaw@segmail.io");
-            emails.add(studEmail);*/
             updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
         }
         

@@ -94,8 +94,9 @@ public class ClientAWSService {
     
     public static final String DEFAULT_SMTP_ENDPOINT = "email-smtp.us-east-1.amazonaws.com";
     public static final String DEFAULT_HTTPS_ENDPOINT_PROD = "email.us-east-1.amazonaws.com"; 
-    public static final String DEFAULT_AWS_ENDPOINT = "us-east-1.amazonaws.com"; //Current production
+    public static final String DEFAULT_AWS_ENDPOINT = "us-east-1.amazonaws.com"; //Legacy Listmail app
 
+    public static final String AWS_ENDPOINT = "ClientAWSService.AWS_ENDPOINT";
     public static final String AWS_IAM_ENDPOINT = "ClientAWSService.AWS_IAM_ENDPOINT";
     public static final String AWS_SES_ENDPOINT = "ClientAWSService.AWS_SES_ENDPOINT";
     public static final String AWS_SQS_ENDPOINT = "ClientAWSService.AWS_SQS_ENDPOINT";
@@ -105,26 +106,31 @@ public class ClientAWSService {
      * If there's no container-managed endpoint, fall back to the default sandbox.
      * @return 
      */
+    public String getAWSEndpoint() {
+        String endpoint = System.getProperty(AWS_ENDPOINT,DEFAULT_AWS_ENDPOINT);
+        
+        return endpoint;
+    }
     public String getIAMEndpoint() {
-        String endpoint = System.getProperty(AWS_IAM_ENDPOINT,"iam."+DEFAULT_AWS_ENDPOINT);
+        String endpoint = System.getProperty(AWS_IAM_ENDPOINT,"iam."+getAWSEndpoint());
         
         return endpoint;
     }
     
     public String getSQSEndpoint() {
-        String endpoint = System.getProperty(AWS_SQS_ENDPOINT,"sqs."+DEFAULT_AWS_ENDPOINT);
+        String endpoint = System.getProperty(AWS_SQS_ENDPOINT,"sqs."+getAWSEndpoint());
         
         return endpoint;
     }
     
     public String getSNSEndpoint() {
-        String endpoint = System.getProperty(AWS_SNS_ENDPOINT,"sns."+DEFAULT_AWS_ENDPOINT);
+        String endpoint = System.getProperty(AWS_SNS_ENDPOINT,"sns."+getAWSEndpoint());
         
         return endpoint;
     }
     
     public String getSESEndpoint() {
-        String endpoint = System.getProperty(AWS_SES_ENDPOINT,"email."+DEFAULT_AWS_ENDPOINT);
+        String endpoint = System.getProperty(AWS_SES_ENDPOINT,"email."+getAWSEndpoint());
         
         return endpoint;
     }
