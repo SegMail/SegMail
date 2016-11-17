@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="FormDeleteVerifiedAddress" class="">
+    <form jsf:id="FormDeleteVerifiedAddress" class="" jsf:prependId="false">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -17,8 +17,11 @@
                     </button>
                     <h4 id="popup_title" class="modal-title">Are you sure you want to remove this verified address</h4>
                 </div>
-                <h:inputHidden value="#{FormDeleteVerifiedAddress.deleteAddress}" ></h:inputHidden>
+                <h:inputHidden id="deleteAddressHidden" value="#{FormDeleteVerifiedAddress.deleteAddress}" ></h:inputHidden>
                 <div class="modal-body refresh">
+                    
+                    <s2:messenger id="FormDeleteVerifiedAddress_messenger" for="FormDeleteVerifiedAddress" showDetail="true" showSummary="true"
+                                class="form-group"></s2:messenger>
                     <p>
                         Once removed, you will not be able to send out emails with this address again and you 
                         might need to wait for a while to add this address back.

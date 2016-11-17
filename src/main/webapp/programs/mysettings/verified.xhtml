@@ -37,11 +37,7 @@
                                 <div class="list-item-right">
                                     <div>
                                         <a jsf:id="DeleteVerifiedAddress#{address.SNO}" href="#delete_verified_address" class="btn btn-danger list-item-trigger"
-                                           data-toggle="modal">
-                                            <f:ajax render=":FormDeleteVerifiedAddress"
-                                                    event="click" onevent="deleteAddress"
-                                                    listener="#{FormDeleteVerifiedAddress.setDeleteAddress(address.VERIFIED_ADDRESS)}"
-                                                    ></f:ajax>
+                                           data-toggle="modal" onclick="$('#deleteAddressHidden').val('#{address.VERIFIED_ADDRESS}')">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </div>

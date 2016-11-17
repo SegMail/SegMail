@@ -301,7 +301,7 @@ public class ClientAWSService {
         }
     }
 
-    public void deleteVerifiedAddressAndSESIdentity(Client client, String verifiedEmail) {
+    public void deleteVerifiedAddressAndSESIdentity(Client client, String verifiedEmail) throws AWSException {
         deleteVerifiedAddress(client, verifiedEmail);
         objService.getEm().flush();
         objService.getEm().clear();
@@ -467,20 +467,24 @@ public class ClientAWSService {
         return newVerifiedAddress;
     }
 
-    public void deleteSESIdentity(Client client, String verifiedEmail) {
+    public void deleteSESIdentity(Client client, String verifiedEmail) throws AWSException {
         List<ClientAWSAccount> accounts = objService.getEnterpriseData(client.getOBJECTID(), ClientAWSAccount.class);
         if (accounts == null || accounts.isEmpty()) {
             throw new RuntimeException("AWS account has not been setup for this account yet.");
         }
         ClientAWSAccount account = accounts.get(0);
         BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(), account.getAWS_SECRET_ACCESS_KEY());
-        AmazonSimpleEmailServiceClient awsClient = new AmazonSimpleEmailServiceClient(clientCredentials);
-        awsClient.setEndpoint(getSESEndpoint());
-        
-        DeleteIdentityRequest delRequest = new DeleteIdentityRequest();
-        delRequest.setIdentity(verifiedEmail);
-        
-        DeleteIdentityResult result = awsClient.deleteIdentity(delRequest);
+        try {
+            AmazonSimpleEmailServiceClient awsClient = new AmazonSimpleEmailServiceClient(clientCredentials);
+            awsClient.setEndpoint(getSESEndpoint());
+
+            DeleteIdentityRequest delRequest = new DeleteIdentityRequest();
+            delRequest.setIdentity(verifiedEmail);
+
+            DeleteIdentityResult result = awsClient.deleteIdentity(delRequest);
+        } catch (Exception ex) {
+            throw new AWSException(ex);
+        }
     }
 
     public void deleteVerifiedAddress(Client client, String verifiedEmail) {
