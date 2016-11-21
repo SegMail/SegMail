@@ -35,6 +35,7 @@ public class ApplicationConfig extends Application {
         resources.add(seca2.bootstrap.module.Webservice.REST.client.RestClientAuthOutboundFilter.class);
         resources.add(seca2.bootstrap.module.Webservice.REST.server.RestServerAuthEndpoint.class);
         resources.add(segmail.program.autoresponder.webservice.WSHttpAutoresponder.class);
+        resources.add(segmail.program.subscribe.subscribe.webservice.WSHttpSubscribe.class);
     }
     
 }
