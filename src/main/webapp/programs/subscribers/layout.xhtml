@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+        <ui:define name="main-program-panel">
+            <div class="row">
+                <div class="col-md-12">
+                    <!--Filters-->
+                    <!--Subscriber Table-->
+                    <div class="block">
+                        <ui:include src="subscriber_table.xhtml" ></ui:include>
+                    </div>
+                </div>
+
+            </div>
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/jquery.dataTables.min.js"></script>
+
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
+
+        </ui:define>
+
+    </ui:composition>
+</html>
+

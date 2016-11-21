@@ -8,6 +8,8 @@ package seca2.bootstrap.module.Webservice.REST;
 import eds.component.user.UserLoginException;
 import eds.component.webservice.WebserviceService;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
@@ -55,6 +57,7 @@ public class RestAuthenticationFilter implements ContainerRequestFilter {
             validateToken(token,ip);
 
         } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
             requestContext.abortWith(
                 Response.status(Response.Status.UNAUTHORIZED).build());
         }
