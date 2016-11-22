@@ -191,7 +191,7 @@ public class WebserviceService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public User authenticateApplicationToken(String token, String ipAddress) throws UserLoginException {
+    public User authenticateApplicationToken(String token) throws UserLoginException {
         
         List<APIAccount> accounts = this.getAPIAccounts(token);
         if(accounts == null || accounts.isEmpty())
@@ -204,11 +204,6 @@ public class WebserviceService {
         ServerInstance server = landingService.getServerFromUser(user.getOBJECTID());
         if(server == null)
             throw new UserLoginException("No servers assigned to user account.");
-        
-        if(ipAddress == null ||
-                server.getIP_ADDRESS() == null ||
-                !ipAddress.equals(server.getIP_ADDRESS()))
-            throw new UserLoginException("Unauthorized IP address.");
         
         return user;
             

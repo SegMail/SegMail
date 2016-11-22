@@ -54,7 +54,7 @@ public class RestAuthenticationFilter implements ContainerRequestFilter {
         try {
 
             // Validate the token
-            validateToken(token,ip);
+            validateToken(token);
 
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
@@ -63,8 +63,8 @@ public class RestAuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
-    private void validateToken(String token, String ip) throws UserLoginException {
-        wsService.authenticateApplicationToken(token, ip);
+    private void validateToken(String token) throws UserLoginException {
+        wsService.authenticateApplicationToken(token);
     }
     
 }
