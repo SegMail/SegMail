@@ -15,20 +15,19 @@ import org.joda.time.DateTime;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
-import segmail.entity.subscription.SubscriberFieldValue;
 
 /**
  *
  * @author LeeKiatHaw
  */
 @SessionScoped
-public class SubscribersDripService extends DripFeederService<SubscriberFieldValue> implements Serializable {
+public class SubscribersDripService extends DripFeederService<SubscriberAccount> implements Serializable {
 
     @EJB GenericObjectService objService;
     @EJB SubscriptionService subService;
     
     //Filters
-    private Long clientId;
+    private long clientId;
     /**
      * If empty, select all lists
      */
@@ -41,6 +40,48 @@ public class SubscribersDripService extends DripFeederService<SubscriberFieldVal
     private DateTime createEnd;
     
     List<SUBSCRIBER_STATUS> statuses;
+
+    public long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(long clientId) {
+        this.clientId = clientId;
+    }
+
+    public List<Long> getListIds() {
+        return listIds;
+    }
+
+    public void setListIds(List<Long> listIds) {
+        this.listIds = listIds;
+    }
+
+    public DateTime getCreateStart() {
+        return createStart;
+    }
+
+    public void setCreateStart(DateTime createStart) {
+        this.createStart = createStart;
+    }
+
+    public DateTime getCreateEnd() {
+        return createEnd;
+    }
+
+    public void setCreateEnd(DateTime createEnd) {
+        this.createEnd = createEnd;
+    }
+
+    public List<SUBSCRIBER_STATUS> getStatuses() {
+        return statuses;
+    }
+
+    public void setStatuses(List<SUBSCRIBER_STATUS> statuses) {
+        this.statuses = statuses;
+    }
+    
+    
     
     /**
      * This implementation should: 
@@ -55,8 +96,8 @@ public class SubscribersDripService extends DripFeederService<SubscriberFieldVal
      * @return 
      */
     @Override
-    public List<SubscriberFieldValue> refill(int start, int size) {
-        return subService.getFieldValuesForClient(clientId, listIds, createStart, createEnd, statuses, start, size);
+    public List<SubscriberAccount> refill(int start, int size) {
+        return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, start, size);
     }
 
     @Override

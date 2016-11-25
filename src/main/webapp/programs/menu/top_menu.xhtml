@@ -12,7 +12,7 @@
         <c:forEach items="#{UserSessionContainer.menu}" var="menuitem">
 
             <li class="#{menuitem.active ? 'active' : ''}">
-                <a href="#{menuitem.URL}">
+                <a href="#{request.contextPath}/#{menuitem.URL}">
                     <h:outputText value="#{menuitem.getPrependTags()}" escape="false" ></h:outputText>
                     #{menuitem.getName()}
                 </a>

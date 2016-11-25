@@ -10,13 +10,36 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <div class="block-head">
-        <h2>Your Subscribers</h2>
+        
+    </div>
+    <div class="block-content">
+        <div class="row">
+            <div class="col-md-6">
+                
+            </div>
+            <div class="col-md-6" style="text-align: right">
+                <a class="btn btn-primary" href="#import_subscriber_popup" data-toggle="modal">
+                    Import Subscriber
+                </a>
+                <a class="btn btn-success" href="#add_subscriber_popup" data-toggle="modal">
+                    Add Subscriber
+                </a>
+            </div>
+        </div>
+        <div class="pull-right">
+            
+        </div>
     </div>
     <div class="block-content np">
-        <table jsf:id="subscriber_table" class="table table-condensed sortable">
+        <table jsf:id="subscriber_table" class="table table-condensed">
             <thead>
                 <tr>
-                    <th><input type="checkbox" class="checkall" /></th>
+                    <th>
+                        <div class="checkbox">
+                            <input type="checkbox" class="trigger-check"
+                                   onclick="toggleCheckbox()"/>
+                        </div>
+                    </th>
                     <th>Email</th>
                     <th>Lists</th>
                     <th>Operations</th>
@@ -24,55 +47,38 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><input type="checkbox" name="checkbox"/></td>
-                    <td>hareluya86@hotmail.com</td>
-                    <td>Segmail Signups, Segmail Premium</td>
-                    <td>
-                        <button class="btn btn-primary">
-                            <i class="fa fa-user"></i>
-                        </button>
-                        <button class="btn btn-danger">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                    <td>
-                            ACTIVE
-                    </td>
-                </tr>
-                <tr>
-                    <td><input type="checkbox" name="checkbox"/></td>
-                    <td>kiathaw@gmail.com</td>
-                    <td>Segmail Signups, Segmail Premium</td>
-                    <td>
-                        <button class="btn btn-primary">
-                            <i class="fa fa-user"></i>
-                        </button>
-                        <button class="btn btn-danger">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                    <td>
-                            ACTIVE
-
-                    </td>
-                </tr>
-                <tr>
-                    <td><input type="checkbox" name="checkbox"/></td>
-                    <td>vincent@segmail.io</td>
-                    <td>Segmail Signups, Segmail Premium</td>
-                    <td>
-                        <button class="btn btn-primary">
-                            <i class="fa fa-user"></i>
-                        </button>
-                        <button class="btn btn-danger">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                    <td>
-                            BOUNCED
-                    </td>
-                </tr>
+                <c:forEach items="#{FormSubscriberTable.subscriberTable.keySet()}" var="subscriber">
+                    <tr>
+                        <td>
+                            <div class="checkbox">
+                                <input type="checkbox" name="checkbox" class="checkbox"/>
+                            </div>
+                        </td>
+                        <td>#{subscriber.EMAIL}</td>
+                        <td>
+                            <c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.Subscription']}"
+                                       var="subscription" varStatus="status" >
+                                <c:choose>
+                                    <c:when test="#{status.index > 0}">
+                                        &#44;
+                                    </c:when>
+                                </c:choose>
+                                #{subscription.TARGET.OBJECT_NAME}
+                            </c:forEach>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary">
+                                <i class="fa fa-user"></i>
+                            </button>
+                            <button class="btn btn-danger">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                        <td>
+                                #{subscriber.SUBSCRIBER_STATUS}
+                        </td>
+                    </tr>
+                </c:forEach>
             </tbody>
         </table>
     </div>
@@ -85,21 +91,13 @@
                             &lt;&lt;
                         </a>
                     </li>
-                    <li class="">
-                        <a href="#">
-                            10
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="#">
-                            11
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="#">
-                            12
-                        </a>
-                    </li>
+                    <c:forEach begin="#{FormSubscriberTable.startPage}" end="#{FormSubscriberTable.endPage}" var="i" >
+                        <li class="">
+                            <a href="#">
+                                #{i}
+                            </a>
+                        </li>
+                    </c:forEach>
                     <li class="">
                         <a href="#">
                             &gt;&gt;

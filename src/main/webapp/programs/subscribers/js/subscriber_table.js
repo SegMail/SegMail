@@ -1,7 +1,7 @@
 $(document).ready(function () {
     //Datatables
     //.$('.sortable').dataTable();
-    initSubscriberTable();
+    //initSubscriberTable();
 });
 
 var initSubscriberTable = function () {
@@ -14,4 +14,10 @@ var initSubscriberTable = function () {
             'info': false
         });
     }
+};
+
+var toggleCheckbox = function() {
+    var checkboxes = $('input.checkbox');
+    var trigCheckbox = $('input.trigger-check');
+    checkboxes.prop('checked',trigCheckbox.prop('checked'));
 }

@@ -20,6 +20,7 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.mail.Email;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -47,6 +48,8 @@ import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
@@ -907,7 +910,7 @@ public class SubscriptionService {
      * @param maxResults the max number of SubscriberAccount records to retrieve from (note: not SubscriberFieldValue records)
      * @return 
      */
-    public List<SubscriberFieldValue> getFieldValuesForClient(
+    public List<SubscriberAccount> getSubscribersForClient(
             long clientId, 
             List<Long> listIds,
             DateTime createStart,
@@ -918,8 +921,9 @@ public class SubscriptionService {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         
         //Inner query - select SubscriberAccount IDs based on the criteria
-        CriteriaQuery<Long> accQuery = builder.createQuery(Long.class);
+        CriteriaQuery<SubscriberAccount> accQuery = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromAcc = accQuery.from(SubscriberAccount.class);
+        Root<SubscriberOwnership> fromOwner = accQuery.from(SubscriberOwnership.class);
         Root<Subscription> fromSubscp = accQuery.from(Subscription.class);
         
         //Build inner criteria here
@@ -944,10 +948,14 @@ public class SubscriptionService {
             }
             criteria.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statuses));
         }
-        accQuery.select(fromAcc.get(SubscriberAccount_.OBJECTID));
+        
+        criteria.add(builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromAcc.get(SubscriberAccount_.OBJECTID)));
+        criteria.add(builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId));
+        
+        accQuery.select(fromAcc).distinct(true);
         accQuery.where(builder.and(criteria.toArray(new Predicate[]{})));
         
-        List<Long> subscriberIds = objService.getEm().createQuery(accQuery)
+        List<SubscriberAccount> results = objService.getEm().createQuery(accQuery)
                 .setFirstResult(startIndex)
                 .setMaxResults(maxResults)
                 .getResultList();
@@ -955,7 +963,7 @@ public class SubscriptionService {
         //builder outer criteria
         
         //Outer query - select field values
-        CriteriaQuery<SubscriberFieldValue> query = builder.createQuery(SubscriberFieldValue.class);
+        /*CriteriaQuery<SubscriberFieldValue> query = builder.createQuery(SubscriberFieldValue.class);
         Root<SubscriberFieldValue> fromValue = query.from(SubscriberFieldValue.class);
         
         query.select(fromValue);
@@ -963,11 +971,13 @@ public class SubscriptionService {
         
         List<SubscriberFieldValue> results = objService.getEm().createQuery(query)
                 .getResultList();
+                */
         
         return results;
     }
     
-    public long countNumberSubscribers(long clientId, 
+    public long countNumberSubscribers(
+            long clientId, 
             List<Long> listIds,
             DateTime createStart,
             DateTime createEnd,
@@ -977,9 +987,10 @@ public class SubscriptionService {
         //Inner query - select SubscriberAccount IDs based on the criteria
         CriteriaQuery<Long> accQuery = builder.createQuery(Long.class);
         Root<SubscriberAccount> fromAcc = accQuery.from(SubscriberAccount.class);
+        Root<SubscriberOwnership> fromOwner = accQuery.from(SubscriberOwnership.class);
         Root<Subscription> fromSubscp = accQuery.from(Subscription.class);
-        Root<SubscriberFieldValue> fromValue = accQuery.from(SubscriberFieldValue.class);
         
+        //Join<SubscriberOwnership, ? extends EnterpriseObject> joinAccOwner = fromOwner.join(SubscriberOwnership_.SOURCE,JoinType.RIGHT);
         //Build inner criteria here
         List<Predicate> criteria = new ArrayList<>();
         
@@ -1000,12 +1011,14 @@ public class SubscriptionService {
             for(SUBSCRIBER_STATUS status : statuses) {
                 statusStrings.add(status.name);
             }
-            criteria.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statuses));
+            criteria.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statusStrings));
         }
         
-        criteria.add(builder.equal(fromValue.get(SubscriberFieldValue_.OWNER), fromAcc.get(SubscriberAccount_.OBJECTID)));
+        criteria.add(builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromAcc.get(SubscriberAccount_.OBJECTID)));
+        criteria.add(builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId));
         
-        accQuery.select(builder.count(fromValue));
+        accQuery.select(builder.countDistinct(fromAcc));
+        //accQuery.select(fromAcc).distinct(true);
         accQuery.where(builder.and(criteria.toArray(new Predicate[]{})));
         
         Long result = objService.getEm().createQuery(accQuery)

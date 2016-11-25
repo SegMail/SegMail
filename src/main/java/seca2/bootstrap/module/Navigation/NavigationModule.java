@@ -91,7 +91,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
             LogicalPathParser newParser = new LogicalPathParser(
                     menuItemCont.getURL(),
                     requestContainer.getPathParser().getViewId(), 
-                    requestContainer.getPathParser().getServletPath()
+                    servletPath
             );
             
             menuItemCont.setActive(newParser.getProgram().equals(requestContainer.getProgramName()));

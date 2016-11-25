@@ -5,10 +5,11 @@
  */
 package segmail.program.subscribers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import seca2.program.Program;
-import segmail.entity.subscription.SubscriptionListField;
+import segmail.entity.subscription.SubscriberAccount;
 
 /**
  *
@@ -16,29 +17,40 @@ import segmail.entity.subscription.SubscriptionListField;
  */
 public class ProgramSubscribers extends Program {
     
-    private List<Map<String,String>> subscriberTable;
+    private Map<SubscriberAccount,Map<String,Object>> subscriberTable;
+    
+    private int currentPage;
 
-    public List<Map<String, String>> getSubscriberTable() {
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+    
+    public Map<SubscriberAccount,Map<String,Object>> getSubscriberTable() {
         return subscriberTable;
     }
 
-    public void setSubscriberTable(List<Map<String, String>> subscriberTable) {
+    public void setSubscriberTable(Map<SubscriberAccount,Map<String,Object>> subscriberTable) {
         this.subscriberTable = subscriberTable;
     }
 
     @Override
     public void clearVariables() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void initRequestParams() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void initProgram() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        setSubscriberTable(new HashMap<SubscriberAccount,Map<String,Object>>());
+        setCurrentPage(1);
     }
     
 }
