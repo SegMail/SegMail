@@ -5,11 +5,13 @@
  */
 package segmail.program.subscribers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import seca2.program.Program;
 import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriptionList;
 
 /**
  *
@@ -17,9 +19,49 @@ import segmail.entity.subscription.SubscriberAccount;
  */
 public class ProgramSubscribers extends Program {
     
-    private Map<SubscriberAccount,Map<String,Object>> subscriberTable;
+    private Map<Long,Map<String,Object>> subscriberTable;
     
     private int currentPage;
+    
+    //I can't believe we have to resort to this
+    //This is actually the best way to control the page numbers
+    private List<Integer> pages;
+    
+    private List<String> assignedLists;
+    private List<Long> convertedAssignedLists;
+    private List<SubscriptionList> ownedLists;
+
+    public List<Long> getConvertedAssignedLists() {
+        return convertedAssignedLists;
+    }
+
+    public void setConvertedAssignedLists(List<Long> convertedAssignedLists) {
+        this.convertedAssignedLists = convertedAssignedLists;
+    }
+
+    public List<String> getAssignedLists() {
+        return assignedLists;
+    }
+
+    public void setAssignedLists(List<String> assignedLists) {
+        this.assignedLists = assignedLists;
+    }
+
+    public List<SubscriptionList> getOwnedLists() {
+        return ownedLists;
+    }
+
+    public void setOwnedLists(List<SubscriptionList> ownedLists) {
+        this.ownedLists = ownedLists;
+    }
+
+    public List<Integer> getPages() {
+        return pages;
+    }
+
+    public void setPages(List<Integer> pages) {
+        this.pages = pages;
+    }
 
     public int getCurrentPage() {
         return currentPage;
@@ -29,11 +71,11 @@ public class ProgramSubscribers extends Program {
         this.currentPage = currentPage;
     }
     
-    public Map<SubscriberAccount,Map<String,Object>> getSubscriberTable() {
+    public Map<Long,Map<String,Object>> getSubscriberTable() {
         return subscriberTable;
     }
 
-    public void setSubscriberTable(Map<SubscriberAccount,Map<String,Object>> subscriberTable) {
+    public void setSubscriberTable(Map<Long,Map<String,Object>> subscriberTable) {
         this.subscriberTable = subscriberTable;
     }
 
@@ -49,8 +91,11 @@ public class ProgramSubscribers extends Program {
 
     @Override
     public void initProgram() {
-        setSubscriberTable(new HashMap<SubscriberAccount,Map<String,Object>>());
+        setSubscriberTable(new HashMap<Long,Map<String,Object>>());
         setCurrentPage(1);
+        setAssignedLists(new ArrayList<String>());
+        setConvertedAssignedLists(new ArrayList<Long>());
+        setOwnedLists(new ArrayList<SubscriptionList>());
     }
     
 }

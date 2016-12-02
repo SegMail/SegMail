@@ -9,102 +9,131 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <div class="block-head">
-        
-    </div>
-    <div class="block-content">
-        <div class="row">
-            <div class="col-md-6">
-                
+    <form jsf:id="FormSubscriberTable">
+        <div class="block-head">
+
+        </div>
+        <div class="block-content">
+            <div class="row">
+                <div class="col-md-3">
+                    <input class="form-control" type="text" placeholder="Search for email"/>
+                </div>
+                <div class="col-md-9" style="text-align: right">
+                    <a class="btn btn-primary" href="#import_subscriber_popup" data-toggle="modal">
+                        Import Subscriber
+                    </a>
+                    <a class="btn btn-info" href="#add_subscriber_popup" data-toggle="modal">
+                        Add Subscriber
+                    </a>
+                </div>
             </div>
-            <div class="col-md-6" style="text-align: right">
-                <a class="btn btn-primary" href="#import_subscriber_popup" data-toggle="modal">
-                    Import Subscriber
-                </a>
-                <a class="btn btn-success" href="#add_subscriber_popup" data-toggle="modal">
-                    Add Subscriber
-                </a>
+            <div class="pull-right">
+
             </div>
         </div>
-        <div class="pull-right">
-            
-        </div>
-    </div>
-    <div class="block-content np">
-        <table jsf:id="subscriber_table" class="table table-condensed">
-            <thead>
-                <tr>
-                    <th>
-                        <div class="checkbox">
-                            <input type="checkbox" class="trigger-check"
-                                   onclick="toggleCheckbox()"/>
-                        </div>
-                    </th>
-                    <th>Email</th>
-                    <th>Lists</th>
-                    <th>Operations</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <c:forEach items="#{FormSubscriberTable.subscriberTable.keySet()}" var="subscriber">
+        <div class="block-content np">
+            <table jsf:id="subscriber_table" class="table table-condensed">
+                <thead>
                     <tr>
-                        <td>
+                        <th>
                             <div class="checkbox">
-                                <input type="checkbox" name="checkbox" class="checkbox"/>
+                                <input type="checkbox" class="trigger-check"
+                                       onclick="toggleCheckbox()"/>
                             </div>
-                        </td>
-                        <td>#{subscriber.EMAIL}</td>
-                        <td>
-                            <c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.Subscription']}"
-                                       var="subscription" varStatus="status" >
-                                <c:choose>
-                                    <c:when test="#{status.index > 0}">
-                                        &#44;
-                                    </c:when>
-                                </c:choose>
-                                #{subscription.TARGET.OBJECT_NAME}
-                            </c:forEach>
-                        </td>
-                        <td>
-                            <button class="btn btn-primary">
-                                <i class="fa fa-user"></i>
-                            </button>
-                            <button class="btn btn-danger">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                        <td>
-                                #{subscriber.SUBSCRIBER_STATUS}
-                        </td>
+                        </th>
+                        <th>
+                            Email
+                        </th>
+                        <th>Lists</th>
+                        <th>Operations</th>
+                        <th>Status</th>
                     </tr>
-                </c:forEach>
-            </tbody>
-        </table>
-    </div>
-    <div class="block-footer">
-        <div class="row">
-            <div class="col-md-12">
-                <ul class="pagination pull-right">
-                    <li class="">
-                        <a href="#">
-                            &lt;&lt;
-                        </a>
-                    </li>
-                    <c:forEach begin="#{FormSubscriberTable.startPage}" end="#{FormSubscriberTable.endPage}" var="i" >
-                        <li class="">
-                            <a href="#">
-                                #{i}
-                            </a>
-                        </li>
+                </thead>
+                <tbody>
+                    <c:forEach items="#{FormSubscriberTable.subscriberTable.keySet()}" var="subscriber">
+                        <tr>
+                            <td>
+                                <div class="checkbox">
+                                    <input type="checkbox" name="checkbox" class="checkbox"/>
+                                </div>
+                            </td>
+                            <td>#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.SubscriberAccount'].EMAIL}</td>
+                            <td>
+                                <ui:repeat value="#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.Subscription']}"
+                                           var="subscription" varStatus="status">
+                                    <c:choose>
+                                        <c:when test="#{status.index > 0}">
+                                            &#44;
+                                        </c:when>
+                                    </c:choose>
+                                    #{subscription.TARGET.OBJECT_NAME}
+                                    
+                                </ui:repeat>
+                                <!--<c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.Subscription']}"
+                                           var="subscription" varStatus="status" >
+                                    <c:choose>
+                                        <c:when test="#{status.index > 0}">
+                                            &#44;
+                                        </c:when>
+                                    </c:choose>
+                                    #{subscription.TARGET.OBJECT_NAME}
+                                </c:forEach>-->
+                            </td>
+                            <td>
+                                <button class="btn btn-primary">
+                                    <i class="fa fa-user"></i>
+                                </button>
+                                <button class="btn btn-danger">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                            <td>
+                                #{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.SubscriberAccount'].SUBSCRIBER_STATUS}
+                            </td>
+                        </tr>
                     </c:forEach>
-                    <li class="">
-                        <a href="#">
-                            &gt;&gt;
-                        </a>
-                    </li>
-                </ul>
+                </tbody>
+            </table>
+        </div>
+        <div class="block-footer">
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="pagination pull-right">
+                        <li class="">
+                            <h:commandLink value="&lt;&lt;" 
+                                               action="#{FormSubscriberTable.loadPage(1)}"
+                                               >
+                                <f:ajax render="@form"
+                                        >
+                                </f:ajax>
+                            </h:commandLink>
+                        </li>
+                        <ui:repeat id="pagination" value="#{FormSubscriberTable.pages}"
+                                   var="i" 
+                                   >
+                            <li class="#{(i eq FormSubscriberTable.currentPage) ? 'active' : ''}">
+                                <h:commandLink value="#{i}" 
+                                               action="#{FormSubscriberTable.loadPage(i)}"
+                                               >
+                                    <f:ajax render="@form"
+                                            >
+                                    </f:ajax>
+                                </h:commandLink>
+                            </li>
+                            
+                        </ui:repeat>
+                        <li class="">
+                            <h:commandLink value="&gt;&gt;" 
+                                               action="#{FormSubscriberTable.loadPage(FormSubscriberTable.totalPage)}"
+                                               >
+                                <f:ajax render="@form"
+                                        >
+                                </f:ajax>
+                            </h:commandLink>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
+    </form>
 </html>

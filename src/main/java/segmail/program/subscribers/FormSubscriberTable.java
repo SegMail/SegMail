@@ -7,6 +7,7 @@ package segmail.program.subscribers;
 
 import eds.component.GenericObjectService;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,13 +17,11 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
-import segmail.entity.subscription.SubscriptionListField;
 
 /**
  *
@@ -33,7 +32,7 @@ import segmail.entity.subscription.SubscriptionListField;
 public class FormSubscriberTable {
     
     private final int RECORDS_PER_PAGE = 20;
-    private final int PAGE_RANGE = 5;
+    private final int PAGE_RANGE = 7; //Must be an odd number 
     
     @Inject ProgramSubscribers program;
     @Inject SubscribersDripService dripService; 
@@ -48,8 +47,8 @@ public class FormSubscriberTable {
         if(!FacesContext.getCurrentInstance().isPostback()) {
             program.initProgram();
             dripService.init(RECORDS_PER_PAGE);
+            dripService.initCriteria();
             loadPage(1);
-            
         }
     }
     
@@ -61,18 +60,27 @@ public class FormSubscriberTable {
         program.setCurrentPage(currentPage);
     }
     
-    public Map<SubscriberAccount,Map<String,Object>> getSubscriberTable() {
+    public Map<Long,Map<String,Object>> getSubscriberTable() {
         return program.getSubscriberTable();
     }
 
-    public void setSubscriberTable(Map<SubscriberAccount,Map<String,Object>> subscriberTable) {
+    public void setSubscriberTable(Map<Long,Map<String,Object>> subscriberTable) {
         program.setSubscriberTable(subscriberTable);
+    }
+    
+    public List<Long> getConvertedAssignedLists() {
+        return program.getConvertedAssignedLists();
+    }
+
+    public void setConvertedAssignedLists(List<Long> convertedAssignedLists) {
+        program.setConvertedAssignedLists(convertedAssignedLists);
     }
     
     public void loadPage(int page) {
         setCurrentPage(page);
         loadFilterCriteria();
         loadSubscribers();
+        updatePageNumbers();
     }
     
     /**
@@ -86,22 +94,34 @@ public class FormSubscriberTable {
             dirtyFlag = true;
         }
         
+        List<Long> convertedList = getConvertedAssignedLists();
+        List<Long> dripList = dripService.getListIds();
+        Collections.sort(convertedList);
+        Collections.sort(dripList);
+        if(dripList == null || !dripList.equals(convertedList)) {
+            dripService.setListIds(convertedList);
+            dirtyFlag = true;
+        }
+        
         //Just placeholders, remember to replace them once the actual UI components are up
         //dripService.setCreateStart(new DateTime(1800,1,1,0,0));
         //dripService.setCreateEnd(new DateTime(9999,12,31,23,59));
         //dripService.setListIds(null);
         
         if(dirtyFlag) {
-            dripService.init(RECORDS_PER_PAGE);
+            dripService.init(RECORDS_PER_PAGE); //cannot use init, because it will clear off all criteria
+            //we need another method that will clear the objects and reset pointers only
         }
         
     }
     
     /**
      * 
-     * @param page 
      */
     public void loadSubscribers() {
+        
+        //Clear variables
+        setSubscriberTable(new HashMap<Long,Map<String,Object>>());
         
         //Extract SubscriberAccounts
         List<SubscriberAccount> subscriberAccounts = dripService.drip(getCurrentPage());
@@ -114,13 +134,16 @@ public class FormSubscriberTable {
         List<Subscription> subscriptions = objService.getRelationshipsForSourceObjects(subscriberIds, Subscription.class);
         List<SubscriberFieldValue> values = subService.getSubscriberValuesBySubscriberObjects(subscriberAccounts);
         
+        //Cache this part
         //Construct the subscriberTable
         //Run through values first
         for(SubscriberFieldValue value : values) {
-            if(!program.getSubscriberTable().containsKey(value.getOWNER()))
-                program.getSubscriberTable().put(value.getOWNER(), new HashMap<String,Object>());
+            if(!program.getSubscriberTable().containsKey(value.getOWNER().getOBJECTID())) {
+                program.getSubscriberTable().put(value.getOWNER().getOBJECTID(), new HashMap<String,Object>());
+                program.getSubscriberTable().get(value.getOWNER().getOBJECTID()).put(SubscriberAccount.class.getName(), value.getOWNER());
+            }
             
-            Map<String,Object> subscriberMap = program.getSubscriberTable().get(value.getOWNER());
+            Map<String,Object> subscriberMap = program.getSubscriberTable().get(value.getOWNER().getOBJECTID());
             //Another map to hold fields
             if(!subscriberMap.containsKey(SubscriberFieldValue.class.getName())) {
                 subscriberMap.put(SubscriberFieldValue.class.getName(), new HashMap<String,SubscriberFieldValue>());
@@ -132,31 +155,57 @@ public class FormSubscriberTable {
         
         //Then run through subscriptions
         for(Subscription subscription : subscriptions) {
-            if(!program.getSubscriberTable().containsKey(subscription.getSOURCE()))
-                program.getSubscriberTable().put(subscription.getSOURCE(), new HashMap<String,Object>());
+            if(!program.getSubscriberTable().containsKey(subscription.getSOURCE().getOBJECTID())) {
+                program.getSubscriberTable().put(subscription.getSOURCE().getOBJECTID(), new HashMap<String,Object>());
+                program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID()).put(SubscriberAccount.class.getName(), subscription.getSOURCE());
+            }
             
-            Map<String,Object> subscriberMap = program.getSubscriberTable().get(subscription.getSOURCE());
+            Map<String,Object> subscriberMap = program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID());
             //Another map to hold the list of subscription
             if(!subscriberMap.containsKey(Subscription.class.getName())) {
                 subscriberMap.put(Subscription.class.getName(), new ArrayList<Subscription>());
             }
             
             List<Subscription> subscriptionList = (List<Subscription>) subscriberMap.get(Subscription.class.getName());
-            subscriptionList.add(subscription);
+            if(!subscriptionList.contains(subscription))
+                subscriptionList.add(subscription);
         }
         
+        //We have to do this because of the exceptionally large data from EJBs
+        objService.getEm().clear();
     }
     
-    public long getTotalPage() {
-        return (dripService.count() / RECORDS_PER_PAGE) + 1;
+    public int getTotalPage() {
+        return (int) ((dripService.count() / RECORDS_PER_PAGE) + 1);
     }
     
-    public long getStartPage() {
+    public List<Integer> getPages() {
+        return program.getPages();
+    }
+
+    public void setPages(List<Integer> pages) {
+        program.setPages(pages);
+    }
+    
+    /*
+    public long startPage() {
         return Math.max(1, getCurrentPage() - (PAGE_RANGE/2));
     }
     
-    public long getEndPage() {
+    public long endPage() {
         return Math.min(getTotalPage(), getCurrentPage() + (PAGE_RANGE/2));
     }
-    
+    */
+
+    public void updatePageNumbers() {
+        //This shit doesn't work
+        //Update: this shit works in this way, not when it's managed in EL
+        int startPage = Math.max(1, getCurrentPage() - (PAGE_RANGE/2));
+        int endPage = Math.min(getTotalPage(), startPage + PAGE_RANGE -1);
+        
+        setPages(new ArrayList<Integer>());
+        for(int i = startPage; i<= endPage; i++){
+            getPages().add(i);
+        }
+    }
 }

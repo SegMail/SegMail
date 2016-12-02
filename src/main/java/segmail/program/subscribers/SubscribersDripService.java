@@ -6,9 +6,13 @@
 package segmail.program.subscribers;
 
 import eds.component.GenericObjectService;
+import eds.component.data.DataValidationException;
 import eds.component.data.DripFeederService;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import org.joda.time.DateTime;
@@ -97,12 +101,28 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
      */
     @Override
     public List<SubscriberAccount> refill(int start, int size) {
-        return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, start, size);
+        try {
+            return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, start, size);
+        } catch (DataValidationException ex) {
+            Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
     protected long countFromDB() {
-        return subService.countNumberSubscribers(clientId, listIds, createStart, createEnd, statuses);
+        try {
+            return subService.countNumberSubscribers(clientId, listIds, createStart, createEnd, statuses);
+        } catch (DataValidationException ex) {
+            Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    protected void initCriteria() {
+        this.listIds = new ArrayList<>();
+        this.statuses = new ArrayList<>();
     }
 
     

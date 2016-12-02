@@ -278,34 +278,25 @@ public class LayoutService implements Serializable {
 
     
     public List<Layout> getLayoutsByProgram(String programName) {
-        try {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Layout> query = builder.createQuery(Layout.class);
+        Root<LayoutAssignment> fromAssign = query.from(LayoutAssignment.class);
+        Root<Program> fromProgram = query.from(Program.class);
+        Root<Layout> fromLayout = query.from(Layout.class);
 
-            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-            CriteriaQuery<Layout> query = builder.createQuery(Layout.class);
-            Root<LayoutAssignment> fromAssign = query.from(LayoutAssignment.class);
-            Root<Program> fromProgram = query.from(Program.class);
-            Root<Layout> fromLayout = query.from(Layout.class);
+        query.select(fromLayout);
+        query.where(
+                builder.and(
+                        builder.equal(fromAssign.get(LayoutAssignment_.SOURCE), fromLayout.get(Layout_.OBJECTID)),
+                        builder.equal(fromAssign.get(LayoutAssignment_.TARGET), fromProgram.get(Program_.OBJECTID)),
+                        builder.equal(fromProgram.get(Program_.PROGRAM_NAME), programName)
+                )
+        );
 
-            query.select(fromLayout);
-            query.where(
-                    builder.and(
-                            builder.equal(fromAssign.get(LayoutAssignment_.SOURCE), fromLayout.get(Layout_.OBJECTID)),
-                            builder.equal(fromAssign.get(LayoutAssignment_.TARGET), fromProgram.get(Program_.OBJECTID)),
-                            builder.equal(fromProgram.get(Program_.PROGRAM_NAME), programName)
-                    )
-            );
+        List<Layout> results = objectService.getEm().createQuery(query)
+                .getResultList();
 
-            List<Layout> results = objectService.getEm().createQuery(query)
-                    .getResultList();
-
-            return results;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        }
+        return results;
     }
 
     /**

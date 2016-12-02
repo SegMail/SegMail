@@ -9,21 +9,27 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <div class="block-head">
-        <h2>Subscription Lists</h2>
-    </div>
-    <div class="block-content">
-        <p>
-            Show the subscribers that are subscribed to the lists:
-        </p>
-        <div class="form-group">
-            <h:selectManyListbox styleClass="select2" style="width: 100%;"
-                                 value="#{FormAssignLists.assignedLists}" 
-                                 >
-                <f:selectItems value="#{FormAssignLists.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
-                               itemValue="#{list.OBJECTID}">
-                </f:selectItems>
-            </h:selectManyListbox>
+    <form jsf:id="FormSubscriptionLists">
+        <div class="block-head">
+            <h2>Subscription Lists</h2>
         </div>
-    </div>
+        <div class="block-content">
+            <p>
+                Show the subscribers that are subscribed to the lists:
+            </p>
+            <div class="form-group">
+                <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                     value="#{FormSubscriptionLists.assignedLists}" 
+                                     
+                                     >
+                    <f:ajax render="@form :FormSubscriberTable" execute="@form"
+                            event="valueChange" listener="#{FormSubscriptionLists.listChangeUpdate()}"
+                            onevent="refresh"></f:ajax>
+                    <f:selectItems value="#{FormSubscriptionLists.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                   itemValue="#{list.OBJECTID}">
+                    </f:selectItems>
+                </h:selectManyListbox>
+            </div>
+        </div>
+    </form>
 </html>
