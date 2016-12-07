@@ -15,16 +15,39 @@
         </div>
         <div class="block-content">
             <div class="row">
-                <div class="col-md-3">
-                    <input class="form-control" type="text" placeholder="Search for email"/>
+                <div class="col-md-4">
+                    <!--<input class="form-control" type="text" placeholder="Search for email"/>-->
+                    <h:inputText styleClass="form-control" pass:placeholder="Search for email"
+                                 value="#{FormSubscriberTable.emailSearch}"
+                        >
+                        <f:ajax event="keyup" listener="#{FormSubscriberTable.loadPage(1)}"
+                                delay="1000" onevent="refresh"
+                                render="@form"
+                            >
+                        </f:ajax>
+                    </h:inputText>
+                    
                 </div>
-                <div class="col-md-9" style="text-align: right">
-                    <a class="btn btn-primary" href="#import_subscriber_popup" data-toggle="modal">
-                        Import Subscriber
-                    </a>
-                    <a class="btn btn-info" href="#add_subscriber_popup" data-toggle="modal">
-                        Add Subscriber
-                    </a>
+                <div id="addSubscButtons" class="col-md-8" style="text-align: right">
+                    <h:commandLink styleClass="btn btn-primary" pass:href="#import_subscriber_popup"
+                                   pass:data-toggle="modal" value="Import Subscribers"
+                                   >
+                        <f:ajax render=":FormImportSubscribers" event="click" 
+                                 onevent="refreshImport"
+                                listener="#{FormImportSubscribers.setupImport()}"
+                                >
+                        </f:ajax>
+                    </h:commandLink>
+                    <h:commandLink styleClass="btn btn-info" pass:href="#add_subscriber_popup"
+                                   pass:data-toggle="modal" value="Add Subscriber"
+                                   style="margin-left: 5px"
+                                   >
+                        <f:ajax render=":FormAddSubscriber" event="click" 
+                                 onevent="refreshAddSubsc"
+                                listener="#{FormImportSubscribers.setupImport()}"
+                                >
+                        </f:ajax>
+                    </h:commandLink>
                 </div>
             </div>
             <div class="pull-right">
@@ -69,15 +92,6 @@
                                     #{subscription.TARGET.OBJECT_NAME}
                                     
                                 </ui:repeat>
-                                <!--<c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.Subscription']}"
-                                           var="subscription" varStatus="status" >
-                                    <c:choose>
-                                        <c:when test="#{status.index > 0}">
-                                            &#44;
-                                        </c:when>
-                                    </c:choose>
-                                    #{subscription.TARGET.OBJECT_NAME}
-                                </c:forEach>-->
                             </td>
                             <td>
                                 <button class="btn btn-primary">

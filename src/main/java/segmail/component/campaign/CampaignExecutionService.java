@@ -119,7 +119,7 @@ public class CampaignExecutionService {
         if (targetLists == null || targetLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
         
-        List<SubscriptionListField> targetListFields = listService.getFieldsForSubscriptionLists(targetLists);//DB hit
+        List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
         
         List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);//DB hit
         if (clientLists == null || clientLists.isEmpty())

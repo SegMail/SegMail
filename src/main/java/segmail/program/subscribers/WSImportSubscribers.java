@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.program.list.webservice;
+package segmail.program.subscribers;
 
 import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
@@ -30,15 +30,16 @@ import javax.jws.WebParam;
 import segmail.component.subscription.MassSubscriptionService;
 import segmail.component.subscription.SubscriptionContainer;
 import segmail.component.subscription.SubscriptionService;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.program.list.ProgramList;
 
 /**
  *
  * @author LeeKiatHaw
  */
-@WebService(serviceName = "WSImportSubscriber")
+@WebService(serviceName = "WSImportSubscribers")
 @HandlerChain(file = "handlers-server.xml")
-public class WSImportSubscriber {
+public class WSImportSubscribers {
 
     @EJB
     FileService fileService;
@@ -66,7 +67,7 @@ public class WSImportSubscriber {
      * for convenience sake.
      */
     @Inject
-    ProgramList program;
+    ProgramSubscribers program;
 
     /**
      * Returns the last position of the file uploaded and -1 if it is a new
@@ -102,16 +103,17 @@ public class WSImportSubscriber {
     //,@WebParam(name = "listId") long listId
     //,@WebParam(name = "clientId") long clientId //Only for internal services we can inject Client object
     ) throws EntityNotFoundException {
-        if (program.getListEditingId() <= 0) {
+        if (program.getSelectedLists().size() <= 0) {
             throw new EntityNotFoundException("No list found.");
         }
-        //subContainer.setList(program.getListEditing());
-        subContainer.setListFields(program.getFieldList());
         
         if (clientFacade.getClient() == null || clientFacade.getClient().getOBJECTID() <= 0) {
             throw new EntityNotFoundException("No client found.");
         }
+        
         //subContainer.setClient(clientFacade.getClient()); //Do not use ClientFacade or ClientContainer in EJB services because they might not be called in the same context (JSF vs JAX-WS/JAX-RS)
+        //subContainer.setList(program.getListEditing());
+        subContainer.setListFields(program.getFieldList());
         
         JsonReader reader = Json.createReader(new StringReader(subscribers));
         JsonObject subscribersObj = reader.readObject();
@@ -124,16 +126,31 @@ public class WSImportSubscriber {
             subscribersList.add(subscriber);
         }
 
-        Map<String, List<Map<String,Object>>> results = massSubService.massSubscribe(clientFacade.getClient(),subscribersList,program.getListEditing(),false);
-        
+        //Call massSubscribe once per listId
+        //This is a workaround!!!
+        Map<String, List<Map<String,Object>>> mergedResults = new HashMap<>();
+        for(SubscriptionList list : program.getSelectedLists()) {
+            //Must set the list before calling massSubscribe
+            //In general, this is not a good design because it gets overlooked during coding
+            //all params required should be declared in the method
+            //subContainer.setList(list); 
+            Map<String, List<Map<String,Object>>> results = massSubService.massSubscribe(clientFacade.getClient(),subscribersList,list,false);
+            //Combine the results
+            for(String key : results.keySet()) {
+                if(mergedResults.get(key) == null)
+                    mergedResults.put(key, results.get(key));
+                else
+                    mergedResults.get(key).addAll(results.get(key));
+            }
+        }
 
         //Construct the JSON response object from the Map object
         //Return object will only contain errors
         int totalErrors = 0;
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
-        for (String key : results.keySet()) {
+        for (String key : mergedResults.keySet()) {
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            List<Map<String,Object>> objHavingThisError = results.get(key);
+            List<Map<String,Object>> objHavingThisError = mergedResults.get(key);
             for(Map<String,Object> mapObj : objHavingThisError) {
                 JsonObjectBuilder jsonObjBuilder = this.convertMapToJson(mapObj);
                 arrayBuilder.add(jsonObjBuilder);

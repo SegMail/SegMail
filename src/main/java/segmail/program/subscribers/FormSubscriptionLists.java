@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.ListService;
+import segmail.component.subscription.SubscriptionContainer;
 import segmail.entity.subscription.SubscriptionList;
 
 /**
@@ -28,6 +29,7 @@ public class FormSubscriptionLists {
     
     @Inject ProgramSubscribers program;
     @Inject FormSubscriberTable formSubscriberTable;
+    @Inject FormImportSubscribers formImportSubscribers;
     
     @Inject ClientContainer clientCont;
     
@@ -68,9 +70,11 @@ public class FormSubscriptionLists {
         setConvertedAssignedLists(new ArrayList<Long>());
         for(String idString : getAssignedLists()) {
             long id = Long.parseLong(idString);
-            getConvertedAssignedLists().add(id);
-            
+            getConvertedAssignedLists().add(id);   
         }
+        
+        //formImportSubscribers.setupImport();
+        
         //Collections.sort(getConvertedAssignedLists()); //redundant since we use List.containsAll()
         //erm...containsAll() is not the correct method to use
         formSubscriberTable.loadPage(1); //this will take care of all the criteria itself

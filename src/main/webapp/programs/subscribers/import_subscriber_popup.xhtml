@@ -9,101 +9,105 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <form jsf:id="FormImportSubscriber" jsf:prependId="false" enctype="multipart/form-data">
+    <form jsf:id="FormImportSubscribers" jsf:prependId="false">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="block">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                            X
-                        </button>
-                        <h4 class="modal-title">Import Subscribers</h4>
-                        
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Import Subscribers</h4>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="form-group" style="margin-bottom: 5px;">
+                        <s2:messenger id="FormImportSubscribers_messenger" for="FormImportSubscribers" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
                     </div>
-
-                    <div class="modal-body">
-
-                        <div class="form-group" style="margin-bottom: 5px;">
-                            <s2:messenger id="FormImportSubscriber_messenger" for="FormImportSubscriber" showDetail="true" showSummary="true"
-                                          class="form-group"></s2:messenger>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                Upload a file
-                            </label>
-                            <div id="uploader">
-                                <div class="fileinput fileinput-new input-group" data-provides="fileinput">
-                                    <div class="form-control" data-trigger="fileinput">
-                                        <i class="glyphicon glyphicon-file fileinput-exists"></i> 
-                                        <span class="fileinput-filename"></span>
-                                    </div>
-                                    <span class="input-group-addon btn btn-default btn-file">
-                                        <span class="fileinput-new">Select file</span>
-                                        <span class="fileinput-exists">Change</span>
-                                        <h:inputFile id="fileUploaded" value="#{FormImportSubscriber.file}" 
-                                                     >
-                                        </h:inputFile>
-                                    </span>
-                                    <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+                    <div class="form-group">
+                        <label>
+                            Upload a file
+                        </label>
+                        <div id="uploader">
+                            <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                <div class="form-control" data-trigger="fileinput">
+                                    <i class="glyphicon glyphicon-file fileinput-exists"></i> 
+                                    <span class="fileinput-filename"></span>
                                 </div>
+                                <span class="input-group-addon btn btn-default btn-file">
+                                    <span class="fileinput-new">Select file</span>
+                                    <span class="fileinput-exists">Change</span>
+                                    <h:inputFile id="fileUploaded" 
+                                                 >
+                                    </h:inputFile>
+                                </span>
+                                <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
                             </div>
                         </div>
-                        <div id="field_selector" class="form-group">
-                            <c:forEach items="#{FormImportSubscriber.listFields}" var="field">
+                    </div>
+                    <div id="field_selector" class="form-group">
+                        <ui:repeat value="#{FormImportSubscribers.fieldList}" var="field">
+                            <div class="form-group">
+                                <label>#{field.OWNER.LIST_NAME} - #{field.FIELD_NAME}: </label>
                                 <div class="form-group">
-                                    <label>#{field.FIELD_NAME}: </label>
-                                    <div class="form-group">
-                                        <select id="#{field.generateKey()}"
-                                                style="width: 50%;" class="select2"
-                                                >
-                                        </select>
-                                    </div>
+                                    <select id="#{field.generateKey()}"
+                                            required="#{field.MANDATORY}"
+                                            style="width: 50%;" class="select2"
+                                            >
+                                    </select>
                                 </div>
-                            </c:forEach>
-                        </div>
-                        <div id="progress-bar-container" class="form-group">
-                            <h4><span id="progress-bar-level"></span>% done</h4>
-                            <div class="progress progress-small">
-                                <div id="progress-bar" class="progress-bar progress-bar-success" 
-                                     role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" 
-                                     style="width:0%"></div>
                             </div>
-                        </div>
-                        <div id="soap-errors"></div>
-                        <div id="upload-status">
-                            <p><span id="totalProcessed"></span> Subscribers processed </p>
-                            <p><span id="totalSuccess"></span> Subscribers successfully updated/created </p>
-                            <p><span id="totalError"></span> Subscribers with errors </p>
-                            
-                            
-                            <h4 id="error-message-header">Errors:</h4>
-                            <div id="error-messages" class="well"></div>
-                            <div id="error-file-download"></div>
+                        </ui:repeat>
+                    </div>
+                    <div id="progress-bar-container" class="form-group">
+                        <h4><span id="progress-bar-level"></span>% done</h4>
+                        <div class="progress progress-small">
+                            <div id="progress-bar" class="progress-bar progress-bar-success" 
+                                 role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" 
+                                 style="width:0%"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary" id="importButton"
-                                onclick="startFileUpload();return false;"
-                                >
-                            Import
-                        </button>
-                        <button class="btn btn-success" id="doneButton"
-                                jsf:action="#{FormImportSubscriber.done()}"
-                                >
-                                    Done
-                        </button>
-                        <button class="btn btn-danger" id="cancelButton"
-                                jsf:action="#{FormImportSubscriber.cancel()}"
-                                >
-                                    Cancel
-                        </button>
-                    </div>
+                    <div id="soap-errors"></div>
+                    <div id="upload-status">
+                        <p><span id="totalProcessed"></span> Subscribers processed </p>
+                        <p><span id="totalSuccess"></span> Subscribers successfully updated/created </p>
+                        <p><span id="totalError"></span> Subscribers with errors </p>
 
+
+                        <h4 id="error-message-header">Errors:</h4>
+                        <div id="error-messages" class="well"></div>
+                        <div id="error-file-download"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="importButton"
+                            onclick="startFileUpload();
+                                    return false;"
+                            >
+                        Import
+                    </button>
+                    <button class="btn btn-success" id="doneButton"
+                            jsf:action="#{FormImportSubscribers.done()}"
+                            >
+                        Done
+                    </button>
+                    <button class="btn btn-danger" id="cancelButton"
+                            jsf:action="#{FormImportSubscribers.cancel()}"
+                            >
+                        Cancel
+                    </button>
+                    <button class="btn btn-default" id="closeButton"
+                            data-dismiss="modal"
+                            >
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
         <script type="text/javascript" >
-            var web_service_endpoint = '#{request.contextPath}/WSImportSubscriber';
+            var web_service_endpoint = '#{request.contextPath}/WSImportSubscribers';
         </script>
     </form>
 </html>

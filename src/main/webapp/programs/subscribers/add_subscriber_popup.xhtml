@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <form jsf:id="FormAddSubscriber" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Add new subscriber</h4>
+                </div>
+
+                <div class="modal-body">
+                    <c:forEach items="#{FormAddSubscriber.fieldList}" var="field">
+                        <div class="form-group">
+                            <label>#{field.OWNER.LIST_NAME} - #{field.FIELD_NAME}: </label>
+                            <input type="#{field.TYPE.toLowerCase()}" required="#{field.MANDATORY}"
+                                       class="form-control 
+                                                validate[#{(field.MANDATORY) ? 'required,' : ''}
+                                                #{(field.TYPE.name.equals('EMAIL')) ? 'custom[email] ' : ''}]"
+                                           name="#{field.generateKey().toString()}" 
+                                           jsf:value="#{FormAddSubscriber.fieldValues[field.generateKey().toString()]}"
+                                           />
+                        </div>
+                    </c:forEach>
+                    <div class="form-group" style="margin-bottom: 5px;">
+                        <s2:messenger id="FormAddSubscriber_messenger" for="FormAddSubscriber" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <h:commandButton id="addSubscButton" styleClass="btn btn-success"
+                                     value="Add subscriber"
+                                        onclick="$('#FormAddSubscriber').validationEngine('validate')">
+                        <f:ajax listener="#{FormAddSubscriber.addSubscriber()}"
+                                render="@form" onevent="refreshAddSubsc"
+                                >
+                        </f:ajax>
+                    </h:commandButton>
+                </div>
+
+            </div>
+        </div>
+        
+    </form>
+</html>

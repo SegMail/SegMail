@@ -10,8 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import seca2.program.Program;
-import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 
 /**
  *
@@ -30,6 +31,68 @@ public class ProgramSubscribers extends Program {
     private List<String> assignedLists;
     private List<Long> convertedAssignedLists;
     private List<SubscriptionList> ownedLists;
+    
+    private List<String> subscriberStatus;
+    private List<SUBSCRIBER_STATUS> convertedSubscriberStatus;
+    private final SUBSCRIBER_STATUS[] allStatuses = SUBSCRIBER_STATUS.values();
+    private String emailSearch;
+    
+    //FormImportSubscribers and FormAddSubscriber
+    private List<SubscriptionListField> fieldList;
+    private List<SubscriptionList> selectedLists;
+    private Map<String,Object> fieldValues;
+
+    public String getEmailSearch() {
+        return emailSearch;
+    }
+
+    public void setEmailSearch(String emailSearch) {
+        this.emailSearch = emailSearch;
+    }
+    
+    public Map<String, Object> getFieldValues() {
+        return fieldValues;
+    }
+
+    public void setFieldValues(Map<String, Object> fieldValues) {
+        this.fieldValues = fieldValues;
+    }
+
+    public List<SubscriptionList> getSelectedLists() {
+        return selectedLists;
+    }
+
+    public void setSelectedLists(List<SubscriptionList> selectedLists) {
+        this.selectedLists = selectedLists;
+    }
+    
+    public List<SubscriptionListField> getFieldList() {
+        return fieldList;
+    }
+
+    public void setFieldList(List<SubscriptionListField> fieldList) {
+        this.fieldList = fieldList;
+    }
+
+    public List<SUBSCRIBER_STATUS> getConvertedSubscriberStatus() {
+        return convertedSubscriberStatus;
+    }
+
+    public void setConvertedSubscriberStatus(List<SUBSCRIBER_STATUS> convertedSubscriberStatus) {
+        this.convertedSubscriberStatus = convertedSubscriberStatus;
+    }
+
+    public SUBSCRIBER_STATUS[] getAllStatuses() {
+        return allStatuses;
+    }
+
+    public List<String> getSubscriberStatus() {
+        return subscriberStatus;
+    }
+
+    public void setSubscriberStatus(List<String> subscriberStatus) {
+        this.subscriberStatus = subscriberStatus;
+    }
 
     public List<Long> getConvertedAssignedLists() {
         return convertedAssignedLists;
@@ -96,6 +159,9 @@ public class ProgramSubscribers extends Program {
         setAssignedLists(new ArrayList<String>());
         setConvertedAssignedLists(new ArrayList<Long>());
         setOwnedLists(new ArrayList<SubscriptionList>());
+        
+        setConvertedSubscriberStatus(new ArrayList<SUBSCRIBER_STATUS>());
+        setSubscriberStatus(new ArrayList<String>());
     }
     
 }

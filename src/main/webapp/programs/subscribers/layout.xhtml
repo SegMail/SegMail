@@ -21,21 +21,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="block">
-                        <div class="block-head">
-                            <h2>
-                                Status of subscribers 
-                            </h2>
-                        </div>
-                        <div class="block-content">
-                            <p>Show the subscribers who have the status </p>
-                            <h:selectManyListbox styleClass="select2" style="width: 100%;"
-                                                 value="#{FormAssignLists.assignedLists}" 
-                                                 >
-                                <f:selectItems value="#{FormAssignLists.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
-                                               itemValue="#{list.OBJECTID}">
-                                </f:selectItems>
-                            </h:selectManyListbox>
-                        </div>
+                        <ui:include src="subscriber_status.xhtml"></ui:include>
                     </div>
 
                 </div>
@@ -67,6 +53,10 @@
             <div class="modal fade" id="import_subscriber_popup">
                 <ui:include src="import_subscriber_popup.xhtml"></ui:include>
             </div>
+            
+            <div class="modal fade" id="add_subscriber_popup">
+                <ui:include src="add_subscriber_popup.xhtml"></ui:include>
+            </div>
         </ui:define>
 
         <ui:define name="scripts-bottom">
@@ -80,8 +70,8 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
 
             <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import.js" />
-
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import_subscriber_popup.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/add_subscriber_popup.js" />
         </ui:define>
 
         <ui:define name="head">

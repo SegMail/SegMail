@@ -297,7 +297,7 @@ public class ListService {
         return allList;
     }
     
-    public List<SubscriptionListField> getFieldsForSubscriptionLists(List<SubscriptionList> lists) {
+    public List<SubscriptionListField> getFieldsForLists(List<SubscriptionList> lists) {
         List<Long> listIds = new ArrayList<>();
         for(SubscriptionList list : lists) {
             listIds.add(list.getOBJECTID());
@@ -306,5 +306,6 @@ public class ListService {
         
         return fields;
     }
+    
 
 }

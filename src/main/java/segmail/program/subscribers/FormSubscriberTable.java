@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.SubscriptionService;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
@@ -76,6 +77,34 @@ public class FormSubscriberTable {
         program.setConvertedAssignedLists(convertedAssignedLists);
     }
     
+    public SUBSCRIBER_STATUS[] getSubscriberStatuses() {
+        return program.getAllStatuses();
+    }
+
+    public List<String> getSubscriberStatus() {
+        return program.getSubscriberStatus();
+    }
+
+    public void setSubscriberStatus(List<String> subscriberStatus) {
+        program.setSubscriberStatus(subscriberStatus);
+    }
+    
+    public List<SUBSCRIBER_STATUS> getConvertedSubscriberStatus() {
+        return program.getConvertedSubscriberStatus();
+    }
+
+    public void setConvertedSubscriberStatus(List<SUBSCRIBER_STATUS> convertedSubscriberStatus) {
+        program.setConvertedSubscriberStatus(convertedSubscriberStatus);
+    }
+    
+    public String getEmailSearch() {
+        return program.getEmailSearch();
+    }
+
+    public void setEmailSearch(String emailSearch) {
+        program.setEmailSearch(emailSearch);
+    }
+    
     public void loadPage(int page) {
         setCurrentPage(page);
         loadFilterCriteria();
@@ -103,6 +132,22 @@ public class FormSubscriberTable {
             dirtyFlag = true;
         }
         
+        List<SUBSCRIBER_STATUS> statuses = this.getConvertedSubscriberStatus();
+        List<SUBSCRIBER_STATUS> statusList = dripService.getStatuses();
+        Collections.sort(statuses);
+        Collections.sort(statusList);
+        if(statusList == null || !statusList.equals(statuses)) {
+            dripService.setStatuses(statuses);
+            dirtyFlag = true;
+        }
+        
+        String searchString = getEmailSearch();
+        String lastSearch = dripService.getEmailSearch();
+        if(lastSearch == null || !lastSearch.equals(searchString)) {
+            dripService.setEmailSearch(searchString);
+            dirtyFlag = true;
+        }
+        
         //Just placeholders, remember to replace them once the actual UI components are up
         //dripService.setCreateStart(new DateTime(1800,1,1,0,0));
         //dripService.setCreateEnd(new DateTime(9999,12,31,23,59));
@@ -127,10 +172,7 @@ public class FormSubscriberTable {
         List<SubscriberAccount> subscriberAccounts = dripService.drip(getCurrentPage());
         
         //Get Subscriptions for all SubscriberAccounts
-        List<Long> subscriberIds = new ArrayList<>();
-        for(SubscriberAccount subscriberAccount : subscriberAccounts) {
-            subscriberIds.add(subscriberAccount.getOBJECTID());
-        }
+        List<Long> subscriberIds = objService.extractIds(subscriberAccounts);
         List<Subscription> subscriptions = objService.getRelationshipsForSourceObjects(subscriberIds, Subscription.class);
         List<SubscriberFieldValue> values = subService.getSubscriberValuesBySubscriberObjects(subscriberAccounts);
         

@@ -41,7 +41,31 @@ function bindFileInput() {
     });
 }
 
+var validateFields = function() {
+    var stop = false;
+    var elems = $('#field_selector select');
+    $('#field_selector select').each(function(i){
+        if($(this).prop('required')) {
+            $(this).siblings('label.control-label').remove();
+            if(!$(this).val()) {
+                stop = true;
+                $(this).parent('.form-group')
+                        .append('<label class="control-label" style="color:#d9534f">'
+                                +'Please select a column for this field.</label>');
+            } else {
+                
+            }
+            
+        }
+    });
+    
+    return stop;
+}
+
 function startFileUpload() {
+    
+    if(validateFields())
+        return;
 
     //Get the file object and create a FileNavigator wrapper
     var files = document.getElementById('fileUploaded').files;
@@ -53,6 +77,7 @@ function startFileUpload() {
     checkedErrorsCollector.reset();
     $('#soap-errors').empty();
     $('#importButton').hide();
+    $('#cancelButton').show();
     //Ping the server and check if the upload was stopped halfway previously
     //by checking the file hash
     var md5Hash = '';
@@ -75,12 +100,12 @@ function startFileUpload() {
 
 
 var checkFileHash = function (file) {
-    block_refresh($('#importButton').parents(".block"));
+    block_refresh($('#importButton').parents(".modal-dialog"));
     $('#importButton').prop("disable", true);
 
     if (!file) {
         GenericErrorController.setErrors("No file selected. Please select file.", "danger");
-        block_refresh($('#importButton').parents(".block"));
+        block_refresh($('#importButton').parents(".modal-dialog"));
         return;
     }
     var navigator = new FileNavigator(file);
@@ -122,7 +147,7 @@ var checkFileStatus = function (file, name, hash, success, error) {
             filename: name
         },
         namespaceQualifier: 'ns',
-        namespaceURL: 'http://webservice.list.program.segmail/',
+        namespaceURL: 'http://subscribers.program.segmail/',
         noPrefix: 0,
         HTTPHeaders: {
         },
@@ -130,11 +155,11 @@ var checkFileStatus = function (file, name, hash, success, error) {
             var xmlResults = SOAPResponse.toJSON();
             var result = xmlResults['#document']['S:Envelope']['S:Body']['ns2:checkFileStatusResponse']["return"];
             success(file, result);
-            block_refresh($('#importButton').parents(".block"));
+            block_refresh($('#importButton').parents(".modal-dialog"));
         },
         error: function (SOAPResponse) {
             logSOAPErrors(SOAPResponse);
-            block_refresh($('#importButton').parents(".block"));
+            block_refresh($('#importButton').parents(".modal-dialog"));
         }
     })
 };
@@ -233,7 +258,7 @@ var sendBatchToWS = function (batch, successCallback, errorCallback) {
             subscribers: JSON.stringify(batch)
         },
         namespaceQualifier: 'ns',
-        namespaceURL: 'http://webservice.list.program.segmail/',
+        namespaceURL: 'http://subscribers.program.segmail/',
         noPrefix: 0,
         HTTPHeaders: {
         },
@@ -535,8 +560,28 @@ var GenericErrorController = function () {
     };
 }();
 
-$(document).ready(function () {
-    bindFileInput();
+function refreshImport(data) {
+    var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
+    var block = $('#FormImportSubscribers .modal-dialog');
+    
+    switch (ajaxstatus) {
+        case "begin": // This is called right before ajax request is been sent.
+            block_refresh(block);
+            break;
+
+        case "complete": // This is called right after ajax response is received.
+
+            break;
+
+        case "success": // This is called when ajax response is successfully processed.
+            //block_refresh(block);
+            bindFileInput();
+            initUIElem();
+            break;
+    }
+};
+
+var initUIElem = function() {
     $('#fileUploaded').val('');//To clear the previous uploaded file
     $('#field_selector').hide();
     $('#importButton').hide();
@@ -544,4 +589,9 @@ $(document).ready(function () {
     $('#soap-errors').hide();
     $('#upload-status').hide();
     $('#doneButton').hide();
+    $('#cancelButton').hide();
+}
+
+$(document).ready(function () {
+    
 });

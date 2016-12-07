@@ -2,6 +2,7 @@ $(document).ready(function () {
     //Datatables
     //.$('.sortable').dataTable();
     //initSubscriberTable();
+    updateAddSubsriberButtons();
 });
 
 var initSubscriberTable = function () {
@@ -31,6 +32,16 @@ var refresh_select2 = function() {
 var refresh_blocks = function() {
     block_refresh($('#FormSubscriptionLists').parents('.block'));
     block_refresh($('#FormSubscriberTable').parents('.block'));
+    block_refresh($('#FormSubscriberStatus').parents('.block'));
+}
+
+var updateAddSubsriberButtons = function() {
+    var select = $('#FormSubscriptionLists select.select2');
+    if($('#FormSubscriptionLists select.select2').val()) {
+        $('#addSubscButtons').show();
+    } else {
+        $('#addSubscButtons').hide();
+    }
 }
 
 function refresh(data) {
@@ -48,6 +59,7 @@ function refresh(data) {
         case "success": // This is called when ajax response is successfully processed.
             refresh_blocks();
             refresh_select2();
+            updateAddSubsriberButtons();
             break;
     }
 };

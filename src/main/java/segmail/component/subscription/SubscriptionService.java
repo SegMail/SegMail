@@ -45,6 +45,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
@@ -159,13 +160,13 @@ public class SubscriptionService {
         if (client == null) {
             throw new EntityNotFoundException(Client.class, clientId);
         }
-        subContainer.setClient(client);
+        //subContainer.setClient(client);
 
         SubscriptionList list = objService.getEnterpriseObjectById(listId, SubscriptionList.class);
         if (list == null) {
             throw new EntityNotFoundException(SubscriptionList.class, listId);
         }
-        subContainer.setList(list);
+        //subContainer.setList(list);
 
         List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
         if (fields == null || fields.isEmpty()) {
@@ -194,7 +195,7 @@ public class SubscriptionService {
         List<Map<String, Object>> singleSubscriberMap = new ArrayList<>();
         singleSubscriberMap.add(values);
 
-        Map<String, List<Map<String, Object>>> results = massSubService.massSubscribe(singleSubscriberMap, doubleOptin);
+        Map<String, List<Map<String, Object>>> results = massSubService.massSubscribe(client, singleSubscriberMap, list, doubleOptin);
         for (String key : results.keySet()) {
             throw new SubscriptionException(key);
         }
@@ -202,6 +203,18 @@ public class SubscriptionService {
         return this.getSubscriptions(email, listId, null).get(0);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<Subscription> subscribe(long clientId, List<SubscriptionList> lists, Map<String, Object> values, boolean doubleOptin)
+            throws EntityNotFoundException, IncompleteDataException, SubscriptionException, RelationshipExistsException {
+
+        List<Subscription> results = new ArrayList<>();
+        for(SubscriptionList list : lists) {
+            Subscription result = this.subscribe(clientId, list.getOBJECTID(), values, doubleOptin);
+            results.add(result);
+        }
+        
+        return results;
+    }
     /**
      * Check if a subscriber subscriberEmail is already subscribed to a list.
      * Each SubscriberAccount object is unique to a Client. The same email will
@@ -737,10 +750,7 @@ public class SubscriptionService {
 
     //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriberFieldValue> getSubscriberValuesBySubscriberObjects(List<SubscriberAccount> subscribers) {
-        List<Long> ids = new ArrayList<>();
-        for (SubscriberAccount subscriber : subscribers) {
-            ids.add(subscriber.getOBJECTID());
-        }
+        List<Long> ids = objService.extractIds(subscribers);
         return getSubscriberValuesBySubscriberIds(ids);
     }
 
@@ -933,48 +943,21 @@ public class SubscriptionService {
             DateTime createStart,
             DateTime createEnd,
             List<SUBSCRIBER_STATUS> statuses,
+            String emailSearch,
             int startIndex,
             int maxResults) throws DataValidationException {
         
-        if (createEnd != null && createStart != null && createEnd.getMillis() < createStart.getMillis()) {
-            throw new DataValidationException("End datetime is before Start dateTime");
+        String sql = buildDripQuery(clientId, listIds, createStart, createEnd, statuses, emailSearch, "");
+        
+        List<Object> results = objService.getEm().createQuery(sql)
+                .setFirstResult(startIndex)
+                .setMaxResults(maxResults)
+                .getResultList();
+        
+        List<SubscriberAccount> subscribers = new ArrayList<>();
+        for(Object result : results) {
+            subscribers.add((SubscriberAccount) result);
         }
-        objService.getEm().clear();
-        List<SubscriberAccount> subscribers = objService.getAllSourceObjectsFromTarget(clientId, SubscriberOwnership.class, SubscriberAccount.class, startIndex, maxResults);
-
-        //Filter off those which are not included in listIds
-        if (listIds != null && !listIds.isEmpty()) {
-            List<Long> subscriberIds = objService.extractIds(subscribers);
-            List<Subscription> subscriptions = objService.getRelationshipsForObjects(subscriberIds, listIds, Subscription.class);
-
-            List<SubscriberAccount> included = new ArrayList<>();
-            for (Subscription sub : subscriptions) {
-                included.add(sub.getSOURCE());
-            }
-
-            subscribers.retainAll(included);
-        }
-
-        //Filter off those not in the createStart and createEnd range
-        //and SUBSCRIBER_STATUS
-        List<SubscriberAccount> filterOff = new ArrayList<>();
-        for (SubscriberAccount acc : subscribers) {
-            if (createStart != null && acc.getDATE_CREATED().before(new java.sql.Date(createStart.getMillis()))) {
-                filterOff.add(acc);
-                continue;
-            }
-            if (createEnd != null && acc.getDATE_CREATED().after(new java.sql.Date(createEnd.getMillis()))) {
-                filterOff.add(acc);
-                continue;
-            }
-            if(statuses != null 
-                    && !statuses.isEmpty() 
-                    && !statuses.contains(SUBSCRIBER_STATUS.valueOf(acc.getSUBSCRIBER_STATUS()))) {
-                filterOff.add(acc);
-                continue;
-            }
-        }
-        subscribers.removeAll(filterOff);
 
         return subscribers;
     }
@@ -996,28 +979,80 @@ public class SubscriptionService {
             final List<Long> listIds,
             DateTime createStart,
             DateTime createEnd,
-            List<SUBSCRIBER_STATUS> statuses) throws DataValidationException {
+            List<SUBSCRIBER_STATUS> statuses,
+            String emailSearch) throws DataValidationException {
         
-        final int LIMIT = 10000;
-        DateTime startTime = DateTime.now();
-        long aggregatedCount = 0;
-
-        int start = 0;
-        int count = 0;
-        do {
-            List<SubscriberAccount> subscribers = this.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, start, LIMIT);
-            count = subscribers.size();
-            aggregatedCount += count;
-            start += LIMIT;
+        String sql = buildDripQuery(clientId, listIds, createStart, createEnd, statuses, emailSearch, "count");
+        
+        Long result = (Long) objService.getEm().createQuery(sql)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    private String buildDripQuery(
+            long clientId,
+            List<Long> listIds,
+            DateTime createStart,
+            DateTime createEnd,
+            List<SUBSCRIBER_STATUS> statuses,
+            String emailSearch,
+            String selectFunction
+            ) throws DataValidationException {
+        if (createEnd != null && createStart != null && createEnd.getMillis() < createStart.getMillis()) {
+            throw new DataValidationException("End datetime is before Start dateTime");
+        }
+        //Risky as the table names might be changed from the Java class but we don't know which methods have hardcoded the names
+        String accTable = SubscriberAccount.class.getSimpleName();//"SUBSCRIBER_ACCOUNT";//
+        String ownTable = SubscriberOwnership.class.getSimpleName();//"SUBSCRIBER_OWNERSHIP";//
+        String subscTable = Subscription.class.getSimpleName();//"SUBSCRIPTION";//
             
-        } while (count > 0);
-
-        DateTime endTime = DateTime.now();
-        long timeTaken = (endTime.getMillis() - startTime.getMillis()) / 1000;
-
-        System.out.println("Time taken: " + timeTaken + " seconds.");
-
-        return aggregatedCount;
+        String sql = "SELECT ";
+        sql += (selectFunction == null || selectFunction.isEmpty()) ? "a " : selectFunction+"(a) ";
+        sql += "FROM ";
+        sql += accTable + " as a , ";
+        sql += ownTable + " as b "; //join with SubscriberOwnership
+        if(listIds != null && !listIds.isEmpty()) { //join with Subscription
+            sql += ", " + subscTable + " as c";
+        } 
+        
+        //Mandatory criteria: clientId
+        sql += " WHERE b.TARGET = " + clientId;
+        sql += " AND a.OBJECTID = b.SOURCE";
+        
+        if(createStart != null) {
+            String dateStart = createStart.toString("YYYYMMDD");
+            sql += " AND a.DATE_CREATED >= " +  dateStart;
+        }
+        if(createEnd != null) {
+            String dateEnd = createEnd.toString("YYYYMMDD");
+            sql += " AND a.DATE_CREATED <= " +  dateEnd;
+        }
+        if(statuses != null && !statuses.isEmpty()) {
+            String statusString = "";
+            for(SUBSCRIBER_STATUS status : statuses) {
+                if(!statusString.isEmpty())
+                    statusString += ",";
+                statusString += "'"+status.name+"'";
+            }
+            sql += " AND a.SUBSCRIBER_STATUS in (" +  statusString +")";   
+        }
+        if(listIds != null && !listIds.isEmpty()) {
+            String listString = "";
+            for(long listId : listIds) {
+                if(!listString.isEmpty()) 
+                    listString += ",";
+                listString += listId;
+            }
+            sql += " AND a.OBJECTID = c.SOURCE";
+            sql += " AND c.TARGET in (" +  listString +")";   
+        }
+        if(emailSearch != null && !emailSearch.isEmpty()) {
+            String searchString = emailSearch.replace('*', '%'); //Most common wildcard char people will use
+            sql += " AND a.EMAIL LIKE '%"+searchString+"%'";
+        }
+        
+        return sql;
     }
 
 }

@@ -44,6 +44,8 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     private DateTime createEnd;
     
     List<SUBSCRIBER_STATUS> statuses;
+    
+    private String emailSearch;
 
     public long getClientId() {
         return clientId;
@@ -84,8 +86,14 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     public void setStatuses(List<SUBSCRIBER_STATUS> statuses) {
         this.statuses = statuses;
     }
-    
-    
+
+    public String getEmailSearch() {
+        return emailSearch;
+    }
+
+    public void setEmailSearch(String emailSearch) {
+        this.emailSearch = emailSearch;
+    }
     
     /**
      * This implementation should: 
@@ -102,7 +110,7 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     @Override
     public List<SubscriberAccount> refill(int start, int size) {
         try {
-            return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, start, size);
+            return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, emailSearch, start, size);
         } catch (DataValidationException ex) {
             Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
@@ -112,7 +120,7 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     @Override
     protected long countFromDB() {
         try {
-            return subService.countNumberSubscribers(clientId, listIds, createStart, createEnd, statuses);
+            return subService.countNumberSubscribers(clientId, listIds, createStart, createEnd, statuses, emailSearch);
         } catch (DataValidationException ex) {
             Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
