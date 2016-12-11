@@ -61,6 +61,7 @@ import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.Subscription_;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -498,5 +499,38 @@ public class CampaignExecutionService {
                 .getSingleResult();
 
         return result;
+    }
+    
+    public void sendPreview(CampaignActivity emailActivity, List<String> previewEmails, long clientId) throws DataValidationException, IncompleteDataException, InvalidEmailException, RelationshipNotFoundException {
+        
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(emailActivity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class); //DB hit
+        if (campaigns == null || campaigns.isEmpty())
+            throw new RelationshipNotFoundException("CampaignActivity "+emailActivity.getOBJECTID()+" is not assigned to any Campaign.");
+        Campaign campaign = campaigns.get(0);
+        
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
+        if (targetLists == null || targetLists.isEmpty())
+            throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+        
+        List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
+        
+        for(String email : previewEmails) {
+            Email preview = new Email();
+            //Set the header info of the email
+            preview.setSUBJECT(emailActivity.getACTIVITY_NAME());
+            preview.addRecipient(email);
+            preview.setSENDER_ADDRESS(campaign.getOVERRIDE_SEND_AS_EMAIL());
+            preview.setSENDER_NAME(campaign.getOVERRIDE_SEND_AS_NAME());
+
+            //Set the body of the email
+            String content = emailActivity.getACTIVITY_CONTENT_PROCESSED();
+
+            String testUnsubLink = mmService.getSystemTestLink(MAILMERGE_REQUEST.UNSUBSCRIBE.label());
+            content = content.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), testUnsubLink);
+
+            preview.setBODY(content);
+
+            mailService.queueEmail(preview, DateTime.now());
+        }
     }
 }

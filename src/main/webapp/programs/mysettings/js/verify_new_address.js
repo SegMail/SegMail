@@ -19,7 +19,7 @@ function verify(data) {
 
 var FormVerifyNewAddress;
 
-var initSignup = function() {
+var initVerify = function() {
     FormVerifyNewAddress = $('#FormVerifyNewAddress').validate({
         rules: {
             'FormVerifyNewAddress:email': {
@@ -43,5 +43,5 @@ var initSignup = function() {
 };
 
 $(document).ready(function(){
-    initSignup();
+    initVerify();
 });

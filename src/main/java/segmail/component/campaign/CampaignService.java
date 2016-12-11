@@ -12,9 +12,11 @@ import eds.component.batch.BatchSchedulingService;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.data.RelationshipNotFoundException;
 import eds.entity.client.Client;
 import eds.entity.data.EnterpriseData_;
 import eds.entity.data.EnterpriseRelationship_;
+import eds.entity.mail.Email;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -33,6 +35,7 @@ import seca2.component.landing.ServerNodeType;
 import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
+import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
 import segmail.entity.campaign.Assign_Campaign_Activity;
@@ -71,7 +74,7 @@ public class CampaignService {
     @EJB BatchSchedulingService batchScheduleService;
     @EJB LandingService landingService;
     @EJB ListService listService;
-    
+    @EJB MailMergeService mmService;
     
     public Campaign getCampaign(long campaignId) {
         Campaign campaign = objService.getEnterpriseObjectById(campaignId, Campaign.class);
@@ -584,4 +587,6 @@ public class CampaignService {
         
         return result;
     } 
+    
+    
 }

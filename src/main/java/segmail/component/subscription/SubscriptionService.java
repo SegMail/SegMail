@@ -156,6 +156,9 @@ public class SubscriptionService {
     public Subscription subscribe(long clientId, long listId, Map<String, Object> values, boolean doubleOptin)
             throws EntityNotFoundException, IncompleteDataException, SubscriptionException, RelationshipExistsException {
 
+        if(values == null || values.isEmpty())
+            throw new IncompleteDataException("No fields found.");
+            
         Client client = objService.getEnterpriseObjectById(clientId, Client.class); //DB hit, can be cached
         if (client == null) {
             throw new EntityNotFoundException(Client.class, clientId);
@@ -179,13 +182,15 @@ public class SubscriptionService {
         for (SubscriptionListField field : fields) {
             if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
                 email = (String) values.get((String) field.generateKey());
+                
+                if (email == null || email.isEmpty()) {
+                    throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
+                }
                 email = email.trim(); //for checking
                 break;
             }
         }
-        if (email == null || email.isEmpty()) {
-            throw new IncompleteDataException("Mandatory list field " + DEFAULT_EMAIL_FIELD_NAME + " is missing.");
-        }
+        
         SUBSCRIPTION_STATUS[] status = {CONFIRMED};
         List<Subscription> existingSubscriptions = this.getSubscriptions(email, listId, status);
         if (existingSubscriptions != null && !existingSubscriptions.isEmpty()) {//checkSubscribed(email, listId)) {

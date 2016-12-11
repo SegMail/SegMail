@@ -162,6 +162,7 @@ public class ProgramSubscribers extends Program {
         
         setConvertedSubscriberStatus(new ArrayList<SUBSCRIBER_STATUS>());
         setSubscriberStatus(new ArrayList<String>());
+        setFieldValues(new HashMap<String,Object>());
     }
     
 }

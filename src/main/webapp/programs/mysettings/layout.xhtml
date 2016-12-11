@@ -29,7 +29,7 @@
                                     <span class="help-block">
                                         How do we address you?
                                     </span>
-                                    <input type="text" jsf:id="contact_first_name" class="validate[required] form-control"
+                                    <input type="text" jsf:id="contact_first_name" class="form-control"
                                            required="true"
                                            jsf:value="#{ContactDetailsForm.contactInfo.FIRSTNAME}"
                                            placeholder="Your first name"></input>
@@ -39,7 +39,7 @@
                                     <span class="help-block">
                                         In case another person has the same awesome name.
                                     </span>
-                                    <input type="text" jsf:id="contact_last_name" class="validate[required] form-control"
+                                    <input type="text" jsf:id="contact_last_name" class="form-control"
                                            jsf:value="#{ContactDetailsForm.contactInfo.LASTNAME}"
                                            required="true"
                                            placeholder="Your last name"></input>
@@ -49,7 +49,7 @@
                                     <span class="help-block">
                                         This is how we will contact you for billings and announcements.
                                     </span>
-                                    <input type="email" jsf:id="contact_email" class="validate[required,custom[email]] form-control"
+                                    <input type="email" jsf:id="contact_email" class="form-control"
                                            required="true"
                                            jsf:value="#{ContactDetailsForm.contactInfo.EMAIL}"
                                            placeholder="Your email"></input>
@@ -69,13 +69,14 @@
                             <div class="block-footer">
                                 <div class="pull-left">
                                     <button type="button" class="btn btn-default"
-                                            onclick="$('#contact_details_form').validationEngine('hideAll');
-                                                    document.getElementById('contact_details_form').reset()">
+                                            onclick="document.getElementById('ContactDetailsForm').reset();
+                                                    ContactDetailsForm.resetForm()">
                                         I screwed up. Help!
                                     </button>
                                 </div>
                                 <div class="pull-right">
                                     <button jsf:id="update_contact_button" class="btn btn-success"
+                                            jsf:onclick="return ContactDetailsForm.form()"
                                             >
                                         <f:ajax listener="#{ContactDetailsForm.update()}"
                                                 event="click" onevent="updateSettings"

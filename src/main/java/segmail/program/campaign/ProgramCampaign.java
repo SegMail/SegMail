@@ -61,6 +61,8 @@ public class ProgramCampaign extends Program{
      */
     private List<SubscriptionListField> listFields;
     
+    private List<String> selectedPreviewAddress;
+    
     @Override
     public void clearVariables() {
         
@@ -219,5 +221,14 @@ public class ProgramCampaign extends Program{
     public void setClickthroughRates(Map<Long, Double> clickthroughRates) {
         this.clickthroughRates = clickthroughRates;
     }
+
+    public List<String> getSelectedPreviewAddress() {
+        return selectedPreviewAddress;
+    }
+
+    public void setSelectedPreviewAddress(List<String> selectedPreviewAddress) {
+        this.selectedPreviewAddress = selectedPreviewAddress;
+    }
+    
     
 }

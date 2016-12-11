@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf">
-    <form jsf:id="FormAddSubscriber" >
+    <form jsf:id="FormAddSubscriber">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -22,12 +22,14 @@
                     <c:forEach items="#{FormAddSubscriber.fieldList}" var="field">
                         <div class="form-group">
                             <label>#{field.OWNER.LIST_NAME} - #{field.FIELD_NAME}: </label>
-                            <input type="#{field.TYPE.toLowerCase()}" required="#{field.MANDATORY}"
+                            <input type="#{field.TYPE.toLowerCase()}" 
                                        class="form-control 
-                                                validate[#{(field.MANDATORY) ? 'required,' : ''}
-                                                #{(field.TYPE.name.equals('EMAIL')) ? 'custom[email] ' : ''}]"
-                                           name="#{field.generateKey().toString()}" 
+                                                #{(field.MANDATORY) ? 'required' : ''}
+                                                #{(field.TYPE.equals('EMAIL')) ? 'email ' : ''}"
+                                           
                                            jsf:value="#{FormAddSubscriber.fieldValues[field.generateKey().toString()]}"
+                                           
+                                           
                                            />
                         </div>
                     </c:forEach>
@@ -37,14 +39,15 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <h:commandButton id="addSubscButton" styleClass="btn btn-success"
-                                     value="Add subscriber"
-                                        onclick="$('#FormAddSubscriber').validationEngine('validate')">
+                    <button jsf:id="addSubscButton" class="btn btn-success"
+                                        jsf:onclick="return FormAddSubscriber.form()">
                         <f:ajax listener="#{FormAddSubscriber.addSubscriber()}"
                                 render="@form" onevent="refreshAddSubsc"
+                                event="click" execute="@form"
                                 >
                         </f:ajax>
-                    </h:commandButton>
+                        Add subscriber
+                    </button>
                 </div>
 
             </div>
