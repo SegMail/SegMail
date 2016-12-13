@@ -26,6 +26,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.js.JSUtility;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
@@ -50,6 +51,7 @@ import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
 @Named("FormEditEmailActivity")
 public class FormEditEmailActivity implements FormEditEntity {
 
+    @Inject UserRequestContainer reqCont;
     @Inject
     ProgramCampaign program;
     @Inject
@@ -155,6 +157,10 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
         program.setMailmergeLinks(mailmergeLinks);
+    }
+    
+    public boolean renderThis() {
+        return reqCont.getPathParser().getOrderedParams().size() == 2;
     }
 
     @Override

@@ -158,7 +158,7 @@ var processMailmergeNoWS = function(timeout) {
     setTimeout(function(){
         var content = $('#preview').html();
         for(var key in mailmergeTagsSubscriber) {
-            if(mailmergeTagsSubscriber.hasOwnProperty(key)) {
+            if(randomSubscriber.hasOwnProperty(mailmergeTagsSubscriber[key])) {
                 var subscVal = randomSubscriber[mailmergeTagsSubscriber[key]];
                 content = content.replace(RegExp(key,'g'),subscVal);
             }
@@ -186,7 +186,9 @@ var toggleMenu = function () {
     }
 };
 
-function setSendInBatch(id) {
+var setSendInBatch = function(id) {
+    if(!document.getElementById(id))
+        return;
     var value = document.getElementById(id).value;
     if (value <= 0)
         document.getElementById(id).value = null;

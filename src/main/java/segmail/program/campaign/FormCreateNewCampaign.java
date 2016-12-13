@@ -16,6 +16,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormCreateEntity;
 import segmail.component.campaign.CampaignService;
@@ -28,6 +29,7 @@ import segmail.component.campaign.CampaignService;
 @Named("FormCreateNewCampaign")
 public class FormCreateNewCampaign implements FormCreateEntity {
 
+    @Inject UserRequestContainer reqCont;
     @Inject ProgramCampaign program;
     
     @EJB CampaignService campaignService;
@@ -49,6 +51,10 @@ public class FormCreateNewCampaign implements FormCreateEntity {
 
     public void setGoals(String goals) {
         this.goals = goals;
+    }
+    
+    public boolean renderThis(){
+        return reqCont.getProgramParamsOrdered().size() == 0;
     }
     
     @Override

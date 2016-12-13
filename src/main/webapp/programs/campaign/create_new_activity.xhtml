@@ -8,7 +8,7 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
-      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough" jsf:rendered="#{FormCreateNewEmailActivity.renderThis()}">
 
     <div class="modal-dialog">
         <div class="modal-content">
@@ -73,7 +73,7 @@
                         <h:commandLink
                                 class="btn btn-success">
                             <f:ajax event="click" onevent="create_new_activity"
-                                    render="@form :ProgramCampaign"
+                                    render="@form :FormEditCampaign"
                                     execute="@form"
                                     listener="#{FormCreateNewEmailActivity.createNew()}"
                                     ></f:ajax>
@@ -88,7 +88,6 @@
                         </button>
 
                     </div>
-                    
                 </form>
             </div>
             <div id="social_media_activity" data-role="delete" style="display: none;">

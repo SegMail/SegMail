@@ -16,6 +16,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
@@ -27,11 +28,15 @@ import segmail.component.campaign.CampaignService;
 @RequestScoped
 @Named("FormExecuteCampaignActivity")
 public class FormExecuteCampaignActivity {
-    
+    @Inject UserRequestContainer reqCont;
     @Inject ProgramCampaign program;
     
     @EJB CampaignService campService;
     @EJB CampaignExecutionService campExecService;
+    
+    public boolean renderThis() {
+        return reqCont.getPathParser().getOrderedParams().size() == 1;
+    }
     
     public void executeAndClose() {
         try {

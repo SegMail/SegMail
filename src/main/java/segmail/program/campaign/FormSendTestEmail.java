@@ -21,6 +21,8 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.joda.time.DateTime;
+import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.UserSessionContainer;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.campaign.CampaignExecutionService;
@@ -35,6 +37,8 @@ import segmail.entity.campaign.Trigger_Email_Activity;
 @RequestScoped
 @Named("FormSendTestEmail")
 public class FormSendTestEmail {
+    
+    @Inject UserRequestContainer reqCont;
     
     @Inject ProgramCampaign program;
     @Inject ClientContainer clientCont;
@@ -63,6 +67,10 @@ public class FormSendTestEmail {
 
     public void setSelectedPreviewAddress(List<String> selectedPreviewAddress) {
         program.setSelectedPreviewAddress(selectedPreviewAddress);
+    }
+    
+    public boolean renderThis(){
+        return reqCont.getProgramParamsOrdered().size() == 1;
     }
     
     public void sendPreview() {

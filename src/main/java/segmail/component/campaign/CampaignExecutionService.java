@@ -525,9 +525,9 @@ public class CampaignExecutionService {
             //Set the body of the email
             String content = emailActivity.getACTIVITY_CONTENT_PROCESSED();
 
-            String testUnsubLink = mmService.getSystemTestLink(MAILMERGE_REQUEST.UNSUBSCRIBE.label());
-            content = content.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), testUnsubLink);
-
+            //String testUnsubLink = mmService.getSystemTestLink(MAILMERGE_REQUEST.UNSUBSCRIBE.label());
+            //content = content.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), testUnsubLink);
+            content = mmService.parseUnsubscribeLink(content,"test");
             preview.setBODY(content);
 
             mailService.queueEmail(preview, DateTime.now());

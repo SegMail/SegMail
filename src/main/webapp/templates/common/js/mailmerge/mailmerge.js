@@ -166,12 +166,12 @@ var processMailmerge = function(sourceSel,updateSel,links,tags,successCallback,e
 }
 
 $(document).ready(function(){
-    if(!WSAutoresponderEndpoint)
+    if(typeof WSAutoresponderEndpoint !== 'undefined' && !WSAutoresponderEndpoint)
         console.log('WSAutoresponderEndpoint is missing.');
     
-    if(!mailmergeTagsSubscriber)
+    if(typeof mailmergeTagsSubscriber !== 'undefined' && !mailmergeTagsSubscriber)
         console.log('mailmergeTagsSubscriber is missing.');
     
-    if(!mailmergeLinks)
+    if(typeof mailmergeLinks !== 'undefined' && !mailmergeLinks)
         console.log('mailmergeLinks is missing.');
 })

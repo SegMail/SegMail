@@ -1,6 +1,6 @@
 function create_new_activity(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
-    var block = $(data.source).parents(".refresh");
+    var block = $(data.source).parents("form");
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.

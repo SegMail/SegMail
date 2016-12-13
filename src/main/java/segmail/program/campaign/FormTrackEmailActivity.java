@@ -8,6 +8,7 @@ package segmail.program.campaign;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.program.FormEditEntity;
 import segmail.entity.campaign.CampaignActivity;
 
@@ -18,7 +19,7 @@ import segmail.entity.campaign.CampaignActivity;
 @RequestScoped
 @Named("FormTrackEmailActivity")
 public class FormTrackEmailActivity implements FormEditEntity  {
-    
+    @Inject UserRequestContainer reqCont;
     @Inject ProgramCampaign program;
     
     public CampaignActivity getEditingActivity() {
@@ -27,6 +28,10 @@ public class FormTrackEmailActivity implements FormEditEntity  {
 
     public void setEditingActivity(CampaignActivity editingActivity) {
         program.setEditingActivity(editingActivity);
+    }
+    
+    public boolean renderThis() {
+        return reqCont.getPathParser().getOrderedParams().size() == 1;
     }
 
     @Override
