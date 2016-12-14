@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
+import javax.ws.rs.core.MultivaluedMap;
 import seca2.program.Program;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
@@ -55,6 +56,11 @@ public class ProgramCampaign extends Program{
     private List<VerifiedSendingAddress> verifiedAddresses;
     
     private Map<Long,Double> clickthroughRates = new HashMap<>();
+    
+    /**
+     * A map of key mailmerge tag to a list of field generated keys
+     */
+    private Map<String,List<String>> mailmergeListFields = new HashMap<>();
     
     /**
      * Intersection of field sets from the different targeted lists.
@@ -228,6 +234,14 @@ public class ProgramCampaign extends Program{
 
     public void setSelectedPreviewAddress(List<String> selectedPreviewAddress) {
         this.selectedPreviewAddress = selectedPreviewAddress;
+    }
+
+    public Map<String, List<String>> getMailmergeListFields() {
+        return mailmergeListFields;
+    }
+
+    public void setMailmergeListFields(Map<String, List<String>> mailmergeListFields) {
+        this.mailmergeListFields = mailmergeListFields;
     }
     
     

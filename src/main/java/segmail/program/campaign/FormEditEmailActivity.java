@@ -74,7 +74,7 @@ public class FormEditEmailActivity implements FormEditEntity {
             loadSchedule();
             loadTargetLists();
             loadTargetListFields();
-            loadRandomSubscriber();
+            loadRandomValues();
             loadMMUrls();
         }
     }
@@ -158,6 +158,15 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void setMailmergeLinks(Map<String, String> mailmergeLinks) {
         program.setMailmergeLinks(mailmergeLinks);
     }
+    
+    public Map<String, List<String>> getMailmergeListFields() {
+        return program.getMailmergeListFields();
+    }
+
+    public void setMailmergeListFields(Map<String, List<String>> mailmergeListFields) {
+        program.setMailmergeListFields(mailmergeListFields);
+    }
+    
     
     public boolean renderThis() {
         return reqCont.getPathParser().getOrderedParams().size() == 2;
@@ -291,9 +300,18 @@ public class FormEditEmailActivity implements FormEditEntity {
         }*/
 
         this.setListFields(sortedList);
+        
+        //Set another Multivalued Map for fields
+        setMailmergeListFields(new HashMap<String,List<String>>());
+        for(SubscriptionListField field : sortedList) {
+            if(!getMailmergeListFields().containsKey(field.getMAILMERGE_TAG())) {
+                getMailmergeListFields().put(field.getMAILMERGE_TAG(), new ArrayList<String>());
+            }
+            getMailmergeListFields().get(field.getMAILMERGE_TAG()).add((String) field.generateKey());
+        }
     }
 
-    public void loadRandomSubscriber() {
+    public void loadRandomValues() {
         //Clear it first
         setRandomSubscriber(new HashMap<String, String>());
 
@@ -305,19 +323,21 @@ public class FormEditEmailActivity implements FormEditEntity {
         if (targetLists == null || targetLists.isEmpty()) {
             return; //Just let the WS return the labels without converting
         }
-        //Get the first list with a valid subscriber
-        Map<Long, Map<String, String>> subscribers = new HashMap<>();
+        //Collect field values from all targeted lists
+        //Actually the identification doesn't matter
+        Map<String, String> randomValues = new HashMap<>();
         for (SubscriptionList targetList : targetLists) {
-            subscribers = subService.getSubscriberValuesMap(targetList.getOBJECTID(), 0, 1);
-            if (!subscribers.isEmpty()) {
-                break;
+            Map<Long,Map<String, String>> subscriber = subService.getSubscriberValuesMap(targetList.getOBJECTID(), 0, 1);
+            if (!subscriber.isEmpty()) {
+                //Extract individual subscriber (will only contain <= 1)
+                for(Map<String, String> sub : subscriber.values()) {
+                    randomValues.putAll(sub);
+                    break;
+                }
             }
         }
 
-        for (Long id : subscribers.keySet()) {
-            setRandomSubscriber(subscribers.get(id));
-            getRandomSubscriber().put("OBJECTID", id.toString());
-        }
+        setRandomSubscriber(randomValues);
     }
 
     public void loadTargetLists() {
