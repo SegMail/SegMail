@@ -13,7 +13,8 @@ public enum EMAIL_PROCESSING_STATUS {
     HOLD("HOLD"),
     QUEUED("QUEUED"),
     SENT("SENT"),
-    ERROR("ERROR");
+    ERROR("ERROR"),
+    BOUNCED("BOUNCED");
     
     public final String label;
     

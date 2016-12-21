@@ -5,6 +5,7 @@
  */
 package segmail.component.account;
 
+import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
@@ -34,6 +35,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import seca2.bootstrap.module.Webservice.REST.RestSecured;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
@@ -59,6 +61,7 @@ public class ClientAccountService {
     @EJB ListService listService;
     @EJB SubscriptionService subService;
     @EJB ClientService clientService;
+    @EJB ClientAWSService clientAWSService;
     @EJB LandingService landingService;
     
     /**
@@ -76,6 +79,7 @@ public class ClientAccountService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @RestSecured
     public String createSegmailUserAccount(
             MultivaluedMap<String,String> subscriptionMap) throws IncompleteDataException {
         
@@ -108,7 +112,7 @@ public class ClientAccountService {
             clientService.createClientContact(newContactInfo);
             
             //Create an AWS IAM user for the new user
-            ClientAWSAccount awsAccount = clientService.registerAWSForClient(clientAssign.getSOURCE());
+            ClientAWSAccount awsAccount = clientAWSService.registerAWSForClient(clientAssign.getSOURCE());
             
             //Call subscription service here instead of having the client to call 2 separate transactions
             List<String> listIds = subscriptionMap.get("list");

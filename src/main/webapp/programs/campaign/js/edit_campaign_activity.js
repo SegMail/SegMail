@@ -18,9 +18,9 @@ var refresh_summernote = function (selector) {
             tags: function() {
                 var allTagsAndLinks = [];
                 for(var key in mailmergeTagsSubscriber) {
-                    if (mailmergeTagsSubscriber.hasOwnProperty(key)) {
+                    //if (mailmergeTagsSubscriber.hasOwnProperty(key)) {
                         allTagsAndLinks.push(key);
-                    }
+                    //}
                 }
                 for(var key in mailmergeLinks) {
                     if (mailmergeLinks.hasOwnProperty(key)) {
@@ -157,10 +157,12 @@ var renderEverything = function () {
 var processMailmergeNoWS = function(timeout) {
     setTimeout(function(){
         var content = $('#preview').html();
-        for(var key in mailmergeTagsSubscriber) {
-            if(mailmergeTagsSubscriber.hasOwnProperty(key)) {
-                var subscVal = randomSubscriber[mailmergeTagsSubscriber[key]];
-                content = content.replace(RegExp(key,'g'),subscVal);
+        for(var mmTag in mailmergeTagsSubscriber) { //eg. { {Email} : [list001001,list002001] }
+            for(var genKey in mailmergeTagsSubscriber[mmTag]) {
+                if(randomSubscriber.hasOwnProperty(mailmergeTagsSubscriber[mmTag][genKey])) { //eg. {list001001:test@test.com,list002001:test2@test2.com}
+                    var subscVal = randomSubscriber[mailmergeTagsSubscriber[mmTag][genKey]];
+                    content = content.replace(RegExp(mmTag,'g'),subscVal);
+                }
             }
         }
         for(var key in mailmergeLinks) {
@@ -186,7 +188,9 @@ var toggleMenu = function () {
     }
 };
 
-function setSendInBatch(id) {
+var setSendInBatch = function(id) {
+    if(!document.getElementById(id))
+        return;
     var value = document.getElementById(id).value;
     if (value <= 0)
         document.getElementById(id).value = null;

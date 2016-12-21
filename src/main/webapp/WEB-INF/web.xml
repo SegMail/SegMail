@@ -93,6 +93,18 @@
         <param-name>NO_AUTHORIZATION_VIEWROOT</param-name>
         <param-value>/programs/program/no_auth_view.xhtml</param-value>
     </context-param>
+    <security-constraint>
+        <display-name>SSL</display-name>
+        <web-resource-collection>
+            <web-resource-name>all</web-resource-name>
+            <description/>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <description/>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
     <env-entry>
         <env-entry-name>US_USER</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
@@ -164,5 +176,14 @@
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>-->
     <!--AWS credentials-->
-    
+    <!--<security-constraint>
+        <display-name>SSL</display-name>
+        <web-resource-collection>
+            <web-resource-name>all</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>-->
 </web-app>

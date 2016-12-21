@@ -13,7 +13,7 @@ public enum MAILMERGE_STATUS {
     UNPROCESSED("UNPROCESSED"),
     PROCESSED("PROCESSED");
     
-    final String name;
+    public final String name;
     
     private MAILMERGE_STATUS(String name){
         this.name = name;

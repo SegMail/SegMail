@@ -105,9 +105,9 @@ public class MailMergeService {
         if (trans == null) {
             trans = new MailMergeRequest();
             //trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.name().toLowerCase());
-            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.program());
+            trans.setPROGRAM(MAILMERGE_REQUEST.CONFIRM.program);
             trans.overrideSTATUS(MAILMERGE_STATUS.UNPROCESSED);
-            trans.setMAILMERGE_LABEL(MAILMERGE_REQUEST.CONFIRM.name());
+            trans.setMAILMERGE_LABEL(MAILMERGE_REQUEST.CONFIRM.name);
             trans.setTRANSACTION_KEY(confirmationKey); //More like an override
             updateService.getEm().persist(trans);
         } else {
@@ -247,7 +247,7 @@ public class MailMergeService {
      * key, we use a more consistent one: [email]+[salt]+[listId]+[salt] so that
      * we can check if it exists before - Let's use the subscriber's ID (the one
      * assigned to the client) - Don't store another transaction because this is
-     * not a time-limited transaction.
+     * not a time-limited transaction. [no more]
      *
      *
      * @param text

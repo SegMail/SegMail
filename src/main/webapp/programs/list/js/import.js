@@ -42,7 +42,7 @@ function bindFileInput() {
 }
 
 function startFileUpload() {
-
+    
     //Get the file object and create a FileNavigator wrapper
     var files = document.getElementById('fileUploaded').files;
     if (files === null || files.length <= 0) { 

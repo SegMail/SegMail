@@ -81,7 +81,10 @@ public final class LogicalPathParser {
     private void parse(String link){
         
         //Before splitting, we need to remove the servletPath
-        String linkNoServlet = (link.startsWith(servletPath)) ? link.replaceFirst(servletPath, "") : link;
+        //We compare both URL by removing the preceding slash
+        String servletPathClean = (servletPath.startsWith("/")) ? servletPath.substring(1) : servletPath;
+        String linkClean = (link.startsWith("/")) ? link.substring(1) : link;
+        String linkNoServlet = (linkClean.startsWith(servletPathClean)) ? linkClean.replaceFirst(servletPathClean, "") : linkClean;
         
         String[] splitElements = linkNoServlet.split("/");
         

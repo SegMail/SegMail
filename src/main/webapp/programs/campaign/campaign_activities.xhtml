@@ -121,6 +121,21 @@
                                                 </f:ajax>
                                                 <i class="fa fa-send"></i>
                                             </button>
+                                            <h:commandLink
+                                                rendered="#{activity.STATUS ne 'COMPLETED' and activity.STATUS ne 'EXECUTING'}"
+                                                pass:href="#send_test_email"
+                                                pass:data-toggle="modal"
+                                                style="margin-right: 3px;"
+                                                class="btn btn-primary list-item-trigger"
+                                                title="Send test email"
+                                                >
+                                                <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
+                                                        render="FormSendTestEmail"
+                                                        onevent="executeAndClose"
+                                                        >
+                                                </f:ajax>
+                                                <i class="fa fa-send-o"></i>
+                                            </h:commandLink>
                                         </div>
                                     </td>
                                 </tr>

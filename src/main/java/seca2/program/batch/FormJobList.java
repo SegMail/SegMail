@@ -7,11 +7,9 @@ package seca2.program.batch;
 
 import eds.component.batch.BatchJobDripDataSource;
 import eds.component.batch.BatchSchedulingService;
-import eds.component.data.DripFeederService;
 import eds.entity.batch.BatchJobRun;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -33,6 +31,7 @@ import org.joda.time.format.DateTimeFormatter;
 public class FormJobList {
     
     private final int RECORDS_PER_PAGE = 20;
+    private final int PAGE_RANGE = 7;
     
     @Inject ProgramBatch program;
     
@@ -116,8 +115,15 @@ public class FormJobList {
     }
     
     public void loadPageNumbers() {
-        List<Integer> pageNumbers = getJobRunDrip().loadPageNumbers();
-        this.setPageNumbers(pageNumbers);
+        //List<Integer> pageNumbers = getJobRunDrip().loadPageNumbers();
+        //this.setPageNumbers(pageNumbers);
+        int startPage = Math.max(1, getCurrentPage() - (PAGE_RANGE/2));
+        int endPage = Math.min(getTotalPage(), startPage + PAGE_RANGE/2);
+        
+        setPageNumbers(new ArrayList<Integer>());
+        for(int i = startPage; i<= endPage; i++){
+            getPageNumbers().add(i);
+        }
     }
     
     public String getStartString() {
@@ -192,5 +198,9 @@ public class FormJobList {
 
     public void setJobRunDrip(BatchJobDripDataSource jobRunDrip) {
         program.setJobRunDrip(jobRunDrip);
+    }
+    
+    public int getTotalPage() {
+        return (int) ((getJobRunDrip().count() / RECORDS_PER_PAGE) + 1);
     }
 }

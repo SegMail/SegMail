@@ -39,7 +39,7 @@ public class MailMergeRequest extends EnterpriseTransaction {
     }
     
     public void overrideSTATUS(MAILMERGE_STATUS mailmerge_status) {
-        this.PROCESSING_STATUS = mailmerge_status.name();
+        this.PROCESSING_STATUS = mailmerge_status.name;
     }
     
 }

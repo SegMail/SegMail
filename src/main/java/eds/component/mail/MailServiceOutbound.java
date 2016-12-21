@@ -13,29 +13,26 @@ import com.amazonaws.services.simpleemail.model.Content;
 import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
+import com.amazonaws.services.simpleemail.model.SendEmailResult;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.component.client.ClientAWSService;
 import eds.component.data.DataValidationException;
-import eds.component.data.IncompleteDataException;
+import eds.entity.client.Client;
+import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -47,12 +44,14 @@ import org.joda.time.DateTime;
  * @author LeeKiatHaw
  */
 @Stateless
-public class MailService {
+public class MailServiceOutbound {
 
     @EJB
-    private GenericObjectService objectService;
+    private GenericObjectService objService;
     @EJB
     private UpdateObjectService updateService;
+    @EJB
+    private ClientAWSService clientAWSService;
 
     @Inject
     @Password
@@ -63,10 +62,6 @@ public class MailService {
      *
      */
     public static final int UPDATE_BATCH_SIZE = 100;
-
-    public static final String DEFAULT_SMTP_ENDPOINT = "email-smtp.us-east-1.amazonaws.com";
-    public static final String DEFAULT_HTTPS_ENDPOINT_PROD = "email.us-east-1.amazonaws.com"; //Current production
-    public static final String DEFAULT_HTTPS_ENDPOINT_SANDBOX = "email.us-west-2.amazonaws.com"; //Sandbox
 
     /**
      * Sends 1 email and logs it in the database depending on the logging flag.
@@ -128,24 +123,31 @@ public class MailService {
                     .withReplyToAddresses(REPLY_TO)
                     .withDestination(destination)
                     .withMessage(message);
-
+            
+            String defaultBounceAddress = getDefaultBounceAddress();
+            if(defaultBounceAddress != null && !defaultBounceAddress.isEmpty()) {
+                request = request.withReturnPath(defaultBounceAddress);
+            }
+            
             // You will need to have AWS_ACCESS_KEY_ID and AWS_SECRET_KEY in your1111 
             // web.xml environmental variables
             AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
-            client.setEndpoint(DEFAULT_HTTPS_ENDPOINT_PROD);
+            client.setEndpoint(clientAWSService.getSESEndpoint());
 
-            client.sendEmail(request);
+            SendEmailResult result = client.sendEmail(request);
+            String messageId = result.getMessageId();
+            email.setAWS_SES_MESSAGE_ID(messageId);
 
         } catch (InvalidEmailException | IllegalArgumentException ex) {
-            Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
         } catch (AmazonClientException ex) {
-            Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             //Retry
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
             email.setRETRIES(email.getRETRIES() + 1);
         } catch (Throwable ex) {
-            Logger.getLogger(MailService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
             //must log an error entity here
         } finally {
@@ -337,5 +339,22 @@ public class MailService {
                 throw new InvalidEmailException("TO address " + to + " is not valid.");
             }
         }
+    }
+    
+    public String getDefaultBounceAddress() {
+        List<Client> bounceClients = objService.getEnterpriseObjectsByName("bounce", Client.class);
+        if(bounceClients == null || bounceClients.isEmpty()) {
+            return null;
+        }
+        
+        Client bounceClient = bounceClients.get(0);
+        List<VerifiedSendingAddress> bounceAddresses = objService.getEnterpriseData(bounceClient.getOBJECTID(), VerifiedSendingAddress.class);
+        if(bounceAddresses == null || bounceAddresses.isEmpty()) {
+            return null;
+        }
+        
+        VerifiedSendingAddress add = bounceAddresses.get(0);
+        
+        return add.getVERIFIED_ADDRESS();
     }
 }

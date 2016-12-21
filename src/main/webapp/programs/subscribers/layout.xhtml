@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+        <ui:define name="main-program-panel">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="block">
+                        <ui:include src="subscription_lists.xhtml" ></ui:include>
+                    </div>
+
+                </div>
+                <div class="col-md-4">
+                    <div class="block">
+                        <ui:include src="subscriber_status.xhtml"></ui:include>
+                    </div>
+
+                </div>
+                <div class="col-md-4">
+                    <div class="block">
+                        <div class="block-head">
+                            <h2>
+                                Mass operations
+                            </h2>
+                        </div>
+                        <div class="block-content">
+                            <p>Execute these operations on the </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <!--Filters-->
+                    <!--Subscriber Table-->
+                    <div class="block">
+                        <ui:include src="subscriber_table.xhtml" ></ui:include>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal fade" id="import_subscriber_popup">
+                <ui:include src="import_subscriber_popup.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="add_subscriber_popup">
+                <ui:include src="add_subscriber_popup.xhtml"></ui:include>
+            </div>
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/jquery.dataTables.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jasny-bootstrap/js/jasny-bootstrap.min.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/client-line-navigator-master/file-navigator.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/client-line-navigator-master/line-navigator.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/jquery.soap/jquery.soap.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/md5/md5.min.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
+
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import_subscriber_popup.js" />
+            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/add_subscriber_popup.js" />
+        </ui:define>
+
+        <ui:define name="head">
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/common/js/jasny-bootstrap/css/jasny-bootstrap.min.css" />
+        </ui:define>
+
+    </ui:composition>
+</html>
+

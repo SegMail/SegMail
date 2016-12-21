@@ -164,7 +164,7 @@ public class FormListEmail {
 
             //Nothing is selected
             if (selectedWelcomeEmailId <= 0) {
-                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Welcome email is not assigned. ", "You need to assign a confirmation email to start receiving signups.");
+                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "No welcome email is assigned. ", "Your customers are more likely to click on links in your welcome email. Are you sure you don't want to create one?");
                 this.resetConfirmationEmailPanel();
                 return;
             }

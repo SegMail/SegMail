@@ -6,29 +6,7 @@
 package eds.component.client;
 
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
-import com.amazonaws.services.identitymanagement.model.AccessKey;
-import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
-import com.amazonaws.services.identitymanagement.model.AddUserToGroupRequest;
-import com.amazonaws.services.identitymanagement.model.CreateAccessKeyRequest;
-import com.amazonaws.services.identitymanagement.model.CreateAccessKeyResult;
-import com.amazonaws.services.identitymanagement.model.CreateUserRequest;
-import com.amazonaws.services.identitymanagement.model.CreateUserResult;
-import com.amazonaws.services.identitymanagement.model.DeleteAccessKeyRequest;
-import com.amazonaws.services.identitymanagement.model.GetUserRequest;
-import com.amazonaws.services.identitymanagement.model.GetUserResult;
-import com.amazonaws.services.identitymanagement.model.ListAccessKeysRequest;
-import com.amazonaws.services.identitymanagement.model.ListAccessKeysResult;
-import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
-import com.amazonaws.services.identitymanagement.model.PutUserPolicyRequest;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
-import com.amazonaws.services.simpleemail.model.DeleteIdentityRequest;
-import com.amazonaws.services.simpleemail.model.DeleteIdentityResult;
-import com.amazonaws.services.simpleemail.model.VerifyEmailIdentityRequest;
-import com.amazonaws.services.simpleemail.model.VerifyEmailIdentityResult;
 import eds.component.GenericObjectService;
-import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
@@ -37,15 +15,11 @@ import eds.component.data.RelationshipExistsException;
 import eds.component.mail.Password;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
-import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientResource;
 import eds.entity.client.ClientResourceAssignment;
 import eds.entity.client.ClientType;
 import eds.entity.client.ContactInfo;
-import eds.entity.client.VerifiedSendingAddress;
-import eds.entity.client.VerifiedSendingAddress_;
-import eds.entity.data.EnterpriseData_;
 import eds.entity.data.EnterpriseObject;
 import eds.entity.user.User;
 import java.util.List;
@@ -54,14 +28,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 
 /**
@@ -308,189 +275,4 @@ public class ClientService {
 
     }
 
-    /**
-     * Only 1 credential record is required and allowed.
-     *
-     * @param client
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ClientAWSAccount registerAWSForClient(Client client) {
-        
-        //1) Call CreateUser API http://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateUser.html
-        //Assume that this would only be called once for each client at this moment
-        /*AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
-        CreateUserRequest userReq = new CreateUserRequest(client.getCLIENT_NAME()).withPath("/segmail/");
-        CreateUserResult userResult = awsClient.createUser(userReq);*/
-        com.amazonaws.services.identitymanagement.model.User newOrExistingUser = this.retrieveOrRegisterAWSUser(client);
-        
-        //2) Call CreateAccessKey API http://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateAccessKey.html
-        /*CreateAccessKeyRequest accessKeyReq = new CreateAccessKeyRequest();
-        accessKeyReq.setRequestCredentials(awsCredentials);
-        accessKeyReq.setUserName(client.getCLIENT_NAME());
-        CreateAccessKeyResult accessKeyResult = awsClient.createAccessKey(accessKeyReq);*/
-        AccessKey newAccessKey = registerNewAWSAccessKey(client);
-        
-        //3) Call AttachUserPolicy API http://docs.aws.amazon.com/IAM/latest/APIReference/API_AttachUserPolicy.html
-        attachSegmailSESPolicyToClient(client);
-        
-        ClientAWSAccount newAccount = new ClientAWSAccount();
-        
-        //newAccount.setOWNER(client);
-        newAccount.setUSERID(newOrExistingUser.getUserId());
-        newAccount.setUSERNAME(newOrExistingUser.getUserName());
-        newAccount.setARN(newOrExistingUser.getArn());
-        newAccount.setAWS_ACCESS_KEY_ID(newAccessKey.getAccessKeyId());
-        newAccount.setAWS_SECRET_ACCESS_KEY(newAccessKey.getSecretAccessKey());
-        
-        objService.getEm().persist(newAccount);
-        newAccount.setOWNER(client);
-        
-        return newAccount;
-    }
-
-    public com.amazonaws.services.identitymanagement.model.User retrieveOrRegisterAWSUser(Client client) {
-        com.amazonaws.services.identitymanagement.model.User result = null;
-        AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
-        
-        try {
-            //1) Call CreateUser API http://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateUser.html
-            //Assume that this would only be called once for each client at this moment
-            //Get the newOrExistingUser first
-            GetUserRequest getReq = new GetUserRequest();
-            //getReq.setRequestCredentials(awsCredentials);
-            getReq.setUserName(client.getCLIENT_NAME());
-            GetUserResult getResult = awsClient.getUser(getReq);
-            result = getResult.getUser();
-            
-        } catch(NoSuchEntityException ex) {
-            CreateUserRequest userReq = new CreateUserRequest(client.getCLIENT_NAME()).withPath("/segmail/");
-            CreateUserResult userResult = awsClient.createUser(userReq);
-            result = userResult.getUser();
-        } finally {
-            return result;
-        }
-    }
-    
-    public AccessKey registerNewAWSAccessKey(Client client) {
-        AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
-        
-        //Delete all existing access keys first
-        ListAccessKeysRequest listReq = new ListAccessKeysRequest();
-        listReq.setUserName(client.getCLIENT_NAME());
-        ListAccessKeysResult listResult = awsClient.listAccessKeys(listReq);
-        for(AccessKeyMetadata key : listResult.getAccessKeyMetadata()){
-            DeleteAccessKeyRequest delReq = new DeleteAccessKeyRequest();
-            delReq.setUserName(key.getUserName());
-            delReq.setAccessKeyId(key.getAccessKeyId());
-            awsClient.deleteAccessKey(delReq);
-        }
-        //Then create a new access key
-        CreateAccessKeyRequest accessKeyReq = new CreateAccessKeyRequest();
-        accessKeyReq.setRequestCredentials(awsCredentials);
-        accessKeyReq.setUserName(client.getCLIENT_NAME());
-        CreateAccessKeyResult accessKeyResult = awsClient.createAccessKey(accessKeyReq);
-        
-        return accessKeyResult.getAccessKey();
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public VerifiedSendingAddress verifyNewSendingAddress(Client client, String sendingAddress) 
-            throws DataValidationException {
-        if(!EmailValidator.getInstance().isValid(sendingAddress))
-            throw new DataValidationException("Email address is invalid.");
-        
-        List<VerifiedSendingAddress> existingAddresses = getVerifiedAddress(client.getOBJECTID(), sendingAddress);
-        if(existingAddresses != null && !existingAddresses.isEmpty())
-            return existingAddresses.get(0);
-        
-        //Get client's AWS credential
-        ///Assume that there's only 1
-        
-        List<ClientAWSAccount> accounts = objService.getEnterpriseData(client.getOBJECTID(), ClientAWSAccount.class);
-        if(accounts == null || accounts.isEmpty()) {
-            throw new RuntimeException("AWS account has not been setup for this account yet.");
-        }
-        ClientAWSAccount account = accounts.get(0);
-        
-        //Persist record first before sending request, just like our MailService
-        //This is to prevent internal errors causing external systems to keep
-        //receiving our erroneous requests
-        int sno = objService.getHighestSNO(VerifiedSendingAddress.class, client.getOBJECTID());
-        
-        VerifiedSendingAddress newVerifiedAddress = new VerifiedSendingAddress();
-        newVerifiedAddress.setVERIFIED_ADDRESS(sendingAddress);
-        newVerifiedAddress.setSNO(++sno);
-        
-        objService.getEm().persist(newVerifiedAddress);
-        newVerifiedAddress.setOWNER(client);
-        
-        BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(),account.getAWS_SECRET_ACCESS_KEY());
-        AmazonSimpleEmailServiceClient awsClient = new AmazonSimpleEmailServiceClient(clientCredentials);
-        VerifyEmailIdentityRequest verifyReq = new VerifyEmailIdentityRequest().withEmailAddress(sendingAddress);
-        VerifyEmailIdentityResult verifyResult = awsClient.verifyEmailIdentity(verifyReq);
-        
-        return newVerifiedAddress;
-    }
-    
-    public List<VerifiedSendingAddress> getVerifiedAddress(long clientId, String sendingAddress) {
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-        CriteriaQuery<VerifiedSendingAddress> query = builder.createQuery(VerifiedSendingAddress.class);
-        Root<VerifiedSendingAddress> fromAddress = query.from(VerifiedSendingAddress.class);
-        
-        query.select(fromAddress);
-        query.where(builder.and(
-                builder.equal(fromAddress.get(VerifiedSendingAddress_.OWNER), clientId),
-                builder.equal(fromAddress.get(VerifiedSendingAddress_.VERIFIED_ADDRESS), sendingAddress)));
-        
-        List<VerifiedSendingAddress> results = objService.getEm().createQuery(query)
-                .getResultList();
-        
-        return results;
-        
-    }
-    
-    public void attachSegmailSESPolicyToClient(Client client) {
-        AmazonIdentityManagementClient awsClient = new AmazonIdentityManagementClient(awsCredentials);
-        AddUserToGroupRequest groupReq = new AddUserToGroupRequest();
-        groupReq.setGroupName("SegmailCustomers");
-        groupReq.setUserName(client.getCLIENT_NAME());
-        awsClient.addUserToGroup(groupReq);
-        
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void deleteSESIdentity(Client client, String verifiedEmail) {
-        
-        List<ClientAWSAccount> accounts = objService.getEnterpriseData(client.getOBJECTID(), ClientAWSAccount.class);
-        if(accounts == null || accounts.isEmpty()) {
-            throw new RuntimeException("AWS account has not been setup for this account yet.");
-        }
-        ClientAWSAccount account = accounts.get(0);
-        
-        BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(),account.getAWS_SECRET_ACCESS_KEY());
-        AmazonSimpleEmailServiceClient awsClient = new AmazonSimpleEmailServiceClient(clientCredentials);
-        DeleteIdentityRequest delRequest = new DeleteIdentityRequest();
-        delRequest.setIdentity(verifiedEmail);
-        DeleteIdentityResult result = awsClient.deleteIdentity(delRequest);
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void deleteVerifiedAddress(Client client, String verifiedEmail) {
-        List<VerifiedSendingAddress> deleteAddresses = getVerifiedAddress(client.getOBJECTID(), verifiedEmail);
-        for(VerifiedSendingAddress add : deleteAddresses) {
-            objService.getEm().remove(add);
-        }
-        
-        
-    }
-    
-    public void deleteVerifiedAddressAndSESIdentity(Client client, String verifiedEmail) {
-        
-        deleteVerifiedAddress(client,verifiedEmail);
-        objService.getEm().flush();
-        objService.getEm().clear();
-        //New transaction, because no 2 different classes of EnterpriseData can be retrieved in the 
-        //same transaction
-        deleteSESIdentity(client, verifiedEmail);
-    }
 }

@@ -42,19 +42,15 @@ public class FormEditExistingServer implements FormEditEntity {
     @Override
     public void saveAndContinue(){
         try {
-            //Save server info
-            landingService.saveServer(this.getServerEditing());
+            ServerInstance server = getServerEditing();
+            server = landingService.saveServer(server);
+            setServerEditing(server);
             //Save server to user relationship
-            landingService.assignUserToServer(this.getUserId(), this.getServerEditing().getOBJECTID());
-            //Save JMS Connection resource
-            /*ServerResource jmsResource = this.getJMSConnection();
-            jmsResource.setOWNER(getServerEditing());
-            jmsResource.setRESOURCE_TYPE(ServerResourceType.JMS_CONNECTION);
-            landingService.updateOrAddResourceForServer(jmsResource);*/
+            landingService.assignUserToServer(getUserId(), getServerEditing().getOBJECTID());
             
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server saved.", "");
         } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
     

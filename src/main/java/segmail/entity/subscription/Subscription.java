@@ -37,7 +37,7 @@ public class Subscription extends EnterpriseRelationship<SubscriberAccount,Subsc
     }
 
     public void setSTATUS(SUBSCRIPTION_STATUS STATUS){
-        this.STATUS = STATUS.name();
+        this.STATUS = STATUS.name;
     }
 
     public String getCONFIRMATION_KEY() {

@@ -14,7 +14,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
-import eds.component.mail.MailService;
+import eds.component.mail.MailServiceOutbound;
 import eds.entity.client.Client;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
@@ -50,6 +50,7 @@ import segmail.entity.campaign.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -60,6 +61,7 @@ import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.Subscription_;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -85,7 +87,7 @@ public class CampaignExecutionService {
     @EJB
     ListService listService;
     @EJB
-    MailService mailService;
+    MailServiceOutbound mailService;
 
     /**
      * Executes the campaign activity from the [start]th subscriber to
@@ -118,7 +120,7 @@ public class CampaignExecutionService {
         if (targetLists == null || targetLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
         
-        List<SubscriptionListField> targetListFields = listService.getFieldsForSubscriptionLists(targetLists);//DB hit
+        List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
         
         List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);//DB hit
         if (clientLists == null || clientLists.isEmpty())
@@ -378,7 +380,10 @@ public class CampaignExecutionService {
         query.where(builder.and(
                 builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), activityId),
                 builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERED_TRANSACTION), fromEmail.get(Email_.TRANSACTION_ID)),
-                builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.SENT.label)
+                fromEmail.get(Email_.PROCESSING_STATUS).in(
+                        EMAIL_PROCESSING_STATUS.SENT.label,
+                        EMAIL_PROCESSING_STATUS.BOUNCED.label
+                )
                 ));
         
         Long result = objService.getEm().createQuery(query)
@@ -421,6 +426,34 @@ public class CampaignExecutionService {
                 total += countUnsentSubscriberEmailsForCampaign(campaignActivityId);
         
         return total;
+        /*
+         * You can't use this method because some Subscribers would have bounced before
+         * this campaign was executed and some after, so there is no absolute way of knowing
+         * how many subscribers were targeted only for this campaign.
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        Root<SubscriberAccount> fromAcc = countQuery.from(SubscriberAccount.class);
+        Root<Subscription> fromSubsc = countQuery.from(Subscription.class);
+        Root<Assign_Campaign_List> fromCampList = countQuery.from(Assign_Campaign_List.class);
+        Root<Assign_Campaign_Activity> fromCampAct = countQuery.from(Assign_Campaign_Activity.class);
+        
+        countQuery.select(builder.count(fromAcc));
+        countQuery.where(
+                builder.and(
+                        builder.equal(fromCampAct.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        builder.equal(fromCampAct.get(Assign_Campaign_Activity_.SOURCE), fromCampList.get(Assign_Campaign_List_.SOURCE)),
+                        builder.equal(fromSubsc.get(Subscription_.TARGET), fromCampList.get(Assign_Campaign_List_.TARGET)),
+                        builder.equal(fromSubsc.get(Subscription_.SOURCE), fromAcc.get(SubscriberAccount_.OBJECTID)),
+                        fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(
+                                SUBSCRIBER_STATUS.ACTIVE.name
+                        )
+                )
+        );
+        
+        long result = objService.getEm().createQuery(countQuery)
+                .getSingleResult();
+        
+        return result;*/
     }
     
     /**
@@ -466,5 +499,38 @@ public class CampaignExecutionService {
                 .getSingleResult();
 
         return result;
+    }
+    
+    public void sendPreview(CampaignActivity emailActivity, List<String> previewEmails, long clientId) throws DataValidationException, IncompleteDataException, InvalidEmailException, RelationshipNotFoundException {
+        
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(emailActivity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class); //DB hit
+        if (campaigns == null || campaigns.isEmpty())
+            throw new RelationshipNotFoundException("CampaignActivity "+emailActivity.getOBJECTID()+" is not assigned to any Campaign.");
+        Campaign campaign = campaigns.get(0);
+        
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
+        if (targetLists == null || targetLists.isEmpty())
+            throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+        
+        List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
+        
+        for(String email : previewEmails) {
+            Email preview = new Email();
+            //Set the header info of the email
+            preview.setSUBJECT(emailActivity.getACTIVITY_NAME());
+            preview.addRecipient(email);
+            preview.setSENDER_ADDRESS(campaign.getOVERRIDE_SEND_AS_EMAIL());
+            preview.setSENDER_NAME(campaign.getOVERRIDE_SEND_AS_NAME());
+
+            //Set the body of the email
+            String content = emailActivity.getACTIVITY_CONTENT_PROCESSED();
+
+            //String testUnsubLink = mmService.getSystemTestLink(MAILMERGE_REQUEST.UNSUBSCRIBE.label());
+            //content = content.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), testUnsubLink);
+            content = mmService.parseUnsubscribeLink(content,"test");
+            preview.setBODY(content);
+
+            mailService.queueEmail(preview, DateTime.now());
+        }
     }
 }

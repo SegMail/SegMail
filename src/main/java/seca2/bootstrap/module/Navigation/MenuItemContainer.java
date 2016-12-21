@@ -33,7 +33,8 @@ public class MenuItemContainer {
             url = url.substring(1, url.length());
         }
         
-        return contextPathTrimmed+"/"+url;
+        //return contextPathTrimmed+"/"+url;
+        return url;
     }
     
     public String getName(){

@@ -13,7 +13,7 @@ public enum ACTIVITY_TYPE {
     EMAIL("EMAIL"),
     SOCIAL_MEDIA("SOCIAL_MEDIA");
     
-    final String name;
+    public final String name;
     
     private ACTIVITY_TYPE(String name) {
         this.name = name;

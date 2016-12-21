@@ -103,4 +103,10 @@ public class BatchJobDripDataSource extends DripFeederService<BatchJobRun> imple
         
         return this.statuses.equals(statuses);
     }
+
+    @Override
+    protected void initCriteria() {
+        this.objects = new ArrayList<>();
+        this.statuses = new ArrayList<>();
+    }
 }

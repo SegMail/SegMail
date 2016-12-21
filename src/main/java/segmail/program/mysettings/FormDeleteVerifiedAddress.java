@@ -5,6 +5,8 @@
  */
 package segmail.program.mysettings;
 
+import eds.component.client.AWSException;
+import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -26,6 +28,7 @@ public class FormDeleteVerifiedAddress {
     @Inject ClientContainer clientCont;
     
     @EJB ClientService clientService;
+    @EJB ClientAWSService clientAWSService;
     
     public String getDeleteAddress() {
         return program.getDeleteAddress();
@@ -37,11 +40,13 @@ public class FormDeleteVerifiedAddress {
     
     public void delete() {
         try{
-            clientService.deleteVerifiedAddressAndSESIdentity(clientCont.getClient(), this.getDeleteAddress());
+            clientAWSService.deleteVerifiedAddressAndSESIdentity(clientCont.getClient(), this.getDeleteAddress());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Your sending address has been removed.", "");
             program.refresh();
-        } catch(Exception ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch(AWSException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");
+        } catch (Exception ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
         
     }

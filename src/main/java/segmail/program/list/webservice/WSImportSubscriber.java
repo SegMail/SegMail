@@ -105,13 +105,13 @@ public class WSImportSubscriber {
         if (program.getListEditingId() <= 0) {
             throw new EntityNotFoundException("No list found.");
         }
-        subContainer.setList(program.getListEditing());
+        //subContainer.setList(program.getListEditing());
         subContainer.setListFields(program.getFieldList());
         
         if (clientFacade.getClient() == null || clientFacade.getClient().getOBJECTID() <= 0) {
             throw new EntityNotFoundException("No client found.");
         }
-        subContainer.setClient(clientFacade.getClient()); //Do not use ClientFacade or ClientContainer in EJB services because they might not be called in the same context (JSF vs JAX-WS/JAX-RS)
+        //subContainer.setClient(clientFacade.getClient()); //Do not use ClientFacade or ClientContainer in EJB services because they might not be called in the same context (JSF vs JAX-WS/JAX-RS)
         
         JsonReader reader = Json.createReader(new StringReader(subscribers));
         JsonObject subscribersObj = reader.readObject();
@@ -124,7 +124,7 @@ public class WSImportSubscriber {
             subscribersList.add(subscriber);
         }
 
-        Map<String, List<Map<String,Object>>> results = massSubService.massSubscribe(subscribersList,false);
+        Map<String, List<Map<String,Object>>> results = massSubService.massSubscribe(clientFacade.getClient(),subscribersList,program.getListEditing(),false);
         
 
         //Construct the JSON response object from the Map object
