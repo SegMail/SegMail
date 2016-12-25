@@ -50,7 +50,6 @@ import org.joda.time.DateTime;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.ServerInstance;
 import seca2.entity.landing.ServerInstance_;
-import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -282,68 +281,6 @@ public class BatchSchedulingService {
         List<BatchJobRun> results = finalQuery.getResultList();
 
         return results;
-        
-        /*CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
-        Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
-
-        List<Predicate> orCriteria = new ArrayList<>();
-        List<Predicate> andCriteria = new ArrayList<>();
-        
-        //For runs with date created only
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), start)
-                )
-        );
-        
-        //For runs with start dates and end dates
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.END_TIME), start)
-                )
-        );
-        
-        //For runs with start dates only
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), start),
-                        builder.isNull(fromRun.get(BatchJobRun_.END_TIME))
-                )
-        );
-        
-        //For runs with cancel dates
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.CANCEL_TIME), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.CANCEL_TIME), start)
-                )
-        );
-        
-        if(status != null)
-            andCriteria.add(builder.equal(fromRun.get(BatchJobRun_.STATUS), status.label));
-        
-        andCriteria.add(builder.or(orCriteria.toArray(new Predicate[]{})));
-        
-        query.select(fromRun);
-        query.where(builder.or(andCriteria.toArray(new Predicate[]{})));
-        
-        query.orderBy(
-                builder.desc(fromRun.get(BatchJobRun_.START_TIME)),
-                builder.desc(fromRun.get(BatchJobRun_.END_TIME)),
-                builder.desc(fromRun.get(BatchJobRun_.CANCEL_TIME)),
-                builder.desc(fromRun.get(BatchJobRun_.DATETIME_CREATED))
-                
-                );
-
-        List<BatchJobRun> results = objectService.getEm().createQuery(query)
-                .getResultList();
-
-        return results;
-        */
     }
 
     public BatchJob getBatchJobById(long batchJobId) {
@@ -472,21 +409,7 @@ public class BatchSchedulingService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJobRun cancelBatchJobRun(String key) throws BatchProcessingException {
-        /*CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaUpdate<BatchJobRun> query = builder.createCriteriaUpdate(BatchJobRun.class);
-        Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
         
-        query.set(fromRun.get(BatchJobRun_.STATUS), BATCH_JOB_RUN_STATUS.CANCELLED.label);
-        DateTime now = DateTime.now();
-        Timestamp ts = new Timestamp(now.getMillis());
-        query.set(fromRun.get(BatchJobRun_.CANCEL_TIME), ts);
-        
-        query.where(builder.equal(fromRun.get(BatchJobRun_.RUN_KEY), key));
-        
-        int result = objectService.getEm().createQuery(query)
-                .executeUpdate();
-        
-        return result;*/
         List<BatchJobRun> runs = this.getJobRunsByKey(key);
         if(runs == null || runs.isEmpty())
             throw new BatchProcessingException("Batch job not found for key "+key);

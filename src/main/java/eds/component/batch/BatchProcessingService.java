@@ -62,30 +62,6 @@ public class BatchProcessingService {
         
     }
 
-    /**
-     * Retrieves the next required jobs and schedules them by sending a message
-     * over JMS to the next N servers.
-     *
-     * @param scheduleTime
-     */
-    /*@Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void processBatchJobQueue(DateTime dt) throws IncompleteDataException {
-        String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
-        if (maxJobString == null || maxJobString.isEmpty()) {
-            System.setProperty(PROCESS_JOB_MODE, "false");
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
-            return;
-        }
-        int maxJobs = Integer.parseInt(maxJobString);
-        List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
-
-        for (BatchJobRun run : nextNJobs) {
-            execService.executeJob(run);
-        }
-    }*/
-    
-    //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void processBatchJobQueue(DateTime dt) {
         String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);

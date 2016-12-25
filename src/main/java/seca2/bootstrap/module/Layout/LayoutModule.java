@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.Layout;
 
+import seca2.bootstrap.module.Preloader.PreloaderContainer;
 import eds.component.layout.LayoutService;
 import eds.entity.layout.Layout;
 import java.io.Serializable;
@@ -17,7 +18,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultKeys;
