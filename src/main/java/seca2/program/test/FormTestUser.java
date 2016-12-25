@@ -16,7 +16,6 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserAccountLockedException;
@@ -78,9 +77,6 @@ public class FormTestUser implements Serializable {
         try{
             userService.createUserType(userTypeName,description,portalAccess,wsAccess);
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_FATAL, "Usertype "+userTypeName+" created!", null);
-        }
-        catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(createUsertypeFormName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EntityExistsException ex) {
@@ -93,8 +89,6 @@ public class FormTestUser implements Serializable {
             userService.registerUserByUserTypeId(chosenUserType, username, password, contact);
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_FATAL, "User "+username+" has been created!", null);
             
-        } catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch(Exception ex){
             FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
                     ex.getClass().getSimpleName(), //why? i forgot why...
@@ -109,8 +103,6 @@ public class FormTestUser implements Serializable {
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_FATAL, "Login successful!", null);
         } catch(UserLoginException esliex){
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, esliex.getLocalizedMessage(), null);
-        } catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch(UserAccountLockedException ualex){
             FacesMessenger.setFacesMessage(loginUserFormName, FacesMessage.SEVERITY_ERROR, ualex.getLocalizedMessage(), "Please contact admin.");
         } catch(Exception ex){
@@ -118,30 +110,10 @@ public class FormTestUser implements Serializable {
         }
     }
     
-    /*
-    public void initializeAllUserTypes(){
-         try{
-            allUserTypes = userService.getAllUserTypes();
-            //who knows whether there is empty list or not?
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
-            FacesMessenger.setFacesMessage(createUserFormName, FacesMessage.SEVERITY_ERROR, 
-                    ex.getCause().getClass().getSimpleName(), 
-                    ex.getCause().getMessage());
-        }
-    }*/
-    
     public void setProfilePicLocation(){
         try{
             userService.setProfilePicLocationForUsername(this.usernameProfilePic, this.profilePicLocation);
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(this.setProfilePicFormName, FacesMessage.SEVERITY_ERROR, 
                     ex.getCause().getClass().getSimpleName(), 
                     ex.getCause().getMessage());

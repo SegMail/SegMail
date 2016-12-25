@@ -181,7 +181,6 @@ public class WSImportSubscriber {
         JsonObjectBuilder jsonObjBuilder = Json.createObjectBuilder();
         for(String key : mapObj.keySet()) {
             if(key == null){
-                System.out.println("key: "+key);
                 continue;
             }
             jsonObjBuilder.add(key, mapObj.get(key).toString()); //Only strings are allowed here

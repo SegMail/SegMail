@@ -191,7 +191,6 @@ public class BatchProcessingService {
         } catch (BatchProcessingException ex) {
             if (!reported) {
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "This server node " + landingService.getOwnServerName() + " is not processing any jobs today because: "+ex.getMessage(), "");
-                //System.out.println("This server node "+landingService.getOwnServerName()+" is not processing any jobs today!");
                 reported = true;
             }
         }

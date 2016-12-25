@@ -10,12 +10,9 @@ import java.io.Serializable;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.IncompleteDataException;
 import eds.component.layout.LayoutService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -48,8 +45,6 @@ public class FormCreateLayout extends Form implements Serializable {
         try{
             this.layoutService.registerLayout(layoutName, viewRoot);
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Layout successfully registered.",null);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (EntityExistsException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {

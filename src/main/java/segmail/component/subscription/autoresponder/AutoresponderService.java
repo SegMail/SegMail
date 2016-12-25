@@ -8,27 +8,22 @@ package segmail.component.subscription.autoresponder;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
-import eds.entity.data.EnterpriseRelationship_;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.Assign_Client_List_;
 import segmail.entity.subscription.SubscriptionList;
@@ -115,38 +110,31 @@ public class AutoresponderService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Assign_AutoresponderEmail_Client assignAutoEmailToClient(long autoEmailId, long clientId) throws EntityNotFoundException, RelationshipExistsException {
-        try {
-            //Check if assignment already exists
-            List<Assign_AutoresponderEmail_Client> assignments = objectService.getRelationshipsForObject(autoEmailId, clientId, Assign_AutoresponderEmail_Client.class);
-            if (assignments != null && !assignments.isEmpty()) {
-                throw new RelationshipExistsException(assignments.get(0));
-            }
-
-            //Check if autoEmail exists
-            AutoresponderEmail autoEmail = objectService.getEnterpriseObjectById(autoEmailId, AutoresponderEmail.class);
-            if (autoEmail == null) {
-                throw new EntityNotFoundException("Autoresponder email id " + autoEmailId + " not found!");
-            }
-
-            //Check if client exists
-            Client client = objectService.getEnterpriseObjectById(clientId, Client.class);
-            if (client == null) {
-                throw new EntityNotFoundException("Client id " + client + " not found!");
-            }
-
-            //Assign
-            Assign_AutoresponderEmail_Client assignment = new Assign_AutoresponderEmail_Client();
-            assignment.setSOURCE(autoEmail);
-            assignment.setTARGET(client);
-            objectService.getEm().persist(assignment);
-
-            return assignment;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
+        //Check if assignment already exists
+        List<Assign_AutoresponderEmail_Client> assignments = objectService.getRelationshipsForObject(autoEmailId, clientId, Assign_AutoresponderEmail_Client.class);
+        if (assignments != null && !assignments.isEmpty()) {
+            throw new RelationshipExistsException(assignments.get(0));
         }
+
+        //Check if autoEmail exists
+        AutoresponderEmail autoEmail = objectService.getEnterpriseObjectById(autoEmailId, AutoresponderEmail.class);
+        if (autoEmail == null) {
+            throw new EntityNotFoundException("Autoresponder email id " + autoEmailId + " not found!");
+        }
+
+        //Check if client exists
+        Client client = objectService.getEnterpriseObjectById(clientId, Client.class);
+        if (client == null) {
+            throw new EntityNotFoundException("Client id " + client + " not found!");
+        }
+
+        //Assign
+        Assign_AutoresponderEmail_Client assignment = new Assign_AutoresponderEmail_Client();
+        assignment.setSOURCE(autoEmail);
+        assignment.setTARGET(client);
+        objectService.getEm().persist(assignment);
+
+        return assignment;
     }
 
     /**
@@ -235,33 +223,19 @@ public class AutoresponderService {
      * @param listId
      */
     public void removeAllAssignedConfirmationEmailFromList(long listId) {
-        try {
-            //List<Assign_AutoConfirmEmail_List> existingAssignments = objectService.getRelationshipsForTargetObject(listId, Assign_AutoConfirmEmail_List.class);
-            List<Assign_AutoresponderEmail_List> existingAssignments = this.getAssignedAutoEmailsAssignmentsForList(listId, AUTO_EMAIL_TYPE.CONFIRMATION);
-            List<Assign_AutoresponderEmail_List> modListCopy = new ArrayList<>(existingAssignments);
-            for (Assign_AutoresponderEmail_List assign : modListCopy) {
-                updateService.getEm().remove(updateService.getEm().contains(assign) ? assign : updateService.getEm().merge(assign));
-            }
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+        
+        List<Assign_AutoresponderEmail_List> existingAssignments = this.getAssignedAutoEmailsAssignmentsForList(listId, AUTO_EMAIL_TYPE.CONFIRMATION);
+        List<Assign_AutoresponderEmail_List> modListCopy = new ArrayList<>(existingAssignments);
+        for (Assign_AutoresponderEmail_List assign : modListCopy) {
+            updateService.getEm().remove(updateService.getEm().contains(assign) ? assign : updateService.getEm().merge(assign));
         }
     }
 
     public void removeAllAssignedWelcomeEmailFromList(long listId) {
-        try {
-            List<Assign_AutoresponderEmail_List> existingAssignments = this.getAssignedAutoEmailsAssignmentsForList(listId, AUTO_EMAIL_TYPE.WELCOME);
-            List<Assign_AutoresponderEmail_List> modListCopy = new ArrayList<>(existingAssignments);
-            for (Assign_AutoresponderEmail_List assign : modListCopy) {
-                updateService.getEm().remove(updateService.getEm().contains(assign) ? assign : updateService.getEm().merge(assign));
-            }
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+        List<Assign_AutoresponderEmail_List> existingAssignments = this.getAssignedAutoEmailsAssignmentsForList(listId, AUTO_EMAIL_TYPE.WELCOME);
+        List<Assign_AutoresponderEmail_List> modListCopy = new ArrayList<>(existingAssignments);
+        for (Assign_AutoresponderEmail_List assign : modListCopy) {
+            updateService.getEm().remove(updateService.getEm().contains(assign) ? assign : updateService.getEm().merge(assign));
         }
     }
 
@@ -275,34 +249,26 @@ public class AutoresponderService {
      * @return
      */
     public List<AutoresponderEmail> getAutoEmailsBySubjectAndTypeForClient(String subject, AUTO_EMAIL_TYPE type, long clientId) {
-        try {
-            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-            CriteriaQuery<AutoresponderEmail> query = builder.createQuery(AutoresponderEmail.class);
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<AutoresponderEmail> query = builder.createQuery(AutoresponderEmail.class);
 
-            Root<AutoresponderEmail> fromAutoEmail = query.from(AutoresponderEmail.class);
-            Root<Assign_AutoresponderEmail_Client> fromAssignAutoEmailClient = query.from(Assign_AutoresponderEmail_Client.class);
+        Root<AutoresponderEmail> fromAutoEmail = query.from(AutoresponderEmail.class);
+        Root<Assign_AutoresponderEmail_Client> fromAssignAutoEmailClient = query.from(Assign_AutoresponderEmail_Client.class);
 
-            query.select(fromAutoEmail);
-            query.where(
-                    builder.and(
-                            builder.equal(fromAutoEmail.get(AutoresponderEmail_.SUBJECT), subject),
-                            builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name),
-                            builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)),
-                            builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId)
-                    )
-            );
+        query.select(fromAutoEmail);
+        query.where(
+                builder.and(
+                        builder.equal(fromAutoEmail.get(AutoresponderEmail_.SUBJECT), subject),
+                        builder.equal(fromAutoEmail.get(AutoresponderEmail_.TYPE), type.name),
+                        builder.equal(fromAutoEmail.get(AutoresponderEmail_.OBJECTID), fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.SOURCE)),
+                        builder.equal(fromAssignAutoEmailClient.get(Assign_AutoresponderEmail_Client_.TARGET), clientId)
+                )
+        );
 
-            List<AutoresponderEmail> results = objectService.getEm().createQuery(query)
-                    .getResultList();
+        List<AutoresponderEmail> results = objectService.getEm().createQuery(query)
+                .getResultList();
 
-            return results;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        return results;
     }
 
     /**

@@ -5,10 +5,8 @@
  */
 package segmail.program.signup;
 
-import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.user.UserService;
-import eds.entity.user.UserAccount;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

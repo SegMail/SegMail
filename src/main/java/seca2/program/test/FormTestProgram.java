@@ -13,11 +13,9 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
-import eds.component.data.DBConnectionException;
 import eds.component.program.ProgramService;
 import eds.component.user.UserService;
 import eds.entity.program.Program;
-import eds.entity.user.User;
 import eds.entity.user.UserType;
 import javax.inject.Inject;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -61,10 +59,7 @@ public class FormTestProgram implements Serializable {
         try{
             programService.registerProgram(programName, programViewRoot, displayName, displayDesc, isPublic);
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_FATAL, "Program "+programName+" successfully created!", null);
-        } catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(TestCreateProgramFormName, FacesMessage.SEVERITY_ERROR, 
                     ex.getClass().getSimpleName(), 
                     ex.getMessage());
@@ -75,10 +70,7 @@ public class FormTestProgram implements Serializable {
         try{
             programService.assignProgramToUserType(this.selectedProgramId, this.selectedUserTypeId);
             FacesMessenger.setFacesMessage(TestAssignProgramToUserTypeName, FacesMessage.SEVERITY_FATAL, "Program "+selectedProgramId+" successfully assigned to UserType "+this.selectedUserTypeId+"!", null);
-        } catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(TestAssignProgramToUserTypeName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(TestAssignProgramToUserTypeName, FacesMessage.SEVERITY_ERROR, 
                     ex.getClass().getSimpleName(), 
                     ex.getMessage());

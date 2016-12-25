@@ -13,6 +13,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.NonCoreModule;
+import seca2.bootstrap.UserRequestContainer;
 
 /**
  *
@@ -21,6 +22,7 @@ import seca2.bootstrap.NonCoreModule;
 @NonCoreModule
 public class PreloaderModule extends BootstrapModule {
     
+    @Inject UserRequestContainer reqCont;
     @Inject PreloaderContainer layoutCont;
 
     @Override
@@ -32,6 +34,9 @@ public class PreloaderModule extends BootstrapModule {
         
         layoutCont.setPreloadMessageMain(messageOfTheDay);
         layoutCont.setPreloadMessageSub(subMessageOfTheDay);
+        
+        if(!reqCont.getPathParser().getOrderedParams().isEmpty())
+            layoutCont.setTimeout(0);
         
         return true;
     }

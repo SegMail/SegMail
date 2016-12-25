@@ -6,7 +6,6 @@
 package segmail.program.autoresponder;
 
 import eds.component.GenericObjectService;
-import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
@@ -175,8 +174,6 @@ public class FormEditExistingTemplate implements FormEditEntity {
             program.refresh();
 
         } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        } catch (DBConnectionException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }
     }

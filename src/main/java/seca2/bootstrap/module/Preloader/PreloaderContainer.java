@@ -31,7 +31,7 @@ public class PreloaderContainer {
     
     @PostConstruct
     public void init() {
-        timeout = 2000; //default 2s
+        timeout = 1000; //default 2s
     }
 
     public String getTemplateLocation() {

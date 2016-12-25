@@ -132,7 +132,6 @@ public class BatchJobStep implements Serializable {
         }
 
         Object ejb = InitialContext.doLookup("java:module/" + getSERVICE_NAME());
-        System.out.println(ejb.getClass().getName());
 
         Object ret = null;
         Method[] methodArray = ejb.getClass().getMethods();

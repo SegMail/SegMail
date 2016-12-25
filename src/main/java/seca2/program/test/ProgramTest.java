@@ -7,7 +7,6 @@
 package seca2.program.test;
 
 import eds.component.GenericObjectService;
-import eds.component.data.DBConnectionException;
 import eds.entity.client.ClientType;
 import eds.entity.layout.Layout;
 import eds.entity.navigation.MenuItem;
@@ -71,12 +70,7 @@ public class ProgramTest extends FormGroup implements Serializable {
             allUserTypes = genericDBService.getAllEnterpriseObjects(UserType.class);
             //who knows whether there is empty list or not?
             
-        }
-        catch(DBConnectionException dbex){
-            //Actually this part does not matter, if there is no DB connection, the BootstrapModules would be activated to display the error page.
-            FacesMessenger.setFacesMessage(PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, 
                     ex.getCause().getClass().getSimpleName(), 
                     ex.getCause().getMessage());
@@ -85,8 +79,6 @@ public class ProgramTest extends FormGroup implements Serializable {
     public void initializeAllLayout(){
         try{
             this.allLayouts = this.genericDBService.getAllEnterpriseObjects(Layout.class);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
@@ -95,8 +87,6 @@ public class ProgramTest extends FormGroup implements Serializable {
     public void initializeAllProgram(){
         try{
             this.allPrograms = this.genericDBService.getAllEnterpriseObjects(Program.class);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
@@ -105,12 +95,8 @@ public class ProgramTest extends FormGroup implements Serializable {
     public void initializeAllMenuItems(){
         try{
             allMenuItems = genericDBService.getAllEnterpriseObjects(MenuItem.class);
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_INFO, "Could not connect to database!", "Please contact admin.");
-            
-        }
-        catch(Exception ex){
+  
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }
@@ -118,12 +104,7 @@ public class ProgramTest extends FormGroup implements Serializable {
     public void initializeAllClientTypes(){
         try{
             allClientTypes = genericDBService.getAllEnterpriseObjects(ClientType.class);
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_INFO, "Could not connect to database!", "Please contact admin.");
-            
-        }
-        catch(Exception ex){
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(this.PROGRAM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
         }
     }

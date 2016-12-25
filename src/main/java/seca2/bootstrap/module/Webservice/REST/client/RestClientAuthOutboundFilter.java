@@ -28,8 +28,6 @@ public class RestClientAuthOutboundFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         
-        System.out.println("JAX-WS client filter called.");//debug
-        
         //If it is an authentication request, don't block it
         if(requestContext.getUri().getPath().endsWith("authentication"))
             return;
@@ -41,7 +39,6 @@ public class RestClientAuthOutboundFilter implements ClientRequestFilter {
                             .entity("No API key. Please request one from the target endpoint /authentication")
                             .build());
         }
-        System.out.println("JAX-WS api key: "+restContainer.getApiKey());//debug
         requestContext.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer "+restContainer.getApiKey());
         
     }

@@ -5,27 +5,17 @@
  */
 package segmail.program.autoresponder;
 
-import eds.component.client.ClientFacade;
-import eds.component.data.DBConnectionException;
-import eds.component.user.UserService;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
-import eds.entity.user.UserType;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
-import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.Program;
-import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**

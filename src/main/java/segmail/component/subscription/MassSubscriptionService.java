@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -44,7 +46,6 @@ import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
@@ -85,7 +86,6 @@ public class MassSubscriptionService {
      * later version of it has another new different field value, both of them
      * will be retained.
      *
-     * No emails will be sent out with this mode as of now.
      *
      * @param subscribers
      * @param doubleOptin
@@ -319,7 +319,7 @@ public class MassSubscriptionService {
             }
             DateTime end = DateTime.now();
             long timeTaken = end.getMillis() - start.getMillis();
-            System.out.println("Time taken to update " + subscribers.size() + " subscribers is " + timeTaken);
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, null, "Time taken to update " + subscribers.size() + " subscribers is " + timeTaken);
         } catch (Throwable ex) {
             //If any exception occurs, return the entire list of survivors
             String errorMsg = "";
@@ -479,57 +479,6 @@ public class MassSubscriptionService {
 
             mailService.queueEmail(confirmEmail, DateTime.now());
         }
-        //Group the SubscriberAccounts together by SubscriptionList
-        /*Map<SubscriptionList, List<SubscriberAccount>> groupedByLists = new HashMap<>();
-        for (Subscription subscription : newSubscriptions) {
-            List<SubscriberAccount> subscribers = groupedByLists.get(subscription.getTARGET());
-            if (subscribers == null) {
-                subscribers = new ArrayList<>();
-                groupedByLists.put(subscription.getTARGET(), subscribers);
-            }
-            subscribers.add(subscription.getSOURCE());
-        }
-
-        for (SubscriptionList list : groupedByLists.keySet()) {
-            //Get the necessary information needed
-            List<AutoresponderEmail> emails = autoresponderService.getAssignedAutoEmailsForList(list.getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
-            if (emails == null || emails.isEmpty()) {
-                throw new IncompleteDataException("Confirmation emails are not assigned to list " + list.getLIST_NAME() + " yet.");
-            }
-
-            AutoresponderEmail assignedConfirmEmail = emails.get(0);
-
-            //Send the email using MailServiceOutbound
-            Email confirmEmail = new Email();
-            confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
-            confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
-            confirmEmail.setSUBJECT(assignedConfirmEmail.getSUBJECT());
-
-            for (SubscriberAccount subscriber : groupedByLists.get(list)) {
-
-                confirmEmail.setRECIPIENTS(new HashSet<String>());
-                confirmEmail.addSingleRecipient(subscriber.getEMAIL());
-        //Parse all mailmerge functions using MailMergeService
-                //Get the confirmation key first
-                String confirmKey = "";
-                for (Subscription newSubscription : newSubscriptions) {
-                    if (newSubscription.getSOURCE().equals(subscriber) && newSubscription.getTARGET().equals(list)) {
-                        confirmKey = newSubscription.getCONFIRMATION_KEY();
-                        if (confirmKey == null || confirmKey.isEmpty()) {
-                            throw new RuntimeException("Confirmation key is not generated for subscription " + newSubscription.toString());
-                        }
-                        break;
-                    }
-                }
-
-                if (confirmKey == null || confirmKey.isEmpty()) {
-                    throw new RuntimeException("No subscription found for subscriber " + subscriber.toString());
-                }
-                confirmEmail.setBODY(mailMergeService.parseConfirmationLink(confirmEmail.getBODY(), confirmKey));
-                mailService.queueEmail(confirmEmail, DateTime.now());
-                
-            }
-        }*/
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
