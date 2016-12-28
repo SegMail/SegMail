@@ -134,7 +134,7 @@ public class CampaignExecutionService {
             List<SubscriberAccount> subscribers = 
                     getUnsentSubscriberEmailsForCampaign(campaignActivityId, 0, (int) Math.min(maxCount-count,BATCH_SIZE)); //DB hit
             //Lock 'em!
-            subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
+            //subscribers = updService.lockObjects(subscribers, LockModeType.PESSIMISTIC_WRITE);
             //Skip if there are no more subscribers to be sent to
             if(subscribers.isEmpty())
                 break;
