@@ -67,6 +67,9 @@
                 <!--create AWS account for user-->
                 <ui:include src="test-cases/createAWSAccountForUser.xhtml" />
                 
+                <!--test REST entity-->
+                <ui:include src="test-cases/testRestEntity.xhtml" />
+                
                 <div class="col-lg-3 col-md-3 col-sm-12">
         <div class="panel panel-default"  style="min-height: 220px;">
             <div class="panel-heading">
@@ -92,7 +95,7 @@
         </ui:define>
 
         <ui:define name="scripts-bottom">
-            
+            <script type="text/javascript" src="#{request.contextPath}/programs/test/js/testRestEntity.js" />
         </ui:define>
 
     </ui:composition>

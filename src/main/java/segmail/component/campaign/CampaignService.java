@@ -9,11 +9,14 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.data.RelationshipNotFoundException;
 import eds.entity.client.Client;
+import eds.entity.client.ContactInfo;
+import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.data.EnterpriseData_;
 import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.mail.Email;
@@ -28,6 +31,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.joda.time.DateTime;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
@@ -52,11 +60,13 @@ import segmail.entity.campaign.CampaignLinkClick;
 import segmail.entity.campaign.CampaignLinkClick_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListField_;
 import segmail.entity.subscription.Subscription_;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -89,6 +99,7 @@ public class CampaignService {
     
     /**
      * Creates and assigns Campaign to the calling Client.
+     * Sets the client's first VerifiedSendingAddress as the Send As.
      * 
      * @param campaignName
      * @param campaignGoals
@@ -98,7 +109,7 @@ public class CampaignService {
      * @throws IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Campaign createCampaign(String campaignName, String campaignGoals) 
+    public Campaign createCampaign(String campaignName, String campaignGoals, Client client) 
             throws RelationshipExistsException, EntityNotFoundException, IncompleteDataException {
         
         Campaign newCampaign = new Campaign();
@@ -110,7 +121,20 @@ public class CampaignService {
         objService.getEm().persist(newCampaign);
         
         //Assign
-        assignCampaignToClient(newCampaign.getOBJECTID(), clientContainer.getClient().getOBJECTID());
+        assignCampaignToClient(newCampaign.getOBJECTID(), client.getOBJECTID());
+        
+        //Set default attributes for Send As email
+        List<VerifiedSendingAddress> addresses = objService.getEnterpriseData(client.getOBJECTID(), VerifiedSendingAddress.class);
+        if(addresses != null && !addresses.isEmpty()) {
+            VerifiedSendingAddress address = addresses.get(0);
+            newCampaign.setOVERRIDE_SEND_AS_EMAIL(address.getVERIFIED_ADDRESS());
+        }
+        //Set default attributes for Send As name
+        List<ContactInfo> contacts = objService.getEnterpriseData(client.getOBJECTID(), ContactInfo.class);
+        if(contacts != null && !contacts.isEmpty()) {
+            ContactInfo contact = contacts.get(0);
+            newCampaign.setOVERRIDE_SEND_AS_NAME(contact.getFIRSTNAME());
+        }
         
         return newCampaign;
     }
@@ -250,10 +274,11 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivity updateCampaignActivity(CampaignActivity activity) 
-            throws IncompleteDataException {
+            throws IncompleteDataException, DataValidationException, EntityNotFoundException {
+        
         validateCampaignActivity(activity);
         activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
-        
+        activity = parseMMTagsAndLinks(activity);
         
         return objService.getEm().merge(activity);
     }
@@ -367,12 +392,12 @@ public class CampaignService {
             //Set Sender's attributes in Campaign with the first list that was assigned
             if(campaign.getOVERRIDE_SEND_AS_EMAIL() == null || campaign.getOVERRIDE_SEND_AS_EMAIL().isEmpty()) {
                 campaign.setOVERRIDE_SEND_AS_EMAIL(targetList.getSEND_AS_EMAIL());
-                updService.getEm().merge(campaign);
+                //updService.getEm().merge(campaign); //no need because it is already managed
             }
             
             if(campaign.getOVERRIDE_SEND_AS_NAME()== null || campaign.getOVERRIDE_SEND_AS_NAME().isEmpty()) {
                 campaign.setOVERRIDE_SEND_AS_NAME(targetList.getSEND_AS_NAME());
-                updService.getEm().merge(campaign);   
+                //updService.getEm().merge(campaign);   //no need because it is already managed
             }
             
         }
@@ -399,6 +424,15 @@ public class CampaignService {
          * Schedule the first one and let the subsequent ones keep scheduling 
          * the subsequent ones until the lists are done.
          */
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(emailActivity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class);
+        if(campaigns == null || campaigns.isEmpty()) {
+            throw new EntityNotFoundException("No Campaign found for this CampaignActivity.");
+        }
+        Campaign campaign = campaigns.get(0);
+        if(campaign.getOVERRIDE_SEND_AS_EMAIL() == null || campaign.getOVERRIDE_SEND_AS_EMAIL().isEmpty() ||
+                campaign.getOVERRIDE_SEND_AS_NAME() == null || campaign.getOVERRIDE_SEND_AS_NAME().isEmpty()) {
+            throw new IncompleteDataException("You need to set Send As name and address for all Campaigns");
+        }
         
         List<CampaignActivitySchedule> scheduleList = objService.getEnterpriseData(emailActivity.getOBJECTID(), CampaignActivitySchedule.class);
         if(scheduleList == null || scheduleList.isEmpty())
@@ -481,10 +515,9 @@ public class CampaignService {
     }
     
     /**
-     * There are normal links and also mailmerge links. If it is a normal link,
-     * return the correct redirect URL that will lead to the intended target. If 
-     * it is a mailmerge link, return an example link that will allow the user to
-     * test out by clicking the link and come to the intended page. 
+     * If the link exists, update its LINK_TARGET and LINK_TEXT. If not, create 
+     * it. Set its ACTIVE flag to true. All links that have been created or updated
+     * are now active within the CampaignActivity.
      * 
      * @param activity
      * @param linkTarget
@@ -509,9 +542,7 @@ public class CampaignService {
             }
         }
         selectedLink.setLINK_TARGET(linkTarget);
-        //selectedLink.setLINK_TARGET(this.constructLink(selectedLink));
         selectedLink.setLINK_TEXT(linkText);
-        //selectedLink.setORIGINAL_LINK_HTML(originalHTML);
         //If not found
         if(selectedLink.getLINK_KEY() == null || selectedLink.getLINK_KEY().isEmpty())
             objService.getEm().persist(selectedLink);
@@ -588,5 +619,84 @@ public class CampaignService {
         return result;
     } 
     
-    
+    /**
+     * Processes 3 things:
+     * 1) Mailmerge tags eg. firstname, lastname, etc.
+     * 2) Mailmerge links eg. confirm, unsubscribe, etc.
+     * 3) Outbound links eg. http://segmail.io
+     * 
+     * The 1st 2 are to be delegated to MailmergeService while the last is to be 
+     * done here.
+     * 
+     * @param editingContent
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivity parseMMTagsAndLinks(CampaignActivity activity) throws DataValidationException, IncompleteDataException, EntityNotFoundException {
+        
+        //Retrieve this first because it has 2 DB hits
+        List<Campaign> campaigns = this.objService.getAllSourceObjectsFromTarget(activity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class);
+        if(campaigns == null || campaigns.isEmpty())
+            throw new EntityNotFoundException("No Campaign found for CampaignActivity "+activity.getOBJECT_NAME());
+        
+        //Outbound links - generate tracking links without subscriber ID
+        //links will be appended with the subscriber's ID when it is sent out
+        String editingContent = activity.getACTIVITY_CONTENT();
+        Document doc = Jsoup.parse(editingContent);
+        Elements links = doc.select("a");
+        //Set all as inactive first
+        updService.deleteAllEnterpriseDataByType(activity.getOBJECTID(), CampaignActivityOutboundLink.class);
+        
+        //Update those that are still active (in use)
+        for(int i=0; i<links.size(); i++) {
+            Element link = links.get(i);
+            String target = link.attr("href");
+            String text = link.html();
+            //If text is image, replace it with a generic image tab
+            if(!link.getElementsByTag("img").isEmpty())
+                text = "[image]";
+            
+            CampaignActivityOutboundLink outboundLink = new CampaignActivityOutboundLink();
+            outboundLink.setOWNER(activity);
+            outboundLink.setSNO(i);
+            outboundLink.setLINK_TARGET(target);
+            outboundLink.setLINK_TEXT(text);
+            outboundLink.setACTIVE(true);
+            objService.getEm().persist(outboundLink);
+            
+            //Construct link
+            String redirectLink = constructLink(outboundLink);
+            
+            //Modify the existing link
+            link.attr("href", redirectLink);
+            link.attr("data-link", (String) outboundLink.generateKey());
+            link.attr("target", "_blank");
+        }
+        
+        activity.setACTIVITY_CONTENT_PROCESSED(doc.outerHtml());
+        String processedContent = activity.getACTIVITY_CONTENT_PROCESSED();
+        
+        //Mailmerge links - generate test links
+        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
+        for(MAILMERGE_REQUEST mmReq : mmReqs) {
+            String tag = mmReq.label;
+            
+            Element a = new Element(Tag.valueOf("a"),"");
+            a.attr("href", mmService.getSystemTestLink(tag));
+            a.html(mmReq.defaultHtmlText);
+            a.attr("target", "_blank");
+            
+            String replacementElem = a.outerHtml();
+            processedContent = processedContent.replace(tag, replacementElem);
+            
+        }
+        
+        //Mailmerge tags (with random subscriber)
+        //Can't do it here because the exact values will be saved into the DB!
+        //This must be done in the UI 
+        
+        activity.setACTIVITY_CONTENT_PROCESSED(processedContent);
+        
+        return activity;
+    }
 }

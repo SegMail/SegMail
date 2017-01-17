@@ -43,8 +43,6 @@ import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 @Stateless
 public class MailMergeService {
 
-    public static final String UNSUBSCRIBE_PROGRAM_NAME = "unsubscribe";
-
     @EJB
     private GenericObjectService objectService;
     @EJB
@@ -279,7 +277,7 @@ public class MailMergeService {
             throw new IncompleteDataException("Please contact app administrator to set a landing server.");
         }
 
-        String unsubLink = landingServer.getURI().concat("/").concat(UNSUBSCRIBE_PROGRAM_NAME).concat("/").concat(unsubscribeKey);
+        String unsubLink = landingServer.getURI().concat("/").concat(MAILMERGE_REQUEST.UNSUBSCRIBE.program).concat("/").concat(unsubscribeKey);
         String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
         
         String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);

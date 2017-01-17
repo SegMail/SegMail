@@ -11,7 +11,7 @@ var refresh_summernote = function (selector) {
         toolbar: [
              ["font", ["bold", "italic", "underline","style"]],
              ["test", ["picture", "link"]],
-             ["para", ["ol", "ul", "paragraph", "height"]],
+             ["para", ["ol", "ul", "paragraph"]],
              ["misc", ["codeview", "help", "MailMerge"]]
         ],
         MailMerge: {
@@ -31,9 +31,10 @@ var refresh_summernote = function (selector) {
             }()
         }
     });
-    observeDOM(document.getElementsByClassName('note-editable')[0], function () {
+    /*observeDOM(document.getElementsByClassName('note-editable')[0], function () {
         onEditorChange();
     });
+    */
 }
 
 var onEditorChange = function () {
@@ -50,7 +51,7 @@ var onSave = function (data) {
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
-            renderEverything();
+            //renderEverything();
             reapply_textarea('editor');
             block_refresh(block);
             break;
@@ -63,7 +64,9 @@ var onSave = function (data) {
             setSendInBatch('sendInBatch')
             refresh_summernote('textarea.editor');
             $('.select2').select2();
-            modifyDomToGeneratePreview();
+            //modifyDomToGeneratePreview();
+            //adjustPreviewPanelHeight();
+            initTextcomplete('.note-editable',mmTags);
             noty({
                 text : 'Email saved',
                 layout : 'topCenter',
@@ -305,11 +308,63 @@ var callWSCreateUpdateLink = function (hashId, linkTarget, linkText, index, succ
         }, successCallback, errorCallback);
 };
 
+var initRestCall = function() {
+    $('#testRestCall').on('click',function(){
+        $.ajax({
+            type: 'POST',
+            url: '/SegMail/rest/campaign/parse/',
+            dataType: 'json',
+            data: {
+                'emailContent' : $('.note-editable').html()
+            },
+            success: function (data) {
+                console.log(data);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        })
+    })
+}
+
+
+var initTextcomplete = function(selector,input) {
+    $(selector).textcomplete([
+        {
+            id: 'tech-companies',
+            words: mmTagsProcessed(),
+            match: /{(\w{2,})$/,
+            search: function (term, callback) {
+                callback($.map(this.words, function (word) {
+                    return word.indexOf(term) === 0 ? word : null;
+                }));
+            },
+            index: 1,
+            template: function (value) {
+                return '<span style="width:100px;"><strong>' + value + '</strong></span>';
+            },
+            replace: function (word) {
+                return '{' + word + '}';
+            }
+        }
+    ])
+};
+
+var mmTagsProcessed = function() {
+    var anotherArray = [];
+    for(var i=0; i<mmTags.length; i++) {
+        anotherArray.push(mmTags[i].slice(1,-1));
+    }
+    return anotherArray;
+}
+
 $(document).ready(function () {
-    
     toggleMenu();
     refresh_summernote('textarea.editor');
     setSendInBatch('sendInBatch');
-    adjustPreviewPanelHeight();
-    modifyDomToGeneratePreview();
+    //adjustPreviewPanelHeight();
+    //modifyDomToGeneratePreview();
+    //initRestCall();
+    initTextcomplete('.note-editable',mmTags);
+    initTextcomplete('#subject',mmTags);
 });

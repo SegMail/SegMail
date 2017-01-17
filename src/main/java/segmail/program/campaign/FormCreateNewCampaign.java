@@ -17,6 +17,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormCreateEntity;
 import segmail.component.campaign.CampaignService;
@@ -31,6 +32,7 @@ public class FormCreateNewCampaign implements FormCreateEntity {
 
     @Inject UserRequestContainer reqCont;
     @Inject ProgramCampaign program;
+    @Inject ClientContainer clientCont;
     
     @EJB CampaignService campaignService;
     
@@ -60,7 +62,7 @@ public class FormCreateNewCampaign implements FormCreateEntity {
     @Override
     public void createNew() {
         try {
-            this.campaignService.createCampaign(campaignName, goals);
+            this.campaignService.createCampaign(campaignName, goals, clientCont.getClient());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign created.", "");
             program.refresh();
             

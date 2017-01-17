@@ -34,6 +34,7 @@ public class FormAssignLists implements FormEditEntity {
     
     @Inject ProgramCampaign program;
     @Inject ClientContainer clientContainer;
+    @Inject FormProgramModeSwitch programSwitch;
     
     @EJB SubscriptionService subService;
     @EJB CampaignService campService;
@@ -96,6 +97,9 @@ public class FormAssignLists implements FormEditEntity {
                 convertedIds.add(idLong);
             }
             campService.assignTargetListToCampaign(convertedIds, program.getEditingCampaignId());
+            
+            programSwitch.reloadEntities();
+            
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Target lists updated", "");
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

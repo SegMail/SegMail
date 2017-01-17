@@ -40,6 +40,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
@@ -1034,4 +1035,38 @@ public class SubscriptionService {
         return sql;
     }
 
+    /**
+     * Based on a list of fields, get SubscriptionListField->SubscriberFieldValue
+     * 
+     * @param fields
+     * @return 
+     */
+    public List<SubscriberFieldValue> getRandomValues(List<SubscriptionListField> fields) {
+        final int MAX = 100;
+        
+        List<SubscriberFieldValue> finalResults = new ArrayList<>();
+        
+        for(SubscriptionListField field : fields) {
+            int rand = (int) (Math.random()*MAX);
+            String queryString = "";
+            queryString += "SELECT * FROM "
+                    + SubscriberFieldValue.class.getName()
+                    + " a ";
+
+            String inCond = "WHERE a.FIELD_KEY in ('" + field.generateKey() + "')";
+
+            Query query = objService.getEm().createQuery(inCond, SubscriberFieldValue.class)
+                    .setFirstResult(0)
+                    .setMaxResults(MAX);
+
+            List<SubscriberFieldValue> results = query.getResultList();
+            if(results == null || results.isEmpty())
+                continue;
+            
+            SubscriberFieldValue randChosen = results.get((int) (results.size()*Math.random()));
+            finalResults.add(randChosen);
+        }
+        
+        return finalResults;
+    }
 }

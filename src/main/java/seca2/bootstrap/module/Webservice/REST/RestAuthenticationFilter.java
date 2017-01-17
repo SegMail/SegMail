@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.Priorities;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import seca2.bootstrap.UserSessionContainer;
 
 /**
  *
@@ -35,8 +37,12 @@ public class RestAuthenticationFilter implements ContainerRequestFilter {
     
     @EJB WebserviceService wsService;
     
+    @Inject UserSessionContainer sessCont;
+    
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        if (sessCont.isLoggedIn())
+            return;
         // Get the HTTP Authorization header from the request
         String authorizationHeader = 
             requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);

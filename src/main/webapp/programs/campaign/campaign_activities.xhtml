@@ -70,23 +70,6 @@
                                                         <i class="fa fa-pencil"></i>
                                                     </a>
                                                 </c:when>
-                                                <c:when test="#{activity.STATUS eq 'EDITING'}">
-                                                    <button
-                                                        jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
-                                                        href="#edit_campaign_activity"
-                                                        data-toggle="modal"
-                                                        style="margin-right: 3px;"
-                                                        class="btn btn-success list-item-trigger"
-                                                        title="Edit Activity"
-                                                        >
-                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
-                                                                render="FormEditEmailActivity"
-                                                                onevent="load_activity"
-                                                                >
-                                                        </f:ajax>
-                                                        <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                </c:when>
                                                 <c:otherwise>
                                                     <button
                                                         jsf:id="track_campaign_activity_button_#{activity.OBJECTID}"

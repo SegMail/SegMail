@@ -62,7 +62,7 @@ public class BatchProcessingService {
         
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void processBatchJobQueue(DateTime dt) {
         String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
         if (maxJobString == null || maxJobString.isEmpty()) {

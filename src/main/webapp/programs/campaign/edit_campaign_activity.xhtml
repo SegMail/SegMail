@@ -13,50 +13,87 @@
         <div class="row">
             <div class="col-md-6">
                 <div jsf:id="editor-panel" pass:id="editor-panel" class="block">
-                    <div class="block-content">
-                        <div class="form-group">
-                            <label>
-                                Subject:
-                            </label>
-                            <input type="text" class="form-control"
-                                   jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_NAME}"
-                                   name="subject" 
-                                   >
-                            </input>
-                        </div>
-                        <div class="form-group">
-                            <textarea id="editor" class="editor"
-                                      jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
-                            </textarea>
-                            <textarea id="processedContent" style="display: none;" jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
-                            </textarea>
-                        </div>
-                        <div class="controls" >
-                            <div class="row-form" style="margin-top: 10px">
-                                <div class="col-md-3">
-                                    <strong>Send in batchs of:</strong>
-                                </div>
-                                <div class="col-md-4">
-                                    <input id="sendInBatch" type="number" style="" class="form-control"
-                                           onchange="setSendInBatch('sendInBatch')"
-                                           jsf:value="#{FormEditEmailActivity.editingSchedule.SEND_IN_BATCH}"
-                                           placeholder="blank or 0 = send all"
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#edit" data-toggle="tab" >Edit</a>
+                        </li>
+                        <li>
+                            <a href="#links" data-toggle="tab">Links</a>
+                        </li>
+                    </ul>
+                    <div class="block-content tab-content">
+                        <div class="tab-pane active" id="edit">
+                            <div class="block-content">
+                                <div class="form-group">
+                                    <label>
+                                        Subject:
+                                    </label>
+                                    <input type="text" class="form-control"
+                                           jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_NAME}"
+                                           name="subject" id="subject" autocomplete="off"
                                            >
                                     </input>
                                 </div>
-                                <div class="col-md-5">
-                                    <div class="form-group">
-                                        <h:selectOneMenu style="width: 100%;"
-                                                         styleClass="select2"
-                                                         value="#{FormEditEmailActivity.editingSchedule.EVERY_HOUR}"
-                                                         >
-                                            <f:selectItem itemValue="6" itemLabel="Every 6 hours"></f:selectItem>
-                                            <f:selectItem itemValue="12" itemLabel="Every 12 hours"></f:selectItem>
-                                            <f:selectItem itemValue="24" itemLabel="Every 24 hours"></f:selectItem>
-                                        </h:selectOneMenu>
+                                <div class="form-group">
+                                    <textarea id="editor" class="editor"
+                                              jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
+                                    </textarea>
+                                    <textarea id="processedContent" style="display: none;" jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                                    </textarea>
+                                </div>
+                                <div class="controls" >
+                                    <div class="row-form" style="margin-top: 10px">
+                                        <div class="col-md-3">
+                                            <strong>Send in batchs of:</strong>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input id="sendInBatch" type="number" style="" class="form-control"
+                                                   onchange="setSendInBatch('sendInBatch')"
+                                                   jsf:value="#{FormEditEmailActivity.editingSchedule.SEND_IN_BATCH}"
+                                                   placeholder="blank or 0 = send all"
+                                                   >
+                                            </input>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <h:selectOneMenu style="width: 100%;"
+                                                                 styleClass="select2"
+                                                                 value="#{FormEditEmailActivity.editingSchedule.EVERY_HOUR}"
+                                                                 >
+                                                    <f:selectItem itemValue="6" itemLabel="Every 6 hours"></f:selectItem>
+                                                    <f:selectItem itemValue="12" itemLabel="Every 12 hours"></f:selectItem>
+                                                    <f:selectItem itemValue="24" itemLabel="Every 24 hours"></f:selectItem>
+                                                </h:selectOneMenu>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="tab-pane" id="links">
+                            <h2>These are your links</h2>
+                            <p>
+                                The html links that you have added to your email will be
+                                automatically parsed into a redirect link for SegMail to
+                                track the number of clicks and click through rates.
+                            </p>
+                            <table class="table table-condensed">
+                                <thead>
+                                    <th>#</th>
+                                    <th>Text</th>
+                                    <th>Actual URL</th>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat value="#{FormEditEmailActivity.links}" var="link" >
+                                        <tr>
+                                            <td>#{link.SNO}</td>
+                                            <td>#{link.LINK_TEXT}</td>
+                                            <td>#{link.LINK_TARGET}</td>
+                                        </tr>
+                                    </ui:repeat>
+                                    
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     <div class="block-footer">
@@ -70,7 +107,7 @@
                                 <f:ajax listener="#{FormEditEmailActivity.saveAndContinue()}"
                                         event="click"
                                         onevent="onSave"
-                                        render="editor-panel"
+                                        render="@form"
                                         execute="@form"
                                         >
                                 </f:ajax>
@@ -83,22 +120,22 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="block">
-                    <div class="block-content">
-                        <h2>This is how your email will look like</h2>
-                        <p>
-                            It's a WYSIWYG editor on your left but you would miss out how the mail merge
-                            tags will look like.
-                        </p>
-                    </div>
-                </div>
                 <div id="preview-panel" class="block">
+                    <div class="block-head">
+                        <h2>#{FormEditEmailActivity.editingActivity.ACTIVITY_NAME}</h2>
+                    </div>
                     <div class="block-content">
-                        <div class="row">
-                            <div id="preview" class="col-md-9" >
-                            </div>
-                            <div id="links" class="col-md-3" >
-                            </div>
+                        <div class="pull-left">
+                            <strong>From: </strong>
+                            #{FormEditEmailActivity.editingCampaign.OVERRIDE_SEND_AS_NAME} 
+                            &lt; #{FormEditEmailActivity.editingCampaign.OVERRIDE_SEND_AS_EMAIL} &gt;
+                        </div>
+                    </div>
+                    <div class="block-content">
+                        <div class="row" style="height:100%">
+                            <h:outputText id="preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}"
+                                          escape="false" styleClass="col-md-12">
+                            </h:outputText>
                         </div>
                     </div>
                 </div>
@@ -132,7 +169,13 @@
                         <c:forEach items = "#{FormEditEmailActivity.randomSubscriber.keySet()}" var = "field" >
                             #{field} : '#{FormEditEmailActivity.randomSubscriber[field]}',
                         </c:forEach>
-                    }
-        </script>   
+                    };
+                    
+                    var mmTags = [
+                        <c:forEach items = "#{FormEditEmailActivity.mailmergeListFields.keySet()}" var = "mmKey" >
+                            '#{mmKey}',
+                        </c:forEach>
+                    ];
+        </script>
     </form>
 </html>

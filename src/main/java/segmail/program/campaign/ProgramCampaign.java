@@ -18,6 +18,7 @@ import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
+import segmail.entity.campaign.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -68,6 +69,8 @@ public class ProgramCampaign extends Program{
     private List<SubscriptionListField> listFields;
     
     private List<String> selectedPreviewAddress;
+    
+    private List<CampaignActivityOutboundLink> links;
     
     @Override
     public void clearVariables() {
@@ -243,6 +246,12 @@ public class ProgramCampaign extends Program{
     public void setMailmergeListFields(Map<String, List<String>> mailmergeListFields) {
         this.mailmergeListFields = mailmergeListFields;
     }
-    
-    
+
+    public List<CampaignActivityOutboundLink> getLinks() {
+        return links;
+    }
+
+    public void setLinks(List<CampaignActivityOutboundLink> links) {
+        this.links = links;
+    }
 }

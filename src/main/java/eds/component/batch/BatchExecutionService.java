@@ -69,7 +69,10 @@ public class BatchExecutionService {
         } catch (InvocationTargetException ex) {
             Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
             return new AsyncResult<>(ex.getTargetException());
-        } 
+        } catch (Throwable ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
+            return new AsyncResult<>(ex);
+        }
     }
 
     public List<BatchJobStep> getBatchJobSteps(long batchJobId) {
