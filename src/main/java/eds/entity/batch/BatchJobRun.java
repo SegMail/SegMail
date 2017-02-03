@@ -7,6 +7,7 @@ package eds.entity.batch;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
@@ -17,7 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
-import seca2.entity.landing.ServerInstance;
 
 /**
  *
@@ -55,8 +55,10 @@ public class BatchJobRun implements Serializable {
     //private ServerInstance SERVER;
     
     private String SERVER_NAME;
+    
+    //private List<BatchJobRunLog> LOG;
 
-    @Id
+    //@Id
     @ManyToOne(cascade={
         CascadeType.MERGE,
         CascadeType.REFRESH
@@ -169,7 +171,7 @@ public class BatchJobRun implements Serializable {
     public void setSERVER_NAME(String SERVER_NAME) {
         this.SERVER_NAME = SERVER_NAME;
     }
-    
+
     //Lifecycle methods
     
     /**
@@ -243,4 +245,28 @@ public class BatchJobRun implements Serializable {
         this.setCANCEL_TIME(null);
         this.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.RUN_KEY);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final BatchJobRun other = (BatchJobRun) obj;
+        if (!Objects.equals(this.RUN_KEY, other.RUN_KEY)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

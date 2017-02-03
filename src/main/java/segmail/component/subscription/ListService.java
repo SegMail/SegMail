@@ -288,6 +288,7 @@ public class ListService {
         return allList;
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriptionListField> getFieldsForLists(List<SubscriptionList> lists) {
         List<Long> listIds = new ArrayList<>();
         for(SubscriptionList list : lists) {

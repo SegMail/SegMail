@@ -1,17 +1,13 @@
 package eds.component.batch;
 
-import com.google.common.base.Objects;
 import eds.component.UpdateObjectService;
 import eds.component.data.IncompleteDataException;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
-import eds.entity.batch.BatchJobRunError;
 import eds.entity.batch.BatchJobRun_;
-import eds.entity.batch.BatchJobTrigger;
+import eds.entity.batch.BatchJobContainer;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -55,6 +51,9 @@ public class BatchProcessingService {
     
     @EJB
     BatchSchedulingService scheduleService;
+    
+    @EJB
+    BatchJobContainer jobCont;
 
     @PostConstruct
     public void init() {
@@ -62,73 +61,21 @@ public class BatchProcessingService {
         
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void processBatchJobQueue(DateTime dt) {
         String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
         if (maxJobString == null || maxJobString.isEmpty()) {
             System.setProperty(PROCESS_JOB_MODE, "false");
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
             return;
         }
         int maxJobs = Integer.parseInt(maxJobString);
         List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
-        for (BatchJobRun run : nextNJobs) {
-            try {
-                //Update the status first
-                DateTime start = DateTime.now();
-                //run.setSTATUS(BATCH_JOB_RUN_STATUS.IN_PROCESS.label);
-                //run.setSTART_TIME(new Timestamp(start.getMillis()));
-                run.start(start);
-                run.getBATCH_JOB().setLAST_RUN(new Timestamp(start.getMillis()));
-                run = updService.getEm().merge(run);
-                updService.getEm().flush();
-                
-                //results.add(execService.executeJob(run));
-                Future<?> result = execService.executeJobNew(run);
-                Object ret = result.get();
-                
-                //If an exception has occured
-                if(ret != null && Throwable.class.isAssignableFrom(ret.getClass())) {
-                    BatchJobRunError newError = new BatchJobRunError(run, (Throwable) ret);
-                    updService.getEm().persist(newError);
-                    
-                    //run.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
-                    run.fail(DateTime.now());
-                    updService.getEm().persist(run);
-                    continue;
-                }
-                
-                //run.setSTATUS(BATCH_JOB_RUN_STATUS.COMPLETED.label);
-                //run.setEND_TIME(new Timestamp(DateTime.now().getMillis()));
-                run.complete(DateTime.now());
-                run = updService.getEm().merge(run);
-                updService.getEm().flush();
-                
-                //Dont schedule the next run
-                if(ret != null && Objects.equal(ret.getClass(), StopNextRunQuickAndDirty.class)) {
-                    continue;
-                }
-                List<BatchJobTrigger> triggers = scheduleService.loadBatchJobTriggers(run.getBATCH_JOB().getBATCH_JOB_ID());
-                if (triggers != null && !triggers.isEmpty()) {
-                    DateTime next = DateTime.now();
-                    //If the entire batch job only took less than 1 second,
-                    //we have to add 1 second so that it would be scheduled in the next
-                    //second. This is because the granularity of triggerNextBatchJobRun()
-                    //is 1 second, not milliseconds.
-                    if (next.withMillisOfSecond(0).equals(start.withMillisOfSecond(0))) {
-                        next = next.plusSeconds(1);
-                    }
-                    scheduleService.triggerNextBatchJobRun(next, triggers.get(0));
-                }
-                
-            }
-            catch (InterruptedException ex) {
-                Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ExecutionException ex) {
-                Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (BatchProcessingException ex) {
-                Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        for(BatchJobRun run : nextNJobs) {
+            //Fire and forget
+            //execService.executeJob(run);
+            jobCont.read(run.getRUN_KEY())
+                .execute(DateTime.now());
         }
 
     }

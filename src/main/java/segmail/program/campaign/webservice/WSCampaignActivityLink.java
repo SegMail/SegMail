@@ -104,13 +104,13 @@ public class WSCampaignActivityLink {
     
     @WebMethod(operationName = "getExecutedForCampaignActivity")
     public long getExecutedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
-        long result = campExeService.countEmailsSentForActivity(campaignActivityId);
+        long result = campService.countEmailsSentForActivity(campaignActivityId);
         return result;
     }
     
     @WebMethod(operationName = "getTotalTargetedForCampaignActivity")
     public long getTotalTargetedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
-        long result = campExeService.countTargetedSubscribersForCampaign(campaignActivityId);
+        long result = campService.countTargetedSubscribersForCampaign(campaignActivityId);
         return result;
     }
     

@@ -9,10 +9,10 @@ var refreshCampaignActivities = function (data) {
             break;
 
         case "complete": // This is called right after ajax response is received.
+            block_refresh(block);
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            block_refresh(block);
             break;
         case "error":
             break;

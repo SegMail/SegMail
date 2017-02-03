@@ -89,7 +89,7 @@ public class FormCampaignActivities {
         List<CampaignActivity> allActivities = getAllActivities();
         for(CampaignActivity activity : allActivities) {
             long totalClicks = campaignService.getTotalLinkClicksForActivity(activity.getOBJECTID());
-            long totalSent = campExeService.countEmailsSentForActivity(activity.getOBJECTID());
+            long totalSent = campaignService.countEmailsSentForActivity(activity.getOBJECTID());
             
             double clickthrough = (totalSent <= 0) ? 0.0 : (totalClicks/totalSent) * 100;
             getClickthroughRates().put(activity.getOBJECTID(), clickthrough);

@@ -7,25 +7,23 @@ package eds.component.batch;
 
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
+import eds.entity.batch.BatchJobCondition;
 import eds.entity.batch.BatchJobRun;
-import eds.entity.batch.BatchJobRunError;
+import eds.entity.batch.BatchJobRunLog;
+import eds.entity.batch.BatchJobSchedule;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStep_;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.concurrent.Future;
-import javax.ejb.AsyncResult;
+import java.util.logging.Level;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.naming.NamingException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.jboss.logging.Logger;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -40,41 +38,45 @@ public class BatchExecutionService {
     UpdateObjectService updService;
     @EJB
     BatchSchedulingService scheduleService;
+    @EJB
+    BatchExecutionHelper execHelper;
 
+    /**
+     * Processes 1 job.
+     *
+     * @param job
+     * @return
+     */
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public Future<?> executeJobNew(BatchJobRun job) {
+    public void executeJob(BatchJobRun job) {
 
+        execHelper.startJob(job);
+
+        //Loop through each step, execute and get the returned result.
+        //If it fails in any of the 
+        List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
         try {
-            Object ret = null; //Only return the last return object from the last step
-            List<BatchJobStep> steps = this.getBatchJobSteps(job.getBATCH_JOB().getBATCH_JOB_ID());
             for (BatchJobStep step : steps) {
-                ret = step.execute();
-                
+                Object ret = step.execute(); 
+                //Create log entry
+                BatchJobRunLog log = new BatchJobRunLog();
+                log.setBATCH_JOB_RUN(job);
+                log.setTIME(new java.sql.Timestamp(DateTime.now().getMillis()));
+                updService.getEm().persist(log);
             }
-            return new AsyncResult<>(ret);
             
-        } catch (IOException ex) {
-            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
-            return new AsyncResult<>(ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
-            return new AsyncResult<>(ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
-            return new AsyncResult<>(ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
-            return new AsyncResult<>(ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
-            return new AsyncResult<>(ex.getTargetException());
-        } catch (Throwable ex) {
-            Logger.getLogger(this.getClass().getSimpleName()).log(Logger.Level.ERROR, ex.getMessage());
-            return new AsyncResult<>(ex);
+            //Trigger the next batch run
+            List<BatchJobCondition> conds = scheduleService.loadBatchJobConditions(job.getBATCH_JOB().getBATCH_JOB_ID());
+            List<BatchJobSchedule> schedules = scheduleService.loadBatchJobSchedules(job.getBATCH_JOB().getBATCH_JOB_ID());
+            
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(BatchExecutionService.class.getName()).log(Level.SEVERE, null, ex);
+            execHelper.logErrors(job,ex);
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<BatchJobStep> getBatchJobSteps(long batchJobId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobStep> query = builder.createQuery(BatchJobStep.class);
@@ -90,11 +92,5 @@ public class BatchExecutionService {
 
         return results;
     }
-
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void logErrors(BatchJobRun job, Throwable ex) {
-        BatchJobRunError newError = new BatchJobRunError(job, ex);
-
-        updService.getEm().persist(ex);
-    }
+    
 }

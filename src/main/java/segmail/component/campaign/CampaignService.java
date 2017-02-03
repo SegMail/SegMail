@@ -13,13 +13,13 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.data.RelationshipNotFoundException;
+import eds.entity.batch.BatchJobContainer;
+import eds.entity.batch.BatchJobRun_;
 import eds.entity.client.Client;
 import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
-import eds.entity.data.EnterpriseData_;
-import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.mail.Email;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -27,6 +27,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -58,9 +59,10 @@ import segmail.entity.campaign.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.campaign.CampaignLinkClick;
 import segmail.entity.campaign.CampaignLinkClick_;
+import segmail.entity.campaign.Trigger_Email_Activity;
+import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
-import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -85,6 +87,8 @@ public class CampaignService {
     @EJB LandingService landingService;
     @EJB ListService listService;
     @EJB MailMergeService mmService;
+    
+    @EJB BatchJobContainer batchJobCont;
     
     public Campaign getCampaign(long campaignId) {
         Campaign campaign = objService.getEnterpriseObjectById(campaignId, Campaign.class);
@@ -417,9 +421,9 @@ public class CampaignService {
      * 
      * @param emailActivity 
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void startSendingCampaignEmail(CampaignActivity emailActivity) 
-            throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
+            throws BatchProcessingException, EntityNotFoundException, IncompleteDataException, IOException, DataValidationException {
         /**
          * Schedule the first one and let the subsequent ones keep scheduling 
          * the subsequent ones until the lists are done.
@@ -438,9 +442,14 @@ public class CampaignService {
         if(scheduleList == null || scheduleList.isEmpty())
             throw new IncompleteDataException("No CampaignActivitySchedule set for CampaignActivity "+emailActivity.getACTIVITY_NAME());
         CampaignActivitySchedule schedule = scheduleList.get(0);
-        Object[] params = {emailActivity.getOBJECTID(), (int)schedule.getSEND_IN_BATCH() };
         
         DateTime now = DateTime.now();
+        batchJobCont.create(emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME());
+        batchJobCont.addStep(CampaignExecutionService.class.getSimpleName(),"executeCampaignActivity",new Object[]{emailActivity.getOBJECTID(),(int)schedule.getSEND_IN_BATCH()});
+        batchJobCont.addCondition(CampaignExecutionService.class.getSimpleName(),"continueCampaignActivity",new Object[]{emailActivity.getOBJECTID()});
+        batchJobCont.setSchedule(schedule.generateCronExp(now).getCRON_EXPRESSION());
+        batchJobCont.schedule(now);
+        /*
         batchScheduleService.createSingleStepJob(
                 emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME(), 
                 "CampaignExecutionService", 
@@ -449,17 +458,24 @@ public class CampaignService {
                 landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID(),
                 schedule.generateCronExp(now).getCRON_EXPRESSION(),
                 now);
-        
-        //Actually we don't need to do this but just for consistency sake
-        //CRON_EXPRESSION don't need to be stored in the first place
-        objService.getEm().merge(schedule);
+        */
         
         //Update the status of the activity
         emailActivity.setSTATUS(ACTIVITY_STATUS.EXECUTING.name);
-        objService.getEm().merge(emailActivity);
+        updService.merge(emailActivity); //New transaction
         
     }
     
+    /**
+     * Using campaignId, get all current targeted subscribers.
+     * Campaign -> Assign_Campaign_List -> Subscription -> SubscriberAccount
+     * 
+     * @param campaignId
+     * @param startIndex
+     * @param maxResults
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
@@ -477,6 +493,7 @@ public class CampaignService {
         
         query.distinct(true);
         query.select(fromSubscrAcc);
+        query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
         List<SubscriberAccount> results  = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
@@ -487,6 +504,7 @@ public class CampaignService {
         
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<String> getTargetedSubscribersEmail(long campaignId, int startIndex, int maxResults) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<String> query = builder.createQuery(String.class);
@@ -504,6 +522,7 @@ public class CampaignService {
         
         query.distinct(true);
         query.select(fromSubscrAcc.get(SubscriberAccount_.EMAIL));
+        query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
         List<String> results  = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
@@ -698,5 +717,97 @@ public class CampaignService {
         activity.setACTIVITY_CONTENT_PROCESSED(processedContent);
         
         return activity;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<String> getSentEmails(long campaignActivityId, int startIndex, int size) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<String> query = builder.createQuery(String.class);
+        Root<Trigger_Email_Activity> fromActivity = query.from(Trigger_Email_Activity.class);
+        
+        query.select(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
+        query.where(builder.equal(fromActivity.get(Trigger_Email_Activity_.TRIGGERING_OBJECT),campaignActivityId));
+        query.orderBy(builder.asc(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL)));
+        
+        List<String> results = objService.getEm().createQuery(query)
+                .setFirstResult(startIndex)
+                .setMaxResults(size)
+                .getResultList();
+        
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public long countEmailsSentForActivity(long activityId) {
+        //Just count the total number of Trigger_Email_Activity !
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<Trigger_Email_Activity> fromTrigger = query.from(Trigger_Email_Activity.class);
+        
+        query.select(builder.count(fromTrigger));
+        query.where(builder.and(
+                builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), activityId)//,
+                ));
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    /**
+     * The implementation of this method is based on the way we execute the activities.
+     * At the point of execution, we do not know who we are going to send to, if 
+     * a subscriber is actively subscribed to a targeted list, then we will send 
+     * to this subscriber, otherwise, if the subscription turns inactive at the point
+     * of execution, we won't be able to send this campaign to this subscriber.
+     * So the only way to forecast how many subscribers we are going to send to,
+     * we use 2 numbers:
+     * <ul>
+     * <li>Unsent</li>
+     * <li>Sent</li>
+     * </ul>
+     * Unsent will be changing throughout the lifetime of the campaign as new subscribers
+     * are activated or existing subscribers unsubscribes. Sent will be a growing 
+     * number but will not change after the activity has completed.
+     * <br>
+     * Hence, once completed, the targeted count of a campaign should be the number 
+     * sent because the unsent number will keep growing even though the activity
+     * has completed and the new subscribers will never be targeted for this activity.
+     * <br>
+     * Returns -1 if the campaignActivityId provided is not valid.
+     * 
+     * @param campaignActivityId
+     * @return
+     */
+    public long countTargetedSubscribersForCampaign(long campaignActivityId) {
+        CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
+        if(activity == null)
+            return -1;
+        if(activity.getSTATUS().equals(ACTIVITY_STATUS.COMPLETED.name))
+            return countEmailsSentForActivity(campaignActivityId);
+        
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
+        Root<Subscription> fromSubscr = query.from(Subscription.class);
+        Root<Assign_Campaign_List> fromAssign = query.from(Assign_Campaign_List.class);
+        Root<Assign_Campaign_Activity> fromCamp = query.from(Assign_Campaign_Activity.class);
+        
+        query.where(
+                builder.and(
+                        builder.equal(fromCamp.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), fromCamp.get(Assign_Campaign_Activity_.SOURCE)),
+                        builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
+                        builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE))
+                )
+        );
+        
+        query.select(builder.countDistinct(fromSubscrAcc));
+        
+        Long result  = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
     }
 }

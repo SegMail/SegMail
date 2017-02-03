@@ -223,7 +223,7 @@ public class LandingService {
      * @throws eds.component.data.IncompleteDataException if no servers are
      * found
      */
-    
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy, ServerNodeType type)
             throws IncompleteDataException {
             //Currently there's no strategy, just take the first one.

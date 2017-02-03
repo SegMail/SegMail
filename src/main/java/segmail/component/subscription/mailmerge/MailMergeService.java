@@ -152,16 +152,16 @@ public class MailMergeService {
      * @param fieldValueMap //MailmergeTag => Field value
      * @return 
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String parseMailmergeTagsSubscriber(String text, Map<String,String> fieldValueMap) {
         if(text == null || text.isEmpty())
-            return "";
-        String parsedText = text;
+            return text;
+        
         for(String mmTag : fieldValueMap.keySet()){
-            parsedText = parsedText.replace(mmTag, fieldValueMap.get(mmTag));
+            text = text.replace(mmTag, fieldValueMap.get(mmTag));
         }
         
-        return parsedText;
+        return text;
     }
     
     /**
@@ -171,6 +171,7 @@ public class MailMergeService {
      * @param values
      * @return subscriberId => {mailmerge-tag} => SubscriberFieldValue
      */
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<Long,Map<String,String>> createMMValueMap(List<Long> subscriberIds, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
         Map<Long,Map<String,String>> results = new HashMap<>();
         
@@ -235,8 +236,8 @@ public class MailMergeService {
         List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscriberIds(ids);
         Map<Long,Map<String,String>> map = this.createMMValueMap(ids, fields, values);
         
-        String parsedText = this.parseMailmergeTagsSubscriber(text, map.get(subscriberId));
-        return parsedText;
+        parseMailmergeTagsSubscriber(text, map.get(subscriberId));
+        return text;
     }
 
     /**
@@ -253,7 +254,7 @@ public class MailMergeService {
      * @return
      * @throws eds.component.data.IncompleteDataException if landing/WEB server is not set
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public String parseUnsubscribeLink(String text, String unsubscribeKey) throws IncompleteDataException {
 
         if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.UNSUBSCRIBE.label())) {
@@ -280,17 +281,14 @@ public class MailMergeService {
         String unsubLink = landingServer.getURI().concat("/").concat(MAILMERGE_REQUEST.UNSUBSCRIBE.program).concat("/").concat(unsubscribeKey);
         String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
         
-        String newEmailBody = text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
-
-        return newEmailBody;
-        
+        return text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
     }
 
     public String parseEverything(String text, Map<String, Object> params) throws IncompleteDataException {
         String result = text;
         //Has to be a better way to register all these parsing in a queue and process them together
         result = this.parseConfirmationLink(result, (String) params.get(MAILMERGE_REQUEST.CONFIRM.label()));
-        result = this.parseUnsubscribeLink(result, (String) params.get(MAILMERGE_REQUEST.UNSUBSCRIBE.label()));
+        this.parseUnsubscribeLink(result, (String) params.get(MAILMERGE_REQUEST.UNSUBSCRIBE.label()));
         //result = this.parseListAttributes(result, (Long) params.get("LISTID"));
         //result = this.parseMultipleContent(result, (Long) params.get("LISTID"));
 

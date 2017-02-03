@@ -3,18 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eds.entity.batch;
+package segmail.component.campaign;
 
-import javax.persistence.PrePersist;
+import javax.ejb.Stateless;
 
 /**
  *
  * @author LeeKiatHaw
  */
-public class BatchJobTriggerListener {
+@Stateless
+public class CampaignHelperService {
     
-    @PrePersist
-    public void PrePersist(BatchJobSchedule job) {
-        //this.labelStepNo(job);
-    }
 }

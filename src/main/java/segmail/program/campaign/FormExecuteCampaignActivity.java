@@ -6,9 +6,10 @@
 package segmail.program.campaign;
 
 import eds.component.batch.BatchProcessingException;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import eds.component.data.RelationshipNotFoundException;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -50,6 +51,10 @@ public class FormExecuteCampaignActivity {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (IOException ex) {
+            Logger.getLogger(FormExecuteCampaignActivity.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DataValidationException ex) {
+            Logger.getLogger(FormExecuteCampaignActivity.class.getName()).log(Level.SEVERE, null, ex);
         }
     }   
 }

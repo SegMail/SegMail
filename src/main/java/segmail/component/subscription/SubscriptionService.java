@@ -824,7 +824,7 @@ public class SubscriptionService {
 
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedWelcomeEmail.getBODY();
-        newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
+        mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
         newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), sub.getTARGET().getOBJECTID());
 
         //Send the email using MailServiceOutbound
