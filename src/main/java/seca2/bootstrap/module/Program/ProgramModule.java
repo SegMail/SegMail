@@ -81,10 +81,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         if(requestContainer.getPathParser().containsFileResource())
             return true;
         
-        //If it is a webservice call, bypass processing
-        //if(requestContainer.isWebservice())
-        //    return true;
-        
         long userTypeId = (sessionContainer.getUserType() == null) ? 
                 -1 : sessionContainer.getUserType().getOBJECTID();
 
@@ -213,6 +209,6 @@ public class ProgramModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean bypassDuringWeb() {
-        return false;
+        return true;
     }
 }
