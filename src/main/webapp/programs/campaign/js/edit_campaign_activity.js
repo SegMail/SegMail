@@ -64,15 +64,8 @@ var onSave = function (data) {
             setSendInBatch('sendInBatch')
             refresh_summernote('textarea.editor');
             $('.select2').select2();
-            //modifyDomToGeneratePreview();
-            //adjustPreviewPanelHeight();
             initTextcomplete('.note-editable',mmTags);
-            noty({
-                text : 'Email saved',
-                layout : 'topCenter',
-                type : 'success',
-                timeout : true
-            }).setTimeout(2000);
+            //Don't show noty when there is no errors, use our custom facesmessenger component
             break;
         case "error":
             noty({

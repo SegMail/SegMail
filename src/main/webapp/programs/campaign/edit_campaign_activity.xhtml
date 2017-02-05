@@ -11,6 +11,12 @@
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <form jsf:id="FormEditEmailActivity" prependId="false">
         <div class="row">
+            <div class="col-md-12">
+                <s2:messenger id="FormEditEmailActivity_Messenger" for="FormEditEmailActivity" showDetail="true" showSummary="true"
+                              class="form-group"></s2:messenger>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-6">
                 <div jsf:id="editor-panel" pass:id="editor-panel" class="block">
                     <ul class="nav nav-tabs">

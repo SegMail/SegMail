@@ -23,6 +23,10 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.component.landing.LandingServerGenerationStrategy;
+import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
+import seca2.entity.landing.ServerInstance;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
 import segmail.component.campaign.CampaignService;
@@ -63,6 +67,8 @@ public class FormEditEmailActivity implements FormEditEntity {
     MailMergeService mmService;
     @EJB
     GenericObjectService objService;
+    @EJB
+    private LandingService landingService;
 
     private String linksDelimited;
 
@@ -73,7 +79,7 @@ public class FormEditEmailActivity implements FormEditEntity {
             loadTargetLists();
             loadTargetListFields();
             loadRandomValues();
-            loadMMUrls();
+            checkServer();
             loadOutboundLinks();
         }
     }
@@ -333,20 +339,13 @@ public class FormEditEmailActivity implements FormEditEntity {
         program.setEditingSchedule(schedule);
     }
 
-    public void loadMMUrls() {
+    public void checkServer() {
 
         try {
-            this.setMailmergeLinks(new HashMap<String, String>());
-            for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
-                //For all emails, don't load confirm links
-                if(request.equals(MAILMERGE_REQUEST.CONFIRM)) {
-                    continue;
-                }
-                String url = mmService.getSystemTestLink(request.label());
-                this.getMailmergeLinks().put(request.label(), url);
-            }
-        } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            ServerInstance testServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+            if(testServer == null)
+                throw new IncompleteDataException("Test server is not setup properly. Please contact your system admin.");
+        
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
