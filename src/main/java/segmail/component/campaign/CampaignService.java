@@ -13,6 +13,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.data.RelationshipNotFoundException;
 import eds.entity.batch.BatchJobContainer;
 import eds.entity.batch.BatchJobRun_;
 import eds.entity.client.Client;
@@ -359,8 +360,27 @@ public class CampaignService {
         return objService.getEm().merge(schedule);
     }
     
+    /**
+     * Full refresh of all targeted SubscriptionList. Checks if there are any 
+     * existing executing CampaignActivities.
+     * 
+     * @param targetLists
+     * @param campaignId
+     * @return
+     * @throws EntityNotFoundException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) throws EntityNotFoundException {
+    public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) 
+            throws EntityNotFoundException, DataValidationException {
+        //Check if there are any executing CampaignActivities
+        List<CampaignActivity> activities = this.getAllActivitiesForCampaign(campaignId);
+        for(CampaignActivity activity : activities) {
+            if(activity.getSTATUS() != null && activity.getSTATUS().equals(ACTIVITY_STATUS.EXECUTING.name))
+                throw new DataValidationException("Campaign activity \""+activity.getACTIVITY_NAME()+"\" is executing. "
+                        + "No list should be assigned or unassigned at this point in time. "
+                        + "Please wait till it is completed.");
+        }
+        
         //Get all available lists for client and make sure client is authorized. (1 SQL query)
         List<SubscriptionList> toBeAssigned = new ArrayList<>();
         List<SubscriptionList> availableLists = listService.getAllListForClient(clientContainer.getClient().getOBJECTID());
@@ -442,6 +462,11 @@ public class CampaignService {
         if(scheduleList == null || scheduleList.isEmpty())
             throw new IncompleteDataException("No CampaignActivitySchedule set for CampaignActivity "+emailActivity.getACTIVITY_NAME());
         CampaignActivitySchedule schedule = scheduleList.get(0);
+        
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
+        if (targetLists == null || targetLists.isEmpty())
+            throw new IncompleteDataException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+        
         
         DateTime now = DateTime.now();
         batchJobCont.create(emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME());

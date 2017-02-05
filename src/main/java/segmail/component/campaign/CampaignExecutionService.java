@@ -32,6 +32,7 @@ import org.joda.time.DateTime;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Client;
 import segmail.entity.campaign.Assign_Campaign_List;
@@ -210,16 +211,26 @@ public class CampaignExecutionService {
         return helper.getUnsubscribeCodes(subscribers, clientId);
     }
     
+    /**
+     * If the Campaign is not in executing state, do not create new clicks.
+     * 
+     * @param linkKey
+     * @return
+     * @throws EntityNotFoundException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String getRedirectLinkAndUpdateHit(String linkKey) throws EntityNotFoundException {
         CampaignActivityOutboundLink link = getLinkByKey(linkKey);
         if(link == null)
             throw new EntityNotFoundException("Link key "+linkKey+" not found.");
         
-        CampaignLinkClick newLinkClick = new CampaignLinkClick();
-        newLinkClick.setLINK_KEY(linkKey);
-        
-        objService.getEm().persist(newLinkClick);
+        if(!ACTIVITY_STATUS.NEW.name.equals(link.getOWNER().getSTATUS()) && 
+                !ACTIVITY_STATUS.EDITING.name.equals(link.getOWNER().getSTATUS())) {
+            CampaignLinkClick newLinkClick = new CampaignLinkClick();
+            newLinkClick.setLINK_KEY(linkKey);
+
+            updService.persist(newLinkClick);
+        }
         
         return link.getLINK_TARGET();
     }
