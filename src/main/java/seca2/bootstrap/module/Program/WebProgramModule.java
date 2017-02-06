@@ -5,16 +5,15 @@
  */
 package seca2.bootstrap.module.Program;
 
-import java.io.File;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.UserRequestContainer;
@@ -42,6 +41,12 @@ public class WebProgramModule extends BootstrapModule implements Serializable {
         String programName = requestContainer.getProgramName();
         String viewLocation = "/programs/"+programName+"/layout.xhtml";
         String realPath = request.getServletContext().getRealPath(viewLocation);
+        
+        //If no program name is stated in the URL, redirect to the landing site
+        if(programName == null || programName.isEmpty()) {
+            //Convention over configuration!
+            ((HttpServletResponse) response).sendRedirect("https://segmail.io");
+        }
         
         //If the xhtml file is not found, point to the not found page.
         if(realPath == null || requestContainer.isError()) {
