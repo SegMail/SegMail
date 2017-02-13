@@ -171,7 +171,7 @@ public class MailMergeService {
      * @param values
      * @return subscriberId => {mailmerge-tag} => SubscriberFieldValue
      */
-    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public Map<Long,Map<String,String>> createMMValueMap(List<Long> subscriberIds, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
         Map<Long,Map<String,String>> results = new HashMap<>();
         

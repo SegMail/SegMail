@@ -31,7 +31,7 @@ import org.joda.time.DateTime;
 })
 public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
     
-    public static final int MAX_SEND_IN_BATCH = 100000;
+    public static final int MAX_SEND_IN_BATCH = 20000;
     public static final int MIN_SEND_IN_BATCH = 1;
 
     protected long SEND_IN_BATCH;
@@ -121,7 +121,7 @@ public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
         return this.generateCronExp(DateTime.now());
     }
     
-    public And everyNHourStartingFrom(int n, int start) {
+    private And everyNHourStartingFrom(int n, int start) {
         //7,14,21,28,35,42,49,56,63,70,77,84,91,98,105
         //24,48,72,96,
         if(n <= 0 || 24 % n != 0)

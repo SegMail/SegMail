@@ -19,6 +19,8 @@ import javax.validation.constraints.NotNull;
 public class CampaignLinkClick extends EnterpriseTransaction {
     
     private String LINK_KEY;
+    
+    private String SOURCE_KEY;
 
     @NotNull
     public String getLINK_KEY() {
@@ -27,6 +29,15 @@ public class CampaignLinkClick extends EnterpriseTransaction {
 
     public void setLINK_KEY(String LINK_KEY) {
         this.LINK_KEY = LINK_KEY;
+    }
+
+    @NotNull
+    public String getSOURCE_KEY() {
+        return SOURCE_KEY;
+    }
+
+    public void setSOURCE_KEY(String SOURCE_KEY) {
+        this.SOURCE_KEY = SOURCE_KEY;
     }
     
     

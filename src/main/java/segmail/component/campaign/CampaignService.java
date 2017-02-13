@@ -13,13 +13,10 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.data.RelationshipNotFoundException;
 import eds.entity.batch.BatchJobContainer;
-import eds.entity.batch.BatchJobRun_;
 import eds.entity.client.Client;
 import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
-import eds.entity.mail.Email;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +25,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -607,6 +603,7 @@ public class CampaignService {
         return server.getURI() + "/link/" + link.getLINK_KEY();
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getLinkClicks(String key) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -621,6 +618,7 @@ public class CampaignService {
         return result;
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getTotalLinkClicksForActivity(long activityId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -641,6 +639,7 @@ public class CampaignService {
         return result;
     } 
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getTotalLinkClicksForCampaign(long campaignId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -805,6 +804,7 @@ public class CampaignService {
      * @param campaignActivityId
      * @return
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long countTargetedSubscribersForCampaign(long campaignActivityId) {
         CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
         if(activity == null)
@@ -834,5 +834,10 @@ public class CampaignService {
                 .getSingleResult();
         
         return result;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public int getConvertedEmails(long campaignActivityId) {
+        return -1;
     }
 }

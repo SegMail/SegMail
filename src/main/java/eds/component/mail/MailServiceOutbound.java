@@ -182,7 +182,7 @@ public class MailServiceOutbound {
      * @throws DataValidationException if either sender or recipient email is missing.
      * @throws InvalidEmailException if validateEmail(Email) throws one.
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void queueEmail(Email email, DateTime scheduledTime) 
             throws DataValidationException, InvalidEmailException {
         //Validate email
@@ -190,7 +190,7 @@ public class MailServiceOutbound {
 
         email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
         email.setSCHEDULED_DATETIME(new Timestamp(scheduledTime.getMillis()));
-        updateService.getEm().persist(email);
+        updateService.persist(email);
     }
 
     

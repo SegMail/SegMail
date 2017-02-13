@@ -23,5 +23,6 @@ public interface WSCampaignActivityLinkInterface extends GenericWSInterface {
     
     @WebMethod(operationName = "redirectAndUpdate")
     public String redirectAndUpdate(
-            @WebParam(name = "linkKey") String linkKey ) throws EntityNotFoundException;
+            @WebParam(name = "linkKey") String linkKey,
+            @WebParam(name = "emailKey") String emailKey ) throws EntityNotFoundException;
 }

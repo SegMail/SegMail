@@ -68,14 +68,16 @@ public class WSCampaignActivityLink {
     
     /**
      * 
-     * @param linkKey
+     * @param linkKey unique identifier of the CampaignActivityOutboundLink
+     * @param emailKey unique identifier of the source Email
      * @return
      * @throws EntityNotFoundException 
      */
     @WebMethod(operationName = "redirectAndUpdate")
     public String redirectAndUpdate(
-            @WebParam(name = "linkKey") String linkKey ) throws EntityNotFoundException {
-        String redirectLink = campExeService.getRedirectLinkAndUpdateHit(linkKey);
+            @WebParam(name = "linkKey") String linkKey, 
+            @WebParam(name = "emailKey") String emailKey ) throws EntityNotFoundException {
+        String redirectLink = campExeService.getRedirectLinkAndUpdateHit(linkKey,emailKey);
         
         return redirectLink;
     }
