@@ -51,11 +51,11 @@ import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
-import segmail.entity.campaign.CampaignActivityOutboundLink_;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignActivitySchedule;
-import segmail.entity.campaign.CampaignLinkClick;
-import segmail.entity.campaign.CampaignLinkClick_;
+import segmail.entity.campaign.link.CampaignLinkClick;
+import segmail.entity.campaign.link.CampaignLinkClick_;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SubscriberAccount;
@@ -805,7 +805,7 @@ public class CampaignService {
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public long countTargetedSubscribersForCampaign(long campaignActivityId) {
+    public long countTargetedSubscribersForActivity(long campaignActivityId) {
         CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
         if(activity == null)
             return -1;
@@ -837,7 +837,40 @@ public class CampaignService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public int getConvertedEmails(long campaignActivityId) {
-        return -1;
+    public long countConvertedEmails(long campaignActivityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignActivityOutboundLink> fromLink = query.from(CampaignActivityOutboundLink.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
+        
+        query.select(builder.countDistinct(fromClicks.get(CampaignLinkClick_.SOURCE_KEY)));
+        query.where(builder.and(
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.OWNER), campaignActivityId),
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.LINK_KEY), fromClicks.get(CampaignLinkClick_.LINK_KEY))
+        ));
+        
+        long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public long countTotalClicksForActivity(long campaignActivityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignActivityOutboundLink> fromLink = query.from(CampaignActivityOutboundLink.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
+        
+        query.select(builder.countDistinct(fromClicks));
+        query.where(builder.and(
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.OWNER), campaignActivityId),
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.LINK_KEY), fromClicks.get(CampaignLinkClick_.LINK_KEY))
+        ));
+        
+        long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
     }
 }

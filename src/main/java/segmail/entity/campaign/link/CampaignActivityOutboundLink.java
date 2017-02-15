@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.campaign;
+package segmail.entity.campaign.link;
 
 import eds.component.encryption.EncryptionType;
 import eds.component.encryption.EncryptionUtility;
@@ -11,6 +11,7 @@ import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import segmail.entity.campaign.CampaignActivity;
 
 /**
  *

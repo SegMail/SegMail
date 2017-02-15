@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.campaign;
+package segmail.entity.campaign.link;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;

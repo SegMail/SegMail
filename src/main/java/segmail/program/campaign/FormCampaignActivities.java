@@ -5,6 +5,8 @@
  */
 package segmail.program.campaign;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -35,7 +37,6 @@ public class FormCampaignActivities {
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()){
             loadAllActivities();
-            loadClickthroughRates();
         }
     }
     
@@ -71,6 +72,7 @@ public class FormCampaignActivities {
         
         setAllActivities(allActivities);
         
+        loadClickthroughRates();
     }
     
     public String toReadableActivityStatus(String activityStatus) {
@@ -88,10 +90,16 @@ public class FormCampaignActivities {
     public void loadClickthroughRates() {
         List<CampaignActivity> allActivities = getAllActivities();
         for(CampaignActivity activity : allActivities) {
-            long totalClicks = campaignService.getTotalLinkClicksForActivity(activity.getOBJECTID());
-            long totalSent = campaignService.countEmailsSentForActivity(activity.getOBJECTID());
+            double totalClicks = campaignService.countConvertedEmails(activity.getOBJECTID());
+            double totalSent = campaignService.countEmailsSentForActivity(activity.getOBJECTID());
+            double clickthrough =  0.0;
             
-            double clickthrough = (totalSent <= 0) ? 0.0 : (totalClicks/totalSent) * 100;
+            if(totalSent > 0) {
+                clickthrough = (totalClicks/totalSent) * 100.0;
+            }
+            BigDecimal rounded = new BigDecimal(clickthrough);
+            clickthrough = rounded.setScale(3,RoundingMode.HALF_UP).doubleValue();
+            
             getClickthroughRates().put(activity.getOBJECTID(), clickthrough);
         }
     }

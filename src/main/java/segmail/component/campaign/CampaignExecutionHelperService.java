@@ -207,7 +207,7 @@ public class CampaignExecutionHelperService {
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void updateActivityStatus(CampaignActivity activity) {
-        long targeted = campService.countTargetedSubscribersForCampaign(activity.getOBJECTID());
+        long targeted = campService.countTargetedSubscribersForActivity(activity.getOBJECTID());
         long sent = campService.countEmailsSentForActivity(activity.getOBJECTID());
         
         if(targeted == sent)

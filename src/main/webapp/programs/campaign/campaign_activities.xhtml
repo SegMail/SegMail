@@ -82,8 +82,9 @@
                                                 class="btn btn-primary list-item-trigger"
                                                 title="Track Activity"
                                                 >
-                                                <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
-                                                        render="FormTrackEmailActivity"
+                                                <f:ajax event="click" listener="#{FormTrackEmailActivity.trackCampaignActivity(activity.OBJECTID)}"
+                                                        render=":FormTrackEmailActivity"
+                                                        execute=":FormTrackEmailActivity"
                                                         onevent="track_activity"
                                                         >
                                                 </f:ajax>

@@ -16,7 +16,7 @@ import javax.jws.WebParam;
 import seca2.component.landing.LandingService;
 import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.program.campaign.ProgramCampaign;
 
 /**
@@ -112,7 +112,7 @@ public class WSCampaignActivityLink {
     
     @WebMethod(operationName = "getTotalTargetedForCampaignActivity")
     public long getTotalTargetedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
-        long result = campService.countTargetedSubscribersForCampaign(campaignActivityId);
+        long result = campService.countTargetedSubscribersForActivity(campaignActivityId);
         return result;
     }
     

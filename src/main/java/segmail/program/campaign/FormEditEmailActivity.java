@@ -36,7 +36,7 @@ import segmail.entity.campaign.ACTIVITY_STATUS;
 import static segmail.entity.campaign.ACTIVITY_STATUS.NEW;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;

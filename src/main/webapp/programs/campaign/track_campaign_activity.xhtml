@@ -24,38 +24,38 @@
                                 <s2:messenger id="FormTrackEmailActivity_messenger" for="FormTrackEmailActivity" showDetail="true" showSummary="true"
                                               class="form-control"></s2:messenger>
                             </div>
-                            <div id="soap-errors">
-                                
-                            </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div id="html-content-form" class="col-md-5 col-sm-8 hidden-xs"><!--preview pane-->
-                            <div id="html-content">
-                                <h:outputText
-                                    escape="false" 
-                                    value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
-                            </div>
-                        </div>
-                        <div id="links-start-form" class="col-md-2 col-sm-4 hidden-xs"><!--links pane-->
-                            <div id="links-start">
-                            </div>
-                        </div>
-                        <div id="stats-form" class="col-md-5 col-sm-12 col-xs-12"><!--links pane-->
+                        <div id="stats-form" class="col-md-6 col-sm-12 col-xs-12"><!--links pane-->
                             <div id="stats-panel">
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <h2>Click-through rates</h2>
+                                        <h2>
+                                            Click rates
+                                        </h2>
+                                    </div>
+                                    <div class="col-lg-4 col-md-5 col-sm-6" style="text-align: right">
+                                        <h:commandLink styleClass="btn btn-success">
+                                            <f:ajax listener="#{FormTrackEmailActivity.saveAndContinue()}"
+                                                    render="@form" execute="@form"
+                                                    onevent="track_activity">
+                                            </f:ajax>
+                                            <i class="fa fa-refresh"></i>
+                                            <span class="hidden-xs">Refresh</span>
+                                        </h:commandLink>
+                                        <button data-dismiss="modal" class="btn btn-default">
+                                            X
+                                            <span class="hidden-xs">Close</span>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="row" style="margin-bottom: 20px;">
+                                <div class="row">
                                     <div class="col-md-4">
                                         <div class="widget">
                                             <div class="widget-container">
                                                 <div id="targeted" class="widget-text">
-                                                    0
+                                                    #{FormTrackEmailActivity.totalTargeted}
                                                 </div>
-                                                
                                             </div>
                                             <div class="widget-content">
                                                 <div class="widget-text">
@@ -67,10 +67,10 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="widget widget-primary">
+                                        <div class="widget widget-info">
                                             <div class="widget-container">
                                                 <div id="sent" class="widget-text">
-                                                    0
+                                                    #{FormTrackEmailActivity.totalSent}
                                                 </div>
                                             </div>
                                             <div class="widget-content">
@@ -83,16 +83,16 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="widget widget-success">
+                                        <div class="widget widget-warning">
                                             <div class="widget-container">
                                                 <div id="clicked" class="widget-text">
-                                                    0
+                                                    #{FormTrackEmailActivity.conversionRate} %
                                                 </div>
                                             </div>
                                             <div class="widget-content">
                                                 <div class="widget-text">
                                                     <strong>
-                                                        Clicked
+                                                        Converted
                                                     </strong>
                                                 </div>
                                             </div>
@@ -111,34 +111,55 @@
                                                 
                                             </thead>
                                             <tbody>
-                                                
+                                                <c:forEach items="#{FormTrackEmailActivity.clicks}" var="entry">
+                                                    <tr>
+                                                        <td>
+                                                            #{entry.key.SNO}
+                                                        </td>
+                                                        <td>
+                                                            #{entry.key.LINK_TEXT}
+                                                        </td>
+                                                        <td>
+                                                            #{entry.value}
+                                                        </td>
+                                                        <td>
+                                                            #{(FormTrackEmailActivity.totalClicked eq 0) ? 
+                                                              0.0 :
+                                                              (entry.value / FormTrackEmailActivity.totalClicked) * 100.0}
+                                                        </td>
+                                                    </tr>
+                                                </c:forEach>
                                             </tbody>
                                             <tfoot>
-                                                
+                                                <tr>
+                                                    <td colspan="2" style="text-align: right;" rowspan="1">
+                                                        <strong>Total</strong>
+                                                    </td>
+                                                    <td>
+                                                        #{FormTrackEmailActivity.totalClicked}
+                                                    </td>
+                                                    <td>
+                                                        100.0 %
+                                                    </td>
+                                                </tr>
                                             </tfoot>
                                         </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <h:inputHidden id="activity-id" pass:id="activity-id" value="#{FormEditEmailActivity.editingActivity.OBJECTID}" >
-                        </h:inputHidden>
-                        <script type="text/javascript" >
-                            var web_service_endpoint = '#{request.contextPath}/WSCampaignActivityLink';
-                            var web_service_endpoint2 = '#{request.contextPath}/WSCampaignActivityMailMerge';
-                            var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
-                        </script>
+                        <div id="html-content-form" class="col-md-6 col-sm-12 hidden-xs"><!--preview pane-->
+                            <div id="html-content">
+                                <h:outputText
+                                    escape="false" 
+                                    value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary"
-                            onclick="refresh();
-                                     return false;">
-                        Refresh
-                    </button>
-                    <button data-dismiss="modal" class="btn btn-default">
-                        Close
-                    </button>
+                    
                 </div>
             </div>
         </div>

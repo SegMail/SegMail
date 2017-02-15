@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.campaign;
+package segmail.entity.campaign.link;
 
 import eds.entity.transaction.EnterpriseTransaction;
 import javax.persistence.Entity;
@@ -30,8 +30,7 @@ public class CampaignLinkClick extends EnterpriseTransaction {
     public void setLINK_KEY(String LINK_KEY) {
         this.LINK_KEY = LINK_KEY;
     }
-
-    @NotNull
+    
     public String getSOURCE_KEY() {
         return SOURCE_KEY;
     }

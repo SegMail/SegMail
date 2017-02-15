@@ -44,9 +44,9 @@ import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
-import segmail.entity.campaign.CampaignActivityOutboundLink_;
-import segmail.entity.campaign.CampaignLinkClick;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink_;
+import segmail.entity.campaign.link.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -195,7 +195,7 @@ public class CampaignExecutionService {
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean continueCampaignActivity(long campaignActivityId) {
-        long targeted = campService.countTargetedSubscribersForCampaign(campaignActivityId);
+        long targeted = campService.countTargetedSubscribersForActivity(campaignActivityId);
         long sent = campService.countEmailsSentForActivity(campaignActivityId);
         
         return sent <= targeted;
@@ -219,7 +219,11 @@ public class CampaignExecutionService {
     }
     
     /**
-     * If the Campaign is not in executing state, do not create new clicks.
+     * If 
+     * - the Campaign is not in executing state, 
+     * - or emailKey is null or empty (link does not have a source, meaning it came from a test email),
+     * 
+     * do not create new clicks.
      * 
      * @param linkKey unique key of the link
      * @param emailKey source of the link
@@ -233,7 +237,9 @@ public class CampaignExecutionService {
             throw new EntityNotFoundException("Link key "+linkKey+" not found.");
         
         if(!ACTIVITY_STATUS.NEW.name.equals(link.getOWNER().getSTATUS()) && 
-                !ACTIVITY_STATUS.EDITING.name.equals(link.getOWNER().getSTATUS())) {
+                !ACTIVITY_STATUS.EDITING.name.equals(link.getOWNER().getSTATUS()) &&
+                emailKey != null && !emailKey.isEmpty()
+                ) {
             CampaignLinkClick newLinkClick = new CampaignLinkClick();
             newLinkClick.setLINK_KEY(linkKey);
             newLinkClick.setSOURCE_KEY(emailKey);
