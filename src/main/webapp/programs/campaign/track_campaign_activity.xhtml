@@ -30,6 +30,7 @@
                         <div id="stats-form" class="col-md-6 col-sm-12 col-xs-12"><!--links pane-->
                             <div id="stats-panel">
                                 <div class="row">
+                                    <div class="col-lg-8 col-md-7 col-sm-6 hidden-xs">
                                         <h2>
                                             Click rates
                                         </h2>
@@ -99,7 +100,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="row">
                                     <div class="col-md-12">
                                         <table id="stats-table" class="table table-striped">
@@ -108,7 +109,7 @@
                                                 <th>Link</th>
                                                 <th>Clicks</th>
                                                 <th>%</th>
-                                                
+
                                             </thead>
                                             <tbody>
                                                 <c:forEach items="#{FormTrackEmailActivity.clicks}" var="entry">
@@ -155,11 +156,11 @@
                                     value="#{FormTrackEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" ></h:outputText>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
                 <div class="modal-footer">
-                    
+
                 </div>
             </div>
         </div>
