@@ -56,6 +56,14 @@ public class FormUnsubscribe {
             WSUnsubscribeInterface clientService = wsService.getWSProvider(endpointName, namespace, WSUnsubscribeInterface.class);
             
             String results = clientService.unsubscribe(key);
+            //Ugly hack, could have used JAX-RS and return a redirect response
+            if(results.startsWith("redirect: ")) {
+                String redirectUrl = results.replace("redirect: ", "");
+                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("http://") ){
+                    redirectUrl = "http://" + redirectUrl;
+                }
+                FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
+            }
             
             this.setListName(results);
             program.setCurrentPage(program.getSUCCESS());
@@ -67,6 +75,9 @@ public class FormUnsubscribe {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
         } catch (MalformedURLException ex) {
+            ex.printStackTrace(System.out);
+            program.setCurrentPage(program.getERROR());
+        } catch (Exception ex) {
             ex.printStackTrace(System.out);
             program.setCurrentPage(program.getERROR());
         }

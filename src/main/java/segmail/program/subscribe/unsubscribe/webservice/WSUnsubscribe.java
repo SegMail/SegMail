@@ -53,15 +53,13 @@ public class WSUnsubscribe implements WSUnsubscribeInterface {
                 return "This is a testing list";
             }
             
-            List<Subscription> sub = subService.unsubscribeSubscriber(key);
-            //SubscriptionList list = sub.getTARGET();
-            
-            /*JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
-            resultObjectBuilder.add("name", list.getLIST_NAME());
-            resultObjectBuilder.add("redirect", "");
-            
-            String result = resultObjectBuilder.build().toString();*/
-            //String result = list.getLIST_NAME();
+            List<Subscription> subs = subService.unsubscribeSubscriber(key);
+            //Assume that there is only 1 unique key for Subscriptions
+            Subscription sub = subs.get(0);
+            SubscriptionList list = sub.getTARGET();
+            if(list.getREDIRECT_UNSUBSCRIBE()!= null && !list.getREDIRECT_UNSUBSCRIBE().isEmpty()) {
+                return "redirect: "+list.getREDIRECT_UNSUBSCRIBE(); //Ugly hack, could have used JAX-RS and return a redirect response
+            }
             
             return key;
         } catch (RelationshipNotFoundException ex) {

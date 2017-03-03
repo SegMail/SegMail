@@ -15,8 +15,9 @@
 
                 <div class="row">
                     <div class="col-md-8">
-                        Set the automatic emails you want to send on different events
-                        for your list.
+                        Set where you want to redirect your subscribers after certain actions. 
+                        If you leave these blank, your subscribers will be redirected to our standard
+                        pages.
                     </div>
                     <div class="page-toolbar-block pull-right">
                         <button jsf:id="save_settings_button" class="btn btn-primary"
@@ -58,25 +59,11 @@
                                 </div>
                                 <div class="timeline-event-content">
                                     <div class="event-title">
-                                        Confirmation email
-                                        <div class="event-date">
-                                            Immediately
-                                        </div>
+                                        Subscribe
                                     </div>
-
-                                    <p>Select the email that you want your users to receive to <u>confirm</u> their signup.</p>
-                                    <p><h:selectOneMenu disabled="true" styleClass="form-control" value="#{FormListEmail.program.selectedConfirmationEmailId}">
-                                            <f:selectItem itemValue="-1" itemLabel="[None assigned]Please go to 'Autoresponders' to create one" />
-                                            <f:selectItems  value="#{FormListEmail.program.confirmationEmails}" var="c"
-                                                            itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
-                                                            >
-                                            </f:selectItems>
-                                        </h:selectOneMenu>
-                                    </p>
                                     <p>
-                                        <label for="confirmRedirect" >
-                                            After subscribing, redirect subscribers to (leave blank to show our standard page):
-                                        </label>
+                                        After subscribing, redirect subscribers to (leave blank to show our standard page):
+                                        
                                         <h:inputText id="confirmRedirect" styleClass="form-control"
                                                      value="#{FormListEmail.listEditing.REDIRECT_CONFIRM}" >
                                         </h:inputText>
@@ -90,29 +77,31 @@
                                 </div>
                                 <div class="timeline-event-content">
                                     <div class="event-title">
-                                        Welcome email
-                                        <div class="event-date">
-                                            After confirmation
-                                        </div>
+                                        Confirm
                                     </div>
+                                    
                                     <p>
-                                        Select the email that you want your users to receive <u>after</u> they have confirmed their signup.
-                                    </p>
-                                    <p>
-                                        <h:selectOneMenu disabled="true" styleClass="form-control" value="#{FormListEmail.program.selectedWelcomeEmailId}">
-                                            <f:selectItem itemValue="-1" itemLabel="[None assigned]Please go to 'Autoresponders' to create one" />
-                                            <f:selectItems  value="#{FormListEmail.program.welcomeEmails}" var="c"
-                                                            itemValue="#{c.OBJECTID}" itemLabel="#{c.SUBJECT}"
-
-                                                            >
-                                            </f:selectItems>
-
-                                        </h:selectOneMenu>
-                                        <label for="welcomeRedirect" >
-                                            After confirming, redirect subscribers to (leave blank to show our standard page):
-                                        </label>
+                                        After confirming, redirect subscribers to (leave blank to show our standard page):
                                         <h:inputText id="welcomeRedirect" styleClass="form-control"
                                                value="#{FormListEmail.listEditing.REDIRECT_WELCOME}" >
+                                        </h:inputText>
+                                    </p>
+                                    
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="timeline-event-icon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <div class="timeline-event-content">
+                                    <div class="event-title">
+                                        Unsubscribe
+                                    </div>
+                                    
+                                    <p>
+                                        After unsubscribing, redirect subscribers to (leave blank to show our standard page):
+                                        <h:inputText id="unsubscribeRedirect" styleClass="form-control"
+                                                     value="#{FormListEmail.listEditing.REDIRECT_UNSUBSCRIBE}" >
                                         </h:inputText>
                                     </p>
                                     

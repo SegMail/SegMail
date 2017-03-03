@@ -70,22 +70,16 @@
                                         <li class="#{(FormProgramListSwitch.showActiveTabs.get('fieldset_panel') ? 'active' : '')}">
                                             <a href="#fieldset_panel" data-toggle="tab">Define fields</a>
                                         </li>
-                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('email_panel') ? 'active' : '')}">
-                                            <a href="#email_panel" data-toggle="tab">Confirmation &amp; Welcome Emails</a>
-                                        </li>
-                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('subscribers_panel') ? 'active' : '')}">
-                                            <a href="#subscribers_panel" data-toggle="tab">Subscribers</a>
+                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('redirect_panel') ? 'active' : '')}">
+                                            <a href="#redirect_panel" data-toggle="tab">Redirects</a>
                                         </li>
                                     </ul>
                                     <div class="block-content tab-content">
-                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('subscribers_panel') ? 'active' : '')}" id="subscribers_panel">
-                                            <ui:include src="subscribers_panel.xhtml"></ui:include>
-                                        </div>
                                         <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('fieldset_panel') ? 'active' : '')}" id="fieldset_panel">
                                             <ui:include src="fieldset_panel.xhtml"></ui:include>
                                         </div>
-                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('email_panel') ? 'active' : '')}" id="email_panel">
-                                            <ui:include src="email_panel.xhtml"></ui:include>
+                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('redirect_panel') ? 'active' : '')}" id="redirect_panel">
+                                            <ui:include src="redirect_panel.xhtml"></ui:include>
                                         </div>
                                         <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('settings_panel') ? 'active' : '')} active" id="settings_panel">
                                             <ui:include src="settings_panel.xhtml"></ui:include>

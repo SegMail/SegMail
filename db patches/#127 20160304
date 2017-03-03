@@ -1,0 +1,17 @@
+##
+# Purpose:
+# This is to delete the table ENTEPRRISE_TRANSACTION and all its Foreign Keys
+#
+
+## 1. Get all tables and constraint names of FK pointing to our target table
+select
+  TABLE_NAME,COLUMN_NAME,CONSTRAINT_NAME, REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME
+from INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+where
+  REFERENCED_TABLE_NAME = 'ENTEPRRISE_TRANSACTION'
+
+## 2. Delete these constraints
+ALTER TABLE [TABLE_NAME] DROP FOREIGN KEY [CONSTRAINT_NAME];
+
+## 3. Delete the ENTEPRRISE_TRANSACTION table
+DROP TABLE ENTEPRRISE_TRANSACTION
