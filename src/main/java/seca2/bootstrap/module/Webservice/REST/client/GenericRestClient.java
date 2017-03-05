@@ -73,15 +73,15 @@ public abstract class GenericRestClient {
             }
             
             ServerInstance targetServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
-            if (targetServer == null) {
-                throw new RuntimeException("No ERP servers setup.");
-            }
             
             targetEndpointURL = targetServer.getURI();
             //Solution from http://stackoverflow.com/a/36220060/5765606
             client = ClientBuilder.newBuilder().register(filter).build();
             
         } catch (IncompleteDataException ex) {
+            Logger.getLogger(GenericRestClient.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        } catch (Exception ex) {
             Logger.getLogger(GenericRestClient.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
         }
@@ -112,6 +112,7 @@ public abstract class GenericRestClient {
         
         if(response.getStatus() != Response.Status.OK.getStatusCode()) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, Response.Status.fromStatusCode(response.getStatus()).name(), response.getStatusInfo().getReasonPhrase());
+            throw new RuntimeException(response.getStatusInfo().getReasonPhrase());
         }
         String token = response.readEntity(String.class);
 

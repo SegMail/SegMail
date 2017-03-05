@@ -6,7 +6,6 @@
 package segmail.program.list;
 
 import eds.component.client.ClientService;
-import eds.component.data.DBConnectionException;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.SubscriptionList;
@@ -79,8 +78,6 @@ public class FormListList {
             List<SubscriptionList> allLists = listService.getAllListForClient(client.getOBJECTID());
 
             this.program.setAllLists(allLists);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }

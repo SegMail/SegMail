@@ -5,13 +5,10 @@
  */
 package segmail.program.list;
 
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.user.UserAccountLockedException;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -64,8 +61,6 @@ public class FormListSettingsDelete {
             reqContainer.getProgramParamsOrdered().clear(); //So that it's not refreshed with the deleted list ID
             program.refresh();
             
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         } catch (UserAccountLockedException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         } catch (UserLoginException ex) {

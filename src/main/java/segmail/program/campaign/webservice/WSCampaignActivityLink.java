@@ -16,7 +16,7 @@ import javax.jws.WebParam;
 import seca2.component.landing.LandingService;
 import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.program.campaign.ProgramCampaign;
 
 /**
@@ -68,14 +68,16 @@ public class WSCampaignActivityLink {
     
     /**
      * 
-     * @param linkKey
+     * @param linkKey unique identifier of the CampaignActivityOutboundLink
+     * @param emailKey unique identifier of the source Email
      * @return
      * @throws EntityNotFoundException 
      */
     @WebMethod(operationName = "redirectAndUpdate")
     public String redirectAndUpdate(
-            @WebParam(name = "linkKey") String linkKey ) throws EntityNotFoundException {
-        String redirectLink = campExeService.getRedirectLinkAndUpdateHit(linkKey);
+            @WebParam(name = "linkKey") String linkKey, 
+            @WebParam(name = "emailKey") String emailKey ) throws EntityNotFoundException {
+        String redirectLink = campExeService.getRedirectLinkAndUpdateHit(linkKey,emailKey);
         
         return redirectLink;
     }
@@ -104,13 +106,13 @@ public class WSCampaignActivityLink {
     
     @WebMethod(operationName = "getExecutedForCampaignActivity")
     public long getExecutedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
-        long result = campExeService.countEmailsSentForActivity(campaignActivityId);
+        long result = campService.countEmailsSentForActivity(campaignActivityId);
         return result;
     }
     
     @WebMethod(operationName = "getTotalTargetedForCampaignActivity")
     public long getTotalTargetedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
-        long result = campExeService.countTargetedSubscribersForCampaign(campaignActivityId);
+        long result = campService.countTargetedSubscribersForActivity(campaignActivityId);
         return result;
     }
     

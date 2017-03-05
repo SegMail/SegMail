@@ -8,7 +8,6 @@ package segmail.component.subscription;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.config.GenericConfigService;
-import eds.component.data.DBConnectionException;
 import eds.component.data.DataValidationException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityNotFoundException;
@@ -17,25 +16,17 @@ import eds.entity.client.Client;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.hibernate.exception.GenericJDBCException;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.FIELD_TYPE;
-import segmail.entity.subscription.ListType;
-import segmail.entity.subscription.ListType_;
-import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
@@ -297,6 +288,7 @@ public class ListService {
         return allList;
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<SubscriptionListField> getFieldsForLists(List<SubscriptionList> lists) {
         List<Long> listIds = new ArrayList<>();
         for(SubscriptionList list : lists) {

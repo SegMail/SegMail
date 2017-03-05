@@ -14,7 +14,6 @@ import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.navigation.NavigationService;
@@ -78,11 +77,7 @@ public class FormTestNavigation implements Serializable{
             MenuItem newMenuItem = navigationService.createMenuItem(menuItemName, menuItemURL, selectedParentMenuItemId,prependHTMLTags,isPublic);
             //if successful, reload the page
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_FATAL, "MenuItem "+newMenuItem.getMENU_ITEM_NAME()+" created successfully!", null);
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
-        }
-        catch(Exception ex){
+        } catch(Exception ex){
             FacesMessenger.setFacesMessage(setupNavigationFormName, FacesMessage.SEVERITY_ERROR,
                     ex.getClass().getSimpleName(), 
                     ex.getMessage());
@@ -94,9 +89,6 @@ public class FormTestNavigation implements Serializable{
             List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId, order);
             
             FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_FATAL, "MenuItem "+selectedAssignedMenuItemId+" is assigned to user type "+selectedUserTypeId+"!", null);
-        }
-        catch(DBConnectionException dbex){
-            FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (RelationshipExistsException ex) {
             FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_ERROR, ex.getMessage(),null);
         } catch (EntityNotFoundException ex) {

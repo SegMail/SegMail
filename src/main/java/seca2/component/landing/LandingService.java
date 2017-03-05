@@ -46,7 +46,7 @@ public class LandingService {
 
     public final String SERVER_NAME = "LandingService.SERVER_NAME";
     
-    @Inject LandingServiceContainer cont;
+    //@Inject LandingServiceContainer cont;
 
     @EJB
     private GenericObjectService objectService;
@@ -139,7 +139,7 @@ public class LandingService {
 
             updateService.getEm().persist(assignment);
             
-            cont.addServer(newInstance);
+            //cont.addServer(newInstance);
             
             return newInstance;
 
@@ -208,7 +208,7 @@ public class LandingService {
             throws DataValidationException, URISyntaxException, EntityExistsException {
         this.validateServer(server);
         server = updateService.getEm().merge(server);
-        cont.addServer(server); //To reload it
+        //cont.addServer(server); //To reload it
         
         return server;
     }
@@ -223,22 +223,20 @@ public class LandingService {
      * @throws eds.component.data.IncompleteDataException if no servers are
      * found
      */
-    
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ServerInstance getNextServerInstance(LandingServerGenerationStrategy strategy, ServerNodeType type)
             throws IncompleteDataException {
             //Currently there's no strategy, just take the first one.
         //This is when the user can set their own landing servers
         //List<ServerInstance> servers = objectService.getAllSourceObjectsFromTarget(userId, Assign_Server_User.class, ServerInstance.class);
         //Only the system admin can set landing servers, so no point retrieving by assignment
-        if(cont.getTotalServerCount() <= 0) {
-            cont.addServers(getServerInstances());
-        }
-        ServerInstance result = cont.getNextServerRR(type);//Only Round Robin is supported at this moment.
-
-        if(result == null)
+        
+        List<ServerInstance> results = this.getServerInstances(type);
+        
+        if(results == null || results.isEmpty())
             throw new IncompleteDataException("No Servers found, please contact your administrators to set a valid ServerInstance first.");
 
-        return result;
+        return results.get(0);
     }
 
     /**
@@ -252,7 +250,7 @@ public class LandingService {
     public void deleteServer(long serverId)
             throws EntityNotFoundException {
         updateService.deleteObjectDataAndRelationships(serverId,ServerInstance.class);
-        cont.removeServer(serverId);
+        //cont.removeServer(serverId);
     }
 
     //Wrong return param - should return a list or use "Contains"

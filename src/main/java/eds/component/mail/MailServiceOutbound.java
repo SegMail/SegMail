@@ -69,7 +69,6 @@ public class MailServiceOutbound {
      * @param email The data structure representing an email.
      * @param logging If logging is turned on, the email will be logged.
      */
-    //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendEmailNow(Email email, boolean logging) {
         try {
@@ -158,73 +157,7 @@ public class MailServiceOutbound {
         }
     }
 
-    /*
-    public void sendEmailBySMTP(Email email) {
-
-        try {
-            //Checks
-            if (email.getRECIPIENTS() == null || email.getRECIPIENTS().isEmpty()) {
-                throw new IncompleteDataException("Emails must have a recipient.");
-            }
-            if (email.getBODY() == null || email.getBODY().isEmpty()) {
-                throw new IncompleteDataException("Emails must have a body.");
-            }
-            if (email.getSUBJECT() == null || email.getSUBJECT().isEmpty()) {
-                throw new IncompleteDataException("Emails must have a subject.");
-            }
-            if (email.getSENDER_ADDRESS() == null || email.getSENDER_ADDRESS().isEmpty()) {
-                throw new IncompleteDataException("Emails must have a sender.");
-            }
-
-            // Create a Properties object to contain connection configuration information.
-            Properties props = System.getProperties();
-            props.put("mail.transport.protocol", "smtp");
-            props.put("mail.smtp.port", 25);
-
-            // Set properties indicating that we want to use STARTTLS to encrypt the connection.
-            // The SMTP session will begin on an unencrypted connection, and then the client
-            // will issue a STARTTLS command to upgrade to an encrypted connection.
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.starttls.required", "true");
-
-            // Create a Session object to represent a mail session with the specified properties. 
-            Session session = Session.getDefaultInstance(props);
-
-            // Create a message with the specified information. 
-            MimeMessage msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(email.getSENDER_ADDRESS()));
-            for (String recipient : email.getRECIPIENTS()) {
-                msg.setRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(recipient));
-            }
-            msg.setSubject(email.getSUBJECT());
-            msg.setContent(email.getBODY(), "text/html");
-
-            // Create a transport.        
-            Transport transport = session.getTransport();
-
-            // Send the message.
-            System.out.println("Attempting to send an email through the Amazon SES SMTP interface...");
-
-            // Connect to Amazon SES using the SMTP username and password you specified above.
-            transport.connect(
-                    DEFAULT_SMTP_ENDPOINT,
-                    awsCredentials.getAWSAccessKeyId(),
-                    awsCredentials.getAWSSecretKey());
-
-            // Send the email.
-            transport.sendMessage(msg, msg.getAllRecipients());
-            System.out.println("Email sent!");
-        } catch (Exception ex) {
-            System.out.println("The email was not sent.");
-            System.out.println("Error message: " + ex.getMessage());
-            throw new EJBException(ex);
-        } finally {
-            // Close and terminate the connection.
-            //transport.close();
-        }
-    }
-    */
+    
     /**
      *
      * @param emailContent
@@ -249,7 +182,7 @@ public class MailServiceOutbound {
      * @throws DataValidationException if either sender or recipient email is missing.
      * @throws InvalidEmailException if validateEmail(Email) throws one.
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void queueEmail(Email email, DateTime scheduledTime) 
             throws DataValidationException, InvalidEmailException {
         //Validate email
@@ -257,7 +190,7 @@ public class MailServiceOutbound {
 
         email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
         email.setSCHEDULED_DATETIME(new Timestamp(scheduledTime.getMillis()));
-        updateService.getEm().persist(email);
+        updateService.persist(email);
     }
 
     
@@ -300,15 +233,7 @@ public class MailServiceOutbound {
         DateTime now = DateTime.now();
         processEmailQueue(now);
     }
-
-    public void printMail1() {
-        System.out.println("MailService.printMail1()");
-    }
-
-    public void printMail2() {
-        System.out.println("MailService.printMail2()");
-    }
-
+    
     /**
      * 
      * @param email

@@ -3,12 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package segmail.entity.campaign;
+package segmail.entity.campaign.link;
 
+import eds.component.encryption.EncryptionType;
+import eds.component.encryption.EncryptionUtility;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import segmail.entity.campaign.CampaignActivity;
 
 /**
  *
@@ -29,6 +32,7 @@ public class CampaignActivityOutboundLink extends EnterpriseData<CampaignActivit
     
     private String ORIGINAL_LINK_HTML;
     
+    private boolean ACTIVE;
 
     public String getLINK_TARGET() {
         return LINK_TARGET;
@@ -61,6 +65,14 @@ public class CampaignActivityOutboundLink extends EnterpriseData<CampaignActivit
     public void setORIGINAL_LINK_HTML(String ORIGINAL_LINK_HTML) {
         this.ORIGINAL_LINK_HTML = ORIGINAL_LINK_HTML;
     }
+
+    public boolean isACTIVE() {
+        return ACTIVE;
+    }
+
+    public void setACTIVE(boolean ACTIVE) {
+        this.ACTIVE = ACTIVE;
+    }
     
     @Override
     public void randInit() {
@@ -69,7 +81,9 @@ public class CampaignActivityOutboundLink extends EnterpriseData<CampaignActivit
 
     @Override
     public Object generateKey() {
-        return super.OWNER;
+        String hash = EncryptionUtility.getHash(getOWNER().toString()+getSNO()+getLINK_TEXT()+getLINK_TARGET(), EncryptionType.SHA256);
+        
+        return hash;
     }
 
     @Override

@@ -47,20 +47,7 @@
                     
                 </c:when>
                 <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.LANDING}">
-                    <div class="row">
-                        <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8">
-                            <h4>Oops, seems like you have reached this place by mistake.</h4>
-                            <p>
-                                If you were led here by some links from your email, most probably our 
-                                servers have run into some issues. Please help us to correct this problem
-                                by submitting a help request to <u>help [at] segmail.io</u>
-                            </p>
-                            <p>
-                                While you're here, <a href="#">check us out</a>.
-                            </p>
-                        </div>
-                    </div>
-                    
+                    <ui:include src="/programs/error/web_error.xhtml" ></ui:include>
                 </c:when>
                 <c:when test="#{FormUnsubscribe.currentPage == ProgramUnsubscribe.ERROR}">
                     <div class="row">

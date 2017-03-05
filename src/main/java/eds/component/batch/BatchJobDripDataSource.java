@@ -5,7 +5,6 @@
  */
 package eds.component.batch;
 
-import eds.component.data.DripDatasource;
 import eds.component.data.DripFeederService;
 import eds.entity.batch.BatchJobRun;
 import java.io.Serializable;

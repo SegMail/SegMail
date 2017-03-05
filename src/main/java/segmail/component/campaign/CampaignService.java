@@ -9,14 +9,15 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import eds.component.data.RelationshipNotFoundException;
+import eds.entity.batch.BatchJobContainer;
 import eds.entity.client.Client;
-import eds.entity.data.EnterpriseData_;
-import eds.entity.data.EnterpriseRelationship_;
-import eds.entity.mail.Email;
+import eds.entity.client.ContactInfo;
+import eds.entity.client.VerifiedSendingAddress;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -28,6 +29,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.joda.time.DateTime;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
@@ -45,11 +51,13 @@ import segmail.entity.campaign.Assign_Campaign_List;
 import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
-import segmail.entity.campaign.CampaignActivityOutboundLink_;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.CampaignActivitySchedule;
-import segmail.entity.campaign.CampaignLinkClick;
-import segmail.entity.campaign.CampaignLinkClick_;
+import segmail.entity.campaign.link.CampaignLinkClick;
+import segmail.entity.campaign.link.CampaignLinkClick_;
+import segmail.entity.campaign.Trigger_Email_Activity;
+import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -57,6 +65,7 @@ import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListField_;
 import segmail.entity.subscription.Subscription_;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -76,6 +85,8 @@ public class CampaignService {
     @EJB ListService listService;
     @EJB MailMergeService mmService;
     
+    @EJB BatchJobContainer batchJobCont;
+    
     public Campaign getCampaign(long campaignId) {
         Campaign campaign = objService.getEnterpriseObjectById(campaignId, Campaign.class);
         return campaign;
@@ -89,6 +100,7 @@ public class CampaignService {
     
     /**
      * Creates and assigns Campaign to the calling Client.
+     * Sets the client's first VerifiedSendingAddress as the Send As.
      * 
      * @param campaignName
      * @param campaignGoals
@@ -98,7 +110,7 @@ public class CampaignService {
      * @throws IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Campaign createCampaign(String campaignName, String campaignGoals) 
+    public Campaign createCampaign(String campaignName, String campaignGoals, Client client) 
             throws RelationshipExistsException, EntityNotFoundException, IncompleteDataException {
         
         Campaign newCampaign = new Campaign();
@@ -110,7 +122,20 @@ public class CampaignService {
         objService.getEm().persist(newCampaign);
         
         //Assign
-        assignCampaignToClient(newCampaign.getOBJECTID(), clientContainer.getClient().getOBJECTID());
+        assignCampaignToClient(newCampaign.getOBJECTID(), client.getOBJECTID());
+        
+        //Set default attributes for Send As email
+        List<VerifiedSendingAddress> addresses = objService.getEnterpriseData(client.getOBJECTID(), VerifiedSendingAddress.class);
+        if(addresses != null && !addresses.isEmpty()) {
+            VerifiedSendingAddress address = addresses.get(0);
+            newCampaign.setOVERRIDE_SEND_AS_EMAIL(address.getVERIFIED_ADDRESS());
+        }
+        //Set default attributes for Send As name
+        List<ContactInfo> contacts = objService.getEnterpriseData(client.getOBJECTID(), ContactInfo.class);
+        if(contacts != null && !contacts.isEmpty()) {
+            ContactInfo contact = contacts.get(0);
+            newCampaign.setOVERRIDE_SEND_AS_NAME(contact.getFIRSTNAME());
+        }
         
         return newCampaign;
     }
@@ -250,10 +275,11 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivity updateCampaignActivity(CampaignActivity activity) 
-            throws IncompleteDataException {
+            throws IncompleteDataException, DataValidationException, EntityNotFoundException {
+        
         validateCampaignActivity(activity);
         activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
-        
+        activity = parseMMTagsAndLinks(activity);
         
         return objService.getEm().merge(activity);
     }
@@ -330,8 +356,27 @@ public class CampaignService {
         return objService.getEm().merge(schedule);
     }
     
+    /**
+     * Full refresh of all targeted SubscriptionList. Checks if there are any 
+     * existing executing CampaignActivities.
+     * 
+     * @param targetLists
+     * @param campaignId
+     * @return
+     * @throws EntityNotFoundException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) throws EntityNotFoundException {
+    public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) 
+            throws EntityNotFoundException, DataValidationException {
+        //Check if there are any executing CampaignActivities
+        List<CampaignActivity> activities = this.getAllActivitiesForCampaign(campaignId);
+        for(CampaignActivity activity : activities) {
+            if(activity.getSTATUS() != null && activity.getSTATUS().equals(ACTIVITY_STATUS.EXECUTING.name))
+                throw new DataValidationException("Campaign activity \""+activity.getACTIVITY_NAME()+"\" is executing. "
+                        + "No list should be assigned or unassigned at this point in time. "
+                        + "Please wait till it is completed.");
+        }
+        
         //Get all available lists for client and make sure client is authorized. (1 SQL query)
         List<SubscriptionList> toBeAssigned = new ArrayList<>();
         List<SubscriptionList> availableLists = listService.getAllListForClient(clientContainer.getClient().getOBJECTID());
@@ -367,12 +412,12 @@ public class CampaignService {
             //Set Sender's attributes in Campaign with the first list that was assigned
             if(campaign.getOVERRIDE_SEND_AS_EMAIL() == null || campaign.getOVERRIDE_SEND_AS_EMAIL().isEmpty()) {
                 campaign.setOVERRIDE_SEND_AS_EMAIL(targetList.getSEND_AS_EMAIL());
-                updService.getEm().merge(campaign);
+                //updService.getEm().merge(campaign); //no need because it is already managed
             }
             
             if(campaign.getOVERRIDE_SEND_AS_NAME()== null || campaign.getOVERRIDE_SEND_AS_NAME().isEmpty()) {
                 campaign.setOVERRIDE_SEND_AS_NAME(targetList.getSEND_AS_NAME());
-                updService.getEm().merge(campaign);   
+                //updService.getEm().merge(campaign);   //no need because it is already managed
             }
             
         }
@@ -392,21 +437,40 @@ public class CampaignService {
      * 
      * @param emailActivity 
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void startSendingCampaignEmail(CampaignActivity emailActivity) 
-            throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
+            throws BatchProcessingException, EntityNotFoundException, IncompleteDataException, IOException, DataValidationException {
         /**
          * Schedule the first one and let the subsequent ones keep scheduling 
          * the subsequent ones until the lists are done.
          */
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(emailActivity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class);
+        if(campaigns == null || campaigns.isEmpty()) {
+            throw new EntityNotFoundException("No Campaign found for this CampaignActivity.");
+        }
+        Campaign campaign = campaigns.get(0);
+        if(campaign.getOVERRIDE_SEND_AS_EMAIL() == null || campaign.getOVERRIDE_SEND_AS_EMAIL().isEmpty() ||
+                campaign.getOVERRIDE_SEND_AS_NAME() == null || campaign.getOVERRIDE_SEND_AS_NAME().isEmpty()) {
+            throw new IncompleteDataException("You need to set Send As name and address for all Campaigns");
+        }
         
         List<CampaignActivitySchedule> scheduleList = objService.getEnterpriseData(emailActivity.getOBJECTID(), CampaignActivitySchedule.class);
         if(scheduleList == null || scheduleList.isEmpty())
             throw new IncompleteDataException("No CampaignActivitySchedule set for CampaignActivity "+emailActivity.getACTIVITY_NAME());
         CampaignActivitySchedule schedule = scheduleList.get(0);
-        Object[] params = {emailActivity.getOBJECTID(), (int)schedule.getSEND_IN_BATCH() };
+        
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
+        if (targetLists == null || targetLists.isEmpty())
+            throw new IncompleteDataException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+        
         
         DateTime now = DateTime.now();
+        batchJobCont.create(emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME());
+        batchJobCont.addStep(CampaignExecutionService.class.getSimpleName(),"executeCampaignActivity",new Object[]{emailActivity.getOBJECTID(),(int)schedule.getSEND_IN_BATCH()});
+        batchJobCont.addCondition(CampaignExecutionService.class.getSimpleName(),"continueCampaignActivity",new Object[]{emailActivity.getOBJECTID()});
+        batchJobCont.setSchedule(schedule.generateCronExp(now).getCRON_EXPRESSION());
+        batchJobCont.schedule(now);
+        /*
         batchScheduleService.createSingleStepJob(
                 emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME(), 
                 "CampaignExecutionService", 
@@ -415,17 +479,24 @@ public class CampaignService {
                 landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID(),
                 schedule.generateCronExp(now).getCRON_EXPRESSION(),
                 now);
-        
-        //Actually we don't need to do this but just for consistency sake
-        //CRON_EXPRESSION don't need to be stored in the first place
-        objService.getEm().merge(schedule);
+        */
         
         //Update the status of the activity
         emailActivity.setSTATUS(ACTIVITY_STATUS.EXECUTING.name);
-        objService.getEm().merge(emailActivity);
+        updService.merge(emailActivity); //New transaction
         
     }
     
+    /**
+     * Using campaignId, get all current targeted subscribers.
+     * Campaign -> Assign_Campaign_List -> Subscription -> SubscriberAccount
+     * 
+     * @param campaignId
+     * @param startIndex
+     * @param maxResults
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
@@ -443,6 +514,7 @@ public class CampaignService {
         
         query.distinct(true);
         query.select(fromSubscrAcc);
+        query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
         List<SubscriberAccount> results  = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
@@ -453,6 +525,7 @@ public class CampaignService {
         
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<String> getTargetedSubscribersEmail(long campaignId, int startIndex, int maxResults) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<String> query = builder.createQuery(String.class);
@@ -470,6 +543,7 @@ public class CampaignService {
         
         query.distinct(true);
         query.select(fromSubscrAcc.get(SubscriberAccount_.EMAIL));
+        query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
         List<String> results  = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
@@ -481,10 +555,9 @@ public class CampaignService {
     }
     
     /**
-     * There are normal links and also mailmerge links. If it is a normal link,
-     * return the correct redirect URL that will lead to the intended target. If 
-     * it is a mailmerge link, return an example link that will allow the user to
-     * test out by clicking the link and come to the intended page. 
+     * If the link exists, update its LINK_TARGET and LINK_TEXT. If not, create 
+     * it. Set its ACTIVE flag to true. All links that have been created or updated
+     * are now active within the CampaignActivity.
      * 
      * @param activity
      * @param linkTarget
@@ -509,9 +582,7 @@ public class CampaignService {
             }
         }
         selectedLink.setLINK_TARGET(linkTarget);
-        //selectedLink.setLINK_TARGET(this.constructLink(selectedLink));
         selectedLink.setLINK_TEXT(linkText);
-        //selectedLink.setORIGINAL_LINK_HTML(originalHTML);
         //If not found
         if(selectedLink.getLINK_KEY() == null || selectedLink.getLINK_KEY().isEmpty())
             objService.getEm().persist(selectedLink);
@@ -532,6 +603,7 @@ public class CampaignService {
         return server.getURI() + "/link/" + link.getLINK_KEY();
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getLinkClicks(String key) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -546,6 +618,7 @@ public class CampaignService {
         return result;
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getTotalLinkClicksForActivity(long activityId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -566,6 +639,7 @@ public class CampaignService {
         return result;
     } 
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long getTotalLinkClicksForCampaign(long campaignId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -588,5 +662,215 @@ public class CampaignService {
         return result;
     } 
     
+    /**
+     * Processes 3 things:
+     * 1) Mailmerge tags eg. firstname, lastname, etc.
+     * 2) Mailmerge links eg. confirm, unsubscribe, etc.
+     * 3) Outbound links eg. http://segmail.io
+     * 
+     * The 1st 2 are to be delegated to MailmergeService while the last is to be 
+     * done here.
+     * 
+     * @param editingContent
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivity parseMMTagsAndLinks(CampaignActivity activity) throws DataValidationException, IncompleteDataException, EntityNotFoundException {
+        
+        //Retrieve this first because it has 2 DB hits
+        List<Campaign> campaigns = this.objService.getAllSourceObjectsFromTarget(activity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class);
+        if(campaigns == null || campaigns.isEmpty())
+            throw new EntityNotFoundException("No Campaign found for CampaignActivity "+activity.getOBJECT_NAME());
+        
+        //Outbound links - generate tracking links without subscriber ID
+        //links will be appended with the subscriber's ID when it is sent out
+        String editingContent = activity.getACTIVITY_CONTENT();
+        Document doc = Jsoup.parse(editingContent);
+        Elements links = doc.select("a");
+        //Set all as inactive first
+        updService.deleteAllEnterpriseDataByType(activity.getOBJECTID(), CampaignActivityOutboundLink.class);
+        
+        //Update those that are still active (in use)
+        for(int i=0; i<links.size(); i++) {
+            Element link = links.get(i);
+            String target = link.attr("href");
+            String text = link.html();
+            //If text is image, replace it with a generic image tab
+            if(!link.getElementsByTag("img").isEmpty())
+                text = "[image]";
+            
+            CampaignActivityOutboundLink outboundLink = new CampaignActivityOutboundLink();
+            outboundLink.setOWNER(activity);
+            outboundLink.setSNO(i);
+            outboundLink.setLINK_TARGET(target);
+            outboundLink.setLINK_TEXT(text);
+            outboundLink.setACTIVE(true);
+            objService.getEm().persist(outboundLink);
+            
+            //Construct link
+            String redirectLink = constructLink(outboundLink);
+            
+            //Modify the existing link
+            link.attr("href", redirectLink);
+            link.attr("data-link", (String) outboundLink.generateKey());
+            link.attr("target", "_blank");
+        }
+        
+        activity.setACTIVITY_CONTENT_PROCESSED(doc.outerHtml());
+        String processedContent = activity.getACTIVITY_CONTENT_PROCESSED();
+        
+        //Mailmerge links - generate test links
+        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
+        for(MAILMERGE_REQUEST mmReq : mmReqs) {
+            String tag = mmReq.label;
+            
+            Element a = new Element(Tag.valueOf("a"),"");
+            a.attr("href", mmService.getSystemTestLink(tag));
+            a.html(mmReq.defaultHtmlText);
+            a.attr("target", "_blank");
+            
+            String replacementElem = a.outerHtml();
+            processedContent = processedContent.replace(tag, replacementElem);
+            
+        }
+        
+        //Mailmerge tags (with random subscriber)
+        //Can't do it here because the exact values will be saved into the DB!
+        //This must be done in the UI 
+        
+        activity.setACTIVITY_CONTENT_PROCESSED(processedContent);
+        
+        return activity;
+    }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<String> getSentEmails(long campaignActivityId, int startIndex, int size) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<String> query = builder.createQuery(String.class);
+        Root<Trigger_Email_Activity> fromActivity = query.from(Trigger_Email_Activity.class);
+        
+        query.select(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
+        query.where(builder.equal(fromActivity.get(Trigger_Email_Activity_.TRIGGERING_OBJECT),campaignActivityId));
+        query.orderBy(builder.asc(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL)));
+        
+        List<String> results = objService.getEm().createQuery(query)
+                .setFirstResult(startIndex)
+                .setMaxResults(size)
+                .getResultList();
+        
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public long countEmailsSentForActivity(long activityId) {
+        //Just count the total number of Trigger_Email_Activity !
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<Trigger_Email_Activity> fromTrigger = query.from(Trigger_Email_Activity.class);
+        
+        query.select(builder.count(fromTrigger));
+        query.where(builder.and(
+                builder.equal(fromTrigger.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), activityId)//,
+                ));
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    /**
+     * The implementation of this method is based on the way we execute the activities.
+     * At the point of execution, we do not know who we are going to send to, if 
+     * a subscriber is actively subscribed to a targeted list, then we will send 
+     * to this subscriber, otherwise, if the subscription turns inactive at the point
+     * of execution, we won't be able to send this campaign to this subscriber.
+     * So the only way to forecast how many subscribers we are going to send to,
+     * we use 2 numbers:
+     * <ul>
+     * <li>Unsent</li>
+     * <li>Sent</li>
+     * </ul>
+     * Unsent will be changing throughout the lifetime of the campaign as new subscribers
+     * are activated or existing subscribers unsubscribes. Sent will be a growing 
+     * number but will not change after the activity has completed.
+     * <br>
+     * Hence, once completed, the targeted count of a campaign should be the number 
+     * sent because the unsent number will keep growing even though the activity
+     * has completed and the new subscribers will never be targeted for this activity.
+     * <br>
+     * Returns -1 if the campaignActivityId provided is not valid.
+     * 
+     * @param campaignActivityId
+     * @return
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public long countTargetedSubscribersForActivity(long campaignActivityId) {
+        CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
+        if(activity == null)
+            return -1;
+        if(activity.getSTATUS().equals(ACTIVITY_STATUS.COMPLETED.name))
+            return countEmailsSentForActivity(campaignActivityId);
+        
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
+        Root<Subscription> fromSubscr = query.from(Subscription.class);
+        Root<Assign_Campaign_List> fromAssign = query.from(Assign_Campaign_List.class);
+        Root<Assign_Campaign_Activity> fromCamp = query.from(Assign_Campaign_Activity.class);
+        
+        query.where(
+                builder.and(
+                        builder.equal(fromCamp.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), fromCamp.get(Assign_Campaign_Activity_.SOURCE)),
+                        builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
+                        builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE))
+                )
+        );
+        
+        query.select(builder.countDistinct(fromSubscrAcc));
+        
+        Long result  = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public long countConvertedEmails(long campaignActivityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignActivityOutboundLink> fromLink = query.from(CampaignActivityOutboundLink.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
+        
+        query.select(builder.countDistinct(fromClicks.get(CampaignLinkClick_.SOURCE_KEY)));
+        query.where(builder.and(
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.OWNER), campaignActivityId),
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.LINK_KEY), fromClicks.get(CampaignLinkClick_.LINK_KEY))
+        ));
+        
+        long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public long countTotalClicksForActivity(long campaignActivityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CampaignActivityOutboundLink> fromLink = query.from(CampaignActivityOutboundLink.class);
+        Root<CampaignLinkClick> fromClicks = query.from(CampaignLinkClick.class);
+        
+        query.select(builder.countDistinct(fromClicks));
+        query.where(builder.and(
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.OWNER), campaignActivityId),
+                builder.equal(fromLink.get(CampaignActivityOutboundLink_.LINK_KEY), fromClicks.get(CampaignLinkClick_.LINK_KEY))
+        ));
+        
+        long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;
+    }
 }

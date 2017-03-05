@@ -14,16 +14,7 @@
         <ui:define name="main-program-panel">
             <c:choose>
                 <c:when test="#{FormLRedirectLink.error}">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
-                            <h4>The application has encountered an error.</h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12 col-md-12">
-                            <p>Please notify your administrators.</p>
-                        </div>
-                    </div>
+                    <ui:include src="/programs/error/web_error.xhtml" ></ui:include>
                 </c:when>
                 <c:otherwise>
                     <h2>Redirecting...</h2>

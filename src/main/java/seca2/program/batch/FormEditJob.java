@@ -11,7 +11,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
-import eds.entity.batch.BatchJobTrigger;
+import eds.entity.batch.BatchJobSchedule;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -107,11 +107,11 @@ public class FormEditJob implements FormEditEntity{
         program.setFirstAndOnlyStep(firstAndOnlyStep);
     }
     
-    public BatchJobTrigger getFirstAndOnlyTrigger() {
+    public BatchJobSchedule getFirstAndOnlyTrigger() {
         return program.getFirstAndOnlyTrigger();
     }
 
-    public void setFirstAndOnlyTrigger(BatchJobTrigger firstAndOnlyTrigger) {
+    public void setFirstAndOnlyTrigger(BatchJobSchedule firstAndOnlyTrigger) {
         program.setFirstAndOnlyTrigger(firstAndOnlyTrigger);
     }
     

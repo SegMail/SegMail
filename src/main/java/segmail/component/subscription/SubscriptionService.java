@@ -9,7 +9,6 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
 import eds.component.client.ClientResourceInterceptor;
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
@@ -20,9 +19,7 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
-import eds.entity.data.EnterpriseObject;
 import eds.entity.mail.Email;
-import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
@@ -38,24 +35,19 @@ import java.util.logging.Logger;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.ws.rs.FormParam;
-import org.hibernate.exception.GenericJDBCException;
 import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
@@ -63,6 +55,7 @@ import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
+import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriberOwnership;
@@ -231,33 +224,25 @@ public class SubscriptionService {
      * @return
      */
     public boolean checkSubscribed(String subscriberEmail, long listId) {
-        try {
-            //Retrieving Subscriptions which has a SubscriberAccount subscriberEmail and a SubscriptionList ID
-            CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-            CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
-            Root<Subscription> fromSubscr = criteria.from(Subscription.class);
-            Root<SubscriberAccount> fromSubscrAcc = criteria.from(SubscriberAccount.class);
+        //Retrieving Subscriptions which has a SubscriberAccount subscriberEmail and a SubscriptionList ID
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+        Root<Subscription> fromSubscr = criteria.from(Subscription.class);
+        Root<SubscriberAccount> fromSubscrAcc = criteria.from(SubscriberAccount.class);
 
-            criteria.select(builder.count(fromSubscrAcc));
+        criteria.select(builder.count(fromSubscrAcc));
 
-            criteria.where(
-                    builder.and(
-                            builder.equal(fromSubscr.get(Subscription_.TARGET), listId),
-                            builder.equal(fromSubscr.get(Subscription_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)),
-                            builder.equal(fromSubscrAcc.get(SubscriberAccount_.EMAIL), subscriberEmail)
-                    )
-            );
+        criteria.where(
+                builder.and(
+                        builder.equal(fromSubscr.get(Subscription_.TARGET), listId),
+                        builder.equal(fromSubscr.get(Subscription_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)),
+                        builder.equal(fromSubscrAcc.get(SubscriberAccount_.EMAIL), subscriberEmail)
+                )
+        );
 
-            Long results = objService.getEm().createQuery(criteria).getSingleResult();
+        Long results = objService.getEm().createQuery(criteria).getSingleResult();
 
-            return results > 0;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
-        }
+        return results > 0;
     }
 
     /**
@@ -271,57 +256,50 @@ public class SubscriptionService {
      * map.
      */
     public Map<Long, Map<String, String>> getSubscriberValuesMap(long listId, int startIndex, int limit) {
-        try {
-            //Get all the SubscriptionFields first
-            List<String> fields = listService.getSubscriptionListFieldKeys(listId);
-            //Multiply limit by number of fields, otherwise we would limit by num of fields, not num of subscribers
-            int limitSubscribers = limit * fields.size();
+        
+        //Get all the SubscriptionFields first
+        List<String> fields = listService.getSubscriptionListFieldKeys(listId);
+        //Multiply limit by number of fields, otherwise we would limit by num of fields, not num of subscribers
+        int limitSubscribers = limit * fields.size();
 
-            CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-            CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
-            Root<Subscription> fromSubscr = criteria.from(Subscription.class);
-            Root<SubscriberFieldValue> fromFieldValue = criteria.from(SubscriberFieldValue.class);
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery criteria = builder.createQuery(SubscriberFieldValue.class);
+        Root<Subscription> fromSubscr = criteria.from(Subscription.class);
+        Root<SubscriberFieldValue> fromFieldValue = criteria.from(SubscriberFieldValue.class);
 
-            criteria.select(fromFieldValue);
-            List<Predicate> conditions = new ArrayList<>();
-            conditions.add(builder.equal(fromSubscr.get(Subscription_.TARGET), listId));
-            conditions.add(builder.equal(
-                    fromSubscr.get(Subscription_.SOURCE),
-                    fromFieldValue.get(SubscriberFieldValue_.OWNER)));
-            if (fields != null && !fields.isEmpty()) {
-                conditions.add(fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields));
-            }
-            criteria.where(
-                    builder.and(
-                            conditions.toArray(new Predicate[]{})
-                    )
-            );
-
-            List<SubscriberFieldValue> results = objService.getEm().createQuery(criteria)
-                    .setFirstResult(startIndex)
-                    .setMaxResults(limitSubscribers)
-                    .getResultList();
-
-            Map<Long, Map<String, String>> resultMap
-                    = new HashMap<>();
-
-            //Collections.sort(results);//Sorting before creating the map may not be the most correct solution but it's the most efficient and effective one at the moment
-            for (SubscriberFieldValue field : results) {
-                SubscriberAccount subscriber = field.getOWNER();
-                if (!resultMap.containsKey(subscriber.getOBJECTID())) {
-                    resultMap.put(subscriber.getOBJECTID(), new HashMap<String, String>());
-
-                }
-                resultMap.get(subscriber.getOBJECTID()).put(field.getFIELD_KEY(), field.getVALUE());
-            }
-            return resultMap;
-
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw new EJBException(pex);
+        criteria.select(fromFieldValue);
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(builder.equal(fromSubscr.get(Subscription_.TARGET), listId));
+        conditions.add(builder.equal(
+                fromSubscr.get(Subscription_.SOURCE),
+                fromFieldValue.get(SubscriberFieldValue_.OWNER)));
+        if (fields != null && !fields.isEmpty()) {
+            conditions.add(fromFieldValue.get(SubscriberFieldValue_.FIELD_KEY).in(fields));
         }
+        criteria.where(
+                builder.and(
+                        conditions.toArray(new Predicate[]{})
+                )
+        );
+
+        List<SubscriberFieldValue> results = objService.getEm().createQuery(criteria)
+                .setFirstResult(startIndex)
+                .setMaxResults(limitSubscribers)
+                .getResultList();
+
+        Map<Long, Map<String, String>> resultMap
+                = new HashMap<>();
+
+        //Collections.sort(results);//Sorting before creating the map may not be the most correct solution but it's the most efficient and effective one at the moment
+        for (SubscriberFieldValue field : results) {
+            SubscriberAccount subscriber = field.getOWNER();
+            if (!resultMap.containsKey(subscriber.getOBJECTID())) {
+                resultMap.put(subscriber.getOBJECTID(), new HashMap<String, String>());
+
+            }
+            resultMap.get(subscriber.getOBJECTID()).put(field.getFIELD_KEY(), field.getVALUE());
+        }
+        return resultMap;
     }
 
     /**
@@ -573,7 +551,8 @@ public class SubscriptionService {
     }
 
     /**
-     *
+     * Remove the Subscription record identified by unsubKey
+     * 
      * @param unsubKey
      * @return
      * @throws RelationshipNotFoundException
@@ -587,10 +566,6 @@ public class SubscriptionService {
             throw new RelationshipNotFoundException("Subscription not found for unsubscribe key.");
         }
 
-        //Get all subscriptions for the same subscriber and client
-        //Assuming that all subscribers are unique only to a client
-        //each subscriber ID will be unique to the client only
-        //so we will just delete all subscriptions with the subscriber ID
         List<Long> listIds = new ArrayList<>();
         for (Subscription sub : results) {
             updService.getEm().remove(sub);
@@ -718,7 +693,7 @@ public class SubscriptionService {
      * @return
      */
     public String getUnsubscribeHashCode(long subscriberId, long listId) {
-        String unsubKey = EncryptionUtility.getHash("unsubscribe " + subscriberId, EncryptionType.SHA256);
+        String unsubKey = EncryptionUtility.getHash("unsubscribe " + subscriberId + " from " + listId, EncryptionType.SHA256);
         return unsubKey;
     }
 
@@ -849,7 +824,7 @@ public class SubscriptionService {
 
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedWelcomeEmail.getBODY();
-        newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
+        mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
         newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), sub.getTARGET().getOBJECTID());
 
         //Send the email using MailServiceOutbound
@@ -1060,4 +1035,38 @@ public class SubscriptionService {
         return sql;
     }
 
+    /**
+     * Based on a list of fields, get SubscriptionListField->SubscriberFieldValue
+     * 
+     * @param fields
+     * @return 
+     */
+    public List<SubscriberFieldValue> getRandomValues(List<SubscriptionListField> fields) {
+        final int MAX = 100;
+        
+        List<SubscriberFieldValue> finalResults = new ArrayList<>();
+        
+        for(SubscriptionListField field : fields) {
+            int rand = (int) (Math.random()*MAX);
+            String queryString = "";
+            queryString += "SELECT * FROM "
+                    + SubscriberFieldValue.class.getName()
+                    + " a ";
+
+            String inCond = "WHERE a.FIELD_KEY in ('" + field.generateKey() + "')";
+
+            Query query = objService.getEm().createQuery(inCond, SubscriberFieldValue.class)
+                    .setFirstResult(0)
+                    .setMaxResults(MAX);
+
+            List<SubscriberFieldValue> results = query.getResultList();
+            if(results == null || results.isEmpty())
+                continue;
+            
+            SubscriberFieldValue randChosen = results.get((int) (results.size()*Math.random()));
+            finalResults.add(randChosen);
+        }
+        
+        return finalResults;
+    }
 }

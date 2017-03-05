@@ -20,13 +20,15 @@ import static eds.entity.batch.BATCH_JOB_RUN_STATUS.SCHEDULED;
 import static eds.entity.batch.BATCH_JOB_STATUS.ACTIVE;
 import eds.entity.batch.BATCH_JOB_TRIGGER_STATUS;
 import eds.entity.batch.BatchJob;
+import eds.entity.batch.BatchJobCondition;
+import eds.entity.batch.BatchJobCondition_;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRun_;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobStepParam;
 import eds.entity.batch.BatchJobStep_;
-import eds.entity.batch.BatchJobTrigger;
-import eds.entity.batch.BatchJobTrigger_;
+import eds.entity.batch.BatchJobSchedule;
+import eds.entity.batch.BatchJobSchedule_;
 import eds.entity.batch.BatchJob_;
 import java.io.IOException;
 import java.io.Serializable;
@@ -50,7 +52,6 @@ import org.joda.time.DateTime;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.ServerInstance;
 import seca2.entity.landing.ServerInstance_;
-import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *
@@ -68,7 +69,7 @@ public class BatchSchedulingService {
     LandingService landingService;
 
     @EJB
-    GenericObjectService objectService;
+    GenericObjectService objService;
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJob createBatchJob(long serverId, String name) throws EntityNotFoundException, IncompleteDataException {
@@ -131,7 +132,7 @@ public class BatchSchedulingService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobTrigger createJobTrigger(long batchJobId, String cronExpression)
+    public BatchJobSchedule createJobSchedule(long batchJobId, String cronExpression)
             throws BatchProcessingException {
         //Get the BatchJob object first
         BatchJob newBatchJob = (batchJobId <= 0) ? null : this.getBatchJobById(batchJobId);
@@ -149,7 +150,7 @@ public class BatchSchedulingService {
         //Validation method, throw runtime exception if invalids
         Cron validCron = this.getValidCronExp(cronExpression, STANDARD_CRON_TYPE);
 
-        BatchJobTrigger newTrigger = new BatchJobTrigger();
+        BatchJobSchedule newTrigger = new BatchJobSchedule();
         newTrigger.setBATCH_JOB(newBatchJob);
         newTrigger.setCRON_EXPRESSION(cronExpression);
         newTrigger.setTRIGGER_STATUS(BATCH_JOB_TRIGGER_STATUS.ACTIVE.label);
@@ -193,13 +194,13 @@ public class BatchSchedulingService {
             BatchJobStep newStep = this.createJobStep(serviceName, serviceMethod, params, newBatchJob.getBATCH_JOB_ID());
 
             //Create the trigger using cronTriggerExpression
-            BatchJobTrigger newTrigger = this.createJobTrigger(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
+            BatchJobSchedule newSchedule = this.createJobSchedule(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
 
             //Trigger next run
             //Because Cron expression doesn't have seconds, so if you don't set this,
             //your batch job won't run immediately even if your Cron expression 
             //means so.
-            BatchJobRun newRun = triggerNextBatchJobRun(currentTime.withSecondOfMinute(0), newTrigger); 
+            BatchJobRun newRun = triggerNextBatchJobRun(currentTime.withSecondOfMinute(0), newSchedule.getBATCH_JOB()); 
 
             return newRun;
 
@@ -219,24 +220,29 @@ public class BatchSchedulingService {
             long serverId,
             String cronTriggerExpression)
             throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
-        try {
+        
+        return createSingleStepJob(batchJobName, serviceName, serviceMethod, params, serverId, cronTriggerExpression, DateTime.now());
+        /*try {
+            
             //Create batch job and the single step
             BatchJob newBatchJob = this.createBatchJob(serverId, batchJobName);
             BatchJobStep newStep = this.createJobStep(serviceName, serviceMethod, params, newBatchJob.getBATCH_JOB_ID());
 
             //Create the trigger using cronTriggerExpression
-            BatchJobTrigger newTrigger = this.createJobTrigger(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
+            BatchJobSchedule newSchedule = this.createJobSchedule(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
 
             //Trigger next run
-            BatchJobRun newRun = triggerNextBatchJobRun(DateTime.now(), newTrigger);
+            BatchJobRun newRun = triggerNextBatchJobRun(DateTime.now(), newSchedule);
 
             return newRun;
+            
 
         } catch (SecurityException ex) {
             throw new BatchProcessingException("Batch processing failed:", ex);
         } catch (IOException ex) {
             throw new BatchProcessingException("Batch processing failed:", ex);
         }
+        */
     }
 
     /**
@@ -256,8 +262,9 @@ public class BatchSchedulingService {
      *
      * @return
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<BatchJobRun> getBatchRuns(Timestamp start, Timestamp end, List<String> statuses, int indexStart, int recordLimit) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
         Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
         
@@ -274,7 +281,7 @@ public class BatchSchedulingService {
         query.where(andCriteria.toArray(new Predicate[]{}));
         
         
-        TypedQuery<BatchJobRun> finalQuery = objectService.getEm().createQuery(query);
+        TypedQuery<BatchJobRun> finalQuery = objService.getEm().createQuery(query);
         if(indexStart >= 0) 
             finalQuery.setFirstResult(indexStart);
         if(recordLimit > 0)
@@ -282,72 +289,10 @@ public class BatchSchedulingService {
         List<BatchJobRun> results = finalQuery.getResultList();
 
         return results;
-        
-        /*CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
-        Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
-
-        List<Predicate> orCriteria = new ArrayList<>();
-        List<Predicate> andCriteria = new ArrayList<>();
-        
-        //For runs with date created only
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.DATETIME_CREATED), start)
-                )
-        );
-        
-        //For runs with start dates and end dates
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.END_TIME), start)
-                )
-        );
-        
-        //For runs with start dates only
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.START_TIME), start),
-                        builder.isNull(fromRun.get(BatchJobRun_.END_TIME))
-                )
-        );
-        
-        //For runs with cancel dates
-        orCriteria.add(
-                builder.and(
-                        builder.lessThanOrEqualTo(fromRun.get(BatchJobRun_.CANCEL_TIME), end),
-                        builder.greaterThanOrEqualTo(fromRun.get(BatchJobRun_.CANCEL_TIME), start)
-                )
-        );
-        
-        if(status != null)
-            andCriteria.add(builder.equal(fromRun.get(BatchJobRun_.STATUS), status.label));
-        
-        andCriteria.add(builder.or(orCriteria.toArray(new Predicate[]{})));
-        
-        query.select(fromRun);
-        query.where(builder.or(andCriteria.toArray(new Predicate[]{})));
-        
-        query.orderBy(
-                builder.desc(fromRun.get(BatchJobRun_.START_TIME)),
-                builder.desc(fromRun.get(BatchJobRun_.END_TIME)),
-                builder.desc(fromRun.get(BatchJobRun_.CANCEL_TIME)),
-                builder.desc(fromRun.get(BatchJobRun_.DATETIME_CREATED))
-                
-                );
-
-        List<BatchJobRun> results = objectService.getEm().createQuery(query)
-                .getResultList();
-
-        return results;
-        */
     }
 
     public BatchJob getBatchJobById(long batchJobId) {
-        return objectService.getEm().find(BatchJob.class, batchJobId);
+        return objService.getEm().find(BatchJob.class, batchJobId);
     }
 
     /**
@@ -387,39 +332,43 @@ public class BatchSchedulingService {
         updateService.getEm().remove(job);
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJobTrigger trigger) 
+    /**
+     * Determines the next batch job run.
+     * 
+     * @param now
+     * @param job
+     * @return
+     * @throws BatchProcessingException 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJob job) 
             throws BatchProcessingException {
-        if(trigger == null)
+        
+        //Trigger the next batch run
+        List<BatchJobCondition> conds = this.loadBatchJobConditions(job.getBATCH_JOB_ID());
+        List<BatchJobSchedule> schedules = this.loadBatchJobSchedules(job.getBATCH_JOB_ID());
+        List<BatchJobRun> readyRuns = this.getLastNBatchRuns(job.getBATCH_JOB_ID(),BATCH_JOB_RUN_STATUS.getReadyStatuses(), 1);
+        List<BatchJobRun> activeRuns = this.getLastNBatchRuns(job.getBATCH_JOB_ID(),BATCH_JOB_RUN_STATUS.getActiveStatuses(), 1);
+        
+        
+        if(schedules == null || schedules.isEmpty())
             return null;
         BatchJobRun newRun = new BatchJobRun();
-        newRun.setBATCH_JOB(trigger.getBATCH_JOB());
+        newRun.setBATCH_JOB(job);
         //newRun.setSERVER(trigger.getBATCH_JOB().getSERVER());
-        newRun.setSERVER_NAME(trigger.getBATCH_JOB().getSERVER_NAME());
+        newRun.setSERVER_NAME(job.getSERVER_NAME());
         //newRun.setSTATUS(BATCH_JOB_RUN_STATUS.WAITING.label);
         newRun.wait(now);
 
         updateService.getEm().persist(newRun);
 
-        String cronExpression = trigger.getCRON_EXPRESSION();
+        String cronExpression = schedules.get(0).getCRON_EXPRESSION();
         //If cronExpression is empty, just return a WAITING BatchJobRun
         if (cronExpression == null || cronExpression.isEmpty()) {
             return newRun;
         }
-
-        //Validate the cron expression
-        //No need as 4.1.0 onwards will use Cron.validate()
-        /*CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(STANDARD_CRON_TYPE);
-        CronValidator cronValid = new CronValidator(cronDef);
-        if (!cronValid.isValid(cronExpression)) {
-            throw new BatchProcessingException("BatchJob " + trigger.getBATCH_JOB().getBATCH_JOB_NAME() + " has invalid cronExpression \"" + cronExpression + "\"");
-        }*/
-
         //Get the next execution time
-        //DateTime now = DateTime.now();
         DateTime nextExecution = this.getNextExecutionTimeCron(cronExpression, now, STANDARD_CRON_TYPE);
-        //newRun.schedule(nextExecution);
-        //newRun.setSTATUS(BATCH_JOB_RUN_STATUS.SCHEDULED.label);
         newRun.schedule(nextExecution);
         
         return newRun;
@@ -431,14 +380,14 @@ public class BatchSchedulingService {
      * @return
      */
     public List<BatchJobRun> getJobRunsByKey(String key) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
         Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
 
         query.select(fromRun);
         query.where(builder.equal(fromRun.get(BatchJobRun_.RUN_KEY), key));
 
-        List<BatchJobRun> results = objectService.getEm().createQuery(query)
+        List<BatchJobRun> results = objService.getEm().createQuery(query)
                 .getResultList();
         return results;
     }
@@ -450,13 +399,13 @@ public class BatchSchedulingService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int deleteBatchJobRun(String key) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaDelete<BatchJobRun> query = builder.createCriteriaDelete(BatchJobRun.class);
         Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
 
         query.where(builder.equal(fromRun.get(BatchJobRun_.RUN_KEY), key));
         
-        int result = objectService.getEm().createQuery(query)
+        int result = objService.getEm().createQuery(query)
                 .executeUpdate();
         
         return result;
@@ -472,21 +421,7 @@ public class BatchSchedulingService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJobRun cancelBatchJobRun(String key) throws BatchProcessingException {
-        /*CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaUpdate<BatchJobRun> query = builder.createCriteriaUpdate(BatchJobRun.class);
-        Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
         
-        query.set(fromRun.get(BatchJobRun_.STATUS), BATCH_JOB_RUN_STATUS.CANCELLED.label);
-        DateTime now = DateTime.now();
-        Timestamp ts = new Timestamp(now.getMillis());
-        query.set(fromRun.get(BatchJobRun_.CANCEL_TIME), ts);
-        
-        query.where(builder.equal(fromRun.get(BatchJobRun_.RUN_KEY), key));
-        
-        int result = objectService.getEm().createQuery(query)
-                .executeUpdate();
-        
-        return result;*/
         List<BatchJobRun> runs = this.getJobRunsByKey(key);
         if(runs == null || runs.isEmpty())
             throw new BatchProcessingException("Batch job not found for key "+key);
@@ -557,15 +492,31 @@ public class BatchSchedulingService {
         return nextExecution;
     }
     
-    public List<BatchJobTrigger> loadBatchJobTriggers(long batchJobId) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<BatchJobTrigger> query = builder.createQuery(BatchJobTrigger.class);
-        Root<BatchJobTrigger> fromTrigger = query.from(BatchJobTrigger.class);
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<BatchJobSchedule> loadBatchJobSchedules(long batchJobId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<BatchJobSchedule> query = builder.createQuery(BatchJobSchedule.class);
+        Root<BatchJobSchedule> fromTrigger = query.from(BatchJobSchedule.class);
         
         query.select(fromTrigger);
-        query.where(builder.equal(fromTrigger.get(BatchJobTrigger_.BATCH_JOB), batchJobId));
+        query.where(builder.equal(fromTrigger.get(BatchJobSchedule_.BATCH_JOB), batchJobId));
         
-        List<BatchJobTrigger> results = objectService.getEm().createQuery(query)
+        List<BatchJobSchedule> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<BatchJobCondition> loadBatchJobConditions(long batchJobId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<BatchJobCondition> query = builder.createQuery(BatchJobCondition.class);
+        Root<BatchJobCondition> fromTrigger = query.from(BatchJobCondition.class);
+        
+        query.select(fromTrigger);
+        query.where(builder.equal(fromTrigger.get(BatchJobCondition_.BATCH_JOB), batchJobId));
+        
+        List<BatchJobCondition> results = objService.getEm().createQuery(query)
                 .getResultList();
         
         return results;
@@ -573,34 +524,34 @@ public class BatchSchedulingService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<BatchJobStep> loadBatchJobSteps(long batchJobId) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<BatchJobStep> query = builder.createQuery(BatchJobStep.class);
         Root<BatchJobStep> fromSteps = query.from(BatchJobStep.class);
         
         query.select(fromSteps);
         query.where(builder.equal(fromSteps.get(BatchJobStep_.BATCH_JOB), batchJobId));
         
-        List<BatchJobStep> results = objectService.getEm().createQuery(query)
+        List<BatchJobStep> results = objService.getEm().createQuery(query)
                 .getResultList();
         
         return results;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobTrigger updateBatchJobTrigger(BatchJobTrigger trigger){
+    public BatchJobSchedule updateBatchJobTrigger(BatchJobSchedule trigger){
         //Do checks
         //Get latest TRIGGER_ORDER
-        BatchJobTrigger mergedTrigger = updateService.getEm().merge(trigger);
+        BatchJobSchedule mergedTrigger = updateService.getEm().merge(trigger);
         
         if(trigger.getBATCH_JOB() == null) //Shouldn't happen, if the above statement was successfully executed
             throw new RuntimeException("No batch job trigger should be created without a BatchJob object.");
         
-        List<BatchJobTrigger> allTriggers = loadBatchJobTriggers(trigger.getBATCH_JOB().getBATCH_JOB_ID());
+        List<BatchJobSchedule> allTriggers = loadBatchJobSchedules(trigger.getBATCH_JOB().getBATCH_JOB_ID());
         //Assume that it is retrieved with the intended order
         //"Refresh" the indexes
         //mergedTrigger should be part of this list
         for(int i=0; i<allTriggers.size(); i++) {
-            BatchJobTrigger t = allTriggers.get(i);
+            BatchJobSchedule t = allTriggers.get(i);
             t.setTRIGGER_ORDER(i);
             t = updateService.getEm().merge(t);
         }
@@ -695,7 +646,7 @@ public class BatchSchedulingService {
     }
     
     public long countBatchJobRuns(Timestamp start, Timestamp end, List<String> statuses) {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<BatchJobRun> fromRuns = query.from(BatchJobRun.class);
         
@@ -711,8 +662,49 @@ public class BatchSchedulingService {
         query.select(builder.count(fromRuns));
         query.where(andCriteria.toArray(new Predicate[]{}));
         
-        long result = objectService.getEm().createQuery(query).getSingleResult();
+        long result = objService.getEm().createQuery(query).getSingleResult();
         
         return result;
+    }
+    
+    /**
+     * Get the latest N job runs for batch job.
+     * 
+     * @param batchJobId
+     * @param statuses null for retrieving all statuses
+     * @param n <= 0 for retrieving all BatchJobRuns
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<BatchJobRun> getLastNBatchRuns(long batchJobId, List<BATCH_JOB_RUN_STATUS> statuses, int n) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
+        Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
+        
+        query.select(fromRun);
+        List<Predicate> andCriteria = new ArrayList<>();
+        
+        andCriteria.add(builder.equal(fromRun.get(BatchJobRun_.BATCH_JOB), batchJobId));
+        
+        if(statuses != null && !statuses.isEmpty()) {
+            List<String> statusString = new ArrayList<>();
+            for(BATCH_JOB_RUN_STATUS status : statuses) {
+                statusString.add(status.label);
+            }
+            andCriteria.add(fromRun.get(BatchJobRun_.STATUS).in(statusString));
+        }
+        
+        query.orderBy(
+                builder.desc(fromRun.get(BatchJobRun_.SCHEDULED_TIME)),
+                builder.desc(fromRun.get(BatchJobRun_.START_TIME)),
+                builder.desc(fromRun.get(BatchJobRun_.END_TIME))
+                );
+        TypedQuery<BatchJobRun> typedQuery = objService.getEm().createQuery(query);
+        if(n > 0)
+            typedQuery.setMaxResults(n);
+        
+        List<BatchJobRun> results = typedQuery.getResultList();
+        
+        return results;
     }
 }

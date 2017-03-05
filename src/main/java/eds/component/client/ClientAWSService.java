@@ -44,7 +44,6 @@ import com.amazonaws.services.sns.model.CreateTopicResult;
 import com.amazonaws.services.sns.model.SubscribeRequest;
 import com.amazonaws.services.sns.model.SubscribeResult;
 import com.amazonaws.services.sqs.AmazonSQSClient;
-import com.amazonaws.services.sqs.model.AddPermissionRequest;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.CreateQueueResult;
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest;
@@ -61,7 +60,6 @@ import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.client.VerifiedSendingAddress_;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -371,13 +369,6 @@ public class ClientAWSService {
         req1.setQueueName(queueName);
         GetQueueUrlResult res1 = sqsClient.getQueueUrl(req1);
         String queueURL = res1.getQueueUrl();
-        
-        /*AddPermissionRequest req = new AddPermissionRequest();
-        req.setQueueUrl(queueURL);
-        //req.setAWSAccountIds(Arrays.asList(new String[]{"*"}));
-        req.setActions(Arrays.asList(new String[]{"*"}));
-        req.setLabel(queueName);
-        sqsClient.addPermission(req);*/
         
         Policy queuePolicy = new Policy();
         queuePolicy.setId(queueURL);

@@ -14,15 +14,12 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import eds.component.data.DBConnectionException;
 import eds.component.user.UserAccountLockedException;
 import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -93,8 +90,6 @@ public class FormUserLogin {
             }
         } catch (UserLoginException esliex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
-        } catch (DBConnectionException dbex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (UserAccountLockedException ualex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
         } catch (Exception ex) {

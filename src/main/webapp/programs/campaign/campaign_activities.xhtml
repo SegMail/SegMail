@@ -19,7 +19,9 @@
                 <button jsf:id="refreshCampaigns"
                    class="btn btn-default nm" data-toggle="modal">
                     <span class="fa fa-refresh"></span>
-                    <f:ajax onevent="refreshCampaignActivities">
+                    <f:ajax render="@form" execute="@form"
+                        listener="#{FormCampaignActivities.loadAllActivities()}"
+                        onevent="refreshCampaignActivities">
                         
                     </f:ajax>
                 </button>
@@ -59,52 +61,36 @@
                                     </td>
                                     <td>
                                         <div class="pull-right">
-                                            <c:choose>
-                                                <c:when test="#{activity.STATUS eq 'NEW' or activity.STATUS eq 'EDITING'}">
-                                                    <a class="btn btn-success list-item-trigger"
-                                                       style="margin-right: 3px;"
-                                                       href="
-                                                       #{request.contextPath}#{UserRequestContainer.printFullPathWithoutContext()}/#{activity.OBJECTID}"
-                                                       title="Edit Activity"
-                                                       >
-                                                        <i class="fa fa-pencil"></i>
-                                                    </a>
-                                                </c:when>
-                                                <c:when test="#{activity.STATUS eq 'EDITING'}">
-                                                    <button
-                                                        jsf:id="edit_campaign_activity_button_#{activity.OBJECTID}"
-                                                        href="#edit_campaign_activity"
-                                                        data-toggle="modal"
-                                                        style="margin-right: 3px;"
-                                                        class="btn btn-success list-item-trigger"
-                                                        title="Edit Activity"
+                                            <h:outputLink styleClass="btn btn-success list-item-trigger"
+                                                rendered="#{activity.STATUS eq 'NEW' or 
+                                                            activity.STATUS eq 'EDITING'}"
+                                                style="margin-right: 3px;"
+                                                
+                                                pass:href="#{request.contextPath}#{UserRequestContainer.printFullPathWithoutContext()}/#{activity.OBJECTID}"
+                                                title="Edit Activity"
+                                                >
+                                                 <i class="fa fa-pencil"></i>
+                                             </h:outputLink>
+                                            <button
+                                                jsf:id="track_campaign_activity_button_#{activity.OBJECTID}"
+                                                jsf:rendered="#{activity.STATUS eq 'EXECUTING' or 
+                                                                activity.STATUS eq 'COMPLETED' or 
+                                                                activity.STATUS eq 'EXECUTING'}"
+                                                href="#track_campaign_activity"
+                                                data-toggle="modal"
+                                                style="margin-right: 3px;"
+                                                class="btn btn-primary list-item-trigger"
+                                                title="Track Activity"
+                                                >
+                                                <f:ajax event="click" listener="#{FormTrackEmailActivity.trackCampaignActivity(activity.OBJECTID)}"
+                                                        render=":FormTrackEmailActivity"
+                                                        execute=":FormTrackEmailActivity"
+                                                        onevent="track_activity"
                                                         >
-                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
-                                                                render="FormEditEmailActivity"
-                                                                onevent="load_activity"
-                                                                >
-                                                        </f:ajax>
-                                                        <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <button
-                                                        jsf:id="track_campaign_activity_button_#{activity.OBJECTID}"
-                                                        href="#track_campaign_activity"
-                                                        data-toggle="modal"
-                                                        style="margin-right: 3px;"
-                                                        class="btn btn-primary list-item-trigger"
-                                                        title="Track Activity"
-                                                        >
-                                                        <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
-                                                                render="FormTrackEmailActivity"
-                                                                onevent="track_activity"
-                                                                >
-                                                        </f:ajax>
-                                                        <i class="fa fa-bar-chart-o"></i>
-                                                    </button>
-                                                </c:otherwise>
-                                            </c:choose>
+                                                </f:ajax>
+                                                <i class="fa fa-bar-chart-o"></i>
+                                            </button>
+                                            
                                             <button
                                                 jsf:rendered="#{activity.STATUS ne 'COMPLETED' and activity.STATUS ne 'EXECUTING'}"
                                                 jsf:id="execute_campaign_activity_button_#{activity.OBJECTID}"

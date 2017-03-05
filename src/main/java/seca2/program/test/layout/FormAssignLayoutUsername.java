@@ -5,7 +5,6 @@
  */
 package seca2.program.test.layout;
 
-import eds.component.data.DBConnectionException;
 import eds.component.layout.LayoutService;
 import eds.component.user.UserService;
 import eds.entity.layout.Layout;
@@ -55,9 +54,7 @@ public class FormAssignLayoutUsername extends Form {
             this.layoutService.assignLayoutToUser(user.getOBJECTID(), layoutId);
             
             FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_FATAL, "Layout successfully assigned.",null);
-        } catch (DBConnectionException ex) {
-            FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, "Could not connect to database! ", "Please contact admin.");
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.FORM_NAME, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName()+": ", ex.getMessage());
         }
     }

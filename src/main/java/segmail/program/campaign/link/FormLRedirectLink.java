@@ -39,6 +39,7 @@ public class FormLRedirectLink {
     private WebserviceService wsService;
     
     private String reqKey;
+    private String emailKey;
     
     private boolean error;
 
@@ -61,7 +62,8 @@ public class FormLRedirectLink {
     
     public void extractParams(UserRequestContainer reqContainer) {
         List<String> params = reqContainer.getProgramParamsOrdered();
-        reqKey = (params != null && !params.isEmpty()) ? params.get(0) : "";    
+        reqKey = (params != null && !params.isEmpty()) ? params.get(0) : "";  
+        emailKey = (params != null && !params.isEmpty() && params.size() >= 2) ? params.get(1) : "";  
     }
 
     private void callRedirectLinkWS() {
@@ -70,7 +72,7 @@ public class FormLRedirectLink {
             String endpointName = "WSCampaignActivityLink";
             WSCampaignActivityLinkInterface clientService = wsService.getWSProvider(endpointName, namespace, WSCampaignActivityLinkInterface.class);
             
-            String target = clientService.redirectAndUpdate(reqKey);
+            String target = clientService.redirectAndUpdate(reqKey,emailKey);
             
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request

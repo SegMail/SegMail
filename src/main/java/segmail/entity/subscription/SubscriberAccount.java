@@ -7,6 +7,7 @@ package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 /**

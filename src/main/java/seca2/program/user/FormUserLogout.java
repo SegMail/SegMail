@@ -11,7 +11,6 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import eds.component.data.DBConnectionException;
 import seca2.bootstrap.UserSessionContainer;
 import javax.servlet.http.HttpSession;
 import seca2.jsf.custom.messenger.FacesMessenger;
@@ -35,8 +34,6 @@ public class FormUserLogout {
             session.invalidate();
             ec.redirect(ec.getRequestContextPath());
             
-        } catch (DBConnectionException dbex) {
-            FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, "Could not connect to database!", "Please contact admin.");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(messageBoxId, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }

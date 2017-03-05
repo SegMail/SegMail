@@ -5,14 +5,14 @@ function track_activity(data) {
 
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
-
+            block_refresh(block);
             break;
 
         case "complete": // This is called right after ajax response is received.
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            refresh();
+            block_refresh(block);
             break;
     }
 }
@@ -21,7 +21,7 @@ var renderLinksAndRefreshStats = function (timeout) {
     setTimeout(function () {
         var position = 0;
         var wsCounts = $('#html-content').find('a').size();
-        var totalClicks = 0;
+        
         $('#links-start').empty();
         $('#stats-table').find('tbody').empty();
         $('#stats-table').find('tfoot').empty();
@@ -62,16 +62,16 @@ var renderLinksAndRefreshStats = function (timeout) {
                 'redirectLink': redirectLink
             }, function (result) {
                 //Add result to table
-                var totalSent = Number($('#sent').html());
-                var clickthrough = (totalSent === 0) ? 0 : (Number(result) / totalSent) * 100.0;
+                var totalClicks = Number($('#sent').html());
+                var clickPercent = (Number(result) / totalSent) * 100.0;
                 var row = '<tr>' +
                         '<td>' + (index + 1) + '</td>' +
                         '<td>' + linkText + '</td>' +
                         '<td>' + result + '</td>' +
-                        '<td>' + clickthrough + '%' + '</td>' +
+                        '<td>' + clickPercent + '%' + '</td>' +
                         '</tr>';
                 $('#stats-table').find('tbody').append(row);
-                totalClicks += Number(result);
+                
                 //Once all calls are done
                 if (!--wsCounts) {
                     

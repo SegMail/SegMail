@@ -16,12 +16,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
- *
+ * Defines the schedule of the BatchJob. The absence of it means batch job only 
+ * run once.
+ * 
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="BATCH_JOB_TRIGGER")
-public class BatchJobTrigger implements Serializable {
+@Table(name="BATCH_JOB_SCHEDULE")
+public class BatchJobSchedule implements Serializable {
     
     private BatchJob BATCH_JOB;
     

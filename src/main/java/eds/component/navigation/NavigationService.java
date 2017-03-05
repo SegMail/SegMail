@@ -15,14 +15,10 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import org.hibernate.exception.GenericJDBCException;
-import eds.component.data.DBConnectionException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -65,51 +61,39 @@ public class NavigationService implements Serializable {
      * @throws eds.component.data.IncompleteDataException
      * @throws eds.component.data.EntityExistsException
      * @throws CreateMenuItemException
-     * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public MenuItem createMenuItem(String name, String requestUrl, long parentMenuItemId, String prependHTMLTags, boolean isPublic) 
             throws IncompleteDataException, EntityExistsException {
-        
-        try {
-            if(name == null || name.length() <= 0)
-                throw new IncompleteDataException("MenuItem name cannot be empty!");
-            if(requestUrl == null || requestUrl.length() <= 0)
-                throw new IncompleteDataException("MenuItem URL cannot be empty!");
-            
-            List<MenuItem> existingMenuItems = getAllMenuItemsByName(name);
-            if(existingMenuItems != null && !existingMenuItems.isEmpty())
-                throw new EntityExistsException(existingMenuItems.get(0));
-            
-            //get parent MenuItem
-            MenuItem parentMenuItem = em.find(MenuItem.class, parentMenuItemId);
+        if(name == null || name.length() <= 0)
+            throw new IncompleteDataException("MenuItem name cannot be empty!");
+        if(requestUrl == null || requestUrl.length() <= 0)
+            throw new IncompleteDataException("MenuItem URL cannot be empty!");
 
-            //Assign root as default if no parent is inputted?
-            /**
-             * If no parent is found, create it as a root.
-             
-            if (parentMenuItem == null) {
-                throw new CreateMenuItemException("Parent MenuItem Id " + parentMenuItemId + " does not exist.");
-            }*/
-            
-            MenuItem newMenuItem = new MenuItem();
-            newMenuItem.setMENU_ITEM_NAME(name);
-            newMenuItem.setMENU_ITEM_URL(requestUrl);
-            newMenuItem.setPREPEND_TAGS(prependHTMLTags);
-            newMenuItem.setPUBLIC(isPublic);
-            //em.getTransaction().begin();
-            em.persist(newMenuItem);
-            //em.getTransaction().commit();
-            
-            return newMenuItem;
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                //throw new DBConnectionException(pex.getCause().getMessage());
-                throw new DBConnectionException();
-            }
-            throw pex;
-        } 
+        List<MenuItem> existingMenuItems = getAllMenuItemsByName(name);
+        if(existingMenuItems != null && !existingMenuItems.isEmpty())
+            throw new EntityExistsException(existingMenuItems.get(0));
+
+        //get parent MenuItem
+        MenuItem parentMenuItem = em.find(MenuItem.class, parentMenuItemId);
+
+        //Assign root as default if no parent is inputted?
+        /**
+         * If no parent is found, create it as a root.
+
+        if (parentMenuItem == null) {
+            throw new CreateMenuItemException("Parent MenuItem Id " + parentMenuItemId + " does not exist.");
+        }*/
+
+        MenuItem newMenuItem = new MenuItem();
+        newMenuItem.setMENU_ITEM_NAME(name);
+        newMenuItem.setMENU_ITEM_URL(requestUrl);
+        newMenuItem.setPREPEND_TAGS(prependHTMLTags);
+        newMenuItem.setPUBLIC(isPublic);
+        em.persist(newMenuItem);
+
+        return newMenuItem;
+ 
 
         
     }
@@ -126,28 +110,11 @@ public class NavigationService implements Serializable {
      * @throws eds.component.data.RelationshipExistsException
      * @throws eds.component.data.EntityNotFoundException
      * 
-     * @throws AssignMenuItemAccessException
-     * @throws DBConnectionException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) 
             throws RelationshipExistsException, EntityNotFoundException {
         
-        try{
-            /*//check if userType already has access to menuItem
-            CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<MenuItemAccess> criteria = builder.createQuery(MenuItemAccess.class); //AS criteria
-            Root<MenuItemAccess> menuItemAccess = criteria.from(MenuItemAccess.class); //FROM MenuItemAccess
-            
-            Join<MenuItemAccess,EnterpriseObject> menuItem = menuItemAccess.join(MenuItemAccess_.SOURCE); //FROM EnterpriseObject
-            //criteria.where(builder.equal(menuItem.get(EnterpriseObject_.OBJECTID), menuItemId)); //WHERE MenuItemAccess.SOURCE.OBJECTID = menuItemId
-            Join<MenuItemAccess,EnterpriseObject> userType = menuItemAccess.join(MenuItemAccess_.TARGET); //FROM EnterpriseObject
-            //criteria.where(builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)); //WHERE MenuItemAccess.TARGET.OBJECTID = userTypeId
-            criteria.where(builder.and(builder.equal(menuItem.get(EnterpriseObject_.OBJECTID), menuItemId),//WHERE MenuItemAccess.SOURCE.OBJECTID = menuItemId
-                           builder.equal(userType.get(EnterpriseObject_.OBJECTID), userTypeId)));  // AND MenuItemAccess.TARGET.OBJECTID = userTypeId
-            
-            List<MenuItemAccess> results = em.createQuery(criteria)
-                    .getResultList();*/
             List<MenuItemAccess> results = this.objectService.getRelationshipsForObject(menuItemId, userTypeId, MenuItemAccess.class);
             
             if(results != null && results.size() > 0){
@@ -165,83 +132,42 @@ public class NavigationService implements Serializable {
             if(assignUserType == null)
                 throw new EntityNotFoundException(UserType.class,menuItemId);
             
-            //Create the MenuItemAccess objects (bi-directional)
-            //MenuItemAccess assignment1 = new MenuItemAccess();
-            //assignment1.setSOURCE(assignUserType);
-            //assignment1.setTARGET(assignMenuItem);
-            
             MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType,order);
-            //assignment2.setSOURCE(assignMenuItem);
-            //assignment2.setTARGET(assignUserType);
             
-            //em.getTransaction().begin();
-            //em.persist(assignment1);
             em.persist(assignment2);
-            //em.getTransaction().commit();
             
             List<MenuItemAccess> biRel = new ArrayList<MenuItemAccess>();
-            //biRel.add(assignment1);
             biRel.add(assignment2);
             
             return biRel;
-            
-        }catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } 
     }
     
     
-    public MenuItem getMenuItemById(long menuItemId) throws DBConnectionException{
-        
-        try {
-            CriteriaBuilder builder = em.getCriteriaBuilder();
-            CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
-            Root<MenuItem> sourceEntity = criteria.from(MenuItem.class);
-            criteria.select(sourceEntity);
-            criteria.where(builder.equal(sourceEntity.get(MenuItem_.OBJECTID), menuItemId));
+    public MenuItem getMenuItemById(long menuItemId) {
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
+        Root<MenuItem> sourceEntity = criteria.from(MenuItem.class);
+        criteria.select(sourceEntity);
+        criteria.where(builder.equal(sourceEntity.get(MenuItem_.OBJECTID), menuItemId));
 
-            MenuItem result = em.createQuery(criteria)
-                    .getSingleResult();
-            return result;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            } 
-            if (pex instanceof NoResultException){
-                return null;
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        MenuItem result = em.createQuery(criteria)
+                .getSingleResult();
+        
+        return result;
     }
 
     
-    public List<MenuItem> getAllMenuItems() throws DBConnectionException {
-        
-        try {
-            List<MenuItem> results = this.objectService.getAllEnterpriseObjects(MenuItem.class);
-            Collections.sort(results, new MenuItemComparator());
-            
-            return results;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+    public List<MenuItem> getAllMenuItems() {
+        List<MenuItem> results = this.objectService.getAllEnterpriseObjects(MenuItem.class);
+        Collections.sort(results, new MenuItemComparator());
+
+        return results;
     }
     
     
     public TreeBranch<MenuItem> buildMenuTree(long rootMenuItemId) {
-        
-        
         List<MenuItem> allMenuItems = this.getAllMenuItems();
+        
         return null;
     }
     
@@ -269,43 +195,24 @@ public class NavigationService implements Serializable {
     
     
     public List<MenuItem> getAllMenuItemsByName(String menuitemname) {
-        
-        try {
-            List<MenuItem> results = this.objectService.getEnterpriseObjectsByName(menuitemname, MenuItem.class);
-            
-            return results;
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
+        List<MenuItem> results = this.objectService.getEnterpriseObjectsByName(menuitemname, MenuItem.class);
+
+        return results;
     }
     
     
     public List<MenuItem> getAllPublicMenuItems(){
-        try {
-            CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-            CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
-            Root<MenuItem> fromMenuItem = criteria.from(MenuItem.class);
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<MenuItem> criteria = builder.createQuery(MenuItem.class);
+        Root<MenuItem> fromMenuItem = criteria.from(MenuItem.class);
+
+        criteria.where(builder.isTrue(fromMenuItem.get(MenuItem_.PUBLIC)));
+
+        List<MenuItem> results = objectService.getEm().createQuery(criteria)
+                .getResultList();
+
+        return results;
             
-            criteria.where(builder.isTrue(fromMenuItem.get(MenuItem_.PUBLIC)));
-            
-            List<MenuItem> results = objectService.getEm().createQuery(criteria)
-                    .getResultList();
-            
-            return results;
-            
-        } catch (PersistenceException pex) {
-            if (pex.getCause() instanceof GenericJDBCException) {
-                throw new DBConnectionException(pex.getCause().getMessage());
-            }
-            throw pex;
-        } catch (Exception ex) {
-            throw ex;
-        }
     }
     
 }

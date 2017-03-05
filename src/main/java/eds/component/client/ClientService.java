@@ -40,8 +40,6 @@ public class ClientService {
 
     @EJB
     private GenericObjectService objService;
-    @EJB
-    private UserService userService;
 
     @Inject
     private ClientFacade clientFacade;

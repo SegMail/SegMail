@@ -12,7 +12,7 @@ import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
-import eds.entity.batch.BatchJobTrigger;
+import eds.entity.batch.BatchJobSchedule;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +50,7 @@ public class ProgramBatch extends Program {
     private boolean editable;
     private BatchJobRun editingBatchJobRun;
     private BatchJobStep firstAndOnlyStep; //Must be initialized in loadBatchJob()
-    private BatchJobTrigger firstAndOnlyTrigger; //Must be initialized in loadBatchJob()
+    private BatchJobSchedule firstAndOnlyTrigger; //Must be initialized in loadBatchJob()
     private long selectedServerIdBatchJob; //Must be set explicitly
     private long selectedServerIdBatchJobRun; //Must be set explicitly
     private final String SCHEDULE_JAVA_DATE_STRING_FORMAT = "yyyy-MM-dd";
@@ -162,11 +162,11 @@ public class ProgramBatch extends Program {
         this.firstAndOnlyStep = firstAndOnlyStep;
     }
 
-    public BatchJobTrigger getFirstAndOnlyTrigger() {
+    public BatchJobSchedule getFirstAndOnlyTrigger() {
         return firstAndOnlyTrigger;
     }
 
-    public void setFirstAndOnlyTrigger(BatchJobTrigger firstAndOnlyTrigger) {
+    public void setFirstAndOnlyTrigger(BatchJobSchedule firstAndOnlyTrigger) {
         this.firstAndOnlyTrigger = firstAndOnlyTrigger;
     }
 
@@ -263,7 +263,7 @@ public class ProgramBatch extends Program {
         //Load trigger and step
         BatchJob bj = getEditingBatchJobRun().getBATCH_JOB();
         
-        List<BatchJobTrigger> triggers = batchScheduleService.loadBatchJobTriggers(bj.getBATCH_JOB_ID());
+        List<BatchJobSchedule> triggers = batchScheduleService.loadBatchJobSchedules(bj.getBATCH_JOB_ID());
         List<BatchJobStep> steps = batchScheduleService.loadBatchJobSteps(bj.getBATCH_JOB_ID());
         
         if(triggers != null && !triggers.isEmpty())

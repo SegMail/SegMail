@@ -5,7 +5,6 @@
  */
 package segmail.entity.subscription;
 
-import eds.entity.batch.BatchJobStepParam;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;

@@ -13,7 +13,6 @@ import javax.faces.application.FacesMessage;
 import javax.persistence.EntityManager;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-import eds.component.data.DBConnectionException;
 import eds.utilities.EntityExplorer;
 import eds.component.data.HibernateEMServices;
 import java.util.ArrayList;
@@ -73,8 +72,6 @@ public class FormTestDB implements Serializable {
             new SchemaExport(cfg)
                     .execute(true, true, true, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
-        } catch (DBConnectionException dbcex) {
-            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", dbcex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
         }
@@ -100,8 +97,6 @@ public class FormTestDB implements Serializable {
             new SchemaExport(cfg)
                     .execute(true, true, false, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
-        } catch (DBConnectionException dbcex) {
-            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", dbcex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
         }
@@ -125,8 +120,6 @@ public class FormTestDB implements Serializable {
             new SchemaExport(cfg)
                     .execute(true, true, false, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
-        } catch (DBConnectionException dbcex) {
-            FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", dbcex.getMessage());
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
         }

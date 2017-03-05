@@ -68,6 +68,8 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     
     private String REDIRECT_WELCOME;
     
+    private String REDIRECT_UNSUBSCRIBE;
+    
     /**
      * The email address that bounces are returned to. 
      * 
@@ -170,6 +172,13 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     public void setREDIRECT_WELCOME(String REDIRECT_WELCOME) {
         this.REDIRECT_WELCOME = REDIRECT_WELCOME;
     }
-    
+
+    public String getREDIRECT_UNSUBSCRIBE() {
+        return REDIRECT_UNSUBSCRIBE;
+    }
+
+    public void setREDIRECT_UNSUBSCRIBE(String REDIRECT_UNSUBSCRIBE) {
+        this.REDIRECT_UNSUBSCRIBE = REDIRECT_UNSUBSCRIBE;
+    }
     
 }

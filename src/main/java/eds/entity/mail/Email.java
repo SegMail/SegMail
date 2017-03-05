@@ -56,6 +56,7 @@ public class Email extends EnterpriseTransaction {
     }
 
     @ElementCollection
+    @Column(name = "RECIPIENT")
     public Set<String> getRECIPIENTS() {
         return RECIPIENTS;
     }

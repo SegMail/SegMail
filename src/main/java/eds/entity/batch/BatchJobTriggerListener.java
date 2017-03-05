@@ -14,7 +14,7 @@ import javax.persistence.PrePersist;
 public class BatchJobTriggerListener {
     
     @PrePersist
-    public void PrePersist(BatchJobTrigger job) {
+    public void PrePersist(BatchJobSchedule job) {
         //this.labelStepNo(job);
     }
 }

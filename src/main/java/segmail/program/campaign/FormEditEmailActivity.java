@@ -5,10 +5,10 @@
  */
 package segmail.program.campaign;
 
+import eds.component.GenericObjectService;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,12 +22,11 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import seca2.bootstrap.UserRequestContainer;
-import seca2.js.JSUtility;
+import seca2.component.landing.LandingServerGenerationStrategy;
+import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
+import seca2.entity.landing.ServerInstance;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormEditEntity;
 import segmail.component.campaign.CampaignService;
@@ -35,8 +34,9 @@ import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import static segmail.entity.campaign.ACTIVITY_STATUS.NEW;
+import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivityOutboundLink;
+import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -56,6 +56,8 @@ public class FormEditEmailActivity implements FormEditEntity {
     ProgramCampaign program;
     @Inject
     AutoresponderSessionContainer autoresponderCont;
+    @Inject
+    FormProgramModeSwitch programSwitch;
 
     @EJB
     CampaignService campaignService;
@@ -63,8 +65,10 @@ public class FormEditEmailActivity implements FormEditEntity {
     SubscriptionService subService;
     @EJB
     MailMergeService mmService;
-
-    List<CampaignActivityOutboundLink> links = new ArrayList<>();
+    @EJB
+    GenericObjectService objService;
+    @EJB
+    private LandingService landingService;
 
     private String linksDelimited;
 
@@ -75,7 +79,8 @@ public class FormEditEmailActivity implements FormEditEntity {
             loadTargetLists();
             loadTargetListFields();
             loadRandomValues();
-            loadMMUrls();
+            checkServer();
+            loadOutboundLinks();
         }
     }
 
@@ -93,14 +98,6 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     public void setEditingActivity(CampaignActivity editingActivity) {
         program.setEditingActivity(editingActivity);
-    }
-
-    public List<CampaignActivityOutboundLink> getLinks() {
-        return links;
-    }
-
-    public void setLinks(List<CampaignActivityOutboundLink> links) {
-        this.links = links;
     }
 
     public String getLinksDelimited() {
@@ -167,6 +164,21 @@ public class FormEditEmailActivity implements FormEditEntity {
         program.setMailmergeListFields(mailmergeListFields);
     }
     
+    public Campaign getEditingCampaign() {
+        return program.getEditingCampaign();
+    }
+
+    public void setEditingCampaign(Campaign editingCampaign) {
+        program.setEditingCampaign(editingCampaign);
+    }
+    
+    public List<CampaignActivityOutboundLink> getLinks() {
+        return program.getLinks();
+    }
+
+    public void setLinks(List<CampaignActivityOutboundLink> links) {
+        program.setLinks(links);
+    }
     
     public boolean renderThis() {
         return reqCont.getPathParser().getOrderedParams().size() == 2;
@@ -175,11 +187,16 @@ public class FormEditEmailActivity implements FormEditEntity {
     @Override
     public void saveAndContinue() {
         try {
-
+            
             CampaignActivity activity = campaignService.updateCampaignActivity(getEditingActivity());
             setEditingActivity(activity);
             CampaignActivitySchedule schedule = campaignService.updateCampaignActivitySchedule(getEditingSchedule());
             setEditingSchedule(schedule);
+            
+            //Reload Campaign and CampaignActivity as they have been updated
+            programSwitch.reloadEntities();
+            //Reload all OutboundLinks for the activity
+            loadOutboundLinks();
 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
@@ -236,31 +253,7 @@ public class FormEditEmailActivity implements FormEditEntity {
         CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
         program.setEditingSchedule(schedule);
 
-    }
-
-    private List<CampaignActivityOutboundLink> constructLinks(String linksText) {
-
-        List<CampaignActivityOutboundLink> links = new ArrayList<>();
-        if (linksText == null || linksText.isEmpty()) {
-            return links;
-        }
-        JsonReader reader = Json.createReader(new StringReader(linksText));
-        JsonArray linkObjs = reader.readArray();
-
-        //Need to construct the CampaignActivityOutboundLinks ourselves
-        for (int i = 0; i < linkObjs.size(); i++) {
-            JsonObject linkObj = linkObjs.getJsonObject(i);
-            Map<String, Object> linkMap = JSUtility.convertJsonObjectToMap((JsonObject) linkObj);
-
-            CampaignActivityOutboundLink link = new CampaignActivityOutboundLink();
-            link.setLINK_TARGET((String) linkMap.get("target"));
-            link.setLINK_TEXT((String) linkMap.get("text"));
-            link.setSNO(Integer.parseInt((String) linkMap.get("index")));
-
-            links.add(link);
-        }
-
-        return links;
+        programSwitch.reloadEntities();
     }
 
     public void loadTargetListFields() {
@@ -284,20 +277,6 @@ public class FormEditEmailActivity implements FormEditEntity {
         });
         List<SubscriptionListField> sortedList = fieldList;//new ArrayList<>();
 
-        /*SubscriptionListField lastField = null;
-        for (SubscriptionListField field : fieldList) {
-            String mailmergeTag = field.getMAILMERGE_TAG();
-            if (lastField != null
-                    && lastField.getMAILMERGE_TAG().equals(mailmergeTag)
-                    && (sortedList.size() <= 0
-                    || !sortedList.get(sortedList.size() - 1).getMAILMERGE_TAG().equals(mailmergeTag))) //sortedList.size() <= 0 //A
-            //or sortedList.size() > 0 and !sortedList.get(sortedList.size()-1) == field //A'B
-            //A + A'B = A + (1 - A)B = A + B - AB = AB
-            {
-                sortedList.add(field);
-            }
-            lastField = field;
-        }*/
 
         this.setListFields(sortedList);
         
@@ -360,23 +339,24 @@ public class FormEditEmailActivity implements FormEditEntity {
         program.setEditingSchedule(schedule);
     }
 
-    public void loadMMUrls() {
+    public void checkServer() {
 
         try {
-            this.setMailmergeLinks(new HashMap<String, String>());
-            for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
-                //For all emails, don't load confirm links
-                if(request.equals(MAILMERGE_REQUEST.CONFIRM)) {
-                    continue;
-                }
-                String url = mmService.getSystemTestLink(request.label());
-                this.getMailmergeLinks().put(request.label(), url);
-            }
-        } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            ServerInstance testServer = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+            if(testServer == null)
+                throw new IncompleteDataException("Test server is not setup properly. Please contact your system admin.");
+        
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
 
+    }
+    
+    public void loadOutboundLinks() {
+        if(getEditingActivity() == null) 
+            return;
+        
+        List<CampaignActivityOutboundLink> links = objService.getEnterpriseData(getEditingActivity().getOBJECTID(), CampaignActivityOutboundLink.class);
+        setLinks(links);
     }
 }
