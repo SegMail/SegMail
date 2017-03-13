@@ -10,6 +10,7 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.campaign.Campaign;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
@@ -137,6 +139,14 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void setMailmergeLinkTags(MAILMERGE_REQUEST[] mailmergeLinkTags) {
         program.setMailmergeLinkTags(mailmergeLinkTags);
     }
+    
+    public List<String> getListTags() {
+        return program.getListTags();
+    }
+
+    public void setListTags(List<String> campaignTags) {
+        program.setListTags(campaignTags);
+    }
 
     @Override
     public void saveAndContinue() {
@@ -243,6 +253,14 @@ public class FormEditExistingTemplate implements FormEditEntity {
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } 
-
+    }
+    
+    public void loadListTags() {
+        
+        List<String> listTags = new ArrayList<>();
+        listTags.add(SubscriptionList.MM_SENDER_NAME);
+        listTags.add(SubscriptionList.MM_SUPPORT_EMAIL);
+        
+        this.setListTags(listTags);
     }
 }

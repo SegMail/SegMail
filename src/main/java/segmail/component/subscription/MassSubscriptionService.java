@@ -467,7 +467,7 @@ public class MassSubscriptionService {
             //Parse all mailmerge functions using MailMergeService
             String newEmailBody = assignedConfirmEmail.getBODY();
             newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, newSubscription.getCONFIRMATION_KEY());
-            newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, newSubscription.getSOURCE().getOBJECTID(), newSubscription.getTARGET().getOBJECTID());
+            newEmailBody = mailMergeService.parseForAutoresponders(newEmailBody, newSubscription.getSOURCE(), newSubscription.getTARGET());
 
              //Send the email using MailServiceOutbound
             Email confirmEmail = new Email();

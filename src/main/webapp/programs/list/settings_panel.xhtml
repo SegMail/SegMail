@@ -52,10 +52,10 @@
                            data-prompt-position="topRight:-100"></input>
                 </div>
                 <div class="form-group">
-                    <label>Send as (Email): </label>
+                    <label>Sender Email: </label>
                     <span class="help-block">
-                        The address your subscribers would see in FROM of their emails.
-                        This is only used in Autoresponder Emails, not emails sent through Campaigns.
+                        The address your subscribers would see in FROM field of their emails, and also the REPLY TO address.
+                        This is only used in Autoresponder Emails (confirmations, welcome, unsubscribes), not emails sent through Campaigns.
                         You can only use addresses that have been verified in <a href="#{request.contextPath}/mysettings#verified">here</a>.
                     </span>
                     <h:selectOneListbox id="selectVerifiedEmail" pass:id="selectVerifiedEmail" styleClass="select2" style="width: 100%;"
@@ -69,12 +69,24 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Send as (Name): </label>
+                    <label>Sender Name: </label>
                     <span class="help-block">
-                        The name your subscribers would see.
+                        This will appear in the FROM field of your subscriber's emails.
+                        You can also insert this name in your email content with the tag <strong>{!sender}</strong>
                     </span>
                     <input type="text" class="form-control" required="true" name="sendasname"
                            jsf:value="#{FormListSettings.list.SEND_AS_NAME}"
+                           data-prompt-position="topRight:-100"></input>
+                </div>
+                
+                <div class="form-group">
+                    <label>Support email (optional): </label>
+                    <span class="help-block">
+                        This is an optional separate email address that you can provide your subscribers for support, if you do not want them to click "reply" directly.
+                        You can insert this email in your email content with the tag <strong>{!support}</strong>
+                    </span>
+                    <input type="text" class="form-control" name="supportemail"
+                           jsf:value="#{FormListSettings.list.SUPPORT_EMAIL}"
                            data-prompt-position="topRight:-100"></input>
                 </div>
                 

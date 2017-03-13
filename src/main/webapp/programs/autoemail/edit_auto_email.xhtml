@@ -86,7 +86,12 @@
                 <c:forEach items = "#{FormEditExistingTemplate.randomSubscriber.keySet()}" var = "field" >
                     #{field} : '#{FormEditExistingTemplate.randomSubscriber[field]}',
                 </c:forEach>
-            }
+            };
+            var listTags = [
+                <c:forEach items = "#{FormEditExistingTemplate.listTags}" var = "lTag" >
+                    '#{lTag}',
+                </c:forEach>
+            ]
         </script>
         
     </form>

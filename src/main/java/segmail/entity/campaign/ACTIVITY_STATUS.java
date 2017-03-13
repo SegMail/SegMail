@@ -10,22 +10,24 @@ package segmail.entity.campaign;
  * @author LeeKiatHaw
  */
 public enum ACTIVITY_STATUS {
-    NEW("NEW"),
-    EDITING("EDITING"),
-    EXECUTING("EXECUTING"),
-    COMPLETED("COMPLETED"),
-    STOPPED("STOPPED");
+    NEW("NEW",0),
+    EDITING("EDITING",1),
+    EXECUTING("EXECUTING",2),
+    COMPLETED("COMPLETED",3),
+    STOPPED("STOPPED",4);
     
     public final String name;
     
-    private ACTIVITY_STATUS(String name) {
+    public final int order;
+    
+    private ACTIVITY_STATUS(String name, int order) {
         this.name = name;
+        this.order = order;
     }
 
     @Override
     public String toString() {
         return name;
     }
-    
     
 }

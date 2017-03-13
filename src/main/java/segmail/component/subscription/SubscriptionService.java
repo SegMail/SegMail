@@ -75,6 +75,7 @@ public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
     public static final String DEFAULT_KEY_FOR_LIST = "LIST";
+    
 
     /**
      * Generic services
@@ -367,7 +368,7 @@ public class SubscriptionService {
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedConfirmEmail.getBODY();
         newEmailBody = mailMergeService.parseConfirmationLink(newEmailBody, sub.getCONFIRMATION_KEY());
-        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), list.getOBJECTID());
+        newEmailBody = mailMergeService.parseForAutoresponders(newEmailBody, sub.getSOURCE(), list);
         //newEmailBody = mailMergeService.parseListAttributes(newEmailBody, listId);
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
@@ -824,8 +825,8 @@ public class SubscriptionService {
 
         //Parse all mailmerge functions using MailMergeService
         String newEmailBody = assignedWelcomeEmail.getBODY();
-        mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
-        newEmailBody = mailMergeService.parseMailmergeTagsSubscriber(newEmailBody, sub.getSOURCE().getOBJECTID(), sub.getTARGET().getOBJECTID());
+        newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY());
+        newEmailBody = mailMergeService.parseForAutoresponders(newEmailBody, sub.getSOURCE(), sub.getTARGET());
 
         //Send the email using MailServiceOutbound
         Email welcomeEmail = new Email();

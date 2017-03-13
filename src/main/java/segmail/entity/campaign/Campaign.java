@@ -18,6 +18,9 @@ import javax.persistence.Table;
 @Table(name="CAMPAIGN")
 public class Campaign extends EnterpriseObject {
     
+    public static final String MM_SUPPORT_EMAIL = "{!support}";
+    public static final String MM_SENDER_NAME = "{!sender}";
+    
     protected String CAMPAIGN_NAME;
     
     protected String CAMPAIGN_GOALS;
@@ -31,6 +34,12 @@ public class Campaign extends EnterpriseObject {
      * The name displayed in the From field when viewed by the recipient.
      */
     private String OVERRIDE_SEND_AS_NAME;
+    
+    /**
+     * The optional support email to show recipients, which is different from 
+     * the sender's email.
+     */
+    private String OVERRIDE_SUPPORT_EMAIL;
 
     public String getCAMPAIGN_NAME() {
         return CAMPAIGN_NAME;
@@ -63,6 +72,14 @@ public class Campaign extends EnterpriseObject {
 
     public void setOVERRIDE_SEND_AS_NAME(String OVERRIDE_SEND_AS_NAME) {
         this.OVERRIDE_SEND_AS_NAME = OVERRIDE_SEND_AS_NAME;
+    }
+
+    public String getOVERRIDE_SUPPORT_EMAIL() {
+        return OVERRIDE_SUPPORT_EMAIL;
+    }
+
+    public void setOVERRIDE_SUPPORT_EMAIL(String OVERRIDE_SUPPORT_EMAIL) {
+        this.OVERRIDE_SUPPORT_EMAIL = OVERRIDE_SUPPORT_EMAIL;
     }
 
     @Override

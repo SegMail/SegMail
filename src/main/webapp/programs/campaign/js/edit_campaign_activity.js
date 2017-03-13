@@ -22,6 +22,11 @@ var refresh_summernote = function (selector) {
                         allTagsAndLinks.push(key);
                     //}
                 }
+                for(var key in campaignTags) {
+                    if (campaignTags.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(campaignTags[key]);
+                    }
+                }
                 for(var key in mailmergeLinks) {
                     if (mailmergeLinks.hasOwnProperty(key)) {
                         allTagsAndLinks.push(key);
@@ -358,6 +363,6 @@ $(document).ready(function () {
     //adjustPreviewPanelHeight();
     //modifyDomToGeneratePreview();
     //initRestCall();
-    initTextcomplete('.note-editable',mmTags);
-    initTextcomplete('#subject',mmTags);
+    //initTextcomplete('.note-editable',mmTags);//Not ready for this release due
+    //initTextcomplete('#subject',mmTags);//Not ready for this release due
 });

@@ -39,6 +39,8 @@ import segmail.entity.subscription.SubscriptionListField_;
 @Stateless
 public class ListService {
 
+    public static final String DEFAULT_FNAME_FIELD_NAME = "Firstname";
+    public static final String DEFAULT_LNAME_FIELD_NAME = "Lastname";
     /**
      * Generic services
      */
@@ -181,6 +183,7 @@ public class ListService {
         newList.setLIST_NAME(listname);
         newList.setREMOTE(remote);
         updateService.getEm().persist(newList);
+        
         Client client = objectService.getEnterpriseObjectById(clientId, Client.class);
         if (client == null) {
             throw new EnterpriseObjectNotFoundException(Client.class);
@@ -189,9 +192,17 @@ public class ListService {
         listAssignment.setSOURCE(client);
         listAssignment.setTARGET(newList);
         updateService.getEm().persist(listAssignment);
+        
+        //The primary mandatory Email field
         SubscriptionListField fieldEmail = new SubscriptionListField(newList, 1, true, SubscriptionService.DEFAULT_EMAIL_FIELD_NAME, FIELD_TYPE.EMAIL, "Email of your subscriber.");
-        fieldEmail.setOWNER(newList);
         updateService.getEm().persist(fieldEmail);
+        
+        //Additional optional fields for the convenience of the user
+        SubscriptionListField fieldFname = new SubscriptionListField(newList, 2, false, DEFAULT_FNAME_FIELD_NAME, FIELD_TYPE.TEXT, "Firstname of your subscriber.");
+        SubscriptionListField fieldLname = new SubscriptionListField(newList, 3, false, DEFAULT_LNAME_FIELD_NAME, FIELD_TYPE.TEXT, "Lastname of your subscriber.");
+        updateService.getEm().persist(fieldFname);
+        updateService.getEm().persist(fieldLname);
+        
         return newList;
     }
 

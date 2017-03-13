@@ -81,6 +81,7 @@ public class FormEditEmailActivity implements FormEditEntity {
             loadRandomValues();
             checkServer();
             loadOutboundLinks();
+            loadCampaignTags();
         }
     }
 
@@ -180,6 +181,14 @@ public class FormEditEmailActivity implements FormEditEntity {
         program.setLinks(links);
     }
     
+    public List<String> getCampaignTags() {
+        return program.getCampaignTags();
+    }
+
+    public void setCampaignTags(List<String> campaignTags) {
+        program.setCampaignTags(campaignTags);
+    }
+    
     public boolean renderThis() {
         return reqCont.getPathParser().getOrderedParams().size() == 2;
     }
@@ -265,18 +274,17 @@ public class FormEditEmailActivity implements FormEditEntity {
             @Override
             public int compare(SubscriptionListField o1, SubscriptionListField o2) {
                 if (o1.getMAILMERGE_TAG() == null || o1.getMAILMERGE_TAG().isEmpty()) {
-                    return 1;
+                    return -1;
                 }
 
                 if (o2.getMAILMERGE_TAG() == null || o2.getMAILMERGE_TAG().isEmpty()) {
-                    return -1;
+                    return 1;
                 }
 
                 return o1.getMAILMERGE_TAG().compareTo(o2.getMAILMERGE_TAG());
             }
         });
         List<SubscriptionListField> sortedList = fieldList;//new ArrayList<>();
-
 
         this.setListFields(sortedList);
         
@@ -358,5 +366,16 @@ public class FormEditEmailActivity implements FormEditEntity {
         
         List<CampaignActivityOutboundLink> links = objService.getEnterpriseData(getEditingActivity().getOBJECTID(), CampaignActivityOutboundLink.class);
         setLinks(links);
+    }
+    
+    public void loadCampaignTags() {
+        if(getEditingActivity() == null) 
+            return;
+        
+        List<String> campaignTags = new ArrayList<>();
+        campaignTags.add(Campaign.MM_SENDER_NAME);
+        campaignTags.add(Campaign.MM_SUPPORT_EMAIL);
+        
+        this.setCampaignTags(campaignTags);
     }
 }

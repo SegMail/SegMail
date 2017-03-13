@@ -17,6 +17,14 @@ import javax.persistence.Table;
 @Entity
 @Table(name="SUBSCRIBER_ACCOUNT")
 public class SubscriberAccount extends EnterpriseObject {
+    
+    /**
+     * This is actually more like the date of creation, but for end users, they 
+     * would only understand date of subscription better.
+     */
+    public static final String MM_DATE_OF_SUBSCRIPTION = "{!date_subscribe}";
+    
+    public static final String MM_LENGTH_OF_SUBSCRIPTION = "{!length_subscribe}";
 
     private String EMAIL;
     

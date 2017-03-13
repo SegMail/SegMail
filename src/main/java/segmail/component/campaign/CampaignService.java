@@ -737,6 +737,8 @@ public class CampaignService {
         //Mailmerge tags (with random subscriber)
         //Can't do it here because the exact values will be saved into the DB!
         //This must be done in the UI 
+        //But we can do Campaign attributes
+        processedContent = mmService.parseStandardCampaignTags(processedContent, campaigns.get(0));
         
         activity.setACTIVITY_CONTENT_PROCESSED(processedContent);
         

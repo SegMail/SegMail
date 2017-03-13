@@ -183,6 +183,12 @@
                             '#{mmKey}',
                         </c:forEach>
                     ];
+                    
+                    var campaignTags = [
+                        <c:forEach items = "#{FormEditEmailActivity.campaignTags}" var = "cTag" >
+                            '#{cTag}',
+                        </c:forEach>
+                    ]
         </script>
     </form>
 </html>

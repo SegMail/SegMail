@@ -10,6 +10,7 @@ import eds.component.UpdateObjectService;
 import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +19,19 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatterBuilder;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
 import segmail.component.subscription.SubscriptionService;
 import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
+import segmail.entity.campaign.Campaign;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
+import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
@@ -148,12 +154,15 @@ public class MailMergeService {
     /**
      * In the future, we should build a MailmergeTag EnterpriseObject class that 
      * can store the attribute and object key of its owner object.
+     * 
+     * This is used by campaigns.
+     * 
      * @param text
      * @param fieldValueMap //MailmergeTag => Field value
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public String parseMailmergeTagsSubscriber(String text, Map<String,String> fieldValueMap) {
+    public String parseSubscriberTags(String text, Map<String,String> fieldValueMap) {
         if(text == null || text.isEmpty())
             return text;
         
@@ -196,29 +205,12 @@ public class MailMergeService {
                 }
             }
         }
-        
-        /*for(SubscriberFieldValue value : values) {
-            long owner = value.getOWNER().getOBJECTID();
-            if(!results.containsKey(owner))
-                results.put(owner, new HashMap<String,SubscriberFieldValue>());
-            
-            Map<String,SubscriberFieldValue> subscriberMap = results.get(owner);
-            
-            //Use the value's key, find the SubscriptionListField and 
-            //get its {mailmerge-tag}
-            String key = value.getFIELD_KEY();
-            for(SubscriptionListField field : fields) {
-                if(field.generateKey() != null && field.generateKey().equals(key)) {
-                    subscriberMap.put(field.getMAILMERGE_TAG(), value);
-                    break;
-                }
-            }
-        }*/
         return results;
     }
     
     /**
      * For sending confirmation emails, where the listId is known.
+     * Used by confirmation and welcome emails.
      * 
      * @param text
      * @param subscriberId
@@ -226,18 +218,23 @@ public class MailMergeService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String parseMailmergeTagsSubscriber(String text, long subscriberId, long listId) {
+    public String parseForAutoresponders(String text, SubscriberAccount subscriber , SubscriptionList list) {
         if(text == null || text.isEmpty())
             return "";
         
-        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
+        List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(list.getOBJECTID());
         List<Long> ids = new ArrayList<>();
-        ids.add(subscriberId);
+        ids.add(subscriber.getOBJECTID());
         List<SubscriberFieldValue> values = subscriptionService.getSubscriberValuesBySubscriberIds(ids);
         Map<Long,Map<String,String>> map = this.createMMValueMap(ids, fields, values);
         
-        parseMailmergeTagsSubscriber(text, map.get(subscriberId));
-        return text;
+        String result = text;
+            
+        result = parseSubscriberTags(result, map.get(subscriber.getOBJECTID()));
+        result = parseStandardListTags(result, list);
+        result = parseExtraSubscriberTags(result, values.get(0).getOWNER(), DateTime.now());
+        
+        return result;
     }
 
     /**
@@ -294,40 +291,6 @@ public class MailMergeService {
 
         return result;
     }
-
-    /**
-     * Forget it, let's just hardcode the hell out of our launch!
-     * 
-     * @param requestType name property of the MAILMERGE_REQUEST type
-     * @param requestKey key to identify the request
-     * @return
-     */
-    /*@TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public MailMergeRequest processMailMergeRequest(String requestType, String requestKey) 
-            throws UnwantedAccessException, TransactionProcessedException {
-        if (requestKey == null || requestKey.isEmpty()) {
-            throw new UnwantedAccessException("Key is not provided.");
-        }
-        if (requestType == null || requestType.isEmpty()) {
-            throw new UnwantedAccessException("Type is not provided.");
-        }
-
-        //Check if it is a testing link
-        MAILMERGE_REQUEST label = MAILMERGE_REQUEST.getByLabel(requestKey);
-        if (label != null) {
-            return label;//throw exception instead
-        }
-        MailMergeRequest trans = transService.getTransactionByKey(requestKey, MailMergeRequest.class);
-        if (trans == null) {
-            throw new UnwantedAccessException();
-        }
-
-        if (MAILMERGE_STATUS.PROCESSED.name().equals(trans.getPROCESSING_STATUS())) {
-            throw new TransactionProcessedException();
-        }
-        
-        return trans;
-    }*/
     
     /**
      * Gets a test link for the mailmerge label
@@ -352,5 +315,41 @@ public class MailMergeService {
         String testLink = testServerAddress + name + "/test";
         
         return testLink;
+    }
+    
+    public String parseStandardListTags(String text, SubscriptionList list) {
+        text = text.replace(SubscriptionList.MM_SENDER_NAME, list.getSEND_AS_NAME());
+        text = text.replace(SubscriptionList.MM_SUPPORT_EMAIL, list.getSUPPORT_EMAIL());
+        
+        return text;
+    }
+    
+    public String parseStandardCampaignTags(String text, Campaign campaign) {
+        text = text.replace(SubscriptionList.MM_SENDER_NAME, campaign.getOVERRIDE_SEND_AS_NAME());
+        text = text.replace(SubscriptionList.MM_SUPPORT_EMAIL, campaign.getOVERRIDE_SUPPORT_EMAIL());
+        
+        return text;
+    }
+    
+    public String parseExtraSubscriberTags(String text, SubscriberAccount subscriber, DateTime now) {
+        text = text.replace(SubscriberAccount.MM_DATE_OF_SUBSCRIPTION, DateFormat.getDateInstance().format(subscriber.getDATE_CREATED()));
+        Period length = (new Period(
+                new DateTime(subscriber.getDATE_CREATED().getTime()),
+                now
+        ));
+        length = length.withHours(0).withMinutes(0).withSeconds(0).withMillis(0);
+        text = text.replace(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION, length.toString(
+                new PeriodFormatterBuilder()
+                        .printZeroAlways()
+                        .printZeroRarelyLast()
+                .appendYears().appendSuffix(" year"," years")
+                .appendSeparator(" ")
+                .appendMonths().appendSuffix(" month"," months")
+                .appendSeparator(" ")
+                .appendDays().appendSuffix(" day"," days")
+                .toFormatter()
+        ));
+        
+        return text;
     }
 }

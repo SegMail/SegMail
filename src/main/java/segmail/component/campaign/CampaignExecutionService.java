@@ -341,7 +341,9 @@ public class CampaignExecutionService {
             //Set the body of the email
             String content = campaignActivity.getACTIVITY_CONTENT_PROCESSED();
             content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); //we'll use the WS method to edit unsub links [update] not now, let's stick to hardcoding as there isn't enough time
-            content = mmService.parseMailmergeTagsSubscriber(content, fieldValuesMap.get(subscriber.getOBJECTID()));
+            content = mmService.parseSubscriberTags(content, fieldValuesMap.get(subscriber.getOBJECTID()));
+            content = mmService.parseStandardCampaignTags(content, campaign);
+            content = mmService.parseExtraSubscriberTags(content, subscriber, DateTime.now());
 
             //email.setBODY(content);
             /**

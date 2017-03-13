@@ -52,6 +52,11 @@ var refresh_summernote = function (selector) {
                         allTagsAndLinks.push(key);
                     }
                 }
+                for(var key in listTags) {
+                    if (listTags.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(listTags[key]);
+                    }
+                }
                 for(var key in mailmergeLinks) {
                     if (mailmergeLinks.hasOwnProperty(key)) {
                         allTagsAndLinks.push(key);

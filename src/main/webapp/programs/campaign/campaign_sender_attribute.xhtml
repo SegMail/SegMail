@@ -19,23 +19,31 @@
 
             <div class="form-group">
                 <p>
-                    This is the same attributes that you have set in Lists.
+                    This is the same set of attributes that you have set in Lists.
                     You will need to set it here because your subscribers might 
                     be subscribed to multiple Lists.
                 </p>
             </div>
             <div class="form-group">
                 <label>
-                    Send as name:
+                    Sender's name:
                 </label>
+                <span class="help-block">
+                    This will appear in the FROM field of your subscriber's emails.
+                    You can also insert this name in your email content with the tag <strong>{!sender}</strong>
+                </span>
                 <input type="text" class="form-control"
                        jsf:value="#{FormCampaignSenderAttribute.editingCampaign.OVERRIDE_SEND_AS_NAME}"
                        />
             </div>
             <div class="form-group">
                 <label>
-                    Send as email:
+                    Sender's email:
                 </label>
+                <span class="help-block">
+                        The address your subscribers would see in FROM field of their emails, and also the REPLY TO address.
+                        You can only use addresses that have been verified in <a href="#{request.contextPath}/mysettings#verified">here</a>.
+                    </span>
                 <h:selectOneListbox id="selectVerifiedEmail" pass:id="selectVerifiedEmail" styleClass="select2" style="width: 100%;"
                                     required="true"
                                     value="#{FormCampaignSenderAttribute.editingCampaign.OVERRIDE_SEND_AS_EMAIL}" 
@@ -44,6 +52,18 @@
                                    itemValue="#{add.VERIFIED_ADDRESS}">
                     </f:selectItems>
                 </h:selectOneListbox> 
+            </div>
+            <div class="form-group">
+                <label>
+                    Support email:
+                </label>
+                <span class="help-block">
+                    This is an optional separate email address that you can provide your subscribers for support, if you do not want them to click "reply" directly.
+                    You can insert this address in your email content with the tag <strong>{!support}</strong>
+                </span>
+                <input type="text" class="form-control"
+                       jsf:value="#{FormCampaignSenderAttribute.editingCampaign.OVERRIDE_SUPPORT_EMAIL}"
+                       />
             </div>
         </div>
         <div class="block-footer">

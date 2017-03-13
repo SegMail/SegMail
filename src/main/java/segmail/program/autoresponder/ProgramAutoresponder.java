@@ -55,6 +55,8 @@ public class ProgramAutoresponder extends Program{
     private MAILMERGE_REQUEST[] mailmergeLinkTags = MAILMERGE_REQUEST.values();
     
     private Map<String,String> mailmergeLinks = new HashMap<>();
+    
+    private List<String> listTags;
 
     public List<AutoresponderEmail> getConfirmationTemplates() {
         return confirmationTemplates;
@@ -166,6 +168,14 @@ public class ProgramAutoresponder extends Program{
 
     public void setAssignedToLists(Map<Long, SubscriptionList> assignedToLists) {
         this.assignedToLists = assignedToLists;
+    }
+    
+    public List<String> getListTags() {
+        return listTags;
+    }
+
+    public void setListTags(List<String> listTags) {
+        this.listTags = listTags;
     }
 
     @Override

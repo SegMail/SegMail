@@ -19,6 +19,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class SubscriptionList extends EnterpriseObject {// implements MailSender {
     
+    public static final String MM_SUPPORT_EMAIL = "{!support}";
+    public static final String MM_SENDER_NAME = "{!sender}";
+    
     /**
      * Private name viewable only by the list owners
      */
@@ -77,6 +80,8 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
      * https://sesblog.amazon.com/post/TxJE1JNZ6T9JXK/Handling-Bounces-and-Complaints
      */
     //private String RETURN_PATH;
+    
+    private String SUPPORT_EMAIL;
 
     public SubscriptionList() {
         this.REMOTE = true; //Default value
@@ -179,6 +184,14 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
 
     public void setREDIRECT_UNSUBSCRIBE(String REDIRECT_UNSUBSCRIBE) {
         this.REDIRECT_UNSUBSCRIBE = REDIRECT_UNSUBSCRIBE;
+    }
+
+    public String getSUPPORT_EMAIL() {
+        return SUPPORT_EMAIL;
+    }
+
+    public void setSUPPORT_EMAIL(String SUPPORT_EMAIL) {
+        this.SUPPORT_EMAIL = SUPPORT_EMAIL;
     }
     
 }

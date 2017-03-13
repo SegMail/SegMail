@@ -7,6 +7,8 @@ package segmail.program.campaign;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -17,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
+import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.CampaignActivitySchedule;
 
@@ -69,6 +72,31 @@ public class FormCampaignActivities {
             return;
         
         List<CampaignActivity> allActivities = campaignService.getAllActivitiesForCampaign(program.getEditingCampaignId());
+        
+        Collections.sort(allActivities, new Comparator<CampaignActivity>(){
+
+            @Override
+            public int compare(CampaignActivity o1, CampaignActivity o2) {
+                if (o1.getDATE_CHANGED()== null) {
+                    return 1;
+                }
+
+                if (o2.getDATE_CHANGED() == null) {
+                    return -1;
+                }
+                
+                if (o1.getDATE_CREATED().equals(o2.getDATE_CREATED())) {
+                    ACTIVITY_STATUS s1 = ACTIVITY_STATUS.valueOf(o1.getSTATUS());
+                    ACTIVITY_STATUS s2 = ACTIVITY_STATUS.valueOf(o2.getSTATUS());
+                    
+                    return s1.compareTo(s2);
+                }
+                    
+                
+                return o2.getDATE_CREATED().compareTo(o1.getDATE_CREATED());
+            }
+            
+        });
         
         setAllActivities(allActivities);
         

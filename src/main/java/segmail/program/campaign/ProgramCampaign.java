@@ -72,6 +72,8 @@ public class ProgramCampaign extends Program{
     
     private List<CampaignActivityOutboundLink> links;
     
+    private List<String> campaignTags;
+    
     @Override
     public void clearVariables() {
         
@@ -253,5 +255,13 @@ public class ProgramCampaign extends Program{
 
     public void setLinks(List<CampaignActivityOutboundLink> links) {
         this.links = links;
+    }
+
+    public List<String> getCampaignTags() {
+        return campaignTags;
+    }
+
+    public void setCampaignTags(List<String> campaignTags) {
+        this.campaignTags = campaignTags;
     }
 }
