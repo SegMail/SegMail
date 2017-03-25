@@ -290,7 +290,7 @@ public class CampaignExecutionService {
             preview.setSENDER_NAME(campaign.getOVERRIDE_SEND_AS_NAME());
 
             //Set the body of the email
-            String content = emailActivity.getACTIVITY_CONTENT_PROCESSED();
+            String content = emailActivity.getACTIVITY_CONTENT_PREVIEW();
 
             //String testUnsubLink = mmService.getSystemTestLink(MAILMERGE_REQUEST.UNSUBSCRIBE.label());
             //content = content.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), testUnsubLink);
@@ -339,18 +339,15 @@ public class CampaignExecutionService {
             email.addRecipient(subscriber.getEMAIL());
 
             //Set the body of the email
-            String content = campaignActivity.getACTIVITY_CONTENT_PROCESSED();
+            String content = campaignActivity.getACTIVITY_CONTENT(); //Should not be the preview content, reparse everything instead
+            content = campService.parseAndUpdateLinks(campaignActivity, content); //Must be before parseUnsubscribeLink so that the unsubscribe link will not be mistaken as an outbound link 
             content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); //we'll use the WS method to edit unsub links [update] not now, let's stick to hardcoding as there isn't enough time
             content = mmService.parseSubscriberTags(content, fieldValuesMap.get(subscriber.getOBJECTID()));
             content = mmService.parseStandardCampaignTags(content, campaign);
             content = mmService.parseExtraSubscriberTags(content, subscriber, DateTime.now());
+            
 
-            //email.setBODY(content);
-            /**
-             * This is done here because we need to persist Email first to get 
-             * a transaction key, and it will still get updated into the DB because
-             * this is done within the transaction context.
-             */
+            //Update each link with the subscriber's ID so that we can track conversion rates
             doc = Jsoup.parse(content);
             appendSubscriberKeyToLinks(doc, subscriber);
             email.setBODY(doc.outerHtml());

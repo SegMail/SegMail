@@ -44,7 +44,7 @@
                                     <textarea id="editor" class="editor"
                                               jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT}">
                                     </textarea>
-                                    <textarea id="processedContent" style="display: none;" jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}" >
+                                    <textarea id="processedContent" style="display: none;" jsf:value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PREVIEW}" >
                                     </textarea>
                                 </div>
                                 <div class="controls" >
@@ -140,7 +140,7 @@
                     </div>
                     <div class="block-content">
                         <div class="row" style="height:100%">
-                            <h:outputText id="preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PROCESSED}"
+                            <h:outputText id="preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PREVIEW}"
                                           escape="false" styleClass="col-md-12">
                             </h:outputText>
                         </div>

@@ -100,7 +100,7 @@ public class CampaignExecutionHelperService {
             email.addRecipient(subscriber.getEMAIL());
 
             //Set the body of the email
-            String content = campaignActivity.getACTIVITY_CONTENT_PROCESSED();
+            String content = campaignActivity.getACTIVITY_CONTENT_PREVIEW();
             content = mmService.parseUnsubscribeLink(content, unsubCodes.get(subscriber)); //we'll use the WS method to edit unsub links [update] not now, let's stick to hardcoding as there isn't enough time
             content = mmService.parseSubscriberTags(content, fieldValuesMap.get(subscriber.getOBJECTID()));
 

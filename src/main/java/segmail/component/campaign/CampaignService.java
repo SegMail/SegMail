@@ -279,7 +279,7 @@ public class CampaignService {
         
         validateCampaignActivity(activity);
         activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
-        activity = parseMMTagsAndLinks(activity);
+        activity = parsePreview(activity);
         
         return objService.getEm().merge(activity);
     }
@@ -664,27 +664,63 @@ public class CampaignService {
     
     /**
      * Processes 3 things:
-     * 1) Mailmerge tags eg. firstname, lastname, etc.
-     * 2) Mailmerge links eg. confirm, unsubscribe, etc.
-     * 3) Outbound links eg. http://segmail.io
+     * 1) Mailmerge links eg. confirm, unsubscribe, etc.
+     * 2) Outbound links eg. http://segmail.io
+     * 3) Campaign-specific tags eg. Sender's name, Sender's email, Support email, etc.
      * 
      * The 1st 2 are to be delegated to MailmergeService while the last is to be 
-     * done here.
+     * done here. The result will be stored in CampaignActivity.ACTIVITY_CONTENT_PREVIEW.
+     * 
+     * This is strictly for generating previews for CampaignActivities. If you need
+     * to send out actual Campaign emails, use the 
+     * {@link #campExecService.sendEmails(Campaign,CampaignActivity,List<SubscriberAccount>,
+     * List<Client>,List<SubscriptionListField>)} method.
+     * 
      * 
      * @param editingContent
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivity parseMMTagsAndLinks(CampaignActivity activity) throws DataValidationException, IncompleteDataException, EntityNotFoundException {
+    public CampaignActivity parsePreview(CampaignActivity activity) throws DataValidationException, IncompleteDataException, EntityNotFoundException {
         
         //Retrieve this first because it has 2 DB hits
         List<Campaign> campaigns = this.objService.getAllSourceObjectsFromTarget(activity.getOBJECTID(), Assign_Campaign_Activity.class, Campaign.class);
         if(campaigns == null || campaigns.isEmpty())
             throw new EntityNotFoundException("No Campaign found for CampaignActivity "+activity.getOBJECT_NAME());
         
+        String processedContent = parseAndUpdateLinks(activity, activity.getACTIVITY_CONTENT());
+        
+        //Mailmerge links - generate test links
+        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
+        for(MAILMERGE_REQUEST mmReq : mmReqs) {
+            String tag = mmReq.label;
+            
+            Element a = new Element(Tag.valueOf("a"),"");
+            a.attr("href", mmService.getSystemTestLink(tag));
+            a.html(mmReq.defaultHtmlText);
+            a.attr("target", "_blank");
+            
+            String replacementElem = a.outerHtml();
+            processedContent = processedContent.replace(tag, replacementElem);
+            
+        }
+        
+        //Mailmerge tags (with random subscriber)
+        //Can't do it here because the exact values will be saved into the DB!
+        //This must be done in the UI 
+        //But we can do Campaign attributes
+        processedContent = mmService.parseStandardCampaignTags(processedContent, campaigns.get(0));
+        
+        activity.setACTIVITY_CONTENT_PREVIEW(processedContent);
+        
+        return activity;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String parseAndUpdateLinks(CampaignActivity activity, String body) throws IncompleteDataException {
         //Outbound links - generate tracking links without subscriber ID
         //links will be appended with the subscriber's ID when it is sent out
-        String editingContent = activity.getACTIVITY_CONTENT();
+        String editingContent = body;
         Document doc = Jsoup.parse(editingContent);
         Elements links = doc.select("a");
         //Set all as inactive first
@@ -716,33 +752,9 @@ public class CampaignService {
             link.attr("target", "_blank");
         }
         
-        activity.setACTIVITY_CONTENT_PROCESSED(doc.outerHtml());
-        String processedContent = activity.getACTIVITY_CONTENT_PROCESSED();
+        editingContent = doc.outerHtml();
         
-        //Mailmerge links - generate test links
-        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
-        for(MAILMERGE_REQUEST mmReq : mmReqs) {
-            String tag = mmReq.label;
-            
-            Element a = new Element(Tag.valueOf("a"),"");
-            a.attr("href", mmService.getSystemTestLink(tag));
-            a.html(mmReq.defaultHtmlText);
-            a.attr("target", "_blank");
-            
-            String replacementElem = a.outerHtml();
-            processedContent = processedContent.replace(tag, replacementElem);
-            
-        }
-        
-        //Mailmerge tags (with random subscriber)
-        //Can't do it here because the exact values will be saved into the DB!
-        //This must be done in the UI 
-        //But we can do Campaign attributes
-        processedContent = mmService.parseStandardCampaignTags(processedContent, campaigns.get(0));
-        
-        activity.setACTIVITY_CONTENT_PROCESSED(processedContent);
-        
-        return activity;
+        return editingContent;
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
