@@ -188,6 +188,12 @@
                         <c:forEach items = "#{FormEditEmailActivity.campaignTags}" var = "cTag" >
                             '#{cTag}',
                         </c:forEach>
+                    ];
+                    
+                    var extraSubscriberTags = [
+                        <c:forEach items = "#{FormEditEmailActivity.extraSubscriberTags}" var = "eTag" >
+                            '#{eTag}',
+                        </c:forEach>
                     ]
         </script>
     </form>

@@ -32,6 +32,11 @@ var refresh_summernote = function (selector) {
                         allTagsAndLinks.push(key);
                     }
                 }
+                for(var key in extraSubscriberTags) {
+                    if (extraSubscriberTags.hasOwnProperty(key)) {
+                        allTagsAndLinks.push(extraSubscriberTags[key]);
+                    }
+                }
                 return allTagsAndLinks;
             }()
         }

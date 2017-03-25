@@ -6,7 +6,6 @@
 package segmail.program.campaign;
 
 import eds.component.GenericObjectService;
-import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
@@ -82,6 +82,7 @@ public class FormEditEmailActivity implements FormEditEntity {
             checkServer();
             loadOutboundLinks();
             loadCampaignTags();
+            loadExtraSubscriberTags();
         }
     }
 
@@ -187,6 +188,14 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     public void setCampaignTags(List<String> campaignTags) {
         program.setCampaignTags(campaignTags);
+    }
+    
+    public List<String> getExtraSubscriberTags() {
+        return program.getExtraSubscriberTags();
+    }
+
+    public void setExtraSubscriberTags(List<String> extraSubscriberTags) {
+        program.setExtraSubscriberTags(extraSubscriberTags);
     }
     
     public boolean renderThis() {
@@ -376,6 +385,17 @@ public class FormEditEmailActivity implements FormEditEntity {
         campaignTags.add(Campaign.MM_SENDER_NAME);
         campaignTags.add(Campaign.MM_SUPPORT_EMAIL);
         
-        this.setCampaignTags(campaignTags);
+        setCampaignTags(campaignTags);
+    }
+    
+    public void loadExtraSubscriberTags() {
+        if(getEditingActivity() == null) 
+            return;
+        
+        List<String> extraSubscriberTags = new ArrayList<>();
+        extraSubscriberTags.add(SubscriberAccount.MM_DATE_OF_SUBSCRIPTION);
+        extraSubscriberTags.add(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION);
+        
+        setExtraSubscriberTags(extraSubscriberTags);
     }
 }

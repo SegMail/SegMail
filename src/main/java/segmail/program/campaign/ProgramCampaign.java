@@ -74,6 +74,8 @@ public class ProgramCampaign extends Program{
     
     private List<String> campaignTags;
     
+    private List<String> extraSubscriberTags;
+    
     @Override
     public void clearVariables() {
         
@@ -263,5 +265,13 @@ public class ProgramCampaign extends Program{
 
     public void setCampaignTags(List<String> campaignTags) {
         this.campaignTags = campaignTags;
+    }
+
+    public List<String> getExtraSubscriberTags() {
+        return extraSubscriberTags;
+    }
+
+    public void setExtraSubscriberTags(List<String> extraSubscriberTags) {
+        this.extraSubscriberTags = extraSubscriberTags;
     }
 }
