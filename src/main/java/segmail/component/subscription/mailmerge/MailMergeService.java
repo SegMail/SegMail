@@ -346,6 +346,8 @@ public class MailMergeService {
                 .appendSeparator(" ")
                 .appendMonths().appendSuffix(" month"," months")
                 .appendSeparator(" ")
+                .appendWeeks().appendSuffix(" week", " weeks")
+                .appendSeparator(" ")        
                 .appendDays().appendSuffix(" day"," days")
                 .toFormatter()
         ));
