@@ -6,7 +6,6 @@
 package segmail.program.campaign;
 
 import eds.component.GenericObjectService;
-import eds.component.client.ClientService;
 import eds.component.data.IncompleteDataException;
 import eds.entity.client.VerifiedSendingAddress;
 import java.util.List;

@@ -6,7 +6,6 @@
 package segmail.entity.subscription.autoresponder;
 
 import eds.entity.data.EnterpriseRelationship;
-import javax.persistence.DiscriminatorColumn;
 import segmail.entity.subscription.SubscriptionList;
 import javax.persistence.Entity;
 import javax.persistence.Table;

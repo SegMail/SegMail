@@ -5,10 +5,7 @@
  */
 package segmail.entity.campaign;
 
-import eds.entity.data.EnterpriseObject;
 import eds.entity.data.EnterpriseObject_;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 

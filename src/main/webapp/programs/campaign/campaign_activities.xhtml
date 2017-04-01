@@ -97,7 +97,7 @@
                                                 href="#execute_campaign_activity"
                                                 data-toggle="modal"
                                                 style="margin-right: 3px;"
-                                                class="btn btn-warning list-item-trigger"
+                                                class="btn btn-danger list-item-trigger"
                                                 title="Execute Activity"
                                                 >
                                                 <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
@@ -112,8 +112,8 @@
                                                 pass:href="#send_test_email"
                                                 pass:data-toggle="modal"
                                                 style="margin-right: 3px;"
-                                                class="btn btn-primary list-item-trigger"
-                                                title="Send test email"
+                                                class="btn btn-default list-item-trigger"
+                                                title="Send Preview Email"
                                                 >
                                                 <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
                                                         render="FormSendTestEmail"
@@ -121,6 +121,20 @@
                                                         >
                                                 </f:ajax>
                                                 <i class="fa fa-send-o"></i>
+                                            </h:commandLink>
+                                            <h:commandLink
+                                                pass:href="#copy_activity"
+                                                pass:data-toggle="modal"
+                                                style="margin-right: 3px;"
+                                                class="btn btn-primary list-item-trigger"
+                                                title="Copy Activity"
+                                                >
+                                                <f:ajax event="click" listener="#{FormEditEmailActivity.loadActivity(activity.OBJECTID)}"
+                                                        render="FormCopyActivity"
+                                                        execute="FormCopyActivity"
+                                                        >
+                                                </f:ajax>
+                                                <i class="fa fa-copy"></i>
                                             </h:commandLink>
                                         </div>
                                     </td>

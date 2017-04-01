@@ -21,7 +21,6 @@ import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.entity.campaign.CampaignActivitySchedule;
 
 /**
  *

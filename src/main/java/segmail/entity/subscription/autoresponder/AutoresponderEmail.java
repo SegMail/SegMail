@@ -144,5 +144,4 @@ public class AutoresponderEmail extends EnterpriseObject {
         
         return subject;
     }
-    
 }

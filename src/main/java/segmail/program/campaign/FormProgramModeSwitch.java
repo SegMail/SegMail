@@ -14,11 +14,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
-import seca2.program.FormNavigation;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
-import segmail.program.campaign.ProgramCampaign;
 
 /**
  * Impt! If this request scoped bean loads the editing Campaign, then it must be

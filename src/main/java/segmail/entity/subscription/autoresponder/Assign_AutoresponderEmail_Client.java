@@ -7,7 +7,6 @@ package segmail.entity.subscription.autoresponder;
 
 import eds.entity.client.Client;
 import eds.entity.data.EnterpriseRelationship;
-import eds.entity.user.UserType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 

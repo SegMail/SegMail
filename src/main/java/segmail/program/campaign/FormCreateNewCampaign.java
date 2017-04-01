@@ -8,8 +8,6 @@ package segmail.program.campaign;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;

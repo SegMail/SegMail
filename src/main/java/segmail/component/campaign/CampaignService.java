@@ -887,4 +887,24 @@ public class CampaignService {
         
         return result;
     }
+
+    /**
+     * Opportunity for an EDS copy method for EnterpriseObjects.
+     * 
+     * @param objectid
+     * @param activityName
+     * @param activityGoals
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public CampaignActivity copyCampaign(long objectid, String activityName, String activityGoals) throws InstantiationException, IllegalAccessException, EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
+        CampaignActivity copy = updService.copyObjectDataAndRelationship(objectid, CampaignActivity.class);
+        copy.setACTIVITY_NAME(activityName);
+        copy.setACTIVITY_GOALS(activityGoals);
+        copy.setSTATUS(ACTIVITY_STATUS.NEW.name);
+        
+        //updService.persist(copy);
+        
+        return copy;
+    }
 }
