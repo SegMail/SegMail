@@ -72,17 +72,22 @@ public class FormListFieldSet {
     public void saveFields() {
         try {
             //Add the new field into the mix
-            if(newField.getFIELD_NAME() != null && !newField.getFIELD_NAME().isEmpty())
+            /**
+             * Not needed as we will have addField() method and button to explicitly add a new field
+             * if(newField.getFIELD_NAME() != null && !newField.getFIELD_NAME().isEmpty())
                 getFieldList().add(newField);
+                */
             
             //Remove fields that have no FIELD_NAME to delete them
-            List<SubscriptionListField> fields = new ArrayList<>();
+            /**
+             * Not needed as we have deleteField(sno) method now
+             * List<SubscriptionListField> fields = new ArrayList<>();
             for(SubscriptionListField field : getFieldList()) {
                 if(field.getFIELD_NAME() != null && !field.getFIELD_NAME().isEmpty())
                     fields.add(field);
-            }
+            }*/
             
-            listService.fullRefreshUpdateSubscriptionListFields(fields);
+            listService.fullRefreshUpdateSubscriptionListFields(getFieldList());
             loadExistingFields();
             loadNewField();
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Fields updated.", "");
@@ -93,6 +98,50 @@ public class FormListFieldSet {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
             loadExistingFields();
         } 
+    }
+    
+    public void deleteField(int sno) {
+        for(int i=0; i<getFieldList().size(); i++) {
+            SubscriptionListField field = getFieldList().get(i);
+            if(sno == field.getSNO()) {
+                getFieldList().remove(field);
+            }
+        }
+        saveFields();
+    }
+    
+    public void addField() {
+        if(newField.getFIELD_NAME() != null && !newField.getFIELD_NAME().isEmpty())
+            getFieldList().add(newField);
+        saveFields();
+    }
+    
+    public void moveUp(int sno) {
+        //If it is 1 or 2, do not allow to move up
+        if(sno <= 2)
+            return;
+        //Index out of bounds
+        if(sno > getFieldList().size())
+            return;
+        
+        //Assuming list is sorted, swap places with the previous index
+        getFieldList().get(sno-1).setSNO(sno-1); //This is the field
+        getFieldList().get(sno-2).setSNO(sno); //This is the field before it
+        saveFields();
+    }
+    
+    public void moveDown(int sno) {
+        //If it is 1, do not allow to move down
+        if(sno <= 1)
+            return;
+        //If it is the last object, do not allow move down
+        if(sno >= getFieldList().size())
+            return;
+        
+        //Assuming list is sorted, swap places with the previous index
+        getFieldList().get(sno-1).setSNO(sno+1); //This is the field
+        getFieldList().get(sno).setSNO(sno); //This is the field before it
+        saveFields();
     }
 
     /**

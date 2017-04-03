@@ -22,6 +22,7 @@
                     </div>
                     <div class="page-toolbar-block pull-right">
                         <button jsf:id="save_settings_button" class="btn btn-primary"
+                                jsf:rendered="false"
                         >
                             <!--f:ajax won't append its code to the onclick attribute of the button element-->
                             <f:ajax execute="@form" render="@form :FormEditListHeader" 
@@ -44,12 +45,24 @@
                     <table id="fieldset_table" class="table" >
                         <tbody>
                             <tr><!--column headers-->
-                                <th>Order</th>
-                                <th>Field name</th>
-                                <th>Mailmerge name</th>
-                                <th>Field type</th>
-                                <th>Mandatory</th>
+                                <th>
+                                    <span class="hidden-xs">Order</span>
+                                    <span class="hidden-sm hidden-md hidden-lg">#</span>
+                                </th>
+                                <th>Name</th>
+                                <th>
+                                    <span class="hidden-xs">Mailmerge name</span>
+                                    <span class="hidden-sm hidden-md hidden-lg">MM</span>
+                                </th>
+                                <th>Type</th>
+                                <th>
+                                    <span class="hidden-xs">Mandatory</span>
+                                    <span class="hidden-sm hidden-md hidden-lg">Mand</span>
+                                </th>
                                 <th>Description</th>
+                                <th>
+                                    <span class="hidden-xs">Actions</span>
+                                </th>
                             </tr>
 
                             <c:forEach items="#{FormListFieldSet.fieldList}" var="field">
@@ -70,6 +83,7 @@
                                                 </div>
                                             </td>
                                             <td>#{field.DESCRIPTION}</td>
+                                            <td></td>
                                         </c:when>
                                         <c:otherwise>
                                             <td style="width:40px">
@@ -81,7 +95,14 @@
                                                 <div class="form-group">
                                                     <input type="text" style=""
                                                            class="form-control"
-                                                           jsf:value="#{field.FIELD_NAME}" />
+                                                           jsf:value="#{field.FIELD_NAME}" >
+                                                        <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.saveFields()}"
+                                                                delay="1000"
+                                                                event="keyup">
+                                                        </f:ajax>
+                                                    </input>
                                                 </div>
                                             </td>
                                             <td style="width:100px">
@@ -97,6 +118,12 @@
                                                                        itemLabel="#{type}"
                                                                        itemValue="#{type}">
                                                         </f:selectItems>
+                                                        <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.saveFields()}"
+                                                                delay="500"
+                                                                >
+                                                            </f:ajax>
 
                                                     </h:selectOneMenu>
                                                 </div>
@@ -104,16 +131,66 @@
                                             <td style="width:60px">
                                                 <div class="form-group">
                                                     <div class="checkbox" style="padding: auto">
-                                                        <input type="checkbox" class="icheck"
+                                                        <input type="checkbox" class="icheck mandatory"
                                                                style=""
-                                                               jsf:value="#{field.MANDATORY}"/>
+                                                               jsf:value="#{field.MANDATORY}">
+                                                            <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.saveFields()}"
+                                                                delay="500"
+                                                                >
+                                                            </f:ajax>
+                                                        </input>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <input class="form-control" type="text" 
-                                                           jsf:value="#{field.DESCRIPTION}"/>
+                                                    <input class="form-control" type="text"
+                                                           jsf:value="#{field.DESCRIPTION}">
+                                                        <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.saveFields()}"
+                                                                delay="2000"
+                                                                event="keyup">
+                                                        </f:ajax>
+                                                    </input>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <button class="btn btn-danger"
+                                                            jsf:id="delete_#{field.SNO}_button"
+                                                            >
+                                                        
+                                                        <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.deleteField(field.SNO)}"
+                                                                >
+                                                        </f:ajax>
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                    <button class="btn btn-default"
+                                                            jsf:id="move_up_#{field.SNO}_button">
+                                                        <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.moveUp(field.SNO)}"
+                                                                >
+                                                        </f:ajax>
+                                                        <i class="fa fa-arrow-up"></i>
+                                                        
+                                                        
+                                                    </button>
+                                                    <button class="btn btn-default"
+                                                            jsf:id="move_down_#{field.SNO}_button">
+                                                        <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                                onevent="saveSettings"
+                                                                listener="#{FormListFieldSet.moveDown(field.SNO)}"
+                                                                >
+                                                        </f:ajax>
+                                                        <i class="fa fa-arrow-down"></i>
+                                                        
+                                                    </button>
                                                 </div>
                                             </td>
                                         </c:otherwise>
@@ -140,7 +217,9 @@
                                     <div class="form-group">
                                         <input type="text" style=""
                                                class="form-control"
-                                               jsf:value="#{FormListFieldSet.newField.FIELD_NAME}"/></div>
+                                               jsf:value="#{FormListFieldSet.newField.FIELD_NAME}">
+                                        </input>
+                                    </div>
                                 </td>
                                 <td></td>
                                 <td>
@@ -151,7 +230,6 @@
                                                            itemLabel="#{type}"
                                                            itemValue="#{type}">
                                             </f:selectItems>
-
                                         </h:selectOneMenu>
                                     </div>
                                 </td>
@@ -161,7 +239,8 @@
                                             <input type="checkbox" class="icheck"
                                                    style=""
                                                    jsf:value="#{FormListFieldSet.newField.MANDATORY}"
-                                                   />
+                                                   >
+                                            </input>
                                         </div>
                                     </div>
                                 </td>
@@ -169,6 +248,20 @@
                                     <div class="form-group">
                                         <input class="form-control" type="text" 
                                                jsf:value="#{FormListFieldSet.newField.DESCRIPTION}"/>
+                                    </div>
+                                </td>
+                                <td style="width:150px;">
+                                    <div class="form-group">
+                                        <button jsf:id="add_button" class="btn btn-primary">
+                                            <!--f:ajax won't append its code to the onclick attribute of the button element-->
+                                            <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                    onevent="saveSettings"
+                                                    listener="#{FormListFieldSet.addField()}"
+                                                    event="click">
+                                            </f:ajax>
+                                            <i class="fa fa-plus"></i>
+                                            Add
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

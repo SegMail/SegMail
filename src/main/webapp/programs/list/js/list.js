@@ -5,6 +5,7 @@
 function saveSettings(data) {
     var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
     var block = $(data.source).parents(".block");
+    
     switch (ajaxstatus) {
         case "begin": // This is called right before ajax request is been sent.
             block_refresh(block);
@@ -16,7 +17,8 @@ function saveSettings(data) {
 
         case "success": // This is called when ajax response is successfully processed.
             bindFileInput();
-            $('#selectVerifiedEmail').select2();
+            $('body select.select2').select2();
+            initICheckMand();
             break;
     }
 }
@@ -92,3 +94,15 @@ var initSettingsValidation = function() {
         }
     });
 };
+
+var initICheckMand = function() {
+    gICheck.init('body');
+    $('input.mandatory').on('ifChanged',function(event){
+        //doing this here because iCheck cannot auto-trigger our input.checkbox's onchange method
+        mojarra.ab(this,event,'valueChange','@form','@form FormEditListHeader',{'onevent':saveSettings,'delay':'500'}); 
+    })
+}
+
+$(document).ready(function(){
+    initICheckMand();
+})
