@@ -132,7 +132,7 @@ public class BatchJobCondition implements Serializable{
             }
             if(ret == null)
                 return false;
-            if(ret == Boolean.FALSE)
+            if(Boolean.FALSE.equals(ret))
                 return false;
             if(ret.getClass().equals(Collection.class)) {
                 if (((Collection)ret).isEmpty())

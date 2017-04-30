@@ -8,6 +8,7 @@ import eds.entity.batch.BatchJobRun_;
 import eds.entity.batch.BatchJobContainer;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -74,8 +75,9 @@ public class BatchProcessingService {
         for(BatchJobRun run : nextNJobs) {
             //Fire and forget
             //execService.executeJob(run);
-            jobCont.read(run.getRUN_KEY())
-                .execute(DateTime.now());
+            
+            jobCont = jobCont.read(run.getRUN_KEY());
+            jobCont.execute(DateTime.now());
         }
 
     }

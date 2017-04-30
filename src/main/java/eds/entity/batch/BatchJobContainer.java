@@ -345,23 +345,25 @@ public class BatchJobContainer extends DBService {
      */
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Future<BatchJobContainer> execute(DateTime startTime) {
-        BatchJobRun oneAndOnlyRun;
-        try {
+    public void execute(DateTime startTime) {
+        BatchJobRun oneAndOnlyRun = null;
+        /*try {
             oneAndOnlyRun = getOneAndOnlyRun();
         } catch (BatchProcessingException ex) {
             this.ex = ex;
             return new AsyncResult<>(this);
-        }
-        //Send to an external service to update the status of the job
-        //This is the only operation that requires a separate transaction because
-        //we don't know when the job will finish executing and while the job is 
-        //executing, we don't want other jobs to accidentally pick it up and process
-        //it again.
-        //Potential use of CompletableFuture here
-        helper.pushToStartStatus(oneAndOnlyRun,startTime);
+        }*/
+        
         
         try {
+            oneAndOnlyRun = getOneAndOnlyRun();
+            //Send to an external service to update the status of the job
+            //This is the only operation that requires a separate transaction because
+            //we don't know when the job will finish executing and while the job is 
+            //executing, we don't want other jobs to accidentally pick it up and process
+            //it again.
+            //Potential use of CompletableFuture here
+            helper.pushToStartStatus(oneAndOnlyRun,startTime);
             for (BatchJobStep step : steps) {
             
                 Object ret = step.execute();
@@ -383,7 +385,7 @@ public class BatchJobContainer extends DBService {
             helper.logErrors(oneAndOnlyRun,ex); 
         }
         
-        return new AsyncResult<>(this);
+        //return new AsyncResult<>(this);
     }
     
     /**

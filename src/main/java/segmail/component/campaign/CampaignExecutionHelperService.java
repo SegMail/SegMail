@@ -143,16 +143,19 @@ public class CampaignExecutionHelperService {
         //compare and accumulate the difference until it reaches the required size
         List<SubscriberAccount> result = new ArrayList<>();
         List<SubscriberAccount> subscribers = new ArrayList<>();
-        List<String> sent = new ArrayList<>();
+        
         int i = searchStartIndex; //For subscribers
         int j = searchStartIndex; //For sent
         final int BATCH_SIZE = 1000;
         
-        sent = campService.getSentEmails(campaignActivityId, j++*BATCH_SIZE, BATCH_SIZE); //initial read
+        //Do not put this in the loop!
+        //sent = campService.getSentEmails(campaignActivityId, j++*BATCH_SIZE, BATCH_SIZE); //initial read
         do {
+            List<String> targetedEmails = new ArrayList<>();
             subscribers = campService.getTargetedSubscribers(campaignId, i++*BATCH_SIZE, BATCH_SIZE);
             for(SubscriberAccount subscriber : subscribers) {
-                String email = subscriber.getEMAIL();
+                targetedEmails.add(subscriber.getEMAIL());
+                /*String email = subscriber.getEMAIL();
                 //If the email has been sent to already
                 if(sent.contains(email)) {
                     sent.remove(email);
@@ -168,7 +171,17 @@ public class CampaignExecutionHelperService {
                     if(result.size() >= size)
                         return result;
                 }
-                
+                */
+            }
+            List<String> sent = campService.getSentEmails(campaignActivityId, targetedEmails);
+            //Check if these emails are already sent
+            for(SubscriberAccount subscriber : subscribers) {
+                String email = subscriber.getEMAIL();
+                if(!sent.contains(email)) {
+                    result.add(subscriber);
+                    if(result.size() >= size)
+                        return result;
+                }
             }
         } while(result.size() < size && !subscribers.isEmpty());
         
@@ -207,14 +220,15 @@ public class CampaignExecutionHelperService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void updateActivityStatus(CampaignActivity activity) {
-        long targeted = campService.countTargetedSubscribersForActivity(activity.getOBJECTID());
+    public void updateActivityStatus(CampaignActivity activity, ACTIVITY_STATUS status) {
+        /*long targeted = campService.countTargetedSubscribersForActivity(activity.getOBJECTID());
         long sent = campService.countEmailsSentForActivity(activity.getOBJECTID());
         
-        if(targeted == sent)
+        if(targeted <= sent)
             activity.setSTATUS(ACTIVITY_STATUS.COMPLETED.name);
-        
-        objService.getEm().merge(activity);
+        */
+        activity = objService.getEm().merge(activity);
+        activity.setSTATUS(status.name);
         
     }
     
