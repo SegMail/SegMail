@@ -64,25 +64,31 @@
                                 <ui:include src="editing_panel_header.xhtml"></ui:include>
                                 <div class="block" >
                                     <ul class="nav nav-tabs">
-                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('settings_panel') ? 'active' : '')} active">
+                                        <li class="#{(ProgramList.activeTab.equals('settings_panel') ? 'active' : '')}">
                                             <a href="#settings_panel" data-toggle="tab">Settings</a>
                                         </li>
-                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('fieldset_panel') ? 'active' : '')}">
+                                        <li class="#{(ProgramList.activeTab.equals('fieldset_panel') ? 'active' : '')}">
                                             <a href="#fieldset_panel" data-toggle="tab">Fields</a>
                                         </li>
-                                        <li class="#{(FormProgramListSwitch.showActiveTabs.get('redirect_panel') ? 'active' : '')}">
+                                        <li class="#{(ProgramList.activeTab.equals('redirect_panel') ? 'active' : '')}">
                                             <a href="#redirect_panel" data-toggle="tab">Redirects</a>
+                                        </li>
+                                        <li class="#{(ProgramList.activeTab.equals('datasource_panel') ? 'active' : '')}">
+                                            <a href="#datasource_panel" data-toggle="tab">Datasource</a>
                                         </li>
                                     </ul>
                                     <div class="block-content tab-content">
-                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('fieldset_panel') ? 'active' : '')}" id="fieldset_panel">
+                                        <div class="tab-pane #{(ProgramList.activeTab.equals('fieldset_panel') ? 'active' : '')}" id="fieldset_panel">
                                             <ui:include src="fieldset_panel.xhtml"></ui:include>
                                         </div>
-                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('redirect_panel') ? 'active' : '')}" id="redirect_panel">
+                                        <div class="tab-pane #{(ProgramList.activeTab.equals('redirect_panel') ? 'active' : '')}" id="redirect_panel">
                                             <ui:include src="redirect_panel.xhtml"></ui:include>
                                         </div>
-                                        <div class="tab-pane #{(FormProgramListSwitch.showActiveTabs.get('settings_panel') ? 'active' : '')} active" id="settings_panel">
+                                        <div class="tab-pane #{(ProgramList.activeTab.equals('settings_panel') ? 'active' : '')}" id="settings_panel">
                                             <ui:include src="settings_panel.xhtml"></ui:include>
+                                        </div>
+                                        <div class="tab-pane #{(ProgramList.activeTab.equals('datasource_panel') ? 'active' : '')}" id="datasource_panel">
+                                            <ui:include src="datasource_panel.xhtml"></ui:include>
                                         </div>
                                     </div>
                                 </div>
@@ -106,7 +112,9 @@
                 <div class="modal fade" id="delete_list_confirmation">
                     <ui:include src="delete_list_popup.xhtml"></ui:include>
                 </div>
-
+                <div class="modal fade" id="add_datasource_popup">
+                    <ui:include src="add_datasouce.xhtml"></ui:include>
+                </div>
         </ui:define>
         
         <ui:define name="toolbar-right"  >
@@ -124,11 +132,10 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/datatables/jquery.dataTables.min.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/jquery-validation/jquery.validate.min.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/jquery-validation/additional-methods.min.js"></script>
-            <script>
-
-
-
-            </script>  
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
+            
             <script type="text/javascript" src="#{request.contextPath}/programs/list/js/list.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/list/js/import.js" />
         </ui:define>

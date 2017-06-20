@@ -88,7 +88,7 @@ public class MassSubscriptionService {
      *
      *
      * @param subscribers
-     * @param doubleOptin
+     * @param doubleOptin Sends confirmation emails and set status to NEW if true; does not send and status to CONFIRMED if false.
      * @return a Map of error messages and their records. A list of possible
      * error messages:
      * <ul>
@@ -103,7 +103,7 @@ public class MassSubscriptionService {
      * </ul>
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Map<String, List<Map<String, Object>>> massSubscribe(Client client, List<Map<String, Object>> subscribers, SubscriptionList list, boolean doubleOptin)
+    public Map<String, List<Map<String, Object>>> massSubscribe(Client client, List<Map<String, Object>> subscribersMap, SubscriptionList list, boolean doubleOptin)
             throws EntityNotFoundException {
 
         //Set up the return results Map
@@ -128,6 +128,14 @@ public class MassSubscriptionService {
         List<Map<String, Object>> survivors = new ArrayList<>();
 
         //Check for mandatory fields and retrieve all emails in a list so that we can check for existing later
+        //Also, filter off duplicates within subscribers and merge their fields
+        //First find the email fieldKey
+        String emailFieldKey = "";
+        for(SubscriptionListField field : fields) {
+            if(DEFAULT_EMAIL_FIELD_NAME.equals(field.getFIELD_NAME()))
+                emailFieldKey = (String) field.generateKey();
+        }
+        List<Map<String, Object>> subscribers = new ArrayList<>(subService.mergeDuplicates(subscribersMap, emailFieldKey));
         for (Map<String, Object> subscriber : subscribers) {
             String email = "";
             String errorKey = "";
@@ -140,6 +148,7 @@ public class MassSubscriptionService {
                 if (field.getFIELD_NAME().equals(DEFAULT_EMAIL_FIELD_NAME)) {
                     email = (String) subscriber.get((String) field.generateKey());// If there exist multiple fieldvalues of email, then the latest one will be used
                     email = email.trim(); //For some reason JS cannot remove this \r character
+                    email = email.toLowerCase(); //Safer?
                     //Validate email format
                     if (!EmailValidator.getInstance().isValid(email)) {
                         errorKey = "Invalid email";
@@ -205,14 +214,16 @@ public class MassSubscriptionService {
         //try {
         for (int i = 0; i < survivors.size(); i++) {
             Map<String, Object> survivor = survivors.get(i);
-            String email = emails.get(i); //emails and survivors have the same order
-            List<SubscriberFieldValue> subFieldValues = new ArrayList<>();
+            //emails and survivors have the same order
+            String email = emails.get(i);
+            //1 list of SubscriberFieldValue per survivor
+            List<SubscriberFieldValue> subFieldValues = new ArrayList<>(); 
             SubscriberAccount account = null; //Hypothetical account
 
             //Find the existing SubscriberAccount
             for (SubscriberAccount existingSubscriber : existingSubscribers) {
                 //If found, get SubscriberFieldValues from existingFieldValues
-                if (existingSubscriber.getEMAIL() == null ? email == null : existingSubscriber.getEMAIL().equals(email)) {
+                if (existingSubscriber.getEMAIL() == null ? email == null : existingSubscriber.getEMAIL().equalsIgnoreCase(email)) {
                     account = existingSubscriber;
                     break;
                 }
@@ -237,6 +248,8 @@ public class MassSubscriptionService {
                     //If exist, add it into updateFieldValueList
                     //Note that if duplicates exist here, the latest value will be taken
                     if (key != null && key.equals(existingFieldValue.getFIELD_KEY())) {
+                        //If key is email, compare ignore case
+                        
                         if (survivor.get(key) != null
                                 && !((String) survivor.get(key)).equals(existingFieldValue.getVALUE())) {
                             existingFieldValue.setVALUE((String) survivor.get(key)); //Update existing value
@@ -310,7 +323,9 @@ public class MassSubscriptionService {
             //As inspired by http://stackoverflow.com/a/11333262/5765606
             //objService.getEm().clear();
             //Update the number of subscribers (async call)
-            subService.updateSubscriberCount(list.getOBJECTID());
+            //Only if there are new subscriptions created
+            if(createNewSubscription != null && !createNewSubscription.isEmpty())
+                subService.updateSubscriberCount(list.getOBJECTID());
             
             //Send confirmation email if double optin is turned on (must be last)
             if (doubleOptin) {
@@ -329,6 +344,26 @@ public class MassSubscriptionService {
             results.put(errorMsg, survivors);
         }
         return results;
+    }
+    
+    /**
+     * 
+     * @param clientId
+     * @param subscribers
+     * @param listId
+     * @param doubleOptin Sends confirmation emails and set status to NEW if true; does not send and status to CONFIRMED if false.
+     * @return
+     * @throws EntityNotFoundException 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Map<String, List<Map<String, Object>>> massSubscribe(long clientId, List<Map<String, Object>> subscribers, long listId, boolean doubleOptin) throws EntityNotFoundException{
+        Client client = objService.getEnterpriseObjectById(clientId, Client.class);
+        SubscriptionList list = objService.getEnterpriseObjectById(listId, SubscriptionList.class);
+        List<SubscriptionListField> fields = objService.getEnterpriseData(listId, SubscriptionListField.class);
+        
+        subContainer.setListFields(fields); //at this point I have totally forgotten why we left this...
+        
+        return massSubscribe(client, subscribers, list, doubleOptin);
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -497,6 +532,7 @@ public class MassSubscriptionService {
         return subscriptions;
     }
     
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void massSubscribeToMultipleLists(long clientId, List<Map<String,Object>> subs, List<Long> listIds, boolean optin) {
         //Required existing data for validations

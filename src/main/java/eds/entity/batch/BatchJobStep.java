@@ -16,6 +16,7 @@ import javax.naming.NamingException;
 import javax.persistence.CascadeType;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -50,7 +51,7 @@ public class BatchJobStep implements Serializable {
         this.SERVICE_NAME = SERVICE_NAME;
     }
 
-    @OneToMany(mappedBy="BATCH_JOB_STEP")
+    @OneToMany(mappedBy="BATCH_JOB_STEP",fetch=FetchType.EAGER)
     /*@JoinColumns({
         @JoinColumn(name = "BATCH_JOB_STEP"),
         @JoinColumn(name = "BATCH_JOB_STEP_ORDER")

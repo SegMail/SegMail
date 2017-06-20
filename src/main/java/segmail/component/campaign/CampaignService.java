@@ -465,7 +465,7 @@ public class CampaignService {
         
         
         DateTime now = DateTime.now();
-        batchJobCont.create(emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME());
+        batchJobCont.create(Campaign.class.getSimpleName()+" "+emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME());
         batchJobCont.addStep(CampaignExecutionService.class.getSimpleName(),"executeCampaignActivity",new Object[]{emailActivity.getOBJECTID(),(int)schedule.getSEND_IN_BATCH()});
         batchJobCont.addCondition(CampaignExecutionService.class.getSimpleName(),"continueCampaignActivity",new Object[]{emailActivity.getOBJECTID()});
         batchJobCont.setSchedule(schedule.generateCronExp(now).getCRON_EXPRESSION());

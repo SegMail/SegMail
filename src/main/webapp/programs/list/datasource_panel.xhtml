@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                You can set up Segmail to read Subscriber data from another datasource - a CRM app, CMS app, or even 
+                directly from your own MySQL database.
+                Segmail will read your datasource every hour to retrieve newly added subscribers and add it in your 
+                Segmail list. You will need to setup the mapping between the fields in your Segmail list and the 
+                fields in your datasource. 
+            </p>
+        </div>
+    </div>
+    <div class="row expandable">
+        <div class="col-md-12">
+            <p>
+                Currently we only support the following:
+                <ul>
+                    <li>MySQL</li>
+                </ul>
+                Please raise a request to us at <strong><u>support@segmail.io</u></strong> with subject "<strong>Datasource request</strong>" and we will get 
+                in contact with you to help you out.
+            </p>
+        </div>
+    </div>
+    <div class="row expandable">
+        <div class="col-md-6">
+            <p>
+                Please also note that this synchronization is one-way:
+                <ul>
+                    <li>If you add a subscriber to your external list, it will also be added to your Segmail list.</li>
+                    <li>If you remove a subscriber from your external list, it will also be unsubscribed in your Segmail list.</li>
+                    <li>If you unsubscribe a subscriber from a SegMail list, your external list will not be affected.</li>
+                    <li>If you add a subscriber to a SegMail list, your external list will not be affected.</li>
+                </ul>
+                You can only setup 1 datasource per list. If you setup a datasource, you will still be able
+                to add subscribers through your signup form or manually in your Subscribers page.
+            </p>
+        </div>
+        <div class="col-md-5">
+            <div class="block">
+                <div class="block-content np">
+                    <table class="table table-bordered ">
+                        <thead>
+                            <th></th>
+                            <th>...Adds</th>
+                            <th>...Removes</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="first">External app...</td>
+                                <td>Segmail adds</td>
+                                <td>Segmail unsubscribes</td>
+                            </tr>
+                            <tr>
+                                <td class="first">Segmail...</td>
+                                <td>External app does <u>nothing</u></td>
+                                <td>External app does <u>nothing</u></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align: center; margin:10px 0 0 0;">
+            <a id="hide_all_info" class="showing" href="javascript:;">
+                <h2 class="h2-hide">Hide all these extra information</h2>
+                <h2 class="h2-show">Explain more</h2>
+            </a>
+        </div>
+    </div>
+    <br />
+    <hr></hr>
+    <form jsf:id="FormListDatasource" >
+        <c:forEach id="msg" items="#{facesContext.messageList}" var="msg">
+            <h:inputHidden pass:data-severity="#{msg.severity.ordinal}" 
+                           pass:data-message="message"
+                           value="#{msg.summary}" 
+                           ></h:inputHidden>
+            
+        </c:forEach>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="checkbox" style="padding: auto">
+                                <h:selectBooleanCheckbox styleClass="icheck mandatory"
+                                                         value="#{FormListDatasource.newDatasource.ACTIVE}"
+                                                         >
+                                    <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        event="valueChange"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        >
+                                    </f:ajax>
+                                </h:selectBooleanCheckbox>
+                                <h3>
+                                    <strong>Use a datasource </strong>(you will still be able to add subscribers to this list through other means like signup forms)
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row"
+                     jsf:rendered="#{FormListDatasource.newDatasource.ACTIVE}">
+                    <div class="alert alert-warning">
+                        <strong>Important!</strong> Please create a READ-ONLY account for this synchronization and 
+                        set restrictions on the access to your database to IP address to Segmail's IP 
+                        <strong>(<span class="ip_address"></span>)</strong> only. This is for security purpose.
+                    </div>
+                    <div id="datasource_info" class="col-md-6 ">
+                        <div class="form-group">
+                            <label>Enter a name for your datasource:</label>
+                            <input type="text" class="form-control" jsf:value="#{FormListDatasource.newDatasource.NAME}" >
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                    onevent="updateDatasource"
+                                    listener="#{FormListDatasource.updateDatasource()}"
+                                    delay="2000"
+                                    event="keyup"
+                                    >
+                                </f:ajax>
+                            </input>
+                        </div>
+                        <div class="form-group">
+                            <label>Enter a description for your datasource:</label>
+                            <textarea class="form-control" jsf:value="#{FormListDatasource.newDatasource.DESCRIPTION}">
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                    onevent="updateDatasource"
+                                    listener="#{FormListDatasource.updateDatasource()}"
+                                    delay="2000"
+                                    event="keyup"
+                                    >
+                                </f:ajax>
+                            </textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Select the type of datasource</label>
+                            <h:selectOneMenu styleClass="form-control" style=""
+                                             value="#{FormListDatasource.newDatasource.ENDPOINT_TYPE}">
+                                <f:selectItems value="#{FormListDatasource.endpointTypes()}" var="type" 
+                                               itemLabel="#{type.label}"
+                                               itemValue="#{type.toString()}">
+                                </f:selectItems>
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        
+                                        >
+                                </f:ajax>
+                           </h:selectOneMenu>
+                        </div>
+                        <div class="form-group">
+                            <label>Datasource Server name:</label>
+                            <input type="text" class="form-control" jsf:value="#{FormListDatasource.newDatasource.SERVER_NAME}" >
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        delay="2000"
+                                        event="keyup"
+                                        >
+                                </f:ajax>
+                            </input>
+                        </div>
+                        <div class="form-group">
+                            <label>Database name:</label>
+                            <input type="text" class="form-control" jsf:value="#{FormListDatasource.newDatasource.DB_NAME}" >
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        delay="2000"
+                                        event="keyup"
+                                        >
+                                </f:ajax>
+                            </input>
+                        </div>
+                        <div class="form-group">
+                            <label>Table name:</label>
+                            <input type="text" class="form-control" jsf:value="#{FormListDatasource.newDatasource.TABLE_NAME}" >
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        delay="2000"
+                                        event="keyup"
+                                        >
+                                </f:ajax>
+                            </input>
+                        </div>
+                        <div class="form-group">
+                            <label>Username:</label>
+                            <input type="text" class="form-control" jsf:value="#{FormListDatasource.newDatasource.USERNAME}" >
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        delay="2000"
+                                        event="keyup"
+                                        >
+                                </f:ajax>
+                            </input>
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input type="password" class="form-control" jsf:value="#{FormListDatasource.newDatasource.PASSWORD}" >
+                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                        onevent="updateDatasource"
+                                        listener="#{FormListDatasource.updateDatasource()}"
+                                        delay="2000"
+                                        event="keyup"
+                                        >
+                                </f:ajax>
+                            </input>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        
+                        <div id="field_mapping" class="well" style="overflow: scroll; max-height: 420px">
+                            <h2>Map your fields:</h2>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <c:forEach items="#{FormListDatasource.datasourceMappings}" var="mapping">
+                                        <div class="row-form">
+                                            <div class="col-md-4">
+                                                <strong>#{mapping.LOCAL_NAME} :</strong>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h:selectOneMenu value="#{mapping.FOREIGN_NAME}" styleClass="form-control">
+                                                    <f:selectItems value="#{FormListDatasource.remoteDBFields}" var="field"
+                                                                   itemLabel="#{field}" itemValue="#{field}">
+                                                    </f:selectItems>
+                                                    <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                        onevent="updateDatasource"
+                                                        listener="#{FormListDatasource.updateMappings()}"
+                                                        delay="1000"
+                                                        event="valueChange"
+                                                        >
+                                                </f:ajax>
+                                                </h:selectOneMenu>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                    
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <div class="col-md-12">
+                                        <div class="checkbox" style="padding: auto">
+                                            <h:selectBooleanCheckbox styleClass="icheck mandatory"
+                                                                     value="#{FormListDatasource.newDatasource.USE_STATUS_FIELD}"
+                                                         >
+                                                <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                    onevent="updateDatasource"
+                                                    listener="#{FormListDatasource.updateDatasource()}"
+                                                    >
+                                                </f:ajax>
+                                            </h:selectBooleanCheckbox>
+                                            Use a status field
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row-form" jsf:rendered="#{FormListDatasource.newDatasource.USE_STATUS_FIELD}">
+                                    <div class="col-md-6">
+                                        If this field:
+                                        <h:selectOneMenu value="#{FormListDatasource.newDatasource.STATUS_FIELD}" styleClass="form-control">
+                                            <f:selectItems value="#{FormListDatasource.remoteDBFields}" var="field"
+                                                           itemLabel="#{field}" itemValue="#{field}">
+                                            </f:selectItems>
+                                            <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                onevent="updateDatasource"
+                                                listener="#{FormListDatasource.updateDatasource()}"
+                                                >
+                                            </f:ajax>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-md-6">
+                                        ...that has this value:
+                                        <h:selectOneMenu value="#{FormListDatasource.newDatasource.STATUS_FIELD_VALUE}" styleClass="form-control">
+                                            <f:selectItems value="#{FormListDatasource.statusFieldValues}" var="field"
+                                                           itemLabel="#{field}" itemValue="#{field}">
+                                            </f:selectItems>
+                                            <f:ajax execute="@form" render="@form :FormEditListHeader" 
+                                                onevent="updateDatasource"
+                                                listener="#{FormListDatasource.updateDatasource()}"
+                                                >
+                                            </f:ajax>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-md-12">
+                                        ...means the subscriber is subscribed and should be sync over to Segmail.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <br/>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</html>

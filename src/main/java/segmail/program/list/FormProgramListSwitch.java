@@ -19,7 +19,6 @@ import seca2.bootstrap.UserRequestContainer;
 import seca2.program.Program;
 import segmail.component.subscription.ListService;
 import segmail.entity.subscription.SubscriptionList;
-import segmail.program.list.ProgramList;
 
 /**
  * Forget this! Can't set the client values back to the server so this is currentlyy

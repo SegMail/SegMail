@@ -71,7 +71,7 @@ public class FormCreateNewCampaign implements FormCreateEntity {
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");
         }
     }
 

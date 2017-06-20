@@ -13,6 +13,8 @@ import seca2.program.Program;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
+import segmail.entity.subscription.datasource.ListDataMapping;
+import segmail.entity.subscription.datasource.ListDatasource;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -33,6 +35,7 @@ public class ProgramList extends Program implements Serializable {
     
     //For controlling the tabs
     private Map<String,Boolean> showActiveTabs;
+    private String activeTab = "settings_panel"; //default
     
     //For subscribers
     private Map<Long,Map<String,String>> subscriberTable;
@@ -59,6 +62,20 @@ public class ProgramList extends Program implements Serializable {
     //For Verified Addresses
     private List<VerifiedSendingAddress> verifiedAddresses;
     private String sendingAddress;
+    
+    //For Datasources
+    private ListDatasource newDatasource;
+    private List<ListDataMapping> datasourceMappings;
+    private String oldPassword;
+    private List<String> remoteDBFields;
+    private String connectionString; //For the purpose of caching remoteDBFields and not querying the remote DB all the time
+    private boolean useStatusField;
+    private List<String> statusFields;
+    private String statusField;
+    private List<String> statusFieldValues;
+    private String statusFieldValue;
+    private String oldStatusField;
+    private String oldStatusFieldValue;
     
     private final String formName = "ProgramList";
     
@@ -241,6 +258,115 @@ public class ProgramList extends Program implements Serializable {
 
     public void setSendingAddress(String sendingAddress) {
         this.sendingAddress = sendingAddress;
+    }
+
+    public ListDatasource getNewDatasource() {
+        return newDatasource;
+    }
+
+    public void setNewDatasource(ListDatasource newDatasource) {
+        this.newDatasource = newDatasource;
+    }
+
+    public String getActiveTab() {
+        return activeTab;
+    }
+
+    public void setActiveTab(String activeTab) {
+        this.activeTab = activeTab;
+    }
+
+    public List<ListDataMapping> getDatasourceMappings() {
+        return datasourceMappings;
+    }
+
+    public void setDatasourceMappings(List<ListDataMapping> datasourceMappings) {
+        this.datasourceMappings = datasourceMappings;
+    }
+
+    public List<String> getRemoteDBFields() {
+        return remoteDBFields;
+    }
+
+    public void setRemoteDBFields(List<String> remoteDBFields) {
+        this.remoteDBFields = remoteDBFields;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+    
+    public void refresh(String activeTab) {
+        this.setActiveTab(activeTab);
+        this.refresh();
+    }
+
+    public String getConnectionString() {
+        return connectionString;
+    }
+
+    public void setConnectionString(String connectionString) {
+        this.connectionString = connectionString;
+    }
+
+    public boolean isUseStatusField() {
+        return useStatusField;
+    }
+
+    public void setUseStatusField(boolean useStatusField) {
+        this.useStatusField = useStatusField;
+    }
+
+    public String getStatusField() {
+        return statusField;
+    }
+
+    public void setStatusField(String statusField) {
+        this.statusField = statusField;
+    }
+
+    public List<String> getStatusFieldValues() {
+        return statusFieldValues;
+    }
+
+    public void setStatusFieldValues(List<String> statusFieldValues) {
+        this.statusFieldValues = statusFieldValues;
+    }
+
+    public String getStatusFieldValue() {
+        return statusFieldValue;
+    }
+
+    public void setStatusFieldValue(String statusFieldValue) {
+        this.statusFieldValue = statusFieldValue;
+    }
+
+    public List<String> getStatusFields() {
+        return statusFields;
+    }
+
+    public void setStatusFields(List<String> statusFields) {
+        this.statusFields = statusFields;
+    }
+
+    public String getOldStatusField() {
+        return oldStatusField;
+    }
+
+    public void setOldStatusField(String oldStatusField) {
+        this.oldStatusField = oldStatusField;
+    }
+
+    public String getOldStatusFieldValue() {
+        return oldStatusFieldValue;
+    }
+
+    public void setOldStatusFieldValue(String oldStatusFieldValue) {
+        this.oldStatusFieldValue = oldStatusFieldValue;
     }
     
     @Override

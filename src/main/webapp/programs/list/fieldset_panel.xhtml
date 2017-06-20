@@ -42,6 +42,7 @@
                 </div>
                 <!--Test the timeline gadget-->
                 <div class="row">
+                    
                     <table id="fieldset_table" class="table" >
                         <tbody>
                             <tr><!--column headers-->
@@ -66,8 +67,6 @@
                             </tr>
 
                             <c:forEach items="#{FormListFieldSet.fieldList}" var="field">
-
-
                                 <tr>
                                     <c:choose>
                                         <c:when test="#{field.SNO == 1 and field.FIELD_NAME == 'Email'}">

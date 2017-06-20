@@ -1,0 +1,32 @@
+##
+# Purpose:
+# This is to add the column DATA_TYPE into the primary keys of all EnterpriseData table.
+#
+
+## 1. Get all tables belonging to EnterpriseData type
+
+SELECT A.NAME as table_name
+FROM
+	(SELECT TABLE_NAME as NAME, COUNT(TABLE_NAME) as C
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE COLUMN_NAME IN ('OWNER','START_DATE','END_DATE','SNO')
+        AND TABLE_SCHEMA='segmail'
+	GROUP BY TABLE_NAME) A
+WHERE 
+	C >= 4
+
+## 2. Create the DATA_TYPE column for each of the tables, if not already exists
+ALTER TABLE <table_name> ADD `DATA_TYPE` VARCHAR(255) NULL;
+
+## 3. Add DATA_TYPE to the primary key
+ALTER TABLE <table_name>
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(
+     `START_DATE`,
+     `SNO`,
+     `END_DATE`,
+     `OWNER`,
+     `DATA_TYPE`);
+
+## 4. Set the DATA_TYPE column name to the java class name
+UPDATE <table_name> SET `DATA_TYPE` = '<Java_class_name>'

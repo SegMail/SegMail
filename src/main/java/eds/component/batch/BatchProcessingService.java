@@ -74,8 +74,8 @@ public class BatchProcessingService {
         for(BatchJobRun run : nextNJobs) {
             //Fire and forget
             //execService.executeJob(run);
-            jobCont.read(run.getRUN_KEY())
-                .execute(DateTime.now());
+            jobCont.read(run.getRUN_KEY());
+            jobCont.execute(DateTime.now());
         }
 
     }

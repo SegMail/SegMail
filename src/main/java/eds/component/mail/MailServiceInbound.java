@@ -8,7 +8,6 @@ package eds.component.mail;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.simpleemail.model.NotificationType;
 import com.amazonaws.services.sqs.AmazonSQSClient;
-import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.GetQueueUrlRequest;
 import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.Message;
@@ -18,7 +17,6 @@ import eds.component.GenericObjectService;
 import eds.component.client.ClientAWSService;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
-import static eds.entity.mail.EMAIL_PROCESSING_STATUS.BOUNCED;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.io.StringReader;
@@ -39,8 +37,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.subscription.SUBSCRIBER_STATUS;
-import segmail.entity.subscription.SubscriberAccount;
 
 /**
  *

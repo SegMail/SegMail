@@ -345,13 +345,13 @@ public class BatchJobContainer extends DBService {
      */
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public Future<BatchJobContainer> execute(DateTime startTime) {
+    public void execute(DateTime startTime) {
         BatchJobRun oneAndOnlyRun;
         try {
             oneAndOnlyRun = getOneAndOnlyRun();
         } catch (BatchProcessingException ex) {
             this.ex = ex;
-            return new AsyncResult<>(this);
+            return;// new AsyncResult<>(this);
         }
         //Send to an external service to update the status of the job
         //This is the only operation that requires a separate transaction because
@@ -383,7 +383,7 @@ public class BatchJobContainer extends DBService {
             helper.logErrors(oneAndOnlyRun,ex); 
         }
         
-        return new AsyncResult<>(this);
+        return;// new AsyncResult<>(this);
     }
     
     /**

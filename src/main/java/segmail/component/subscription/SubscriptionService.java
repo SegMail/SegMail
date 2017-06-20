@@ -24,6 +24,7 @@ import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,7 @@ import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.UNSUBSCRIBED;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
@@ -444,6 +446,7 @@ public class SubscriptionService {
         return newOrExistingAcc;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Subscription> getSubscriptions(String subscriberEmail, long listId, SUBSCRIPTION_STATUS[] statusList) {
         CriteriaBuilder builder = this.objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
@@ -473,7 +476,18 @@ public class SubscriptionService {
         return results;
     }
 
+    /**
+     * 
+     * @param subscriberEmails if null or empty, an empty list will be returned.
+     * @param listId
+     * @param statusList Null or empty to retrieve all
+     * @return 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Subscription> getSubscriptionsByEmails(List<String> subscriberEmails, long listId, SUBSCRIPTION_STATUS[] statusList) {
+        if(subscriberEmails == null || subscriberEmails.isEmpty())
+            return new ArrayList<>();
+        
         CriteriaBuilder builder = this.objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Subscription> query = builder.createQuery(Subscription.class);
         Root<SubscriberAccount> fromSubscriber = query.from(SubscriberAccount.class);
@@ -552,7 +566,8 @@ public class SubscriptionService {
     }
 
     /**
-     * Remove the Subscription record identified by unsubKey
+     * Remove the Subscription record identified by unsubKey and updates all 
+     * lists counts.
      * 
      * @param unsubKey
      * @return
@@ -569,7 +584,8 @@ public class SubscriptionService {
 
         List<Long> listIds = new ArrayList<>();
         for (Subscription sub : results) {
-            updService.getEm().remove(sub);
+            sub.setSTATUS(UNSUBSCRIBED);
+            sub = (Subscription) updService.merge(sub);
             if (!listIds.contains(sub.getTARGET().getOBJECTID())) {
                 listIds.add(sub.getTARGET().getOBJECTID());
             }
@@ -746,7 +762,7 @@ public class SubscriptionService {
     @Asynchronous
     //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public Future<Integer> updateSubscriberCount(long listId) {
+    public void updateSubscriberCount(long listId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
         Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
@@ -767,7 +783,6 @@ public class SubscriptionService {
         int result = objService.getEm().createQuery(query)
                 .executeUpdate();
 
-        return new AsyncResult<>(result);
     }
 
     /**
@@ -780,18 +795,11 @@ public class SubscriptionService {
      */
     //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public int updateAllSubscriberCountForClient(long clientId) {
+    public void updateAllSubscriberCountForClient(long clientId) {
         List<SubscriptionList> lists = listService.getAllListForClient(clientId);
-        int result = 0;
         for (SubscriptionList list : lists) {
-            try {
-                result += updateSubscriberCount(list.getOBJECTID()).get();
-            } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(SubscriptionService.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            updateSubscriberCount(list.getOBJECTID());
         }
-
-        return result;
     }
 
     /**
@@ -842,7 +850,7 @@ public class SubscriptionService {
     /**
      * 1) Updates SubscriberAccount.SUBSCRIBER_STATUS
      *
-     * @param subscribers
+     * @param subscribers List of bounced email address.
      * @param clientId
      * @return
      */
@@ -1069,5 +1077,64 @@ public class SubscriptionService {
         }
         
         return finalResults;
+    }
+    
+    /**
+     * Returns the next (size) subscribers of a list sorted by the EMAIL field ascending.
+     * 
+     * @param listId
+     * @param start
+     * @param size
+     * @return 
+     */
+    public List<SubscriberAccount> getNextNSubscribers(long listId, int start, int size) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
+        Root<SubscriberAccount> fromAcc = query.from(SubscriberAccount.class);
+        Root<Subscription> fromSubsc = query.from(Subscription.class);
+        
+        query.select(fromAcc);
+        query.where(
+                builder.and(
+                        builder.equal(fromSubsc.get(Subscription_.TARGET), listId),
+                        builder.equal(fromAcc.get(SubscriberAccount_.OBJECTID), fromSubsc.get(Subscription_.SOURCE))
+                )
+        );
+        query.orderBy(builder.asc(fromAcc.get(SubscriberAccount_.EMAIL)));
+        
+        List<SubscriberAccount> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    /**
+     * Note:
+     * - Converts all email addresses to lowercases
+     * @param subscribers
+     * @param emailKey
+     * @return 
+     */
+    public Collection<Map<String, Object>> mergeDuplicates(List<Map<String, Object>> subscribers, String emailKey) {
+        Map<String,Map<String, Object>> results = new HashMap<>();
+        
+        for(Map<String, Object> subscriber : subscribers) {
+            
+            String email = ((String) subscriber.get(emailKey)).toLowerCase();
+            Map<String, Object> newSubscriber = new HashMap<>();
+            if (results.containsKey(email)) {
+                //If results already contain the subscriber, retrieve it
+                newSubscriber = results.get(email);
+            }
+            
+            for(String key : subscriber.keySet()) {
+                //Just dump everything, override any existing fields and adding new fields
+                newSubscriber.put(key, subscriber.get(key));
+            }
+            
+            results.put(email, newSubscriber);
+        }
+        
+        return results.values();
     }
 }

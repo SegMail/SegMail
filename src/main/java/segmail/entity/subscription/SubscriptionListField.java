@@ -5,9 +5,7 @@
  */
 package segmail.entity.subscription;
 
-import eds.entity.audit.AuditedObjectListener;
 import eds.entity.data.EnterpriseData;
-import eds.entity.data.EnterpriseDataListener;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
@@ -25,7 +23,15 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
     
     private boolean MANDATORY;
     private String FIELD_NAME;
-    private String KEY_NAME; //Immutable name to retrieve for a SubscriberFieldValue
+    /**
+     * Immutable name to retrieve for a SubscriberFieldValue
+     * 
+     * [2017.04.18] It is impossible to have an immutable name stored because over 
+     * the course of its lifecycle, a field gets deleted, recreated, and modified.
+     * Instead, the EnterpriseData.generateKey() method is used to identify it.
+     * It changes very often so there is no point storing it.
+     */
+    private String KEY_NAME; 
     private String TYPE;
     private String DESCRIPTION;
     
