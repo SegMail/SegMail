@@ -162,16 +162,18 @@ public class DatasourceService {
             
             syncNew(datasource, mappings, datasource.getNEXT_SYNC_NEW_INDEX(), SYNC_REC_BATCH_SIZE,
                     //If 1st sync for this list, use NUM_BATCHES_1ST. Else, NUM_BATCHES_SUB.
-                    (datasource.getSYNC_NEW_CYCLES() == 0) ?
-                            NUM_BATCHES_1ST : NUM_BATCHES_SUB);
-            
+                    NUM_BATCHES_SUB
+                    //(datasource.getSYNC_NEW_CYCLES() == 0) ?
+                    //        NUM_BATCHES_1ST : NUM_BATCHES_SUB
+            );
             
             //Then the removed subscribers
             syncRemoved(datasource, mappings, datasource.getNEXT_SYNC_REMOVE_INDEX(), SYNC_REC_BATCH_SIZE,
                     //If 1st sync for this list, use NUM_BATCHES_1ST. Else, NUM_BATCHES_SUB.
-                    (datasource.getNEXT_SYNC_REMOVE_INDEX() == 0) ?
-                            NUM_BATCHES_1ST : NUM_BATCHES_SUB);
-            
+                    NUM_BATCHES_SUB
+                    //(datasource.getNEXT_SYNC_REMOVE_INDEX() == 0) ?
+                    //        NUM_BATCHES_1ST : NUM_BATCHES_SUB);
+            );
         } catch (SQLException ex) {
             Logger.getLogger(DatasourceService.class.getName()).log(Level.SEVERE, null, ex);
             //Update sync status
