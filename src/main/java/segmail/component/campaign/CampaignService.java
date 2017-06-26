@@ -763,6 +763,7 @@ public class CampaignService {
         CriteriaQuery<String> query = builder.createQuery(String.class);
         Root<Trigger_Email_Activity> fromActivity = query.from(Trigger_Email_Activity.class);
         
+        query.distinct(true);
         query.select(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
         query.where(builder.equal(fromActivity.get(Trigger_Email_Activity_.TRIGGERING_OBJECT),campaignActivityId));
         query.orderBy(builder.asc(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL)));
@@ -906,5 +907,26 @@ public class CampaignService {
         //updService.persist(copy);
         
         return copy;
+    }
+
+    public List<String> getSentEmails(long campaignActivityId, List<String> sent) {
+        if(sent == null || sent.isEmpty())
+            return new ArrayList<>();
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<String> query = builder.createQuery(String.class);
+        Root<Trigger_Email_Activity> fromActivity = query.from(Trigger_Email_Activity.class);
+        
+        //query.distinct(true);//We don't need distinct here as there is no result limit and we want to eliminate case sensitivity for duplicate emails.
+        query.select(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL));
+        query.where(builder.and(
+                builder.equal(fromActivity.get(Trigger_Email_Activity_.TRIGGERING_OBJECT),campaignActivityId),
+                fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL).in(sent)
+        ));
+        query.orderBy(builder.asc(fromActivity.get(Trigger_Email_Activity_.SUBCRIBER_EMAIL)));
+        
+        List<String> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
     }
 }

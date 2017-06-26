@@ -21,19 +21,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.joda.time.DateTime;
 import seca2.component.landing.LandingServerGenerationStrategy;
@@ -346,22 +342,17 @@ public class BatchJobContainer extends DBService {
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void execute(DateTime startTime) {
-        BatchJobRun oneAndOnlyRun;
-        try {
-            oneAndOnlyRun = getOneAndOnlyRun();
-        } catch (BatchProcessingException ex) {
-            this.ex = ex;
-            return;// new AsyncResult<>(this);
-        }
-        //Send to an external service to update the status of the job
-        //This is the only operation that requires a separate transaction because
-        //we don't know when the job will finish executing and while the job is 
-        //executing, we don't want other jobs to accidentally pick it up and process
-        //it again.
-        //Potential use of CompletableFuture here
-        helper.pushToStartStatus(oneAndOnlyRun,startTime);
+        BatchJobRun oneAndOnlyRun = null;
         
         try {
+            oneAndOnlyRun = getOneAndOnlyRun();
+            //Send to an external service to update the status of the job
+            //This is the only operation that requires a separate transaction because
+            //we don't know when the job will finish executing and while the job is 
+            //executing, we don't want other jobs to accidentally pick it up and process
+            //it again.
+            //Potential use of CompletableFuture here
+            helper.pushToStartStatus(oneAndOnlyRun,startTime);
             for (BatchJobStep step : steps) {
             
                 Object ret = step.execute();
@@ -382,8 +373,6 @@ public class BatchJobContainer extends DBService {
             //Update the job with ERROR status
             helper.logErrors(oneAndOnlyRun,ex); 
         }
-        
-        return;// new AsyncResult<>(this);
     }
     
     /**

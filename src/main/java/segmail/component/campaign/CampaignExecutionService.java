@@ -148,8 +148,8 @@ public class CampaignExecutionService {
                     subscribers, clientLists, targetListFields);
             count += increment;
         }
-        
-        helper.updateActivityStatus(campaignActivity);
+        if(increment <= 0)
+            helper.updateActivityStatus(campaignActivity,ACTIVITY_STATUS.COMPLETED);
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -195,10 +195,15 @@ public class CampaignExecutionService {
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean continueCampaignActivity(long campaignActivityId) {
-        long targeted = campService.countTargetedSubscribersForActivity(campaignActivityId);
+        /*long targeted = campService.countTargetedSubscribersForActivity(campaignActivityId);
         long sent = campService.countEmailsSentForActivity(campaignActivityId);
         
-        return sent <= targeted;
+        return sent <= targeted;*/
+        CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
+        if(activity == null)
+            return false;
+        
+        return !ACTIVITY_STATUS.COMPLETED.name.equals(activity.getSTATUS());
     }
     
     /**
