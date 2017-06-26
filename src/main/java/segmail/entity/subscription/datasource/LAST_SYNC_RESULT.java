@@ -15,7 +15,8 @@ public enum LAST_SYNC_RESULT {
     INCOMPLETE("INCOMPLETE"),
     CONN_ERROR("CONN_ERROR"),
     NO_MAPPING("NO_MAPPING"),
-    NO_CLIENT("NO_CLIENT");
+    NO_CLIENT("NO_CLIENT"),
+    UNKNOWN_ERROR("UNKNOWN_ERROR");
     
     public final String label;
     

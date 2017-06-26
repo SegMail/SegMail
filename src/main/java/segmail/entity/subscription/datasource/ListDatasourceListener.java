@@ -17,14 +17,12 @@ public class ListDatasourceListener {
     
     @PrePersist
     public void prePersist(ListDatasource ld) {
-        //updateURL(ld);
-        updatePort(ld);
+        
     }
     
     @PreUpdate
     public void preUpdate(ListDatasource ld) {
-        //updateURL(ld);
-        updatePort(ld);
+        
     }
     
     /**

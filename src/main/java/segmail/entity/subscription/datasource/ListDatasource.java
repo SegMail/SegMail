@@ -92,6 +92,8 @@ public class ListDatasource extends EnterpriseData<SubscriptionList> {
      */
     private int NEXT_SYNC_NEW_INDEX;
     
+    private int NEXT_SYNC_REMOVE_INDEX;
+    
     /**
      * This represents the number of times the entire list has been run through
      * for syncing newly-added subscribers.
@@ -282,6 +284,14 @@ public class ListDatasource extends EnterpriseData<SubscriptionList> {
     
     public void setLAST_SYNC_MESSAGE(LAST_SYNC_RESULT message) {
         this.LAST_SYNC_MESSAGE = message.label;
+    }
+
+    public int getNEXT_SYNC_REMOVE_INDEX() {
+        return NEXT_SYNC_REMOVE_INDEX;
+    }
+
+    public void setNEXT_SYNC_REMOVE_INDEX(int NEXT_SYNC_REMOVE_INDEX) {
+        this.NEXT_SYNC_REMOVE_INDEX = NEXT_SYNC_REMOVE_INDEX;
     }
 
     @Override

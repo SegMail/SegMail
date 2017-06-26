@@ -87,7 +87,9 @@ public class MassSubscriptionService {
      * will be retained.
      *
      *
-     * @param subscribers
+     * @param client
+     * @param subscribersMap
+     * @param list
      * @param doubleOptin Sends confirmation emails and set status to NEW if true; does not send and status to CONFIRMED if false.
      * @return a Map of error messages and their records. A list of possible
      * error messages:

@@ -73,12 +73,29 @@ public class DatasourceService {
     @EJB SubscriptionService subService;
     @EJB DatasourceServiceHelper helper;
     
+    /**
+     * Updates mapping and also the 1st field as the key field, as the first field
+     * of any list is always the Email field.
+     * 
+     * @param listId
+     * @param mappings
+     * @return 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<ListDataMapping> refreshDataMappings(long listId, List<ListDataMapping> mappings) {
         updService.deleteAllEnterpriseDataByType(listId, ListDataMapping.class);
         
         for(ListDataMapping mapping : mappings) {
             updService.persist(mapping);
+        }
+        
+        //set the key field for this datasource
+        //Always use the first one
+        List<ListDatasource> dsList = objService.getEnterpriseData(listId, ListDatasource.class);
+        if(dsList != null && !dsList.isEmpty()) {
+            ListDatasource ds = dsList.get(0);
+            ds.setKEY_FIELD(mappings.get(0).getFOREIGN_NAME());
+            ds = (ListDatasource) updService.merge(ds);
         }
         
         return mappings;
@@ -113,11 +130,7 @@ public class DatasourceService {
     /**
      * Synchronizes the entire list.
      * 
-     * @param datasource
-     * 
-     * @throws eds.component.data.EntityNotFoundException 
-     * @throws eds.component.data.IncompleteDataException 
-     * @throws java.sql.SQLException 
+     * @param datasource 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void syncList(ListDatasource datasource) {
@@ -145,15 +158,17 @@ public class DatasourceService {
                 throw new IncompleteDataException("No data mappings configured for list ID");
             
             //Start with the new subscribers
+            
             syncNew(datasource, mappings, datasource.getNEXT_SYNC_NEW_INDEX(), SYNC_REC_BATCH_SIZE,
                     //If 1st sync for this list, use NUM_BATCHES_1ST. Else, NUM_BATCHES_SUB.
                     (datasource.getSYNC_NEW_CYCLES() == 0) ?
                             NUM_BATCHES_1ST : NUM_BATCHES_SUB);
             
+            
             //Then the removed subscribers
-            syncRemoved(datasource, mappings, datasource.getNEXT_SYNC_NEW_INDEX(), SYNC_REC_BATCH_SIZE,
+            syncRemoved(datasource, mappings, datasource.getNEXT_SYNC_REMOVE_INDEX(), SYNC_REC_BATCH_SIZE,
                     //If 1st sync for this list, use NUM_BATCHES_1ST. Else, NUM_BATCHES_SUB.
-                    (datasource.getSYNC_NEW_CYCLES() == 0) ?
+                    (datasource.getNEXT_SYNC_REMOVE_INDEX() == 0) ?
                             NUM_BATCHES_1ST : NUM_BATCHES_SUB);
             
         } catch (SQLException ex) {
@@ -168,6 +183,10 @@ public class DatasourceService {
             Logger.getLogger(DatasourceService.class.getName()).log(Level.SEVERE, null, ex);
             //Update sync status
             datasource.setLAST_SYNC_MESSAGE(LAST_SYNC_RESULT.NO_CLIENT);
+        } catch (Exception ex) {
+            Logger.getLogger(DatasourceService.class.getName()).log(Level.SEVERE, null, ex);
+            //Update sync status
+            datasource.setLAST_SYNC_MESSAGE(LAST_SYNC_RESULT.UNKNOWN_ERROR);
         } finally {
             datasource.setLAST_SYNC(new java.sql.Timestamp(DateTime.now().getMillis()));
             datasource.setLAST_SYNC_MESSAGE(LAST_SYNC_RESULT.COMPLETE);
@@ -231,73 +250,74 @@ public class DatasourceService {
             }
             deltaCount = objs1.size();
             
-            datasource.setNEXT_SYNC_NEW_INDEX(deltaCount > 0 ? index : 0); //If <= 0, the list has completed and next start should be reset to 0.
-            //datasource = (ListDatasource) updService.merge(datasource); //Flush the updates
+            datasource.setNEXT_SYNC_NEW_INDEX(deltaCount > 0 ? start + size*batchIndex : 0); //If <= 0, the list has completed and next start should be reset to 0.
+            
             
         } while (deltaCount > 0 && batchIndex < batch);
-        
+        datasource.setSYNC_NEW_CYCLES(deltaCount > 0 ? datasource.getSYNC_NEW_CYCLES() : datasource.getSYNC_NEW_CYCLES()+1);
         
         return datasource;
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public void syncRemoved(ListDatasource datasource, 
+    public ListDatasource syncRemoved(ListDatasource datasource, 
             List<ListDataMapping> mappings, 
             int start, 
             int size,
             int batch) throws SQLException, EntityNotFoundException, IncompleteDataException {
         
-        int index = start;
         int deltaCount = 0;
+        int batchIndex = 0;
+        
         do{
             //Get local subscribers already sorted in ascending email order
             List<SubscriberAccount> accounts = subService.getNextNSubscribers(
                     datasource.getOWNER().getOBJECTID(), 
-                    index, 
+                    start + size*batchIndex++, 
                     size);
             Map<String,SubscriberAccount> accountsMap = new HashMap<>();
             accounts.forEach(acc -> {
                 accountsMap.put(acc.getEMAIL(), acc);
             });
             //Get remote subscribers
+            List<String> toBeRemoved = new ArrayList<>(accountsMap.keySet());
             List<ListDatasourceObjectWrapper> objs1 = dsQueryService.getRemoteSubscriberWrappers(
                     datasource, 
                     mappings, 
                     datasource.getKEY_FIELD(), 
-                    new ArrayList<>(accountsMap.keySet()),
+                    toBeRemoved,
                     -1, 
                     -1);
             //For each local subscriber that does not exist in the remote list, unsubscribe it
             //objs1 is a subset of accounts
             //Sort the remote lists first
-            List<String> toBeRemoved = new ArrayList<>();
+            
             Collections.sort(objs1);
-            int i = 0;
-            int j = 0;
-            while (i < accounts.size() && j < objs1.size()) {
-                //If exists
-                if(accounts.get(i).getEMAIL() == null ? objs1.get(j).getId() == null : accounts.get(i).getEMAIL().equals(objs1.get(j).getId())) {
-                    i++;
-                    j++;
-                    continue;
-                }
-                //If doesn't exist
-                toBeRemoved.add(accounts.get(i).getEMAIL());
-                i++;
+            for(String email : accountsMap.keySet()) {
+                objs1.forEach(wrapper -> { 
+                    if(email != null && email.equalsIgnoreCase(wrapper.getId()))
+                        toBeRemoved.remove(email);
+                });
+                
             }
             List<Subscription> subscriptions = subService.getSubscriptionsByEmails(toBeRemoved, datasource.getOWNER().getOBJECTID(), 
                     new SUBSCRIPTION_STATUS[]{ CONFIRMED });
-            subscriptions.forEach(sub -> {
+            for(Subscription sub : subscriptions) {
                 try {
                     subService.unsubscribeSubscriber(sub.getUNSUBSCRIBE_KEY());
                 } catch (RelationshipNotFoundException ex) {
                     Logger.getLogger(DatasourceService.class.getName()).log(Level.SEVERE, null, ex);
-                    
                 }
-            });
+            }
+            deltaCount = accounts.size();
+            datasource.setNEXT_SYNC_REMOVE_INDEX(deltaCount > 0 ? start + size*batchIndex : 0); //If <= 0, the list has completed and next start should be reset to 0.
             
-        } while (deltaCount > 0 && index - start < batch*size);
+            
+        } while (deltaCount > 0 && batchIndex < batch);
         
+        datasource.setSYNC_REMOVE_CYCLES(deltaCount > 0 ? datasource.getSYNC_REMOVE_CYCLES() : datasource.getSYNC_REMOVE_CYCLES()+1);
+        
+        return datasource;
     }
     
     /**

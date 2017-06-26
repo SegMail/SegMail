@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,8 +57,8 @@ public class DatasourceQueryService {
             int start, 
             int max) throws SQLException, IncompleteDataException {
         Connection conn = DatasourceConnectionFactory.getMySQLConnection(ld.getSERVER_NAME(), ld.getDB_NAME(), ld.getUSERNAME(), ld.getPASSWORD());
+        
         try {
-            
             //Construct the field list
             String fieldString = "";
             for(ListDataMapping mapping : mappings) {
@@ -70,7 +69,7 @@ public class DatasourceQueryService {
             
             //Construct query
             String queryString = "";
-            queryString += "SELECT " + fieldString;
+            queryString += "SELECT DISTINCT " + fieldString;
             queryString += " FROM " + ld.getTABLE_NAME();
             
             //WHERE criteria
@@ -79,8 +78,10 @@ public class DatasourceQueryService {
                 String inList = "";
                 for(String in : keyList) {
                     if(inList.length() > 0)
-                        inList += ",";
-                    inList += "'"+in+"'";
+                        inList += ",";   
+                    String cleanedEmail = in.replace("'", "\\'");
+                    
+                    inList += "'"+cleanedEmail+"'";
                 }
                 queryString += " AND "+ld.getKEY_FIELD()+" IN (" + inList + ")";
             }

@@ -285,6 +285,7 @@ public class FormListDatasource {
         
             setDatasourceMappings(refreshed);
             
+            
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Field Mapping updated!", "");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -294,8 +295,6 @@ public class FormListDatasource {
     
     public void tryConnection(boolean force) {
         try {
-            String connStringCurr = getConnectionString();
-            String connStringNew = getNewDatasource().connectionKey();
             if(!force &&
                     (getConnectionString() == null || getNewDatasource().connectionKey()== null
                     || getConnectionString().equals(getNewDatasource().connectionKey()))

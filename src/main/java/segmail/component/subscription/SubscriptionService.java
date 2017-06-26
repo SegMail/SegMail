@@ -29,11 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -585,7 +582,7 @@ public class SubscriptionService {
         List<Long> listIds = new ArrayList<>();
         for (Subscription sub : results) {
             sub.setSTATUS(UNSUBSCRIBED);
-            sub = (Subscription) updService.merge(sub);
+            sub = (Subscription) updService.getEm().merge(sub);
             if (!listIds.contains(sub.getTARGET().getOBJECTID())) {
                 listIds.add(sub.getTARGET().getOBJECTID());
             }
@@ -604,6 +601,8 @@ public class SubscriptionService {
      *
      * @param key
      * @throws eds.component.data.IncompleteDataException
+     * @throws eds.component.data.DataValidationException
+     * @throws eds.component.mail.InvalidEmailException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void retriggerConfirmation(String key)
@@ -760,8 +759,8 @@ public class SubscriptionService {
     }
 
     @Asynchronous
-    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED) //maybe THIS is the bug
     public void updateSubscriberCount(long listId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
@@ -790,8 +789,7 @@ public class SubscriptionService {
      * have more simple queries than to have fewer complex queries and overload
      * the DB.
      *
-     * @param subscribers
-     * @return
+     * @param clientId
      */
     //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -920,11 +918,13 @@ public class SubscriptionService {
      * @param createEnd End criteria of the SubscriberAccount.DATE_CREATED
      * field, null for 31.12.9999
      * @param statuses list of SUBSCRIBER_STATUS, empty or null for all
+     * @param emailSearch
      * @param startIndex the first SubscriberAccount index to start retrieving
      * from (note: not SubscriberFieldValue records)
      * @param maxResults the max number of SubscriberAccount records to retrieve
      * from (note: not SubscriberFieldValue records)
      * @return
+     * @throws eds.component.data.DataValidationException
      */
     public List<SubscriberAccount> getSubscribersForClient(
             long clientId,
@@ -960,6 +960,7 @@ public class SubscriptionService {
      * @param createStart
      * @param createEnd
      * @param statuses
+     * @param emailSearch
      * @return
      * @throws eds.component.data.DataValidationException
      */
@@ -1103,7 +1104,10 @@ public class SubscriptionService {
         query.orderBy(builder.asc(fromAcc.get(SubscriberAccount_.EMAIL)));
         
         List<SubscriberAccount> results = objService.getEm().createQuery(query)
+                .setFirstResult(start)
+                .setMaxResults(size)
                 .getResultList();
+                
         
         return results;
     }
