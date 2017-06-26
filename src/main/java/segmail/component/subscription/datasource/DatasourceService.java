@@ -34,6 +34,7 @@ import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
@@ -274,7 +275,8 @@ public class DatasourceService {
             List<SubscriberAccount> accounts = subService.getNextNSubscribers(
                     datasource.getOWNER().getOBJECTID(), 
                     start + size*batchIndex++, 
-                    size);
+                    size,
+                    new SUBSCRIPTION_STATUS[]{ NEW,CONFIRMED });
             Map<String,SubscriberAccount> accountsMap = new HashMap<>();
             accounts.forEach(acc -> {
                 accountsMap.put(acc.getEMAIL(), acc);

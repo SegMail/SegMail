@@ -1086,21 +1086,27 @@ public class SubscriptionService {
      * @param listId
      * @param start
      * @param size
+     * @param statusList leave empty or null to omit this criteria
      * @return 
      */
-    public List<SubscriberAccount> getNextNSubscribers(long listId, int start, int size) {
+    public List<SubscriberAccount> getNextNSubscribers(long listId, int start, int size, SUBSCRIPTION_STATUS[] statusList) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromAcc = query.from(SubscriberAccount.class);
         Root<Subscription> fromSubsc = query.from(Subscription.class);
         
         query.select(fromAcc);
-        query.where(
-                builder.and(
-                        builder.equal(fromSubsc.get(Subscription_.TARGET), listId),
-                        builder.equal(fromAcc.get(SubscriberAccount_.OBJECTID), fromSubsc.get(Subscription_.SOURCE))
-                )
-        );
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(builder.equal(fromSubsc.get(Subscription_.TARGET), listId));
+        conditions.add(builder.equal(fromAcc.get(SubscriberAccount_.OBJECTID), fromSubsc.get(Subscription_.SOURCE)));
+        if(statusList != null && statusList.length > 0) {
+            String[] statusNames = new String[statusList.length];
+            for (int i = 0; i < statusList.length; i++) {
+                statusNames[i] = statusList[i].name;
+            }
+            conditions.add(fromSubsc.get(Subscription_.STATUS).in(statusNames));
+        }
+        query.where(conditions.toArray(new Predicate[]{}));
         query.orderBy(builder.asc(fromAcc.get(SubscriberAccount_.EMAIL)));
         
         List<SubscriberAccount> results = objService.getEm().createQuery(query)
