@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 /**
@@ -18,7 +19,11 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="EMAIL")
+@Table(name="EMAIL"
+        ,indexes={
+            @Index(name="MailServiceOutbound",
+                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED")
+        })
 public class Email extends EnterpriseTransaction {
     
     public static final String CREATED_FROM = "CREATED_FROM";

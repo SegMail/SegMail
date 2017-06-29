@@ -17,6 +17,7 @@ import javax.naming.NamingException;
 import javax.persistence.CascadeType;
 import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -88,11 +89,7 @@ public class BatchJobCondition implements Serializable{
         this.PARAMS.add(param);
     }
     
-    @OneToMany(mappedBy="BATCH_JOB_CONDITION")
-    /*@JoinColumns({
-        @JoinColumn(name = "BATCH_JOB_STEP"),
-        @JoinColumn(name = "BATCH_JOB_STEP_ORDER")
-    })*/
+    @OneToMany(mappedBy="BATCH_JOB_CONDITION",fetch=FetchType.EAGER)
     @OrderColumn(name = "PARAM_ORDER")
     public List<BatchJobConditionParam> getPARAMS() {
         return PARAMS;

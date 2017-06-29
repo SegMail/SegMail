@@ -9,6 +9,7 @@ import eds.entity.mail.Email;
 import eds.entity.transaction.EnterpriseTransactionTrigger;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 /**
@@ -20,7 +21,11 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="TRIGGER_EMAIL_ACTIVITY")
+@Table(name="TRIGGER_EMAIL_ACTIVITY"
+        ,indexes = {
+            @Index(name="CampaignServiceGetSentEmails", columnList="TRANSACTION_ID,TRIGGERING_OBJECT,SUBCRIBER_EMAIL")
+        }
+)
 @EntityListeners({
     Trigger_Email_Activity_Listener.class
 })
