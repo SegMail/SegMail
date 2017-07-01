@@ -45,6 +45,8 @@ import org.joda.time.DateTime;
  */
 @Stateless
 public class MailServiceOutbound {
+    
+    final int NUM_RETRIES = 100;
 
     @EJB
     private GenericObjectService objService;
@@ -142,9 +144,13 @@ public class MailServiceOutbound {
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
         } catch (AmazonClientException ex) {
             Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
-            //Retry
-            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
+            //Retry for NUM_RETRIES times
             email.setRETRIES(email.getRETRIES() + 1);
+            if(email.getRETRIES() >= NUM_RETRIES)
+                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
+            else
+                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
+            
         } catch (Throwable ex) {
             Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);

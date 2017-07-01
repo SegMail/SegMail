@@ -80,7 +80,7 @@ public class BatchJobContainerHelper extends DBService {
         return job;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean checkConditions(List<BatchJobCondition> conditions) {
         //Loop through and execute
         //If any condition returns false, don't schedule this batch job
