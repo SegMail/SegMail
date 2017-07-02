@@ -213,6 +213,7 @@ public class CampaignService {
         newActivity.setACTIVITY_GOALS(goals);
         newActivity.setACTIVITY_TYPE(type.name);
         newActivity.setSTATUS(ACTIVITY_STATUS.NEW.name);
+        newActivity.setACTIVITY_CONTENT(""); //To avoid nullpointerexception
         
         validateCampaignActivity(newActivity);
         

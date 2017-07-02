@@ -132,11 +132,12 @@ public class CampaignExecutionHelperService {
      * @param campaignId
      * @param campaignActivityId
      * @param searchStartIndex the nth batch of targeted subscribers that we want to start searching from
+     * this is a wrapper object so that the calling client can retrieve the updated value
      * @param size
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<SubscriberAccount> getUnsentSubscriberEmailsForCampaign(long campaignId, long campaignActivityId, int searchStartIndex, int size) {
+    public List<SubscriberAccount> getUnsentSubscriberEmailsForCampaign(long campaignId, long campaignActivityId, Counter searchStartIndex, int size) {
         
         //New algorithm
         //Select both SubscriberAccount and Trigger_Email_Activity batch by batch, 
@@ -144,34 +145,16 @@ public class CampaignExecutionHelperService {
         List<SubscriberAccount> result = new ArrayList<>();
         List<SubscriberAccount> subscribers = new ArrayList<>();
         
-        int i = searchStartIndex; //For subscribers
-        int j = searchStartIndex; //For sent
         final int BATCH_SIZE = 1000;
         
         //Do not put this in the loop!
         //sent = campService.getSentEmails(campaignActivityId, j++*BATCH_SIZE, BATCH_SIZE); //initial read
         do {
             List<String> targetedEmails = new ArrayList<>();
-            subscribers = campService.getTargetedSubscribers(campaignId, i++*BATCH_SIZE, BATCH_SIZE);
+            subscribers = campService.getTargetedSubscribers(campaignId, searchStartIndex.getValue()*BATCH_SIZE, BATCH_SIZE);
+            searchStartIndex.increment();
             for(SubscriberAccount subscriber : subscribers) {
                 targetedEmails.add(subscriber.getEMAIL());
-                /*String email = subscriber.getEMAIL();
-                //If the email has been sent to already
-                if(sent.contains(email)) {
-                    sent.remove(email);
-                    //Only after a successful remove operation then we reload sent
-                    //If not it is going to reload for each and every one of the subscribers
-                    if(sent.isEmpty())
-                        sent = campService.getSentEmails(campaignActivityId, j++*BATCH_SIZE, BATCH_SIZE);    
-                } 
-                //If the email is not sent to yet, add it in result
-                else {
-                    result.add(subscriber);
-                    //Exit this do while
-                    if(result.size() >= size)
-                        return result;
-                }
-                */
             }
             List<String> sent = campService.getSentEmails(campaignActivityId, targetedEmails);
             //Check if these emails are already sent
@@ -220,7 +203,7 @@ public class CampaignExecutionHelperService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void updateActivityStatus(CampaignActivity activity, ACTIVITY_STATUS status) {
+    public void updateActivityStatus(CampaignActivity activity, ACTIVITY_STATUS status, int lastIndex) {
         /*long targeted = campService.countTargetedSubscribersForActivity(activity.getOBJECTID());
         long sent = campService.countEmailsSentForActivity(activity.getOBJECTID());
         
@@ -229,7 +212,7 @@ public class CampaignExecutionHelperService {
         */
         activity = objService.getEm().merge(activity);
         activity.setSTATUS(status.name);
-        
+        activity.setLAST_INDEX(lastIndex);
     }
     
     /**

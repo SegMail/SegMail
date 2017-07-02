@@ -137,11 +137,13 @@ public class CampaignExecutionService {
          * 2) the end of the list has been reached ie. no more records are being processed
          * in the next call
          */
-        int i = 0; //For subscribers
+        Counter c = new Counter(campaignActivity.getLAST_INDEX()); //For subscribers
         while (count < maxCount && increment > 0) {
             List<SubscriberAccount> subscribers = 
-                    helper.getUnsentSubscriberEmailsForCampaign(
-                            campaign.getOBJECTID(), campaignActivityId, i++, batch_size); //DB hit
+                    helper.getUnsentSubscriberEmailsForCampaign(campaign.getOBJECTID(), 
+                            campaignActivityId, 
+                            c, //updated inside this method
+                            batch_size); //DB hit
             
             increment = this.sendEmails(
                     campaign, campaignActivity,
@@ -149,7 +151,9 @@ public class CampaignExecutionService {
             count += increment;
         }
         if(increment <= 0)
-            helper.updateActivityStatus(campaignActivity,ACTIVITY_STATUS.COMPLETED);
+            helper.updateActivityStatus(campaignActivity,ACTIVITY_STATUS.COMPLETED,c.getValue());
+        else
+            helper.updateActivityStatus(campaignActivity,ACTIVITY_STATUS.EXECUTING,c.getValue());
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -176,21 +180,6 @@ public class CampaignExecutionService {
 
         return results;
 
-    }
-
-    /**
-     * A long query but worth the performance. If a subscriber appears in more
-     * than 1 list, only 1 email will be sent. 1 Email per CampaignActivity per
-     * SubscriberAccount. Only send to Subscriptions with CONFIRMED status.
-     *
-     * @param campaignActivityId
-     * @param startIndex
-     * @param size
-     * @return
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<SubscriberAccount> getUnsentSubscriberEmailsForCampaign(long campaignId, long campaignActivityId, int startIndex, int size) {
-        return helper.getUnsentSubscriberEmailsForCampaign(campaignId, campaignActivityId, startIndex, size);
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -390,5 +379,21 @@ public class CampaignExecutionService {
             href += subscriber.getOBJECTID();
             link.attr("href", href);
         }
+    }
+}
+
+class Counter {
+    int i;
+    
+    Counter(int i) {
+        this.i = i;
+    }
+    
+    int getValue() {
+        return i;
+    }
+    
+    void increment() {
+        i++;
     }
 }

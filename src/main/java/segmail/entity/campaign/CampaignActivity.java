@@ -39,7 +39,7 @@ public class CampaignActivity extends EnterpriseObject {
     private java.sql.Timestamp END_TIME;
     private java.sql.Timestamp CANCEL_TIME;
     
-    
+    private int LAST_INDEX;
 
     public String getACTIVITY_TYPE() {
         return ACTIVITY_TYPE;
@@ -122,6 +122,14 @@ public class CampaignActivity extends EnterpriseObject {
 
     public void setACTIVITY_CONTENT_PREVIEW(String ACTIVITY_CONTENT_PREVIEW) {
         this.ACTIVITY_CONTENT_PREVIEW = ACTIVITY_CONTENT_PREVIEW;
+    }
+
+    public int getLAST_INDEX() {
+        return LAST_INDEX;
+    }
+
+    public void setLAST_INDEX(int LAST_INDEX) {
+        this.LAST_INDEX = LAST_INDEX;
     }
 
     @Override

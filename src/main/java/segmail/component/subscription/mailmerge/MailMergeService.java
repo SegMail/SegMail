@@ -167,7 +167,11 @@ public class MailMergeService {
             return text;
         
         for(String mmTag : fieldValueMap.keySet()){
-            text = text.replace(mmTag, fieldValueMap.get(mmTag));
+            String value = fieldValueMap.get(mmTag);
+            if(value == null)
+                value = "";
+            
+            text = text.replace(mmTag, value);
         }
         
         return text;
