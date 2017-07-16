@@ -352,7 +352,7 @@ public class BatchJobContainer extends DBService {
             //executing, we don't want other jobs to accidentally pick it up and process
             //it again.
             //Potential use of CompletableFuture here
-            helper.pushToStartStatus(oneAndOnlyRun,startTime);
+            oneAndOnlyRun = helper.pushToStartStatus(oneAndOnlyRun,startTime);
             for (BatchJobStep step : steps) {
             
                 Object ret = step.execute();
@@ -364,7 +364,7 @@ public class BatchJobContainer extends DBService {
                 helper.insertLog(log);
             }
             //Update the job with COMPLETED status
-            helper.pushToCompleted(oneAndOnlyRun,DateTime.now());
+            oneAndOnlyRun = helper.pushToCompleted(oneAndOnlyRun,DateTime.now());
             //start scheduling the next job
             schedule(DateTime.now());
             
