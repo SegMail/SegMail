@@ -120,7 +120,7 @@ public class BatchProcessingService {
     }
 
     @Schedule(second = "*/10", minute = "*", hour = "*")
-    public void cron() throws IncompleteDataException {
+    public void cron() {
         
         try {
             boolean processMode = this.getProcessMode();

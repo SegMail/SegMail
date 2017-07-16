@@ -172,6 +172,10 @@ public class FormListDatasource {
         return DATASOURCE_ENDPOINT_TYPE.values();
     }
     
+    public long getSyncHours() {
+        return dsService.getDelay() / (60*60*1000);
+    }
+    
     public String getIP() {
         try {
             InetAddress address = InetAddress.getByName("admin.segmail.io");

@@ -11,6 +11,7 @@ package segmail.entity.subscription;
  */
 public enum FIELD_TYPE {
     TEXT("TEXT"),
+    DATE("DATE"),
     EMAIL("EMAIL");
     
     public final String name;

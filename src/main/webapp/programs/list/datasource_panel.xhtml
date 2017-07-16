@@ -14,10 +14,9 @@
         <div class="col-md-12">
             <p>
                 You can set up Segmail to read Subscriber data from another datasource - a CRM app, CMS app, or even 
-                directly from your own MySQL database.
-                Segmail will read your datasource every hour to retrieve newly added subscribers and add it in your 
-                Segmail list. You will need to setup the mapping between the fields in your Segmail list and the 
-                fields in your datasource. 
+                directly from your own MySQL database. Segmail will read your datasource every #{FormListDatasource.syncHours} 
+                hour to retrieve newly added subscribers and add it in your Segmail list. You will need to setup the 
+                mapping between the fields in your Segmail list and the fields in your datasource. 
             </p>
         </div>
     </div>

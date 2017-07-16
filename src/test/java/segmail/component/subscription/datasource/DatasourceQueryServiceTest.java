@@ -95,6 +95,7 @@ public class DatasourceQueryServiceTest {
         
         mappings = ListDataMapping.initMappingsFromMap(fieldMappings);
         mappings.add(new ListDataMapping("EMAIL",SubscriptionService.DEFAULT_EMAIL_FIELD_NAME,KEY_FIELD,FIELD_TYPE.EMAIL.name));
+        mappings.add(new ListDataMapping("DATE","DATE","dateadd",FIELD_TYPE.DATE.name));
     }
     
     @After

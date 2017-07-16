@@ -50,9 +50,9 @@ import segmail.entity.subscription.datasource.synchronize.ListDatasourceObjectWr
  */
 @Stateless
 public class DatasourceService {
-    
-    public static final long DEFAULT_SYNC_TIME_MS = 60*60*2*1000;
-    public static final String SYNC_TIME_MS_OVERWRITE_KEY = "DatasourceService.SYNC_TIME_MS_OVERWRITE_KEY";
+    public static final long DEFAULT_SYNC_TIME_HR = 2;
+    public static final long DEFAULT_SYNC_TIME_MS = DEFAULT_SYNC_TIME_HR*60*60*1000;
+    public static final String SYNC_TIME_HR_OVERWRITE_KEY = "DatasourceService.SYNC_TIME_HR_OVERWRITE_KEY";
     
     final int SYNC_DS_BATCH_SIZE = 10;
     final int SYNC_REC_BATCH_SIZE = 1000;
@@ -107,11 +107,7 @@ public class DatasourceService {
         int next = 0;
         int index = 0;
         
-        String systemSet = System.getProperty(SYNC_TIME_MS_OVERWRITE_KEY);
-        long delay = DEFAULT_SYNC_TIME_MS;
-        if(systemSet != null && !systemSet.isEmpty()) {
-            delay = Long.parseLong(systemSet);
-        }
+        long delay = getDelay();
         
         do{
             List<ListDatasource> datasources = this.getNextNDatasources(
@@ -414,11 +410,7 @@ public class DatasourceService {
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean checkRunSync(DateTime now, DateTime lastSync) {
-        String systemSet = System.getProperty(SYNC_TIME_MS_OVERWRITE_KEY);
-        long delay = DEFAULT_SYNC_TIME_MS;
-        if(systemSet != null && !systemSet.isEmpty()) {
-            delay = Long.parseLong(systemSet);
-        }
+        long delay = getDelay();
         
         return now.getMillis() - lastSync.getMillis() > delay;
     }
@@ -428,5 +420,15 @@ public class DatasourceService {
         updated = (ListDatasource) updService.merge(updated);
         
         return updated;
+    }
+    
+    public long getDelay() {
+        String systemSet = System.getProperty(SYNC_TIME_HR_OVERWRITE_KEY);
+        long delay = DEFAULT_SYNC_TIME_MS;
+        if(systemSet != null && !systemSet.isEmpty()) {
+            delay = Long.parseLong(systemSet) * 60 * 60 * 1000;
+        }
+        
+        return delay;
     }
 }

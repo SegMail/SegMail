@@ -115,6 +115,8 @@ public class DatasourceQueryService {
                         case EMAIL: result.addValue(localKey, rs.getString(foreignName));
                                     result.setEmail(rs.getString(foreignName));
                                     break;
+                        case DATE : result.addValue(localKey, rs.getDate(foreignName));
+                                    break;
                         case TEXT : 
                         default   : result.addValue(localKey, rs.getString(foreignName));
                                     break;
