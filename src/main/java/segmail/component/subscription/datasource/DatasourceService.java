@@ -294,11 +294,10 @@ public class DatasourceService {
             
             Collections.sort(objs1);
             for(String email : accountsMap.keySet()) {
-                objs1.forEach(wrapper -> { 
+                for(ListDatasourceObjectWrapper wrapper : objs1) {
                     if(email != null && email.equalsIgnoreCase(wrapper.getId()))
                         toBeRemoved.remove(email);
-                });
-                
+                }
             }
             List<Subscription> subscriptions = subService.getSubscriptionsByEmails(toBeRemoved, datasource.getOWNER().getOBJECTID(), 
                     new SUBSCRIPTION_STATUS[]{ CONFIRMED });

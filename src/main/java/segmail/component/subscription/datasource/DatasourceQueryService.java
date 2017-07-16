@@ -101,7 +101,7 @@ public class DatasourceQueryService {
             } else {
                 stmt = conn.prepareStatement(queryString);
             }
-            
+            Logger.getLogger(DatasourceQueryService.class.getName()).log(Level.INFO, queryString, new Integer(0)); //debug
             ResultSet rs = stmt.executeQuery();
             
             List<ListDatasourceObject> results = new ArrayList<>();
@@ -113,7 +113,10 @@ public class DatasourceQueryService {
                     String foreignName = mapping.getFOREIGN_NAME();
                     switch(FIELD_TYPE.valueOf(mapping.getTYPE())) {
                         case EMAIL: result.addValue(localKey, rs.getString(foreignName));
-                                    result.setEmail(rs.getString(foreignName));
+                                    //Only the 1st EMAIL field should be the identifier of this record
+                                    //This is a quick and easy assumption, may not be true!
+                                    if(mapping.getSNO() == 1)
+                                        result.setEmail(rs.getString(foreignName));
                                     break;
                         case DATE : result.addValue(localKey, rs.getDate(foreignName));
                                     break;
