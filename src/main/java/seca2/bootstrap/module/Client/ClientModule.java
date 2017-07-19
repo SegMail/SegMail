@@ -5,8 +5,10 @@
  */
 package seca2.bootstrap.module.Client;
 
+import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import eds.entity.client.Client;
+import eds.entity.client.ContactInfo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class ClientModule extends BootstrapModule implements Serializable {
     @Inject UserSessionContainer sessionContainer;
     
     @EJB ClientService clientService;
+    @EJB GenericObjectService objService;
 
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
@@ -39,6 +42,10 @@ public class ClientModule extends BootstrapModule implements Serializable {
             Client client = clientService.getClientByAssignedUser(sessionContainer.getUser().getOBJECTID());
             
             clientContainer.setClient(client);
+            
+            List<ContactInfo> contacts = objService.getEnterpriseData(client.getOBJECTID(), ContactInfo.class);
+            if(contacts != null && !contacts.isEmpty())
+                clientContainer.setContact(contacts.get(0));
         }
         
         return true;

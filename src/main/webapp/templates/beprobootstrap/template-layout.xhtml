@@ -63,7 +63,10 @@
                     <div class="profile">
                         <img src="img/samples/users/user-30.jpg" />
                         <div class="profile-info">
-                            <a href="#" class="profile-title">Howdy, #{UserSessionContainer.username}</a>
+                            <a href="#" class="profile-title">Howdy#{
+                                (ClientContainer.contact.FIRSTNAME eq null or ClientContainer.contact.FIRSTNAME.length() le 0) 
+                                    ? '!' : ', '.concat(ClientContainer.contact.FIRSTNAME)
+                            }</a>
                             <span class="profile-subtitle">#{UserSessionContainer.usertypeName}</span>
                             <div class="profile-buttons">
                                 <form jsf:id="user_action_menu">

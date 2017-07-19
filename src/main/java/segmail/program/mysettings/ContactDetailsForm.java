@@ -25,6 +25,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserSessionContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -40,6 +41,7 @@ public class ContactDetailsForm {
     
     @Inject private UserSessionContainer userContainer;
     @Inject private MySettingsProgram program;
+    @Inject private ClientContainer clientContainer;
     
     private final String formName = "contact_details_form";
     
@@ -103,7 +105,9 @@ public class ContactDetailsForm {
             newContactInfo.setOWNER(thisClient); //May be null at this point of time
             setContactInfo(newContactInfo);
         }
-            
+        
+        clientContainer.setContact(this.getContactInfo());
+        
     }
     
     public void initUserEmail() {
