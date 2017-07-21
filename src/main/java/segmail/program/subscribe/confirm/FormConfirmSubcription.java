@@ -62,10 +62,11 @@ public class FormConfirmSubcription {
             
             String results = clientService.confirm(key);
             
-            //Ugly hack, could have used JAX-RS and return a redirect response
+            //Ugly hack, could have used JAX-RS and return a redirect response 
+            //Wrong - because we're calling from the server side, we still need to redirect the user explicitly.
             if(results.startsWith("redirect: ")) {
                 String redirectUrl = results.replace("redirect: ", "");
-                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("http://") ){
+                if(!redirectUrl.startsWith("http")){
                     redirectUrl = "http://" + redirectUrl;
                 }
                 FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);

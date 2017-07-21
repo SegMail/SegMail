@@ -92,11 +92,14 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             
             Subscription confirmedSubsc = subService.confirmSubscriber(key);
 
-            int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name);
+            /*int updateResults = transService.updateStatus(key, MAILMERGE_STATUS.PROCESSED.name,MailMergeRequest.class );
 
             if (updateResults <= 0) {
                 throw new RuntimeException("No Transaction was udpated.");
             }
+            */
+            trans.setPROCESSING_STATUS(MAILMERGE_STATUS.PROCESSED.name);
+            trans = transService.mergeTransaction(trans);
             
             SubscriptionList list = confirmedSubsc.getTARGET();
             if(list.getREDIRECT_WELCOME() != null && !list.getREDIRECT_WELCOME().isEmpty()) {
