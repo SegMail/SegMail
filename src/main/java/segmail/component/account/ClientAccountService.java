@@ -5,6 +5,7 @@
  */
 package segmail.component.account;
 
+import eds.component.GenericObjectService;
 import eds.component.client.ClientAWSService;
 import eds.component.client.ClientService;
 import eds.component.data.DataValidationException;
@@ -28,6 +29,8 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,11 +46,14 @@ import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionException;
 import segmail.component.subscription.SubscriptionService;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 
 /**
- *
+ * This is a RESTful service endpoints for all signup services.
+ * 
  * @author LeeKiatHaw
  */
 @Stateless
@@ -63,12 +69,14 @@ public class ClientAccountService {
     @EJB ClientService clientService;
     @EJB ClientAWSService clientAWSService;
     @EJB LandingService landingService;
+    @EJB GenericObjectService objService;
     
     /**
      * 1) Create the UserAccount (username, password, email)
-     * 2) Subscribe to the Segmail list (email, listid, clientid)
+     * 2) Create the ClientAccount and ClientAWSAccount
+     * 3) Subscribe to the Segmail list (email, listid, clientid)
      * 
-     * If the user 
+     * If any one of the parameters are not available, skip the step.
      * 
      * @param subscriptionMap
      * @return
@@ -78,55 +86,54 @@ public class ClientAccountService {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     @RestSecured
     public String createSegmailUserAccount(
             MultivaluedMap<String,String> subscriptionMap) throws IncompleteDataException {
         
-        //To be used in case of EntityExistsException or RelationshipExistsException
-        ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
-        try {
+        //For account creation
+        final String usernameKey = "username";
+        final String passwordKey = "password";
+        final String emailkey = "email";
+        String username = subscriptionMap.getFirst(usernameKey);
+        String password = subscriptionMap.getFirst(passwordKey);
+        String email = subscriptionMap.getFirst(emailkey);
+        
+        //For subscription to list
+        final String listKey = "list";
+        final String clientKey = "client";
+        long listId = Long.parseLong(subscriptionMap.getFirst(listKey));
+        long clientId = Long.parseLong(subscriptionMap.getFirst(clientKey));
+        
+        //Register user account and client account
+        if(username != null && !username.isEmpty()) {
+            UserAccount userAccount = null;
+            try {
+                long userTypeId = userService.getUserTypeByName(SEGMAIL_USER_ACCOUNT_NAME).get(0).getOBJECTID();
+                userAccount = userService.registerUserByUserTypeId(userTypeId, username, password, email);
+            } catch (EntityNotFoundException | DataValidationException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+                return "Error : "+ex.getMessage();
+            } catch (EntityExistsException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+                userAccount = userService.getUserAccountByUsername(username);
+            }
             
-            //Create user account
-            List<UserType> userTypes = userService.getUserTypeByName(SEGMAIL_USER_ACCOUNT_NAME);
-            if(userTypes == null || userTypes.isEmpty())
-                throw new EntityNotFoundException(SEGMAIL_USER_ACCOUNT_NAME+" type not created yet.");
-            long sUserTypeId = userTypes.get(0).getOBJECTID();
-            
-            UserAccount segmailAccount = userService.registerUserByUserTypeId(sUserTypeId, subscriptionMap.getFirst("username"), subscriptionMap.getFirst("password"), subscriptionMap.getFirst("email"));
-            
-            //Create Client
-            ClientType clientType = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE);
-            if(clientType == null)
-                throw new EntityNotFoundException(SEGMAIL_CLIENT_TYPE+" type not created yet.");
-            long clientTypeId = clientType.getOBJECTID();
-            
-            ClientUserAssignment clientAssign = clientService.registerClientForUser(segmailAccount.getOWNER(), clientTypeId);
-            
-            //Update Client attribute
-            ContactInfo newContactInfo = new ContactInfo();
-            newContactInfo.setEMAIL(subscriptionMap.getFirst("email") == null ? "" : subscriptionMap.getFirst("email"));
-            newContactInfo.setFIRSTNAME(subscriptionMap.getFirst("firstname") == null ? "" : subscriptionMap.getFirst("firstname"));
-            newContactInfo.setLASTNAME(subscriptionMap.getFirst("lastname") == null ? "" : subscriptionMap.getFirst("lastname"));
-            newContactInfo.setOWNER(clientAssign.getSOURCE());
-            clientService.createClientContact(newContactInfo);
-            
-            //Create an AWS IAM user for the new user
-            ClientAWSAccount awsAccount = clientAWSService.registerAWSForClient(clientAssign.getSOURCE());
-            
-            //Call subscription service here instead of having the client to call 2 separate transactions
-            List<String> listIds = subscriptionMap.get("list");
-                if(listIds == null || listIds.isEmpty())
-                    throw new IncompleteDataException("No list IDs provided.");
-
-            long listId = Long.parseLong(listIds.get(0));
-            
-            List<String> clientIds = subscriptionMap.get("client");
-            if(clientIds == null || clientIds.isEmpty())
-                throw new IncompleteDataException("No client IDs provided.");
-            
-            clientTypeId = Long.parseLong(clientIds.get(0));
-            
+            ClientUserAssignment clientUserAssign = null;
+            try {
+                long clientTypeId = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE).getOBJECTID();
+                clientUserAssign = clientService.registerClientForUser(userAccount.getOWNER(), clientTypeId);
+            } catch (EntityNotFoundException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (EntityExistsException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (RelationshipExistsException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        //Subscribe
+        if(listId > 0) {
             Map<String,Object> subscriberMap = new HashMap<>();
             for(String key : subscriptionMap.keySet()) {
                 if(subscriptionMap.get(key) == null)
@@ -138,38 +145,70 @@ public class ClientAccountService {
                 
                 subscriberMap.put(key, values.get(0));
             }
-            
-            //Get the list from listKey
-            Subscription subscription = subService.subscribe(clientTypeId, listId, subscriberMap, true);
-            
-            SubscriptionList list = subscription.getTARGET();
-            if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
-                String redirectUrl = list.getREDIRECT_CONFIRM();
-                if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("https://"))
-                    redirectUrl = "http://"+redirectUrl;
+            try {
+                Subscription newSubsc = subService.subscribe(clientId, listId, subscriberMap, true);
                 
-                return "Redirect : "+redirectUrl;
+                //If there is a redirect link, return it
+                SubscriptionList list = newSubsc.getTARGET();
+                if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
+                    String redirectUrl = list.getREDIRECT_CONFIRM();
+                    if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("https://"))
+                        redirectUrl = "http://"+redirectUrl;
+
+                    return "Redirect : "+redirectUrl;
+                }
+                
+            } catch (EntityNotFoundException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SubscriptionException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+                return "Error : "+ex.getMessage();
+            } catch (RelationshipExistsException ex) {
+                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            return Long.toString(clientAssign.getSOURCE().getOBJECTID());
-        } catch (EntityNotFoundException ex) {
-            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            return "Error : "+ex.getMessage();
-        } catch (IncompleteDataException ex) {
-            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            return "Error : "+ex.getMessage();
-        } catch (EntityExistsException | RelationshipExistsException ex) {
-            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            return "Exist : Your account was already created. Please check your email for our confirmation emails and visit <a target=\"_blank\" href=\""+server.getURI()+"\">Our login page</a>";
-        } catch (DataValidationException ex) {
-            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            return "Error : "+ex.getMessage();
-        } catch (SubscriptionException ex) {
-            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            return "Error : "+ex.getMessage();
-        } 
+        }
+        
+        return "Success";
     }
          
-    
+    @Path("segmail/check")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @RestSecured
+    public String checkAccount(MultivaluedMap<String,String> accountMap) {
+        final String emailKey = "email";
+        final String usernameKey = "username";
+        final String clientKey = "client";
+        
+        String email = accountMap.getFirst(emailKey);
+        String username = accountMap.getFirst(usernameKey);
+        String client = accountMap.getFirst(clientKey);
+        long listId = Long.parseLong(accountMap.getFirst("list"));
+        
+        JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
+        
+        if(email != null && !email.isEmpty()) {
+            List<Subscription> subcs = subService.getSubscriptions(email, listId, null);
+            if(subcs == null || subcs.isEmpty()) {
+                //resultObjectBuilder.addNull(emailKey); //Don't put anything
+            } else { // Let the client decide the message to return to the user
+                resultObjectBuilder.add(emailKey, subcs.get(0).getSTATUS());
+            }
+        }
+        
+        if(username != null && !username.isEmpty()) {
+            Boolean userExists = userService.checkUsernameExist(username);
+            resultObjectBuilder.add(usernameKey, userExists.toString());
+        }
+        
+        if(client != null && !client.isEmpty()) {
+            Boolean clientExists = !(clientService.getClientByClientname(client) == null);
+            resultObjectBuilder.add(clientKey, clientExists.toString());
+        }
+        
+        return resultObjectBuilder.build().toString();
+    }
     
 }

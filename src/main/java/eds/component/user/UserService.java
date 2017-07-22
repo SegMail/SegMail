@@ -382,7 +382,7 @@ public class UserService extends DBService {
         }
     }
 
-    
+    //@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public UserAccount getUserAccountByUsername(String username) {
         
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
