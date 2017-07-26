@@ -34,7 +34,11 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.mail.MailServiceOutbound;
 import eds.component.transaction.TransactionNotFoundException;
 import eds.component.transaction.TransactionService;
+import eds.entity.transaction.EnterpriseTransactionTrigger_;
+import eds.entity.transaction.EnterpriseTransaction_;
+import eds.entity.user.PasswordResetRequest_;
 import eds.entity.user.Trigger_Password_User;
+import eds.entity.user.Trigger_Password_User_;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserAccount_;
@@ -706,16 +710,14 @@ public class UserService extends DBService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void resetPassword(String token, String password) throws TransactionNotFoundException {
-        List<Trigger_Password_User> trigs = txService.getTriggerByTxKey(token, PasswordResetRequest.class, Trigger_Password_User.class);
-        
-        if(trigs == null || trigs.isEmpty()) {
+        //2 separate queries are better
+        List<User> users = getUserByPasswordResetToken(token);
+        if(users == null || users.isEmpty())
             throw new TransactionNotFoundException();
-        }
         
-        PasswordResetRequest req = trigs.get(0).getTRIGGERED_TRANSACTION();
-        User user = trigs.get(0).getTRIGGERING_OBJECT();
-        UserAccount acct = this.getUserAccountById(user.getOBJECTID());
+        UserAccount acct = this.getUserAccountById(users.get(0).getOBJECTID());
         
+        PasswordResetRequest req = txService.getTransactionByKey(token, PasswordResetRequest.class);
         //If token is not NEW, also throw a TransactionNotFoundException
         if(!PWD_PROCESSING_STATUS.NEW.label.equalsIgnoreCase(req.getPROCESSING_STATUS()))
             throw new TransactionNotFoundException();
@@ -732,5 +734,25 @@ public class UserService extends DBService {
         req.setPROCESSING_STATUS(PWD_PROCESSING_STATUS.PROCESSED.label);
         
         req = em.merge(req);
+    }
+    
+    public List<User> getUserByPasswordResetToken(String token) {
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<User> query = builder.createQuery(User.class);
+        Root<Trigger_Password_User> fromTg = query.from(Trigger_Password_User.class);
+        Root<PasswordResetRequest> fromReq = query.from(PasswordResetRequest.class);
+        Root<User> fromUser = query.from(User.class);
+        
+        query.select(fromUser);
+        query.where(builder.and(
+                builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_KEY), token),
+                builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_ID), fromTg.get(Trigger_Password_User_.TRIGGERED_TRANSACTION)),
+                builder.equal(fromTg.get(Trigger_Password_User_.TRIGGERING_OBJECT), fromUser.get(User_.OBJECTID))
+        ));
+        
+        List<User> results = em.createQuery(query)
+                .getResultList();
+        
+        return results;
     }
 }
