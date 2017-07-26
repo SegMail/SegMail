@@ -43,9 +43,8 @@ public class ClientModule extends BootstrapModule implements Serializable {
             
             clientContainer.setClient(client);
             
-            List<ContactInfo> contacts = objService.getEnterpriseData(client.getOBJECTID(), ContactInfo.class);
-            if(contacts != null && !contacts.isEmpty())
-                clientContainer.setContact(contacts.get(0));
+            //For displaying user's name on the sidebar
+            setContactInfo();
         }
         
         return true;
@@ -115,4 +114,13 @@ public class ClientModule extends BootstrapModule implements Serializable {
         return true;
     }
 
+    private void setContactInfo(){
+        Client client = clientContainer.getClient();
+        if(client == null)
+            return;
+        
+        List<ContactInfo> contacts = objService.getEnterpriseData(client.getOBJECTID(), ContactInfo.class);
+            if(contacts != null && !contacts.isEmpty())
+                clientContainer.setContact(contacts.get(0));
+    }
 }
