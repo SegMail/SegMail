@@ -5,6 +5,7 @@
  */
 package seca2.program.user;
 
+import eds.component.data.IncompleteDataException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -19,7 +20,13 @@ import seca2.bootstrap.UserSessionContainer;
 import eds.component.user.UserLoginException;
 import eds.component.user.UserService;
 import eds.entity.user.User;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import seca2.component.landing.LandingServerGenerationStrategy;
+import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
+import seca2.entity.landing.ServerInstance;
 import seca2.jsf.custom.messenger.FacesMessenger;
 
 /**
@@ -30,14 +37,16 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @RequestScoped
 public class FormUserLogin {
 
-    @EJB
-    private UserService userService;
-    @Inject private UserSessionContainer userContainer;
+    @EJB UserService userService;
+    @EJB LandingService landingService;
+    @Inject UserSessionContainer userContainer;
 
     private String username;
     private String password;
 
     private final String messageBoxId = "form-user-login";
+    
+    private String webserverURL;
     
     /**
      * This can work only because the variables in this bean was assessed in the xhtml page.
@@ -47,11 +56,22 @@ public class FormUserLogin {
     public void init(){
         FacesContext fc = FacesContext.getCurrentInstance();
         ExternalContext ec = fc.getExternalContext();
-        if(!fc.isPostback() /* && must have some other ways to know this is a timeout*/
-            && !userContainer.isLoggedIn()
+        if(!fc.isPostback()) { /* && must have some other ways to know this is a timeout*/
+            if( !userContainer.isLoggedIn()
                 && (userContainer.getLastProgram() != null && !userContainer.getLastProgram().isEmpty())
                 ){
-            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
+                FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your session has expired. Please login again.", null);
+            }
+            
+            if(webserverURL == null) {
+                try {
+                    ServerInstance webserver = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+                    webserverURL = webserver.getURI();
+                } catch (IncompleteDataException ex) {
+                    Logger.getLogger(FormUserLogin.class.getName()).log(Level.SEVERE, null, ex);
+                    webserverURL = ""; //No big deal, just don't try to set it anymore
+                }
+            }
         }
     }
 
@@ -113,4 +133,11 @@ public class FormUserLogin {
         this.password = password;
     }
 
+    public String getWebserverURL() {
+        return webserverURL;
+    }
+
+    public void setWebserverURL(String webserverURL) {
+        this.webserverURL = webserverURL;
+    }
 }

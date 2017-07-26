@@ -13,11 +13,17 @@ import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.transaction.TransactionNotFoundException;
+import eds.component.transaction.TransactionService;
+import eds.component.user.PWD_PROCESSING_STATUS;
 import eds.component.user.UserService;
 import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.ClientType;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ContactInfo;
+import eds.entity.user.PasswordResetRequest;
+import eds.entity.user.Trigger_Password_User;
+import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserType;
 import java.util.HashMap;
@@ -32,10 +38,16 @@ import javax.ejb.TransactionAttributeType;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import seca2.bootstrap.module.Webservice.REST.RestSecured;
@@ -70,6 +82,7 @@ public class ClientAccountService {
     @EJB ClientAWSService clientAWSService;
     @EJB LandingService landingService;
     @EJB GenericObjectService objService;
+    @EJB TransactionService txService;
     
     /**
      * 1) Create the UserAccount (username, password, email)
@@ -209,6 +222,78 @@ public class ClientAccountService {
         }
         
         return resultObjectBuilder.build().toString();
+    }
+    
+    /**
+     * Initialize the password reseting process
+     * 
+     * @param email
+     * @return 
+     */
+    @Path("segmail/reset/init")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @RestSecured
+    public String resetLoginAccountInit(@QueryParam("email") String email) {
+        
+        try {
+            String token = userService.generatePasswordResetToken(email);
+            
+            return token;
+            
+        } catch (IncompleteDataException ex) {
+            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            return "Error:No servers setup yet, please contact your administrators.";
+        }
+    }
+    
+    /**
+     * 
+     * @param token
+     * @return 
+     */
+    @Path("segmail/reset/retrieve")
+    @GET
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @RestSecured
+    public String retrieveRequest(@QueryParam("token") String token) {
+        PasswordResetRequest req = txService.getTransactionByKey(token, PasswordResetRequest.class);
+        if(PWD_PROCESSING_STATUS.PROCESSED.label.equals(req.getPROCESSING_STATUS()))
+            throw new ForbiddenException("This request has been processed. Please create another one.");
+        
+        return "Valid";
+    }
+    
+    
+    /**
+     * 
+     * @param token
+     * @param password
+     * @return 
+     */
+    @Path("segmail/reset/password")
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @RestSecured
+    public String resetPassword(
+            @QueryParam("token") String token,
+            @QueryParam("password") String password) {
+        
+        try {
+            userService.resetPassword(token, password);
+            
+            return "Success";
+        } catch (TransactionNotFoundException ex) {
+            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new ForbiddenException();
+        }
+        
     }
     
 }

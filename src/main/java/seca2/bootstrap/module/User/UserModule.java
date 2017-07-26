@@ -5,6 +5,7 @@
  */
 package seca2.bootstrap.module.User;
 
+import eds.component.data.IncompleteDataException;
 import seca2.bootstrap.UserSessionContainer;
 import java.io.Serializable;
 import javax.ejb.EJB;
@@ -24,6 +25,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.component.landing.LandingServerGenerationStrategy;
+import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
 
 /**
  *
@@ -34,6 +38,8 @@ public class UserModule extends BootstrapModule implements Serializable {
 
     @EJB
     private UserService userService;
+    @EJB
+    private LandingService landingService;
 
     /**
      * Should we inject or should we put it in InputContext?
@@ -78,6 +84,17 @@ public class UserModule extends BootstrapModule implements Serializable {
         //Regardless pass or fail, just populate first, the next module should correct it
         requestContainer.setViewLocation(defaults.LOGIN_PAGE); //I'm not sure what will happen here, since we have already fowarded the request to this page below
         requestContainer.setTemplateLocation(defaults.LOGIN_PAGE_TEMPLATE);
+        
+        //For login page, set the default WEB server]
+        //This can be used for other programs as well
+        if (userContainer.getDefaultWebServer() == null) {
+            try {
+                userContainer.setDefaultWebServer(landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP));
+            } catch (IncompleteDataException ex) {
+                Logger.getLogger(UserModule.class.getName()).log(Level.SEVERE, null, ex);
+                //No need to raise 
+            }
+        }
 
         //If on login page, forward the request to viewId index.xhtml
         //String loginPath = request.getServletContext().getInitParameter(defaults.LOGIN_PATH);

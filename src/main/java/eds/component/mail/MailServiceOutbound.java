@@ -24,6 +24,8 @@ import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -163,20 +165,6 @@ public class MailServiceOutbound {
         }
     }
 
-    
-    /**
-     *
-     * @param emailContent
-     * @param listId
-     * @return
-     */
-    
-    public String parseEmailContent(String emailContent, long listId) {
-
-        //1. Parse global codes
-        //2. Parse list-defined fields
-        return "";
-    }
 
     /**
      * Puts Email in QUEUED status with scheduleTime. If the processEmailQueue(DateTime) 
@@ -288,4 +276,25 @@ public class MailServiceOutbound {
         
         return add.getVERIFIED_ADDRESS();
     }
+    
+    public void sendQuickMail(
+            String subject, 
+            String body, 
+            String sender, 
+            DateTime dt, 
+            boolean logging,
+            String... recipients) {
+        
+        Email email = new Email();
+        email.setSUBJECT(subject);
+        email.setSENDER_ADDRESS(sender);
+        email.setBODY(body);
+        email.setSCHEDULED_DATETIME(new java.sql.Timestamp(dt.getMillis()));
+        
+        for(String recipient : recipients) {
+            email.addRecipient(recipient);
+        }
+        
+        sendEmailNow(email, logging);
+    } 
 }

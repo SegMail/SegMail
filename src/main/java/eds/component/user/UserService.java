@@ -5,6 +5,7 @@
  */
 package eds.component.user;
 
+import eds.entity.user.PasswordResetRequest;
 import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
@@ -30,6 +31,10 @@ import eds.component.data.HibernateHelper;
 import eds.component.data.IncompleteDataException;
 import eds.component.encryption.EncryptionType;
 import eds.component.encryption.EncryptionUtility;
+import eds.component.mail.MailServiceOutbound;
+import eds.component.transaction.TransactionNotFoundException;
+import eds.component.transaction.TransactionService;
+import eds.entity.user.Trigger_Password_User;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserAccount_;
@@ -37,8 +42,11 @@ import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
 import eds.entity.user.User_;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import org.apache.commons.validator.routines.EmailValidator;
+import seca2.component.landing.LandingServerGenerationStrategy;
+import seca2.component.landing.LandingService;
+import seca2.component.landing.ServerNodeType;
+import seca2.entity.landing.ServerInstance;
 
 /**
  *
@@ -49,14 +57,23 @@ public class UserService extends DBService {
 
     private static final String HASH_KEY = "33150291203315029120";
     private static final int MAX_UNSUCCESS_ATTEMPTS = 3;
+    
+    public static final String PASSWORD_RESET_EMAIL_TYPE = "PASSWORD_RESET";
+    public static final String ADMIN_EMAIL = "support@segmail.io";
 
     @Resource()
     private String US_USER;
 
     @EJB
-    private GenericObjectService objectService;
+    GenericObjectService objectService;
     @EJB
-    private UpdateObjectService updService;
+    UpdateObjectService updService;
+    @EJB
+    MailServiceOutbound mailService;
+    @EJB
+    LandingService landingService;
+    @EJB
+    TransactionService txService;
 
     /**
      * Creates and returns a new UserType entity. If userTypeName is empty or
@@ -623,5 +640,97 @@ public class UserService extends DBService {
         }
 
         return results.get(0); 
+    }
+    
+    /**
+     * 1) Locks the account if it hasn't been locked (to prevent anymore logins other than the person who receives the reset email)
+     * 2) Generate a PasswordResetRequest with TRANSACTION_KEY, along with the Trigger_Password_User link to User
+     * 3) Sends an email to the account holder with a link /reset/[TRANSACTION_KEY]
+     * 4) Returns the key
+     * 
+     * @param email
+     * @return 
+     * @throws eds.component.data.IncompleteDataException 
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public String generatePasswordResetToken(String email) throws IncompleteDataException {
+        //1)
+        UserAccount acct = getUserAccountByContactEmail(email);
+        acct.setUSER_LOCKED(true);
+        acct = em.merge(acct);
+        
+        //2)
+        PasswordResetRequest req = new PasswordResetRequest();
+        req.setPROGRAM(PasswordResetRequest.class.getSimpleName());
+        req.setPROCESSING_STATUS(PWD_PROCESSING_STATUS.NEW.label);
+        em.persist(req);
+        
+        Trigger_Password_User trigger = new Trigger_Password_User();
+        trigger.setTRIGGERED_TRANSACTION(req);
+        trigger.setTRIGGERING_OBJECT(acct.getOWNER());
+        em.persist(trigger);
+        
+        //3)
+        ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
+        String message = "";
+        message += "Hi,";
+        message += "<br>";
+        message += "<br>You have requested a password reset for your Segmail account.";
+        message += "<br>Please click <a target=\"_blank\" href=\""+server.getURI()+"/reset/"+req.getTRANSACTION_KEY()+"\">here</a> to reset your password.";
+        message += "<br>If you did not request this, please ignore this email.";
+        message += "<br>";
+        message += "<br>Regards,";
+        message += "<br>Segmail Administrator";
+        message += "<br>";
+        message += "<br>Segmail - Pay for effective emails, not storage.";
+        
+        mailService.sendQuickMail(
+                "Segmail Password Reset", 
+                message, 
+                ADMIN_EMAIL,
+                DateTime.now(), 
+                true,
+                email);
+        
+        //4)
+        String token = req.getTRANSACTION_KEY();
+        return token;
+        
+    }
+    
+    /**
+     * 
+     * @param token
+     * @param password
+     * @throws TransactionNotFoundException if the token is invalid or not found
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void resetPassword(String token, String password) throws TransactionNotFoundException {
+        List<Trigger_Password_User> trigs = txService.getTriggerByTxKey(token, PasswordResetRequest.class, Trigger_Password_User.class);
+        
+        if(trigs == null || trigs.isEmpty()) {
+            throw new TransactionNotFoundException();
+        }
+        
+        PasswordResetRequest req = trigs.get(0).getTRIGGERED_TRANSACTION();
+        User user = trigs.get(0).getTRIGGERING_OBJECT();
+        UserAccount acct = this.getUserAccountById(user.getOBJECTID());
+        
+        //If token is not NEW, also throw a TransactionNotFoundException
+        if(!PWD_PROCESSING_STATUS.NEW.label.equalsIgnoreCase(req.getPROCESSING_STATUS()))
+            throw new TransactionNotFoundException();
+        
+        //Set new password
+        String hashedPassword = this.getPasswordHash(acct.getUSERNAME(), password, HASH_KEY);
+        acct.setPASSWORD(hashedPassword);
+        //Unlock account
+        acct.setUSER_LOCKED(false);
+        
+        acct = em.merge(acct);
+        
+        //Update the req as PROCESSED
+        req.setPROCESSING_STATUS(PWD_PROCESSING_STATUS.PROCESSED.label);
+        
+        req = em.merge(req);
     }
 }

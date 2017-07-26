@@ -18,6 +18,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import seca2.bootstrap.module.Navigation.MenuItemContainer;
+import seca2.entity.landing.ServerInstance;
 
 /**
  *
@@ -42,6 +43,8 @@ public class UserSessionContainer implements Serializable, ActiveUser {
     
     private List<MenuItemContainer> menu;
     
+    private ServerInstance defaultWebServer;
+    
     @PostConstruct
     public void init(){
         user = null;
@@ -61,6 +64,7 @@ public class UserSessionContainer implements Serializable, ActiveUser {
          * 
          */
         menu = null;
+        defaultWebServer = null;
         
     }
     
@@ -143,6 +147,14 @@ public class UserSessionContainer implements Serializable, ActiveUser {
 
     public void setMenu(List<MenuItemContainer> menu) {
         this.menu = menu;
+    }
+
+    public ServerInstance getDefaultWebServer() {
+        return defaultWebServer;
+    }
+
+    public void setDefaultWebServer(ServerInstance defaultWebServer) {
+        this.defaultWebServer = defaultWebServer;
     }
     
     public void overwriteProgramTitle(String overwriteTitle) {
