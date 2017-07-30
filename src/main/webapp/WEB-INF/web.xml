@@ -8,10 +8,6 @@
         <param-name>javax.faces.FACELETS_LIBRARIES</param-name>
         <param-value>/WEB-INF/seca2-s2.taglib.xml</param-value>
     </context-param>
-    <!--<context-param>
-        <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>
-        <param-value>65535</param-value>
-    </context-param>-->
     <context-param>
         <param-name>primefaces.UPLOADER</param-name>
         <param-value>commons</param-value>
@@ -26,15 +22,6 @@
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
-    <!--non-JSF values-->
-    <!--<context-param>
-        <param-name>INSTALL</param-name>
-        <param-value>tru</param-value>
-    </context-param>-->
-    <!--<context-param>
-        <param-name>RUN_MODE</param-name>
-        <param-value>erp</param-value>
-    </context-param>-->
     <context-param>
         <param-name>LOGIN_PATH</param-name>
         <param-value>/login</param-value>
@@ -135,55 +122,20 @@
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
-        <!--<multipart-config>
-            <location>/tmp</location>
-            <max-file-size>20848820</max-file-size>
-            <max-request-size>418018841</max-request-size>
-            <file-size-threshold>1048576</file-size-threshold>
-        </multipart-config>-->
     </servlet>
     <servlet-mapping>
         <servlet-name>Faces Servlet</servlet-name>
         <url-pattern>/program/*</url-pattern>
         <url-pattern>/login/*</url-pattern>
     </servlet-mapping>
-    <!--<servlet>
-        <servlet-name>WS Servlet</servlet-name>
-        <servlet-class>segmail.program.subscribe.confirm.ConfirmWSServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>WS Servlet</servlet-name>
-        <url-pattern>/ws/*</url-pattern>
-    </servlet-mapping>-->
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
-    <!--<welcome-file-list>
-        <welcome-file>program/index.xhtml</welcome-file>
-    </welcome-file-list>-->
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>
         <!--when u store at client side, session object will not be auto created-->
     </context-param>
-    <!--<filter-mapping>
-        <filter-name>Primefaces Fileupload Filter</filter-name>
-        <servlet-name>facesServlet</servlet-name>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>-->
-    <!--AWS credentials-->
-    <!--<security-constraint>
-        <display-name>SSL</display-name>
-        <web-resource-collection>
-            <web-resource-name>all</web-resource-name>
-            <url-pattern>/*</url-pattern>
-        </web-resource-collection>
-        <user-data-constraint>
-            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-        </user-data-constraint>
-    </security-constraint>-->
 </web-app>

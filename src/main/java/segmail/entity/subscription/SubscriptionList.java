@@ -8,7 +8,6 @@ package segmail.entity.subscription;
 import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -16,7 +15,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST")
-@XmlRootElement
 public class SubscriptionList extends EnterpriseObject {// implements MailSender {
     
     public static final String MM_SUPPORT_EMAIL = "{!support}";

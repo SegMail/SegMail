@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 import segmail.entity.subscription.SubscriptionList;
 
 /**
@@ -20,7 +19,6 @@ import segmail.entity.subscription.SubscriptionList;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST_DATASOURCE")
-@XmlRootElement
 @EntityListeners({
     ListDatasourceListener.class
 })

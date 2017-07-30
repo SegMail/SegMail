@@ -16,7 +16,7 @@ import javax.persistence.Table;
  * @author KH
  */
 @Entity
-@Table(name="MENU_ITEM_ACCESS")
+@Table(name="MENUITEM_ACCESS")
 public class MenuItemAccess extends EnterpriseRelationship<MenuItem,UserType> {
     
     private int MENU_ORDER;

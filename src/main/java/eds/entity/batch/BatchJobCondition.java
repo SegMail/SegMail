@@ -33,7 +33,7 @@ import javax.persistence.Table;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name = "BATCH_JOB_CONDTION")
+@Table(name = "BATCH_JOB_CONDITION")
 public class BatchJobCondition implements Serializable{
     
     private BatchJob BATCH_JOB;

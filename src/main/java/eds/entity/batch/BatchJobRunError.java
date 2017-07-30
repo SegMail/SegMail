@@ -7,16 +7,9 @@ package eds.entity.batch;
 
 import eds.entity.transaction.EnterpriseTransaction;
 import java.io.PrintWriter;
-import java.io.Serializable;
 import java.io.StringWriter;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -41,8 +34,12 @@ public class BatchJobRunError extends EnterpriseTransaction {
     }
 
     public BatchJobRunError(BatchJobRun BATCH_JOB_RUN, Throwable ex) {
-        this.BATCH_JOB_ID = BATCH_JOB_RUN.getBATCH_JOB().getBATCH_JOB_ID();
-        this.BATCH_JOB_RUN_KEY = BATCH_JOB_RUN.getRUN_KEY();
+        //Temporary fix to discover root cause
+        if(BATCH_JOB_RUN != null) {
+            this.BATCH_JOB_ID = BATCH_JOB_RUN.getBATCH_JOB().getBATCH_JOB_ID();
+            this.BATCH_JOB_RUN_KEY = BATCH_JOB_RUN.getRUN_KEY();
+        }
+        
         this.EXCEPTION_CLASS = ex.getClass().getName();
         this.EXCEPTION_MESSAGE = ex.getMessage();
         

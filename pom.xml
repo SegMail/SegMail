@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mycompany</groupId>
-    <artifactId>SegMail</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>io.segmail</groupId>
+    <artifactId>Segmail</artifactId>
+    <version>1.0</version>
     <packaging>war</packaging>
 
-    <name>SegMail</name>
+    <name>Segmail</name>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -30,22 +30,12 @@
             <artifactId>joda-time</artifactId>
             <version>2.3</version>
         </dependency>
-        <!--<dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.35</version>
-        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.10</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>com.ocpsoft</groupId>
-            <artifactId>prettyfaces-jsf2</artifactId>
-            <version>3.3.3</version>
-        </dependency>-->
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
@@ -60,7 +50,7 @@
             <groupId>com.sun.faces</groupId>
             <artifactId>jsf-impl</artifactId>
             <version>2.2.12</version>
-        </dependency><!---->
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>EDS</artifactId>
@@ -80,58 +70,8 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.53</version><!--must update!!-->
+            <version>1.11.53</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.glassfish.main.extras</groupId>
-            <artifactId>glassfish-embedded-all</artifactId>
-            <version>4.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-            <version>1.0.0.CR4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.junit</groupId>
-            <artifactId>arquillian-junit-container</artifactId>
-            <version>1.1.8.Final</version>
-            <scope>test</scope>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Segurl</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
-        
-        <!--For Arquillian unit/integration tests-->
-        <!--<dependency>
-            <groupId>org.jboss.arquillian</groupId>
-            <artifactId>arquillian-bom</artifactId>
-            <version>1.1.10.Final</version>
-            <scope>test</scope>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-            <version>1.0.0.CR4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.junit</groupId>
-            <artifactId>arquillian-junit-container</artifactId>
-            <version>1.1.8.Final</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.extras</groupId>
-            <artifactId>glassfish-embedded-all</artifactId>
-            <version>3.1.1</version>
-            <scope>test</scope>
-        </dependency>-->
         <!--For Arquillian unit/integration tests-->
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -344,7 +284,6 @@
     </dependencies>
     
     <build>
-        <!--<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -374,14 +313,6 @@
                             </directory>
 
                         </resource>
-                        <!--<resource>
-                            <directory>src</directory>
-                            <targetPath>WEB-INF</targetPath>
-                            <includes>
-                                <include>jax-ws-catalog.xml</include>
-                                <include>wsdl/**</include>
-                            </includes>
-                        </resource>-->
                     </webResources>
                 </configuration>
             </plugin>
@@ -415,7 +346,6 @@
                 <version>2.17</version>
             </plugin>
             <plugin>
-                <!--<groupId>org.jvnet.jax-ws-commons</groupId>-->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>2.4</version>

@@ -18,7 +18,6 @@ import javax.persistence.TableGenerator;
  */
 @Entity
 @Table(name="USER")
-//@TableGenerator(name="USER_SEQ",initialValue=1,allocationSize=1,table="SEQUENCE")
 public class User extends EnterpriseObject {
 
     private UserType USERTYPE;

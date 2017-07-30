@@ -15,7 +15,6 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="LAYOUT")
-//@EntityListeners(LayoutListener.class)
 public class Layout extends EnterpriseObject {
 
     private String LAYOUT_NAME;

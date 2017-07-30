@@ -52,6 +52,9 @@ $RECYCLE.BIN/
 *.msp
 
 target/**
-nbactions.xml
-
 src/wsdl/**
+nbactions.xml
+nb-configuration.xml
+
+
+

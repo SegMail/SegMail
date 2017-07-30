@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Can more than 1 Campaign share the same activity???
@@ -19,7 +18,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name="CAMPAIGN_ACTIVITY")
-@XmlRootElement
 public class CampaignActivity extends EnterpriseObject {
     
     private String ACTIVITY_NAME;

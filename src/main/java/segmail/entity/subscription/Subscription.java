@@ -8,7 +8,6 @@ package segmail.entity.subscription;
 import eds.entity.data.EnterpriseRelationship;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -16,7 +15,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name="SUBSCRIPTION")
-@XmlRootElement
 public class Subscription extends EnterpriseRelationship<SubscriberAccount,SubscriptionList> {
 
     private String STATUS;
