@@ -252,7 +252,7 @@ public class FormSubscriberTable {
         List<SubscriptionListField> fields = listService.getFieldsForLists(lists);
         setFieldMap(new HashMap<>());
         for(SubscriptionListField field : fields) {
-            getFieldMap().put(field.getKEY_NAME(), field);
+            getFieldMap().put((String) field.generateKey(), field);//Use generateKey instead of FIELD_KEY because we still have legacy fields that contain the old key type
         }
         
         //We have to do this because of the exceptionally large data from EJBs
