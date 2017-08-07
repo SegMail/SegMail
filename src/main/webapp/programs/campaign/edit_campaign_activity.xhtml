@@ -140,7 +140,7 @@
                     </div>
                     <div class="block-content">
                         <div class="row" style="height:100%">
-                            <h:outputText id="preview" value="#{FormEditEmailActivity.editingActivity.ACTIVITY_CONTENT_PREVIEW}"
+                            <h:outputText id="preview" value="#{FormEditEmailActivity.previewBody}"
                                           escape="false" styleClass="col-md-12">
                             </h:outputText>
                         </div>
@@ -170,11 +170,6 @@
                                         '#{FormEditEmailActivity.mailmergeLinks[link.label()]}'
                                 ],
                             </c:when>
-                        </c:forEach>
-                    };
-                    var randomSubscriber = {
-                        <c:forEach items = "#{FormEditEmailActivity.randomSubscriber.keySet()}" var = "field" >
-                            #{field} : '#{FormEditEmailActivity.randomSubscriber[field]}',
                         </c:forEach>
                     };
                     

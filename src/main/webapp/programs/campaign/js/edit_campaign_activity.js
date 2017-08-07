@@ -74,7 +74,7 @@ var onSave = function (data) {
             setSendInBatch('sendInBatch')
             refresh_summernote('textarea.editor');
             $('.select2').select2();
-            initTextcomplete('.note-editable',mmTags);
+            initTextcomplete('.note-editable',mmTags); //Still experimental and not working
             //Don't show noty when there is no errors, use our custom facesmessenger component
             break;
         case "error":

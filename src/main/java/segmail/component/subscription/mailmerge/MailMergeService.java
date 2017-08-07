@@ -22,6 +22,8 @@ import javax.ejb.TransactionAttributeType;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
@@ -301,6 +303,8 @@ public class MailMergeService {
      * 
      * @param label
      * @return 
+     * @throws eds.component.data.DataValidationException if label is invalid (not a value of @Class MAILMERGE_REQUEST)
+     * @throws eds.component.data.IncompleteDataException if the WEB ServerInstance is not set up properly.
      */
     public String getSystemTestLink(String label) throws DataValidationException, IncompleteDataException{
         MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
@@ -357,5 +361,25 @@ public class MailMergeService {
         ));
         
         return text;
+    }
+    
+    public String parseTestMailmergeLinks(String content) throws DataValidationException, IncompleteDataException {
+        String preview = content;
+        //Mailmerge links - generate test links
+        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
+        for(MAILMERGE_REQUEST mmReq : mmReqs) {
+            String tag = mmReq.label;
+            
+            Element a = new Element(Tag.valueOf("a"),"");
+            a.attr("href", getSystemTestLink(tag));
+            a.html(mmReq.defaultHtmlText);
+            a.attr("target", "_blank");
+            
+            String replacementElem = a.outerHtml();
+            preview = preview.replace(tag, replacementElem);
+            
+        }
+        
+        return preview;
     }
 }

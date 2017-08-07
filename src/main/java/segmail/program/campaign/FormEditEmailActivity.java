@@ -83,6 +83,7 @@ public class FormEditEmailActivity implements FormEditEntity {
             loadOutboundLinks();
             loadCampaignTags();
             loadExtraSubscriberTags();
+            loadPreviewBody();
         }
     }
 
@@ -198,6 +199,14 @@ public class FormEditEmailActivity implements FormEditEntity {
         program.setExtraSubscriberTags(extraSubscriberTags);
     }
     
+    public String getPreviewBody() {
+        return program.getPreviewBody();
+    }
+
+    public void setPreviewBody(String previewBody) {
+        program.setPreviewBody(previewBody);
+    }
+    
     public boolean renderThis() {
         return reqCont.getPathParser().getOrderedParams().size() == 2;
     }
@@ -215,6 +224,7 @@ public class FormEditEmailActivity implements FormEditEntity {
             programSwitch.reloadEntities();
             //Reload all OutboundLinks for the activity
             loadOutboundLinks();
+            loadPreviewBody();
 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
@@ -309,7 +319,7 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     public void loadRandomValues() {
         //Clear it first
-        setRandomSubscriber(new HashMap<String, String>());
+        setRandomSubscriber(null);
 
         if (this.getEditingActivity() == null) {
             return;
@@ -397,5 +407,16 @@ public class FormEditEmailActivity implements FormEditEntity {
         extraSubscriberTags.add(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION);
         
         setExtraSubscriberTags(extraSubscriberTags);
+    }
+    
+    public void loadPreviewBody() {
+        if(getEditingActivity() == null) 
+            return;
+        CampaignActivity activity = getEditingActivity();
+        
+        // So far only the rendering of random subscriber
+        String body = campaignService.parseRandomSubscriber(activity.getACTIVITY_CONTENT_PREVIEW(),getRandomSubscriber(),getListFields());
+        
+        setPreviewBody(body);
     }
 }

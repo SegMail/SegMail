@@ -63,28 +63,25 @@ public class WSAutoresponder {
             @WebParam(name = "subject") String subject,
             @WebParam(name = "body") String body,
             @WebParam(name = "bodyProcessed") String bodyProcessed)
-        throws EntityNotFoundException, IncompleteDataException, EntityExistsException {
+            throws EntityNotFoundException, IncompleteDataException, EntityExistsException, DataValidationException {
 
-        try {
-            AutoresponderEmail autoemail = listCont.getEditingTemplate();
+        AutoresponderEmail autoemail = listCont.getEditingTemplate();
 
-            if (autoemail == null) {
-                throw new EntityNotFoundException("No AutoresponderEmail found.");
-            }
+        if (autoemail == null) {
+            throw new EntityNotFoundException("No AutoresponderEmail found.");
+        }
 
-            autoemail.setSUBJECT(subject);
-            autoemail.setBODY(body);
+        autoemail.setSUBJECT(subject);
+        autoemail.setBODY(body);
         //autoemail.setBODY_PROCESSED(bodyProcessed);
 
-            autoemail = autoemailService.saveAutoEmail(autoemail);
-            listCont.setEditingTemplate(autoemail);
-            
-            DateTime now = DateTime.now();
+        autoemail = autoemailService.saveAutoEmail(autoemail);
+        listCont.setEditingTemplate(autoemail);
 
-            return now.toString("dd-MM-yyyy hh:mm:ss");
-        } catch (Exception ex) {
-            throw ex;
-        }
+        DateTime now = DateTime.now();
+
+        return now.toString("dd-MM-yyyy hh:mm:ss");
+
     }
 
     /**

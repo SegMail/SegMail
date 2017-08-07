@@ -19,6 +19,19 @@
                 </div>
 
                 <div class="modal-body">
+                    <div class="form-group">
+                        <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                     value="#{FormAddSubscriber.assignedLists}" 
+
+                                     >
+                            <f:ajax render="@form" execute="@form"
+                                    event="valueChange" listener="#{FormImportSubscribers.setupImport()}"
+                                    onevent="refreshAddSubsc"></f:ajax>
+                            <f:selectItems value="#{FormAddSubscriber.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                           itemValue="#{list.OBJECTID}">
+                            </f:selectItems>
+                        </h:selectManyListbox>
+                    </div>
                     <c:forEach items="#{FormAddSubscriber.fieldList}" var="field">
                         <div class="form-group">
                             <label>#{field.OWNER.LIST_NAME} - #{field.FIELD_NAME}: </label>

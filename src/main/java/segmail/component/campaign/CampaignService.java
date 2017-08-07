@@ -20,6 +20,7 @@ import eds.entity.client.VerifiedSendingAddress;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -692,7 +693,8 @@ public class CampaignService {
         String processedContent = parseAndUpdateLinks(activity, activity.getACTIVITY_CONTENT());
         
         //Mailmerge links - generate test links
-        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
+        processedContent = mmService.parseTestMailmergeLinks(processedContent);
+        /*MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
         for(MAILMERGE_REQUEST mmReq : mmReqs) {
             String tag = mmReq.label;
             
@@ -704,7 +706,7 @@ public class CampaignService {
             String replacementElem = a.outerHtml();
             processedContent = processedContent.replace(tag, replacementElem);
             
-        }
+        }*/
         
         //Mailmerge tags (with random subscriber)
         //Can't do it here because the exact values will be saved into the DB!
@@ -929,5 +931,18 @@ public class CampaignService {
                 .getResultList();
         
         return results;
+    }
+    
+    public String parseRandomSubscriber(String body, Map<String,String> randomSubscriber, List<SubscriptionListField> fields) {
+        String preview = body;
+        for(String key : randomSubscriber.keySet()) {
+            for(SubscriptionListField field : fields) {
+                if(key.equals(field.generateKey())) {
+                    preview = preview.replace(field.getMAILMERGE_TAG(), randomSubscriber.get(key));
+                }
+            }
+        }
+        
+        return preview;
     }
 }

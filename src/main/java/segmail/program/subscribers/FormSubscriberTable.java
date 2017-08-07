@@ -6,6 +6,7 @@
 package segmail.program.subscribers;
 
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,11 +19,14 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 
 /**
  *
@@ -40,6 +44,8 @@ public class FormSubscriberTable {
     
     @EJB SubscriptionService subService;
     @EJB GenericObjectService objService;
+    @EJB ListService listService;
+    @EJB UpdateObjectService updService;
     
     @Inject ClientContainer clientCont;
     
@@ -103,6 +109,22 @@ public class FormSubscriberTable {
 
     public void setEmailSearch(String emailSearch) {
         program.setEmailSearch(emailSearch);
+    }
+    
+    public List<SubscriptionListField> getFieldList() {
+        return program.getFieldList();
+    }
+
+    public void setFieldList(List<SubscriptionListField> fieldList) {
+        program.setFieldList(fieldList);
+    }
+    
+    public Map<String, SubscriptionListField> getFieldMap() {
+        return program.getFieldMap();
+    }
+
+    public void setFieldMap(Map<String, SubscriptionListField> fieldMap) {
+        program.setFieldMap(fieldMap);
     }
     
     public void loadPage(int page) {
@@ -180,22 +202,32 @@ public class FormSubscriberTable {
         //Construct the subscriberTable
         //Run through values first
         for(SubscriberFieldValue value : values) {
+            // Do not add the first EMAIL field as it is the ID of the Subscriber and cannot be edited!
+            
             if(!program.getSubscriberTable().containsKey(value.getOWNER().getOBJECTID())) {
                 program.getSubscriberTable().put(value.getOWNER().getOBJECTID(), new HashMap<String,Object>());
-                program.getSubscriberTable().get(value.getOWNER().getOBJECTID()).put(SubscriberAccount.class.getName(), value.getOWNER());
+                program.getSubscriberTable().get(value.getOWNER().getOBJECTID()).put(SubscriberAccount.class.getSimpleName(), value.getOWNER());
             }
             
             Map<String,Object> subscriberMap = program.getSubscriberTable().get(value.getOWNER().getOBJECTID());
-            //Another map to hold fields
-            if(!subscriberMap.containsKey(SubscriberFieldValue.class.getName())) {
-                subscriberMap.put(SubscriberFieldValue.class.getName(), new HashMap<String,SubscriberFieldValue>());
+            
+            // Another map to hold fields
+            if(!subscriberMap.containsKey(SubscriberFieldValue.class.getSimpleName())) {
+                subscriberMap.put(SubscriberFieldValue.class.getSimpleName(), new HashMap<String,SubscriberFieldValue>());
+            }
+            Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getSimpleName());
+            fieldMap.put(value.getFIELD_KEY(), value);
+            
+            // Add a list to hold checkbox boolean values
+            if(!subscriberMap.containsKey("checked")) {
+                subscriberMap.put("checked", false); //Default to unchecked when initializing
             }
             
-            Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getName());
-            fieldMap.put(value.getFIELD_KEY(), value);
         }
         
-        //Then run through subscriptions
+        // Then run through subscriptions
+        // Collect SubscriptionLists on the way
+        List<SubscriptionList> lists = new ArrayList<>();
         for(Subscription subscription : subscriptions) {
             if(!program.getSubscriberTable().containsKey(subscription.getSOURCE().getOBJECTID())) {
                 program.getSubscriberTable().put(subscription.getSOURCE().getOBJECTID(), new HashMap<String,Object>());
@@ -211,6 +243,16 @@ public class FormSubscriberTable {
             List<Subscription> subscriptionList = (List<Subscription>) subscriberMap.get(Subscription.class.getName());
             if(!subscriptionList.contains(subscription))
                 subscriptionList.add(subscription);
+            
+            // Collect SubscriptionLists on the way
+            if(!lists.contains(subscription.getTARGET()))
+                lists.add(subscription.getTARGET());
+        }
+        
+        List<SubscriptionListField> fields = listService.getFieldsForLists(lists);
+        setFieldMap(new HashMap<>());
+        for(SubscriptionListField field : fields) {
+            getFieldMap().put(field.getKEY_NAME(), field);
         }
         
         //We have to do this because of the exceptionally large data from EJBs
@@ -238,6 +280,42 @@ public class FormSubscriberTable {
         return Math.min(getTotalPage(), getCurrentPage() + (PAGE_RANGE/2));
     }
     */
+    
+    public SubscriberAccount getSubscriberAccount(long subscriberId) {
+        if(getSubscriberTable().get(subscriberId) == null) {
+            return null;
+        }
+        Map<String,Object> subscriberMap = getSubscriberTable().get(subscriberId);
+        
+        SubscriberAccount acc = (SubscriberAccount) subscriberMap.get(SubscriberAccount.class.getSimpleName());
+        
+        return acc;
+    }
+    
+    public List<Subscription> getSubscriptions(long subscriberId) {
+        if(getSubscriberTable().get(subscriberId) == null) {
+            return null;
+        }
+        Map<String,Object> subscriberMap = getSubscriberTable().get(subscriberId);
+        
+        List<Subscription> subsc = (List<Subscription>) subscriberMap.get(Subscription.class.getSimpleName());
+        
+        return subsc;
+    }
+    
+    public Map<String,SubscriberFieldValue> getSubscriberFieldValueMap(long subscriberId) {
+        if(getSubscriberTable().get(subscriberId) == null) {
+            return null;
+        }
+        Map<String,Object> subscriberMap = getSubscriberTable().get(subscriberId);
+        
+        if(subscriberMap.get(SubscriberFieldValue.class.getSimpleName()) == null) {
+            subscriberMap.put(SubscriberFieldValue.class.getSimpleName(), new HashMap<>());
+        }
+        Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getSimpleName());
+        
+        return fieldMap;
+    }
 
     public void updatePageNumbers() {
         //This shit doesn't work
@@ -250,4 +328,25 @@ public class FormSubscriberTable {
             getPages().add(i);
         }
     }
+    
+    /**
+     * Cannot use this because of some JSF issue.
+     * 
+     * @param subscriberId
+     * @param fieldKey 
+     */
+    public void saveField(long subscriberId, String fieldKey) {
+        
+        Map<String,SubscriberFieldValue> fieldMap = 
+            (Map<String,SubscriberFieldValue>) getSubscriberTable().get(subscriberId)
+                    .get(SubscriberFieldValue.class.getSimpleName());
+        
+        SubscriberFieldValue fieldValue = fieldMap.get(fieldKey);
+        //fieldValue.setVALUE(value);
+        
+        fieldValue = (SubscriberFieldValue) updService.merge(fieldValue);
+        
+        fieldMap.put(fieldValue.getFIELD_KEY(), fieldValue);
+    }
+    
 }

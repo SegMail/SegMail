@@ -75,6 +75,8 @@ public class ProgramCampaign extends Program{
     
     private List<String> extraSubscriberTags;
     
+    private String previewBody;
+    
     @Override
     public void clearVariables() {
         
@@ -272,5 +274,13 @@ public class ProgramCampaign extends Program{
 
     public void setExtraSubscriberTags(List<String> extraSubscriberTags) {
         this.extraSubscriberTags = extraSubscriberTags;
+    }
+
+    public String getPreviewBody() {
+        return previewBody;
+    }
+
+    public void setPreviewBody(String previewBody) {
+        this.previewBody = previewBody;
     }
 }

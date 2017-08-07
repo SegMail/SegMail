@@ -45,7 +45,8 @@ var validateFields = function() {
     var stop = false;
     var elems = $('#field_selector select');
     $('#field_selector select').each(function(i){
-        if($(this).prop('required')) {
+        var required = $(this).data('required');
+        if($(this).data('required')) {
             $(this).siblings('label.control-label').remove();
             if(!$(this).val()) {
                 stop = true;
@@ -577,6 +578,7 @@ function refreshImport(data) {
             //block_refresh(block);
             bindFileInput();
             initUIElem();
+            refresh_select2();
             break;
     }
 };

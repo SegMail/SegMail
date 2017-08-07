@@ -41,6 +41,7 @@ public class ProgramSubscribers extends Program {
     private List<SubscriptionListField> fieldList;
     private List<SubscriptionList> selectedLists;
     private Map<String,Object> fieldValues;
+    private Map<String,SubscriptionListField> fieldMap;
 
     public String getEmailSearch() {
         return emailSearch;
@@ -140,6 +141,14 @@ public class ProgramSubscribers extends Program {
 
     public void setSubscriberTable(Map<Long,Map<String,Object>> subscriberTable) {
         this.subscriberTable = subscriberTable;
+    }
+
+    public Map<String, SubscriptionListField> getFieldMap() {
+        return fieldMap;
+    }
+
+    public void setFieldMap(Map<String, SubscriptionListField> fieldMap) {
+        this.fieldMap = fieldMap;
     }
 
     @Override

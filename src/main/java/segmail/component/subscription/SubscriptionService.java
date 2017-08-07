@@ -1148,4 +1148,21 @@ public class SubscriptionService {
         return results.values();
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int updateFieldValue(long subscriberId, String fieldKey, String fieldValue) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaUpdate<SubscriberFieldValue> query = builder.createCriteriaUpdate(SubscriberFieldValue.class);
+        Root<SubscriberFieldValue> fromValue = query.from(SubscriberFieldValue.class);
+        
+        query.set(fromValue.get(SubscriberFieldValue_.VALUE), fieldValue);
+        query.where(builder.and(
+                builder.equal(fromValue.get(SubscriberFieldValue_.OWNER), subscriberId),
+                builder.equal(fromValue.get(SubscriberFieldValue_.FIELD_KEY), fieldKey)
+        ));
+        
+        int result = objService.getEm().createQuery(query)
+                .executeUpdate();
+        
+        return result;
+    }
 }

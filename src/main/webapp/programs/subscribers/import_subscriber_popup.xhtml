@@ -27,6 +27,19 @@
                                       class="form-group"></s2:messenger>
                     </div>
                     <div class="form-group">
+                        <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                     value="#{FormImportSubscribers.assignedLists}" 
+                                     
+                                     >
+                            <f:ajax render="@form" execute="@form"
+                                    event="valueChange" listener="#{FormImportSubscribers.setupImport()}"
+                                    onevent="refreshImport"></f:ajax>
+                            <f:selectItems value="#{FormImportSubscribers.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                           itemValue="#{list.OBJECTID}">
+                            </f:selectItems>
+                        </h:selectManyListbox>
+                    </div>
+                    <div class="form-group">
                         <label>
                             Upload a file
                         </label>
@@ -53,8 +66,8 @@
                                 <label>#{field.OWNER.LIST_NAME} - #{field.FIELD_NAME}: </label>
                                 <div class="form-group">
                                     <select id="#{field.generateKey()}"
-                                            required="#{field.MANDATORY}"
-                                            style="width: 50%;" class="select2"
+                                            data-required="#{field.MANDATORY}"
+                                            style="width: 50%;" class="select2 "
                                             >
                                     </select>
                                 </div>

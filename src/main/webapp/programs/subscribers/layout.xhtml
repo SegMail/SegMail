@@ -8,46 +8,43 @@
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
-      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
         <ui:define name="main-program-panel">
             <div class="row">
-                <div class="col-md-4">
-                    <div class="block">
-                        <ui:include src="subscription_lists.xhtml" ></ui:include>
-                    </div>
-
-                </div>
-                <div class="col-md-4">
-                    <div class="block">
-                        <ui:include src="subscriber_status.xhtml"></ui:include>
-                    </div>
-
-                </div>
-                <div class="col-md-4">
-                    <div class="block">
-                        <div class="block-head">
-                            <h2>
-                                Mass operations
-                            </h2>
-                        </div>
-                        <div class="block-content">
-                            <p>Execute these operations on the </p>
-                        </div>
-                    </div>
-
-                </div>
+                
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-8">
                     <!--Filters-->
+                    <div class="block">
+                        <div class="block-content">
+                            <div class="input-group">
+                                <input type="text" placeholder="Search by email" id="widgetInputMessage" class="faqSearchKeyword form-control"/>
+                                <div class="input-group-btn">
+                                    <button class="btn btn-primary" type="button" id="faqSearch">Search</button>
+                                </div>
+                            </div>                                         
+                        </div>
+                    </div>
                     <!--Subscriber Table-->
                     <div class="block">
                         <ui:include src="subscriber_table.xhtml" ></ui:include>
                     </div>
                 </div>
-
+                <div class="col-md-4">
+                    <div class="block">
+                        <ui:include src="actions.xhtml" ></ui:include>
+                    </div>
+                    <div class="block">
+                        <ui:include src="subscription_lists.xhtml" ></ui:include>
+                    </div>
+                    <div class="block">
+                        <ui:include src="subscriber_status.xhtml"></ui:include>
+                    </div>
+                </div>
             </div>
 
             <div class="modal fade" id="import_subscriber_popup">
@@ -68,14 +65,22 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/md5/md5.min.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/xml2json/xml2json.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/json2xml/json2xml.js"></script>
-
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
+            
             <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import_subscriber_popup.js" />
             <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/add_subscriber_popup.js" />
+            
+            <script type="text/javascript">
+                var CONTEXT_PATH = '#{request.contextPath}';
+            </script>
         </ui:define>
 
         <ui:define name="head">
             <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/common/js/jasny-bootstrap/css/jasny-bootstrap.min.css" />
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/programs/subscribers/css/subscriber_table.css" />
         </ui:define>
 
     </ui:composition>

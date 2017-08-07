@@ -13,7 +13,8 @@ import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /**
- *
+ * Created because to read in a random set of SubscriptionListField is a very expensive operation.
+ * 
  * @author LeeKiatHaw
  */
 @SessionScoped

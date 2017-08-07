@@ -66,9 +66,9 @@ var refresh_summernote = function (selector) {
             }()
         }
     });
-    observeDOM(document.getElementsByClassName('note-editable')[0], function () {
+    /*observeDOM(document.getElementsByClassName('note-editable')[0], function () {
         onEditorChange();
-    });
+    });*/
 }
 
 // Events
@@ -76,7 +76,7 @@ var onEditorChange = function () {
     renderEverything();
 }
 
-var onSave = function () {
+var onSave2 = function () {
     //Block button
     //$('#saveButton').prop('disabled', true);
     block_refresh($('#editor-panel'));
@@ -114,9 +114,36 @@ var onSave = function () {
             });
         });
     },100);
-    
 };
 
+var onSave = function (data) {
+    var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
+    var block = $(data.source).parents(".block");
+
+    switch (ajaxstatus) {
+        case "begin": // This is called right before ajax request is been sent.
+            //renderEverything();
+            reapply_textarea('editor');
+            block_refresh(block);
+            break;
+
+        case "complete": // This is called right after ajax response is received.
+            
+            break;
+
+        case "success": // This is called when ajax response is successfully processed.
+            block_refresh(block);
+            refresh_summernote('textarea.editor');
+            //Don't show noty when there is no errors, use our custom facesmessenger component
+            break;
+        case "error":
+            noty({
+                text : 'Error.',
+                layout : 'topCenter',
+                type : 'danger'
+            });
+    }
+};
 // Helper functions
 var toggleMenu = function () {
     if ($(document).has('#FormEditExistingTemplate').length) {
@@ -226,6 +253,6 @@ $(document).ready(function () {
 
     toggleMenu();
     refresh_summernote('textarea.editor');
-    adjustPreviewPanelHeight();
-    modifyDomToGeneratePreview();
+    //adjustPreviewPanelHeight();
+    //modifyDomToGeneratePreview();
 });

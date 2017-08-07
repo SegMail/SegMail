@@ -71,6 +71,22 @@ public class FormAddSubscriber {
         program.setFieldValues(fieldValues);
     }
     
+    public List<String> getAssignedLists() {
+        return program.getAssignedLists();
+    }
+
+    public void setAssignedLists(List<String> assignedLists) {
+        program.setAssignedLists(assignedLists);
+    }
+
+    public List<SubscriptionList> getOwnedLists() {
+        return program.getOwnedLists();
+    }
+
+    public void setOwnedLists(List<SubscriptionList> ownedLists) {
+        program.setOwnedLists(ownedLists);
+    }
+    
     public void addSubscriber() {
         try {
             if (getSelectedLists() == null || getSelectedLists().isEmpty()) {

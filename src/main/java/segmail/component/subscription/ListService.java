@@ -12,7 +12,9 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.client.VerifiedSendingAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,12 +27,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
 import segmail.entity.subscription.SubscriptionListField_;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
 /**
  *
@@ -50,6 +54,8 @@ public class ListService {
     private UpdateObjectService updateService;
     @EJB
     private GenericConfigService configService;
+    @EJB
+    private AutoresponderService autoService;
 
     public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
         if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name) && !field.getFIELD_NAME().equalsIgnoreCase(FIELD_TYPE.EMAIL.name)) {
@@ -175,7 +181,7 @@ public class ListService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException {
+    public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException, RelationshipExistsException, EntityNotFoundException {
         if (listname == null || listname.isEmpty()) {
             throw new IncompleteDataException("List name cannot be empty.");
         }
@@ -202,6 +208,19 @@ public class ListService {
         SubscriptionListField fieldLname = new SubscriptionListField(newList, 3, false, DEFAULT_LNAME_FIELD_NAME, FIELD_TYPE.TEXT, "Lastname of your subscriber.");
         updateService.getEm().persist(fieldFname);
         updateService.getEm().persist(fieldLname);
+        
+        //Set some default fields for the convenience of the user
+        List<VerifiedSendingAddress> sendingAddreses = objectService.getEnterpriseData(clientId, VerifiedSendingAddress.class);
+        if(sendingAddreses != null && !sendingAddreses.isEmpty()) {
+            // Randomly choose the first one returned
+            newList.setSEND_AS_EMAIL(sendingAddreses.get(0).getVERIFIED_ADDRESS());
+            // Set the Send As name as the email
+            newList.setSEND_AS_NAME(newList.getSEND_AS_EMAIL());
+        }
+        
+        //Directly assign a default confirmation and welcome message
+        autoService.createAndAssignDefaultAutoEmail(newList.getOBJECTID(), clientId, AUTO_EMAIL_TYPE.CONFIRMATION);
+        autoService.createAndAssignDefaultAutoEmail(newList.getOBJECTID(), clientId, AUTO_EMAIL_TYPE.WELCOME);
         
         return newList;
     }

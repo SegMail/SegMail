@@ -148,6 +148,14 @@ public class FormEditExistingTemplate implements FormEditEntity {
         program.setListTags(campaignTags);
     }
 
+    public String getPreviewBody() {
+        return program.getPreviewBody();
+    }
+
+    public void setPreviewBody(String previewBody) {
+        program.setPreviewBody(previewBody);
+    }
+    
     @Override
     public void saveAndContinue() {
         try {

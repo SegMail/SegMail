@@ -1,0 +1,9 @@
+.faq .item .title .note {
+    color: #464646;
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.faq .item .title.expanded {
+    font-size: 18px;
+}
