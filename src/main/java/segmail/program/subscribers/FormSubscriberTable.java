@@ -216,7 +216,7 @@ public class FormSubscriberTable {
                 subscriberMap.put(SubscriberFieldValue.class.getSimpleName(), new HashMap<String,SubscriberFieldValue>());
             }
             Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getSimpleName());
-            fieldMap.put(value.getFIELD_KEY(), value);
+            fieldMap.put((String) value.generateKey(), value); //Use generateKey instead of FIELD_KEY because we still have legacy fields that contain the old key type
             
             // Add a list to hold checkbox boolean values
             if(!subscriberMap.containsKey("checked")) {
