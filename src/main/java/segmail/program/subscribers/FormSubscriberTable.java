@@ -216,7 +216,7 @@ public class FormSubscriberTable {
                 subscriberMap.put(SubscriberFieldValue.class.getSimpleName(), new HashMap<String,SubscriberFieldValue>());
             }
             Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getSimpleName());
-            fieldMap.put((String) value.generateKey(), value); //Use generateKey instead of FIELD_KEY because we still have legacy fields that contain the old key type
+            fieldMap.put((String) value.getFIELD_KEY(), value);
             
             // Add a list to hold checkbox boolean values
             if(!subscriberMap.containsKey("checked")) {
@@ -280,42 +280,6 @@ public class FormSubscriberTable {
         return Math.min(getTotalPage(), getCurrentPage() + (PAGE_RANGE/2));
     }
     */
-    
-    public SubscriberAccount getSubscriberAccount(long subscriberId) {
-        if(getSubscriberTable().get(subscriberId) == null) {
-            return null;
-        }
-        Map<String,Object> subscriberMap = getSubscriberTable().get(subscriberId);
-        
-        SubscriberAccount acc = (SubscriberAccount) subscriberMap.get(SubscriberAccount.class.getSimpleName());
-        
-        return acc;
-    }
-    
-    public List<Subscription> getSubscriptions(long subscriberId) {
-        if(getSubscriberTable().get(subscriberId) == null) {
-            return null;
-        }
-        Map<String,Object> subscriberMap = getSubscriberTable().get(subscriberId);
-        
-        List<Subscription> subsc = (List<Subscription>) subscriberMap.get(Subscription.class.getSimpleName());
-        
-        return subsc;
-    }
-    
-    public Map<String,SubscriberFieldValue> getSubscriberFieldValueMap(long subscriberId) {
-        if(getSubscriberTable().get(subscriberId) == null) {
-            return null;
-        }
-        Map<String,Object> subscriberMap = getSubscriberTable().get(subscriberId);
-        
-        if(subscriberMap.get(SubscriberFieldValue.class.getSimpleName()) == null) {
-            subscriberMap.put(SubscriberFieldValue.class.getSimpleName(), new HashMap<>());
-        }
-        Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getSimpleName());
-        
-        return fieldMap;
-    }
 
     public void updatePageNumbers() {
         //This shit doesn't work
@@ -346,7 +310,7 @@ public class FormSubscriberTable {
         
         fieldValue = (SubscriberFieldValue) updService.merge(fieldValue);
         
-        fieldMap.put(fieldValue.getFIELD_KEY(), fieldValue);
+        fieldMap.put((String) fieldValue.generateKey(), fieldValue);
     }
     
 }
