@@ -36,6 +36,11 @@ public class RestResetClient extends GenericRestClient {
         
         String result = response.readEntity(String.class);
         
+        if(result != null && result.startsWith("Error")) {
+            String error = result.split(":")[1];
+            throw new RuntimeException(error);
+        }
+        
         return result;
     }
     

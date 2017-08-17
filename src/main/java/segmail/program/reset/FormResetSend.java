@@ -68,6 +68,7 @@ public class FormResetSend {
             setToken(token);
             setForm(FORM_SEND_SUCCESS);
         } catch (Exception ex) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             setForm(FORM_SEND_ERROR);
         }
     }
