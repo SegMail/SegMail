@@ -657,9 +657,12 @@ public class UserService extends DBService {
      * @throws eds.component.data.IncompleteDataException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String generatePasswordResetToken(String email) throws IncompleteDataException {
+    public String generatePasswordResetToken(String email) throws IncompleteDataException, EntityNotFoundException {
         //1)
         UserAccount acct = getUserAccountByContactEmail(email);
+        if(acct == null)
+            throw new EntityNotFoundException("Username not found.");
+        
         acct.setUSER_LOCKED(true);
         acct = em.merge(acct);
         

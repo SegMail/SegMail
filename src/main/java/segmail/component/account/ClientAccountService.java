@@ -246,6 +246,9 @@ public class ClientAccountService {
         } catch (IncompleteDataException ex) {
             Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
             return "Error:No servers setup yet, please contact your administrators.";
+        } catch (EntityNotFoundException ex) {
+            Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+            return "Error:"+ex.getMessage();
         }
     }
     
