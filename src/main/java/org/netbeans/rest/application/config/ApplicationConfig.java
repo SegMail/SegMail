@@ -29,6 +29,8 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(org.glassfish.json.jaxrs.JsonStructureBodyReader.class);
+        resources.add(org.glassfish.json.jaxrs.JsonStructureBodyWriter.class);
         resources.add(seca2.bootstrap.module.Webservice.REST.RestAuthenticationFilter.class);
         resources.add(seca2.bootstrap.module.Webservice.REST.client.RestClientAuthOutboundFilter.class);
         resources.add(seca2.bootstrap.module.Webservice.REST.server.RestServerAuthEndpoint.class);

@@ -74,7 +74,8 @@ function refresh(data) {
             refresh_blocks();
             refresh_select2();
             updateAddSubsriberButtons();
-            //initExpandTab();
+            initExpandTab();
+            initFieldForms();
             break;
     }
 };
@@ -158,7 +159,7 @@ var updateFieldValue = function(id,key,value) {
             'value':value
         }*/
         success: function (data) {
-            console.log(data);
+            //console.log(data);
             if(data.result === 'success') {
                 noty({
                     text: 'Field updated.',

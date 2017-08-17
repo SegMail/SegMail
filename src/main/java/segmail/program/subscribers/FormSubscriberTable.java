@@ -231,16 +231,16 @@ public class FormSubscriberTable {
         for(Subscription subscription : subscriptions) {
             if(!program.getSubscriberTable().containsKey(subscription.getSOURCE().getOBJECTID())) {
                 program.getSubscriberTable().put(subscription.getSOURCE().getOBJECTID(), new HashMap<String,Object>());
-                program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID()).put(SubscriberAccount.class.getName(), subscription.getSOURCE());
+                program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID()).put(SubscriberAccount.class.getSimpleName(), subscription.getSOURCE());
             }
             
             Map<String,Object> subscriberMap = program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID());
             //Another map to hold the list of subscription
-            if(!subscriberMap.containsKey(Subscription.class.getName())) {
-                subscriberMap.put(Subscription.class.getName(), new ArrayList<Subscription>());
+            if(!subscriberMap.containsKey(Subscription.class.getSimpleName())) {
+                subscriberMap.put(Subscription.class.getSimpleName(), new ArrayList<Subscription>());
             }
             
-            List<Subscription> subscriptionList = (List<Subscription>) subscriberMap.get(Subscription.class.getName());
+            List<Subscription> subscriptionList = (List<Subscription>) subscriberMap.get(Subscription.class.getSimpleName());
             if(!subscriptionList.contains(subscription))
                 subscriptionList.add(subscription);
             

@@ -10,139 +10,156 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions">
-
-    <div class="block-head">
-        <ul class="buttons">
-            <li>
-                <a href="javascript:;" onclick="toggleCheckbox()">
-                    <span class="fa fa-check"></span>
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="block-content faq">
-        <c:forEach items="#{FormSubscriberTable.subscriberTable.keySet()}" var="subscriber">
-
-            <div class="item">
-                <div class="title">
-                    #{FormSubscriberTable.subscriberTable[subscriber]['SubscriberAccount'].EMAIL}
-                    <c:set var="numSubsc"
-                           value="#{fn:length(FormSubscriberTable.subscriberTable[subscriber]['Subscription'])}" >                            
-
-                    </c:set>
-                    <c:if test="#{numSubsc gt 0}">
-                        <span class="note"> 
-                            subscribed to #{numSubsc} 
-                            #{numSubsc gt 1 ? 'lists' : 'list'}
-                        </span>
-                    </c:if>
-                    <div class="pull-right">
-                        <div class="checkbox">
-                            <h:selectBooleanCheckbox styleClass="checkbox"
-                                                     value="#{FormSubscriberTable.subscriberTable[subscriber]['checked']}"
-                                                     >
-                            </h:selectBooleanCheckbox>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="text">
-                    <div class="row" style="margin-top: 20px;">
-                        <div class="col-md-3">
-                            <h4>Subscribed to:</h4>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-group">
-                                <c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['segmail.entity.subscription.Subscription']}"
-                                           var="subscription">
-                                    <li class="list-group-item">
-                                        #{subscription.TARGET.LIST_NAME}
-                                        <span class="badge">
-                                            #{subscription.STATUS}
-                                        </span>
-                                    </li>
-                                </c:forEach>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="row" style="margin-top: 20px;">
-                        <div class="col-md-12">
-                            <h4>Fields belonging to this subscriber</h4>
-                            <table class="table table-condensed">
-                                <thead>
-                                    <tr>
-                                        <th>Field name</th>
-                                        <th>Mailmerge</th>
-                                        <th>List</th>
-                                        <th>Edit value</th>
-                                        <th style="width:130px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['SubscriberFieldValue'].keySet()}"
-                                               var="fieldKey" id="fields_#{subscriber}"
-                                               >
-                                        <c:set value="#{FormSubscriberTable.subscriberTable[subscriber]['SubscriberFieldValue'][fieldKey]}"
-                                               var="fieldValueObj">
-                                        </c:set>
-                                        <tr>
-                                            <td>#{FormSubscriberTable.fieldMap[fieldKey].FIELD_NAME}</td>
-                                            <td>#{FormSubscriberTable.fieldMap[fieldKey].MAILMERGE_TAG}</td>
-                                            <td>#{FormSubscriberTable.fieldMap[fieldKey].OWNER.LIST_NAME}</td>
-                                            <td>
-                                                <h:inputText pass:name="fieldValue" value="#{fieldValueObj.VALUE}"
-                                                             disabled="#{FormSubscriberTable.fieldMap[fieldKey].SNO le 1}"
-                                                             pass:data-key="#{fieldKey}" pass:data-id="#{subscriber}" 
-                                                             pass:class="form-control" 
-                                                             />
-                                            </td>
-                                            <td>
-                                                <c:if test="#{FormSubscriberTable.fieldMap[fieldKey].SNO gt 1}">
-
-                                                    <button class="btn btn-default save" data-key="#{fieldKey}" data-id="#{subscriber}"
-                                                            jsf:rendered="#{FormSubscriberTable.fieldMap[fieldKey].SNO gt 1}"
-                                                            >
-                                                        <i class="fa fa-floppy-o"></i>
-                                                    </button>
-                                                    <button class="btn btn-primary reset" data-key="#{fieldKey}" data-id="#{subscriber}"
-                                                            title="Reset Field"
-                                                            >
-                                                        <i class="fa fa-refresh"></i>
-                                                    </button>
-                                                    <button class="btn btn-danger"
-                                                            >
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                </c:if>
-                                            </td>
-                                        </tr>
-                                    </c:forEach>
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="row" style="margin-top: 20px;">
-
-                    </div>
-                </div>
-            </div>
-
-        </c:forEach>
-        <div class="item" id="faq-1">
-            <div class="title">
-                <span>kiathaw@gmail.com </span>
-                <span class="note"> subscribed to 3 lists</span>
-                <div class="pull-right">
-                    <div class="checkbox">
-                        <input type="checkbox" name="checkbox" class="checkbox"/>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
     <form jsf:id="FormSubscriberTable">
+        <div class="block-head">
+            <ul class="buttons">
+                <li>
+                    <a href="javascript:;" onclick="toggleCheckbox()">
+                        <span class="fa fa-check"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="block-content faq">
+            <c:forEach items="#{FormSubscriberTable.subscriberTable.keySet()}" var="subscriber">
+
+                <div class="item">
+                    <div class="title">
+                        #{FormSubscriberTable.subscriberTable[subscriber]['SubscriberAccount'].EMAIL}
+                        <c:set var="numSubsc"
+                               value="#{fn:length(FormSubscriberTable.subscriberTable[subscriber]['Subscription'])}" >                            
+
+                        </c:set>
+                        <c:if test="#{numSubsc gt 0}">
+                            <span class="note"> 
+                                subscribed to #{numSubsc} 
+                                #{numSubsc gt 1 ? 'lists' : 'list'}
+                            </span>
+                        </c:if>
+                        <div class="pull-right">
+                            <div class="checkbox">
+                                <h:selectBooleanCheckbox styleClass="checkbox"
+                                                         value="#{FormSubscriberTable.subscriberTable[subscriber]['checked']}"
+                                                         >
+                                </h:selectBooleanCheckbox>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text">
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-md-2 ">
+                                <div class="user-profile-block">
+                                    <div class="user-profile-image">
+                                        <img src="#{request.contextPath}/templates/common/img/placeholder.png" class="img-circle img-thumbnail" width="100" height="100" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Subscribed to:</h4>
+                                <ul class="list-group">
+                                    <c:forEach items="#{FormSubscriberTable.subscriberTable[subscriber]['Subscription']}"
+                                               var="subscription">
+                                        <li class="list-group-item">
+                                            #{subscription.TARGET.LIST_NAME}
+                                            <c:choose>
+                                                <c:when test="#{subscription.STATUS eq 'NEW'}">
+                                                    <span class="badge badge-primary">
+                                                        #{subscription.STATUS}
+                                                    </span>
+                                                </c:when>
+                                                <c:when test="#{subscription.STATUS eq 'CONFIRMED'}">
+                                                    <span class="badge badge-success">
+                                                        #{subscription.STATUS}
+                                                    </span>
+                                                </c:when>
+                                                <c:when test="#{subscription.STATUS eq 'UNSUBSCRIBED'}">
+                                                    <span class="badge badge-warning">
+                                                        #{subscription.STATUS}
+                                                    </span>
+                                                </c:when>
+                                                <c:when test="#{subscription.STATUS eq 'BOUNCED'}">
+                                                    <span class="badge badge-danger">
+                                                        #{subscription.STATUS}
+                                                    </span>
+                                                </c:when>
+                                            </c:choose>
+
+                                        </li>
+                                    </c:forEach>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-md-12">
+                                <h4>Fields belonging to this subscriber</h4>
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>Field name</th>
+                                            <th>Mailmerge</th>
+                                            <th>List</th>
+                                            <th>Edit value</th>
+                                            <th style="width:130px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <ui:repeat value="#{FormSubscriberTable.subscriberTable[subscriber]['SubscriberFieldValue'].keySet().toArray()}"
+                                                   var="fieldKey"
+                                                   >
+                                            <c:set value="#{FormSubscriberTable.subscriberTable[subscriber]['SubscriberFieldValue'][fieldKey]}"
+                                                   var="fieldValueObj">
+                                            </c:set>
+                                            <tr>
+                                                <td>#{FormSubscriberTable.fieldMap[fieldKey].FIELD_NAME}</td>
+                                                <td>#{FormSubscriberTable.fieldMap[fieldKey].MAILMERGE_TAG}</td>
+                                                <td>#{FormSubscriberTable.fieldMap[fieldKey].OWNER.LIST_NAME}</td>
+                                                <td>
+                                                    <h:inputText pass:name="fieldValue" value="#{fieldValueObj.VALUE}"
+                                                                 disabled="#{FormSubscriberTable.fieldMap[fieldKey].SNO le 1}"
+                                                                 pass:data-key="#{fieldKey}" pass:data-id="#{subscriber}" 
+                                                                 pass:class="form-control" 
+                                                                 />
+                                                </td>
+                                                <td>
+                                                    <h:panelGroup rendered="#{FormSubscriberTable.fieldMap[fieldKey].SNO gt 1}">
+                                                        <button class="btn btn-default save" data-key="#{fieldKey}" data-id="#{subscriber}"
+
+                                                                onclick="return false;"
+                                                                >
+                                                            <i class="fa fa-floppy-o"></i>
+                                                        </button>
+                                                        <button class="btn btn-primary reset" data-key="#{fieldKey}" data-id="#{subscriber}"
+
+                                                                title="Reset Field"
+                                                                onclick="return false;"
+                                                                >
+                                                            <i class="fa fa-refresh"></i>
+                                                        </button>
+                                                        <button class="btn btn-danger"
+
+                                                                onclick="return false;"
+                                                                >
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </h:panelGroup>
+                                                </td>
+                                            </tr>
+                                        </ui:repeat>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 20px;">
+
+                        </div>
+                    </div>
+                </div>
+
+            </c:forEach>
+        </div>
         <div class="block-footer">
             <div class="row">
                 <div class="col-md-12" jsf:rendered="#{FormSubscriberTable.totalPage gt 1}">
@@ -152,7 +169,8 @@
                                            rendered="#{FormSubscriberTable.pages.get(0) ne 1 }"
                                            action="#{FormSubscriberTable.loadPage(1)}"
                                            >
-                                <f:ajax render="@form"
+                                <f:ajax render="@form" 
+                                        onevent="refresh"
                                         >
                                 </f:ajax>
                             </h:commandLink>
@@ -164,7 +182,8 @@
                                 <h:commandLink value="#{i}" 
                                                action="#{FormSubscriberTable.loadPage(i)}"
                                                >
-                                    <f:ajax render="@form"
+                                    <f:ajax render="@form" 
+                                            onevent="refresh"
                                             >
                                     </f:ajax>
                                 </h:commandLink>
@@ -173,14 +192,15 @@
                         </ui:repeat>
                         <li class="">
                             <h:commandLink value="&gt;&gt;" 
-                                           rendered="#{FormSubscriberTable.pages.get(0) ne FormSubscriberTable.totalPage }"
+                                           rendered="#{FormSubscriberTable.pages.get(FormSubscriberTable.pages.size()-1) ne FormSubscriberTable.totalPage }"
                                            action="#{FormSubscriberTable.loadPage(FormSubscriberTable.totalPage)}"
                                            >
-                                <f:ajax render="@form"
+                                <f:ajax render="@form" 
                                         >
                                 </f:ajax>
                             </h:commandLink>
                         </li>
+
                     </ul>
                 </div>
             </div>
