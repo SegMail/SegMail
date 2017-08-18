@@ -45,8 +45,10 @@ var refresh_select2 = function() {
 
 var refresh_blocks = function() {
     block_refresh($('#FormSubscriptionLists').parents('.block'));
-    block_refresh($('#FormSubscriberTable').parents('.block'));
     block_refresh($('#FormSubscriberStatus').parents('.block'));
+    $('#FormSubscriberTable').find('.block').each(function(){
+        block_refresh($(this));
+    })
 }
 
 var updateAddSubsriberButtons = function() {
@@ -67,12 +69,11 @@ function refresh(data) {
             break;
 
         case "complete": // This is called right after ajax response is received.
-
+            refresh_blocks();
+            refresh_select2();
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            refresh_blocks();
-            refresh_select2();
             updateAddSubsriberButtons();
             initExpandTab();
             initFieldForms();
