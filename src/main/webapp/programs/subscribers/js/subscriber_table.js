@@ -70,10 +70,10 @@ function refresh(data) {
 
         case "complete": // This is called right after ajax response is received.
             refresh_blocks();
-            refresh_select2();
             break;
 
         case "success": // This is called when ajax response is successfully processed.
+            refresh_select2();
             updateAddSubsriberButtons();
             initExpandTab();
             initFieldForms();
