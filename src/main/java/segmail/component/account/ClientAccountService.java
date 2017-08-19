@@ -17,18 +17,10 @@ import eds.component.transaction.TransactionNotFoundException;
 import eds.component.transaction.TransactionService;
 import eds.component.user.PWD_PROCESSING_STATUS;
 import eds.component.user.UserService;
-import eds.entity.client.ClientAWSAccount;
-import eds.entity.client.ClientType;
 import eds.entity.client.ClientUserAssignment;
-import eds.entity.client.ContactInfo;
 import eds.entity.user.PasswordResetRequest;
-import eds.entity.user.Trigger_Password_User;
-import eds.entity.user.User;
 import eds.entity.user.UserAccount;
-import eds.entity.user.UserType;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -40,28 +32,17 @@ import javax.json.JsonObjectBuilder;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import seca2.bootstrap.module.Webservice.REST.RestSecured;
-import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
-import seca2.entity.landing.ServerInstance;
 import segmail.component.subscription.ListService;
-import segmail.component.subscription.SubscriptionException;
 import segmail.component.subscription.SubscriptionService;
-import segmail.entity.subscription.SUBSCRIPTION_STATUS;
-import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.Subscription;
-import segmail.entity.subscription.SubscriptionList;
 
 /**
  * This is a RESTful service endpoints for all signup services.
@@ -83,6 +64,7 @@ public class ClientAccountService {
     @EJB LandingService landingService;
     @EJB GenericObjectService objService;
     @EJB TransactionService txService;
+    @EJB ClientAccountServiceHelper helper;
     
     /**
      * 1) Create the UserAccount (username, password, email)
@@ -118,35 +100,45 @@ public class ClientAccountService {
         long listId = Long.parseLong(subscriptionMap.getFirst(listKey));
         long clientId = Long.parseLong(subscriptionMap.getFirst(clientKey));
         
+        JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
+        
         //Register user account and client account
         if(username != null && !username.isEmpty()) {
             UserAccount userAccount = null;
             try {
                 long userTypeId = userService.getUserTypeByName(SEGMAIL_USER_ACCOUNT_NAME).get(0).getOBJECTID();
                 userAccount = userService.registerUserByUserTypeId(userTypeId, username, password, email);
+                resultObjectBuilder.add("username", userAccount.getUSERNAME());
             } catch (EntityNotFoundException | DataValidationException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-                return "Error : "+ex.getMessage();
+                //return "Error : "+ex.getMessage();
+                resultObjectBuilder.add("user_error", ex.getMessage());
+                return resultObjectBuilder.build().toString();
             } catch (EntityExistsException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
                 userAccount = userService.getUserAccountByUsername(username);
+                resultObjectBuilder.add("username", userAccount.getUSERNAME());
             }
             
             ClientUserAssignment clientUserAssign = null;
             try {
                 long clientTypeId = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE).getOBJECTID();
                 clientUserAssign = clientService.registerClientForUser(userAccount.getOWNER(), clientTypeId);
+                resultObjectBuilder.add("client", clientUserAssign.getSOURCE().getCLIENT_NAME());
             } catch (EntityNotFoundException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+                resultObjectBuilder.add("client_error", ex.getMessage());
             } catch (EntityExistsException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+                resultObjectBuilder.add("client_error", ex.getMessage());
             } catch (RelationshipExistsException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
+                resultObjectBuilder.add("client_error", ex.getMessage());
             }
         }
         
         //Subscribe
-        if(listId > 0) {
+        /*if(listId > 0) {
             Map<String,Object> subscriberMap = new HashMap<>();
             for(String key : subscriptionMap.keySet()) {
                 if(subscriptionMap.get(key) == null)
@@ -179,9 +171,9 @@ public class ClientAccountService {
             } catch (RelationshipExistsException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        }*/
         
-        return "Success";
+        return resultObjectBuilder.build().toString();
     }
          
     @Path("segmail/check")
@@ -194,11 +186,13 @@ public class ClientAccountService {
         final String emailKey = "email";
         final String usernameKey = "username";
         final String clientKey = "client";
+        final String listKey = "list";
         
         String email = accountMap.getFirst(emailKey);
         String username = accountMap.getFirst(usernameKey);
         String client = accountMap.getFirst(clientKey);
-        long listId = Long.parseLong(accountMap.getFirst("list"));
+        long listId = Long.parseLong(accountMap.getFirst(listKey));
+        long clientId = Long.parseLong(accountMap.getFirst(clientKey));
         
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
         
@@ -206,6 +200,8 @@ public class ClientAccountService {
             List<Subscription> subcs = subService.getSubscriptions(email, listId, null);
             if(subcs == null || subcs.isEmpty()) {
                 //resultObjectBuilder.addNull(emailKey); //Don't put anything
+                String subscribeResult = helper.subscribe(listId, clientId, accountMap);
+                resultObjectBuilder.add(emailKey, subscribeResult);
             } else { // Let the client decide the message to return to the user
                 resultObjectBuilder.add(emailKey, subcs.get(0).getSTATUS());
             }

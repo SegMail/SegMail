@@ -51,6 +51,7 @@ public class WSHttpSubscribe {
     @EJB SubscriptionService subService;
     
     /**
+     * Currently only allows subscription to 1 list only.
      * 
      * @param subscriptionMap
      * @return 

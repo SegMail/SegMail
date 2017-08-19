@@ -34,8 +34,6 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.mail.MailServiceOutbound;
 import eds.component.transaction.TransactionNotFoundException;
 import eds.component.transaction.TransactionService;
-import eds.entity.transaction.EnterpriseTransactionTrigger_;
-import eds.entity.transaction.EnterpriseTransaction_;
 import eds.entity.user.PasswordResetRequest_;
 import eds.entity.user.Trigger_Password_User;
 import eds.entity.user.Trigger_Password_User_;
