@@ -106,7 +106,10 @@ public class FormUserLogin {
                 //this should be in the navigation module
                 
             } else {
-                ec.redirect(ec.getRequestContextPath());//go to home
+                if(ec.getRequestContextPath() == null || ec.getRequestContextPath().isEmpty())
+                    ec.redirect("/");
+                else
+                    ec.redirect(ec.getRequestContextPath());//go to home
             }
         } catch (UserLoginException esliex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);

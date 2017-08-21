@@ -14,6 +14,7 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
@@ -52,8 +53,11 @@ public class MailServiceInbound {
     BasicAWSCredentials awsCredentials;
     
     @EJB GenericObjectService objService;
+    @EJB UpdateObjectService updService;
     @EJB ClientAWSService clientAWSService;
     @EJB SubscriptionService subService;
+    
+    @EJB MailServiceInboundHelper helper;
     
     /**
      * Try to return a List of messages in some format
@@ -119,24 +123,26 @@ public class MailServiceInbound {
     }
     
     @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
         if(emails == null || emails.isEmpty())
             return;
         List<String> subscriberAddress = new ArrayList<>();
         for(Email email : emails) {
-            email.setPROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED.label);
+            helper.updateBounceStatus(email);
             Set<String> recipients = email.getRECIPIENTS();
             subscriberAddress.addAll(recipients);
             
         }
-        //Update Subscription
+        // These shouldn't be here. They should be in SubscriptionService, but 
+        // for convenience's sake they are put here.
+        // Update Subscription
         subService.updateSubscriptionBounceStatus(subscriberAddress, clientId);
 
-        //Update SubscriberAccount
+        // Update SubscriberAccount
         subService.updateSubscriberBounceStatus(subscriberAddress, clientId);
 
-        //Update subscriber count for SubscriptionLists
+        // Update subscriber count for SubscriptionLists
         subService.updateAllSubscriberCountForClient(clientId);
     }
     
