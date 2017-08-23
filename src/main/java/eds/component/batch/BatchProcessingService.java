@@ -1,22 +1,28 @@
 package eds.component.batch;
 
 import eds.component.UpdateObjectService;
-import eds.component.data.IncompleteDataException;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRun_;
 import eds.entity.batch.BatchJobContainer;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -53,8 +59,11 @@ public class BatchProcessingService {
     @EJB
     BatchSchedulingService scheduleService;
     
-    @EJB
-    BatchJobContainer jobCont;
+    @Resource(mappedName="jms/_defaultConnectionFactory")
+    ConnectionFactory connectionFactory;
+
+    @Resource(mappedName="jms/BatchJobContainer")
+    Queue queue;
 
     @PostConstruct
     public void init() {
@@ -63,22 +72,45 @@ public class BatchProcessingService {
     }
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public void processBatchJobQueue(DateTime dt) {
-        String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
-        if (maxJobString == null || maxJobString.isEmpty()) {
-            System.setProperty(PROCESS_JOB_MODE, "false");
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
-            return;
+    public void processBatchJobQueue(DateTime dt) throws JMSException {
+        Connection conn = null;
+        Session session = null;
+        MessageProducer messageProducer = null;
+        try {
+            String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
+            if (maxJobString == null || maxJobString.isEmpty()) {
+                System.setProperty(PROCESS_JOB_MODE, "false");
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
+                return;
+            }
+            int maxJobs = Integer.parseInt(maxJobString);
+            List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
+            
+            // Open a JMS queue session
+            conn = connectionFactory.createConnection();
+            session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            messageProducer = session.createProducer(queue);
+            
+            for(BatchJobRun run : nextNJobs) {
+                //Fire and forget
+                //execService.executeJob(run);
+                //jobCont.read(run.getRUN_KEY());
+                //jobCont.execute(DateTime.now());
+                
+                // Make use of JMS and MDB
+                TextMessage message = session.createTextMessage();
+                message.setStringProperty(BatchJobContainer.BATCH_RUN_KEY_PARAM, run.getRUN_KEY());
+                messageProducer.send(message);
+            }
+            
+        } catch (JMSException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            // Important!!! Release resources because there's a limit to the number of producers, sessions and connection pools
+            messageProducer.close();
+            session.close();
+            conn.close();
         }
-        int maxJobs = Integer.parseInt(maxJobString);
-        List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
-        for(BatchJobRun run : nextNJobs) {
-            //Fire and forget
-            //execService.executeJob(run);
-            jobCont.read(run.getRUN_KEY());
-            jobCont.execute(DateTime.now());
-        }
-
     }
 
     /**
@@ -141,6 +173,8 @@ public class BatchProcessingService {
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "This server node " + landingService.getOwnServerName() + " is not processing any jobs today because: "+ex.getMessage(), "");
                 reported = true;
             }
+        } catch (JMSException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

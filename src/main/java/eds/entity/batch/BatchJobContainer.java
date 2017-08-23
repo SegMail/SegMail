@@ -23,11 +23,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.ActivationConfigProperty;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -41,8 +45,14 @@ import seca2.entity.landing.ServerInstance;
  *
  * @author LeeKiatHaw
  */
-@Stateless
-public class BatchJobContainer extends DBService {
+//@Stateless
+@MessageDriven(activationConfig = {
+    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/BatchJobContainer"),
+    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue")
+})
+public class BatchJobContainer extends DBService implements MessageListener {
+    
+    public static final String BATCH_RUN_KEY_PARAM = "BATCH_RUN_KEY";
     
     final CronType STANDARD_CRON_TYPE = CronType.UNIX;
     
@@ -431,5 +441,18 @@ public class BatchJobContainer extends DBService {
             //runs.add(oneAndOnlyRun);
         }
         return oneAndOnlyRun;
+    }
+
+    @Override
+    public void onMessage(Message message) {
+        try {
+            String runKey = message.getStringProperty(BATCH_RUN_KEY_PARAM);
+            
+            read(runKey);
+            execute(DateTime.now());
+            
+        } catch (JMSException ex) {
+            Logger.getLogger(BatchJobContainer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
