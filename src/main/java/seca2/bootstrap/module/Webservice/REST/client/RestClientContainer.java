@@ -8,7 +8,6 @@ package seca2.bootstrap.module.Webservice.REST.client;
 import java.io.Serializable;
 import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 
 /**

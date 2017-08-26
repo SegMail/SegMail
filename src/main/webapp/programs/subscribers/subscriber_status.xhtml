@@ -28,5 +28,17 @@
                 </f:selectItems>
             </h:selectManyListbox>
         </div>
+        <div class="form-group"
+             jsf:rendered="#{FormSubscriberStatus.subscriberStatus.size() gt 0}">
+            <h:selectOneRadio styleClass="" value="#{FormSubscriberStatus.anyOrAllStatuses}" 
+                                  >
+                    <f:selectItem itemValue="any" itemLabel="ANY" ></f:selectItem>
+                    <f:selectItem itemValue="all" itemLabel="ALL" ></f:selectItem>
+                    <f:ajax event="valueChange"
+                            render="@form :FormSubscriberTable" execute="@form"
+                            listener="#{FormSubscriberStatus.statusUpdate()}"
+                            onevent="refresh"></f:ajax>
+                </h:selectOneRadio>
+            </div>
     </form>
 </html>

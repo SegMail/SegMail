@@ -21,6 +21,7 @@ import static eds.entity.batch.BATCH_JOB_STATUS.ACTIVE;
 import eds.entity.batch.BATCH_JOB_TRIGGER_STATUS;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobCondition;
+import eds.entity.batch.BatchJobConditionParam;
 import eds.entity.batch.BatchJobCondition_;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRun_;
@@ -92,6 +93,16 @@ public class BatchSchedulingService {
         return newBatchJob;
     }
 
+    /**
+     * 
+     * @param serviceName
+     * @param serviceMethod
+     * @param params to be passed into the job step
+     * @param batchJobId
+     * @return
+     * @throws BatchProcessingException
+     * @throws IOException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJobStep createJobStep(
             String serviceName,
@@ -167,11 +178,14 @@ public class BatchSchedulingService {
      * @param serviceName Full class name, with package, of the EJB class eg.
      * eds.component.data.ObjectService
      * @param serviceMethod
-     * @param params
+     * @param params to be passed into the job step
      * @param cronTriggerExpression
      * @param serverId
      * @param currentTime that tells BatchSchedulingService when to start computing
      * the next run based on cronTriggerExpression.
+     * @param condServiceName Name of the EJB service class to be triggered to check if future runs should be scheduled
+     * @param condServiceMethod Name of the EJB service method to be triggered to check if future runs should be scheduled
+     * @param condParams params to be passed into the condition service method
      * 
      * @return
      * @throws eds.component.batch.BatchProcessingException
@@ -186,15 +200,18 @@ public class BatchSchedulingService {
             Object[] params,
             long serverId,
             String cronTriggerExpression,
-            DateTime currentTime)
+            DateTime currentTime,
+            String condServiceName,
+            String condServiceMethod,
+            Object[] condParams)
             throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
         try {
             //Create batch job and the single step
-            BatchJob newBatchJob = this.createBatchJob(serverId, batchJobName);
-            BatchJobStep newStep = this.createJobStep(serviceName, serviceMethod, params, newBatchJob.getBATCH_JOB_ID());
+            BatchJob newBatchJob = createBatchJob(serverId, batchJobName);
+            BatchJobStep newStep = createJobStep(serviceName, serviceMethod, params, newBatchJob.getBATCH_JOB_ID());
 
             //Create the trigger using cronTriggerExpression
-            BatchJobSchedule newSchedule = this.createJobSchedule(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
+            BatchJobSchedule newSchedule = createJobSchedule(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
 
             //Trigger next run
             //Because Cron expression doesn't have seconds, so if you don't set this,
@@ -202,6 +219,13 @@ public class BatchSchedulingService {
             //means so.
             BatchJobRun newRun = triggerNextBatchJobRun(currentTime.withSecondOfMinute(0), newSchedule.getBATCH_JOB()); 
 
+            // Set conditions for future runs
+            // Conditions are optional, so if empty params, skip creation of condition
+            if (condServiceName != null && !condServiceName.isEmpty() 
+                    && condServiceMethod != null && !condServiceMethod.isEmpty()) {
+                BatchJobCondition newCond = this.createBatchJobCondition(newBatchJob, condServiceName, condServiceMethod, condParams);
+            }
+            
             return newRun;
 
         } catch (SecurityException ex) {
@@ -218,31 +242,23 @@ public class BatchSchedulingService {
             String serviceMethod,
             Object[] params,
             long serverId,
-            String cronTriggerExpression)
+            String cronTriggerExpression,
+            String condServiceName,
+            String condServiceMethod,
+            Object[] condParams)
             throws BatchProcessingException, EntityNotFoundException, IncompleteDataException {
         
-        return createSingleStepJob(batchJobName, serviceName, serviceMethod, params, serverId, cronTriggerExpression, DateTime.now());
-        /*try {
-            
-            //Create batch job and the single step
-            BatchJob newBatchJob = this.createBatchJob(serverId, batchJobName);
-            BatchJobStep newStep = this.createJobStep(serviceName, serviceMethod, params, newBatchJob.getBATCH_JOB_ID());
-
-            //Create the trigger using cronTriggerExpression
-            BatchJobSchedule newSchedule = this.createJobSchedule(newBatchJob.getBATCH_JOB_ID(), cronTriggerExpression);
-
-            //Trigger next run
-            BatchJobRun newRun = triggerNextBatchJobRun(DateTime.now(), newSchedule);
-
-            return newRun;
-            
-
-        } catch (SecurityException ex) {
-            throw new BatchProcessingException("Batch processing failed:", ex);
-        } catch (IOException ex) {
-            throw new BatchProcessingException("Batch processing failed:", ex);
-        }
-        */
+        return createSingleStepJob(
+                batchJobName, 
+                serviceName, 
+                serviceMethod, 
+                params, 
+                serverId, 
+                cronTriggerExpression, 
+                DateTime.now(),
+                condServiceName,
+                condServiceMethod,
+                condParams);
     }
 
     /**
@@ -706,5 +722,40 @@ public class BatchSchedulingService {
         List<BatchJobRun> results = typedQuery.getResultList();
         
         return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJobCondition createBatchJobCondition(
+            BatchJob job, 
+            String serviceName, 
+            String serviceMethod,
+            Object[] params) throws IOException {
+        BatchJobCondition condition = new BatchJobCondition();
+        condition.setBATCH_JOB(job);
+        condition.setSERVICE_NAME(serviceName);
+        condition.setSERVICE_METHOD(serviceMethod);
+        updateService.persist(condition);
+        
+        //Create params
+        for (int i = 0; params != null && i < params.length; i++) {
+
+            BatchJobConditionParam newParam = new BatchJobConditionParam();
+            newParam.setPARAM_ORDER(i);
+            newParam.setBATCH_JOB_CONDITION(condition);
+            updateService.persist(newParam);
+
+            condition.addPARAMS(newParam);
+
+            Object obj = params[i];
+            Class clazz = obj.getClass();
+            if (Serializable.class.isAssignableFrom(clazz)) {
+                Serializable s = (Serializable) obj;
+                newParam.setSERIALIZED_OBJECT(s);
+                continue;
+            }
+            newParam.setSTRING_VALUE(obj.toString());
+        }
+        
+        return condition;
     }
 }

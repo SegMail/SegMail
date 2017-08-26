@@ -127,6 +127,14 @@ public class FormSubscriberTable {
         program.setFieldMap(fieldMap);
     }
     
+    public String getAnyOrAll() {
+        return program.getAnyOrAllLists();
+    }
+
+    public void setAnyOrAll(String anyOrAll) {
+        program.setAnyOrAllLists(anyOrAll);
+    }
+    
     public void loadPage(int page) {
         setCurrentPage(page);
         loadFilterCriteria();
@@ -167,6 +175,13 @@ public class FormSubscriberTable {
         String lastSearch = dripService.getEmailSearch();
         if(lastSearch == null || !lastSearch.equals(searchString)) {
             dripService.setEmailSearch(searchString);
+            dirtyFlag = true;
+        }
+        
+        String anyOrAll = getAnyOrAll();
+        String lastAnyOrAll = dripService.getAnyOrAll();
+        if(lastAnyOrAll == null || !lastAnyOrAll.equals(anyOrAll)) {
+            dripService.setAnyOrAll(anyOrAll);
             dirtyFlag = true;
         }
         

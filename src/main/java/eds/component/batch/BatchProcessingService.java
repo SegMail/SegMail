@@ -4,7 +4,7 @@ import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRun_;
-import eds.entity.batch.BatchJobContainer;
+import eds.entity.batch.BatchJobExecutor;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
@@ -99,7 +99,7 @@ public class BatchProcessingService {
                 
                 // Make use of JMS and MDB
                 TextMessage message = session.createTextMessage();
-                message.setStringProperty(BatchJobContainer.BATCH_RUN_KEY_PARAM, run.getRUN_KEY());
+                message.setStringProperty(BatchJobExecutor.BATCH_RUN_KEY_PARAM, run.getRUN_KEY());
                 messageProducer.send(message);
             }
             

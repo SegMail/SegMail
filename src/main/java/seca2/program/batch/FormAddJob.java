@@ -47,7 +47,16 @@ public class FormAddJob {
     
     public void addBatchJob(){
         try {
-            schedulingService.createSingleStepJob(batchJobName, serviceName, serviceMethod, null, serverId, cronExpression);
+            schedulingService.createSingleStepJob(
+                    batchJobName, 
+                    serviceName, 
+                    serviceMethod, 
+                    null, 
+                    serverId, 
+                    cronExpression,
+                    "",
+                    "",
+                    null);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job added!", "");
             program.refresh();
         } catch (IncompleteDataException ex) {

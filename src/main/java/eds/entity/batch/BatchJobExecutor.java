@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.ActivationConfigProperty;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.MessageDriven;
 import javax.ejb.TransactionAttribute;
@@ -45,12 +44,11 @@ import seca2.entity.landing.ServerInstance;
  *
  * @author LeeKiatHaw
  */
-//@Stateless
 @MessageDriven(activationConfig = {
     @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "jms/BatchJobContainer"),
     @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue")
 })
-public class BatchJobContainer extends DBService implements MessageListener {
+public class BatchJobExecutor extends DBService implements MessageListener {
     
     public static final String BATCH_RUN_KEY_PARAM = "BATCH_RUN_KEY";
     
@@ -83,7 +81,7 @@ public class BatchJobContainer extends DBService implements MessageListener {
         //runs = new ArrayList<>();
     }
     
-    public BatchJobContainer read(long batchJobId) {
+    public BatchJobExecutor read(long batchJobId) {
         clear();
         job = em.find(BatchJob.class, batchJobId);
         steps = loadBatchJobSteps(batchJobId);
@@ -95,7 +93,7 @@ public class BatchJobContainer extends DBService implements MessageListener {
         return this;
     }
     
-    public BatchJobContainer read(String runKey) {
+    public BatchJobExecutor read(String runKey) {
         clear();
         //Don't load all runs, as it might get overloaded
         List<BatchJobRun> runs = getJobRunsByKey(runKey);
@@ -110,8 +108,16 @@ public class BatchJobContainer extends DBService implements MessageListener {
         return this;
     }
 
+    /**
+     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
+     * @param name
+     * @return
+     * @throws IncompleteDataException
+     * @deprecated
+     */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobContainer create(String name) throws IncompleteDataException {
+    public BatchJobExecutor create(String name) throws IncompleteDataException {
         clear();
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
         
@@ -125,8 +131,18 @@ public class BatchJobContainer extends DBService implements MessageListener {
         return this;
     }
 
+    /**
+     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
+     * @param serviceName
+     * @param serviceMethod
+     * @param params
+     * @return
+     * @throws IOException
+     * @deprecated
+     */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobContainer addStep(String serviceName, String serviceMethod, Object[] params) 
+    public BatchJobExecutor addStep(String serviceName, String serviceMethod, Object[] params) 
             throws IOException {
         
         BatchJobStep step = new BatchJobStep();
@@ -159,8 +175,18 @@ public class BatchJobContainer extends DBService implements MessageListener {
         return this;
     }
 
+    /**
+     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
+     * @param serviceName
+     * @param serviceMethod
+     * @param params
+     * @return
+     * @throws IOException
+     * @deprecated
+     */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobContainer addCondition(String serviceName, String serviceMethod, Object[] params) throws IOException {
+    public BatchJobExecutor addCondition(String serviceName, String serviceMethod, Object[] params) throws IOException {
         
         BatchJobCondition condition = new BatchJobCondition();
         condition.setBATCH_JOB(job);
@@ -192,8 +218,15 @@ public class BatchJobContainer extends DBService implements MessageListener {
         return this;
     }
 
+    /**
+     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
+     * @param cronExpression
+     * @return
+     * @throws DataValidationException 
+     */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobContainer setSchedule(String cronExpression) throws DataValidationException {
+    public BatchJobExecutor setSchedule(String cronExpression) throws DataValidationException {
         
         BatchJobSchedule schedule = new BatchJobSchedule();
         schedule.setBATCH_JOB(job);
@@ -292,8 +325,9 @@ public class BatchJobContainer extends DBService implements MessageListener {
      * @return this instance
      * @throws BatchProcessingException if there is already an existing active run
      */
+    
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobContainer schedule(DateTime triggerTime) throws BatchProcessingException {
+    public BatchJobExecutor schedule(DateTime triggerTime) throws BatchProcessingException {
         //Get the schedules and conditions
         conditions = loadBatchJobConditions(job.getBATCH_JOB_ID());
         schedules = loadBatchJobSchedules(job.getBATCH_JOB_ID());
@@ -319,11 +353,6 @@ public class BatchJobContainer extends DBService implements MessageListener {
         return this;
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobContainer cancel(DateTime cancelTime) {
-        return this;
-    }
-    
     /**
      * Executes the underlying batch job and the status updates.
      * <br>
@@ -333,8 +362,8 @@ public class BatchJobContainer extends DBService implements MessageListener {
      * <li><b>ERROR</b>: if an expected exception occurs within the execution
      * - ie. thrown by the underlying service defined in BatchJobStep</li>
      * <li><b>SCHEDULED</b>: if an unexpected error occurs outside of the execution
-     * and the entire transaction has to be rolled back - ie. thrown by this 
-     * BatchJobContainer in the update operation of the BatchJobRun itself</li>
+ and the entire transaction has to be rolled back - ie. thrown by this 
+ BatchJobExecutor in the update operation of the BatchJobRun itself</li>
      * </ul>
      * Once the operation has started and before it ends, the BatchJobRun status
      * must be in the <b>IN_PROCESS</b>. However, it should not stay in this state
@@ -349,7 +378,7 @@ public class BatchJobContainer extends DBService implements MessageListener {
      * @param startTime
      * @return
      */
-    @Asynchronous
+    //@Asynchronous //Doesn't matter, because this is a MDB
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void execute(DateTime startTime) {
         BatchJobRun oneAndOnlyRun = null;
@@ -452,7 +481,7 @@ public class BatchJobContainer extends DBService implements MessageListener {
             execute(DateTime.now());
             
         } catch (JMSException ex) {
-            Logger.getLogger(BatchJobContainer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BatchJobExecutor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

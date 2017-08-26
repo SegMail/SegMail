@@ -32,10 +32,13 @@ public class ProgramSubscribers extends Program {
     private List<Long> convertedAssignedLists;
     private List<SubscriptionList> ownedLists;
     
+    // FormSubscriptionLists and FormSubscriberStatus
     private List<String> subscriberStatus;
     private List<SUBSCRIBER_STATUS> convertedSubscriberStatus;
     private final SUBSCRIBER_STATUS[] allStatuses = SUBSCRIBER_STATUS.values();
     private String emailSearch;
+    private String anyOrAllLists;
+    private String anyOrAllStatuses;
     
     //FormImportSubscribers and FormAddSubscriber
     private List<SubscriptionListField> fieldList;
@@ -151,6 +154,22 @@ public class ProgramSubscribers extends Program {
         this.fieldMap = fieldMap;
     }
 
+    public String getAnyOrAllLists() {
+        return anyOrAllLists;
+    }
+
+    public void setAnyOrAllLists(String anyOrAllLists) {
+        this.anyOrAllLists = anyOrAllLists;
+    }
+
+    public String getAnyOrAllStatuses() {
+        return anyOrAllStatuses;
+    }
+
+    public void setAnyOrAllStatuses(String anyOrAllStatuses) {
+        this.anyOrAllStatuses = anyOrAllStatuses;
+    }
+
     @Override
     public void clearVariables() {
         
@@ -172,6 +191,9 @@ public class ProgramSubscribers extends Program {
         setConvertedSubscriberStatus(new ArrayList<SUBSCRIBER_STATUS>());
         setSubscriberStatus(new ArrayList<String>());
         setFieldValues(new HashMap<String,Object>());
+        
+        setAnyOrAllLists("any");
+        setAnyOrAllStatuses("any");
     }
     
 }

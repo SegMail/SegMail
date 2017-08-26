@@ -46,6 +46,8 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     List<SUBSCRIBER_STATUS> statuses;
     
     private String emailSearch;
+    
+    private String anyOrAll;
 
     public long getClientId() {
         return clientId;
@@ -94,6 +96,14 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     public void setEmailSearch(String emailSearch) {
         this.emailSearch = emailSearch;
     }
+
+    public String getAnyOrAll() {
+        return anyOrAll;
+    }
+
+    public void setAnyOrAll(String anyOrAll) {
+        this.anyOrAll = anyOrAll;
+    }
     
     /**
      * This implementation should: 
@@ -110,7 +120,7 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     @Override
     public List<SubscriberAccount> refill(int start, int size) {
         try {
-            return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, emailSearch, start, size);
+            return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, emailSearch, start, size, anyOrAll);
         } catch (DataValidationException ex) {
             Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
@@ -120,7 +130,7 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     @Override
     protected long countFromDB() {
         try {
-            return subService.countNumberSubscribers(clientId, listIds, createStart, createEnd, statuses, emailSearch);
+            return subService.countNumberSubscribers(clientId, listIds, createStart, createEnd, statuses, emailSearch, anyOrAll);
         } catch (DataValidationException ex) {
             Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
@@ -131,6 +141,7 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     protected void initCriteria() {
         this.listIds = new ArrayList<>();
         this.statuses = new ArrayList<>();
+        this.anyOrAll = "any";
     }
 
     

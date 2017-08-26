@@ -64,6 +64,14 @@ public class FormSubscriptionLists {
         program.setOwnedLists(ownedLists);
     }
     
+    public String getAnyOrAllLists() {
+        return program.getAnyOrAllLists();
+    }
+
+    public void setAnyOrAllLists(String anyOrAll) {
+        program.setAnyOrAllLists(anyOrAll);
+    }
+    
     public void listChangeUpdate() {
         
         //Convert assignedLists to convertedAssignedLists

@@ -20,6 +20,7 @@ import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
 import eds.entity.mail.Email;
+import java.math.BigInteger;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
@@ -39,6 +40,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
 import javax.persistence.Query;
+import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
@@ -923,6 +925,7 @@ public class SubscriptionService {
      * from (note: not SubscriberFieldValue records)
      * @param maxResults the max number of SubscriberAccount records to retrieve
      * from (note: not SubscriberFieldValue records)
+     * @param anyOrAll
      * @return
      * @throws eds.component.data.DataValidationException
      */
@@ -934,21 +937,52 @@ public class SubscriptionService {
             List<SUBSCRIBER_STATUS> statuses,
             String emailSearch,
             int startIndex,
-            int maxResults) throws DataValidationException {
+            int maxResults,
+            String anyOrAll) throws DataValidationException {
         
-        String sql = buildDripQuery(clientId, listIds, createStart, createEnd, statuses, emailSearch, "");
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
+        Root<SubscriberAccount> fromAcc = query.from(SubscriberAccount.class);
+        Root<SubscriberOwnership> fromOwn = query.from(SubscriberOwnership.class);
+        Root<Subscription> fromSubsc = query.from(Subscription.class);
         
-        List<Object> results = objService.getEm().createQuery(sql)
+        query.select(fromAcc);
+        List<Predicate> conditions = new ArrayList<>();
+        conditions.add(builder.equal(fromOwn.get(SubscriberOwnership_.TARGET), clientId));
+        conditions.add(builder.equal(fromOwn.get(SubscriberOwnership_.SOURCE), fromAcc.get(SubscriberAccount_.OBJECTID)));
+        if(createStart != null) {
+            conditions.add(builder.greaterThanOrEqualTo(fromAcc.get(SubscriberAccount_.DATE_CREATED), 
+                new java.sql.Date(createStart.getMillis())));
+        }
+        if(createEnd != null) {
+            conditions.add(builder.lessThanOrEqualTo(fromAcc.get(SubscriberAccount_.DATE_CREATED), 
+                new java.sql.Date(createEnd.getMillis())));
+        }
+        
+        // Any or All fields
+        if(listIds != null && !listIds.isEmpty()) {
+            conditions.add(fromSubsc.get(Subscription_.TARGET).in(listIds));
+            conditions.add(builder.equal(fromSubsc.get(Subscription_.SOURCE),fromAcc.get(SubscriberAccount_.OBJECTID)));
+            
+            if(anyOrAll != null && "all".equalsIgnoreCase(anyOrAll)) {
+                query.groupBy(fromAcc.get(SubscriberAccount_.OBJECTID));
+                query.having(builder.equal(builder.count(fromAcc),listIds.size()));
+            }
+        }
+        
+        if(statuses != null && !statuses.isEmpty()) {
+            conditions.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statuses));
+            
+            //Another clause for if any or all
+        }
+        
+        query.where(builder.and(conditions.toArray(new Predicate[]{})));
+        List<SubscriberAccount> results = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
                 .setMaxResults(maxResults)
                 .getResultList();
-        
-        List<SubscriberAccount> subscribers = new ArrayList<>();
-        for(Object result : results) {
-            subscribers.add((SubscriberAccount) result);
-        }
 
-        return subscribers;
+        return results ;//subscribers;
     }
 
     /**
@@ -961,6 +995,7 @@ public class SubscriptionService {
      * @param createEnd
      * @param statuses
      * @param emailSearch
+     * @param anyOrAll
      * @return
      * @throws eds.component.data.DataValidationException
      */
@@ -970,14 +1005,36 @@ public class SubscriptionService {
             DateTime createStart,
             DateTime createEnd,
             List<SUBSCRIBER_STATUS> statuses,
-            String emailSearch) throws DataValidationException {
+            String emailSearch,
+            String anyOrAll
+    ) throws DataValidationException {
         
-        String sql = buildDripQuery(clientId, listIds, createStart, createEnd, statuses, emailSearch, "count");
+        String sql = buildDripQueryCount(clientId, listIds, createStart, createEnd, statuses, emailSearch, anyOrAll);
         
-        Long result = (Long) objService.getEm().createQuery(sql)
-                .getSingleResult();
+        Long result =  ((BigInteger)objService.getEm().createNativeQuery(sql)
+                .getSingleResult())
+                .longValue();
         
         return result;
+    }
+    
+    private String buildDripQueryCount(
+            long clientId,
+            List<Long> listIds,
+            DateTime createStart,
+            DateTime createEnd,
+            List<SUBSCRIBER_STATUS> statuses,
+            String emailSearch,
+            String anyOrAll
+            ) throws DataValidationException {
+        String sql = buildDripQuery(clientId, listIds, createStart, createEnd, statuses, emailSearch, anyOrAll);
+        
+        String preSQL = "SELECT COUNT(*) from (";
+        String postSQL = ") a";
+        
+        String finalSQL = preSQL + sql + postSQL;
+        return finalSQL;
+            
     }
     
     private String buildDripQuery(
@@ -987,18 +1044,20 @@ public class SubscriptionService {
             DateTime createEnd,
             List<SUBSCRIBER_STATUS> statuses,
             String emailSearch,
-            String selectFunction
+            //String selectFunction,
+            String anyOrAll
             ) throws DataValidationException {
         if (createEnd != null && createStart != null && createEnd.getMillis() < createStart.getMillis()) {
             throw new DataValidationException("End datetime is before Start dateTime");
         }
         //Risky as the table names might be changed from the Java class but we don't know which methods have hardcoded the names
-        String accTable = SubscriberAccount.class.getSimpleName();//"SUBSCRIBER_ACCOUNT";//
-        String ownTable = SubscriberOwnership.class.getSimpleName();//"SUBSCRIBER_OWNERSHIP";//
-        String subscTable = Subscription.class.getSimpleName();//"SUBSCRIPTION";//
+        String accTable = SubscriberAccount.class.getAnnotation(Table.class).name();
+        String ownTable = SubscriberOwnership.class.getAnnotation(Table.class).name();//"SUBSCRIBER_OWNERSHIP";//
+        String subscTable = Subscription.class.getAnnotation(Table.class).name();//"SUBSCRIPTION";//
             
         String sql = "SELECT ";
-        sql += (selectFunction == null || selectFunction.isEmpty()) ? "a " : selectFunction+"(a) ";
+        //sql += (selectFunction == null || selectFunction.isEmpty()) ? "a " : selectFunction+"(a) ";
+        sql += "a.* ";
         sql += "FROM ";
         sql += accTable + " as a , ";
         sql += ownTable + " as b "; //join with SubscriberOwnership
@@ -1038,8 +1097,11 @@ public class SubscriptionService {
             sql += " AND c.TARGET in (" +  listString +")";   
         }
         if(emailSearch != null && !emailSearch.isEmpty()) {
-            String searchString = emailSearch.replace('*', '%'); //Most common wildcard char people will use
+            String searchString = emailSearch.replace('*', '%').replace(" OR ", " "); //Most common wildcard char people will use
             sql += " AND a.EMAIL LIKE '%"+searchString+"%'";
+        }
+        if(anyOrAll != null && "all".equalsIgnoreCase(anyOrAll)) {
+            sql += " GROUP BY a.OBJECTID HAVING count(a.OBJECTID) = " + listIds.size();
         }
         
         return sql;
@@ -1106,7 +1168,7 @@ public class SubscriptionService {
             }
             conditions.add(fromSubsc.get(Subscription_.STATUS).in(statusNames));
         }
-        query.where(conditions.toArray(new Predicate[]{}));
+        query.where(builder.and(conditions.toArray(new Predicate[]{})));
         query.orderBy(builder.asc(fromAcc.get(SubscriberAccount_.EMAIL)));
         
         List<SubscriberAccount> results = objService.getEm().createQuery(query)

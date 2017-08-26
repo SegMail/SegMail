@@ -13,7 +13,6 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
-import eds.entity.batch.BatchJobContainer;
 import eds.entity.client.Client;
 import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
@@ -33,7 +32,6 @@ import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
@@ -66,7 +64,6 @@ import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListField_;
 import segmail.entity.subscription.Subscription_;
-import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -85,8 +82,6 @@ public class CampaignService {
     @EJB LandingService landingService;
     @EJB ListService listService;
     @EJB MailMergeService mmService;
-    
-    @EJB BatchJobContainer batchJobCont;
     
     public Campaign getCampaign(long campaignId) {
         Campaign campaign = objService.getEnterpriseObjectById(campaignId, Campaign.class);
@@ -438,6 +433,11 @@ public class CampaignService {
      * will occur and the sending schedule created halfway will be destroyed.
      * 
      * @param emailActivity 
+     * @throws eds.component.batch.BatchProcessingException 
+     * @throws eds.component.data.EntityNotFoundException 
+     * @throws eds.component.data.IncompleteDataException 
+     * @throws java.io.IOException 
+     * @throws eds.component.data.DataValidationException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void startSendingCampaignEmail(CampaignActivity emailActivity) 
@@ -465,23 +465,25 @@ public class CampaignService {
         if (targetLists == null || targetLists.isEmpty())
             throw new IncompleteDataException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
         
-        
         DateTime now = DateTime.now();
-        batchJobCont.create(Campaign.class.getSimpleName()+" "+emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME());
-        batchJobCont.addStep(CampaignExecutionService.class.getSimpleName(),"executeCampaignActivity",new Object[]{emailActivity.getOBJECTID(),(int)schedule.getSEND_IN_BATCH()});
-        batchJobCont.addCondition(CampaignExecutionService.class.getSimpleName(),"continueCampaignActivity",new Object[]{emailActivity.getOBJECTID()});
-        batchJobCont.setSchedule(schedule.generateCronExp(now).getCRON_EXPRESSION());
-        batchJobCont.schedule(now);
-        /*
+        
+        String jobName = "Campaign " + emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME() + " (ID: " + emailActivity.getOBJECTID() + ")";
+        if(clientContainer != null && clientContainer.getClient() != null) {
+            jobName += " by Client " + clientContainer.getClient().getCLIENT_NAME() + " (ID: " + clientContainer.getClient().getOBJECTID() + ")";
+        }
+        
         batchScheduleService.createSingleStepJob(
-                emailActivity.getACTIVITY_TYPE()+" "+emailActivity.getACTIVITY_NAME(), 
+                jobName, 
                 "CampaignExecutionService", 
                 "executeCampaignActivity", 
-                params,
+                new Object[]{emailActivity.getOBJECTID(),(int)schedule.getSEND_IN_BATCH()},
                 landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP).getOBJECTID(),
                 schedule.generateCronExp(now).getCRON_EXPRESSION(),
-                now);
-        */
+                now,
+                CampaignExecutionService.class.getSimpleName(),
+                "continueCampaignActivity",
+                new Object[]{emailActivity.getOBJECTID()});
+        
         
         //Update the status of the activity
         emailActivity.setSTATUS(ACTIVITY_STATUS.EXECUTING.name);
