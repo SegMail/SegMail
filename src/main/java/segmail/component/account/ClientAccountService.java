@@ -115,8 +115,15 @@ public class ClientAccountService {
                 resultObjectBuilder.add("user_error", ex.getMessage());
                 return resultObjectBuilder.build().toString();
             } catch (EntityExistsException ex) {
+                /**
+                 * Because users are identified by contact email first and foremost, we 
+                 * check if the contact email exists and throw this exception. In theory,
+                 * all Segmail users' contact email and their usernames are the same because 
+                 * username is also email, so we don't expect 2 users with the same contact email
+                 * but different username.
+                 */
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-                userAccount = userService.getUserAccountByUsername(username);
+                userAccount = userService.getUserAccountByContactEmail(username); 
                 resultObjectBuilder.add("username", userAccount.getUSERNAME());
             }
             
