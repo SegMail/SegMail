@@ -54,6 +54,7 @@ import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.UNSUBSCRIBED;
 import segmail.entity.subscription.SubscriberAccount;
@@ -186,7 +187,7 @@ public class SubscriptionService {
             }
         }
         
-        SUBSCRIPTION_STATUS[] status = {CONFIRMED};
+        SUBSCRIPTION_STATUS[] status = {NEW,CONFIRMED};
         List<Subscription> existingSubscriptions = this.getSubscriptions(email, listId, status);
         if (existingSubscriptions != null && !existingSubscriptions.isEmpty()) {//checkSubscribed(email, listId)) {
             throw new RelationshipExistsException(existingSubscriptions.get(0).getCONFIRMATION_KEY());

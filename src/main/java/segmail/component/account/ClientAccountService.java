@@ -42,6 +42,9 @@ import seca2.bootstrap.module.Webservice.REST.RestSecured;
 import seca2.component.landing.LandingService;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import segmail.entity.subscription.Subscription;
 
 /**
@@ -204,7 +207,7 @@ public class ClientAccountService {
         JsonObjectBuilder resultObjectBuilder = Json.createObjectBuilder();
         
         if(email != null && !email.isEmpty()) {
-            List<Subscription> subcs = subService.getSubscriptions(email, listId, null);
+            List<Subscription> subcs = subService.getSubscriptions(email, listId, new SUBSCRIPTION_STATUS[]{NEW,CONFIRMED});
             if(subcs == null || subcs.isEmpty()) {
                 //resultObjectBuilder.addNull(emailKey); //Don't put anything
                 String subscribeResult = helper.subscribe(listId, clientId, accountMap);

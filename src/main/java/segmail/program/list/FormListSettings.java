@@ -73,7 +73,9 @@ public class FormListSettings {
     
     public void saveSettings(){
         try {
-            listService.saveList(program.getListEditing());
+            SubscriptionList listEditing = listService.saveList(program.getListEditing());
+            program.setListEditing(listEditing);
+            
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Settings saved!", null);
         } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());

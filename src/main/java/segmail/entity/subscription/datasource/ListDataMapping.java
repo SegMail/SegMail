@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionList;
@@ -23,6 +24,9 @@ import segmail.entity.subscription.SubscriptionList;
  */
 @Entity
 @Table(name="SUBSCRIPTION_LIST_DATA_MAPPING")
+@EntityListeners({
+    ListDataMappingListener.class
+})
 public class ListDataMapping extends EnterpriseData<SubscriptionList>{
     
     /**

@@ -235,12 +235,12 @@ public class ListService {
      * <li>REDIRECT_CONFIRM or REDIRECT_WELCOME are invalid</li>
      * </ul>
      */
-    public void saveList(SubscriptionList list) throws DataValidationException {
+    public SubscriptionList saveList(SubscriptionList list) throws DataValidationException {
 
         validateList(list);
-
-        updateService.getEm().merge(list);
-
+        list = updateService.getEm().merge(list);
+        
+        return list;
     }
 
     public void validateList(SubscriptionList list) throws DataValidationException {
@@ -250,13 +250,18 @@ public class ListService {
         }
 
         if (list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
-            if (UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM())) {
+            if (!UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM())) {
                 throw new DataValidationException("Redirect URL " + list.getREDIRECT_CONFIRM() + " is invalid.");
             }
         }
         if (list.getREDIRECT_WELCOME() != null && !list.getREDIRECT_WELCOME().isEmpty()) {
-            if (UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME())) {
+            if (!UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME())) {
                 throw new DataValidationException("Redirect URL " + list.getREDIRECT_WELCOME() + " is invalid.");
+            }
+        }
+        if (list.getREDIRECT_UNSUBSCRIBE()!= null && !list.getREDIRECT_UNSUBSCRIBE().isEmpty()) {
+            if (!UrlValidator.getInstance().isValid(list.getREDIRECT_UNSUBSCRIBE())) {
+                throw new DataValidationException("Redirect URL " + list.getREDIRECT_UNSUBSCRIBE() + " is invalid.");
             }
         }
 

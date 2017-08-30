@@ -276,9 +276,12 @@ public class DatasourceService {
                     size,
                     new SUBSCRIPTION_STATUS[]{ NEW,CONFIRMED });
             Map<String,SubscriberAccount> accountsMap = new HashMap<>();
-            accounts.forEach(acc -> {
+            /*accounts.forEach(acc -> {
                 accountsMap.put(acc.getEMAIL(), acc);
-            });
+            });*/
+            for(SubscriberAccount acc : accounts) {
+                accountsMap.put(acc.getEMAIL(), acc);
+            }
             //Get remote subscribers
             List<String> toBeRemoved = new ArrayList<>(accountsMap.keySet());
             List<ListDatasourceObjectWrapper> objs1 = dsQueryService.getRemoteSubscriberWrappers(

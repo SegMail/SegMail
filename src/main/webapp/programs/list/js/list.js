@@ -59,6 +59,7 @@ $(document).ready(function () {
     toggleMenu();
     
     initSettingsValidation();
+    initRedirect();
 });
 
 var FormListSettings;
@@ -76,6 +77,36 @@ var initSettingsValidation = function() {
             'FormListSettings:sendasname' : {
                 required: true,
                 minlength: 6
+            }
+        },
+        errorPlacement: function (error, element) {
+            element.parents('.form-group').addClass('has-error');
+            error.insertBefore(element);
+
+        },
+        highlight: function (element, errorClass) {
+
+        },
+        success : function (label, element) {
+            $(element).parents('.form-group').removeClass('has-error');
+            $(element).siblings('label').remove();
+        }
+    });
+};
+
+var FormListEmail;
+
+var initRedirect = function() {
+    FormListEmail = $('#FormListEmail').validate({
+        rules: {
+            'FormListEmail:confirmRedirect' : {
+                url : true
+            },
+            'FormListEmail:welcomeRedirect' : {
+                url : true
+            },
+            'FormListEmail:unsubscribeRedirect' : {
+                url : true
             }
         },
         errorPlacement: function (error, element) {
@@ -177,6 +208,15 @@ function updateDatasource(data) {
 var updateSegmailIp = function() {
     $.getJSON('https://jsonip.com/?callback=?', function(response){
         $('.ip_address').html(response.ip);
+    });
+}
+
+var addSchemeToUrl = function() {
+    $('input.url').each(function(){
+        var address = $(this).val();
+        if(address && !address.startsWith('http')) {
+            $(this).val('http://'+address);
+        }
     });
 }
 

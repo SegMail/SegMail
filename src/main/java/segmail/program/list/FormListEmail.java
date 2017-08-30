@@ -7,27 +7,28 @@ package segmail.program.list;
 
 import eds.component.GenericObjectService;
 import eds.component.data.DataValidationException;
-import eds.component.data.EntityNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
-import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.SubscriptionList;
-import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
-import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
-import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 
 /**
  *
@@ -50,6 +51,8 @@ public class FormListEmail {
     private ListService listService;
 
     private final String formName = "form_list_email";
+    
+    private String redirectConfirmExample;
 
     /**
      * We can control the number of DB hits for each form in this method. Each
@@ -60,145 +63,41 @@ public class FormListEmail {
     public void init() {
         FacesContext fc = FacesContext.getCurrentInstance();
         if (!fc.isPostback()) {
-            reset();
+            //reset();
+            initParams();
         }
     }
-
-    public void loadAvailableConfirmationEmails() {
-        try {
-            List<AutoresponderEmail> confirmEmails
-                    = autoresponderService.getAvailableAutoEmailsForClient(
-                            clientContainer.getClient().getOBJECTID(),
-                            AUTO_EMAIL_TYPE.CONFIRMATION);
-            program.setConfirmationEmails(confirmEmails);
-
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-
-    public void loadAvailableWelcomeEmails() {
-        try {
-            List<AutoresponderEmail> welcomeEmails
-                    = autoresponderService.getAvailableAutoEmailsForClient(
-                            clientContainer.getClient().getOBJECTID(),
-                            AUTO_EMAIL_TYPE.WELCOME);
-            program.setWelcomeEmails(welcomeEmails);
-
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-
-    public void loadAssignedConfirmEmail() {
-        try {
-            if (program.getListEditing() == null) {
-                return;
-            }
-            //If there is already a confirmation email assigned, load it
-            List<AutoresponderEmail> assignedConfirmEmails = autoresponderService.getAssignedAutoEmailsForList(
-                    program.getListEditing().getOBJECTID(), AUTO_EMAIL_TYPE.CONFIRMATION);
-
-            program.setSelectedConfirmationEmail(
-                    (assignedConfirmEmails == null || assignedConfirmEmails.isEmpty())
-                            ? null : assignedConfirmEmails.get(0));
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-
-    public void loadAssignedWelcomeEmail() {
-        try {
-            if (program.getListEditing() == null) {
-                return;
-            }
-            //If there is already a confirmation email assigned, load it
-            //List<AutoWelcomeEmail> assignedAutoEmails = objectService.getAllSourceObjectsFromTarget(program.getListEditing().getOBJECTID(),
-            //        Assign_AutoWelcomeEmail_List.class, AutoWelcomeEmail.class);
-            List<AutoresponderEmail> assignedWelcomeEmails = autoresponderService.getAssignedAutoEmailsForList(
-                    program.getListEditing().getOBJECTID(), AUTO_EMAIL_TYPE.WELCOME);
-
-            program.setSelectedWelcomeEmail(
-                    (assignedWelcomeEmails == null || assignedWelcomeEmails.isEmpty())
-                            ? null : assignedWelcomeEmails.get(0)
-            );
-        } catch (EJBException ex) {
-            FacesMessenger.setFacesMessage(program.getFormName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
-        }
-    }
-
-    public void assignConfirmationEmail() {
-        try {
-            long selectedConfirmEmailId = program.getSelectedConfirmationEmailId();
-            long editingListId = program.getListEditing().getOBJECTID();
-
-            //Remove all assigned Confirmation emails first
-            autoresponderService.removeAllAssignedConfirmationEmailFromList(editingListId);
-
-            //Nothing is selected
-            if (selectedConfirmEmailId <= 0) {
-                //autoresponderService.removeAllAssignedConfirmationEmailFromList(editingListId);
-                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "Confirmation email is not assigned. ", "You need to assign a confirmation email to start receiving signups.");
-                this.resetConfirmationEmailPanel();
-                return;
-            }
-
-            Assign_AutoresponderEmail_List newAssign = autoresponderService.assignAutoEmailToList(program.getSelectedConfirmationEmailId(), program.getListEditing().getOBJECTID());
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Confirmation email assigned", "");
-            program.setSelectedConfirmationEmail(newAssign.getSOURCE());
-
-        } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName() + ": " + ex.getMessage(), "Please contact your system administrator.");
-        }
-    }
-
-    public void assignWelcomeEmail() {
-        try {
-            long selectedWelcomeEmailId = program.getSelectedWelcomeEmailId();
-            long editingListId = program.getListEditing().getOBJECTID();
-
-            //Remove all assigned Welcome emails first
-            autoresponderService.removeAllAssignedWelcomeEmailFromList(editingListId);
-
-            //Nothing is selected
-            if (selectedWelcomeEmailId <= 0) {
-                FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_WARN, "No welcome email is assigned. ", "Your customers are more likely to click on links in your welcome email. Are you sure you don't want to create one?");
-                this.resetConfirmationEmailPanel();
-                return;
-            }
-
-            Assign_AutoresponderEmail_List newAssign = autoresponderService.assignAutoEmailToList(program.getSelectedWelcomeEmailId(), program.getListEditing().getOBJECTID());
-            program.setSelectedWelcomeEmail(newAssign.getSOURCE());
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Welcome email assigned", "");
-
-        } catch (EntityNotFoundException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
-        } catch (Exception ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName() + ": " + ex.getMessage(), "Please contact your system administrator.");
-        }
+    
+    public void initParams() {
+        List<String> confirmUrlParams = getListEditing().generateConfirmParamList();
+        setConfirmUrlParams(confirmUrlParams);
+        List<String> welcomeUrlParams = getListEditing().generateWelcomeParamList();
+        setWelcomeUrlParams(welcomeUrlParams);
+        List<String> unsubscribeUrlParams = getListEditing().generateUnsubscribeParamList();
+        setUnsubUrlParams(unsubscribeUrlParams);
     }
 
     public void assignRedirects() {
         try {
-            //Save the redirect link
-            listService.saveList(program.getListEditing());
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_FATAL, "Redirect links are assigned.", "");
+            // Assign the params first
+            getListEditing().setREDIRECT_CONFIRM_PARAMS(getConfirmUrlParams());
+            getListEditing().setREDIRECT_WELCOME_PARAMS(getWelcomeUrlParams());
+            getListEditing().setREDIRECT_UNSUBSCRIBE_PARAMS(getUnsubUrlParams());
+            
+            // Save the redirect link
+            SubscriptionList listEditing = listService.saveList(getListEditing());
+            setListEditing(listEditing);
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Redirect links are assigned.", "");
         } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
-
     }
-
+    
     public void saveEmailSettings() {
-
-        this.assignConfirmationEmail();
-        this.assignWelcomeEmail();
-        this.assignRedirects();
-        reset();
+        assignRedirects();
+        //reset();
     }
-
+    
     public ProgramList getProgram() {
         return program;
     }
@@ -217,10 +116,6 @@ public class FormListEmail {
     }
 
     public void reset() {
-        loadAvailableConfirmationEmails();
-        loadAvailableWelcomeEmails();
-        loadAssignedConfirmEmail();
-        loadAssignedWelcomeEmail();
     }
 
     public SubscriptionList getListEditing() {
@@ -229,5 +124,41 @@ public class FormListEmail {
 
     public void setListEditing(SubscriptionList listEditing) {
         program.setListEditing(listEditing);
+    }
+    
+    public List<String> getConfirmUrlParams() {
+        return program.getConfirmUrlParams();
+    }
+
+    public void setConfirmUrlParams(List<String> subscribeUrlParams) {
+        program.setConfirmUrlParams(subscribeUrlParams);
+    }
+    
+    public String getConfirmUrlMasked() throws URISyntaxException {
+        return getListEditing().generateConfirmUrl();
+    }
+
+    public List<String> getWelcomeUrlParams() {
+        return program.getWelcomeUrlParams();
+    }
+
+    public void setWelcomeUrlParams(List<String> confirmUrlParams) {
+        program.setWelcomeUrlParams(confirmUrlParams);
+    }
+
+    public List<String> getUnsubUrlParams() {
+        return program.getUnsubUrlParams();
+    }
+
+    public void setUnsubUrlParams(List<String> unsubUrlParams) {
+        program.setUnsubUrlParams(unsubUrlParams);
+    }
+
+    public String getRedirectConfirmExample() {
+        return redirectConfirmExample;
+    }
+
+    public void setRedirectConfirmExample(String redirectConfirmExample) {
+        this.redirectConfirmExample = redirectConfirmExample;
     }
 }

@@ -7,9 +7,10 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
 
-    <form jsf:id="form_list_email">
+    <form jsf:id="FormListEmail">
         <div class="row">
             <div class="col-md-12">
 
@@ -21,7 +22,7 @@
                     </div>
                     <div class="page-toolbar-block pull-right">
                         <button jsf:id="save_settings_button" class="btn btn-primary"
-
+                                jsf:onclick="addSchemeToUrl(); return FormListEmail.form()"
                                 >
                             <!--f:ajax won't append its code to the onclick attribute of the button element-->
                             <f:ajax execute="@form" render="@form :FormListList :FormEditListHeader" 
@@ -61,14 +62,31 @@
                                     <div class="event-title">
                                         Subscribe
                                     </div>
+                                    <p class="text-success">
+                                        <strong>
+                                                #{FormListEmail.listEditing.generateConfirmUrl()}
+                                        </strong>
+                                    </p>
                                     <p>
                                         After subscribing, redirect subscribers to (leave blank to show our standard page):
-                                        
-                                        <h:inputText id="confirmRedirect" styleClass="form-control"
+
+                                        <h:inputText id="confirmRedirect" styleClass="form-control url"
                                                      value="#{FormListEmail.listEditing.REDIRECT_CONFIRM}" >
                                         </h:inputText>
                                     </p>
-
+                                    <p>
+                                        <strong class="text-info">[Optional]</strong> Insert these mailmerge tags as url parameters:
+                                        <div class="form-group">
+                                            <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                                                 pass:title="These are useful"
+                                                                 value="#{FormListEmail.confirmUrlParams}"
+                                                >
+                                                <f:selectItems value="#{FormListFieldSet.fieldList}" var="field"
+                                                               itemLabel="#{field.FIELD_NAME}" itemValue="#{field.MAILMERGE_TAG}">
+                                                </f:selectItems>
+                                            </h:selectManyListbox>
+                                        </div>
+                                    </p>
                                 </div>
                             </div>
                             <div class="timeline-event">
@@ -79,14 +97,30 @@
                                     <div class="event-title">
                                         Confirm
                                     </div>
-                                    
+                                    <p class="text-success">
+                                        <strong>
+                                                #{FormListEmail.listEditing.generateWelcomeUrl()}
+                                        </strong>
+                                    </p>
                                     <p>
                                         After confirming, redirect subscribers to (leave blank to show our standard page):
-                                        <h:inputText id="welcomeRedirect" styleClass="form-control"
+                                        <h:inputText id="welcomeRedirect" styleClass="form-control url"
                                                value="#{FormListEmail.listEditing.REDIRECT_WELCOME}" >
                                         </h:inputText>
                                     </p>
-                                    
+                                    <p>
+                                        <strong class="text-info">[Optional]</strong> Insert these mailmerge tags as url parameters:
+                                        <div class="form-group">
+                                            <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                                                 pass:title="These are useful"
+                                                                 value="#{FormListEmail.welcomeUrlParams}"
+                                                >
+                                                <f:selectItems value="#{FormListFieldSet.fieldList}" var="field"
+                                                               itemLabel="#{field.FIELD_NAME}" itemValue="#{field.MAILMERGE_TAG}">
+                                                </f:selectItems>
+                                            </h:selectManyListbox>
+                                        </div>
+                                    </p>
                                 </div>
                             </div>
                             <div class="timeline-event">
@@ -97,14 +131,30 @@
                                     <div class="event-title">
                                         Unsubscribe
                                     </div>
-                                    
+                                    <p class="text-success">
+                                        <strong>
+                                            #{FormListEmail.listEditing.generateUnsubscribeUrl()}
+                                        </strong>
+                                    </p>
                                     <p>
                                         After unsubscribing, redirect subscribers to (leave blank to show our standard page):
-                                        <h:inputText id="unsubscribeRedirect" styleClass="form-control"
+                                        <h:inputText id="unsubscribeRedirect" styleClass="form-control url"
                                                      value="#{FormListEmail.listEditing.REDIRECT_UNSUBSCRIBE}" >
                                         </h:inputText>
                                     </p>
-                                    
+                                    <p>
+                                        <strong class="text-info">[Optional]</strong> Insert these mailmerge tags as url parameters:
+                                        <div class="form-group">
+                                            <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                                                 pass:title="These are useful"
+                                                                 value="#{FormListEmail.unsubUrlParams}"
+                                                >
+                                                <f:selectItems value="#{FormListFieldSet.fieldList}" var="field"
+                                                               itemLabel="#{field.FIELD_NAME}" itemValue="#{field.MAILMERGE_TAG}">
+                                                </f:selectItems>
+                                            </h:selectManyListbox>
+                                        </div>
+                                    </p>
                                 </div>
                             </div>
                             <div class="timeline-event">

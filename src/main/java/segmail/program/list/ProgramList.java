@@ -52,6 +52,10 @@ public class ProgramList extends Program implements Serializable {
     private AutoresponderEmail selectedWelcomeEmail;
     private long selectedWelcomeEmailId;
     
+    private List<String> confirmUrlParams;
+    private List<String> welcomeUrlParams;
+    private List<String> unsubUrlParams;
+    
     //For field list
     private List<SubscriptionListField> fieldList;
     private SubscriptionListField newField;
@@ -367,6 +371,30 @@ public class ProgramList extends Program implements Serializable {
 
     public void setOldStatusFieldValue(String oldStatusFieldValue) {
         this.oldStatusFieldValue = oldStatusFieldValue;
+    }
+
+    public List<String> getConfirmUrlParams() {
+        return confirmUrlParams;
+    }
+
+    public void setConfirmUrlParams(List<String> confirmUrlParams) {
+        this.confirmUrlParams = confirmUrlParams;
+    }
+
+    public List<String> getWelcomeUrlParams() {
+        return welcomeUrlParams;
+    }
+
+    public void setWelcomeUrlParams(List<String> welcomeUrlParams) {
+        this.welcomeUrlParams = welcomeUrlParams;
+    }
+
+    public List<String> getUnsubUrlParams() {
+        return unsubUrlParams;
+    }
+
+    public void setUnsubUrlParams(List<String> unsubUrlParams) {
+        this.unsubUrlParams = unsubUrlParams;
     }
     
     @Override

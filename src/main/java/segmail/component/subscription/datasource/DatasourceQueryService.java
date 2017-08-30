@@ -62,6 +62,8 @@ public class DatasourceQueryService {
             //Construct the field list
             String fieldString = "";
             for(ListDataMapping mapping : mappings) {
+                if(mapping.getFOREIGN_NAME() == null || mapping.getFOREIGN_NAME().isEmpty())
+                    continue;
                 if(fieldString.length() > 0)
                     fieldString += ",";
                 fieldString += mapping.getFOREIGN_NAME();
@@ -111,6 +113,10 @@ public class DatasourceQueryService {
                     ListDataMapping mapping = mappings.get(i);
                     String localKey = mapping.getKEY_NAME();
                     String foreignName = mapping.getFOREIGN_NAME();
+                    // If the foreignName is not selected for this mapping, skip this local field.
+                    if(foreignName == null || foreignName.isEmpty()) 
+                        continue;
+                    
                     switch(FIELD_TYPE.valueOf(mapping.getTYPE())) {
                         case EMAIL: result.addValue(localKey, rs.getString(foreignName));
                                     //Only the 1st EMAIL field should be the identifier of this record
