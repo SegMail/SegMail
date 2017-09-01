@@ -118,11 +118,11 @@ public class DatasourceQueryService {
                         continue;
                     
                     switch(FIELD_TYPE.valueOf(mapping.getTYPE())) {
-                        case EMAIL: result.addValue(localKey, rs.getString(foreignName));
+                        case EMAIL: result.addValue(localKey, rs.getString(foreignName).trim()); //Trim because some emails have spaces before and after!
                                     //Only the 1st EMAIL field should be the identifier of this record
                                     //This is a quick and easy assumption, may not be true!
                                     if(mapping.getSNO() == 1)
-                                        result.setEmail(rs.getString(foreignName));
+                                        result.setEmail(rs.getString(foreignName).trim());
                                     break;
                         case DATE : result.addValue(localKey, rs.getDate(foreignName));
                                     break;
