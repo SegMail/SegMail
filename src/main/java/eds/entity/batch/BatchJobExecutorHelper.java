@@ -26,7 +26,7 @@ import org.joda.time.DateTime;
  * @author LeeKiatHaw
  */
 @Stateless
-public class BatchJobContainerHelper extends DBService {
+public class BatchJobExecutorHelper extends DBService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public BatchJobRun insertRun(BatchJobRun job) {

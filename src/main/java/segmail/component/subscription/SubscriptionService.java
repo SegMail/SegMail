@@ -752,6 +752,13 @@ public class SubscriptionService {
         List<Long> ids = objService.extractIds(subscribers);
         return getSubscriberValuesBySubscriberIds(ids);
     }
+    
+    public List<SubscriberFieldValue> getSubscriberValuesBySubscriberObject(SubscriberAccount subscriber) {
+        List<SubscriberAccount> subscribers = new ArrayList<>();
+        subscribers.add(subscriber);
+        
+        return getSubscriberValuesBySubscriberObjects(subscribers);
+    }
 
     //
 

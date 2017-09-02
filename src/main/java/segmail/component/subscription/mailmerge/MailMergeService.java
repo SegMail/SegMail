@@ -214,6 +214,13 @@ public class MailMergeService {
         return results;
     }
     
+    public Map<Long,Map<String,String>> createMMValueMap(long subscriberId, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
+        List<Long> subscriberIds = new ArrayList<>();
+        subscriberIds.add(subscriberId);
+        
+        return this.createMMValueMap(subscriberIds, fields, values);
+    }
+    
     /**
      * For sending confirmation emails, where the listId is known.
      * Used by confirmation and welcome emails.
@@ -285,17 +292,6 @@ public class MailMergeService {
         String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
         
         return text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
-    }
-
-    public String parseEverything(String text, Map<String, Object> params) throws IncompleteDataException {
-        String result = text;
-        //Has to be a better way to register all these parsing in a queue and process them together
-        result = this.parseConfirmationLink(result, (String) params.get(MAILMERGE_REQUEST.CONFIRM.label()));
-        this.parseUnsubscribeLink(result, (String) params.get(MAILMERGE_REQUEST.UNSUBSCRIBE.label()));
-        //result = this.parseListAttributes(result, (Long) params.get("LISTID"));
-        //result = this.parseMultipleContent(result, (Long) params.get("LISTID"));
-
-        return result;
     }
     
     /**

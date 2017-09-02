@@ -52,14 +52,11 @@ public class BatchProcessingService {
 
     @EJB
     LandingService landingService;
-
-    @EJB
-    BatchExecutionService execService;
     
     @EJB
     BatchSchedulingService scheduleService;
     
-    @Resource(mappedName="jms/_defaultConnectionFactory")
+    @Resource //(mappedName="jms/_defaultConnectionFactory")
     ConnectionFactory connectionFactory;
 
     @Resource(mappedName="jms/BatchJobContainer")
@@ -144,7 +141,6 @@ public class BatchProcessingService {
         List<BatchJobRun> results = updService.getEm().createQuery(query)
                 .setFirstResult(0)
                 .setMaxResults(n)
-                //.setLockMode(LockModeType.PESSIMISTIC_READ) //The BatchExecutionService should be locking it, not this
                 .getResultList();
 
         return results;

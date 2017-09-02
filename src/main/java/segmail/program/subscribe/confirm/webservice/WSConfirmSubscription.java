@@ -13,6 +13,9 @@ import segmail.program.subscribe.confirm.client.WSConfirmSubscriptionInterface;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
 import eds.component.transaction.TransactionService;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -21,9 +24,14 @@ import javax.ejb.TransactionAttributeType;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebParam;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
+import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_STATUS;
 import segmail.entity.subscription.email.mailmerge.MailMergeRequest;
 
@@ -42,6 +50,10 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
     SubscriptionService subService;
     @EJB
     TransactionService transService;
+    @EJB
+    ListService listService;
+    @EJB
+    MailMergeService mmService;
 
     /**
      * Confirms a subscription.
@@ -101,9 +113,18 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
             trans.setPROCESSING_STATUS(MAILMERGE_STATUS.PROCESSED.name);
             trans = transService.mergeTransaction(trans);
             
+            SubscriberAccount newSub = confirmedSubsc.getSOURCE();
             SubscriptionList list = confirmedSubsc.getTARGET();
-            if(list.getREDIRECT_WELCOME() != null && !list.getREDIRECT_WELCOME().isEmpty()) {
-                return "redirect: "+list.getREDIRECT_WELCOME(); //Ugly hack, could have used JAX-RS and return a redirect response
+                
+            String redirect = list.generateWelcomeUrl();
+            if(redirect != null && !redirect.isEmpty()) {
+                List<SubscriberFieldValue> fieldValues = subService.getSubscriberValuesBySubscriberObject(newSub);
+                List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(list.getOBJECTID());
+                Map<Long,Map<String,String>> mmValues = mmService.createMMValueMap(newSub.getOBJECTID(), fields, fieldValues);
+                
+                redirect = mmService.parseSubscriberTags(redirect, mmValues.get(newSub.getOBJECTID()));
+                
+                return "redirect: "+redirect; //Ugly hack, could have used JAX-RS and return a redirect response
             }
 
             return list.getLIST_NAME();
@@ -119,6 +140,9 @@ public class WSConfirmSubscription implements WSConfirmSubscriptionInterface {
         } catch (InvalidEmailException ex) {
             Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException("Subscriber's or sender's email address is invalid.", ex);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(WSConfirmSubscription.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex.getMessage(), ex);
         }
     }
 

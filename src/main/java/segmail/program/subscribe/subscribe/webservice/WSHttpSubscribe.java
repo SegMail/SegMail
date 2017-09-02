@@ -11,6 +11,7 @@ import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +34,12 @@ import seca2.bootstrap.module.Webservice.REST.RestSecured;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionException;
 import segmail.component.subscription.SubscriptionService;
+import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 
 /**
  * REST Web Service - accepts a request for a new subscription
@@ -49,6 +54,7 @@ public class WSHttpSubscribe {
     
     @EJB ListService listService;
     @EJB SubscriptionService subService;
+    @EJB MailMergeService mmService;
     
     /**
      * Currently only allows subscription to 1 list only.
@@ -93,14 +99,21 @@ public class WSHttpSubscribe {
             
             //Get the list from listKey
             Subscription subscription = subService.subscribe(clientId, listId, subscriberMap, true);
-            
+            SubscriberAccount newSub = subscription.getSOURCE();
             SubscriptionList list = subscription.getTARGET();
-            if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
-                String redirectUrl = list.getREDIRECT_CONFIRM();
+            
+            String redirect = list.generateConfirmUrl();
+            if(redirect != null && !redirect.isEmpty()) {
+                /*String redirectUrl = list.getREDIRECT_CONFIRM();
                 if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("https://"))
                     redirectUrl = "http://"+redirectUrl;
+                */
+                List<SubscriptionListField> fields = listService.getFieldsForSubscriptionList(listId);
+                List<SubscriberFieldValue> fieldValues = subService.getSubscriberValuesBySubscriberObject(newSub);
+                Map<Long,Map<String,String>> mmValues = mmService.createMMValueMap(newSub.getOBJECTID(), fields, fieldValues);
+                redirect = mmService.parseSubscriberTags(redirect, mmValues.get(newSub.getOBJECTID()));
                 
-                return Response.status(Response.Status.TEMPORARY_REDIRECT).entity(redirectUrl).build();
+                return Response.status(Response.Status.TEMPORARY_REDIRECT).entity(redirect).build();
             }
             
             return Response.ok("ok").entity(subscription.getCONFIRMATION_KEY()).build();
@@ -118,6 +131,9 @@ public class WSHttpSubscribe {
             String confirmKey = ex.getMessage();
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(confirmKey).build();
             
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(WSHttpSubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
         }  
     }
     

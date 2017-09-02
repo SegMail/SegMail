@@ -12,7 +12,6 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 import eds.component.DBService;
-import eds.component.batch.BatchExecutionService;
 import eds.component.batch.BatchProcessingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
@@ -71,7 +70,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
     private Exception ex;   
     
     @EJB LandingService landingService;
-    @EJB BatchJobContainerHelper helper;
+    @EJB BatchJobExecutorHelper helper;
     
     public void clear() {
         job = null;
@@ -408,7 +407,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
             schedule(DateTime.now());
             
         } catch (Exception ex) { //Expected exceptions
-            Logger.getLogger(BatchExecutionService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             //Update the job with ERROR status
             helper.logErrors(oneAndOnlyRun,ex); 
         }
