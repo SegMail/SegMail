@@ -71,22 +71,6 @@ public class FormProgramModeSwitch {
     public void setEditingCampaign(Campaign editingCampaign) {
         program.setEditingCampaign(editingCampaign);
     }
-
-    public long getEditingCampaignId() {
-        return program.getEditingCampaignId();
-    }
-
-    public void setEditingCampaignId(long editingCampaignId) {
-        program.setEditingCampaignId(editingCampaignId);
-    }
-    
-    public long getEditingActivityId() {
-        return program.getEditingActivityId();
-    }
-
-    public void setEditingActivityId(long editingActivityId) {
-        program.setEditingActivityId(editingActivityId);
-    }
     
     public CampaignActivity getEditingActivity() {
         return program.getEditingActivity();
@@ -110,18 +94,18 @@ public class FormProgramModeSwitch {
         
         if(params.size() >= 1) {
             long newCampaignId = Long.parseLong(params.get(0));
-            if (getEditingCampaignId() != newCampaignId) { 
-                setEditingCampaignId(newCampaignId);
+            if (getEditingCampaign() == null 
+                    || getEditingCampaign().getOBJECTID() != newCampaignId) { 
 
-                Campaign editingCampaign = campaignService.getCampaign(getEditingCampaignId());
+                Campaign editingCampaign = campaignService.getCampaign(newCampaignId);
                 setEditingCampaign(editingCampaign);
             }
         }
         
         if(params.size() >= 2) {
             long newActivityId = Long.parseLong(params.get(1));
-            if (getEditingActivityId() != newActivityId) { 
-                setEditingActivityId(newActivityId);
+            if (getEditingActivity() == null
+                    || getEditingActivity().getOBJECTID() != newActivityId) { 
 
                 CampaignActivity editingActivy = campaignService.getCampaignActivity(newActivityId);
                 setEditingActivity(editingActivy);

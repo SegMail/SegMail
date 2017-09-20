@@ -14,10 +14,12 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.program.FormCreateEntity;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.ACTIVITY_TYPE;
+import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 
 /**
@@ -28,6 +30,7 @@ import segmail.entity.campaign.CampaignActivity;
 @Named("FormCreateNewEmailActivity")
 public class FormCreateNewEmailActivity implements FormCreateEntity {
     @Inject UserRequestContainer reqCont;
+    @Inject ClientContainer cltCont;
     
     @EJB CampaignService campaignService;
     
@@ -52,6 +55,14 @@ public class FormCreateNewEmailActivity implements FormCreateEntity {
         this.activityGoals = activityGoals;
     }
     
+    public void setEditingCampaign(Campaign editingCampaign) {
+        program.setEditingCampaign(editingCampaign);
+    }
+
+    public Campaign getEditingCampaign() {
+        return program.getEditingCampaign();
+    }
+    
     public boolean renderThis(){
         return reqCont.getProgramParamsOrdered().size() == 1;
     }
@@ -59,7 +70,12 @@ public class FormCreateNewEmailActivity implements FormCreateEntity {
     @Override
     public void createNew() {
         try {
-            CampaignActivity newActivity = campaignService.createCampaignActivity(program.getEditingCampaignId(),activityName, activityGoals, ACTIVITY_TYPE.EMAIL);
+            CampaignActivity newActivity = campaignService.createCampaignActivity(
+                    getEditingCampaign().getOBJECTID(),
+                    cltCont.getClient().getOBJECTID(),
+                    activityName, 
+                    activityGoals, 
+                    ACTIVITY_TYPE.EMAIL);
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Activity created. You can edit your activity now.", "");
             program.refresh();
         } catch (IncompleteDataException ex) {

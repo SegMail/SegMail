@@ -13,11 +13,13 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
+import eds.component.data.UnauthorizedAccessException;
 import eds.entity.client.Client;
 import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
@@ -27,6 +29,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
@@ -43,6 +46,8 @@ import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.ACTIVITY_TYPE;
+import segmail.entity.campaign.Assign_CampaignActivity_List;
+import segmail.entity.campaign.Assign_CampaignActivity_List_;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Activity_;
 import segmail.entity.campaign.Assign_Campaign_Client;
@@ -57,8 +62,13 @@ import segmail.entity.campaign.link.CampaignLinkClick;
 import segmail.entity.campaign.link.CampaignLinkClick_;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
+import segmail.entity.campaign.filter.CampaignActivityFilter;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
+import segmail.entity.subscription.SubscriberFieldValue;
+import segmail.entity.subscription.SubscriberFieldValue_;
+import segmail.entity.subscription.SubscriberOwnership;
+import segmail.entity.subscription.SubscriberOwnership_;
 import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -196,7 +206,7 @@ public class CampaignService {
      * @throws EntityNotFoundException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivity createCampaignActivity(long campaignId, String name, String goals, ACTIVITY_TYPE type) throws IncompleteDataException, EntityNotFoundException {
+    public CampaignActivity createCampaignActivity(long campaignId, long clientId, String name, String goals, ACTIVITY_TYPE type) throws IncompleteDataException, EntityNotFoundException {
         
         //Assign campaign to activity (save 1 SQL query)
         //assignCampaignToActivity(campaignId,newActivity.getOBJECTID());
@@ -224,6 +234,15 @@ public class CampaignService {
         //Have to create schedule here or else if the creation fails, this object
         //will not be rolled back
         createActivitySchedule(newActivity.getOBJECTID(), 0, 0);
+        
+        // By default, assign all the client's list to this campaign activity
+        List<SubscriptionList> lists = listService.getAllListForClient(clientId);
+        lists.forEach(list -> {
+            Assign_CampaignActivity_List assign = new Assign_CampaignActivity_List();
+            assign.setSOURCE(newActivity);
+            assign.setTARGET(list);
+            objService.getEm().persist(assign);
+        });
         
         return newActivity;
     }
@@ -329,6 +348,11 @@ public class CampaignService {
         return targetLists;
     }
     
+    public List<SubscriptionList> getTargetedListsForActivity(long campaignActivityId) {
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaignActivityId, Assign_CampaignActivity_List.class, SubscriptionList.class);
+        return targetLists;
+    }
+    
     public List<SubscriptionListField> getTargetedListFields(long campaignId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
@@ -339,6 +363,24 @@ public class CampaignService {
         query.where(builder.and(
                 builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), campaignId),
                 builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromFields.get(SubscriptionListField_.OWNER))
+                ));
+        
+        List<SubscriptionListField> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
+    
+    public List<SubscriptionListField> getTargetedListFieldsForActivity(long campaignActivityId) {
+        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromFields = query.from(SubscriptionListField.class);
+        Root<Assign_CampaignActivity_List> fromAssign = query.from(Assign_CampaignActivity_List.class);
+        
+        query.select(fromFields);
+        query.where(builder.and(
+                builder.equal(fromAssign.get(Assign_CampaignActivity_List_.SOURCE), campaignActivityId),
+                builder.equal(fromAssign.get(Assign_CampaignActivity_List_.TARGET), fromFields.get(SubscriptionListField_.OWNER))
                 ));
         
         List<SubscriptionListField> results = objService.getEm().createQuery(query)
@@ -358,25 +400,21 @@ public class CampaignService {
      * existing executing CampaignActivities.
      * 
      * @param targetLists
-     * @param campaignId
+     * @param campaignActivityId
+     * @param clientId
      * @return
      * @throws EntityNotFoundException 
+     * @throws eds.component.data.DataValidationException 
+     * @throws eds.component.data.UnauthorizedAccessException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<Assign_Campaign_List> assignTargetListToCampaign(List<Long> targetLists, long campaignId) 
-            throws EntityNotFoundException, DataValidationException {
-        //Check if there are any executing CampaignActivities
-        List<CampaignActivity> activities = this.getAllActivitiesForCampaign(campaignId);
-        for(CampaignActivity activity : activities) {
-            if(activity.getSTATUS() != null && activity.getSTATUS().equals(ACTIVITY_STATUS.EXECUTING.name))
-                throw new DataValidationException("Campaign activity \""+activity.getACTIVITY_NAME()+"\" is executing. "
-                        + "No list should be assigned or unassigned at this point in time. "
-                        + "Please wait till it is completed.");
-        }
+    public List<Assign_CampaignActivity_List> assignTargetListToCampaign(List<Long> targetLists, long campaignActivityId, long clientId) 
+            throws EntityNotFoundException, DataValidationException, UnauthorizedAccessException {
+        //Check if there are any executing CampaignActivities?
         
         //Get all available lists for client and make sure client is authorized. (1 SQL query)
         List<SubscriptionList> toBeAssigned = new ArrayList<>();
-        List<SubscriptionList> availableLists = listService.getAllListForClient(clientContainer.getClient().getOBJECTID());
+        List<SubscriptionList> availableLists = listService.getAllListForClient(clientId); //very bad practice
         for(Long inList : targetLists) {
             boolean found = false;
             for(SubscriptionList availList : availableLists) {
@@ -384,23 +422,27 @@ public class CampaignService {
                     toBeAssigned.add(availList); //To be updated to the DB later.
                     found = true;
                 }
-                    
             }
             if(!found)
-                throw new EntityNotFoundException(SubscriptionList.class,inList);
+                throw new UnauthorizedAccessException("Client "+clientId+" is not authorized to access SubscriptionList "+inList);
         }
         
         //Get Campaign object (1 SQL query)
-        Campaign campaign = this.getCampaign(campaignId);
+        List<Campaign> campaigns = objService.getAllSourceObjectsFromTarget(campaignActivityId, Assign_Campaign_Activity.class, Campaign.class);
+        if(campaigns == null || campaigns.isEmpty())
+            throw new EntityNotFoundException("Campaign Activity "+ campaignActivityId + " is not assigned to a Campaign.");
+        Campaign campaign = campaigns.get(0);
+        
+        CampaignActivity campaignActivity = this.getCampaignActivity(campaignActivityId);
         
         //Delete all existing (1 SQL query)
-        int results = updService.deleteRelationshipBySource(campaignId, Assign_Campaign_List.class);
+        int results = updService.deleteRelationshipBySource(campaignActivityId, Assign_CampaignActivity_List.class);
         
         //Create all new (1 SQL query?)
-        List<Assign_Campaign_List> newAssigns = new ArrayList<>();
+        List<Assign_CampaignActivity_List> newAssigns = new ArrayList<>();
         for(SubscriptionList targetList : toBeAssigned) {
-            Assign_Campaign_List newAssign = new Assign_Campaign_List();
-            newAssign.setSOURCE(campaign);
+            Assign_CampaignActivity_List newAssign = new Assign_CampaignActivity_List();
+            newAssign.setSOURCE(campaignActivity);
             newAssign.setTARGET(targetList);
             
             newAssigns.add(newAssign);
@@ -409,12 +451,10 @@ public class CampaignService {
             //Set Sender's attributes in Campaign with the first list that was assigned
             if(campaign.getOVERRIDE_SEND_AS_EMAIL() == null || campaign.getOVERRIDE_SEND_AS_EMAIL().isEmpty()) {
                 campaign.setOVERRIDE_SEND_AS_EMAIL(targetList.getSEND_AS_EMAIL());
-                //updService.getEm().merge(campaign); //no need because it is already managed
             }
             
             if(campaign.getOVERRIDE_SEND_AS_NAME()== null || campaign.getOVERRIDE_SEND_AS_NAME().isEmpty()) {
                 campaign.setOVERRIDE_SEND_AS_NAME(targetList.getSEND_AS_NAME());
-                //updService.getEm().merge(campaign);   //no need because it is already managed
             }
             
         }
@@ -461,9 +501,12 @@ public class CampaignService {
             throw new IncompleteDataException("No CampaignActivitySchedule set for CampaignActivity "+emailActivity.getACTIVITY_NAME());
         CampaignActivitySchedule schedule = scheduleList.get(0);
         
+        /*
+         * remove this check since we target allif no list is specified.
         List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
         if (targetLists == null || targetLists.isEmpty())
             throw new IncompleteDataException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+        */
         
         DateTime now = DateTime.now();
         
@@ -492,32 +535,79 @@ public class CampaignService {
     }
     
     /**
-     * Using campaignId, get all current targeted subscribers.
+     * Using campaignActivityId, get all current targeted subscribers.
      * Campaign -> Assign_Campaign_List -> Subscription -> SubscriberAccount
      * 
-     * @param campaignId
+     * CampaignActivity 
+     * -> Assign_CampaignActivity_List (if don't exist, target entire SubscriberOwnership base
+     * -> Subscription / SubscriberOwnership
+     * -> CampaignActivityFilter (If don't exist, target entire SubscriberAccount base
+     * -> SubscriberAccount
+     * 
+     * 
+     * @param campaignActivityId
      * @param startIndex
      * @param maxResults
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<SubscriberAccount> getTargetedSubscribers(long campaignId, int startIndex, int maxResults) {
+    public List<SubscriberAccount> getTargetedSubscribers(
+            long campaignActivityId, 
+            long clientId, 
+            List<Long> listIds,
+            List<CampaignActivityFilter> filters,
+            int startIndex, 
+            int maxResults) {
+        //Should be passed in, not queried here
+        //List<Assign_CampaignActivity_List> assignCAList = objService.getRelationshipsForSourceObject(campaignActivityId, Assign_CampaignActivity_List.class);
+        //List<CampaignActivityFilter> filters = objService.getEnterpriseData(campaignActivityId, CampaignActivityFilter.class);
+        
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
-        Root<Subscription> fromSubscr = query.from(Subscription.class);
-        Root<Assign_Campaign_List> fromAssign = query.from(Assign_Campaign_List.class);
         
-        query.where(
-                builder.and(
-                        builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), campaignId),
-                        builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
-                        builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE))
-                )
-        );
+        List<Predicate> conditions = new ArrayList<>();
+        
+        // If assignCAList is not empty
+        // join to Assign_CampaignActivity_List and select SubscriptionLists
+        if(listIds != null && !listIds.isEmpty()) {
+            Root<Subscription> fromSubsc = query.from(Subscription.class);
+            
+            conditions.add(fromSubsc.get(Subscription_.TARGET).in(listIds));
+            conditions.add(builder.equal(fromSubsc.get(Subscription_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+        } 
+        // else if assignCAList is empty, join to SubscriberOwnership
+        else {
+            Root<SubscriberOwnership> fromOwner = query.from(SubscriberOwnership.class);
+            
+            conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId));
+            conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+        }
+        
+        // If filters is not empty,
+        // join to CampaignActivityFilter
+        // and to SubscriberFieldValues
+        if(filters != null && !filters.isEmpty()) {
+            // 
+            Root<SubscriberFieldValue> fromFieldValues = query.from(SubscriberFieldValue.class);
+            
+            conditions.add(builder.equal(fromFieldValues.get(SubscriberFieldValue_.OWNER), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            List<String> fieldValues = new ArrayList<>();
+            for(CampaignActivityFilter filter : filters) {
+                fieldValues.add(filter.getFIELD_KEY()+filter.getVALUE());
+            }
+            // Temporary solution, awaiting a more dynamic one
+            conditions.add(
+                builder.concat(
+                    fromFieldValues.get(SubscriberFieldValue_.FIELD_KEY),
+                    fromFieldValues.get(SubscriberFieldValue_.VALUE)
+                ).in(fieldValues)
+            );
+        }
         
         query.distinct(true);
         query.select(fromSubscrAcc);
+        query.where(builder.and(conditions.toArray(new Predicate[]{})));
         query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
         List<SubscriberAccount> results  = objService.getEm().createQuery(query)
@@ -599,7 +689,7 @@ public class CampaignService {
      * 
      * @param link
      * @return
-     * @throws IncompleteDataException 
+     * @throws IncompleteDataException if no server exists
      */
     public String constructLink(CampaignActivityOutboundLink link) throws IncompleteDataException {
         ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.WEB);
@@ -721,6 +811,16 @@ public class CampaignService {
         return activity;
     }
     
+    /**
+     * Reads all HTML <a> tags in body, creates CampaignActivityOutboundLink for 
+     * each link, and replace those <a> tags with the redirect link and the 
+     * [data-link] attribute.
+     * 
+     * @param activity
+     * @param body
+     * @return
+     * @throws IncompleteDataException if no servers exist.
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseAndUpdateLinks(CampaignActivity activity, String body) throws IncompleteDataException {
         //Outbound links - generate tracking links without subscriber ID
@@ -937,6 +1037,9 @@ public class CampaignService {
     
     public String parseRandomSubscriber(String body, Map<String,String> randomSubscriber, List<SubscriptionListField> fields) {
         String preview = body;
+        if(randomSubscriber == null)
+            return preview;
+        
         for(String key : randomSubscriber.keySet()) {
             for(SubscriptionListField field : fields) {
                 if(key.equals(field.generateKey())) {
@@ -946,5 +1049,28 @@ public class CampaignService {
         }
         
         return preview;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<CampaignActivityFilter> updateFilters(List<CampaignActivityFilter> filters) {
+        long id = filters.get(0).getOWNER().getOBJECTID();
+        
+        updService.deleteAllEnterpriseDataByType(id, CampaignActivityFilter.class);
+        
+        filters.sort(new Comparator<CampaignActivityFilter>() {
+
+            @Override
+            public int compare(CampaignActivityFilter o1, CampaignActivityFilter o2) {
+                return o1.getSNO() - o2.getSNO();
+            }
+            
+        });
+        for(int i=0; i < filters.size(); i++) {
+            CampaignActivityFilter filter = filters.get(i);
+            filter.setSNO(i+1);
+            updService.getEm().persist(filter);
+        }
+        
+        return filters;
     }
 }

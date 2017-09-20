@@ -31,7 +31,7 @@ import org.joda.time.DateTime;
 })
 public class CampaignActivitySchedule extends EnterpriseData<CampaignActivity> {
     
-    public static final int MAX_SEND_IN_BATCH = 20000;
+    public static final int MAX_SEND_IN_BATCH = 50000;
     public static final int MIN_SEND_IN_BATCH = 1;
 
     protected long SEND_IN_BATCH;

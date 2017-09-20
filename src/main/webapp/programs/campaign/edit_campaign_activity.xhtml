@@ -9,7 +9,7 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <form jsf:id="FormEditEmailActivity" prependId="false">
+    <h:form id="FormEditEmailActivity" prependId="false">
         <div class="row">
             <div class="col-md-12">
                 <s2:messenger id="FormEditEmailActivity_Messenger" for="FormEditEmailActivity" showDetail="true" showSummary="true"
@@ -18,13 +18,16 @@
         </div>
         <div class="row">
             <div class="col-md-6">
-                <div jsf:id="editor-panel" pass:id="editor-panel" class="block">
+                <div id="editor-panel" class="block">
                     <ul class="nav nav-tabs">
                         <li class="active">
                             <a href="#edit" data-toggle="tab" >Edit</a>
                         </li>
                         <li>
                             <a href="#links" data-toggle="tab">Links</a>
+                        </li>
+                        <li>
+                            <a href="#target" data-toggle="tab">Filters</a>
                         </li>
                     </ul>
                     <div class="block-content tab-content">
@@ -102,10 +105,103 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="target" class="tab-pane">
+                        <h:panelGroup layout="block" id="target-content">
+                            <h2>Targeting a specific segment</h2>
+                            <p>
+                                You can target a particular segment of your subscribers
+                                by setting a set of selection criteria based on 
+                                lists or field values.
+                            </p>
+                            <p>
+                                <br />
+                            </p>
+                            <table class="table table-condensed">
+                                <thead>
+                                    <th>#</th>
+                                    <th>Field</th>
+                                    <th>Criteria</th>
+                                    <th>Value</th>
+                                    <th></th>
+                                </thead>
+                                <tbody>
+                                    <c:forEach items="#{FormEditEmailActivity.filters}" var="filter">
+                                        <tr>
+                                            <td>
+                                                #{filter.SNO}
+                                            </td>
+                                            <td>
+                                                <h:selectOneListbox value="#{filter.FIELD_KEY}"
+                                                                    style="width: 150px"
+                                                                    styleClass="select2">
+                                                    <f:selectItems value="#{FormEditEmailActivity.listFields}" var="field"
+                                                                   itemLabel="#{field.FIELD_NAME}" 
+                                                                   itemValue="#{field.KEY_NAME}" 
+                                                                   
+                                                                   >
+                                                    </f:selectItems>
+                                                </h:selectOneListbox>
+                                            </td>
+                                            <td>
+                                                <h:selectOneListbox value="#{filter.OPERATOR}" styleClass="select2">
+                                                    <f:selectItems value="#{FormEditEmailActivity.operators}" var="operator"
+                                                                   itemLabel="#{operator.toString()}"
+                                                                   itemValue="#{operator.toString()}"
+                                                                   >
+                                                    </f:selectItems>               
+                                                </h:selectOneListbox>
+                                            </td>
+                                            <td>
+                                                <h:inputText styleClass="form-control" value="#{filter.VALUE}"></h:inputText>
+                                            </td>
+                                            <td>
+                                                <h:commandLink styleClass="btn btn-danger">
+                                                    <f:ajax render=":target-content" execute="@form"
+                                                            listener="#{FormEditEmailActivity.deleteFilter(filter.SNO)}"
+                                                            onevent="onAddNewFilter"
+                                                            >
+                                                    </f:ajax>
+                                                    <i class="fa fa-trash"></i>
+                                                </h:commandLink>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    <tr>
+                                        <td colspan="5" style="text-align: center;">
+                                            <h:commandLink>
+                                                <f:ajax render=":target-content" execute="@form"
+                                                        listener="#{FormEditEmailActivity.addNewFilter()}"
+                                                        onevent="onAddNewFilter"
+                                                        >
+                                                </f:ajax>
+                                                <i class="fa fa-plus-circle"></i>
+                                                Add new filter
+                                            </h:commandLink>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p>
+                                <br />
+                            </p>
+                            <div class="form-group">
+                                <label>Targeted lists:</label>
+                                <h:selectManyListbox styleClass="select2" style="width: 100%;"
+                                                     value="#{FormEditEmailActivity.selectedTargetLists}" 
+                                                     
+                                    >
+                                    <f:selectItems value="#{FormEditEmailActivity.ownedLists}" var="list" 
+                                                   itemLabel="#{list.LIST_NAME}"
+                                                   itemValue="#{list.OBJECTID}">
+                                    </f:selectItems>
+                                </h:selectManyListbox>
+                            </div>
+                        </h:panelGroup>
+                        </div>
                     </div>
                     <div class="block-footer">
                         <div class="pull-left">
-                            <a href="#{request.contextPath}/campaign/#{FormEditEmailActivity.editingCampaignId}" class="btn btn-default">Return without Saving</a>
+                            <a href="#{request.contextPath}/campaign/#{FormEditEmailActivity.editingCampaign.OBJECTID}" class="btn btn-default">Return without Saving</a>
                         </div>
                         <div class="pull-right">
                             <button jsf:id="saveButton" pass:id="saveButton"
@@ -129,13 +225,45 @@
             <div class="col-md-6">
                 <div id="preview-panel" class="block">
                     <div class="block-head">
-                        <h2>#{FormEditEmailActivity.editingActivity.ACTIVITY_NAME}</h2>
+                        <div class="block-title">
+                            #{FormEditEmailActivity.editingActivity.ACTIVITY_NAME}
+                        </div>
+                        <div class="block-title-date">
+                            <span jsf:rendered="#{FormEditEmailActivity.editingActivity.STATUS eq 'NEW'}"
+                                  class="group group-green">
+                            </span>
+                            <span jsf:rendered="#{FormEditEmailActivity.editingActivity.STATUS eq 'EDITING'}"
+                                  class="group group-blue">
+                            </span>
+                            <span jsf:rendered="#{FormEditEmailActivity.editingActivity.STATUS eq 'EXECUTING'}"
+                                  class="group group-red">
+                            </span>
+                            <span jsf:rendered="#{FormEditEmailActivity.editingActivity.STATUS eq 'COMPLETED'}"
+                                  class="group group-yellow">
+                            </span>
+                            #{FormEditEmailActivity.editingActivity.DATE_CHANGED}
+                        </div>
                     </div>
                     <div class="block-content">
                         <div class="pull-left">
                             <strong>From: </strong>
                             #{FormEditEmailActivity.editingCampaign.OVERRIDE_SEND_AS_NAME} 
                             &lt; #{FormEditEmailActivity.editingCampaign.OVERRIDE_SEND_AS_EMAIL} &gt;
+                        </div>
+                        <br />
+                        <div class="pull-left">
+                            <strong>To: </strong>
+                            <c:forEach items="#{FormEditEmailActivity.targetLists}" var="list" varStatus="cnt">
+                                <c:if test="#{!cnt.first}">
+                                    ,
+                                </c:if>
+                                <span class="list-name">#{list.LIST_NAME} (~#{list.SUBSCRIBER_COUNT})</span>
+                            </c:forEach>
+                        </div>
+                        <div class="pull-right btn-group">
+                            <button class="btn btn-default">
+                                Send test email
+                            </button>
                         </div>
                     </div>
                     <div class="block-content">
@@ -191,5 +319,5 @@
                         </c:forEach>
                     ]
         </script>
-    </form>
+    </h:form>
 </html>

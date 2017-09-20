@@ -95,14 +95,14 @@ public class FormTrackEmailActivity implements FormEditEntity  {
 
     @Override
     public void saveAndContinue() {
-        setTotalTargeted(campService.countTargetedSubscribersForActivity(program.getEditingActivityId()));
-        setTotalSent(campService.countEmailsSentForActivity(program.getEditingActivityId()));
-        setTotalClicked(campService.countTotalClicksForActivity(program.getEditingActivityId()));
+        setTotalTargeted(campService.countTargetedSubscribersForActivity(getEditingActivity().getOBJECTID()));
+        setTotalSent(campService.countEmailsSentForActivity(getEditingActivity().getOBJECTID()));
+        setTotalClicked(campService.countTotalClicksForActivity(getEditingActivity().getOBJECTID()));
         
-        setConversionRate(this.loadConversionRate(program.getEditingActivityId(), totalClicked));
+        setConversionRate(this.loadConversionRate(getEditingActivity().getOBJECTID(), totalClicked));
         
         //Load clicks for each link
-        setClicks(loadClicks(program.getEditingActivityId()));
+        setClicks(loadClicks(getEditingActivity().getOBJECTID()));
     }
 
     @Override

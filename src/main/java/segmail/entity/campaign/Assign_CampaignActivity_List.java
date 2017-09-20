@@ -14,10 +14,9 @@ import segmail.entity.subscription.SubscriptionList;
  *
  * @author LeeKiatHaw
  */
-@Deprecated
 @Entity
-@Table(name="ASSIGN_CAMPAIGN_LIST")
-public class Assign_Campaign_List extends EnterpriseRelationship<Campaign,SubscriptionList>{
+@Table(name="ASSIGN_CAMPAIGNACTIVITY_LIST")
+public class Assign_CampaignActivity_List extends EnterpriseRelationship<CampaignActivity,SubscriptionList> {
 
     @Override
     public void randInit() {

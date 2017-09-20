@@ -38,6 +38,7 @@ import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
+import segmail.entity.campaign.Assign_CampaignActivity_List;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Client;
 import segmail.entity.campaign.Assign_Campaign_List;
@@ -48,6 +49,7 @@ import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.entity.campaign.link.CampaignActivityOutboundLink_;
 import segmail.entity.campaign.link.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
+import segmail.entity.campaign.filter.CampaignActivityFilter;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.SubscriberFieldValue;
@@ -84,8 +86,6 @@ public class CampaignExecutionService {
     @EJB
     CampaignExecutionHelperService helper; 
     
-    @Resource
-    TransactionSynchronizationRegistry txReg;
 
     /**
      * Executes the campaign activity from the [start]th subscriber to
@@ -100,8 +100,11 @@ public class CampaignExecutionService {
      *
      * @param campaignActivityId
      * @param maxSize
-     * @throws eds.component.data.EntityNotFoundException
-     * @throws eds.component.data.RelationshipNotFoundException
+     * @throws EntityNotFoundException if the campaignActivityId is not found
+     * @throws RelationshipNotFoundException if campaignActivityId is not assigned to any Campaign.
+     * @throws IncompleteDataException if no servers exist.
+     * @throws DataValidationException if either sender or recipient email is missing.
+     * @throws InvalidEmailException if either sender or recipient email is invalid
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void executeCampaignActivity(long campaignActivityId, final int maxSize)
@@ -117,15 +120,16 @@ public class CampaignExecutionService {
             throw new RelationshipNotFoundException("CampaignActivity "+campaignActivityId+" is not assigned to any Campaign.");
         Campaign campaign = campaigns.get(0);
         
-        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
-        if (targetLists == null || targetLists.isEmpty())
-            throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaignActivityId, Assign_CampaignActivity_List.class, SubscriptionList.class); //DB hit
+        List<Long> listIds = objService.extractIds(targetLists);
         
         List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
         
         List<Client> clientLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_Client.class, Client.class);//DB hit
         if (clientLists == null || clientLists.isEmpty())
             throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned to any Clients.");
+        
+        List<CampaignActivityFilter> filters = objService.getEnterpriseData(campaignActivityId, CampaignActivityFilter.class);
         
         int count = 0; 
         int increment = 1;
@@ -142,6 +146,9 @@ public class CampaignExecutionService {
             List<SubscriberAccount> subscribers = 
                     helper.getUnsentSubscriberEmailsForCampaign(campaign.getOBJECTID(), 
                             campaignActivityId, 
+                            clientLists.get(0).getOBJECTID(), 
+                            listIds,
+                            filters,
                             c, //updated inside this method
                             batch_size); //DB hit
             
@@ -157,37 +164,7 @@ public class CampaignExecutionService {
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<String> getSubscriberEmailsForCampaign(long campaignId, int startIndex, int size) {
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-        CriteriaQuery<String> query = builder.createQuery(String.class);
-        Root<SubscriberAccount> fromSubAcc = query.from(SubscriberAccount.class);
-        Root<Subscription> fromSubp = query.from(Subscription.class);
-        Root<Assign_Campaign_List> fromAssignCampList = query.from(Assign_Campaign_List.class);
-
-        query.select(fromSubAcc.get(SubscriberAccount_.EMAIL));
-        query.where(
-                builder.and(
-                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.SOURCE), campaignId),
-                        builder.equal(fromAssignCampList.get(Assign_Campaign_List_.TARGET), fromSubp.get(Subscription_.TARGET)),
-                        builder.equal(fromSubp.get(Subscription_.TARGET), fromSubAcc.get(SubscriberAccount_.OBJECTID))
-                )
-        );
-
-        List<String> results = objService.getEm().createQuery(query)
-                .setFirstResult(startIndex)
-                .setMaxResults(size)
-                .getResultList();
-
-        return results;
-
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public boolean continueCampaignActivity(long campaignActivityId) {
-        /*long targeted = campService.countTargetedSubscribersForActivity(campaignActivityId);
-        long sent = campService.countEmailsSentForActivity(campaignActivityId);
-        
-        return sent <= targeted;*/
         CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
         if(activity == null)
             return false;
@@ -286,8 +263,6 @@ public class CampaignExecutionService {
             //Set the body of the email
             String content = emailActivity.getACTIVITY_CONTENT_PREVIEW();
 
-            //String testUnsubLink = mmService.getSystemTestLink(MAILMERGE_REQUEST.UNSUBSCRIBE.label());
-            //content = content.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), testUnsubLink);
             mmService.parseUnsubscribeLink(content,"test");
             preview.setBODY(content);
 
@@ -295,6 +270,18 @@ public class CampaignExecutionService {
         }
     }
     
+    /**
+     * 
+     * @param campaign
+     * @param campaignActivity
+     * @param subscribers
+     * @param clientLists
+     * @param targetListFields
+     * @return
+     * @throws IncompleteDataException if no servers exist.
+     * @throws DataValidationException if either sender or recipient email is missing.
+     * @throws InvalidEmailException if either sender or recipient email is invalid
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public int sendEmails(
             Campaign campaign,
@@ -307,9 +294,8 @@ public class CampaignExecutionService {
         if(subscribers.isEmpty())
             return 0;
         //Retrieve all unsubscribe codes
-        Map<SubscriberAccount,String> unsubCodes = this.getUnsubscribeCodes(subscribers, clientLists.get(0).getOBJECTID()); //DB hit
+        Map<SubscriberAccount,String> unsubCodes = getUnsubscribeCodes(subscribers, clientLists.get(0).getOBJECTID()); //DB hit
         //Retrieve all subscriber's field values
-        //List<SubscriberFieldValue> fieldValues = subService.getSubscriberValuesBySubscriberObjects(subscribers); //DB hit
         List<Long> subscrIds = objService.extractIds(subscribers);
         List<SubscriberFieldValue> fieldValues = objService.getEnterpriseDataByIds(subscrIds, SubscriberFieldValue.class);
 
@@ -339,7 +325,6 @@ public class CampaignExecutionService {
             content = mmService.parseSubscriberTags(content, fieldValuesMap.get(subscriber.getOBJECTID()));
             content = mmService.parseStandardCampaignTags(content, campaign);
             content = mmService.parseExtraSubscriberTags(content, subscriber, DateTime.now());
-            
 
             //Update each link with the subscriber's ID so that we can track conversion rates
             doc = Jsoup.parse(content);
