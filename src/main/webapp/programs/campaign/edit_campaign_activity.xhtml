@@ -136,7 +136,7 @@
                                                                     styleClass="select2">
                                                     <f:selectItems value="#{FormEditEmailActivity.listFields}" var="field"
                                                                    itemLabel="#{field.FIELD_NAME}" 
-                                                                   itemValue="#{field.KEY_NAME}" 
+                                                                   itemValue="#{field.generateKey()}" 
                                                                    
                                                                    >
                                                     </f:selectItems>

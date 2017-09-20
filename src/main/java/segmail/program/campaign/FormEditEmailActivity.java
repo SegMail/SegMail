@@ -256,11 +256,11 @@ public class FormEditEmailActivity implements FormEditEntity {
             loadTargetListFields();
             
             // Update Filters
-            campaignService.updateFilters(getFilters());
+            campaignService.updateFilters(clientCont.getClient().getOBJECTID(),getFilters());
             loadFilters(); //Needed?
             
             //Reload Campaign and CampaignActivity as they have been updated
-            programSwitch.reloadEntities();
+            //programSwitch.reloadEntities();
             //Reload all OutboundLinks for the activity
             loadOutboundLinks();
             loadPreviewBody();

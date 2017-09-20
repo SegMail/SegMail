@@ -246,11 +246,12 @@ public class CampaignExecutionService {
             throw new RelationshipNotFoundException("CampaignActivity "+emailActivity.getOBJECTID()+" is not assigned to any Campaign.");
         Campaign campaign = campaigns.get(0);
         
-        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaign.getOBJECTID(), Assign_Campaign_List.class, SubscriptionList.class); //DB hit
+        /*List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(emailActivity.getOBJECTID(), Assign_CampaignActivity_List.class, SubscriptionList.class); //DB hit
         if (targetLists == null || targetLists.isEmpty())
-            throw new RelationshipNotFoundException("Campaign "+campaign.getOBJECTID()+" is not assigned any target lists.");
+            throw new RelationshipNotFoundException("CampaignActivity "+emailActivity.getOBJECTID()+" is not assigned any target lists.");
+        */
         
-        List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
+        //List<SubscriptionListField> targetListFields = listService.getFieldsForLists(targetLists);//DB hit
         
         for(String email : previewEmails) {
             Email preview = new Email();

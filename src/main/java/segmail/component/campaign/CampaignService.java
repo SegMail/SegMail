@@ -1051,11 +1051,19 @@ public class CampaignService {
         return preview;
     }
     
+    /**
+     * 
+     * @param campaignActivityId if filters is empty, then we won't know whose filters to delete
+     * @param filters if this is null, method will return an empty list
+     * @return 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<CampaignActivityFilter> updateFilters(List<CampaignActivityFilter> filters) {
-        long id = filters.get(0).getOWNER().getOBJECTID();
+    public List<CampaignActivityFilter> updateFilters(long campaignActivityId, List<CampaignActivityFilter> filters) {
         
-        updService.deleteAllEnterpriseDataByType(id, CampaignActivityFilter.class);
+        updService.deleteAllEnterpriseDataByType(campaignActivityId, CampaignActivityFilter.class);
+        
+        if(filters == null)
+            return new ArrayList<>(); //Gracefully return an empty list
         
         filters.sort(new Comparator<CampaignActivityFilter>() {
 
