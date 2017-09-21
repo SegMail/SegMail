@@ -90,16 +90,12 @@ public class MailMergeService {
      *
      * @param text
      * @param confirmationKey
-     * @param email
      * @return
      * @throws eds.component.data.IncompleteDataException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseConfirmationLink(
             String text, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
-            //String landingServerAddress, 
-            //String email,
-            //long listId
             String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
         if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
@@ -226,8 +222,8 @@ public class MailMergeService {
      * Used by confirmation and welcome emails.
      * 
      * @param text
-     * @param subscriberId
-     * @param listId
+     * @param subscriber
+     * @param list
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -359,6 +355,14 @@ public class MailMergeService {
         return text;
     }
     
+    /**
+     * Returns content replaced with mailmerge links.
+     * 
+     * @param content
+     * @return
+     * @throws DataValidationException if any errors are thrown when generating the test link
+     * @throws IncompleteDataException if no available server is setup yet
+     */
     public String parseTestMailmergeLinks(String content) throws DataValidationException, IncompleteDataException {
         String preview = content;
         //Mailmerge links - generate test links

@@ -17,6 +17,7 @@ import eds.component.data.UnauthorizedAccessException;
 import eds.entity.client.Client;
 import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
+import eds.entity.data.EnterpriseObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,6 +32,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -63,6 +65,9 @@ import segmail.entity.campaign.link.CampaignLinkClick_;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.Trigger_Email_Activity_;
 import segmail.entity.campaign.filter.CampaignActivityFilter;
+import segmail.entity.campaign.filter.FILTER_OPERATOR;
+import segmail.entity.subscription.SUBSCRIBER_STATUS;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.SubscriberFieldValue;
@@ -110,6 +115,7 @@ public class CampaignService {
      * 
      * @param campaignName
      * @param campaignGoals
+     * @param client
      * @return
      * @throws RelationshipExistsException
      * @throws EntityNotFoundException
@@ -198,6 +204,7 @@ public class CampaignService {
      * and creates an default CampaignActivitySchedule.
      * 
      * @param campaignId
+     * @param clientId
      * @param name
      * @param goals
      * @param type
@@ -206,7 +213,8 @@ public class CampaignService {
      * @throws EntityNotFoundException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivity createCampaignActivity(long campaignId, long clientId, String name, String goals, ACTIVITY_TYPE type) throws IncompleteDataException, EntityNotFoundException {
+    public CampaignActivity createCampaignActivity(long campaignId, long clientId, String name, String goals, ACTIVITY_TYPE type) 
+            throws IncompleteDataException, EntityNotFoundException {
         
         //Assign campaign to activity (save 1 SQL query)
         //assignCampaignToActivity(campaignId,newActivity.getOBJECTID());
@@ -302,6 +310,7 @@ public class CampaignService {
     
     /**
      * Should validators be in EJB services? 
+     * No, should be moved to the entity or listener.
      * 
      * @param activity
      * @throws IncompleteDataException 
@@ -546,7 +555,10 @@ public class CampaignService {
      * 
      * 
      * @param campaignActivityId
+     * @param clientId
+     * @param listIds
      * @param startIndex
+     * @param filters
      * @param maxResults
      * @return 
      */
@@ -575,6 +587,7 @@ public class CampaignService {
             
             conditions.add(fromSubsc.get(Subscription_.TARGET).in(listIds));
             conditions.add(builder.equal(fromSubsc.get(Subscription_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            conditions.add(builder.equal(fromSubsc.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.CONFIRMED.name)); // temporary solution
         } 
         // else if assignCAList is empty, join to SubscriberOwnership
         else {
@@ -582,27 +595,61 @@ public class CampaignService {
             
             conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId));
             conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            conditions.add(builder.equal(fromSubscrAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.ACTIVE.name)); // temporary solution
         }
         
         // If filters is not empty,
         // join to CampaignActivityFilter
         // and to SubscriberFieldValues
         if(filters != null && !filters.isEmpty()) {
-            // 
-            Root<SubscriberFieldValue> fromFieldValues = query.from(SubscriberFieldValue.class);
+            // Subquery is the only way
+            //Root<SubscriberFieldValue> fromFieldValues = query.from(SubscriberFieldValue.class);
             
-            conditions.add(builder.equal(fromFieldValues.get(SubscriberFieldValue_.OWNER), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
-            List<String> fieldValues = new ArrayList<>();
+            //conditions.add(builder.equal(fromFieldValues.get(SubscriberFieldValue_.OWNER), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            List<String> fieldValuesEq = new ArrayList<>();
+            List<String> fieldValuesNeq = new ArrayList<>();
             for(CampaignActivityFilter filter : filters) {
-                fieldValues.add(filter.getFIELD_KEY()+filter.getVALUE());
+                switch(FILTER_OPERATOR.valueOf(filter.getOPERATOR())) {
+                    case EQUALS :   fieldValuesEq.add(filter.getFIELD_KEY()+filter.getVALUE());
+                                    break;
+                    case NOT_EQUALS:fieldValuesNeq.add(filter.getFIELD_KEY()+filter.getVALUE());
+                                    break;
+                    default :       break;
+                }
             }
             // Temporary solution, awaiting a more dynamic one
-            conditions.add(
-                builder.concat(
-                    fromFieldValues.get(SubscriberFieldValue_.FIELD_KEY),
-                    fromFieldValues.get(SubscriberFieldValue_.VALUE)
-                ).in(fieldValues)
-            );
+            // For EQUALS clause
+            if (fieldValuesEq.size() > 0) {
+                Subquery<EnterpriseObject> inFValues = query.subquery(EnterpriseObject.class);
+                Root<SubscriberFieldValue> fromFieldValues = inFValues.from(SubscriberFieldValue.class);
+                
+                inFValues.select(fromFieldValues.get(SubscriberFieldValue_.OWNER));
+                inFValues.where(
+                    builder.concat(
+                        fromFieldValues.get(SubscriberFieldValue_.FIELD_KEY),
+                        fromFieldValues.get(SubscriberFieldValue_.VALUE)
+                    ).in(fieldValuesEq)
+                );
+                conditions.add(
+                        fromSubscrAcc.in(inFValues)
+                );
+            }
+            // NOT_EQUALS clause
+            if (fieldValuesNeq.size() > 0) {
+                Subquery<EnterpriseObject> notInFValues = query.subquery(EnterpriseObject.class);
+                Root<SubscriberFieldValue> fromFieldValues = notInFValues.from(SubscriberFieldValue.class);
+                
+                notInFValues.select(fromFieldValues.get(SubscriberFieldValue_.OWNER));
+                notInFValues.where(
+                    builder.concat(
+                        fromFieldValues.get(SubscriberFieldValue_.FIELD_KEY),
+                        fromFieldValues.get(SubscriberFieldValue_.VALUE)
+                    ).in(fieldValuesNeq)
+                );
+                conditions.add(
+                        builder.not(fromSubscrAcc.in(notInFValues))
+                );
+            }
         }
         
         query.distinct(true);
@@ -660,7 +707,7 @@ public class CampaignService {
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) throws IncompleteDataException {
+    public CampaignActivityOutboundLink createOrUpdateLink(CampaignActivity activity, String linkTarget, String linkText, int index) {
         
         //Get the existing link first
         List<CampaignActivityOutboundLink> allLinks = objService.getEnterpriseData(activity.getOBJECTID(), CampaignActivityOutboundLink.class);
@@ -771,8 +818,11 @@ public class CampaignService {
      * List<Client>,List<SubscriptionListField>)} method.
      * 
      * 
-     * @param editingContent
+     * @param activity
      * @return 
+     * @throws DataValidationException if any errors are thrown when generating the test link
+     * @throws IncompleteDataException if no available server is setup yet
+     * @throws EntityNotFoundException if no Campaign is assigned to activity
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CampaignActivity parsePreview(CampaignActivity activity) throws DataValidationException, IncompleteDataException, EntityNotFoundException {
@@ -786,19 +836,6 @@ public class CampaignService {
         
         //Mailmerge links - generate test links
         processedContent = mmService.parseTestMailmergeLinks(processedContent);
-        /*MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
-        for(MAILMERGE_REQUEST mmReq : mmReqs) {
-            String tag = mmReq.label;
-            
-            Element a = new Element(Tag.valueOf("a"),"");
-            a.attr("href", mmService.getSystemTestLink(tag));
-            a.html(mmReq.defaultHtmlText);
-            a.attr("target", "_blank");
-            
-            String replacementElem = a.outerHtml();
-            processedContent = processedContent.replace(tag, replacementElem);
-            
-        }*/
         
         //Mailmerge tags (with random subscriber)
         //Can't do it here because the exact values will be saved into the DB!
@@ -1001,15 +1038,19 @@ public class CampaignService {
      * @param activityName
      * @param activityGoals
      * @return 
+     * @throws java.lang.InstantiationException 
+     * @throws java.lang.IllegalAccessException 
+     * @throws eds.component.data.EntityNotFoundException 
+     * @throws java.lang.NoSuchFieldException 
+     * @throws java.lang.NoSuchMethodException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public CampaignActivity copyCampaign(long objectid, String activityName, String activityGoals) throws InstantiationException, IllegalAccessException, EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
+    public CampaignActivity copyCampaign(long objectid, String activityName, String activityGoals) 
+            throws InstantiationException, IllegalAccessException, EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
         CampaignActivity copy = updService.copyObjectDataAndRelationship(objectid, CampaignActivity.class);
         copy.setACTIVITY_NAME(activityName);
         copy.setACTIVITY_GOALS(activityGoals);
         copy.setSTATUS(ACTIVITY_STATUS.NEW.name);
-        
-        //updService.persist(copy);
         
         return copy;
     }
