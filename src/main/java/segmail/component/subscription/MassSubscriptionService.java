@@ -305,7 +305,10 @@ public class MassSubscriptionService {
 
             if (!existingSubscription.contains(subscription)) {
                 createNewSubscription.add(subscription);
-            } 
+            }
+            // If the existingSubscription STATUS were anything other than
+            // NEW, CONFIRMED,
+            // remove them from updating
         }
 
         //Time to do db updates and inserts
@@ -314,12 +317,14 @@ public class MassSubscriptionService {
             int updateFieldValueResult = updateFieldValueList(updateFieldValueList);
             createNewSubAccList = createNewSubscriberAccounts(createNewSubAccList);
             createFieldValueList = createFieldValueList(createFieldValueList);
-            //Create SubscriberOwnership!!!
+            // Create SubscriberOwnership!!!
             createNewSubOwnership = createSubscriberOwnership(createNewSubOwnership);
-            //Create Subscription!!!
+            // Create Subscription!!!
             createNewSubscription = createSubscription(createNewSubscription);
-            //Update all existing subscriptions
-            existingSubscription = updateExistingSubscriptions(existingSubscription, doubleOptin ? NEW : CONFIRMED);
+            // Update all existing subscriptions
+            // Actually I forgot why we need to update all existing found subscription, it seems a little redundant
+            // existingSubscription = updateExistingSubscriptions(existingSubscription, doubleOptin ? NEW : CONFIRMED);
+            
             
             //Necessary for #74
             //As inspired by http://stackoverflow.com/a/11333262/5765606
