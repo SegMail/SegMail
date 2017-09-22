@@ -17,7 +17,6 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
 import eds.entity.client.VerifiedSendingAddress;
-import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.io.StringReader;
@@ -64,6 +63,7 @@ public class MailServiceInbound {
      * 
      * @param sender 
      * @param type 
+     * @return  
      */
     public List<Email> retrieveEmailFromSQSMessage(VerifiedSendingAddress sender, NotificationType type) {
         String endpoint = clientAWSService.getSQSEndpoint();
@@ -118,6 +118,8 @@ public class MailServiceInbound {
         for(String receiptHandle : receiptHandles) {
             sqsClient.deleteMessage(queueURL, receiptHandle);
         }
+        
+        sqsClient.shutdown();
         
         return emails;
     }

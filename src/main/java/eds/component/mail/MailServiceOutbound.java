@@ -24,6 +24,7 @@ import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -71,6 +72,7 @@ public class MailServiceOutbound {
      * @param email The data structure representing an email.
      * @param logging If logging is turned on, the email will be logged.
      */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void sendEmailNow(Email email, boolean logging) {
         try {
@@ -100,16 +102,6 @@ public class MailServiceOutbound {
             
             email.addReplyTo(email.getSENDER_ADDRESS());
             Set<String> REPLY_TO = email.getREPLY_TO_ADDRESSES();
-
-            // Validate all email addresses before sending
-            /*if (!EmailValidator.getInstance().isValid(FROM_ADDRESS)) {
-                throw new InvalidEmailException("FROM address " + FROM_ADDRESS + " is not valid.");
-            }
-            for (String to : TO) {
-                if (!EmailValidator.getInstance().isValid(to)) {
-                    throw new InvalidEmailException("TO address " + to + " is not valid.");
-                }
-            }*/
 
             //3) Create the AWS Content, Body, Message and SendEmailRequest objects
             Content textSubject = new Content().withData(SUBJECT);
@@ -161,6 +153,91 @@ public class MailServiceOutbound {
                 updateService.getEm().flush(); //Redundant
             }
         }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void sendEmailNow(List<Email> emails, boolean logging) {
+        // You will need to have AWS_ACCESS_KEY_ID and AWS_SECRET_KEY in your1111 
+        // web.xml environmental variables
+        // Initiate the client resource once
+        AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCredentials);
+        client.setEndpoint(clientAWSService.getSESEndpoint());
+        for(Email email : emails) {
+            try{
+                //Validate
+                validateEmail(email);
+                /**
+                 * Update the status first, because there is a higher chance of
+                 * error during sending than during updating, hence by updating
+                 * first, we ensure that a sending error will rollback the
+                 * transaction and leave the status as QUEUE rather than
+                 * successfully send out an email and leave the status as QUEUE
+                 * because of a JPA update error.
+                 */
+                if (logging) {
+                    email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.SENT);
+                    updateService.getEm().merge(email);
+                    updateService.getEm().flush();
+                }
+
+                // Get the sender, subject and body from email
+                String FROM_ADDRESS = email.getSENDER_ADDRESS();
+                String FROM_NAME = email.getSENDER_NAME();
+                String SUBJECT = email.getSUBJECT();
+                String BODY = email.getBODY();
+                Set<String> TO = email.getRECIPIENTS();
+                String FROM = (FROM_NAME == null) ? FROM_ADDRESS : FROM_NAME + " <" + FROM_ADDRESS + ">";
+
+                email.addReplyTo(email.getSENDER_ADDRESS());
+                Set<String> REPLY_TO = email.getREPLY_TO_ADDRESSES();
+
+                //3) Create the AWS Content, Body, Message and SendEmailRequest objects
+                Content textSubject = new Content().withData(SUBJECT);
+                Content textBody = new Content().withData(BODY);
+                Body body = new Body().withHtml(textBody);
+
+                Message message = new Message().withBody(body).withSubject(textSubject);
+
+                Destination destination = new Destination().withToAddresses(TO);
+                SendEmailRequest request = new SendEmailRequest()
+                        .withSource(FROM)
+                        .withReplyToAddresses(REPLY_TO)
+                        .withDestination(destination)
+                        .withMessage(message);
+
+                String defaultBounceAddress = getDefaultBounceAddress();
+                if(defaultBounceAddress != null && !defaultBounceAddress.isEmpty()) {
+                    request = request.withReturnPath(defaultBounceAddress);
+                }
+                
+                SendEmailResult result = client.sendEmail(request);
+                String messageId = result.getMessageId();
+                email.setAWS_SES_MESSAGE_ID(messageId);
+
+            } catch (InvalidEmailException | IllegalArgumentException ex) {
+                Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
+                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
+            } catch (AmazonClientException ex) {
+                Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
+                //Retry for NUM_RETRIES times
+                email.setRETRIES(email.getRETRIES() + 1);
+                if(email.getRETRIES() >= NUM_RETRIES)
+                    email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
+                else
+                    email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
+
+            } catch (Throwable ex) {
+                Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
+                email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
+                //must log an error entity here
+            } finally {
+                if (logging) {
+                    updateService.getEm().merge(email);
+                    updateService.getEm().flush(); //Redundant
+                }
+            }
+        }
+        client.shutdown(); // Always good to close resources after use!
     }
 
 
@@ -215,9 +292,10 @@ public class MailServiceOutbound {
 
         List<Email> emails = this.getNextNEmailsInQueue(processTime, UPDATE_BATCH_SIZE);
 
-        for (Email email : emails) {
+        /*for (Email email : emails) {
             sendEmailNow(email, true);
-        }
+        }*/
+        sendEmailNow(emails, true);
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -293,6 +371,9 @@ public class MailServiceOutbound {
             email.addRecipient(recipient);
         }
         
-        sendEmailNow(email, logging);
+        // Switch to the new method
+        List<Email> emails = new ArrayList<>();
+        emails.add(email);
+        sendEmailNow(emails, logging);
     } 
 }
