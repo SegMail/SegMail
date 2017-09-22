@@ -68,6 +68,7 @@ import segmail.entity.campaign.filter.CampaignActivityFilter;
 import segmail.entity.campaign.filter.FILTER_OPERATOR;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
+import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.SubscriberFieldValue;
@@ -982,7 +983,8 @@ public class CampaignService {
                         //builder.equal(fromCamp.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
                         //builder.equal(fromAssign.get(Assign_CampaignActivity_List_.SOURCE), fromCamp.get(Assign_Campaign_Activity_.SOURCE)),
                         builder.equal(fromAssign.get(Assign_CampaignActivity_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
-                        builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE))
+                        builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE)),
+                        builder.equal(fromSubscr.get(Subscription_.STATUS), CONFIRMED)
                 )
         );
         
