@@ -984,7 +984,7 @@ public class CampaignService {
                         //builder.equal(fromAssign.get(Assign_CampaignActivity_List_.SOURCE), fromCamp.get(Assign_Campaign_Activity_.SOURCE)),
                         builder.equal(fromAssign.get(Assign_CampaignActivity_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
                         builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE)),
-                        builder.equal(fromSubscr.get(Subscription_.STATUS), CONFIRMED)
+                        builder.equal(fromSubscr.get(Subscription_.STATUS), CONFIRMED.name)
                 )
         );
         
