@@ -742,7 +742,6 @@ public class BatchSchedulingService {
             BatchJobConditionParam newParam = new BatchJobConditionParam();
             newParam.setPARAM_ORDER(i);
             newParam.setBATCH_JOB_CONDITION(condition);
-            updateService.persist(newParam);
 
             condition.addPARAMS(newParam);
 
@@ -751,9 +750,11 @@ public class BatchSchedulingService {
             if (Serializable.class.isAssignableFrom(clazz)) {
                 Serializable s = (Serializable) obj;
                 newParam.setSERIALIZED_OBJECT(s);
-                continue;
+            } else {
+                newParam.setSTRING_VALUE(obj.toString());
             }
-            newParam.setSTRING_VALUE(obj.toString());
+            
+            updateService.persist(newParam); // for some reason it is not managed if we persist it at the start of the loop
         }
         
         return condition;
