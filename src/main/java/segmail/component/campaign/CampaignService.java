@@ -973,14 +973,15 @@ public class CampaignService {
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
         Root<Subscription> fromSubscr = query.from(Subscription.class);
-        Root<Assign_Campaign_List> fromAssign = query.from(Assign_Campaign_List.class);
-        Root<Assign_Campaign_Activity> fromCamp = query.from(Assign_Campaign_Activity.class);
+        Root<Assign_CampaignActivity_List> fromAssign = query.from(Assign_CampaignActivity_List.class);
+        //Root<Assign_Campaign_Activity> fromCamp = query.from(Assign_Campaign_Activity.class);
         
         query.where(
                 builder.and(
-                        builder.equal(fromCamp.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
-                        builder.equal(fromAssign.get(Assign_Campaign_List_.SOURCE), fromCamp.get(Assign_Campaign_Activity_.SOURCE)),
-                        builder.equal(fromAssign.get(Assign_Campaign_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
+                        builder.equal(fromAssign.get(Assign_CampaignActivity_List_.SOURCE), campaignActivityId),
+                        //builder.equal(fromCamp.get(Assign_Campaign_Activity_.TARGET), campaignActivityId),
+                        //builder.equal(fromAssign.get(Assign_CampaignActivity_List_.SOURCE), fromCamp.get(Assign_Campaign_Activity_.SOURCE)),
+                        builder.equal(fromAssign.get(Assign_CampaignActivity_List_.TARGET), fromSubscr.get(Subscription_.TARGET)),
                         builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE))
                 )
         );
