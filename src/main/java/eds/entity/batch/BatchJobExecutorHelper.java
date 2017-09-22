@@ -59,9 +59,12 @@ public class BatchJobExecutorHelper extends DBService {
         BatchJobRunError newError = new BatchJobRunError(job, ex);
         em.persist(newError);
         
-        job.fail(DateTime.now());
+        if(job != null) {
+            job.fail(DateTime.now());
+            job = em.merge(job);
+        }
         
-        return em.merge(job);
+        return job;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)

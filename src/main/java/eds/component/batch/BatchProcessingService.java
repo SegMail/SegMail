@@ -166,11 +166,13 @@ public class BatchProcessingService {
             
         } catch (BatchProcessingException ex) {
             if (!reported) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "This server node " + landingService.getOwnServerName() + " is not processing any jobs today because: "+ex.getMessage(), "");
+                Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, "This server node " + landingService.getOwnServerName() + " is not processing any jobs today because: "+ex.getMessage(), "");
                 reported = true;
             }
         } catch (JMSException ex) {
-            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(this.getClass().getSimpleName()).log(Level.SEVERE, null, ex);
         }
     }
     
