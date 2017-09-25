@@ -47,7 +47,8 @@ import org.joda.time.DateTime;
 @Stateless
 public class MailServiceOutbound {
     
-    final int NUM_RETRIES = 100;
+    final int NUM_RETRIES = 3; // default
+    final String NUM_RETRIES_KEY = "NUM_RETRIES";
 
     @EJB
     private GenericObjectService objService;
@@ -137,8 +138,9 @@ public class MailServiceOutbound {
         } catch (AmazonClientException ex) {
             Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
             //Retry for NUM_RETRIES times
+            int retries = Integer.parseInt(System.getProperty(NUM_RETRIES_KEY, ""+NUM_RETRIES));
             email.setRETRIES(email.getRETRIES() + 1);
-            if(email.getRETRIES() >= NUM_RETRIES)
+            if(email.getRETRIES() >= retries)
                 email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
             else
                 email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
@@ -220,8 +222,9 @@ public class MailServiceOutbound {
             } catch (AmazonClientException ex) {
                 Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
                 //Retry for NUM_RETRIES times
+                int retries = Integer.parseInt(System.getProperty(NUM_RETRIES_KEY, ""+NUM_RETRIES));
                 email.setRETRIES(email.getRETRIES() + 1);
-                if(email.getRETRIES() >= NUM_RETRIES)
+                if(email.getRETRIES() >= retries)
                     email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.ERROR);
                 else
                     email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
