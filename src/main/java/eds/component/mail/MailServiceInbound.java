@@ -124,7 +124,7 @@ public class MailServiceInbound {
         return emails;
     }
     
-    @Asynchronous
+    //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
         if(emails == null || emails.isEmpty())

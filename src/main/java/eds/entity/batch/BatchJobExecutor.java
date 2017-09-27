@@ -503,7 +503,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         BatchJobRun run = em.find(BatchJobRun.class, runKey);
         
         if(run == null)
-            throw new BatchProcessingException("Batch job run " + run.getRUN_KEY() + " not found.");
+            throw new BatchProcessingException("Batch job run " + runKey + " not found.");
         
         DateTime now = DateTime.now();
         run = helper.pushToStartStatus(run, now);
