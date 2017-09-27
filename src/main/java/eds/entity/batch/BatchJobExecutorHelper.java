@@ -29,9 +29,9 @@ import org.joda.time.DateTime;
 public class BatchJobExecutorHelper extends DBService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public BatchJobRun insertRun(BatchJobRun job) {
-        em.persist(job);
-        return job;
+    public BatchJobRun insertRun(BatchJobRun run) {
+        em.persist(run);
+        return run;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -83,7 +83,7 @@ public class BatchJobExecutorHelper extends DBService {
         return job;
     }
 
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public boolean checkConditions(List<BatchJobCondition> conditions) {
         //Loop through and execute
         //If any condition returns false, don't schedule this batch job
