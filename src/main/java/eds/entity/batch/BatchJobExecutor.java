@@ -247,7 +247,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         return this;
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<BatchJobStep> loadBatchJobSteps(long batchJobId) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BatchJobStep> query = builder.createQuery(BatchJobStep.class);
@@ -262,7 +262,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         return results;
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<BatchJobCondition> loadBatchJobConditions(long batchJobId) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BatchJobCondition> query = builder.createQuery(BatchJobCondition.class);
@@ -277,7 +277,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         return results;
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<BatchJobSchedule> loadBatchJobSchedules(long batchJobId) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BatchJobSchedule> query = builder.createQuery(BatchJobSchedule.class);
@@ -483,9 +483,16 @@ public class BatchJobExecutor extends DBService implements MessageListener {
             String runKey = message.getStringProperty(BATCH_RUN_KEY_PARAM);
             
             /**
-             * Don't do it this way anymore! Keep it simple and tight!
-            read(runKey);
-            execute(DateTime.now());
+             * 3 Steps to process a batch job: 
+             * 1) Lock - updates the batch job run status to IN_PROCESS so that 
+             * BatchProcessingService will not pick it up again.
+             * 2) Execute - instantiates the POJO java class (usually an EJB) and 
+             * invokes the selected method. 
+             * 3) Schedule next run - execute all BatchJobConditions and decide
+             * if the next run should be scheduled.
+             * 
+             * All steps should not have any transaction associated - beca
+             * 
             */
             BatchJobRun run = lock(runKey); // so that no other cron instance would pick up this run
             run = executeRun(run);

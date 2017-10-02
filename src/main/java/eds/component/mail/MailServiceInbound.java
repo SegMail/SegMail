@@ -17,6 +17,7 @@ import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
 import eds.entity.client.VerifiedSendingAddress;
+import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
 import java.io.StringReader;
@@ -115,9 +116,9 @@ public class MailServiceInbound {
         emails.addAll(getEmailsBySESMessageId(messageIds));
         
         //Delete messages that have been read
-        for(String receiptHandle : receiptHandles) {
+        /*for(String receiptHandle : receiptHandles) {
             sqsClient.deleteMessage(queueURL, receiptHandle);
-        }
+        }*/
         
         sqsClient.shutdown();
         
@@ -125,13 +126,16 @@ public class MailServiceInbound {
     }
     
     //@Asynchronous
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
         if(emails == null || emails.isEmpty())
             return;
         List<String> subscriberAddress = new ArrayList<>();
         for(Email email : emails) {
-            helper.updateBounceStatus(email);
+            //helper.updateBounceStatus(email);
+            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
+            email = (Email) updService.merge(email);
+            
             Set<String> recipients = email.getRECIPIENTS();
             subscriberAddress.addAll(recipients);
             
@@ -148,6 +152,7 @@ public class MailServiceInbound {
         subService.updateAllSubscriberCountForClient(clientId);
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void processAllBounce() {
         List<VerifiedSendingAddress> senders = new ArrayList<>();
         List<VerifiedSendingAddress> singleFetch = getAllVerifiedSenders(0, MAX_EMAIL_PROCESSED);

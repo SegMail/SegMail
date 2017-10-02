@@ -579,8 +579,8 @@ public class CampaignService {
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
         
-        List<Predicate> conditions = new ArrayList<>();
-        
+        List<Predicate> conditions = generateTargetedCriteria(builder, clientId, listIds, filters);
+        /*
         // If assignCAList is not empty
         // join to Assign_CampaignActivity_List and select SubscriptionLists
         if(listIds != null && !listIds.isEmpty()) {
@@ -651,10 +651,10 @@ public class CampaignService {
                         builder.not(fromSubscrAcc.in(notInFValues))
                 );
             }
-        }
+        }*/
         
         query.distinct(true);
-        query.select(fromSubscrAcc);
+        query.select(fromSubscrAcc);    
         query.where(builder.and(conditions.toArray(new Predicate[]{})));
         query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
@@ -963,17 +963,22 @@ public class CampaignService {
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public long countTargetedSubscribersForActivity(long campaignActivityId) {
+    public long countTargetedSubscribersForActivity(long campaignActivityId, long clientId) {
         CampaignActivity activity = objService.getEnterpriseObjectById(campaignActivityId, CampaignActivity.class);
         if(activity == null)
             return -1;
         if(activity.getSTATUS().equals(ACTIVITY_STATUS.COMPLETED.name))
             return countEmailsSentForActivity(campaignActivityId);
         
+        // Get listIds and filters
+        List<SubscriptionList> targetLists = objService.getAllTargetObjectsFromSource(campaignActivityId, Assign_CampaignActivity_List.class, SubscriptionList.class); //DB hit
+        List<Long> listIds = objService.extractIds(targetLists);
+        List<CampaignActivityFilter> filters = objService.getEnterpriseData(campaignActivityId, CampaignActivityFilter.class);
+        
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
-        Root<Subscription> fromSubscr = query.from(Subscription.class);
+        /*Root<Subscription> fromSubscr = query.from(Subscription.class);
         Root<Assign_CampaignActivity_List> fromAssign = query.from(Assign_CampaignActivity_List.class);
         //Root<Assign_Campaign_Activity> fromCamp = query.from(Assign_Campaign_Activity.class);
         
@@ -986,9 +991,12 @@ public class CampaignService {
                         builder.equal(fromSubscrAcc.get(SubscriberAccount_.OBJECTID), fromSubscr.get(Subscription_.SOURCE)),
                         builder.equal(fromSubscr.get(Subscription_.STATUS), CONFIRMED.name)
                 )
-        );
+        );*/
+        
+        List<Predicate> conditions = generateTargetedCriteria(builder, clientId, listIds, filters);
         
         query.select(builder.countDistinct(fromSubscrAcc));
+        query.where(builder.and(conditions.toArray(new Predicate[]{})));
         
         Long result  = objService.getEm().createQuery(query)
                 .getSingleResult();
@@ -1124,5 +1132,91 @@ public class CampaignService {
         }
         
         return filters;
+    }
+    
+    
+    private List<Predicate> generateTargetedCriteria(
+            CriteriaBuilder builder,
+            long clientId, 
+            List<Long> listIds,
+            List<CampaignActivityFilter> filters) {
+        CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
+        Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
+        
+        List<Predicate> conditions = new ArrayList<>();
+        
+        // If assignCAList is not empty
+        // join to Assign_CampaignActivity_List and select SubscriptionLists
+        if(listIds != null && !listIds.isEmpty()) {
+            Root<Subscription> fromSubsc = query.from(Subscription.class);
+            
+            conditions.add(fromSubsc.get(Subscription_.TARGET).in(listIds));
+            conditions.add(builder.equal(fromSubsc.get(Subscription_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            conditions.add(builder.equal(fromSubsc.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.CONFIRMED.name)); // temporary solution
+        } 
+        // else if assignCAList is empty, join to SubscriberOwnership
+        else {
+            Root<SubscriberOwnership> fromOwner = query.from(SubscriberOwnership.class);
+            
+            conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId));
+            conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            conditions.add(builder.equal(fromSubscrAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.ACTIVE.name)); // temporary solution
+        }
+        
+        // If filters is not empty,
+        // join to CampaignActivityFilter
+        // and to SubscriberFieldValues
+        if(filters != null && !filters.isEmpty()) {
+            // Subquery is the only way
+            //Root<SubscriberFieldValue> fromFieldValues = query.from(SubscriberFieldValue.class);
+            
+            //conditions.add(builder.equal(fromFieldValues.get(SubscriberFieldValue_.OWNER), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
+            List<String> fieldValuesEq = new ArrayList<>();
+            List<String> fieldValuesNeq = new ArrayList<>();
+            for(CampaignActivityFilter filter : filters) {
+                switch(FILTER_OPERATOR.valueOf(filter.getOPERATOR())) {
+                    case EQUALS :   fieldValuesEq.add(filter.getFIELD_KEY()+filter.getVALUE());
+                                    break;
+                    case NOT_EQUALS:fieldValuesNeq.add(filter.getFIELD_KEY()+filter.getVALUE());
+                                    break;
+                    default :       break;
+                }
+            }
+            // Temporary solution, awaiting a more dynamic one
+            // For EQUALS clause
+            if (fieldValuesEq.size() > 0) {
+                Subquery<EnterpriseObject> inFValues = query.subquery(EnterpriseObject.class);
+                Root<SubscriberFieldValue> fromFieldValues = inFValues.from(SubscriberFieldValue.class);
+                
+                inFValues.select(fromFieldValues.get(SubscriberFieldValue_.OWNER));
+                inFValues.where(
+                    builder.concat(
+                        fromFieldValues.get(SubscriberFieldValue_.FIELD_KEY),
+                        fromFieldValues.get(SubscriberFieldValue_.VALUE)
+                    ).in(fieldValuesEq)
+                );
+                conditions.add(
+                        fromSubscrAcc.in(inFValues)
+                );
+            }
+            // NOT_EQUALS clause
+            if (fieldValuesNeq.size() > 0) {
+                Subquery<EnterpriseObject> notInFValues = query.subquery(EnterpriseObject.class);
+                Root<SubscriberFieldValue> fromFieldValues = notInFValues.from(SubscriberFieldValue.class);
+                
+                notInFValues.select(fromFieldValues.get(SubscriberFieldValue_.OWNER));
+                notInFValues.where(
+                    builder.concat(
+                        fromFieldValues.get(SubscriberFieldValue_.FIELD_KEY),
+                        fromFieldValues.get(SubscriberFieldValue_.VALUE)
+                    ).in(fieldValuesNeq)
+                );
+                conditions.add(
+                        builder.not(fromSubscrAcc.in(notInFValues))
+                );
+            }
+        }
+        
+        return conditions;
     }
 }
