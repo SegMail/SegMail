@@ -15,6 +15,7 @@ import eds.component.DBService;
 import eds.component.batch.BatchProcessingException;
 import eds.component.data.DataValidationException;
 import eds.component.data.IncompleteDataException;
+import static eds.entity.batch.BATCH_JOB_RUN_STATUS.CANCELLED;
 import static eds.entity.batch.BATCH_JOB_STATUS.ACTIVE;
 import java.io.IOException;
 import java.io.Serializable;
@@ -505,6 +506,15 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         }
     }
     
+    /**
+     * Changes the run status to IN_PROCESS.
+     * BatchProcessingService will not be able to pick up this job but users 
+     * can still change the status to CANCELLED.
+     * 
+     * @param runKey
+     * @return
+     * @throws BatchProcessingException 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public BatchJobRun lock(String runKey) throws BatchProcessingException {
         BatchJobRun run = em.find(BatchJobRun.class, runKey);
@@ -545,8 +555,23 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         return run;
     }
     
+    /**
+     * If run.getSTATUS() is CANCELLED, return the current run and do not 
+     * schedule the next run.
+     * 
+     * @param run
+     * @param triggerTime
+     * @return
+     * @throws BatchProcessingException 
+     */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public BatchJobRun scheduleNextRun(BatchJobRun run, DateTime triggerTime) throws BatchProcessingException {
+        // Check if the status has been updated to CANCELLED
+        run = em.find(BatchJobRun.class, run.getRUN_KEY());
+        if(CANCELLED.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
+            return run;
+        }
+
         //Get the schedules and conditions
         List<BatchJobCondition> conditionList = loadBatchJobConditions(run.getBATCH_JOB().getBATCH_JOB_ID());
         List<BatchJobSchedule> scheduleList = loadBatchJobSchedules(run.getBATCH_JOB().getBATCH_JOB_ID());
