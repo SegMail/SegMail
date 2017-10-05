@@ -438,14 +438,16 @@ public class BatchSchedulingService {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJobRun cancelBatchJobRun(String key) throws BatchProcessingException {
         
-        List<BatchJobRun> runs = this.getJobRunsByKey(key);
-        if(runs == null || runs.isEmpty())
+        //List<BatchJobRun> runs = this.getJobRunsByKey(key);
+        BatchJobRun run = updateService.getEm().find(BatchJobRun.class, key);
+        run = updateService.getEm().merge(run);
+        
+        if(run == null)
             throw new BatchProcessingException("Batch job not found for key "+key);
         
-        BatchJobRun run = runs.get(0);
         run.cancel(DateTime.now());
         
-        return updateService.getEm().merge(run);
+        return run;
         
     }
 

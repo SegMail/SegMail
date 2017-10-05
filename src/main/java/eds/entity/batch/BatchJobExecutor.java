@@ -522,6 +522,15 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         if(run == null)
             throw new BatchProcessingException("Batch job run " + runKey + " not found.");
         
+        // This means that batch job was picked up twice by BatchJobProcessingService
+        // We should lock the batch job the moment it is sent to the queue, but this is a temporary
+        // arrangement to validate the root cause.
+        if(BATCH_JOB_RUN_STATUS.IN_PROCESS.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
+            throw new BatchProcessingException("Issue #177 Batch job failure. Run key "
+                    +run.getRUN_KEY()+" has already been picked up by BatchProcessingService before sent to "
+                    + "the JMS queue twice.");
+        }
+        
         DateTime now = DateTime.now();
         run = helper.pushToStartStatus(run, now);
         
