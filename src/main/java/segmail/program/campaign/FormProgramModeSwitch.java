@@ -94,22 +94,24 @@ public class FormProgramModeSwitch {
         
         if(params.size() >= 1) {
             long newCampaignId = Long.parseLong(params.get(0));
-            if (getEditingCampaign() == null 
-                    || getEditingCampaign().getOBJECTID() != newCampaignId) { 
+            // Unnecessary, just reload everything to avoid pessimistic lock problem
+            //if (getEditingCampaign() == null 
+            //        || getEditingCampaign().getOBJECTID() != newCampaignId) { 
 
                 Campaign editingCampaign = campaignService.getCampaign(newCampaignId);
                 setEditingCampaign(editingCampaign);
-            }
+            //}
         }
         
         if(params.size() >= 2) {
             long newActivityId = Long.parseLong(params.get(1));
-            if (getEditingActivity() == null
-                    || getEditingActivity().getOBJECTID() != newActivityId) { 
+            // Unnecessary, just reload everything to avoid pessimistic lock problem
+            //if (getEditingActivity() == null
+            //        || getEditingActivity().getOBJECTID() != newActivityId) { 
 
                 CampaignActivity editingActivy = campaignService.getCampaignActivity(newActivityId);
                 setEditingActivity(editingActivy);
-            }
+            //}
         }
     }
 

@@ -28,6 +28,8 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
+import javax.persistence.Query;
+import javax.persistence.Table;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -38,6 +40,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.omg.PortableInterceptor.ACTIVE;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
@@ -574,12 +577,14 @@ public class CampaignService {
         //Should be passed in, not queried here
         //List<Assign_CampaignActivity_List> assignCAList = objService.getRelationshipsForSourceObject(campaignActivityId, Assign_CampaignActivity_List.class);
         //List<CampaignActivityFilter> filters = objService.getEnterpriseData(campaignActivityId, CampaignActivityFilter.class);
-        
+        if(true)  // Trial solution using LEFT JOINs 
+            return this.getTargetedSubscribers2(campaignActivityId, clientId, listIds, filters, startIndex, maxResults);
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
+        query.select(fromSubscrAcc);
         
-        List<Predicate> conditions = generateTargetedCriteria(builder, clientId, listIds, filters);
+        List<Predicate> conditions = generateTargetedCriteria(builder, query, fromSubscrAcc, clientId, listIds, filters);
         /*
         // If assignCAList is not empty
         // join to Assign_CampaignActivity_List and select SubscriptionLists
@@ -654,7 +659,7 @@ public class CampaignService {
         }*/
         
         query.distinct(true);
-        query.select(fromSubscrAcc);    
+            
         query.where(builder.and(conditions.toArray(new Predicate[]{})));
         query.orderBy(builder.asc(fromSubscrAcc.get(SubscriberAccount_.EMAIL)));
         
@@ -665,6 +670,98 @@ public class CampaignService {
         
         return results;
         
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<SubscriberAccount> getTargetedSubscribers2(
+            long campaignActivityId, 
+            long clientId, 
+            List<Long> listIds,
+            List<CampaignActivityFilter> filters,
+            int startIndex, 
+            int maxResults){
+        // Table names
+        String objTable = EnterpriseObject.class.getAnnotation(Table.class).name();
+        String accTable = SubscriberAccount.class.getAnnotation(Table.class).name();
+        String subscTable = Subscription.class.getAnnotation(Table.class).name();
+        String ownerTable = SubscriberOwnership.class.getAnnotation(Table.class).name();
+        String fieldValTable = SubscriberFieldValue.class.getAnnotation(Table.class).name();
+        // Table alias
+        String accAlias = "acc";
+        String subscAlias = "subsc";
+        String ownerAlias = "owner";
+        String fieldValAlias = "val";
+        String objAlias = "obj";
+        
+        // Field names
+        String objectid = "OBJECTID";
+        String source = "SOURCE";
+        String target = "TARGET";
+        String status = "STATUS";
+        String confirmed = "CONFIRMED";
+        String owner = "OWNER";
+        String fieldKey = "FIELD_KEY";
+        String fieldVal = "VALUE";
+        String accStatus = "SUBSCRIBER_STATUS";
+        String active = SUBSCRIBER_STATUS.ACTIVE.name;
+        
+        String sqlString = "SELECT " + accAlias + ".*, "+ objAlias +".* FROM " + accTable + " " + accAlias + " " ;
+        
+        // Join with EnterpriseObject first
+        sqlString += "LEFT JOIN " + objTable + " " + objAlias;
+        sqlString += " ON " + objAlias + "." + objectid + " = " + accAlias + "." + objectid + " ";
+        
+        // Then join with Subscription if any list is chosen
+        if(listIds != null && !listIds.isEmpty()) {
+            sqlString += "LEFT JOIN ";
+            sqlString += subscTable + " " + subscAlias + " ";
+            sqlString += "ON " + subscAlias + "." + source + " = " + accAlias + "." + objectid + " ";
+            sqlString += "AND " + subscAlias + "." + target + " IN (" + listIds.get(0);
+            for(int i=1; i < listIds.size(); i++) {
+                sqlString += "," + listIds.get(i);
+            }
+            sqlString += ") ";
+            sqlString += "AND " + subscAlias + "." + status + " = '" + confirmed + "'";
+        } else {
+            sqlString += "LEFT JOIN ";
+            sqlString += ownerTable + " " + ownerAlias + " ";
+            sqlString += "ON " + ownerAlias + "." + source + " = " + accAlias + "." + objectid + " ";
+            sqlString += "AND " + subscAlias + "." + target + " = " + clientId;
+        }
+        
+        if(filters != null && !filters.isEmpty()) {
+            for(int i=0; i<filters.size(); i++) {
+                sqlString += "LEFT JOIN ";
+                sqlString += fieldValTable + " " + fieldValAlias+i + " ";
+                sqlString += "ON " + fieldValAlias+i + "." + owner + " = " + accAlias + "." + objectid + " ";
+                sqlString += "AND " + fieldValAlias+i + "." + fieldKey + " = '" + filters.get(i).getFIELD_KEY() + "' ";
+                sqlString += "AND " + fieldValAlias+i + "." + fieldVal + " = '" + filters.get(i).getVALUE()+ "' ";
+            }
+        }
+        // where clause
+        sqlString += "WHERE " + accAlias + "." + accStatus + " = '" + active + "' ";
+        
+        if(filters != null && !filters.isEmpty()) {
+            for(int i=0; i<filters.size(); i++) {
+                if(FILTER_OPERATOR.EQUALS.equals(FILTER_OPERATOR.valueOf(filters.get(i).getOPERATOR()))){
+                    sqlString += " AND " + fieldValAlias+i + "." + owner + " IS NOT NULL ";
+                } else {
+                    sqlString += " AND " + fieldValAlias+i + "." + owner + " IS NULL ";
+                }
+            }
+        }
+        
+        //LIMIT clause
+        if(startIndex >= 0 && maxResults > 0) {
+            sqlString += " LIMIT " + startIndex + ", " + maxResults;
+        }
+        
+        System.out.println("QUERY: " + sqlString);
+            
+        Query q = objService.getEm().createNativeQuery(sqlString, SubscriberAccount.class);
+        List<SubscriberAccount> results = q.getResultList();
+        
+        return results;
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -978,6 +1075,7 @@ public class CampaignService {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
+        query.select(builder.countDistinct(fromSubscrAcc));
         /*Root<Subscription> fromSubscr = query.from(Subscription.class);
         Root<Assign_CampaignActivity_List> fromAssign = query.from(Assign_CampaignActivity_List.class);
         //Root<Assign_Campaign_Activity> fromCamp = query.from(Assign_Campaign_Activity.class);
@@ -993,9 +1091,8 @@ public class CampaignService {
                 )
         );*/
         
-        List<Predicate> conditions = generateTargetedCriteria(builder, clientId, listIds, filters);
+        List<Predicate> conditions = generateTargetedCriteria(builder, query, fromSubscrAcc, clientId, listIds, filters);
         
-        query.select(builder.countDistinct(fromSubscrAcc));
         query.where(builder.and(conditions.toArray(new Predicate[]{})));
         
         Long result  = objService.getEm().createQuery(query)
@@ -1137,11 +1234,13 @@ public class CampaignService {
     
     private List<Predicate> generateTargetedCriteria(
             CriteriaBuilder builder,
+            CriteriaQuery query,
+            Root<SubscriberAccount> fromSubscrAcc,
             long clientId, 
             List<Long> listIds,
             List<CampaignActivityFilter> filters) {
-        CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
-        Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
+        //CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
+        //Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
         
         List<Predicate> conditions = new ArrayList<>();
         
