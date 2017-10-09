@@ -19,6 +19,7 @@ import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.data.EnterpriseObject;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -1126,7 +1127,7 @@ public class CampaignService {
         String accStatus = "SUBSCRIBER_STATUS";
         String active = SUBSCRIBER_STATUS.ACTIVE.name;
         
-        String sqlString = "SELECT COUNT( DISTINCT" + accAlias + "."+ objectid +") cnt FROM " + accTable + " " + accAlias + " " ;
+        String sqlString = "SELECT COUNT( DISTINCT " + accAlias + "."+ objectid +") cnt FROM " + accTable + " " + accAlias + " " ;
         
         // Join with EnterpriseObject first
         sqlString += "LEFT JOIN " + objTable + " " + objAlias;
@@ -1179,7 +1180,7 @@ public class CampaignService {
         System.out.println("QUERY: " + sqlString);
             
         Query q = objService.getEm().createNativeQuery(sqlString);
-        Long result = (Long) q.getSingleResult();
+        Integer result =  (Integer) q.getSingleResult();
         
         return result;
     }
