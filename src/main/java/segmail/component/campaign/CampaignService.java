@@ -1180,7 +1180,7 @@ public class CampaignService {
         System.out.println("QUERY: " + sqlString);
             
         Query q = objService.getEm().createNativeQuery(sqlString);
-        Integer result =  (Integer) q.getSingleResult();
+        Long result =  ((BigInteger) q.getSingleResult()).longValue();
         
         return result;
     }
