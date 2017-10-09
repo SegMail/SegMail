@@ -721,7 +721,7 @@ public class CampaignService {
                 sqlString += "," + listIds.get(i);
             }
             sqlString += ") ";
-            sqlString += "AND " + subscAlias + "." + status + " = '" + confirmed + "'";
+            sqlString += "AND " + subscAlias + "." + status + " = '" + confirmed + "' ";
         } else {
             sqlString += "LEFT JOIN ";
             sqlString += ownerTable + " " + ownerAlias + " ";
@@ -740,6 +740,9 @@ public class CampaignService {
         }
         // where clause
         sqlString += "WHERE " + accAlias + "." + accStatus + " = '" + active + "' ";
+        if(listIds != null && !listIds.isEmpty()) {
+            sqlString += " AND " + subscAlias + "." + source + " IS NOT NULL";
+        }
         
         if(filters != null && !filters.isEmpty()) {
             for(int i=0; i<filters.size(); i++) {
@@ -1072,7 +1075,7 @@ public class CampaignService {
         List<Long> listIds = objService.extractIds(targetLists);
         List<CampaignActivityFilter> filters = objService.getEnterpriseData(campaignActivityId, CampaignActivityFilter.class);
         
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        /*CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
         Root<SubscriberAccount> fromSubscrAcc = query.from(SubscriberAccount.class);
         query.select(builder.countDistinct(fromSubscrAcc));
@@ -1091,12 +1094,92 @@ public class CampaignService {
                 )
         );*/
         
-        List<Predicate> conditions = generateTargetedCriteria(builder, query, fromSubscrAcc, clientId, listIds, filters);
+        /*List<Predicate> conditions = generateTargetedCriteria(builder, query, fromSubscrAcc, clientId, listIds, filters);
         
         query.where(builder.and(conditions.toArray(new Predicate[]{})));
         
         Long result  = objService.getEm().createQuery(query)
-                .getSingleResult();
+                .getSingleResult();*/
+        
+        // Table names
+        String objTable = EnterpriseObject.class.getAnnotation(Table.class).name();
+        String accTable = SubscriberAccount.class.getAnnotation(Table.class).name();
+        String subscTable = Subscription.class.getAnnotation(Table.class).name();
+        String ownerTable = SubscriberOwnership.class.getAnnotation(Table.class).name();
+        String fieldValTable = SubscriberFieldValue.class.getAnnotation(Table.class).name();
+        // Table alias
+        String accAlias = "acc";
+        String subscAlias = "subsc";
+        String ownerAlias = "owner";
+        String fieldValAlias = "val";
+        String objAlias = "obj";
+        
+        // Field names
+        String objectid = "OBJECTID";
+        String source = "SOURCE";
+        String target = "TARGET";
+        String status = "STATUS";
+        String confirmed = "CONFIRMED";
+        String owner = "OWNER";
+        String fieldKey = "FIELD_KEY";
+        String fieldVal = "VALUE";
+        String accStatus = "SUBSCRIBER_STATUS";
+        String active = SUBSCRIBER_STATUS.ACTIVE.name;
+        
+        String sqlString = "SELECT COUNT( DISTINCT" + accAlias + "."+ objectid +") cnt FROM " + accTable + " " + accAlias + " " ;
+        
+        // Join with EnterpriseObject first
+        sqlString += "LEFT JOIN " + objTable + " " + objAlias;
+        sqlString += " ON " + objAlias + "." + objectid + " = " + accAlias + "." + objectid + " ";
+        
+        // Then join with Subscription if any list is chosen
+        if(listIds != null && !listIds.isEmpty()) {
+            sqlString += "LEFT JOIN ";
+            sqlString += subscTable + " " + subscAlias + " ";
+            sqlString += "ON " + subscAlias + "." + source + " = " + accAlias + "." + objectid + " ";
+            sqlString += "AND " + subscAlias + "." + target + " IN (" + listIds.get(0);
+            for(int i=1; i < listIds.size(); i++) {
+                sqlString += "," + listIds.get(i);
+            }
+            sqlString += ") ";
+            sqlString += "AND " + subscAlias + "." + status + " = '" + confirmed + "' ";
+        } else {
+            sqlString += "LEFT JOIN ";
+            sqlString += ownerTable + " " + ownerAlias + " ";
+            sqlString += "ON " + ownerAlias + "." + source + " = " + accAlias + "." + objectid + " ";
+            sqlString += "AND " + subscAlias + "." + target + " = " + clientId;
+        }
+        
+        if(filters != null && !filters.isEmpty()) {
+            for(int i=0; i<filters.size(); i++) {
+                sqlString += "LEFT JOIN ";
+                sqlString += fieldValTable + " " + fieldValAlias+i + " ";
+                sqlString += "ON " + fieldValAlias+i + "." + owner + " = " + accAlias + "." + objectid + " ";
+                sqlString += "AND " + fieldValAlias+i + "." + fieldKey + " = '" + filters.get(i).getFIELD_KEY() + "' ";
+                sqlString += "AND " + fieldValAlias+i + "." + fieldVal + " = '" + filters.get(i).getVALUE()+ "' ";
+            }
+        }
+        // where clause
+        sqlString += "WHERE " + accAlias + "." + accStatus + " = '" + active + "' ";
+        if(listIds != null && !listIds.isEmpty()) {
+            sqlString += " AND " + subscAlias + "." + source + " IS NOT NULL";
+        }
+        
+        if(filters != null && !filters.isEmpty()) {
+            for(int i=0; i<filters.size(); i++) {
+                if(FILTER_OPERATOR.EQUALS.equals(FILTER_OPERATOR.valueOf(filters.get(i).getOPERATOR()))){
+                    sqlString += " AND " + fieldValAlias+i + "." + owner + " IS NOT NULL ";
+                } else {
+                    sqlString += " AND " + fieldValAlias+i + "." + owner + " IS NULL ";
+                }
+            }
+        }
+        
+        
+        System.out.println("QUERY: " + sqlString);
+            
+        Query q = objService.getEm().createNativeQuery(sqlString);
+        Long result = (Long) q.getSingleResult();
         
         return result;
     }
