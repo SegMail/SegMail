@@ -217,7 +217,7 @@ public class BatchSchedulingService {
             //Because Cron expression doesn't have seconds, so if you don't set this,
             //your batch job won't run immediately even if your Cron expression 
             //means so.
-            BatchJobRun newRun = triggerNextBatchJobRun(currentTime.withSecondOfMinute(0), newSchedule.getBATCH_JOB()); 
+            BatchJobRun newRun = triggerFirstBatchJobRun(currentTime.withSecondOfMinute(0), newSchedule.getBATCH_JOB()); 
 
             // Set conditions for future runs
             // Conditions are optional, so if empty params, skip creation of condition
@@ -349,7 +349,7 @@ public class BatchSchedulingService {
     }
 
     /**
-     * Determines the next batch job run.
+     * Schedules the first run immediately
      * 
      * @param now
      * @param job
@@ -357,35 +357,16 @@ public class BatchSchedulingService {
      * @throws BatchProcessingException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobRun triggerNextBatchJobRun(DateTime now, BatchJob job) 
+    public BatchJobRun triggerFirstBatchJobRun(DateTime now, BatchJob job) 
             throws BatchProcessingException {
         
-        //Trigger the next batch run
-        List<BatchJobCondition> conds = this.loadBatchJobConditions(job.getBATCH_JOB_ID());
-        List<BatchJobSchedule> schedules = this.loadBatchJobSchedules(job.getBATCH_JOB_ID());
-        List<BatchJobRun> readyRuns = this.getLastNBatchRuns(job.getBATCH_JOB_ID(),BATCH_JOB_RUN_STATUS.getReadyStatuses(), 1);
-        List<BatchJobRun> activeRuns = this.getLastNBatchRuns(job.getBATCH_JOB_ID(),BATCH_JOB_RUN_STATUS.getActiveStatuses(), 1);
-        
-        
-        if(schedules == null || schedules.isEmpty())
-            return null;
         BatchJobRun newRun = new BatchJobRun();
         newRun.setBATCH_JOB(job);
-        //newRun.setSERVER(trigger.getBATCH_JOB().getSERVER());
         newRun.setSERVER_NAME(job.getSERVER_NAME());
-        //newRun.setSTATUS(BATCH_JOB_RUN_STATUS.WAITING.label);
-        newRun.wait(now);
-
-        updateService.getEm().persist(newRun);
-
-        String cronExpression = schedules.get(0).getCRON_EXPRESSION();
-        //If cronExpression is empty, just return a WAITING BatchJobRun
-        if (cronExpression == null || cronExpression.isEmpty()) {
-            return newRun;
-        }
-        //Get the next execution time
-        DateTime nextExecution = this.getNextExecutionTimeCron(cronExpression, now, STANDARD_CRON_TYPE);
+        DateTime nextExecution = DateTime.now();
         newRun.schedule(nextExecution);
+        
+        updateService.getEm().persist(newRun);
         
         return newRun;
     }

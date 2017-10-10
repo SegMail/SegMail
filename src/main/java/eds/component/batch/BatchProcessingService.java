@@ -74,6 +74,11 @@ public class BatchProcessingService {
         Session session = null;
         MessageProducer messageProducer = null;
         try {
+            // Open a JMS queue session
+            conn = connectionFactory.createConnection();
+            session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            messageProducer = session.createProducer(queue);
+            
             String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
             if (maxJobString == null || maxJobString.isEmpty()) {
                 System.setProperty(PROCESS_JOB_MODE, "false");
@@ -83,16 +88,11 @@ public class BatchProcessingService {
             int maxJobs = Integer.parseInt(maxJobString);
             List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
             
-            // Open a JMS queue session
-            conn = connectionFactory.createConnection();
-            session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            messageProducer = session.createProducer(queue);
-            
             for(BatchJobRun run : nextNJobs) {
-                //Fire and forget
-                //execService.executeJob(run);
-                //jobCont.read(run.getRUN_KEY());
-                //jobCont.execute(DateTime.now());
+                // Very crucial part!!!
+                // QUEUE the batch job run before sending the message
+                run.queue(DateTime.now());
+                run = (BatchJobRun) updService.merge(run);
                 
                 // Make use of JMS and MDB
                 TextMessage message = session.createTextMessage();

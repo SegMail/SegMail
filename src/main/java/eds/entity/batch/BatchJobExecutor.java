@@ -430,8 +430,8 @@ public class BatchJobExecutor extends DBService implements MessageListener {
     public DateTime getNextExecutionTimeCron(String cronExpression, DateTime now, CronType cronType){
         //Get the next execution time
         ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
-        DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1));//because ExecutionTime will plus 1 sec
-        //DateTime lastExecution = executionTime.lastExecution(now);
+        //DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1));//because ExecutionTime will plus 1 sec
+        DateTime nextExecution = executionTime.nextExecution(now); // Issue with the above mode is that 
         
         return nextExecution;
     }
@@ -525,9 +525,9 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         // This means that batch job was picked up twice by BatchJobProcessingService
         // We should lock the batch job the moment it is sent to the queue, but this is a temporary
         // arrangement to validate the root cause.
-        if(BATCH_JOB_RUN_STATUS.IN_PROCESS.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
+        if(!BATCH_JOB_RUN_STATUS.QUEUED.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
             throw new BatchProcessingException("Issue #177 Batch job failure. Run key "
-                    +run.getRUN_KEY()+" has already been picked up by BatchProcessingService before sent to "
+                    +run.getRUN_KEY()+" has already been queued by BatchProcessingService before sent to "
                     + "the JMS queue twice.");
         }
         
@@ -596,7 +596,13 @@ public class BatchJobExecutor extends DBService implements MessageListener {
             //Assume that there will only be 1 schedule
             BatchJobSchedule schedule = scheduleList.get(0);
             String cronExpression = schedule.getCRON_EXPRESSION();
-            nextExecution = this.getNextExecutionTimeCron(cronExpression, triggerTime.withSecondOfMinute(0), STANDARD_CRON_TYPE);
+            nextExecution = this.getNextExecutionTimeCron(
+                    cronExpression, 
+                    // Because our Cron runs every 10 seconds, we need to push 1 minute
+                    // into the next run time so that the evaluated time will not
+                    // be the same as the current time.
+                    triggerTime, 
+                    STANDARD_CRON_TYPE);
         }
         //Create new run
         

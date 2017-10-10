@@ -39,6 +39,7 @@ public class BatchJobRun implements Serializable {
     private java.sql.Timestamp START_TIME;
     private java.sql.Timestamp END_TIME;
     private java.sql.Timestamp CANCEL_TIME;
+    private java.sql.Timestamp QUEUED_TIME;
     
     private String CREATED_BY;
     private String RUN_BY;
@@ -172,6 +173,14 @@ public class BatchJobRun implements Serializable {
         this.SERVER_NAME = SERVER_NAME;
     }
 
+    public Timestamp getQUEUED_TIME() {
+        return QUEUED_TIME;
+    }
+
+    public void setQUEUED_TIME(Timestamp QUEUED_TIME) {
+        this.QUEUED_TIME = QUEUED_TIME;
+    }
+
     //Lifecycle methods
     
     /**
@@ -244,6 +253,11 @@ public class BatchJobRun implements Serializable {
         this.setEND_TIME(new Timestamp(changeDateTime.getMillis()));
         this.setCANCEL_TIME(null);
         this.setSTATUS(BATCH_JOB_RUN_STATUS.FAILED.label);
+    }
+    
+    public void queue(DateTime changeDateTime) {
+        this.setQUEUED_TIME(new Timestamp(changeDateTime.getMillis()));
+        this.setSTATUS(BATCH_JOB_RUN_STATUS.QUEUED.label);
     }
 
     @Override

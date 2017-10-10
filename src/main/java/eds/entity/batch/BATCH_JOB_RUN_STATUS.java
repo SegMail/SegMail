@@ -22,10 +22,17 @@ public enum BATCH_JOB_RUN_STATUS {
     
     /**
      * Possible transition to:
-     * - IN_PROCESS
+     * - QUEUED
      * - CANCELLED
      */
     SCHEDULED("SCHEDULED"),
+    
+    /**
+     * Possible transition to:
+     * - IN_PROCESS
+     * - CANCELLED
+     */
+    QUEUED("QUEUED"),
     
     /**
      * Possible transition to:
