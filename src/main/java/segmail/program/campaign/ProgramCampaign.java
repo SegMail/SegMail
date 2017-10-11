@@ -19,6 +19,8 @@ import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.campaign.filter.CampaignActivityFilter;
+import segmail.entity.campaign.filter.FILTER_OPERATOR;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
@@ -42,11 +44,11 @@ public class ProgramCampaign extends Program{
     private List<CampaignActivity> allActivities;
     private Map<String,String> activityStatusMapping;
     
-    private long editingActivityId;
     private CampaignActivity editingActivity;
     private CampaignActivitySchedule editingSchedule;
     
-    private List<SubscriptionList> ownedLists;
+    // Used for Assign_CampaignActivity_List now
+    private List<SubscriptionList> ownedLists; 
     private List<SubscriptionList> targetLists;
     private List<String> selectedLists; //JSF selectMany component will store it as String.
     
@@ -77,6 +79,15 @@ public class ProgramCampaign extends Program{
     
     private String previewBody;
     
+    /**
+     * For editing CampaignActivityFilters
+     * 
+     */
+    private final FILTER_OPERATOR[] operators = FILTER_OPERATOR.values();
+    private List<CampaignActivityFilter> filters;
+    private List<SubscriptionList> activityTargetLists;
+    private List<String> selectedTargetLists; //JSF selectMany component will store it as String.
+    
     @Override
     public void clearVariables() {
         
@@ -91,10 +102,10 @@ public class ProgramCampaign extends Program{
     public void initProgram() {
         //initEditCampaignMode(); //On first load do this in Forms
         activityStatusMapping = new HashMap<String,String>();
-        activityStatusMapping.put(ACTIVITY_STATUS.NEW.name, "primary");
-        activityStatusMapping.put(ACTIVITY_STATUS.EXECUTING.name, "info");
-        activityStatusMapping.put(ACTIVITY_STATUS.COMPLETED.name, "success");
-        activityStatusMapping.put(ACTIVITY_STATUS.STOPPED.name, "default");
+        activityStatusMapping.put(ACTIVITY_STATUS.NEW.name, "default");
+        activityStatusMapping.put(ACTIVITY_STATUS.EXECUTING.name, "blue");
+        activityStatusMapping.put(ACTIVITY_STATUS.COMPLETED.name, "green");
+        activityStatusMapping.put(ACTIVITY_STATUS.STOPPED.name, "red");
     }
 
     
@@ -153,7 +164,6 @@ public class ProgramCampaign extends Program{
 
     public void setEditingActivity(CampaignActivity editingActivity) {
         this.editingActivity = editingActivity;
-        this.setEditingActivityId((editingActivity == null) ? -1 :editingActivity.getOBJECTID());
     }
 
     public CampaignActivitySchedule getEditingSchedule() {
@@ -186,14 +196,6 @@ public class ProgramCampaign extends Program{
 
     public void setTargetLists(List<SubscriptionList> targetLists) {
         this.targetLists = targetLists;
-    }
-
-    public long getEditingActivityId() {
-        return editingActivityId;
-    }
-
-    public void setEditingActivityId(long editingActivityId) {
-        this.editingActivityId = editingActivityId;
     }
     
     public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
@@ -283,4 +285,41 @@ public class ProgramCampaign extends Program{
     public void setPreviewBody(String previewBody) {
         this.previewBody = previewBody;
     }
+
+    public CampaignService getCampaignService() {
+        return campaignService;
+    }
+
+    public void setCampaignService(CampaignService campaignService) {
+        this.campaignService = campaignService;
+    }
+
+    public List<CampaignActivityFilter> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(List<CampaignActivityFilter> filters) {
+        this.filters = filters;
+    }
+
+    public List<SubscriptionList> getActivityTargetLists() {
+        return activityTargetLists;
+    }
+
+    public void setActivityTargetLists(List<SubscriptionList> activityTargetLists) {
+        this.activityTargetLists = activityTargetLists;
+    }
+
+    public FILTER_OPERATOR[] getOperators() {
+        return operators;
+    }
+
+    public List<String> getSelectedTargetLists() {
+        return selectedTargetLists;
+    }
+
+    public void setSelectedTargetLists(List<String> selectedTargetLists) {
+        this.selectedTargetLists = selectedTargetLists;
+    }
+    
 }

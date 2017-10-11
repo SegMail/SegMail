@@ -53,7 +53,7 @@ public class FormCancelJobFutureRun implements FormEditEntity {
         try {
             scheduleService.cancelBatchJobRun(getEditingBatchJobRun().getRUN_KEY());
             //DateTime current = program.getCurrentRunDateTime();
-            ///scheduleService.triggerNextBatchJobRun(current,program.getFirstAndOnlyTrigger());
+            ///scheduleService.triggerFirstBatchJobRun(current,program.getFirstAndOnlyTrigger());
             FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "All batch job runs have been cancelled.", "");
             closeWithoutSaving();
         } catch (BatchProcessingException ex) {

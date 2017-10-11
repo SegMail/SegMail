@@ -64,6 +64,7 @@ public class MailServiceInbound {
      * 
      * @param sender 
      * @param type 
+     * @return  
      */
     public List<Email> retrieveEmailFromSQSMessage(VerifiedSendingAddress sender, NotificationType type) {
         String endpoint = clientAWSService.getSQSEndpoint();
@@ -115,21 +116,26 @@ public class MailServiceInbound {
         emails.addAll(getEmailsBySESMessageId(messageIds));
         
         //Delete messages that have been read
-        for(String receiptHandle : receiptHandles) {
+        /*for(String receiptHandle : receiptHandles) {
             sqsClient.deleteMessage(queueURL, receiptHandle);
-        }
+        }*/
+        
+        sqsClient.shutdown();
         
         return emails;
     }
     
-    @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    //@Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
         if(emails == null || emails.isEmpty())
             return;
         List<String> subscriberAddress = new ArrayList<>();
         for(Email email : emails) {
-            helper.updateBounceStatus(email);
+            //helper.updateBounceStatus(email);
+            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
+            email = (Email) updService.merge(email);
+            
             Set<String> recipients = email.getRECIPIENTS();
             subscriberAddress.addAll(recipients);
             
@@ -146,6 +152,7 @@ public class MailServiceInbound {
         subService.updateAllSubscriberCountForClient(clientId);
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void processAllBounce() {
         List<VerifiedSendingAddress> senders = new ArrayList<>();
         List<VerifiedSendingAddress> singleFetch = getAllVerifiedSenders(0, MAX_EMAIL_PROCESSED);

@@ -13,6 +13,7 @@ import javax.jws.HandlerChain;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingService;
 import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
@@ -20,9 +21,11 @@ import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.program.campaign.ProgramCampaign;
 
 /**
- *
+ * Not in use anymore, since we want to full utilize JSF partial requests.
+ * 
  * @author LeeKiatHaw
  */
+@Deprecated
 @WebService(serviceName = "WSCampaignActivityLink")
 @HandlerChain(file = "handlers-server.xml")
 public class WSCampaignActivityLink {
@@ -30,6 +33,8 @@ public class WSCampaignActivityLink {
     @EJB CampaignService campService;
     @EJB CampaignExecutionService campExeService;
     @EJB LandingService landingService;
+    
+    @Inject ClientContainer cltCont; 
     
     /**
      * If this is not injected, no service calls can proceed.
@@ -112,7 +117,7 @@ public class WSCampaignActivityLink {
     
     @WebMethod(operationName = "getTotalTargetedForCampaignActivity")
     public long getTotalTargetedForCampaignActivity(@WebParam(name = "campaignActivityId") long campaignActivityId) {
-        long result = campService.countTargetedSubscribersForActivity(campaignActivityId);
+        long result = campService.countTargetedSubscribersForActivity(campaignActivityId,cltCont.getClient().getOBJECTID());
         return result;
     }
     

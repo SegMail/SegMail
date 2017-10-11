@@ -90,16 +90,12 @@ public class MailMergeService {
      *
      * @param text
      * @param confirmationKey
-     * @param email
      * @return
      * @throws eds.component.data.IncompleteDataException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseConfirmationLink(
             String text, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
-            //String landingServerAddress, 
-            //String email,
-            //long listId
             String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
         if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
@@ -226,8 +222,8 @@ public class MailMergeService {
      * Used by confirmation and welcome emails.
      * 
      * @param text
-     * @param subscriberId
-     * @param listId
+     * @param subscriber
+     * @param list
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -271,6 +267,10 @@ public class MailMergeService {
             return text;
         }
         
+        if (unsubscribeKey == null || unsubscribeKey.isEmpty() ) {
+            return text;
+        }
+        
         // Check if key exists
         /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
          if(trans == null) {
@@ -288,7 +288,8 @@ public class MailMergeService {
             throw new IncompleteDataException("Please contact app administrator to set a landing server.");
         }
 
-        String unsubLink = landingServer.getURI().concat("/").concat(MAILMERGE_REQUEST.UNSUBSCRIBE.program).concat("/").concat(unsubscribeKey);
+        //String unsubLink = landingServer.getURI().concat("/").concat(MAILMERGE_REQUEST.UNSUBSCRIBE.program).concat("/").concat(unsubscribeKey);
+        String unsubLink = landingServer.getURI() + "/" + MAILMERGE_REQUEST.UNSUBSCRIBE.program + "/" + unsubscribeKey;
         String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
         
         return text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
@@ -322,6 +323,9 @@ public class MailMergeService {
     }
     
     public String parseStandardListTags(String text, SubscriptionList list) {
+        if(text == null || text.isEmpty() || list == null)
+            return text;
+        
         text = text.replace(SubscriptionList.MM_SENDER_NAME, list.getSEND_AS_NAME());
         text = text.replace(SubscriptionList.MM_SUPPORT_EMAIL, list.getSUPPORT_EMAIL());
         
@@ -329,6 +333,9 @@ public class MailMergeService {
     }
     
     public String parseStandardCampaignTags(String text, Campaign campaign) {
+        if(text == null || text.isEmpty() || campaign == null)
+            return text;
+        
         text = text.replace(SubscriptionList.MM_SENDER_NAME, campaign.getOVERRIDE_SEND_AS_NAME());
         text = text.replace(SubscriptionList.MM_SUPPORT_EMAIL, campaign.getOVERRIDE_SUPPORT_EMAIL());
         
@@ -336,6 +343,9 @@ public class MailMergeService {
     }
     
     public String parseExtraSubscriberTags(String text, SubscriberAccount subscriber, DateTime now) {
+        if(text == null || text.isEmpty() || subscriber == null)
+            return text;
+        
         text = text.replace(SubscriberAccount.MM_DATE_OF_SUBSCRIPTION, DateFormat.getDateInstance().format(subscriber.getDATE_CREATED()));
         Period length = (new Period(
                 new DateTime(subscriber.getDATE_CREATED().getTime()),
@@ -359,7 +369,18 @@ public class MailMergeService {
         return text;
     }
     
+    /**
+     * Returns content replaced with mailmerge links.
+     * 
+     * @param content
+     * @return
+     * @throws DataValidationException if any errors are thrown when generating the test link
+     * @throws IncompleteDataException if no available server is setup yet
+     */
     public String parseTestMailmergeLinks(String content) throws DataValidationException, IncompleteDataException {
+        if(content == null || content.isEmpty())
+            return content;
+        
         String preview = content;
         //Mailmerge links - generate test links
         MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
