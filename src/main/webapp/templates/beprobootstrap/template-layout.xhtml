@@ -14,9 +14,14 @@
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />        
             <meta http-equiv="X-UA-Compatible" content="IE=edge" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <!-- AJAX Loader -->
+            <!-- AJAX Loader (PF) -->
             <link rel="stylesheet" href="#{request.contextPath}/templates/common/css/ajax-loader/spinner.css" />
             <script src="#{request.contextPath}/templates/common/js/ajax-loader/ajax-loader.js"></script> 
+            
+            <!-- AJAX Loader (Custom) -->
+            <link rel="stylesheet" href="#{request.contextPath}/templates/common/js/ajax-loader/spinner.css" />
+            <script src="#{request.contextPath}/templates/common/js/ajax-loader/spinner.js"></script>
+            
 
             <!--custom hacks-->
             <link rel="stylesheet" href="#{request.contextPath}/templates/beprobootstrap/css/hacks/primefaces-hacks.css" />
@@ -69,26 +74,12 @@
                             }</a>
                             <span class="profile-subtitle">#{UserSessionContainer.usertypeName}</span>
                             <div class="profile-buttons">
-                                <form jsf:id="user_action_menu">
-                                    <div class="btn-group">
-                                        <a class="but dropdown-toggle" data-toggle="dropdown">
-                                            <i class="fa fa-cog"></i>
-                                        </a>
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li>
-                                                <a jsf:actionListener="#{FormUserLogout.logout()}" >
-                                                    <f:ajax execute="@form" render="@form"></f:ajax>
-                                                    Logout
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </form>
+                                <ui:include src="#{UserRequestContainer.menuLocations['PROFILE']}"></ui:include>
                             </div>
                         </div>
                     </div><!-- profile block -->
                     <ul class="navigation">
-                        <ui:include src="#{UserRequestContainer.menuLocation}" />
+                        <ui:include src="#{UserRequestContainer.menuLocations['LEFT']}" />
                     </ul>
                     <!-- page navigation(menu) -->
 
@@ -147,7 +138,7 @@
 
 
         <!--template scripts-->
-        <link href="#{request.contextPath}/templates/beprobootstrap/css/theme-d-hw-turquoise.css" rel="stylesheet" type="text/css" id="theme"/>
+        <link href="#{request.contextPath}/templates/beprobootstrap/css/styles.css" rel="stylesheet" type="text/css" id="theme"/>
         <!--[if lt IE 10]><link rel="stylesheet" type="text/css" href="css/ie.css"/><![endif]-->
 
         <!--Use PF's own Jquery library instead--><!--no we are moving away from PF-->
@@ -205,7 +196,7 @@
 
         <!--For editable forms-->
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/bootstrap-editable.min.js"></script>  
-        <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/inputs-ext/address/address.js"></script>
+        <!--<script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-editable/inputs-ext/address/address.js"></script>-->
         <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/select2/select2.min.js"></script>
         <!--For editable forms-->
 

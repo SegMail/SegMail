@@ -18,6 +18,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
@@ -48,6 +49,7 @@ public class FormSubscriberTable {
     @EJB UpdateObjectService updService;
     
     @Inject ClientContainer clientCont;
+    @Inject UserRequestContainer reqCont;
     
     @PostConstruct
     public void init(){
@@ -56,6 +58,7 @@ public class FormSubscriberTable {
             dripService.init(RECORDS_PER_PAGE);
             dripService.initCriteria();
             loadPage(1);
+            updateToolbar();
         }
     }
     
@@ -133,6 +136,14 @@ public class FormSubscriberTable {
 
     public void setAnyOrAll(String anyOrAll) {
         program.setAnyOrAllLists(anyOrAll);
+    }
+    
+    public int getCurrentPageRecordStart() {
+        return 1 + ((getCurrentPage() - 1) * RECORDS_PER_PAGE);
+    }
+    
+    public int getCurrentPageRecordEnd() {
+        return getCurrentPageRecordStart() + getSubscriberTable().size() - 1;
     }
     
     public void loadPage(int page) {
@@ -286,6 +297,14 @@ public class FormSubscriberTable {
         program.setPages(pages);
     }
     
+    public long getTotalCount() {
+        return dripService.count();
+    }
+
+    public int getRECORDS_PER_PAGE() {
+        return RECORDS_PER_PAGE;
+    }
+    
     /*
     public long startPage() {
         return Math.max(1, getCurrentPage() - (PAGE_RANGE/2));
@@ -328,4 +347,10 @@ public class FormSubscriberTable {
         fieldMap.put((String) fieldValue.generateKey(), fieldValue);
     }
     
+    public void updateToolbar() {
+        if(this.getSubscriberTable() == null || getSubscriberTable().isEmpty()) {
+            reqCont.setRenderPageBreadCrumbs(false);
+            reqCont.setRenderPageToolbar(false);
+        }
+    }
 }

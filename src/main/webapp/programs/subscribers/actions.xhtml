@@ -17,25 +17,29 @@
             </h2>
         </div>
         <div class="block-content">
-            <h:commandLink styleClass="btn btn-primary" pass:href="#import_subscriber_popup"
-                           pass:data-toggle="modal" value="Import from File"
-                           >
-                <f:ajax render=":FormImportSubscribers" event="click" 
-                        onevent="refreshImport"
-                        listener="#{FormImportSubscribers.setupImport()}"
-                        >
-                </f:ajax>
-            </h:commandLink>
-            <h:commandLink styleClass="btn btn-info" pass:href="#add_subscriber_popup"
-                           pass:data-toggle="modal" value="Add Single Subscriber"
+            <a class="btn btn-default" href="#add_subscriber_popup"
+                           data-toggle="modal"
                            style="margin-left: 5px"
                            >
+                <i class="fa fa-plus"></i>
+                Add 1x Subscriber
                 <f:ajax render=":FormAddSubscriber" event="click" 
                         onevent="refreshAddSubsc"
                         listener="#{FormImportSubscribers.setupImport()}"
                         >
                 </f:ajax>
-            </h:commandLink>
+            </a>
+            <a class="btn btn-default" href="#import_subscriber_popup"
+                           data-toggle="modal"
+                           >
+                <i class="fa fa-floppy-o"></i>
+                Import from File
+                <f:ajax render=":FormImportSubscribers" event="click" 
+                        onevent="refreshImport"
+                        listener="#{FormImportSubscribers.setupImport()}"
+                        >
+                </f:ajax>
+            </a>
         </div>
     </form>
 </html>

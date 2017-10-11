@@ -768,6 +768,11 @@ public class SubscriptionService {
         return results;
     }
 
+    /**
+     * The Asynchronous annotation is still useful, but we need something better like 
+     * a Message-Driven Bean to do true asynchronous calls.
+     * @param listId 
+     */
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
     //@TransactionAttribute(TransactionAttributeType.REQUIRED) //maybe THIS is the bug
@@ -952,7 +957,6 @@ public class SubscriptionService {
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromAcc = query.from(SubscriberAccount.class);
         Root<SubscriberOwnership> fromOwn = query.from(SubscriberOwnership.class);
-        Root<Subscription> fromSubsc = query.from(Subscription.class);
         
         query.select(fromAcc);
         List<Predicate> conditions = new ArrayList<>();
@@ -969,6 +973,9 @@ public class SubscriptionService {
         
         // Any or All fields
         if(listIds != null && !listIds.isEmpty()) {
+            // Impt to be declared here instead of outside because it will add an unnecessary join.
+            // If the FROM table is optional, do not declare it if not required at all!
+            Root<Subscription> fromSubsc = query.from(Subscription.class); 
             conditions.add(fromSubsc.get(Subscription_.TARGET).in(listIds));
             conditions.add(builder.equal(fromSubsc.get(Subscription_.SOURCE),fromAcc.get(SubscriberAccount_.OBJECTID)));
             

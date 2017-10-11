@@ -25,7 +25,10 @@
             <p>
                 Currently we only support the following:
                 <ul>
-                    <li>MySQL</li>
+                    <c:forEach items="#{FormListDatasource.endpointTypes()}" var="type">
+                        <li>#{type.label}</li>
+                    </c:forEach>
+                    
                 </ul>
                 Please raise a request to us at <strong><u>support@segmail.io</u></strong> with subject "<strong>Datasource request</strong>" and we will get 
                 in contact with you to help you out.

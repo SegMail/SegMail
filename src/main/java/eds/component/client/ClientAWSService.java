@@ -53,6 +53,7 @@ import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.SetQueueAttributesRequest;
 import eds.component.GenericObjectService;
 import eds.component.data.DataValidationException;
+import eds.component.data.EntityExistsException;
 import eds.component.mail.Password;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
@@ -411,7 +412,7 @@ public class ClientAWSService {
      * @throws DataValidationException 
      */
     public VerifiedSendingAddress verifyNewSendingAddress(Client client, String sendingAddress, boolean registerBounce) 
-            throws DataValidationException {
+            throws DataValidationException, EntityExistsException {
         
         if (!EmailValidator.getInstance().isValid(sendingAddress)) {
             throw new DataValidationException("Email address is invalid.");
@@ -424,7 +425,7 @@ public class ClientAWSService {
                 if(address.getOWNER().equals(client))
                     throw new DataValidationException("This email address was requested by you or already verified.");
             }
-            throw new DataValidationException("This email address is already taken by another account.");
+            throw new EntityExistsException("This email address is already taken by another account.");
         }
         
         List<ClientAWSAccount> accounts = objService.getEnterpriseData(client.getOBJECTID(), ClientAWSAccount.class);

@@ -5,6 +5,7 @@ $(document).ready(function () {
     updateAddSubsriberButtons();
     initExpandTab();
     initFieldForms();
+    toggleMenu();
 });
 
 var initSubscriberTable = function () {
@@ -205,4 +206,10 @@ var initFieldForms = function() {
             $('input[data-id="'+id+'"][data-key="'+key+'"]').val(defValue);
         })
     })
+}
+
+var toggleMenu = function () {
+    if ($(document).has('#no_subscribers').length) {
+        page_navigation();
+    }
 }

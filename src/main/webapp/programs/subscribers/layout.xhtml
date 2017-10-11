@@ -14,11 +14,109 @@
                     >
         <ui:define name="main-program-panel">
             <div class="row">
-                
+                <h:inputHidden value="#{FormSubscriptionLists}" ></h:inputHidden>
             </div>
-            <div class="row">
+            <div class="row" jsf:rendered="#{fn:length(FormSubscriberTable.subscriberTable.keySet()) le 0}" >
+                <div id="no_subscribers" class="jumbotron" style="text-align: center;">
+                    <h1 style="margin-top: 10px;">You have no Subscribers yet</h1>
+                    <h2>Start building your list with these options now:</h2>
+                    <br/>
+                    <br/>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <i class="fa fa-user" style="font-size: 40px"></i> 
+                            <div>
+                                <p class="text-info">Add a single subscriber by using a form</p>
+                                Manually enter your subscriber's info by using a online form. 
+                                Choose which lists to add to.
+                            </div>
+                            <br/>
+                            
+                        </div>
+                        <div class="col-md-3">
+                            <i class="fa fa-code" style="font-size: 40px"></i> 
+                            <div>
+                                <p class="text-primary">Setup a signup form to start collecting emails</p>
+                                Copy and paste html code on your own website to collect signups.
+                            </div>
+                            <br/>
+                            
+                        </div>
+                        <div class="col-md-3">
+                            <i class="fa fa-file-excel-o" style="font-size: 40px"></i> 
+                            <div>
+                                <p class="text-warning">Import multiple subscribers using an Excel or CSV file</p>
+                                Upload a file exported from your legacy database. 1st line in the file
+                                will be read as the header and must be present. You will be able to choose
+                                which columns in your file is mapped to which fields in your list.
+                            </div>
+                            <br/>
+                            
+                        </div>
+                        <div class="col-md-3">
+                            <i class="fa fa-database" style="font-size: 40px"></i> 
+                            <div>
+                                <p class="text-success">Sync from your own CRM / Blog / Ecommerce site</p>
+                                Using just your database login credentials, you can rely on our synchronization
+                                engine to keep your subscriber's info up-to-date with your main apps.
+                            </div>
+                            <br/>
+                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h:form>
+                            <div class="col-md-3">
+                                <h:commandLink styleClass="btn btn-info" pass:href="#add_subscriber_popup" pass:data-toggle="modal"
+                                   >
+                                    <i class="fa fa-plus"></i>
+                                    Add a Subscriber
+                                    <f:ajax render=":FormAddSubscriber" event="click" 
+                                            onevent="refreshAddSubsc"
+                                            listener="#{FormImportSubscribers.setupImport()}"
+                                            >
+                                    </f:ajax>
+                                </h:commandLink>
+                            </div>
+                            <div class="col-md-3">
+                                <a class="btn btn-primary" href="#{request.contextPath}/signupcode" data-toggle="modal">
+                                    <i class="fa fa-code"></i>
+                                    Go to signup codes
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <h:commandLink styleClass="btn btn-warning" pass:href="#import_subscriber_popup" 
+                                               pass:data-toggle="modal">
+                                    <i class="fa fa-floppy-o"></i>
+                                    Import from a file
+                                    <f:ajax render=":FormImportSubscribers" event="click" 
+                                            onevent="refreshImport"
+                                            listener="#{FormImportSubscribers.setupImport()}"
+                                            >
+                                    </f:ajax>
+                                </h:commandLink>
+                            </div>
+                            <div class="col-md-3">
+                                <h:commandLink styleClass="btn btn-success" pass:href="#add_datasource_popup" 
+                                               pass:data-toggle="modal">
+                                    <i class="fa fa-gears"></i>
+                                    Setup a datasource
+                                    <f:ajax render=":FormSetupDatasource" event="click"
+                                            onevent="refreshImport"
+                                            listener="#{FormImportSubscribers.setupImport()}"
+                                            
+                                            >
+                                    </f:ajax>
+                                </h:commandLink>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+            <div class="row" jsf:rendered="#{fn:length(FormSubscriberTable.subscriberTable.keySet()) gt 0}" >
                 <div class="col-md-8">
-                    <ui:include src="subscriber_table.xhtml" ></ui:include>
+                    <ui:include src="subscriber_table_1.xhtml" ></ui:include>
                 </div>
                 <div class="col-md-4">
                     <div class="block">
@@ -40,6 +138,15 @@
             <div class="modal fade" id="add_subscriber_popup">
                 <ui:include src="add_subscriber_popup.xhtml"></ui:include>
             </div>
+            
+            <div class="modal fade" id="select_columns_popup">
+                <ui:include src="select_columns_popup.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="add_datasource_popup">
+                <ui:include src="add_datasource.xhtml"></ui:include>
+            </div>
+            
         </ui:define>
 
         <ui:define name="scripts-bottom">

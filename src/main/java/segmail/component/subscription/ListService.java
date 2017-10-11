@@ -45,6 +45,11 @@ public class ListService {
 
     public static final String DEFAULT_FNAME_FIELD_NAME = "Firstname";
     public static final String DEFAULT_LNAME_FIELD_NAME = "Lastname";
+    public static final String[] DEFAULT_FIELD_NAMES = {
+        SubscriptionService.DEFAULT_EMAIL_FIELD_NAME,
+        DEFAULT_FNAME_FIELD_NAME,
+        DEFAULT_LNAME_FIELD_NAME
+    };
     /**
      * Generic services
      */
@@ -235,6 +240,7 @@ public class ListService {
      * <li>REDIRECT_CONFIRM or REDIRECT_WELCOME are invalid</li>
      * </ul>
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList saveList(SubscriptionList list) throws DataValidationException {
 
         validateList(list);

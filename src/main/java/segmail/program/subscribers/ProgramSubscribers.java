@@ -45,7 +45,7 @@ public class ProgramSubscribers extends Program {
     private List<SubscriptionList> selectedLists;
     private Map<String,Object> fieldValues;
     private Map<String,SubscriptionListField> fieldMap;
-
+    
     public String getEmailSearch() {
         return emailSearch;
     }

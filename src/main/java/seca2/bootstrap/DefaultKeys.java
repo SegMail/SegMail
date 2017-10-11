@@ -81,7 +81,9 @@ public class DefaultKeys {
     /**
      * The global default menu location
      */
-    public final String DEFAULT_MENU_LOCATION = "DEFAULT_MENU_LOCATION";
+    public final String DEFAULT_LEFT_MENU_LOCATION = "DEFAULT_LEFT_MENU_LOCATION";
+    
+    public final String DEFAULT_PROFILE_MENU_LOCATION = "DEFAULT_PROFILE_MENU_LOCATION";
     
     public final String GLOBAL_VIEWROOT = "GLOBAL_VIEWROOT";
     

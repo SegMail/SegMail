@@ -10,6 +10,8 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <h:panelGroup layout="block" rendered="#{FormProgramListSwitch.editListMode}">
+        <h:inputHidden pass:id="activeTab" value="#{FormProgramListSwitch.activeTab}" ></h:inputHidden>
+        
         <a  href="#{request.contextPath}/list"
             class="btn btn-primary"
             >

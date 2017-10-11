@@ -195,7 +195,9 @@ public class MassSubscriptionService {
         //All existing subscriptions
         //Just in case the SubscriberAccount, Ownership and FieldValues are created but the subscription is not,
         //this is used for checking.
-        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID(), null);
+        List<Subscription> existingSubscription = subService.getSubscriptionsByEmails(emails, list.getOBJECTID(), new SUBSCRIPTION_STATUS[]{
+                NEW,CONFIRMED //If UNSBSCRIBED or BOUNCED, do not add them back as we don't want to send unwanted emails!
+            });
 
         /**
          * For each survivor: 1) Check if SubscriberAccount has already been
@@ -270,14 +272,18 @@ public class MassSubscriptionService {
                     if (account == null) {
                         account = new SubscriberAccount();
                         account.setEMAIL(email);
-                        account.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.ACTIVE.name);
+                        //account.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.VERIFIED.name);
                         createNewSubAccList.add(account);
                         //Create SubscriberOwnership!!!
                         SubscriberOwnership ownership = new SubscriberOwnership();
                         ownership.setSOURCE(account);
                         ownership.setTARGET(client);
                         createNewSubOwnership.add(ownership);
-
+                        if(doubleOptin) {
+                            account.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.NEW.name);
+                        } else {
+                            account.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.VERIFIED.name);
+                        }
                     }
                     newValue.setOWNER(account);
 
@@ -595,16 +601,16 @@ public class MassSubscriptionService {
             for(SubscriberAccount acc : existAcc) {
                 if(email.equals(acc.getEMAIL())) { //Already exist
                     newAcc = acc;
-                    //Only if the status is INACTIVE, revert to ACTIVE
+                    //Only if the status is INACTIVE, revert to VERIFIED
                     //If the status is BOUNCED, leave it
                     if(newAcc.getSUBSCRIBER_STATUS().equals(SUBSCRIBER_STATUS.INACTIVE.name))
-                        newAcc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.ACTIVE.name);
+                        newAcc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.VERIFIED.name);
                 }
             }
             if(newAcc == null) { //Construct new SubscriberAccount object
                 newAcc = new SubscriberAccount();
                 newAcc.setEMAIL(email);
-                newAcc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.ACTIVE.name);
+                newAcc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.NEW.name);
             }
             allAcc.add(newAcc);
         }

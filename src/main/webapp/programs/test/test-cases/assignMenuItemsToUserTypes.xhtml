@@ -69,6 +69,19 @@
                            jsf:value="#{FormTestNavigation.order}" />
                     </div>
                 </div>
+                <div class="row"><!--order of menu item for the selected usertype-->
+                    <div class="col-md-12 col-xs-12 form-group">
+                        <label>Group:</label>
+                        <span class="help-block">
+                            Define the group to assign this menu item for this user.
+                        </span>
+                        <h:selectOneListbox value="#{FormTestNavigation.group}">
+                            <f:selectItems value="#{FormTestNavigation.menuGroups}" var="group"
+                                           itemLabel="group" itemValue="group">
+                            </f:selectItems>
+                        </h:selectOneListbox>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-12 col-xs-12 form-group">
                         <p:commandButton id="createMenuItemAccess" styleClass="btn btn-primary col-md-12 col-xs-12" value="Assign menu item to user type"

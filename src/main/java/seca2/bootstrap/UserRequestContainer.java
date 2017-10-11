@@ -26,7 +26,9 @@ public class UserRequestContainer {
     
     private String templateLocation;
     
+    @Deprecated
     private String menuLocation;
+    private Map<String,String> menuLocations;
     
     private boolean error = false; //default value
     
@@ -154,6 +156,14 @@ public class UserRequestContainer {
 
     public void setRenderPageBreadCrumbs(boolean renderPageBreadCrumbs) {
         this.renderPageBreadCrumbs = renderPageBreadCrumbs;
+    }
+
+    public Map<String, String> getMenuLocations() {
+        return menuLocations;
+    }
+
+    public void setMenuLocations(Map<String, String> menuLocations) {
+        this.menuLocations = menuLocations;
     }
     
     public String printFullPathWithoutContext() {

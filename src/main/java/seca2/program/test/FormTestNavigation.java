@@ -18,6 +18,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.navigation.NavigationService;
 import eds.component.user.UserService;
+import eds.entity.navigation.MENU_GROUP;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
 import eds.entity.user.UserType;
@@ -48,6 +49,7 @@ public class FormTestNavigation implements Serializable{
     private long selectedAssignedMenuItemId;
     private long selectedUserTypeId;
     private int order;
+    private String group;
     
     //Test custom selectonemenu tag
     private List<String> selectOneMenuTest;
@@ -86,7 +88,7 @@ public class FormTestNavigation implements Serializable{
     
     public void assignMenuAccess(){
         try{
-            List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId, order);
+            List<MenuItemAccess> biRel = navigationService.assignMenuItemAccess(selectedUserTypeId, selectedAssignedMenuItemId, order, group);
             
             FacesMessenger.setFacesMessage(assignMenuItemForm, FacesMessage.SEVERITY_FATAL, "MenuItem "+selectedAssignedMenuItemId+" is assigned to user type "+selectedUserTypeId+"!", null);
         } catch (RelationshipExistsException ex) {
@@ -191,11 +193,24 @@ public class FormTestNavigation implements Serializable{
     public void setIsPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
-    
-    
-    
 
-    public void assignMenuItems(String usertypename, String menuname, int order){
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+    
+    public List<String> getMenuGroups() {
+        List<String> groups = new ArrayList<>();
+        for(MENU_GROUP group : MENU_GROUP.values()) {
+            groups.add(group.name);
+        }
+        return groups;
+    }
+
+    public void assignMenuItems(String usertypename, String menuname, int order, String group){
         List<UserType> usertypes = this.userService.getUserTypeByName(usertypename);
         List<MenuItem> menuitems = this.navigationService.getAllMenuItemsByName(menuname);
         
@@ -208,6 +223,7 @@ public class FormTestNavigation implements Serializable{
         this.setSelectedUserTypeId(usertypes.get(0).getOBJECTID());
         this.setSelectedAssignedMenuItemId(menuitems.get(0).getOBJECTID());
         this.setOrder(order);
+        this.setGroup(group);
         
         this.assignMenuAccess();
     }

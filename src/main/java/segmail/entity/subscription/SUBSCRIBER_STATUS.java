@@ -10,9 +10,11 @@ package segmail.entity.subscription;
  * @author LeeKiatHaw
  */
 public enum SUBSCRIBER_STATUS {
-    ACTIVE("ACTIVE"),
-    INACTIVE("INACTIVE"),
-    BOUNCED("BOUNCED");
+    NEW("NEW"),
+    VERIFIED("VERIFIED"), // Verified email
+    REMOVED("REMOVED"), // Remove themselves voluntarily
+    INACTIVE("INACTIVE"), // Removed by administrator
+    BOUNCED("BOUNCED"); // Any hard bounces
     
     public final String name;
     

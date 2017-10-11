@@ -25,6 +25,8 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @Named("FormToolbarRight")
 public class FormToolbarRight  {
     
+    protected final String REFRESH_FLAG = "REFRESH_FLAG";
+    
     @Inject private UserRequestContainer reqContainer;
     
     private String formName = "FormToolbarRight";
@@ -35,6 +37,8 @@ public class FormToolbarRight  {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request
             ec.getFlash().setKeepMessages(true);
+            // Set a flash scope flag to indicate this was a refresh
+            ec.getFlash().put(REFRESH_FLAG, true);
             ec.redirect(ec.getRequestContextPath()+reqContainer.printFullPathWithoutContext());
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getFormName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);

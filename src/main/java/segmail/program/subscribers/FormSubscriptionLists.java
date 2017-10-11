@@ -7,7 +7,6 @@ package segmail.program.subscribers;
 
 import eds.entity.client.Client;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -16,7 +15,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
 import segmail.component.subscription.ListService;
-import segmail.component.subscription.SubscriptionContainer;
 import segmail.entity.subscription.SubscriptionList;
 
 /**

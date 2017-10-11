@@ -46,6 +46,9 @@ var toggleMenu = function () {
     if ($(document).has('#list_editing_block').length) {
         page_navigation();
     }
+    if ($(document).has('#listIntro').length) {
+        page_navigation();
+    }
 };
 
 $(document).ready(function () {
@@ -220,10 +223,18 @@ var addSchemeToUrl = function() {
     });
 }
 
+var passTabBackToJSF = function() {
+    $('#list_editing_block .nav-tabs li a').click(function(){
+        var id = $(this).data('id');
+        $('#activeTab').val(id);
+    })
+}
+
 $(document).ready(function(){
     initICheckMand();
     initToggleInfo();
     updateSegmailIp();
+    passTabBackToJSF();
 });
 
 $(window).load(function(){

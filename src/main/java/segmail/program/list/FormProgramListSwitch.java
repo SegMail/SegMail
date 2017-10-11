@@ -6,9 +6,7 @@
 package segmail.program.list;
 
 import eds.component.GenericObjectService;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -16,7 +14,6 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
-import seca2.program.Program;
 import segmail.component.subscription.ListService;
 import segmail.entity.subscription.SubscriptionList;
 
@@ -40,21 +37,23 @@ public class FormProgramListSwitch {
     @PostConstruct
     public void init(){
         if(!FacesContext.getCurrentInstance().isPostback()) {
+            initActiveTab();
+            initPageToolbar();
             loadListOrLists();
         }
         
     }
     
-    public boolean isEditListMode() {
-        return program.getListEditing() != null;
-    }
-    
-    public Map<String, Boolean> getShowActiveTabs() {
-        return program.getShowActiveTabs();
+    public String getActiveTab() {
+        return program.getActiveTab();
     }
 
-    public void setShowActiveTabs(Map<String, Boolean> showActiveTabs) {
-        program.setShowActiveTabs(showActiveTabs);
+    public void setActiveTab(String activeTab) {
+        program.setActiveTab(activeTab);
+    }
+    
+    public boolean isEditListMode() {
+        return program.getListEditing() != null;
     }
 
     public void loadListOrLists(){
@@ -70,4 +69,48 @@ public class FormProgramListSwitch {
         
     }
     
+    public void initActiveTab() {
+        List<String> params = reqContainer.getProgramParamsOrdered();
+        String currentTab = getActiveTab();
+        String nextTab = program.TABS[0]; // default
+        
+        // If the tab name is provided in url
+        if(params != null && params.size() >= 2) {
+            String param = params.get(1);
+            nextTab = (param != null && !param.isEmpty()) ? param : nextTab;
+        }
+        
+        // If the current request is a refresh, get the current tab (Highest precedence)
+        // If current request is empty, then nextTab should still be the default tab
+        if(program.isLastReqRefresh()) {
+            nextTab = (currentTab != null && !currentTab.isEmpty()) ? currentTab : nextTab;
+        }
+        
+        // Only set activeTab to nextTab if it is found in the TABS array
+        for(String TAB : program.TABS) {
+            if(TAB.equals(nextTab)) {
+                setActiveTab(TAB);
+                return;
+            }
+        }
+    }
+    
+    public void initPageToolbar() {
+        List<String> params = reqContainer.getProgramParamsOrdered();
+    
+        // When in edit list page
+        if(params != null && params.size() >= 1) {
+            reqContainer.setRenderPageToolbar(false);
+            reqContainer.setRenderPageBreadCrumbs(false);
+            return;
+        }
+        
+        // When no list available
+        if(program.getAllLists() == null || program.getAllLists().isEmpty()) {
+            reqContainer.setRenderPageToolbar(false);
+            reqContainer.setRenderPageBreadCrumbs(false);
+            return;
+        }
+        
+    }
 }

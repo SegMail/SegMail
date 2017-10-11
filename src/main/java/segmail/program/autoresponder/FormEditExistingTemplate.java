@@ -31,7 +31,6 @@ import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
-import segmail.entity.campaign.Campaign;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
@@ -243,7 +242,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void loadMMUrls() {
 
         try {
-            this.setMailmergeLinks(new HashMap<String, String>());
+            setMailmergeLinks(new HashMap<String, String>());
             for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
                 //For confirm emails, don't load unsubscribe links
                 //For welcome emails, don't load confirm links

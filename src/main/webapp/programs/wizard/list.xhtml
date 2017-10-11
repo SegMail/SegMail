@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <c:set value="#{FormWizardInit.currentStage}" var="stage"></c:set>
+        <div class="jumbotron">
+            
+            <div class="row" style="margin-top: 20px">
+                <div class="col-md-10">
+                    <h1>
+                        Step #{stage} - Create a list
+                    </h1>
+                </div>
+                <div class="col-md-2">
+                    <i class="fa fa-list" style="font-size: 65px"></i> 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        Think of your lists as different sources of leads coming from 
+                        different channels. If you have a CRM, blog or e-commerce site, you
+                        could sync them into Segmail and blast campaigns at a cheaper rate.
+                    </p>
+                    <p>
+                        Each list will contain certain <strong>fields</strong> that can store 
+                        permenant pieces of information of your subscribers like names, dates, 
+                        contact info, and even customer segments (retail, corporate, free, paid,
+                        premium, etc). 
+                    </p>
+                    <p>
+                        You can add/delete fields in the fieldsets tab of the <a href="#{request.contextPath}/list">list page</a>.
+                    </p>
+                    <p>
+                        <strong>Give your list a name</strong>:
+                    </p>
+                    <div class="form-group">
+                        <s2:messenger for="ProgramSetupWizard" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <div class="row-form">
+                        <div class="col-md-10">
+                        <input type="text" class="form-control input-lg" name="listname" id="listname" autocomplete="off"
+                               jsf:value="#{FormWizardList.listname}"
+                               data-provide="typeahead"
+                               
+                               />
+                        </div>
+                        <div class="col-md-2">
+                            <h:commandLink styleClass="btn btn-primary btn-lg pull-right"
+                                           onclick="return listForm().form();"
+                                           >
+                                <f:ajax render="@form :FormWizardInit" execute="@form :FormWizardInit"
+                                        onevent="refresh"
+                                        listener="#{FormWizardList.createList()}"
+                                        >
+                                </f:ajax>
+                                Create list
+                            </h:commandLink>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <br />
+            </div>
+            <div class="row">
+                <br />
+            </div>
+            <div class="row">
+                <br />
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="text-left">
+                        <h:commandLink>
+                            <f:ajax listener="#{FormWizardInit.gotoStage(stage-1)}"
+                                    render="@form :FormWizardInit" execute="@form"
+                                    onevent="refresh"
+                                    >
+                            </f:ajax>
+                            &lt;-- Or go back to #{FormWizardInit.stages.get(stage-1)}
+                        </h:commandLink>
+                      
+                    </h2>
+                </div>
+            </div>
+        </div>
+    
+    <script>
+
+        var existing_lists = [
+        <ui:repeat value="#{FormWizardList.existingLists}" var="list">
+            '#{list.LIST_NAME}',
+        </ui:repeat>
+        ];
+    </script>
+</html>
