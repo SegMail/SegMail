@@ -47,6 +47,7 @@ public class MailServiceInbound {
     
     final int MAX_SENDERS_PROCESSED = 100;
     final int MAX_BOUNCE_PROCESSED = 100;
+    final int MAX_QUEUE_MSG_READ = 100;
     
     @Inject
     @Password
@@ -83,7 +84,7 @@ public class MailServiceInbound {
         //Get the messages using queueURL
         ReceiveMessageRequest msgReq = new ReceiveMessageRequest();
         msgReq.setQueueUrl(queueURL);
-        msgReq.setMaxNumberOfMessages(10);
+        msgReq.setMaxNumberOfMessages(MAX_QUEUE_MSG_READ);
         
         ReceiveMessageResult msgRes = sqsClient.receiveMessage(msgReq);
         List<Message> messages = msgRes.getMessages();
