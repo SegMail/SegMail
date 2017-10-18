@@ -759,8 +759,6 @@ public class CampaignService {
         if(startIndex >= 0 && maxResults > 0) {
             sqlString += " LIMIT " + startIndex + ", " + maxResults;
         }
-        
-        System.out.println("QUERY: " + sqlString);
             
         Query q = objService.getEm().createNativeQuery(sqlString, SubscriberAccount.class);
         List<SubscriberAccount> results = q.getResultList();

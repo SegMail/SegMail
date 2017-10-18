@@ -48,8 +48,11 @@ public class WebserviceAuthHandlerServer implements SOAPHandler<SOAPMessageConte
     @Override
     public boolean handleMessage(SOAPMessageContext context) {
         try {
-            System.out.println("Server handler called");
+            HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
             
+            Logger.getLogger(WebserviceAuthHandlerServer.class.getName()).log(Level.INFO, 
+                    "WebserviceAuthHandlerClient called from: "
+                    + req.getRemoteAddr(), "");
 
             boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
             boolean success = (outbound) ? true : authenticateWS(context);

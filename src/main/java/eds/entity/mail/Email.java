@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
@@ -60,7 +61,7 @@ public class Email extends EnterpriseTransaction {
         this.SENDER_ADDRESS = SENDER_ADDRESS;
     }
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "RECIPIENT")
     public Set<String> getRECIPIENTS() {
         return RECIPIENTS;
@@ -100,7 +101,7 @@ public class Email extends EnterpriseTransaction {
         this.SENDER_NAME = SENDER_NAME;
     }
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     public Set<String> getREPLY_TO_ADDRESSES() {
         return REPLY_TO_ADDRESSES;
     }

@@ -24,7 +24,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -46,7 +45,8 @@ import segmail.component.subscription.SubscriptionService;
 @Stateless
 public class MailServiceInbound {
     
-    final int MAX_EMAIL_PROCESSED = 100;
+    final int MAX_SENDERS_PROCESSED = 100;
+    final int MAX_BOUNCE_PROCESSED = 100;
     
     @Inject
     @Password
@@ -66,6 +66,7 @@ public class MailServiceInbound {
      * @param type 
      * @return  
      */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<Email> retrieveEmailFromSQSMessage(VerifiedSendingAddress sender, NotificationType type) {
         String endpoint = clientAWSService.getSQSEndpoint();
         String queueName = clientAWSService.getSQSNameForAddress(sender, type);
@@ -100,7 +101,7 @@ public class MailServiceInbound {
             JsonObject msgBody = Json.createReader(new StringReader(body.getJsonString("Message").getString())).readObject();
             JsonString notifType = msgBody.getJsonString("notificationType");
             
-            if(!"Bounce".equals(notifType.getString()))
+            if(!"Bounce".equalsIgnoreCase(notifType.getString()))
                 continue;
             JsonObject bounce = msgBody.getJsonObject("bounce");
             JsonString bounceType = bounce.getJsonString("bounceType");
@@ -110,15 +111,16 @@ public class MailServiceInbound {
             if("Permanent".equalsIgnoreCase(bounceType.getString())) {
                 messageIds.add(messageId.getString());
             } else {//Haven't figure out what to do yet
-                
+                // To be safe, we update all bounce types
+                messageIds.add(messageId.getString());
             }
         }
         emails.addAll(getEmailsBySESMessageId(messageIds));
         
         //Delete messages that have been read
-        /*for(String receiptHandle : receiptHandles) {
+        for(String receiptHandle : receiptHandles) {
             sqsClient.deleteMessage(queueURL, receiptHandle);
-        }*/
+        }
         
         sqsClient.shutdown();
         
@@ -126,7 +128,7 @@ public class MailServiceInbound {
     }
     
     //@Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
         if(emails == null || emails.isEmpty())
             return;
@@ -142,34 +144,34 @@ public class MailServiceInbound {
         }
         // These shouldn't be here. They should be in SubscriptionService, but 
         // for convenience's sake they are put here.
-        // Update Subscription
-        subService.updateSubscriptionBounceStatus(subscriberAddress, clientId);
-
-        // Update SubscriberAccount
-        subService.updateSubscriberBounceStatus(subscriberAddress, clientId);
+        // Update Subscription and SubscriberAccount
+        subService.updateSubscriptionSubscriberBounce(subscriberAddress, clientId);
 
         // Update subscriber count for SubscriptionLists
         subService.updateAllSubscriberCountForClient(clientId);
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void processAllBounce() {
-        List<VerifiedSendingAddress> senders = new ArrayList<>();
-        List<VerifiedSendingAddress> singleFetch = getAllVerifiedSenders(0, MAX_EMAIL_PROCESSED);
-        senders.addAll(singleFetch);
-        while (singleFetch.size() >= MAX_EMAIL_PROCESSED) {
-            singleFetch = getAllVerifiedSenders(senders.size(), MAX_EMAIL_PROCESSED);
-            senders.addAll(singleFetch);
-        }
         
-        for(VerifiedSendingAddress sender : senders) {
+        List<VerifiedSendingAddress> senders = new ArrayList<>();
+        int sendersIndex = 0;
+        int totalEmailCount = 0;
+        do {
+            senders = getAllVerifiedSenders(MAX_SENDERS_PROCESSED*sendersIndex++, MAX_SENDERS_PROCESSED);
             
-            List<Email> emails = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
-            updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
-        }
+            for(VerifiedSendingAddress sender : senders) {
+
+                List<Email> emails = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
+                updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
+                totalEmailCount += emails.size();
+            }
+            
+        } while (senders.size() > 0 && totalEmailCount < MAX_BOUNCE_PROCESSED);
         
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<VerifiedSendingAddress> getAllVerifiedSenders(int start, int max) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<VerifiedSendingAddress> countQuery = builder.createQuery(VerifiedSendingAddress.class);

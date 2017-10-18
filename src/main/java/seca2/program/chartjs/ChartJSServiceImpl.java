@@ -38,8 +38,6 @@ public class ChartJSServiceImpl implements ChartJSService {
      */
     @Override
     public int add(int firstNum, int secondNum) {
-        //TODO write your implementation code here:
-        System.out.println("add method called!");
         
         MessageContext mctx = wsctx.getMessageContext();
         Map http_headers = (Map) mctx.get(MessageContext.HTTP_REQUEST_HEADERS);

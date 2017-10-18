@@ -46,8 +46,11 @@ public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageConte
     @Override
     public boolean handleMessage(SOAPMessageContext context) {
         try {
-            System.out.println("Client handler called");
+            HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
             
+            Logger.getLogger(WebserviceAuthHandlerClient.class.getName()).log(Level.INFO, 
+                    "WebserviceAuthHandlerClient called to: "
+                    + req.getRequestURI(), "");
             insertCredentials(context);
             
             return true;
