@@ -153,8 +153,12 @@ public class MailServiceInbound {
         // These shouldn't be here. They should be in SubscriptionService, but 
         // for convenience's sake they are put here.
         // Update Subscription and SubscriberAccount
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Starting the update for "
+                +" list " + subscriberAddress.stream().collect(Collectors.joining(","))
+                +" at "+DateTime.now());
         subService.updateSubscriptionSubscriberBounce(subscriberAddress, clientId);
-
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Completed the update "
+                +" at "+DateTime.now());
         // Update subscriber count for SubscriptionLists
         subService.updateAllSubscriberCountForClient(clientId);
     }
