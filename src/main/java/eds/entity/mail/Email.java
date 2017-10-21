@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @Table(name="EMAIL"
         ,indexes={
             @Index(name="MailServiceOutbound",
-                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED")
+                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED,AWS_SES_MESSAGE_ID")
         })
 public class Email extends EnterpriseTransaction {
     

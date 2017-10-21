@@ -704,7 +704,7 @@ public class CampaignService {
         String fieldKey = "FIELD_KEY";
         String fieldVal = "VALUE";
         String accStatus = "SUBSCRIBER_STATUS";
-        String active = SUBSCRIBER_STATUS.ACTIVE.name;
+        String active = SUBSCRIBER_STATUS.VERIFIED.name;
         
         String sqlString = "SELECT " + accAlias + ".*, "+ objAlias +".* FROM " + accTable + " " + accAlias + " " ;
         
@@ -1125,7 +1125,7 @@ public class CampaignService {
         String fieldKey = "FIELD_KEY";
         String fieldVal = "VALUE";
         String accStatus = "SUBSCRIBER_STATUS";
-        String active = SUBSCRIBER_STATUS.ACTIVE.name;
+        String active = SUBSCRIBER_STATUS.VERIFIED.name;
         
         String sqlString = "SELECT COUNT( DISTINCT " + accAlias + "."+ objectid +") cnt FROM " + accTable + " " + accAlias + " " ;
         
@@ -1343,7 +1343,7 @@ public class CampaignService {
             
             conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId));
             conditions.add(builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscrAcc.get(SubscriberAccount_.OBJECTID)));
-            conditions.add(builder.equal(fromSubscrAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.ACTIVE.name)); // temporary solution
+            conditions.add(builder.equal(fromSubscrAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.VERIFIED.name)); // temporary solution
         }
         
         // If filters is not empty,

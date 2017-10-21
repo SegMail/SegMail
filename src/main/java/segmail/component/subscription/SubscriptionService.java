@@ -47,6 +47,7 @@ import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.persistence.metamodel.Attribute;
 import javax.ws.rs.FormParam;
 import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
@@ -939,8 +940,11 @@ public class SubscriptionService {
      * @param maxResults the max number of SubscriberAccount records to retrieve
      * from (note: not SubscriberFieldValue records)
      * @param anyOrAll
+     * @param orderBy the field name in the SubscriberAccount_ class to be sorted
+     * @param asc True for ascending order, false for descending order
      * @return
      * @throws eds.component.data.DataValidationException
+     * @throws java.lang.NoSuchFieldException if orderBy is invalid
      */
     public List<SubscriberAccount> getSubscribersForClient(
             long clientId,
@@ -951,7 +955,9 @@ public class SubscriptionService {
             String emailSearch,
             int startIndex,
             int maxResults,
-            String anyOrAll) throws DataValidationException {
+            String anyOrAll,
+            String orderBy,
+            boolean asc) throws DataValidationException, NoSuchFieldException {
         
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
@@ -987,10 +993,16 @@ public class SubscriptionService {
         
         if(statuses != null && !statuses.isEmpty()) {
             conditions.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statuses));
-            
-            //Another clause for if any or all
         }
         
+        // Order by 
+        if (orderBy != null && SubscriberAccount_.class.getField(orderBy) != null) {
+            if(asc) {
+                query.orderBy(builder.asc(fromAcc.get(orderBy)));
+            } else {
+                query.orderBy(builder.desc(fromAcc.get(orderBy)));
+            }
+        }
         query.where(builder.and(conditions.toArray(new Predicate[]{})));
         List<SubscriberAccount> results = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
