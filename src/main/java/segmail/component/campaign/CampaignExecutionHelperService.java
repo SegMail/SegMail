@@ -78,8 +78,6 @@ public class CampaignExecutionHelperService {
         
         final int BATCH_SIZE = 1000;
         
-        //Do not put this in the loop!
-        //sent = campService.getSentEmails(campaignActivityId, j++*BATCH_SIZE, BATCH_SIZE); //initial read
         do {
             List<String> targetedEmails = new ArrayList<>();
             // Change here to select by campaign activity 

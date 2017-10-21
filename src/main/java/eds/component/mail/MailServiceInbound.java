@@ -13,6 +13,7 @@ import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
+import com.sun.istack.logging.Logger;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
@@ -24,6 +25,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -36,6 +39,7 @@ import javax.json.JsonString;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.joda.time.DateTime;
 import segmail.component.subscription.SubscriptionService;
 
 /**
@@ -47,7 +51,7 @@ public class MailServiceInbound {
     
     final int MAX_SENDERS_PROCESSED = 100;
     final int MAX_BOUNCE_PROCESSED = 100;
-    final int MAX_QUEUE_MSG_READ = 100;
+    final int MAX_QUEUE_MSG_READ = 200;
     
     @Inject
     @Password
@@ -84,10 +88,11 @@ public class MailServiceInbound {
         //Get the messages using queueURL
         ReceiveMessageRequest msgReq = new ReceiveMessageRequest();
         msgReq.setQueueUrl(queueURL);
-        msgReq.setMaxNumberOfMessages(MAX_QUEUE_MSG_READ);
-        
+        msgReq.setMaxNumberOfMessages(10);
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Started reading SQS msg at "+DateTime.now());
         ReceiveMessageResult msgRes = sqsClient.receiveMessage(msgReq);
         List<Message> messages = msgRes.getMessages();
+        Logger.getLogger(this.getClass()).log(Level.INFO, messages.size() + " msgs read at "+DateTime.now());
         
         List<Email> emails = new ArrayList<>();
         List<String> messageIds = new ArrayList<>();
@@ -120,7 +125,9 @@ public class MailServiceInbound {
         
         //Delete messages that have been read
         for(String receiptHandle : receiptHandles) {
+            Logger.getLogger(this.getClass()).log(Level.INFO, "Started deleting SQS msg "+receiptHandle+" at "+DateTime.now());
             sqsClient.deleteMessage(queueURL, receiptHandle);
+            Logger.getLogger(this.getClass()).log(Level.INFO, "Finished deleting SQS msg "+receiptHandle+" at "+DateTime.now());
         }
         
         sqsClient.shutdown();
@@ -154,16 +161,30 @@ public class MailServiceInbound {
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void processAllBounce() {
-        
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Bounced processing started at "+DateTime.now());
         List<VerifiedSendingAddress> senders = new ArrayList<>();
         int sendersIndex = 0;
         int totalEmailCount = 0;
         do {
             senders = getAllVerifiedSenders(MAX_SENDERS_PROCESSED*sendersIndex++, MAX_SENDERS_PROCESSED);
-            
+            Logger.getLogger(this.getClass()).log(Level.INFO, senders.size() + " Senders retrieved at "+DateTime.now());
             for(VerifiedSendingAddress sender : senders) {
-
-                List<Email> emails = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
+                Logger.getLogger(this.getClass()).log(Level.INFO, "Processing sender "
+                        + sender.getVERIFIED_ADDRESS() +" ARN:"
+                        + sender.getAWS_SQS_BOUNCE_QUEUE_ARN() + " at "+DateTime.now());
+                List<Email> emails = new ArrayList<>();
+                List<Email> incList = new ArrayList<>();
+                do {
+                    incList = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
+                    Logger.getLogger(this.getClass()).log(Level.INFO, "Rerieved msg ids "+
+                            incList.stream().map(s -> 
+                                    "{msgId:"+s.getAWS_SES_MESSAGE_ID() 
+                                    + ",email:" + s.getRECIPIENTS().stream().collect(Collectors.joining(","))
+                                    + "}\n"
+                            ).collect(Collectors.joining("\n"))
+                            + " at "+DateTime.now());
+                    emails.addAll(incList);
+                } while(incList.size() > 0 && incList.size() < MAX_QUEUE_MSG_READ);
                 updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
                 totalEmailCount += emails.size();
             }

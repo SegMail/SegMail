@@ -75,7 +75,7 @@
                                                 jsf:id="track_campaign_activity_button_#{activity.OBJECTID}"
                                                 jsf:rendered="#{activity.STATUS eq 'EXECUTING' or 
                                                                 activity.STATUS eq 'COMPLETED' or 
-                                                                activity.STATUS eq 'EXECUTING'}"
+                                                                activity.STATUS eq 'SUSPENDED' }"
                                                 href="#track_campaign_activity"
                                                 data-toggle="modal"
                                                 style="margin-right: 3px;"
@@ -92,7 +92,7 @@
                                             </button>
                                             
                                             <button
-                                                jsf:rendered="#{activity.STATUS ne 'COMPLETED' and activity.STATUS ne 'EXECUTING'}"
+                                                jsf:rendered="#{activity.STATUS eq 'NEW' or activity.STATUS eq 'EDITING'}"
                                                 jsf:id="execute_campaign_activity_button_#{activity.OBJECTID}"
                                                 href="#execute_campaign_activity"
                                                 data-toggle="modal"
@@ -108,7 +108,7 @@
                                                 <i class="fa fa-send"></i>
                                             </button>
                                             <h:commandLink
-                                                rendered="#{activity.STATUS ne 'COMPLETED' and activity.STATUS ne 'EXECUTING'}"
+                                                rendered="#{activity.STATUS eq 'NEW' or activity.STATUS eq 'EDITING'}"
                                                 pass:href="#send_test_email"
                                                 pass:data-toggle="modal"
                                                 style="margin-right: 3px;"

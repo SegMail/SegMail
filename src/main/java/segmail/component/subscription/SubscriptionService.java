@@ -19,6 +19,10 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
+import eds.entity.audit.AuditedObject_;
+import eds.entity.data.EnterpriseObject;
+import eds.entity.data.EnterpriseObject_;
+import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.mail.Email;
 import java.math.BigInteger;
 import segmail.entity.subscription.SubscriberAccount_;
@@ -913,15 +917,25 @@ public class SubscriptionService {
         String accTable = SubscriberAccount.class.getAnnotation(Table.class).name();
         String subscTable = Subscription.class.getAnnotation(Table.class).name();
         String ownTable = SubscriberOwnership.class.getAnnotation(Table.class).name();
+        String objTable = EnterpriseObject.class.getAnnotation(Table.class).name();
         String objId = SubscriberAccount_.OBJECTID.getName();
         String source = Subscription_.SOURCE.getName();
         String target = Subscription_.TARGET.getName();
         String accStatus = SubscriberAccount_.SUBSCRIBER_STATUS.getName();
         String subscStatus = Subscription_.STATUS.getName();
         String email = SubscriberAccount_.EMAIL.getName();
+        String dateChangeObj = EnterpriseObject_.DATE_CHANGED.getName();
+        String dateChangeRel = EnterpriseRelationship_.DATE_CHANGED.getName();
+        
+        // Update DATE_CHANGE for native queries as listeners will not be triggered!
+        DateTime now = DateTime.now();
+        java.sql.Date today = new java.sql.Date(now.getMillis());
         String mySQLUpdate = 
             "update "
                 + accTable + " acc " //+ "SUBSCRIBER_ACCOUNT "
+                + "join"
+                    + objTable
+                    + " obj on acc."+objId+" = obj."+objId+" "
                 + "join "
                     + ownTable
                     + " own on acc."+objId+" = own."+source+" and own."+target+" = " + clientId + " "
@@ -931,6 +945,8 @@ public class SubscriptionService {
             + "set "
                 + "acc."+accStatus+" = '"+SUBSCRIBER_STATUS.BOUNCED+"' ,"
                 + "subsc."+subscStatus+" = '"+SUBSCRIPTION_STATUS.BOUNCED+"' "
+                + "obj."+dateChangeObj+" = '"+today+"' "
+                + "subsc."+dateChangeRel+" = '"+today+"' "
             + "where "
                 + "acc." + email + " in (" 
                 + subscribers.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","))

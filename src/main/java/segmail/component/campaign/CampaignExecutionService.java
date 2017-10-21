@@ -15,6 +15,7 @@ import eds.component.data.RelationshipNotFoundException;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
 import eds.entity.client.Client;
+import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,6 @@ import segmail.entity.campaign.ACTIVITY_STATUS;
 import segmail.entity.campaign.Assign_CampaignActivity_List;
 import segmail.entity.campaign.Assign_Campaign_Activity;
 import segmail.entity.campaign.Assign_Campaign_Client;
-import segmail.entity.campaign.Assign_Campaign_List;
-import segmail.entity.campaign.Assign_Campaign_List_;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.link.CampaignActivityOutboundLink;
@@ -49,12 +48,9 @@ import segmail.entity.campaign.link.CampaignLinkClick;
 import segmail.entity.campaign.Trigger_Email_Activity;
 import segmail.entity.campaign.filter.CampaignActivityFilter;
 import segmail.entity.subscription.SubscriberAccount;
-import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.SubscriberFieldValue;
-import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
-import segmail.entity.subscription.Subscription_;
 
 /**
  *
@@ -64,6 +60,7 @@ import segmail.entity.subscription.Subscription_;
 public class CampaignExecutionService {
 
     public final int BATCH_SIZE = 1000;
+    public final double SUSP_BOUNCED_RATE = 0.1;
     
     @Inject ClientFacade clientFacade;
 
@@ -149,7 +146,17 @@ public class CampaignExecutionService {
                             filters,
                             c, //updated inside this method
                             batch_size); //DB hit
-            
+            // Check if bounce rates are high here before calling sendEmails()
+            // Stop sending if bounce rate gets above SUSP_BOUNCED_RATE
+            long totalSent = campService.getEmailCountByStatus(campaignActivityId, null);
+            long bounced = campService.getEmailCountByStatus(campaignActivityId, EMAIL_PROCESSING_STATUS.BOUNCED);
+            if(bounced / totalSent > SUSP_BOUNCED_RATE) {
+                // c here has to be decrement in case we need to restart this campaign
+                c.decrement();
+                helper.updateActivityStatus(campaignActivity,ACTIVITY_STATUS.SUSPENDED,c.getValue());
+                return;
+            }
+                
             increment = this.sendEmails(
                     campaign, campaignActivity,
                     subscribers, clientLists, targetListFields);
@@ -167,12 +174,14 @@ public class CampaignExecutionService {
         if(activity == null)
             return false;
         
-        return !ACTIVITY_STATUS.COMPLETED.name.equals(activity.getSTATUS());
+        if (ACTIVITY_STATUS.EXECUTING.name.equals(activity.getSTATUS())) return true;
+        
+        return false;
     }
     
     /**
      * By using a map, this actually guarantees the uniqueness of the results. 
-     * 1 subcriber to 1 code. If the subscriber is subscribed to multiple lists,
+     * 1 subscriber to 1 code. If the subscriber is subscribed to multiple lists,
      * only the last subscription will be returned. If they click on any links 
      * with any of their own unsubscribe codes, they will be able to see all the 
      * lists that they are subscribed to and select which ones they want to unsubscribe
@@ -379,5 +388,9 @@ class Counter {
     
     void increment() {
         i++;
+    }
+    
+    void decrement() {
+        i--;
     }
 }
