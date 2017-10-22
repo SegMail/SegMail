@@ -72,18 +72,7 @@ public class MailServiceInbound {
      * @return  
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public List<Email> retrieveEmailFromSQSMessage(VerifiedSendingAddress sender, NotificationType type) {
-        String endpoint = clientAWSService.getSQSEndpoint();
-        String queueName = clientAWSService.getSQSNameForAddress(sender, type);
-        
-        //Get the queueURL first
-        AmazonSQSClient sqsClient = new AmazonSQSClient(awsCredentials); //or use client credentials?
-        sqsClient.setEndpoint(endpoint);
-        GetQueueUrlRequest urlReq = new GetQueueUrlRequest();
-        urlReq.setQueueName(queueName);
-        GetQueueUrlResult urlRes = sqsClient.getQueueUrl(urlReq);
-        
-        String queueURL = urlRes.getQueueUrl();
+    public List<Message> retrieveFromSQSMessage(AmazonSQSClient sqsClient, String queueURL, NotificationType type) {
         
         //Get the messages using queueURL
         ReceiveMessageRequest msgReq = new ReceiveMessageRequest();
@@ -94,15 +83,16 @@ public class MailServiceInbound {
         List<Message> messages = msgRes.getMessages();
         Logger.getLogger(this.getClass()).log(Level.INFO, messages.size() + " msgs read at "+DateTime.now());
         
+        return messages;
+    }
+    
+    public List<Email> retrieveEmailsFromDB(List<Message> messages) {
         List<Email> emails = new ArrayList<>();
         List<String> messageIds = new ArrayList<>();
-        List<String> receiptHandles = new ArrayList<>();
         
         for(Message message : messages) {
             JsonReader reader = Json.createReader(new StringReader(message.getBody()));
             JsonObject body = reader.readObject();
-            String receiptHandle = message.getReceiptHandle();
-            receiptHandles.add(receiptHandle);
             
             JsonObject msgBody = Json.createReader(new StringReader(body.getJsonString("Message").getString())).readObject();
             JsonString notifType = msgBody.getJsonString("notificationType");
@@ -123,17 +113,16 @@ public class MailServiceInbound {
         }
         emails.addAll(getEmailsBySESMessageId(messageIds));
         
-        //Delete messages that have been read
-        for(String receiptHandle : receiptHandles) {
-            Logger.getLogger(this.getClass()).log(Level.INFO, "Started deleting SQS msg "+receiptHandle+" at "+DateTime.now());
-            sqsClient.deleteMessage(queueURL, receiptHandle);
-            Logger.getLogger(this.getClass()).log(Level.INFO, "Finished deleting SQS msg "+receiptHandle+" at "+DateTime.now());
-        }
-        
-        sqsClient.shutdown();
-        
         return emails;
     }
+    
+    public void deleteSQSMessages(AmazonSQSClient sqsClient, String queueURL, List<Message> messages) {
+        for(Message message : messages) {
+            String receiptHandle = message.getReceiptHandle();
+            sqsClient.deleteMessage(queueURL, receiptHandle);
+        }
+    }
+    
     
     //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -169,7 +158,8 @@ public class MailServiceInbound {
         List<VerifiedSendingAddress> senders = new ArrayList<>();
         int sendersIndex = 0;
         int totalEmailCount = 0;
-        do {
+        
+        do { // Looping through Senders
             senders = getAllVerifiedSenders(MAX_SENDERS_PROCESSED*sendersIndex++, MAX_SENDERS_PROCESSED);
             Logger.getLogger(this.getClass()).log(Level.INFO, senders.size() + " Senders retrieved at "+DateTime.now());
             for(VerifiedSendingAddress sender : senders) {
@@ -177,24 +167,41 @@ public class MailServiceInbound {
                         + sender.getVERIFIED_ADDRESS() +" ARN:"
                         + sender.getAWS_SQS_BOUNCE_QUEUE_ARN() + " at "+DateTime.now());
                 List<Email> emails = new ArrayList<>();
-                List<Email> incList = new ArrayList<>();
-                do {
-                    incList = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
+                List<Email> incEmails = new ArrayList<>();
+                List<Message> msg = new ArrayList<>();
+                List<Message> incMsg = new ArrayList<>();
+                
+                String endpoint = clientAWSService.getSQSEndpoint();
+                String queueName = clientAWSService.getSQSNameForAddress(sender, NotificationType.Bounce);
+
+                //Get the queueURL first
+                AmazonSQSClient sqsClient = new AmazonSQSClient(awsCredentials); //or use client credentials?
+                sqsClient.setEndpoint(endpoint);
+                GetQueueUrlRequest urlReq = new GetQueueUrlRequest();
+                urlReq.setQueueName(queueName);
+                GetQueueUrlResult urlRes = sqsClient.getQueueUrl(urlReq);
+
+                String queueURL = urlRes.getQueueUrl();
+                do { // Looping through Emails from each Sender
+                    incMsg = retrieveFromSQSMessage(sqsClient,queueURL, NotificationType.Bounce);
+                    incEmails = retrieveEmailsFromDB(incMsg);
+                    
                     Logger.getLogger(this.getClass()).log(Level.INFO, "Rerieved msg ids "+
-                            incList.stream().map(s -> 
+                            incEmails.stream().map(s -> 
                                     "{msgId:"+s.getAWS_SES_MESSAGE_ID() 
                                     + ",email:" + s.getRECIPIENTS().stream().collect(Collectors.joining(","))
                                     + "}\n"
                             ).collect(Collectors.joining("\n"))
                             + " at "+DateTime.now());
-                    emails.addAll(incList);
-                } while(incList.size() > 0 && incList.size() < MAX_QUEUE_MSG_READ);
+                    msg.addAll(incMsg);
+                    emails.addAll(incEmails);
+                } while(incEmails.size() > 0 && incEmails.size() < MAX_QUEUE_MSG_READ);
+                
                 updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
+                deleteSQSMessages(sqsClient, queueURL, msg);
                 totalEmailCount += emails.size();
             }
-            
         } while (senders.size() > 0 && totalEmailCount < MAX_BOUNCE_PROCESSED);
-        
     }
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)

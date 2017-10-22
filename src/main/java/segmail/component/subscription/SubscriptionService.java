@@ -918,14 +918,16 @@ public class SubscriptionService {
         String subscTable = Subscription.class.getAnnotation(Table.class).name();
         String ownTable = SubscriberOwnership.class.getAnnotation(Table.class).name();
         String objTable = EnterpriseObject.class.getAnnotation(Table.class).name();
-        String objId = SubscriberAccount_.OBJECTID.getName();
-        String source = Subscription_.SOURCE.getName();
-        String target = Subscription_.TARGET.getName();
-        String accStatus = SubscriberAccount_.SUBSCRIBER_STATUS.getName();
-        String subscStatus = Subscription_.STATUS.getName();
-        String email = SubscriberAccount_.EMAIL.getName();
-        String dateChangeObj = EnterpriseObject_.DATE_CHANGED.getName();
-        String dateChangeRel = EnterpriseRelationship_.DATE_CHANGED.getName();
+        
+        // We hard code the field names in plain strings
+        String objId = "OBJECTID";
+        String source = "SOURCE";
+        String target = "TARGET";
+        String accStatus = "SUBSCRIBER_STATUS";
+        String subscStatus = "STATUS";
+        String email = "EMAIL";
+        String dateChangeObj = "DATE_CHANGED";
+        String dateChangeRel = "DATE_CHANGED";
         
         // Update DATE_CHANGE for native queries as listeners will not be triggered!
         DateTime now = DateTime.now();
@@ -933,7 +935,7 @@ public class SubscriptionService {
         String mySQLUpdate = 
             "update "
                 + accTable + " acc " //+ "SUBSCRIBER_ACCOUNT "
-                + "join"
+                + "join "
                     + objTable
                     + " obj on acc."+objId+" = obj."+objId+" "
                 + "join "
@@ -943,20 +945,20 @@ public class SubscriptionService {
                     + subscTable
                     + " subsc on acc."+objId+" = subsc."+source+" "
             + "set "
-                + "acc."+accStatus+" = '"+SUBSCRIBER_STATUS.BOUNCED+"' ,"
-                + "subsc."+subscStatus+" = '"+SUBSCRIPTION_STATUS.BOUNCED+"' "
-                + "obj."+dateChangeObj+" = '"+today+"' "
+                + "acc."+accStatus+" = '"+SUBSCRIBER_STATUS.BOUNCED+"', "
+                + "subsc."+subscStatus+" = '"+SUBSCRIPTION_STATUS.BOUNCED+"', "
+                + "obj."+dateChangeObj+" = '"+today+"', "
                 + "subsc."+dateChangeRel+" = '"+today+"' "
             + "where "
                 + "acc." + email + " in (" 
                 + subscribers.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","))
                 + ")";
-        Query q = objService.getEm().createNativeQuery(mySQLUpdate, SubscriberAccount.class);
+        Query q = objService.getEm().createNativeQuery(mySQLUpdate);
         int result = q.executeUpdate();
         
         return result;
     }
-
+    
     /**
      *
      * @param clientId the Client OBJECT_ID
