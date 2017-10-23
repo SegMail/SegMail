@@ -1138,12 +1138,13 @@ public class CampaignService {
         String fieldVal = "VALUE";
         String accStatus = "SUBSCRIBER_STATUS";
         String active = SUBSCRIBER_STATUS.ACTIVE.name;
+        String email = "EMAIL";
         
         String sqlString = "SELECT ";
         if(selectFunction != null && !selectFunction.isEmpty()) {
-            sqlString += selectFunction.toUpperCase() + "(" + accAlias + "."+ objectid +") " + selectFunction.toLowerCase() + " ";
+            sqlString += selectFunction.toUpperCase() + " ( DISTINCT " + accAlias + "."+ objectid +") " + selectFunction.toLowerCase() + " ";
         } else {
-        sqlString += accAlias + ".*, "+ objAlias + ".* ";
+        sqlString += "DISTINCT " + accAlias + ".*, "+ objAlias + ".* ";
         }
         sqlString += "FROM " + accTable + " " + accAlias + " " ;
         
@@ -1198,6 +1199,8 @@ public class CampaignService {
         if(startIndex >= 0 && maxResults > 0) {
             sqlString += " LIMIT " + startIndex + ", " + maxResults;
         }
+        // ORDER clause
+        sqlString += " ORDER BY " + accAlias + "." + email + " asc";
         
         return sqlString;
     }
