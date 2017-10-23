@@ -150,7 +150,7 @@ public class CampaignExecutionService {
             // Stop sending if bounce rate gets above SUSP_BOUNCED_RATE
             long totalSent = campService.getEmailCountByStatus(campaignActivityId, null);
             long bounced = campService.getEmailCountByStatus(campaignActivityId, EMAIL_PROCESSING_STATUS.BOUNCED);
-            if(bounced / totalSent > SUSP_BOUNCED_RATE) {
+            if(totalSent > 0 && bounced / totalSent > SUSP_BOUNCED_RATE) {
                 // c here has to be decrement in case we need to restart this campaign
                 c.decrement();
                 helper.updateActivityStatus(campaignActivity,ACTIVITY_STATUS.SUSPENDED,c.getValue());
