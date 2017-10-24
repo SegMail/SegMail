@@ -1142,7 +1142,7 @@ public class CampaignService {
         
         String sqlString = "SELECT ";
         if(selectFunction != null && !selectFunction.isEmpty()) {
-            sqlString += selectFunction.toUpperCase() + " ( DISTINCT " + accAlias + "."+ objectid +") " + selectFunction.toLowerCase() + " ";
+            sqlString += selectFunction.toUpperCase() + "( DISTINCT " + accAlias + "."+ objectid +") " + selectFunction.toLowerCase() + " ";
         } else {
         sqlString += "DISTINCT " + accAlias + ".*, "+ objAlias + ".* ";
         }
