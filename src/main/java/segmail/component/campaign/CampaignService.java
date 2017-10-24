@@ -1194,13 +1194,13 @@ public class CampaignService {
                 }
             }
         }
+        // ORDER clause
+        sqlString += " ORDER BY " + accAlias + "." + email + " asc";
         
         //LIMIT clause
         if(startIndex >= 0 && maxResults > 0) {
             sqlString += " LIMIT " + startIndex + ", " + maxResults;
         }
-        // ORDER clause
-        sqlString += " ORDER BY " + accAlias + "." + email + " asc";
         
         return sqlString;
     }
