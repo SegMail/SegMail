@@ -9,12 +9,12 @@ function track_activity(data) {
             break;
 
         case "complete": // This is called right after ajax response is received.
-            block_refresh(trackingBlock);
+            //block_refresh(trackingBlock);
             break;
 
         case "success": // This is called when ajax response is successfully processed.
             block_refresh(block);
-            block_refresh(trackingBlock);
+            //block_refresh(trackingBlock);
             break;
     }
 }

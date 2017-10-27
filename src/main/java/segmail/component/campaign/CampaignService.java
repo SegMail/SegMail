@@ -945,7 +945,7 @@ public class CampaignService {
         List<Long> listIds = objService.extractIds(targetLists);
         String sqlString = this.createTargetSubscriberQueryString(listIds, filters, clientId, -1, -1, "count");
         
-        Query q = objService.getEm().createNativeQuery(sqlString, SubscriberAccount.class);
+        Query q = objService.getEm().createNativeQuery(sqlString);
         Long result =  ((BigInteger) q.getSingleResult()).longValue();
         
         return result;
@@ -1195,7 +1195,7 @@ public class CampaignService {
             }
         }
         // ORDER clause
-        sqlString += " ORDER BY " + accAlias + "." + email + " asc";
+        sqlString += " ORDER BY " + accAlias + "." + email + " ASC";
         
         //LIMIT clause
         if(startIndex >= 0 && maxResults > 0) {
