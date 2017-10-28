@@ -51,7 +51,7 @@ public class MailServiceInbound {
     
     final int MAX_SENDERS_PROCESSED = 100;
     final int MAX_BOUNCE_PROCESSED = 100;
-    final int MAX_QUEUE_MSG_READ = 200;
+    final int MAX_QUEUE_MSG_READ = 50;
     
     @Inject
     @Password
@@ -186,7 +186,7 @@ public class MailServiceInbound {
                     incMsg = retrieveFromSQSMessage(sqsClient,queueURL, NotificationType.Bounce);
                     incEmails = retrieveEmailsFromDB(incMsg);
                     
-                    Logger.getLogger(this.getClass()).log(Level.INFO, "Rerieved msg ids "+
+                    Logger.getLogger(this.getClass()).log(Level.INFO, "Retrieved msg ids "+
                             incEmails.stream().map(s -> 
                                     "{msgId:"+s.getAWS_SES_MESSAGE_ID() 
                                     + ",email:" + s.getRECIPIENTS().stream().collect(Collectors.joining(","))
@@ -195,7 +195,7 @@ public class MailServiceInbound {
                             + " at "+DateTime.now());
                     msg.addAll(incMsg);
                     emails.addAll(incEmails);
-                } while(incEmails.size() > 0 && incEmails.size() < MAX_QUEUE_MSG_READ);
+                } while(incMsg.size() > 0 && msg.size() < MAX_QUEUE_MSG_READ);
                 
                 updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
                 deleteSQSMessages(sqsClient, queueURL, msg);
