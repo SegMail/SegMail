@@ -6,9 +6,11 @@
 package segmail.entity.subscription.email.mailmerge;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import eds.entity.transaction.TransactionStatus;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -40,6 +42,19 @@ public class MailMergeRequest extends EnterpriseTransaction {
     
     public void overrideSTATUS(MAILMERGE_STATUS mailmerge_status) {
         this.PROCESSING_STATUS = mailmerge_status.name;
+    }
+
+    @Override
+    public MAILMERGE_STATUS PROCESSING_STATUS() {
+        if(this.PROCESSING_STATUS == null || this.PROCESSING_STATUS.isEmpty())
+            return null;
+        
+        return MAILMERGE_STATUS.valueOf(this.PROCESSING_STATUS);
+    }
+
+    @Override
+    public MailMergeRequest transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
     }
     
 }

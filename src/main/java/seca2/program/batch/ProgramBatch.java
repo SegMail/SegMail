@@ -15,7 +15,6 @@ import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobSchedule;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -91,9 +90,6 @@ public class ProgramBatch extends Program {
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.CANCELLED.label, "warning");
         batchJobStatusMapping.put(BATCH_JOB_RUN_STATUS.FAILED.label, "danger");
         
-        /*for(BATCH_JOB_RUN_STATUS status : BATCH_JOB_RUN_STATUS.values()) {
-            statuses.put(status.label, false);
-        }*/
         statuses.put(BATCH_JOB_RUN_STATUS.WAITING.label, false);
         statuses.put(BATCH_JOB_RUN_STATUS.SCHEDULED.label, false);
         statuses.put(BATCH_JOB_RUN_STATUS.IN_PROCESS.label, true);
@@ -271,9 +267,6 @@ public class ProgramBatch extends Program {
         
         if(steps != null && !steps.isEmpty())
             this.setFirstAndOnlyStep(steps.get(0));
-        
-        //this.setSelectedServerIdBatchJob(this.getEditingBatchJobRun().getBATCH_JOB().getSERVER().getOBJECTID());
-        //this.setSelectedServerIdBatchJobRun(getEditingBatchJobRun().getSERVER().getOBJECTID());
         
         updateEditable();
     }

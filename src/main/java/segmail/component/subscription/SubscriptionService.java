@@ -19,11 +19,9 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
-import eds.entity.audit.AuditedObject_;
 import eds.entity.data.EnterpriseObject;
-import eds.entity.data.EnterpriseObject_;
-import eds.entity.data.EnterpriseRelationship_;
 import eds.entity.mail.Email;
+import eds.entity.mail.QueuedEmail;
 import java.math.BigInteger;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -37,7 +35,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -57,7 +54,6 @@ import org.joda.time.DateTime;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
-import static segmail.entity.subscription.SUBSCRIBER_STATUS.BOUNCED;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
@@ -381,7 +377,7 @@ public class SubscriptionService {
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
         //Send the email using MailServiceOutbound
-        Email confirmEmail = new Email();
+        Email confirmEmail = new QueuedEmail();
         confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
         confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
         confirmEmail.setBODY(newEmailBody);
@@ -850,7 +846,7 @@ public class SubscriptionService {
         newEmailBody = mailMergeService.parseForAutoresponders(newEmailBody, sub.getSOURCE(), sub.getTARGET());
 
         //Send the email using MailServiceOutbound
-        Email welcomeEmail = new Email();
+        Email welcomeEmail = new QueuedEmail();
         welcomeEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
         welcomeEmail.setSENDER_NAME(list.getSEND_AS_NAME());
         welcomeEmail.setBODY(newEmailBody);

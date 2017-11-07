@@ -9,11 +9,9 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.entity.audit.ActiveUser;
 import javax.inject.Inject;
-import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import org.joda.time.DateTime;
-import seca2.entity.landing.ServerInstance;
 
 /**
  *
@@ -27,26 +25,13 @@ public class BatchJobRunListener {
     public void PrePersist(BatchJobRun run) {
         this.recordCreated(run);
         this.generateTransactionKey(run);
-        //this.setServerName(run);
-    }
-    
-    @PostPersist
-    public void PostPersist(BatchJobRun run){
-        //this.generateTransactionKey(trans);
     }
     
     @PreUpdate
     public void PreUpdate(BatchJobRun run) {
         this.recordCreated(run);
         this.generateTransactionKey(run);
-        //this.setServerName(run);
     }
-    
-    //@PostUpdate
-    public void PostUpdate(BatchJobRun run) {
-        //this.generateTransactionKey(run);
-    }
-    
     
     public void recordCreated(BatchJobRun run){
         if(run.getDATETIME_CREATED()!= null) return;
@@ -70,15 +55,6 @@ public class BatchJobRunListener {
         
         run.setRUN_KEY(hash);
     }
-    
-    /*private void setServerName(BatchJobRun run) {
-        if(run == null || run.getSERVER() == null)
-            return;
-        
-        ServerInstance server = run.getSERVER();
-        run.setSERVER_NAME(server.getNAME());
-            
-    }*/
     
     public void updateDates(BatchJobRun run) {
         

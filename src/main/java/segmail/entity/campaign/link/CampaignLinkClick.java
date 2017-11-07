@@ -6,9 +6,11 @@
 package segmail.entity.campaign.link;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import eds.entity.transaction.TransactionStatus;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -37,6 +39,16 @@ public class CampaignLinkClick extends EnterpriseTransaction {
 
     public void setSOURCE_KEY(String SOURCE_KEY) {
         this.SOURCE_KEY = SOURCE_KEY;
+    }
+
+    @Override
+    public <Ts extends TransactionStatus> Ts PROCESSING_STATUS() {
+        return null;
+    }
+
+    @Override
+    public CampaignLinkClick transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
     }
     
     

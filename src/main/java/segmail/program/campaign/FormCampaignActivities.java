@@ -114,6 +114,7 @@ public class FormCampaignActivities {
         return readableStatus;
     }
     
+    // Make AJAX!!!
     public void loadClickthroughRates() {
         List<CampaignActivity> allActivities = getAllActivities();
         for(CampaignActivity activity : allActivities) {

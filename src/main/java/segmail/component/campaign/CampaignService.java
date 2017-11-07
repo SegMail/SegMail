@@ -21,6 +21,7 @@ import eds.entity.data.EnterpriseObject;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
 import eds.entity.mail.Email_;
+import eds.entity.transaction.EnterpriseTransaction_;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -303,6 +304,10 @@ public class CampaignService {
         validateCampaignActivity(activity);
         activity.setSTATUS(ACTIVITY_STATUS.EDITING.name); //Not a good idea to put this in validation.
         activity = parsePreview(activity);
+        // Previously we did this during the actual execution, which is redundant
+        // links will all remain the same for all recipients
+        String linksParsed = this.parseAndUpdateLinks(activity, activity.getACTIVITY_CONTENT());
+        activity.setACTIVITY_CONTENT_PROCESSED(linksParsed);
         
         return objService.getEm().merge(activity);
     }
@@ -838,7 +843,7 @@ public class CampaignService {
         if(campaigns == null || campaigns.isEmpty())
             throw new EntityNotFoundException("No Campaign found for CampaignActivity "+activity.getOBJECT_NAME());
         
-        String processedContent = parseAndUpdateLinks(activity, activity.getACTIVITY_CONTENT());
+        String processedContent = activity.getACTIVITY_CONTENT_PROCESSED();//parseAndUpdateLinks(activity, activity.getACTIVITY_CONTENT());
         
         //Mailmerge links - generate test links
         processedContent = mmService.parseTestMailmergeLinks(processedContent);
@@ -907,7 +912,31 @@ public class CampaignService {
     
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public long countEmailsSentForActivity(long activityId) {
-        return this.getEmailCountByStatus(activityId, EMAIL_PROCESSING_STATUS.SENT);
+        //if(! ACTIVITY_STATUS.COMPLETED.equals(status))
+        long sentTblCnt = getEmailCountByStatus(activityId, EMAIL_PROCESSING_STATUS.SENT);
+        long legacyTblCnt = getEmailCountByStatus(activityId, EMAIL_PROCESSING_STATUS.LEGACY_SENT);
+        
+        return sentTblCnt + legacyTblCnt;
+        
+        // If the status is COMPLETED, we cannot count the same SENT numbers again.
+        // we will need another way to get this number because Emails are 
+        // transaction data that will be deleted/archived someday
+        /*CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<Email> fromEmail = query.from(Email.class);
+        Root<Trigger_Email_Activity> fromTrigg = query.from(Trigger_Email_Activity.class);
+        
+        query.select(builder.countDistinct(fromEmail.get(Email_.TRANSACTION_ID)));
+        query.where(builder.and(
+                builder.equal(fromEmail.get(Email_.PROCESSING_STATUS), EMAIL_PROCESSING_STATUS.SENT.label),
+                builder.equal(fromEmail.get(Email_.TRANSACTION_KEY), fromTrigg.get(Trigger_Email_Activity_.TRIGGERED_TRANSACTION)),
+                builder.equal(fromTrigg.get(Trigger_Email_Activity_.TRIGGERING_OBJECT), activityId)
+        ));
+        
+        Long result = objService.getEm().createQuery(query)
+                .getSingleResult();
+        
+        return result;*/
     }
     
     /**
@@ -933,6 +962,7 @@ public class CampaignService {
      * Returns -1 if the campaignActivityId provided is not valid.
      * 
      * @param campaignActivityId
+     * @param clientId
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
@@ -1083,18 +1113,18 @@ public class CampaignService {
     
     public long getEmailCountByStatus(long campaignActivityId, EMAIL_PROCESSING_STATUS status) {
         String triggTable = Trigger_Email_Activity.class.getAnnotation(Table.class).name();
-        String emailTable = Email.class.getAnnotation(Table.class).name();
-        String triggTx = Trigger_Email_Activity_.TRIGGERED_TRANSACTION.getName();
-        String triggObj = Trigger_Email_Activity_.TRIGGERING_OBJECT.getName();
-        String txId = Email_.TRANSACTION_ID.getName();
-        String pStatus = Email_.PROCESSING_STATUS.getName();
+        String emailTable = status.tableName();//Email.class.getAnnotation(Table.class).name();
+        String triggTx = "TRIGGERED_TRANSACTION"; //Trigger_Email_Activity_.TRIGGERED_TRANSACTION.getName();
+        String triggObj = "TRIGGERING_OBJECT";//Trigger_Email_Activity_.TRIGGERING_OBJECT.getName();
+        String txKey = "TRANSACTION_KEY"; // rmb it's not ID anymore!!!
+        String pStatus = "PROCESSING_STATUS";
         String trigg = "trigg";
         String email = "email";
         
-        String sqlString = "select count("+trigg+"."+txId+") "
+        String sqlString = "select count("+trigg+"."+txKey+") "
             + "from "+triggTable+" "+trigg+" "
             + "join "+emailTable+" "+email+" "
-                +"on "+trigg+"."+triggTx+" = "+email+"."+txId+" "
+                +"on "+trigg+"."+triggTx+" = "+email+"."+txKey+" "
                 + "and "+trigg+"."+triggObj+" = "+campaignActivityId+" ";
         if(status != null) {
             sqlString += "and "+email+"."+pStatus+" = '"+status.label+"' ";

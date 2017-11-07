@@ -9,7 +9,6 @@ import eds.component.encryption.EncryptionType;
 import eds.component.encryption.EncryptionUtility;
 import eds.entity.data.EnterpriseData;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.Table;
 
 /**

@@ -50,7 +50,6 @@ public class BatchJobStepParam implements Serializable {
 
     @Id
     @ManyToOne(cascade = {
-                //CascadeType.PERSIST,
                 CascadeType.MERGE,
                 CascadeType.REFRESH
             })

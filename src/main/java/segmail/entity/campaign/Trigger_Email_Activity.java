@@ -7,10 +7,12 @@ package segmail.entity.campaign;
 
 import eds.entity.mail.Email;
 import eds.entity.transaction.EnterpriseTransactionTrigger;
+import eds.entity.transaction.TransactionStatus;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
  * A Trigger_Email_Activity is a relationship stating that "the CampaignActivity,
@@ -38,6 +40,16 @@ public class Trigger_Email_Activity extends EnterpriseTransactionTrigger<Email,C
 
     public void setSUBCRIBER_EMAIL(String SUBCRIBER_EMAIL) {
         this.SUBCRIBER_EMAIL = SUBCRIBER_EMAIL;
+    }
+
+    @Override
+    public <Ts extends TransactionStatus> Ts PROCESSING_STATUS() {
+        return null;
+    }
+
+    @Override
+    public Trigger_Email_Activity transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
     }
     
     

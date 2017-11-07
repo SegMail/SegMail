@@ -12,14 +12,12 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 import eds.component.DBService;
+import eds.component.batch.BatchJobTransitionService;
 import eds.component.batch.BatchProcessingException;
-import eds.component.data.DataValidationException;
-import eds.component.data.IncompleteDataException;
 import static eds.entity.batch.BATCH_JOB_RUN_STATUS.CANCELLED;
-import static eds.entity.batch.BATCH_JOB_STATUS.ACTIVE;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
+import static eds.entity.batch.BATCH_JOB_RUN_STATUS.COMPLETED;
+import static eds.entity.batch.BATCH_JOB_RUN_STATUS.IN_PROCESS;
+import eds.entity.batch.run.BatchJobRunScheduled;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,10 +33,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import org.joda.time.DateTime;
-import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
-import seca2.component.landing.ServerNodeType;
-import seca2.entity.landing.ServerInstance;
 
 /**
  *
@@ -54,201 +49,11 @@ public class BatchJobExecutor extends DBService implements MessageListener {
     
     final CronType STANDARD_CRON_TYPE = CronType.UNIX;
     
-    private BatchJob job;
-    
-    //Static data
-    private List<BatchJobStep> steps;
-    private List<BatchJobCondition> conditions;
-    private List<BatchJobSchedule> schedules;
-    
-    //Instances
-    //private List<BatchJobRun> runs; //I see no use for this at the moment
-    
-    //Exceptions
-    /**
-     * This is a potential use for CompletableFuture
-     */
-    private Exception ex;   
-    
     @EJB LandingService landingService;
     @EJB BatchJobExecutorHelper helper;
+    @EJB BatchJobTransitionService bjTransService;
     
-    @Deprecated
-    public void clear() {
-        job = null;
-        steps = new ArrayList<>();
-        conditions = new ArrayList<>();
-        schedules = new ArrayList<>();
-        //runs = new ArrayList<>();
-    }
-    
-    @Deprecated
-    public BatchJobExecutor read(long batchJobId) {
-        clear();
-        job = em.find(BatchJob.class, batchJobId);
-        steps = loadBatchJobSteps(batchJobId);
-        conditions = loadBatchJobConditions(batchJobId);
-        schedules = loadBatchJobSchedules(batchJobId);
-        
-        //Don't load all runs, as it might get overloaded
-        
-        return this;
-    }
-    
-    @Deprecated
-    public BatchJobExecutor read(String runKey) {
-        clear();
-        //Don't load all runs, as it might get overloaded
-        List<BatchJobRun> runs = getJobRunsByKey(runKey);
-        if(runs == null || runs.isEmpty()) {
-            return this;
-        }
-        job = runs.get(0).getBATCH_JOB();
-        steps = loadBatchJobSteps(job.getBATCH_JOB_ID());
-        conditions = loadBatchJobConditions(job.getBATCH_JOB_ID());
-        schedules = loadBatchJobSchedules(job.getBATCH_JOB_ID());
-        
-        return this;
-    }
-
-    /**
-     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
-     * @param name
-     * @return
-     * @throws IncompleteDataException
-     * @deprecated
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobExecutor create(String name) throws IncompleteDataException {
-        clear();
-        ServerInstance server = landingService.getNextServerInstance(LandingServerGenerationStrategy.ROUND_ROBIN, ServerNodeType.ERP);
-        
-        job = new BatchJob();
-        job.setSTATUS(ACTIVE.label);
-        job.setBATCH_JOB_NAME(name);
-        job.setSERVER_NAME(server.getNAME());
-        
-        em.persist(job);
-        
-        return this;
-    }
-
-    /**
-     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
-     * @param serviceName
-     * @param serviceMethod
-     * @param params
-     * @return
-     * @throws IOException
-     * @deprecated
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobExecutor addStep(String serviceName, String serviceMethod, Object[] params) 
-            throws IOException {
-        
-        BatchJobStep step = new BatchJobStep();
-        step.setBATCH_JOB(job);
-        step.setSERVICE_NAME(serviceName);
-        step.setSERVICE_METHOD(serviceMethod);
-        em.persist(step);
-        this.steps.add(step);
-        
-        //Create params
-        for (int i = 0; params != null && i < params.length; i++) {
-
-            BatchJobStepParam newParam = new BatchJobStepParam();
-            newParam.setPARAM_ORDER(i);
-            newParam.setBATCH_JOB_STEP(step);
-            
-            em.persist(newParam);
-            step.addPARAMS(newParam);
-
-            Object obj = params[i];
-            Class clazz = obj.getClass();
-            if (Serializable.class.isAssignableFrom(clazz)) {
-                Serializable s = (Serializable) obj;
-                newParam.setSERIALIZED_OBJECT(s);
-                continue;
-            }
-            newParam.setSTRING_VALUE(obj.toString());
-        }
-        
-        return this;
-    }
-
-    /**
-     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
-     * @param serviceName
-     * @param serviceMethod
-     * @param params
-     * @return
-     * @throws IOException
-     * @deprecated
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobExecutor addCondition(String serviceName, String serviceMethod, Object[] params) throws IOException {
-        
-        BatchJobCondition condition = new BatchJobCondition();
-        condition.setBATCH_JOB(job);
-        condition.setSERVICE_NAME(serviceName);
-        condition.setSERVICE_METHOD(serviceMethod);
-        em.persist(condition);
-        conditions.add(condition);
-        
-        //Create params
-        for (int i = 0; params != null && i < params.length; i++) {
-
-            BatchJobConditionParam newParam = new BatchJobConditionParam();
-            newParam.setPARAM_ORDER(i);
-            newParam.setBATCH_JOB_CONDITION(condition);
-            em.persist(newParam);
-
-            condition.addPARAMS(newParam);
-
-            Object obj = params[i];
-            Class clazz = obj.getClass();
-            if (Serializable.class.isAssignableFrom(clazz)) {
-                Serializable s = (Serializable) obj;
-                newParam.setSERIALIZED_OBJECT(s);
-                continue;
-            }
-            newParam.setSTRING_VALUE(obj.toString());
-        }
-        
-        return this;
-    }
-
-    /**
-     * Do not use this!!! This Container is now a MDB and will only be used for execution!!!
-     * @param cronExpression
-     * @return
-     * @throws DataValidationException 
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobExecutor setSchedule(String cronExpression) throws DataValidationException {
-        
-        BatchJobSchedule schedule = new BatchJobSchedule();
-        schedule.setBATCH_JOB(job);
-        schedule.setCRON_EXPRESSION(cronExpression);
-        schedule.setTRIGGER_STATUS(BATCH_JOB_TRIGGER_STATUS.ACTIVE.label);
-        
-        //Each BatchJob should only have 1 schedule
-        if(schedules != null) {
-            for(BatchJobSchedule existingSchedule : schedules) {
-                em.remove(existingSchedule);
-            }
-        }
-        em.persist(schedule);
-        schedules.add(schedule);
-        
-        return this;
-    }
-    
-    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<BatchJobStep> loadBatchJobSteps(long batchJobId) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BatchJobStep> query = builder.createQuery(BatchJobStep.class);
@@ -263,7 +68,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         return results;
     }
     
-    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<BatchJobCondition> loadBatchJobConditions(long batchJobId) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BatchJobCondition> query = builder.createQuery(BatchJobCondition.class);
@@ -278,7 +83,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         return results;
     }
     
-    //@TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<BatchJobSchedule> loadBatchJobSchedules(long batchJobId) {
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<BatchJobSchedule> query = builder.createQuery(BatchJobSchedule.class);
@@ -292,132 +97,6 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         
         return results;
     }
-
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<BatchJobRun> getJobRunsByKey(String key) {
-        CriteriaBuilder builder = em.getCriteriaBuilder();
-        CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
-        Root<BatchJobRun> fromRun = query.from(BatchJobRun.class);
-
-        query.select(fromRun);
-        query.where(builder.equal(fromRun.get(BatchJobRun_.RUN_KEY), key));
-
-        List<BatchJobRun> results = em.createQuery(query)
-                .getResultList();
-        return results;
-    }
-    
-    
-    /**
-     * Given a time, trigger the next run by considering the BatchJob's schedule
-     * and conditions.
-     * <br>
-     * <strong>Condition</strong>
-     * If there are no conditions available, run it.
-     * <br>
-     * <strong>Schedule</strong>
-     * If there are no schedules available, run it immediately.
-     * <br>
-     * Note: we have to run this in a transaction context, although there is a 
-     * chance that it will timeout, because whoever calls it will call it 
-     * in a transaction context together with other methods from this container.
-     * Eg. create().setSchedule().schedule(). If this method is non-transactional
-     * then it won't be able to "see" the objects created in the preceeding calls.
-     * 
-     * @param triggerTime
-     * @return this instance
-     * @throws BatchProcessingException if there is already an existing active run
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJobExecutor schedule(DateTime triggerTime) throws BatchProcessingException {
-        //Get the schedules and conditions
-        conditions = loadBatchJobConditions(job.getBATCH_JOB_ID());
-        schedules = loadBatchJobSchedules(job.getBATCH_JOB_ID());
-        
-        if(conditions != null && !conditions.isEmpty()) {
-            //Need to call this in a new transaction
-            if(!helper.checkConditions(conditions))
-                return this;
-        }
-        DateTime nextExecution = triggerTime;
-        
-        if(schedules != null && !schedules.isEmpty()) {
-            //Assume that there will only be 1 schedule
-            BatchJobSchedule schedule = schedules.get(0);
-            String cronExpression = schedule.getCRON_EXPRESSION();
-            nextExecution = this.getNextExecutionTimeCron(cronExpression, triggerTime.withSecondOfMinute(0), STANDARD_CRON_TYPE);
-        }
-        //Create new run
-        //Check if there are any existing jobs in the active status
-        BatchJobRun oneAndOnlyRun = getOneAndOnlyRun();
-        oneAndOnlyRun = helper.pushToScheduled(oneAndOnlyRun,nextExecution);
-        
-        return this;
-    }
-    
-    /**
-     * Executes the underlying batch job and the status updates.
-     * <br>
-     * Once called, the underlying BatchJobRun must only end in 3 states:
-     * <ul>
-     * <li><b>COMPLETED</b>: if the batch job successfully completes</li>
-     * <li><b>ERROR</b>: if an expected exception occurs within the execution
-     * - ie. thrown by the underlying service defined in BatchJobStep</li>
-     * <li><b>SCHEDULED</b>: if an unexpected error occurs outside of the execution
- and the entire transaction has to be rolled back - ie. thrown by this 
- BatchJobExecutor in the update operation of the BatchJobRun itself</li>
-     * </ul>
-     * Once the operation has started and before it ends, the BatchJobRun status
-     * must be in the <b>IN_PROCESS</b>. However, it should not stay in this state
-     * once the execution has completed or rolled back.
-     * <br>
-     * This method must also check for batch job integrity - there should only be
-     * one batch job run in a ready and active state.
-     * <br>
-     * This method should be called in no transaction context, because it is 
-     * long running.
-     * 
-     * @param startTime
-     * @return
-     */
-    //@Asynchronous //Doesn't matter, because this is a MDB
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public void execute(DateTime startTime) {
-        BatchJobRun oneAndOnlyRun = null;
-        
-        try {
-            oneAndOnlyRun = getOneAndOnlyRun();
-            //Send to an external service to update the status of the job
-            //This is the only operation that requires a separate transaction because
-            //we don't know when the job will finish executing and while the job is 
-            //executing, we don't want other jobs to accidentally pick it up and process
-            //it again.
-            //Potential use of CompletableFuture here
-            oneAndOnlyRun = helper.pushToStartStatus(oneAndOnlyRun,startTime);
-            for (BatchJobStep step : steps) {
-            
-                Object ret = step.execute();
-                //Create log entry
-                BatchJobRunLog log = new BatchJobRunLog();
-                log.setBATCH_JOB_RUN(oneAndOnlyRun);
-                log.setSTEP_ORDER(step.getSTEP_ORDER());
-                log.setTIME(new java.sql.Timestamp(DateTime.now().getMillis()));
-                helper.insertLog(log);
-            }
-            //Update the job with COMPLETED status
-            oneAndOnlyRun = helper.pushToCompleted(oneAndOnlyRun,DateTime.now());
-            //start scheduling the next job
-            schedule(DateTime.now());
-            
-        } catch (Exception ex) { //Expected exceptions
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-            //Update the job with ERROR status
-            helper.logErrors(oneAndOnlyRun,ex); 
-        }
-    }
     
     /**
      * Helper method.
@@ -430,8 +109,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
     public DateTime getNextExecutionTimeCron(String cronExpression, DateTime now, CronType cronType){
         //Get the next execution time
         ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
-        //DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1));//because ExecutionTime will plus 1 sec
-        DateTime nextExecution = executionTime.nextExecution(now); // Issue with the above mode is that 
+        DateTime nextExecution = executionTime.nextExecution(now);
         
         return nextExecution;
     }
@@ -441,41 +119,6 @@ public class BatchJobExecutor extends DBService implements MessageListener {
         CronParser parser = new CronParser(cronDef);
         return parser.parse(cronExp).validate();
         
-    }
-    
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public BatchJobRun getOneAndOnlyRun() throws BatchProcessingException {
-        //Check if there are any existing jobs in the active status
-        //Need to check in this.runs too!!!
-        List<BatchJobRun> activeRuns = helper.getLastNBatchRuns(
-                job.getBATCH_JOB_ID(),
-                BATCH_JOB_RUN_STATUS.getActiveStatuses(),
-                1);
-        if(activeRuns != null && !activeRuns.isEmpty()) {
-            throw new BatchProcessingException("There is an active run of this batch job currently!");
-        }
-        //Check if there are any existing jobs in the ready status, modify them instead of creating new
-        //ones
-        List<BatchJobRun> standbyRuns = helper.getLastNBatchRuns(
-                job.getBATCH_JOB_ID(),
-                BATCH_JOB_RUN_STATUS.getReadyStatuses(),
-                1); //We are assuming that there will only be 1 run in a standby status
-        
-        BatchJobRun oneAndOnlyRun = new BatchJobRun();
-        if(standbyRuns != null && !standbyRuns.isEmpty()) {
-            oneAndOnlyRun = standbyRuns.get(0);
-            oneAndOnlyRun = helper.updateRun(oneAndOnlyRun);
-        } else { 
-            //Most of the time it won't come to this point because this container
-            //is called when there is already a batch job run scheduled
-            oneAndOnlyRun.setBATCH_JOB(job);
-            oneAndOnlyRun.setSERVER_NAME(job.getSERVER_NAME());
-            
-            helper.insertRun(oneAndOnlyRun);
-            //runs.add(oneAndOnlyRun);
-        }
-        return oneAndOnlyRun;
     }
 
     @Override
@@ -495,9 +138,9 @@ public class BatchJobExecutor extends DBService implements MessageListener {
              * All steps should not have any transaction associated - beca
              * 
             */
-            BatchJobRun run = lock(runKey); // so that no other cron instance would pick up this run
+            BatchJobRun run = lockForExecution(runKey); // so that no other cron instance would pick up this run
             run = executeRun(run);
-            BatchJobRun nextRun = scheduleNextRun(run, DateTime.now());
+            BatchJobRun nextRun = scheduleNextRun(runKey, DateTime.now());
             
         } catch (JMSException ex) {
             Logger.getLogger(BatchJobExecutor.class.getName()).log(Level.SEVERE, null, ex);
@@ -516,23 +159,19 @@ public class BatchJobExecutor extends DBService implements MessageListener {
      * @throws BatchProcessingException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public BatchJobRun lock(String runKey) throws BatchProcessingException {
+    public BatchJobRun lockForExecution(String runKey) throws BatchProcessingException {
         BatchJobRun run = em.find(BatchJobRun.class, runKey);
         
-        if(run == null)
-            throw new BatchProcessingException("Batch job run " + runKey + " not found.");
-        
         // This means that batch job was picked up twice by BatchJobProcessingService
-        // We should lock the batch job the moment it is sent to the queue, but this is a temporary
+        // We should lockForExecution the batch job the moment it is sent to the queue, but this is a temporary
         // arrangement to validate the root cause.
-        if(!BATCH_JOB_RUN_STATUS.QUEUED.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
+        if(!BATCH_JOB_RUN_STATUS.QUEUED.equals(run.STATUS())) {
             throw new BatchProcessingException("Issue #177 Batch job failure. Run key "
                     +run.getRUN_KEY()+" has already been queued by BatchProcessingService before sent to "
                     + "the JMS queue twice.");
         }
         
-        DateTime now = DateTime.now();
-        run = helper.pushToStartStatus(run, now);
+        run = bjTransService.transit(run, IN_PROCESS, DateTime.now());
         
         return run;
     }
@@ -553,8 +192,7 @@ public class BatchJobExecutor extends DBService implements MessageListener {
                 log = helper.insertLog(log);
             }
             //Update the job with COMPLETED status
-            run = helper.pushToCompleted(run,DateTime.now());
-            
+            run = bjTransService.transit(run, COMPLETED, DateTime.now());
         } catch (Exception ex) { //Expected exceptions
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             //Update the job with ERROR status
@@ -574,10 +212,11 @@ public class BatchJobExecutor extends DBService implements MessageListener {
      * @throws BatchProcessingException 
      */
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public BatchJobRun scheduleNextRun(BatchJobRun run, DateTime triggerTime) throws BatchProcessingException {
+    public BatchJobRun scheduleNextRun(String runKey, DateTime triggerTime) throws BatchProcessingException {
         // Check if the status has been updated to CANCELLED
-        run = em.find(BatchJobRun.class, run.getRUN_KEY());
-        if(CANCELLED.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
+        // by reading it again
+        BatchJobRun run = em.find(BatchJobRun.class, runKey);
+        if(run == null || CANCELLED.equals(BATCH_JOB_RUN_STATUS.valueOf(run.getSTATUS()))) {
             return run;
         }
 
@@ -596,23 +235,17 @@ public class BatchJobExecutor extends DBService implements MessageListener {
             //Assume that there will only be 1 schedule
             BatchJobSchedule schedule = scheduleList.get(0);
             String cronExpression = schedule.getCRON_EXPRESSION();
-            nextExecution = this.getNextExecutionTimeCron(
+            nextExecution = getNextExecutionTimeCron(
                     cronExpression, 
-                    // Because our Cron runs every 10 seconds, we need to push 1 minute
-                    // into the next run time so that the evaluated time will not
-                    // be the same as the current time.
                     triggerTime, 
                     STANDARD_CRON_TYPE);
         }
         //Create new run
-        
-        BatchJobRun nextRun = new BatchJobRun();
+        BatchJobRun nextRun = new BatchJobRunScheduled();
         nextRun.setBATCH_JOB(run.getBATCH_JOB());
         nextRun.setSERVER_NAME(run.getBATCH_JOB().getSERVER_NAME());
-            
+        nextRun.schedule(nextExecution);
         nextRun = helper.insertRun(nextRun);
-        
-        nextRun = helper.pushToScheduled(nextRun,nextExecution);
         
         return nextRun;
     }

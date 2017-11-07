@@ -6,14 +6,16 @@
 package eds.entity.batch;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import eds.entity.transaction.TransactionStatus;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
- *
+ * This is a log class/table, not a status class/table
  * @author LeeKiatHaw
  */
 @Entity
@@ -89,6 +91,16 @@ public class BatchJobRunError extends EnterpriseTransaction {
 
     public void setBATCH_JOB_RUN_KEY(String BATCH_JOB_RUN_KEY) {
         this.BATCH_JOB_RUN_KEY = BATCH_JOB_RUN_KEY;
+    }
+
+    @Override
+    public <Ts extends TransactionStatus> Ts PROCESSING_STATUS() {
+        return null;
+    }
+
+    @Override
+    public BatchJobRunError transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
     }
     
     

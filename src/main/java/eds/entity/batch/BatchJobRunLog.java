@@ -7,8 +7,11 @@ package eds.entity.batch;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import static javax.persistence.ConstraintMode.NO_CONSTRAINT;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -28,6 +31,9 @@ public class BatchJobRunLog implements Serializable {
 
     @Id
     @ManyToOne
+    @JoinColumn(name="BATCH_JOB_RUN",
+            referencedColumnName="RUN_KEY",
+            foreignKey=@ForeignKey(name="BATCH_JOB_RUN",value=NO_CONSTRAINT))
     @SequenceGenerator(name = "gen_batch_job_run_log_id", sequenceName = "batch_job_run_log_id", allocationSize = 1)
     public BatchJobRun getBATCH_JOB_RUN() {
         return BATCH_JOB_RUN;

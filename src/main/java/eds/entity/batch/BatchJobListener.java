@@ -25,24 +25,12 @@ public class BatchJobListener {
     public void PrePersist(BatchJob job) {
         this.recordCreated(job);
         this.recordDatetimeChanged(job);
-        //this.labelStepNo(job);
-    }
-    
-    @PostPersist
-    public void PostPersist(BatchJob job){
-        //this.generateTransactionKey(trans);
     }
     
     @PreUpdate
     public void PreUpdate(BatchJob job) {
         this.recordCreated(job);
         this.recordDatetimeChanged(job);
-        //this.labelStepNo(job);
-    }
-    
-    @PostUpdate
-    public void PostUpdate(BatchJob job) {
-        //this.generateTransactionKey(trans);
     }
     
     public void recordDatetimeChanged(BatchJob job){

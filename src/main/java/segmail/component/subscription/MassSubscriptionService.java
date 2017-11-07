@@ -13,6 +13,7 @@ import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
 import eds.entity.client.Client;
 import eds.entity.mail.Email;
+import eds.entity.mail.QueuedEmail;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,8 +37,6 @@ import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
-import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
-import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValueComparator;
@@ -512,7 +511,7 @@ public class MassSubscriptionService {
             newEmailBody = mailMergeService.parseForAutoresponders(newEmailBody, newSubscription.getSOURCE(), newSubscription.getTARGET());
 
              //Send the email using MailServiceOutbound
-            Email confirmEmail = new Email();
+            Email confirmEmail = new QueuedEmail();
             confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
             confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
             confirmEmail.setBODY(newEmailBody);

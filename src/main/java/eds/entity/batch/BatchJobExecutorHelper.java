@@ -6,8 +6,12 @@
 package eds.entity.batch;
 
 import eds.component.DBService;
+import eds.component.batch.BatchJobTransitionService;
+import eds.component.batch.BatchProcessingException;
+import static eds.entity.batch.BATCH_JOB_RUN_STATUS.IN_PROCESS;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -27,6 +31,8 @@ import org.joda.time.DateTime;
  */
 @Stateless
 public class BatchJobExecutorHelper extends DBService {
+    
+    @EJB BatchJobTransitionService bjTransService;
     
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public BatchJobRun insertRun(BatchJobRun run) {
@@ -134,5 +140,23 @@ public class BatchJobExecutorHelper extends DBService {
         List<BatchJobRun> results = typedQuery.getResultList();
         
         return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public BatchJobRun lockForExecution(String runKey) throws BatchProcessingException {
+        BatchJobRun run = em.find(BatchJobRun.class, runKey);
+        
+        // This means that batch job was picked up twice by BatchJobProcessingService
+        // We should lockForExecution the batch job the moment it is sent to the queue, but this is a temporary
+        // arrangement to validate the root cause.
+        if(!BATCH_JOB_RUN_STATUS.QUEUED.equals(run.STATUS())) {
+            throw new BatchProcessingException("Issue #177 Batch job failure. Run key "
+                    +run.getRUN_KEY()+" has already been queued by BatchProcessingService before sent to "
+                    + "the JMS queue twice.");
+        }
+        
+        run = bjTransService.transit(run, IN_PROCESS, DateTime.now());
+        
+        return run;
     }
 }

@@ -15,7 +15,7 @@ import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.transaction.TransactionNotFoundException;
 import eds.component.transaction.TransactionService;
-import eds.component.user.PWD_PROCESSING_STATUS;
+import eds.entity.user.PWD_PROCESSING_STATUS;
 import eds.component.user.UserService;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.user.PasswordResetRequest;

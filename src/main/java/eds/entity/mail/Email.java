@@ -6,6 +6,7 @@
 package eds.entity.mail;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import eds.entity.transaction.TransactionStatus;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -23,27 +25,44 @@ import javax.persistence.Table;
 @Table(name="EMAIL"
         ,indexes={
             @Index(name="MailServiceOutbound",
-                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED")
+                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED,AWS_SES_MESSAGE_ID")
         })
-public class Email extends EnterpriseTransaction {
+
+public abstract class Email extends EnterpriseTransaction {
     
     public static final String CREATED_FROM = "CREATED_FROM";
     
-    private String SUBJECT;
+    protected String SUBJECT;
     
-    private String BODY;
+    protected String BODY;
     
-    private String SENDER_ADDRESS;
+    protected String SENDER_ADDRESS;
     
-    private String SENDER_NAME;
+    protected String SENDER_NAME;
     
-    private Set<String> RECIPIENTS = new HashSet();
+    protected Set<String> RECIPIENTS = new HashSet();
     
-    private Set<String> REPLY_TO_ADDRESSES = new HashSet();
+    protected Set<String> REPLY_TO_ADDRESSES = new HashSet();
     
-    private int RETRIES;
+    protected int RETRIES;
     
-    private String AWS_SES_MESSAGE_ID;
+    protected String AWS_SES_MESSAGE_ID;
+    
+    public Email() {
+        
+    }
+
+    public Email(Email anotherEmail) {
+        super(anotherEmail);
+        this.SUBJECT = anotherEmail.SUBJECT;
+        this.BODY = anotherEmail.BODY;
+        this.SENDER_ADDRESS = anotherEmail.SENDER_ADDRESS;
+        this.SENDER_NAME = anotherEmail.SENDER_NAME;
+        this.RETRIES = anotherEmail.RETRIES;
+        this.AWS_SES_MESSAGE_ID = anotherEmail.AWS_SES_MESSAGE_ID;
+        this.RECIPIENTS = new HashSet<>(anotherEmail.RECIPIENTS);
+        this.REPLY_TO_ADDRESSES = new HashSet<>(anotherEmail.REPLY_TO_ADDRESSES);
+    }
     
     public String getSUBJECT() {
         return SUBJECT;
@@ -128,6 +147,37 @@ public class Email extends EnterpriseTransaction {
 
     public void setAWS_SES_MESSAGE_ID(String AWS_SES_MESSAGE_ID) {
         this.AWS_SES_MESSAGE_ID = AWS_SES_MESSAGE_ID;
+    }
+
+    @Override
+    public EMAIL_PROCESSING_STATUS PROCESSING_STATUS() {
+        if(PROCESSING_STATUS == null || PROCESSING_STATUS.isEmpty())
+            return null;
+        
+        // May throw IllegalArgumentException, but it may as well be a RuntimeException
+        // so let it throw
+        return EMAIL_PROCESSING_STATUS.valueOf(PROCESSING_STATUS); 
+    }
+
+    @Override
+    public Email transit(TransactionStatus newStatus, DateTime dt) {
+        // If either old or new statuses are null
+        if(newStatus.getStatus() == null || this.PROCESSING_STATUS() == null)
+            return this;
+        
+        // If no change in status
+        if(newStatus.getStatus().equals(this.PROCESSING_STATUS))
+            return this;
+        
+        if(newStatus.getStatus().equals(EMAIL_PROCESSING_STATUS.QUEUED.getStatus()))
+            return new QueuedEmail(this,dt);
+        
+        if(newStatus.getStatus().equals(EMAIL_PROCESSING_STATUS.SENT.getStatus()))
+            return new SentEmail(this,dt);
+        
+        this.setPROCESSING_STATUS(newStatus.getStatus());
+        
+        return this;
     }
     
 }

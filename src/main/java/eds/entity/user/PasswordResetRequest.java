@@ -5,10 +5,11 @@
  */
 package eds.entity.user;
 
-import eds.entity.mail.Email;
 import eds.entity.transaction.EnterpriseTransaction;
+import eds.entity.transaction.TransactionStatus;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -17,5 +18,15 @@ import javax.persistence.Table;
 @Entity
 @Table(name="PASSWORD_RESET_REQUEST")
 public class PasswordResetRequest extends EnterpriseTransaction {
+
+    @Override
+    public <Ts extends TransactionStatus> Ts PROCESSING_STATUS() {
+        return null;
+    }
+
+    @Override
+    public PasswordResetRequest transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
+    }
     
 }
