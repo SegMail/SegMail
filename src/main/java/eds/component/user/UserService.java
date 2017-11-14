@@ -728,8 +728,7 @@ public class UserService extends DBService {
         
         query.select(fromUser);
         query.where(builder.and(
-                builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_KEY), token),
-                builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_ID), fromTg.get(Trigger_Password_User_.TRIGGERED_TRANSACTION)),
+                builder.equal(fromTg.get(Trigger_Password_User_.TRIGGERED_TRANSACTION), token),
                 builder.equal(fromTg.get(Trigger_Password_User_.TRIGGERING_OBJECT), fromUser.get(User_.OBJECTID))
         ));
         
