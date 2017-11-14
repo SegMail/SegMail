@@ -8,6 +8,7 @@ package eds.entity.mail;
 import eds.entity.transaction.EnterpriseTransaction;
 import eds.entity.transaction.TransactionStatus;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -25,7 +26,9 @@ import org.joda.time.DateTime;
 @Table(name="EMAIL"
         ,indexes={
             @Index(name="MailServiceOutbound",
-                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED,AWS_SES_MESSAGE_ID")
+                    columnList="TRANSACTION_ID,PROCESSING_STATUS,SCHEDULED_DATETIME,DATETIME_CHANGED,AWS_SES_MESSAGE_ID"),
+            @Index(name="MailServiceInbound",
+                    columnList="AWS_SES_MESSAGE_ID"),
         })
 
 public abstract class Email extends EnterpriseTransaction {
@@ -175,9 +178,39 @@ public abstract class Email extends EnterpriseTransaction {
         if(newStatus.getStatus().equals(EMAIL_PROCESSING_STATUS.SENT.getStatus()))
             return new SentEmail(this,dt);
         
+        if(newStatus.getStatus().equals(EMAIL_PROCESSING_STATUS.BOUNCED.getStatus()))
+            return new BouncedEmail(this,dt);
+        
+        if(newStatus.getStatus().equals(EMAIL_PROCESSING_STATUS.ERROR.getStatus()))
+            return new ErrorEmail(this,dt);
+        
+        // If there is no dedicated class for this status, we return the same 
+        // instance.
         this.setPROCESSING_STATUS(newStatus.getStatus());
         
         return this;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.TRANSACTION_KEY);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Email other = (Email) obj;
+        if (!Objects.equals(this.TRANSACTION_KEY, other.TRANSACTION_KEY)) {
+            return false;
+        }
+        return true;
     }
     
 }

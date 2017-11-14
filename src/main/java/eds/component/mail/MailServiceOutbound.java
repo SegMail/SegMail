@@ -56,7 +56,7 @@ public class MailServiceOutbound {
     @EJB
     private GenericObjectService objService;
     @EJB
-    private UpdateObjectService updateService;
+    private UpdateObjectService updService;
     @EJB
     private ClientAWSService clientAWSService;
     @EJB
@@ -140,6 +140,7 @@ public class MailServiceOutbound {
             } catch (TransactionLockingException ex) {
                 // Don't do anything in this case
                 Logger.getLogger(MailServiceOutbound.class.getName()).log(Level.SEVERE, null, ex);
+                processingResult = EMAIL_PROCESSING_STATUS.ERROR;
                 continue;
 
             } catch (Throwable ex) {
@@ -152,7 +153,7 @@ public class MailServiceOutbound {
                 try {
                     switch (processingResult) {
                         case SENT: {
-                            queuedMail = (Email) updateService.merge(queuedMail);
+                            queuedMail = (Email) updService.merge(queuedMail);
                             break;
                         }
                         default:  {
@@ -189,7 +190,7 @@ public class MailServiceOutbound {
         validateEmail(email);
 
         QueuedEmail qEmail = new QueuedEmail(email, scheduledTime);
-        updateService.persist(qEmail);
+        updService.persist(qEmail);
         
         return qEmail;
     }
@@ -197,7 +198,7 @@ public class MailServiceOutbound {
     public List<QueuedEmail> getNextNEmailsInQueue(DateTime processTime, int nextNEmails) {
         Timestamp nowTS = new Timestamp(processTime.getMillis());
         // Get all queued queuedMail sorted by their DATE_CHANGED
-        CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
+        CriteriaBuilder builder = updService.getEm().getCriteriaBuilder();
         CriteriaQuery<QueuedEmail> query = builder.createQuery(QueuedEmail.class);
         Root<QueuedEmail> fromQ = query.from(QueuedEmail.class);
 
@@ -208,7 +209,7 @@ public class MailServiceOutbound {
         );
         query.orderBy(builder.asc(fromQ.get(Email_.DATETIME_CHANGED)));
 
-        List<QueuedEmail> results = updateService.getEm().createQuery(query)
+        List<QueuedEmail> results = updService.getEm().createQuery(query)
                 .setFirstResult(0)
                 .setMaxResults(nextNEmails)
                 .getResultList();
@@ -297,6 +298,10 @@ public class MailServiceOutbound {
         for (String recipient : recipients) {
             email.addRecipient(recipient);
         }
+        // Must persist! Since https://github.com/SegMail/SegMail/issues/180
+        // as calling sendEmailNow will require a stored copy of the QueuedEmail 
+        // we have created here
+        email = (Email) updService.persist(email);
 
         // Switch to the new method
         List<Email> emails = new ArrayList<>();

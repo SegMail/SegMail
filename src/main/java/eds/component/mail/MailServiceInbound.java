@@ -17,10 +17,12 @@ import com.sun.istack.logging.Logger;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
+import eds.component.transaction.TransactionLockingException;
+import eds.component.transaction.TransactionService;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
-import eds.entity.mail.Email_;
+import eds.entity.mail.SentEmail;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +35,11 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -61,6 +65,7 @@ public class MailServiceInbound {
     @EJB UpdateObjectService updService;
     @EJB ClientAWSService clientAWSService;
     @EJB SubscriptionService subService;
+    @EJB TransactionService txService;
     
     @EJB MailServiceInboundHelper helper;
     
@@ -86,9 +91,10 @@ public class MailServiceInbound {
         return messages;
     }
     
-    public List<Email> retrieveEmailsFromDB(List<Message> messages) {
-        List<Email> emails = new ArrayList<>();
+    public List<SentEmail> retrieveEmailsFromDB(List<Message> messages) {
+        List<SentEmail> emails = new ArrayList<>();
         List<String> messageIds = new ArrayList<>();
+        List<String> recipientEmails = new ArrayList<>();
         
         for(Message message : messages) {
             JsonReader reader = Json.createReader(new StringReader(message.getBody()));
@@ -103,6 +109,8 @@ public class MailServiceInbound {
             JsonString bounceType = bounce.getJsonString("bounceType");
             JsonObject mail = msgBody.getJsonObject("mail");
             JsonString messageId = mail.getJsonString("messageId");
+            // We'll think of how to use this 
+            JsonArray recipients = mail.getJsonArray("destination");
             
             if("Permanent".equalsIgnoreCase(bounceType.getString())) {
                 messageIds.add(messageId.getString());
@@ -123,20 +131,23 @@ public class MailServiceInbound {
         }
     }
     
-    
-    //@Asynchronous
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
+    public void updateBounceStatusForEmails(List<SentEmail> emails, long clientId) {
         if(emails == null || emails.isEmpty())
             return;
         List<String> subscriberAddress = new ArrayList<>();
         for(Email email : emails) {
-            //helper.updateBounceStatus(email);
-            email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
-            email = (Email) updService.merge(email);
-            
-            Set<String> recipients = email.getRECIPIENTS();
-            subscriberAddress.addAll(recipients);
+            try {
+                //helper.updateBounceStatus(email);
+                //email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
+                //email = (Email) updService.merge(email);
+                email = txService.transitTx(email, EMAIL_PROCESSING_STATUS.BOUNCED, DateTime.now());
+                Set<String> recipients = email.getRECIPIENTS();
+                subscriberAddress.addAll(recipients);
+            } catch (TransactionLockingException ex) {
+                // Forget about it...
+                Logger.getLogger(this.getClass()).log(Level.SEVERE, "Bounce issue: " + ex.getMessage());
+            }
             
         }
         // These shouldn't be here. They should be in SubscriptionService, but 
@@ -166,8 +177,8 @@ public class MailServiceInbound {
                 Logger.getLogger(this.getClass()).log(Level.INFO, "Processing sender "
                         + sender.getVERIFIED_ADDRESS() +" ARN:"
                         + sender.getAWS_SQS_BOUNCE_QUEUE_ARN() + " at "+DateTime.now());
-                List<Email> emails = new ArrayList<>();
-                List<Email> incEmails = new ArrayList<>();
+                List<SentEmail> emails = new ArrayList<>();
+                List<SentEmail> incEmails = new ArrayList<>();
                 List<Message> msg = new ArrayList<>();
                 List<Message> incMsg = new ArrayList<>();
                 
@@ -220,10 +231,18 @@ public class MailServiceInbound {
         return senders;
     }
     
-    public List<Email> getEmailsBySESMessageId(List<String> messageIds) {
+    public List<SentEmail> getEmailsBySESMessageId(List<String> messageIds) {
         if(messageIds == null || messageIds.isEmpty())
             return new ArrayList<>();
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        
+        String sql = "SELECT * FROM EMAIL_SENT WHERE AWS_SES_MESSAGE_ID IN ("
+                + messageIds.stream().map(m -> "'" + m + "'").collect(Collectors.joining(","))
+                + ")";
+        
+        Query q = objService.getEm().createNativeQuery(sql,SentEmail.class);
+        List<SentEmail> results = q.getResultList();
+        
+        /*CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Email> query = builder.createQuery(Email.class);
         Root<Email> fromEmail = query.from(Email.class);
         
@@ -232,6 +251,22 @@ public class MailServiceInbound {
         
         List<Email> results = objService.getEm().createQuery(query)
                 .getResultList();
+        */
+        return results;
+    }
+    
+    public List<Email> getEmailsFromOriginalEmailTable(List<String> messageIds) {
+        if(messageIds == null || messageIds.isEmpty())
+            return new ArrayList<>();
+        
+        // Must use native SQL, cannot use JPA as it will still map back to the 
+        // concrete implementations of Email
+        String sql = "SELECT * FROM EMAIL WHERE AWS_SES_MESSAGE_ID IN ("
+                + messageIds.stream().map(m -> "'" + m + "'").collect(Collectors.joining(","))
+                + ")";
+        
+        Query q = objService.getEm().createNativeQuery(sql,Email.class);
+        List<Email> results = q.getResultList();
         
         return results;
     }

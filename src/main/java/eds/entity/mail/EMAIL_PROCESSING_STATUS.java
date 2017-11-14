@@ -15,7 +15,7 @@ public enum EMAIL_PROCESSING_STATUS implements TransactionStatus {
     HOLD("HOLD","EMAIL_HOLD","Email"),
     QUEUED("QUEUED","EMAIL_QUEUED","QueuedEmail"),
     SENT("SENT","EMAIL_SENT","SentEmail"),
-    ERROR("ERROR","EMAIL_ERROR","Email"),
+    ERROR("ERROR","EMAIL_ERROR","ErrorEmail"),
     BOUNCED("BOUNCED","EMAIL_BOUNCED","BouncedEmail"),
     
     /**

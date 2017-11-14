@@ -15,6 +15,7 @@ import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.transaction.TransactionNotFoundException;
 import eds.component.transaction.TransactionService;
+import eds.component.user.UserNotFoundResetException;
 import eds.entity.user.PWD_PROCESSING_STATUS;
 import eds.component.user.UserService;
 import eds.entity.client.ClientUserAssignment;
@@ -252,9 +253,10 @@ public class ClientAccountService {
         } catch (IncompleteDataException ex) {
             Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
             return "Error:No servers setup yet, please contact your administrators.";
-        } catch (EntityNotFoundException ex) {
+        } catch (UserNotFoundResetException ex) {
+            // Return an empty token
             Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            return "Error:"+ex.getMessage();
+            return "";
         }
     }
     

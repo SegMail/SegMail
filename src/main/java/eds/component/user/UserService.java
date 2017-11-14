@@ -15,7 +15,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -634,13 +633,15 @@ public class UserService extends DBService {
      * @param email
      * @return 
      * @throws eds.component.data.IncompleteDataException 
+     * @throws eds.component.user.UserNotFoundResetException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String generatePasswordResetToken(String email) throws IncompleteDataException, EntityNotFoundException {
+    public String generatePasswordResetToken(String email) 
+            throws IncompleteDataException, UserNotFoundResetException {
         //1)
         UserAccount acct = getUserAccountByContactEmail(email);
         if(acct == null)
-            throw new EntityNotFoundException("Username not found.");
+            throw new UserNotFoundResetException("Username not found.");
         
         acct.setUSER_LOCKED(true);
         acct = em.merge(acct);

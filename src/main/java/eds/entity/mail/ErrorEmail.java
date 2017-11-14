@@ -15,18 +15,18 @@ import org.joda.time.DateTime;
  * @author LeeKiatHaw
  */
 @Entity
-@Table(name="EMAIL_SENT")
-public class SentEmail extends Email {
+@Table(name="EMAIL_ERROR")
+public class ErrorEmail extends Email {
     
-    public SentEmail() {
-        this.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.SENT);
+    public ErrorEmail() {
+        this.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
     }
 
-    public SentEmail(Email email, DateTime sentTime) {
+    public ErrorEmail(Email email, DateTime sentTime) {
         super(email);
         
         this.setSCHEDULED_DATETIME(new Timestamp(sentTime.getMillis()));
-        this.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.SENT);
+        this.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
     }
     
 }

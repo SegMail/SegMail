@@ -9,10 +9,10 @@ import eds.component.DBService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobRun_;
-import eds.entity.transaction.EnterpriseTransaction_;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.Root;
@@ -39,6 +39,16 @@ public class BatchJobTransitionServiceHelper extends DBService {
         
         return result;
     } 
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public int removeRun2(String key, BATCH_JOB_RUN_STATUS status) {
+        String sql = "DELETE FROM " + status.tableName + 
+                " WHERE RUN_KEY = '" + key + "' AND STATUS = '" + status.label + "'";
+        Query query = em.createNativeQuery(sql);
+        int result = query.executeUpdate();
+        
+        return result;
+    }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public BatchJobRun reInsertRun(BatchJobRun run) {

@@ -19,7 +19,7 @@ import org.joda.time.DateTime;
 public class BouncedEmail extends Email {
     
     public BouncedEmail() {
-        
+        this.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
     }
 
     public BouncedEmail(Email email, DateTime sentTime) {

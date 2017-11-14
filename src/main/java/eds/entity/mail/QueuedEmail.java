@@ -19,7 +19,7 @@ import org.joda.time.DateTime;
 public class QueuedEmail extends Email {
     
     public QueuedEmail() {
-        
+        this.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.QUEUED);
     }
 
     public QueuedEmail(Email email, DateTime scheduledTime) {

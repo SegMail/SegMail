@@ -2,6 +2,7 @@ package eds.component.batch;
 
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
+import static eds.entity.batch.BATCH_JOB_RUN_STATUS.QUEUED;
 import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobExecutor;
 import eds.entity.batch.run.BatchJobRunScheduled;
@@ -86,7 +87,7 @@ public class BatchProcessingService {
             String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
             if (maxJobString == null || maxJobString.isEmpty()) {
                 System.setProperty(PROCESS_JOB_MODE, "false");
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "System property " + MAX_JOBS_PER_CRON + " is not set", "");
                 return;
             }
             int maxJobs = Integer.parseInt(maxJobString);
@@ -95,7 +96,7 @@ public class BatchProcessingService {
             for(BatchJobRun run : nextNJobs) {
                 // Very crucial part!!!
                 // QUEUE the batch job run before sending the message
-                run = bjTransService.transit(run, BATCH_JOB_RUN_STATUS.QUEUED, dt);
+                run = bjTransService.transit(run, QUEUED, dt);
                 
                 // Make use of JMS and MDB
                 TextMessage message = session.createTextMessage();
