@@ -340,5 +340,36 @@ public class ListService {
         return fields;
     }
     
+    /**
+     * Some fields do not have KEY_NAME prior to adding of KEY_NAME in the design
+     * hence we will need to select these fields by listIds.
+     * 
+     * On the other hand, while you are retrieving fields from a list of Subscriptions,
+     * some Subscription records could have been deleted but the Subscriber still
+     * has the SubscriberFieldValue. Hence, you will need both KEY_NAME and 
+     * SubscriptionList Ids to get the full list of SubscriptionListField that 
+     * you can match to a Subscriber's list of SubscriptionListField.
+     * 
+     * @param fieldKeys
+     * @param listIds
+     * @return 
+     */
+    public List<SubscriptionListField> getFieldsByKeyOrLists(List<String> fieldKeys, List<Long> listIds) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
+        
+        query.select(fromField);
+        query.where(
+                builder.or(
+                        fromField.get(SubscriptionListField_.KEY_NAME).in(fieldKeys),
+                        fromField.get(SubscriptionListField_.OWNER).in(listIds)
+                ));
+        
+        List<SubscriptionListField> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
 
 }

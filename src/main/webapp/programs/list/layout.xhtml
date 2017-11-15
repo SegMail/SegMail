@@ -26,70 +26,14 @@
                 <c:when test="#{FormListList.allLists eq null or 
                                 FormListList.allLists.size() le 0}">
 
-                    <div id="listIntro" class="jumbotron" style="text-align: center;">
-                        <h1 style="margin-top: 10;">Start building your list</h1>
-                        <h2>Here is what you can do with your lists:</h2>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <i class="fa fa-tags" style="font-size: 40px"></i> 
-                                <div>
-                                    <p class="text-info">Create custom fields</p>
-                                    Collect customized information from your subscribers like 
-                                    multiple names and email addresses, referrals, groupings, 
-                                    tags, etc. These information can be used to select campaign
-                                    targets later.
-                                </div>
-                                <br/>
-
-                            </div>
-                            <div class="col-md-3">
-                                <i class="fa fa-filter" style="font-size: 40px"></i> 
-                                <div>
-                                    <p class="text-primary">Lead generation channel</p>
-                                    Think of your lists as different sources of leads coming from 
-                                    different channels. If you have a CRM, blog or e-commerce site, you
-                                    could sync them into Segmail and blast campaigns at a cheaper rate.
-                                </div>
-                                <br/>
-
-                            </div>
-                            <div class="col-md-3">
-                                <i class="fa fa-code" style="font-size: 40px"></i> 
-                                <div>
-                                    <p class="text-warning">Minimal coding</p>
-                                    Set redirects upon certain events like signup, confirmation and 
-                                    unsubscribe, without the use of API programming.
-                                    Define specific field values like email, names, addresses,
-                                    preferences, etc, which you can pass it back to your CRM, blogs or 
-                                    e-commerce store.
-                                </div>
-                                <br/>
-
-                            </div>
-                            <div class="col-md-3">
-                                <i class="fa fa-database" style="font-size: 40px"></i> 
-                                <div>
-                                    <p class="text-success">Define external datasource</p>
-                                    Using just your database login credentials, you can rely on our synchronization
-                                    engine to keep your subscriber's info up-to-date with your main apps.
-                                </div>
-                                <br/>
-
-                            </div>
-                        </div>
-                        <p>
-                            <a class="btn btn-lg btn-primary" href="#add_list_popup" data-toggle="modal">
-                                Create my first list
-                            </a>
-                        </p>
-                    </div>
+                    <ui:include src="setup.xhtml"></ui:include>
 
                 </c:when>
                 <c:otherwise>
                     <c:choose> 
                         <c:when test="#{not FormProgramListSwitch.editListMode}" >
                             <div class="row">
-                                <div class="col-md-12"><!--Lists block-->
+                                <div class="col-md-6"><!--Lists block-->
 
                                     <div class="block nb">
                                         <div class="block-head">
@@ -165,7 +109,8 @@
         </ui:define>
         
         <ui:define name="toolbar-right"  >
-            <ui:include src="edit_list_controls.xhtml" ></ui:include>
+            <ui:include src="edit_list_controls.xhtml">
+            </ui:include>
         </ui:define>
 
         <ui:define name="scripts-bottom">

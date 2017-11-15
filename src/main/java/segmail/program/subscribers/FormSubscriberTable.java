@@ -138,6 +138,14 @@ public class FormSubscriberTable {
         program.setAnyOrAllLists(anyOrAll);
     }
     
+    public Map<String, String> getStatusColor() {
+        return program.getStatusColor();
+    }
+
+    public void setStatusColor(Map<String, String> statusColor) {
+        program.setStatusColor(statusColor);
+    }
+    
     public int getCurrentPageRecordStart() {
         return 1 + ((getCurrentPage() - 1) * RECORDS_PER_PAGE);
     }
@@ -227,6 +235,7 @@ public class FormSubscriberTable {
         //Cache this part
         //Construct the subscriberTable
         //Run through values first
+        // Must clear all before loading subscriberTable
         for(SubscriberFieldValue value : values) {
             // Do not add the first EMAIL field as it is the ID of the Subscriber and cannot be edited!
             

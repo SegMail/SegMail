@@ -87,7 +87,7 @@ public class FormImportSubscribers {
         List<String> assignedLists = getAssignedLists();
         
         getFieldList().clear();
-        
+        getSelectedLists().clear();
         for(String idString : assignedLists) {
             for(SubscriptionList list : ownedLists) {
                 long listId = Long.parseLong(idString);

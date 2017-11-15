@@ -9,8 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTime;
 import seca2.program.Program;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
+import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriberFieldValue;
+import segmail.entity.subscription.Subscription;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 
@@ -39,12 +43,88 @@ public class ProgramSubscribers extends Program {
     private String emailSearch;
     private String anyOrAllLists;
     private String anyOrAllStatuses;
+    private Map<String,String> statusColor;
     
     //FormImportSubscribers and FormAddSubscriber
     private List<SubscriptionListField> fieldList;
     private List<SubscriptionList> selectedLists;
     private Map<String,Object> fieldValues;
     private Map<String,SubscriptionListField> fieldMap;
+    
+    private final String[] SCREENS = {
+        "SETUP",
+        "SUBSCRIBER_LIST",
+        "SUBSCRIBER_VIEW"
+    };
+    private String currentScreen;
+    private boolean setup;
+    
+    // Subscriber view
+    private SubscriberAccount subscriber;
+    private Map<String,SubscriberFieldValue> subscriberValues;
+    private List<Subscription> subscriptions;
+    private String subscriberAge;
+    private DateTime subscribedSince;
+
+    public DateTime getSubscribedSince() {
+        return subscribedSince;
+    }
+
+    public void setSubscribedSince(DateTime subscribedSince) {
+        this.subscribedSince = subscribedSince;
+    }
+
+    public String getSubscriberAge() {
+        return subscriberAge;
+    }
+
+    public void setSubscriberAge(String subscriberAge) {
+        this.subscriberAge = subscriberAge;
+    }
+
+    public SubscriberAccount getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(SubscriberAccount subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    public Map<String, SubscriberFieldValue> getSubscriberValues() {
+        return subscriberValues;
+    }
+
+    public void setSubscriberValues(Map<String, SubscriberFieldValue> subscriberValues) {
+        this.subscriberValues = subscriberValues;
+    }
+
+    public List<Subscription> getSubscriptions() {
+        return subscriptions;
+    }
+
+    public void setSubscriptions(List<Subscription> subscriptions) {
+        this.subscriptions = subscriptions;
+    }
+
+    public boolean isSetup() {
+        return setup;
+    }
+
+    public void setSetup(boolean setup) {
+        this.setup = setup;
+    }
+
+    public String getCurrentScreen() {
+        return currentScreen;
+    }
+
+    public void setCurrentScreen(String currentScreen) {
+        this.currentScreen = currentScreen;
+    }
+
+    public String[] getSCREENS() {
+        return SCREENS;
+    }
     
     public String getEmailSearch() {
         return emailSearch;
@@ -170,6 +250,14 @@ public class ProgramSubscribers extends Program {
         this.anyOrAllStatuses = anyOrAllStatuses;
     }
 
+    public Map<String, String> getStatusColor() {
+        return statusColor;
+    }
+
+    public void setStatusColor(Map<String, String> statusColor) {
+        this.statusColor = statusColor;
+    }
+
     @Override
     public void clearVariables() {
         
@@ -194,6 +282,14 @@ public class ProgramSubscribers extends Program {
         
         setAnyOrAllLists("any");
         setAnyOrAllStatuses("any");
+        
+        // Initialize colors for subscriber status
+        setStatusColor(new HashMap<String,String>());
+        getStatusColor().put(SUBSCRIBER_STATUS.NEW.name, "success");
+        getStatusColor().put(SUBSCRIBER_STATUS.VERIFIED.name, "primary");
+        getStatusColor().put(SUBSCRIBER_STATUS.REMOVED.name, "warning");
+        getStatusColor().put(SUBSCRIBER_STATUS.INACTIVE.name, "warning");
+        getStatusColor().put(SUBSCRIBER_STATUS.BOUNCED.name, "danger");
     }
     
 }

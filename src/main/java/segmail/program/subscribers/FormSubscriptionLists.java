@@ -7,10 +7,12 @@ package segmail.program.subscribers;
 
 import eds.entity.client.Client;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.module.Client.ClientContainer;
@@ -35,7 +37,10 @@ public class FormSubscriptionLists {
     
     @PostConstruct
     public void init() {
-        loadLists();
+        if(!FacesContext.getCurrentInstance().isPostback()) {
+            loadLists();
+        }
+        
     }
     
     public List<Long> getConvertedAssignedLists() {

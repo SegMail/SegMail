@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.stream.Collectors.toList;
 import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -50,6 +51,8 @@ import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.Attribute;
 import javax.ws.rs.FormParam;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatterBuilder;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
@@ -939,7 +942,7 @@ public class SubscriptionService {
      * from (note: not SubscriberFieldValue records)
      * @param maxResults the max number of SubscriberAccount records to retrieve
      * from (note: not SubscriberFieldValue records)
-     * @param anyOrAll
+     * @param anyOrAll in ANY of the given listId or in ALL of the listIds
      * @param orderBy the field name in the SubscriberAccount_ class to be sorted
      * @param asc True for ascending order, false for descending order
      * @return
@@ -992,7 +995,8 @@ public class SubscriptionService {
         }
         
         if(statuses != null && !statuses.isEmpty()) {
-            conditions.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statuses));
+            List<String> statusStrings = statuses.stream().map(s -> s.name).collect(toList());
+            conditions.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statusStrings));
         }
         
         // Order by 
@@ -1253,5 +1257,28 @@ public class SubscriptionService {
                 .executeUpdate();
         
         return result;
+    }
+    
+    public String calculateSubscriberAge(SubscriberAccount subscriber, DateTime now) {
+        Period length = (new Period(
+                new DateTime(subscriber.getDATE_CREATED().getTime()),
+                now
+        ));
+        length = length.withHours(0).withMinutes(0).withSeconds(0).withMillis(0);
+        String ageString = length.toString(
+                new PeriodFormatterBuilder()
+                        .printZeroAlways()
+                        .printZeroRarelyLast()
+                .appendYears().appendSuffix(" year"," years")
+                .appendSeparator(" ")
+                .appendMonths().appendSuffix(" month"," months")
+                .appendSeparator(" ")
+                .appendWeeks().appendSuffix(" week", " weeks")
+                .appendSeparator(" ")        
+                .appendDays().appendSuffix(" day"," days")
+                .toFormatter()
+        );
+        
+        return ageString;
     }
 }
