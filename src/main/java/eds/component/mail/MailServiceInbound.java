@@ -206,7 +206,7 @@ public class MailServiceInbound {
                             + " at "+DateTime.now());
                     msg.addAll(incMsg);
                     emails.addAll(incEmails);
-                } while(incMsg.size() > 0 && msg.size() < MAX_QUEUE_MSG_READ);
+                } while(incEmails.size() > 0 && emails.size() < MAX_QUEUE_MSG_READ);
                 
                 updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
                 deleteSQSMessages(sqsClient, queueURL, msg);
