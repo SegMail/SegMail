@@ -137,7 +137,6 @@ public class FormTestEverything {
     private final String CLIENT_AWS_ACCOUNT_CLIENTNAME_TAG = "CLIENT_AWS_ACCOUNT_CLIENTNAME";
     
     public void init(){
-        System.out.println("Test everything init");
     }
     
     public void setupSegmail(){

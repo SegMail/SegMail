@@ -31,6 +31,7 @@ import eds.entity.batch.BatchJobStep_;
 import eds.entity.batch.BatchJobSchedule;
 import eds.entity.batch.BatchJobSchedule_;
 import eds.entity.batch.BatchJob_;
+import eds.entity.batch.run.BatchJobRunScheduled;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -110,7 +111,7 @@ public class BatchSchedulingService {
             Object[] params,
             long batchJobId) throws BatchProcessingException, IOException {
 
-        BatchJob newBatchJob = (batchJobId <= 0) ? null : this.getBatchJobById(batchJobId);
+        BatchJob newBatchJob = (batchJobId <= 0) ? null : objService.getEm().find(BatchJob.class, batchJobId);
         if (newBatchJob == null) {
             throw new BatchProcessingException("Batch job with ID " + batchJobId + " not found.");
         }
@@ -146,18 +147,11 @@ public class BatchSchedulingService {
     public BatchJobSchedule createJobSchedule(long batchJobId, String cronExpression)
             throws BatchProcessingException {
         //Get the BatchJob object first
-        BatchJob newBatchJob = (batchJobId <= 0) ? null : this.getBatchJobById(batchJobId);
+        BatchJob newBatchJob = (batchJobId <= 0) ? null : objService.getEm().find(BatchJob.class, batchJobId);
         if (newBatchJob == null) {
             throw new BatchProcessingException("Batch job with ID " + batchJobId + " not found.");
         }
         
-        /*CronDefinition cronDef = CronDefinitionBuilder.instanceDefinitionFor(STANDARD_CRON_TYPE);
-        CronValidator cronValid = new CronValidator(cronDef);
-
-        //If cronExpression is provided but invalid, throw an exception
-        if (cronExpression != null && !cronExpression.isEmpty() && !cronValid.isValid(cronExpression)) {
-            throw new BatchProcessingException("Invalid cronExpression \"" + cronExpression + "\"");
-        }*/
         //Validation method, throw runtime exception if invalids
         Cron validCron = this.getValidCronExp(cronExpression, STANDARD_CRON_TYPE);
 
@@ -307,10 +301,6 @@ public class BatchSchedulingService {
         return results;
     }
 
-    public BatchJob getBatchJobById(long batchJobId) {
-        return objService.getEm().find(BatchJob.class, batchJobId);
-    }
-
     /**
      * Should check if batch job is in process and throw an exception.
      *
@@ -321,12 +311,6 @@ public class BatchSchedulingService {
     public BatchJobRun updateBatchJobRun(BatchJobRun jobRun) {
         updateBatchJobRunStatus(jobRun);
         return updateService.getEm().merge(jobRun);
-    }
-    
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public BatchJob updateBatchJob(BatchJob job) {
-        
-        return updateService.getEm().merge(job);
     }
 
     /**
@@ -360,7 +344,7 @@ public class BatchSchedulingService {
     public BatchJobRun triggerFirstBatchJobRun(DateTime now, BatchJob job) 
             throws BatchProcessingException {
         
-        BatchJobRun newRun = new BatchJobRun();
+        BatchJobRun newRun = new BatchJobRunScheduled();
         newRun.setBATCH_JOB(job);
         newRun.setSERVER_NAME(job.getSERVER_NAME());
         DateTime nextExecution = DateTime.now();
@@ -486,7 +470,6 @@ public class BatchSchedulingService {
         //Get the next execution time
         ExecutionTime executionTime = ExecutionTime.forCron(getValidCronExp(cronExpression,cronType));
         DateTime nextExecution = executionTime.nextExecution(now.minusSeconds(1));//because ExecutionTime will plus 1 sec
-        //DateTime lastExecution = executionTime.lastExecution(now);
         
         return nextExecution;
     }
@@ -574,16 +557,6 @@ public class BatchSchedulingService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignServerToBatchJob(long batchJobId, long serverId) throws EntityNotFoundException, BatchProcessingException {
-        //ServerInstance server = landingService.getServerInstance(serverId);
-        //if(server == null)
-        //    throw new EntityNotFoundException(ServerInstance.class,serverId);
-        
-        /*BatchJob job = this.getBatchJobById(batchJobId);
-        if(job == null)
-            throw new BatchProcessingException("Batch job ID "+batchJobId+" not found.");
-        
-        job.setSERVER(server);
-        updateService.getEm().merge(job);*/
         CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
         CriteriaUpdate<BatchJob> update = builder.createCriteriaUpdate(BatchJob.class);
         Root<BatchJob> fromBatchJob = update.from(BatchJob.class);
@@ -606,18 +579,6 @@ public class BatchSchedulingService {
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignServerToBatchJobRun(String runKey, long serverId) throws EntityNotFoundException, BatchProcessingException {
-        /*ServerInstance server = landingService.getServerInstance(serverId);
-        if(server == null)
-            throw new EntityNotFoundException(ServerInstance.class,serverId);
-        
-        List<BatchJobRun> runs = this.getJobRunsByKey(runKey);
-        if(runs == null || runs.isEmpty())
-            throw new BatchProcessingException("Batch job run key "+runKey+" not found.");
-        
-        BatchJobRun run = runs.get(0);
-        //run.setSERVER(server);
-        run.setSERVER_NAME(server.getNAME());
-        updateService.getEm().merge(run);*/
         CriteriaBuilder builder = updateService.getEm().getCriteriaBuilder();
         CriteriaUpdate<BatchJobRun> update = builder.createCriteriaUpdate(BatchJobRun.class);
         Root<BatchJobRun> fromBatchJob = update.from(BatchJobRun.class);

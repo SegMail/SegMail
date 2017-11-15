@@ -6,8 +6,10 @@
 package eds.entity.user;
 
 import eds.entity.transaction.EnterpriseTransactionTrigger;
+import eds.entity.transaction.TransactionStatus;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -24,6 +26,16 @@ public class Trigger_Password_User extends EnterpriseTransactionTrigger<Password
 
     public void setTRIGGERED_EMAIL(String TRIGGERED_EMAIL) {
         this.TRIGGERED_EMAIL = TRIGGERED_EMAIL;
+    }
+
+    @Override
+    public <Ts extends TransactionStatus> Ts PROCESSING_STATUS() {
+        return null;
+    }
+
+    @Override
+    public Trigger_Password_User transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
     }
     
 }

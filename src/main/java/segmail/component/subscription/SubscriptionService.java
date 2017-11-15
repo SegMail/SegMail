@@ -19,7 +19,9 @@ import eds.component.encryption.EncryptionUtility;
 import eds.component.encryption.EncryptionType;
 import eds.component.mail.InvalidEmailException;
 import eds.component.mail.MailServiceOutbound;
+import eds.entity.data.EnterpriseObject;
 import eds.entity.mail.Email;
+import eds.entity.mail.QueuedEmail;
 import java.math.BigInteger;
 import segmail.entity.subscription.SubscriberAccount_;
 import segmail.entity.subscription.Subscription;
@@ -32,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
-import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -379,7 +381,7 @@ public class SubscriptionService {
         //newEmailBody = mailMergeService.parseUnsubscribeLink(newEmailBody, sub.getUNSUBSCRIBE_KEY()); //Should not be here!
 
         //Send the email using MailServiceOutbound
-        Email confirmEmail = new Email();
+        Email confirmEmail = new QueuedEmail();
         confirmEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
         confirmEmail.setSENDER_NAME(list.getSEND_AS_NAME());
         confirmEmail.setBODY(newEmailBody);
@@ -772,14 +774,7 @@ public class SubscriptionService {
         return results;
     }
 
-    /**
-     * The Asynchronous annotation is still useful, but we need something better like 
-     * a Message-Driven Bean to do true asynchronous calls.
-     * @param listId 
-     */
-    @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
-    //@TransactionAttribute(TransactionAttributeType.REQUIRED) //maybe THIS is the bug
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateSubscriberCount(long listId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
@@ -854,7 +849,7 @@ public class SubscriptionService {
         newEmailBody = mailMergeService.parseForAutoresponders(newEmailBody, sub.getSOURCE(), sub.getTARGET());
 
         //Send the email using MailServiceOutbound
-        Email welcomeEmail = new Email();
+        Email welcomeEmail = new QueuedEmail();
         welcomeEmail.setSENDER_ADDRESS(list.getSEND_AS_EMAIL());
         welcomeEmail.setSENDER_NAME(list.getSEND_AS_NAME());
         welcomeEmail.setBODY(newEmailBody);
@@ -866,11 +861,14 @@ public class SubscriptionService {
 
     /**
      * 1) Updates SubscriberAccount.SUBSCRIBER_STATUS
+     * 
+     * [Deprecated] Use updateSubscriptionSubscriberBounce instead
      *
      * @param subscribers List of bounced email address.
      * @param clientId
      * @return
      */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int updateSubscriberBounceStatus(List<String> subscribers, long clientId) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
@@ -897,37 +895,69 @@ public class SubscriptionService {
     }
 
     /**
-     * 2) Updates all Subscription.SUBSCRIPTION_STATUS
+     * 
+     * 1) Updates all SubscriberAccount.SUBSCRIBER_STATUS to BOUNCED
+     * 2) Updates all Subscription.SUBSCRIPTION_STATUS to BOUNCED
+     * 
+     * For all SubscriberAccount belonging to cientId (SubscriberOwnership->SubscriberAccount)
+     * and all Subscriptions belonging to the SubscriberAccount (SubscriberAccount->Subscriptions)
      *
      * @param subscribers
      * @param clientId
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public int updateSubscriptionBounceStatus(List<String> subscribers, long clientId) {
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-        CriteriaUpdate<Subscription> update = builder.createCriteriaUpdate(Subscription.class);
-        Root<Subscription> updateAccount = update.from(Subscription.class);
-
-        Subquery<Long> accQuery = update.subquery(Long.class);
-        Root<SubscriberAccount> fromAcc = accQuery.from(SubscriberAccount.class);
-        Root<SubscriberOwnership> fromOwner = accQuery.from(SubscriberOwnership.class);
-        accQuery.select(fromAcc.get(SubscriberAccount_.OBJECTID));
-        accQuery.where(builder.and(
-                builder.equal(fromAcc.get(SubscriberAccount_.OBJECTID), fromOwner.get(SubscriberOwnership_.SOURCE)),
-                builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId),
-                fromAcc.get(SubscriberAccount_.EMAIL).in(subscribers)
-        ));
-
-        update.set(updateAccount.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.BOUNCED.name);
-        update.where(updateAccount.get(Subscription_.SOURCE).in(accQuery));
-
-        int result = objService.getEm().createQuery(update)
-                .executeUpdate();
-
+    public int updateSubscriptionSubscriberBounce(List<String> subscribers, long clientId) {
+        if(subscribers == null || subscribers.isEmpty())
+            return 0;
+        
+        // Native MySQL query implementation because we cannot use 
+        // JOINs in JPA Criteria API for EnterpriseRelationships
+        String accTable = SubscriberAccount.class.getAnnotation(Table.class).name();
+        String subscTable = Subscription.class.getAnnotation(Table.class).name();
+        String ownTable = SubscriberOwnership.class.getAnnotation(Table.class).name();
+        String objTable = EnterpriseObject.class.getAnnotation(Table.class).name();
+        
+        // We hard code the field names in plain strings
+        String objId = "OBJECTID";
+        String source = "SOURCE";
+        String target = "TARGET";
+        String accStatus = "SUBSCRIBER_STATUS";
+        String subscStatus = "STATUS";
+        String email = "EMAIL";
+        String dateChangeObj = "DATE_CHANGED";
+        String dateChangeRel = "DATE_CHANGED";
+        
+        // Update DATE_CHANGE for native queries as listeners will not be triggered!
+        DateTime now = DateTime.now();
+        java.sql.Date today = new java.sql.Date(now.getMillis());
+        String mySQLUpdate = 
+            "update "
+                + accTable + " acc " //+ "SUBSCRIBER_ACCOUNT "
+                + "join "
+                    + objTable
+                    + " obj on acc."+objId+" = obj."+objId+" "
+                + "join "
+                    + ownTable
+                    + " own on acc."+objId+" = own."+source+" and own."+target+" = " + clientId + " "
+                + "left join "
+                    + subscTable
+                    + " subsc on acc."+objId+" = subsc."+source+" "
+            + "set "
+                + "acc."+accStatus+" = '"+SUBSCRIBER_STATUS.BOUNCED+"', "
+                + "subsc."+subscStatus+" = '"+SUBSCRIPTION_STATUS.BOUNCED+"', "
+                + "obj."+dateChangeObj+" = '"+today+"', "
+                + "subsc."+dateChangeRel+" = '"+today+"' "
+            + "where "
+                + "acc." + email + " in (" 
+                + subscribers.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","))
+                + ")";
+        Query q = objService.getEm().createNativeQuery(mySQLUpdate);
+        int result = q.executeUpdate();
+        
         return result;
     }
-
+    
     /**
      *
      * @param clientId the Client OBJECT_ID

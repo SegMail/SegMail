@@ -11,7 +11,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
@@ -26,12 +25,6 @@ import seca2.component.landing.LandingService;
  * @author LeeKiatHaw
  */
 public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageContext>{
-
-    /**
-     * You cannot store these here!
-     */
-    //private String username = "sws";
-    //private String password = "sws";
     
     public static final String USERNAME_KEY = "WS_CLIENT_USERNAME";
     public static final String PASSWORD_KEY = "WS_PASSWORD_KEY";
@@ -46,22 +39,20 @@ public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageConte
     @Override
     public boolean handleMessage(SOAPMessageContext context) {
         try {
-            System.out.println("Client handler called");
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO,"Client handler called","");
             
             insertCredentials(context);
             
             return true;
             
         } catch (SOAPException ex) {
-            Logger.getLogger(WebserviceAuthHandlerClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
 
     @Override
     public boolean handleFault(SOAPMessageContext context) {
-        
-        
         
         return true;
     }
@@ -77,8 +68,6 @@ public class WebserviceAuthHandlerClient implements SOAPHandler<SOAPMessageConte
      * @param context 
      */
     private void insertCredentials(SOAPMessageContext context) throws SOAPException {
-        HttpServletRequest req = (HttpServletRequest) context.get(MessageContext.SERVLET_REQUEST);
-        
         SOAPMessage message = context.getMessage();
         SOAPHeader header = message.getSOAPHeader();
         

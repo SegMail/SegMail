@@ -5,6 +5,7 @@
  */
 package eds.component.user;
 
+import eds.entity.user.PWD_PROCESSING_STATUS;
 import eds.entity.user.PasswordResetRequest;
 import eds.component.GenericObjectService;
 import eds.entity.data.EnterpriseObject;
@@ -14,7 +15,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -62,9 +62,6 @@ public class UserService extends DBService {
     
     public static final String PASSWORD_RESET_EMAIL_TYPE = "PASSWORD_RESET";
     public static final String ADMIN_EMAIL = "support@segmail.io";
-
-    @Resource()
-    private String US_USER;
 
     @EJB
     GenericObjectService objectService;
@@ -437,7 +434,6 @@ public class UserService extends DBService {
         //Temporary measure before we find a better way to define the underlying
         //data of UserAccount object and subsequently how to retrieve the correct
         //result.
-        //
         List<UserAccount> results = objectService.getEm().createQuery(criteria)
                 .getResultList();
 
@@ -462,21 +458,6 @@ public class UserService extends DBService {
 
         return result > 0;
     }
-
-    
-    public long getUserCount() {
-        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
-        CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
-        Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserAccount
-
-        criteria.select(builder.count(criteria.from(UserAccount.class))); // SELECT *
-
-        Long result = objectService.getEm().createQuery(criteria)
-                .getSingleResult();
-
-        return result;
-    }
-
     
     public String getUserProfilePicLocation(long userid) {
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
@@ -539,7 +520,7 @@ public class UserService extends DBService {
         MessageDigest md;
         byte[] hash;
         try {
-            md = MessageDigest.getInstance("SHA-256");
+            md = MessageDigest.getInstance(EncryptionType.SHA256.toString());
             hash = md.digest(secureHash.getBytes("UTF-8"));
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
             throw new RuntimeException("Error encountered in login method.");
@@ -557,7 +538,7 @@ public class UserService extends DBService {
         Root<User> fromUser = criteria.from(User.class);
         Root<UserType> fromUserType = criteria.from(UserType.class);
 
-        criteria.select(fromUserAccount).distinct(true); // SELECT *
+        criteria.select(fromUserAccount).distinct(true); 
         criteria.where(builder.and(
                 builder.isTrue(fromUserType.get(UserType_.WS_ACCESS)),
                 builder.equal(fromUserType.get(UserType_.OBJECTID), fromUser.get(User_.USERTYPE)),
@@ -625,15 +606,14 @@ public class UserService extends DBService {
         
         CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
         CriteriaQuery<UserAccount> criteria = builder.createQuery(UserAccount.class);
-        Root<UserAccount> sourceEntity = criteria.from(UserAccount.class); //FROM UserType
+        Root<UserAccount> sourceEntity = criteria.from(UserAccount.class);
 
-        criteria.select(sourceEntity); // SELECT *
-        criteria.where(builder.equal(sourceEntity.get(UserAccount_.CONTACT_EMAIL), email)); //WHERE USERTYPENAME = userTypeName
+        criteria.select(sourceEntity);
+        criteria.where(builder.equal(sourceEntity.get(UserAccount_.CONTACT_EMAIL), email)); 
 
         //Temporary measure before we find a better way to define the underlying
         //data of UserAccount object and subsequently how to retrieve the correct
         //result.
-        //
         List<UserAccount> results = objectService.getEm().createQuery(criteria)
                 .getResultList();
 
@@ -653,13 +633,15 @@ public class UserService extends DBService {
      * @param email
      * @return 
      * @throws eds.component.data.IncompleteDataException 
+     * @throws eds.component.user.UserNotFoundResetException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public String generatePasswordResetToken(String email) throws IncompleteDataException, EntityNotFoundException {
+    public String generatePasswordResetToken(String email) 
+            throws IncompleteDataException, UserNotFoundResetException {
         //1)
         UserAccount acct = getUserAccountByContactEmail(email);
         if(acct == null)
-            throw new EntityNotFoundException("Username not found.");
+            throw new UserNotFoundResetException("Username not found.");
         
         acct.setUSER_LOCKED(true);
         acct = em.merge(acct);
@@ -747,7 +729,7 @@ public class UserService extends DBService {
         query.select(fromUser);
         query.where(builder.and(
                 builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_KEY), token),
-                builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_ID), fromTg.get(Trigger_Password_User_.TRIGGERED_TRANSACTION)),
+                builder.equal(fromReq.get(PasswordResetRequest_.TRANSACTION_KEY), fromTg.get(Trigger_Password_User_.TRIGGERED_TRANSACTION)),
                 builder.equal(fromTg.get(Trigger_Password_User_.TRIGGERING_OBJECT), fromUser.get(User_.OBJECTID))
         ));
         

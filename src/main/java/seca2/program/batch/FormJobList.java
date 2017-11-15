@@ -115,8 +115,6 @@ public class FormJobList {
     }
     
     public void loadPageNumbers() {
-        //List<Integer> pageNumbers = getJobRunDrip().loadPageNumbers();
-        //this.setPageNumbers(pageNumbers);
         int startPage = Math.max(1, getCurrentPage() - (PAGE_RANGE/2));
         int endPage = Math.min(getTotalPage(), startPage + PAGE_RANGE/2);
         

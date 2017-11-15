@@ -9,7 +9,6 @@ import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
-import java.sql.Timestamp;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;

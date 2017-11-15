@@ -18,12 +18,4 @@ public enum BATCH_JOB_STATUS {
     private BATCH_JOB_STATUS(String label){
         this.label = label;
     }
-    
-    public BATCH_JOB_STATUS getBATCH_JOB_STATUS(String label){
-        for(BATCH_JOB_STATUS s : BATCH_JOB_STATUS.values()){
-            if(s.label.equals(label))
-                return s;
-        }
-        return BATCH_JOB_STATUS.values()[0];
-    }
 }

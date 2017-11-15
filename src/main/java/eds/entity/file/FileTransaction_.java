@@ -5,10 +5,7 @@
  */
 package eds.entity.file;
 
-import eds.entity.transaction.EnterpriseTransaction;
 import eds.entity.transaction.EnterpriseTransaction_;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 

@@ -12,6 +12,8 @@ import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +188,36 @@ public class MailMergeService {
     public Map<Long,Map<String,String>> createMMValueMap(List<Long> subscriberIds, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
         Map<Long,Map<String,String>> results = new HashMap<>();
         
+        // Sort for faster access in the triple loop later
+        Collections.sort(fields, new Comparator<SubscriptionListField>() {
+            /**
+             * Sort by field keys.
+             * 
+             * @param o1
+             * @param o2
+             * @return 
+             */
+            @Override
+            public int compare(SubscriptionListField o1, SubscriptionListField o2) {
+                return o1.generateKey().toString().compareTo(o2.generateKey().toString());
+            }
+        });
+        Collections.sort(values, new Comparator<SubscriberFieldValue>(){
+
+            /**
+             * Sort by field keys.
+             * 
+             * @param o1
+             * @param o2
+             * @return 
+             */
+            @Override
+            public int compare(SubscriberFieldValue o1, SubscriberFieldValue o2) {
+                return o1.getFIELD_KEY().compareTo(o2.getFIELD_KEY());
+            }
+            
+        });
+        
         for(SubscriptionListField field : fields) {
             String key = (String) field.generateKey();
             String tag = field.getMAILMERGE_TAG();
@@ -200,7 +232,8 @@ public class MailMergeService {
                 //Else, just insert an empty field
                 subscriberMap.put(tag, "");
                 for(SubscriberFieldValue value : values) {
-                    if(value.getFIELD_KEY() != null && value.getFIELD_KEY().equals(key)) {
+                    if(value.getFIELD_KEY() != null && value.getFIELD_KEY().equals(key)
+                            && value.getOWNER().getOBJECTID() == subscriberId) {
                         subscriberMap.put(tag, value.getVALUE());
                         break;
                     }

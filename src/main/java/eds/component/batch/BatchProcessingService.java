@@ -2,9 +2,11 @@ package eds.component.batch;
 
 import eds.component.UpdateObjectService;
 import eds.entity.batch.BATCH_JOB_RUN_STATUS;
+import static eds.entity.batch.BATCH_JOB_RUN_STATUS.QUEUED;
 import eds.entity.batch.BatchJobRun;
-import eds.entity.batch.BatchJobRun_;
 import eds.entity.batch.BatchJobExecutor;
+import eds.entity.batch.run.BatchJobRunScheduled;
+import eds.entity.batch.run.BatchJobRunScheduled_;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.logging.Level;
@@ -56,7 +58,10 @@ public class BatchProcessingService {
     @EJB
     BatchSchedulingService scheduleService;
     
-    @Resource //(mappedName="jms/_defaultConnectionFactory")
+    @EJB
+    BatchJobTransitionService bjTransService;
+    
+    @Resource // Always the default JMS connection
     ConnectionFactory connectionFactory;
 
     @Resource(mappedName="jms/BatchJobContainer")
@@ -82,17 +87,16 @@ public class BatchProcessingService {
             String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
             if (maxJobString == null || maxJobString.isEmpty()) {
                 System.setProperty(PROCESS_JOB_MODE, "false");
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "System property " + MAX_JOBS_PER_CRON + " is not set", "");
                 return;
             }
             int maxJobs = Integer.parseInt(maxJobString);
-            List<BatchJobRun> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
+            List<BatchJobRunScheduled> nextNJobs = this.getNextNJobRuns(maxJobs, dt);
             
             for(BatchJobRun run : nextNJobs) {
                 // Very crucial part!!!
                 // QUEUE the batch job run before sending the message
-                run.queue(DateTime.now());
-                run = (BatchJobRun) updService.merge(run);
+                run = bjTransService.transit(run, QUEUED, dt);
                 
                 // Make use of JMS and MDB
                 TextMessage message = session.createTextMessage();
@@ -101,6 +105,8 @@ public class BatchProcessingService {
             }
             
         } catch (JMSException ex) {
+            Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (BatchProcessingException ex) {
             Logger.getLogger(BatchProcessingService.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             // Important!!! Release resources because there's a limit to the number of producers, sessions and connection pools
@@ -118,27 +124,27 @@ public class BatchProcessingService {
      * @return
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<BatchJobRun> getNextNJobRuns(int n, DateTime time) {
+    public List<BatchJobRunScheduled> getNextNJobRuns(int n, DateTime time) {
 
         Timestamp ts = new Timestamp(time.getMillis());
         String serverName = landingService.getOwnServerName();
 
         CriteriaBuilder builder = updService.getEm().getCriteriaBuilder();
-        CriteriaQuery<BatchJobRun> query = builder.createQuery(BatchJobRun.class);
-        Root<BatchJobRun> fromBatchJobRun = query.from(BatchJobRun.class);
+        CriteriaQuery<BatchJobRunScheduled> query = builder.createQuery(BatchJobRunScheduled.class);
+        Root<BatchJobRunScheduled> fromBatchJobRun = query.from(BatchJobRunScheduled.class);
 
         query.select(fromBatchJobRun);
         query.where(
                 builder.and(
-                        builder.equal(fromBatchJobRun.get(BatchJobRun_.STATUS), BATCH_JOB_RUN_STATUS.SCHEDULED.label),
-                        builder.equal(fromBatchJobRun.get(BatchJobRun_.SERVER_NAME), serverName),
-                        builder.lessThanOrEqualTo(fromBatchJobRun.get(BatchJobRun_.SCHEDULED_TIME), ts)
+                        builder.equal(fromBatchJobRun.get(BatchJobRunScheduled_.STATUS), BATCH_JOB_RUN_STATUS.SCHEDULED.label),
+                        builder.equal(fromBatchJobRun.get(BatchJobRunScheduled_.SERVER_NAME), serverName),
+                        builder.lessThanOrEqualTo(fromBatchJobRun.get(BatchJobRunScheduled_.SCHEDULED_TIME), ts)
                 )
         );
 
-        query.orderBy(builder.asc(fromBatchJobRun.get(BatchJobRun_.SCHEDULED_TIME)));
+        query.orderBy(builder.asc(fromBatchJobRun.get(BatchJobRunScheduled_.SCHEDULED_TIME)));
 
-        List<BatchJobRun> results = updService.getEm().createQuery(query)
+        List<BatchJobRunScheduled> results = updService.getEm().createQuery(query)
                 .setFirstResult(0)
                 .setMaxResults(n)
                 .getResultList();
@@ -184,9 +190,6 @@ public class BatchProcessingService {
     public int getCronNum() {
         String maxJobString = System.getProperty(MAX_JOBS_PER_CRON);
         if (maxJobString == null || maxJobString.isEmpty()) {
-            //System.setProperty(PROCESS_JOB_MODE, "false");
-            //Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Sytem property " + MAX_JOBS_PER_CRON + " is not set", "");
-            //errorMessage = "Sytem property " + MAX_JOBS_PER_CRON + " is not set";
             return -1;
         }
         return Integer.parseInt(maxJobString);

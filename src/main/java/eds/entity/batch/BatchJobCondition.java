@@ -54,7 +54,6 @@ public class BatchJobCondition implements Serializable{
     
     @Id
     @ManyToOne(cascade = {
-        //CascadeType.PERSIST,
         CascadeType.MERGE,
         CascadeType.REFRESH
     })
@@ -109,7 +108,6 @@ public class BatchJobCondition implements Serializable{
 
                 if (param.getSERIALIZED_OBJECT() != null && !param.getSERIALIZED_OBJECT().isEmpty()) {
                     Object obj = param.SERIALIZED_OBJECT();
-                    Class clazz = obj.getClass();
                     params[i] = obj;
                     continue;
                 }

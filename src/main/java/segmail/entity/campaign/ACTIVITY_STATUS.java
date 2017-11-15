@@ -14,7 +14,8 @@ public enum ACTIVITY_STATUS {
     EDITING("EDITING",1),
     EXECUTING("EXECUTING",2),
     COMPLETED("COMPLETED",3),
-    STOPPED("STOPPED",4);
+    STOPPED("STOPPED",4),
+    SUSPENDED("SUSPENDED",5);
     
     public final String name;
     
