@@ -60,6 +60,7 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
     /**
      * Current number of subscribers by subscription.
      */
+    @Deprecated
     private long SUBSCRIBER_COUNT;
     
     /**
@@ -157,10 +158,12 @@ public class SubscriptionList extends EnterpriseObject {// implements MailSender
         this.REMOTE = REMOTE;
     }
 
+    @Deprecated
     public long getSUBSCRIBER_COUNT() {
         return SUBSCRIBER_COUNT;
     }
 
+    @Deprecated
     public void setSUBSCRIBER_COUNT(long SUBSCRIBER_COUNT) {
         this.SUBSCRIBER_COUNT = SUBSCRIBER_COUNT;
     }

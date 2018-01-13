@@ -18,6 +18,7 @@ import eds.component.transaction.TransactionService;
 import eds.component.user.UserNotFoundResetException;
 import eds.entity.user.PWD_PROCESSING_STATUS;
 import eds.component.user.UserService;
+import eds.entity.client.ClientAWSAccount;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.user.PasswordResetRequest;
 import eds.entity.user.UserAccount;
@@ -135,6 +136,7 @@ public class ClientAccountService {
             try {
                 long clientTypeId = clientService.getClientTypeByName(SEGMAIL_CLIENT_TYPE).getOBJECTID();
                 clientUserAssign = clientService.registerClientForUser(userAccount.getOWNER(), clientTypeId);
+                ClientAWSAccount account = clientAWSService.registerAWSForClient(clientUserAssign.getSOURCE());
                 resultObjectBuilder.add("client", clientUserAssign.getSOURCE().getCLIENT_NAME());
             } catch (EntityNotFoundException ex) {
                 Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
@@ -147,42 +149,6 @@ public class ClientAccountService {
                 resultObjectBuilder.add("client_error", ex.getMessage());
             }
         }
-        
-        //Subscribe
-        /*if(listId > 0) {
-            Map<String,Object> subscriberMap = new HashMap<>();
-            for(String key : subscriptionMap.keySet()) {
-                if(subscriptionMap.get(key) == null)
-                    continue;
-                
-                List<String> values = subscriptionMap.get(key);
-                if(values.isEmpty())
-                    continue;
-                
-                subscriberMap.put(key, values.get(0));
-            }
-            try {
-                Subscription newSubsc = subService.subscribe(clientId, listId, subscriberMap, true);
-                
-                //If there is a redirect link, return it
-                SubscriptionList list = newSubsc.getTARGET();
-                if(list.getREDIRECT_CONFIRM()!= null && !list.getREDIRECT_CONFIRM().isEmpty()) {
-                    String redirectUrl = list.getREDIRECT_CONFIRM();
-                    if(!redirectUrl.startsWith("http://") && !redirectUrl.startsWith("https://"))
-                        redirectUrl = "http://"+redirectUrl;
-
-                    return "Redirect : "+redirectUrl;
-                }
-                
-            } catch (EntityNotFoundException ex) {
-                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SubscriptionException ex) {
-                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-                return "Error : "+ex.getMessage();
-            } catch (RelationshipExistsException ex) {
-                Logger.getLogger(ClientAccountService.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }*/
         
         return resultObjectBuilder.build().toString();
     }

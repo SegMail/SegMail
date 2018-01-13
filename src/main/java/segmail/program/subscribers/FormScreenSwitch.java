@@ -74,6 +74,8 @@ public class FormScreenSwitch {
         // change reloads subscriberTable
         if(getSubscriberTable().isEmpty()) {
             setCurrentScreen(getSCREENS()[0]);
+            reqCont.setRenderPageToolbar(false);
+            reqCont.setRenderPageBreadCrumbs(false);
         } else {
             setCurrentScreen(getSCREENS()[1]);
         }

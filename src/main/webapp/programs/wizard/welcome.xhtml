@@ -17,6 +17,7 @@
                     <h2>We're gonna get you up and running in no time.</h2>
                     <p><br /></p>
                     <h:commandLink styleClass="btn btn-primary btn-lg" 
+                                   pass:data-page="welcome"
                                      >
                         <f:ajax listener="#{FormWizardInit.nextPage()}"
                                 render="@form :FormWizardInit" execute="@form"

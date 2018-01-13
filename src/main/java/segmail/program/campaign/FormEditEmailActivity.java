@@ -289,7 +289,7 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void delete() {
         try {
             campaignService.deleteCampaignActivity(getEditingActivity().getOBJECTID());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity deleted.", "");
+            FacesMessenger.setFacesMessage(ProgramCampaign.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity deleted.", "");
             closeWithoutSaving();
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -463,7 +463,7 @@ public class FormEditEmailActivity implements FormEditEntity {
         CampaignActivity activity = getEditingActivity();
         
         // So far only the rendering of random subscriber
-        String body = campaignService.parseRandomSubscriber(activity.getACTIVITY_CONTENT_PREVIEW(),getRandomSubscriber(),getListFields());
+        String body = campaignService.parseRandomSubscriber(activity.getACTIVITY_CONTENT_PROCESSED(),getRandomSubscriber(),getListFields());
         
         setPreviewBody(body);
     }

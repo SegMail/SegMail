@@ -28,19 +28,16 @@
                 </p>
             </div>
         </div>
-        <div class="row">
-            <br />
-        </div>
-        <div class="row" style="text-align: center;">
+        <div class="row" style="text-align: center; margin-top: 40px;">
             <div class="col-md-4">
-                <i class="fa fa-code" style="font-size: 40px"></i> 
+                <i class="fa fa-code" style="font-size: 40px;"></i> 
                 <h2 class="text-info">Signup code</h2>
                 <p>Paste a signup code on your website:</p>
                 <textarea id="codeEditor"></textarea>
             </div>
             
             <div class="col-md-4">
-                <i class="fa fa-file-excel-o" style="font-size: 40px"></i> 
+                <i class="fa fa-file-excel-o" style="font-size: 40px; "></i> 
                 <h2 class="text-info">Import Excel or CSV file</h2>
                 <p>
                     Upload a file exported from your legacy database. 1st line in the file
@@ -61,7 +58,7 @@
             </div>
             
             <div class="col-md-4">
-                <i class="fa fa-database" style="font-size: 40px"></i> 
+                <i class="fa fa-database" style="font-size: 40px; margin-bottom: 20px;"></i> 
                 <h2 class="text-info">Sync from your Database</h2>
                 <p>
                     Using just your database login credentials, you can rely on our synchronization
@@ -81,7 +78,7 @@
         <div class="row">
             <div class="col-md-6">
                 <h2 class="text-left">
-                    <h:commandLink>
+                    <h:commandLink pass:data-page="collect">
                         <f:ajax listener="#{FormWizardInit.gotoStage(stage-1)}"
                                 render="@form :FormWizardInit" execute="@form"
                                 onevent="refresh"
@@ -93,22 +90,34 @@
                 </h2>
             </div>
             <div class="col-md-6">
-                <h:commandLink styleClass="btn btn-primary btn-lg pull-right"
-                               onclick="return collectForm().form()"
-                               >
-                    <f:ajax render="@form :FormWizardInit" execute="@form"
-                            onevent="refresh"
-                            listener="#{FormWizardAuto.saveAutoresponders()}"
-                            >
-                    </f:ajax>
+                <a href="#{request.contextPath}/" class="btn btn-primary btn-lg pull-right">
                     Done
-                </h:commandLink>
+                </a>
             </div>
         </div>
     </div>
-    <ui:include src="/programs/signupcode/generate_signup_code.xhtml" ></ui:include>
+    <script>
+        var listId = #{FormSignupCode.selectedListId};
+        var clientId = #{FormSignupCode.clientId};
+        
+        var serverUrl = '#{FormSignupCode.signupLink}';
+        
+        var fieldList = [
+        <c:forEach items="#{FormSignupCode.fields}" var="field">
+            {
+                'name': '#{field.FIELD_NAME}',
+                'key' : '#{field.generateKey()}',
+                'description' : '#{field.DESCRIPTION}',
+                'mandatory' : '#{field.MANDATORY}'
+            },
+        </c:forEach>
+        ];
+        
+        var sendAs = '#{FormSignupCode.selectedList.SEND_AS_EMAIL}';
+        var confirmEmailCount = #{FormSignupCode.confirmEmails.size()};
+        
+    </script>
     <div class="modal fade" id="add_datasource_popup">
         <ui:include src="/programs/subscribers/add_datasource.xhtml" ></ui:include>
     </div>
-    
 </html>

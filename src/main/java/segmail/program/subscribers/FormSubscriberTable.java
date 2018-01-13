@@ -141,6 +141,14 @@ public class FormSubscriberTable {
     public Map<String, String> getStatusColor() {
         return program.getStatusColor();
     }
+    
+    public String getCheckedIds() {
+        return program.getCheckedIds();
+    }
+
+    public void setCheckedIds(String checkedIds) {
+        program.setCheckedIds(checkedIds);
+    }
 
     public void setStatusColor(Map<String, String> statusColor) {
         program.setStatusColor(statusColor);
@@ -360,6 +368,14 @@ public class FormSubscriberTable {
         if(this.getSubscriberTable() == null || getSubscriberTable().isEmpty()) {
             reqCont.setRenderPageBreadCrumbs(false);
             reqCont.setRenderPageToolbar(false);
+        }
+    }
+    
+    public void testReadCheckbox() {
+        String checkboxes = this.getCheckedIds();
+        for(String checkedId : checkboxes.split(",")) {
+            Long id = Long.parseLong(checkedId);
+            System.out.println("Subscriber "+id+" is checked.");
         }
     }
 }

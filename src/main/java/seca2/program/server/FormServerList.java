@@ -18,8 +18,6 @@ import javax.inject.Named;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import seca2.component.landing.LandingService;
 import seca2.entity.landing.ServerInstance;
-import seca2.entity.landing.ServerResource;
-import seca2.entity.landing.ServerResourceType;
 
 /**
  *
@@ -46,7 +44,7 @@ public class FormServerList {
         try {
             program.setServers(landingService.getServerInstances());
         } catch (EJBException ex) { //Transaction did not go through
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+            FacesMessenger.setFacesMessage(ProgramServer.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         }
     }
     
@@ -56,7 +54,7 @@ public class FormServerList {
             program.setAssignment(landingService.getServerUserAssignment(serverId));
             program.setUserIdExisting(program.getAssignment().getTARGET().getOBJECTID());
         } catch (EJBException ex) { //Transaction did not go through
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+            FacesMessenger.setFacesMessage(ProgramServer.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         }
     }
     
@@ -68,7 +66,7 @@ public class FormServerList {
             //program.setJMSConnection(landingService.getServerJMSConnection(serverId));
             //program.setShowEditingPanel(true);
         } catch (EJBException ex) { //Transaction did not go through
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
+            FacesMessenger.setFacesMessage(ProgramServer.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());
         }
     }
     

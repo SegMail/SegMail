@@ -5,8 +5,6 @@
  */
 package segmail.program.subscribe.unsubscribe.client;
 
-import eds.component.data.RelationshipNotFoundException;
-import eds.component.webservice.TransactionProcessedException;
 import eds.component.webservice.UnwantedAccessException;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;

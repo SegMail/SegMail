@@ -47,11 +47,14 @@ public class UserRequestContainer {
     private boolean renderPageToolbar;
     private boolean renderPageBreadCrumbs;
     
+    private boolean renderPreloader;
+    
     @PostConstruct
     public void init() {
         //default values
         renderPageToolbar = true;
         renderPageBreadCrumbs = true;
+        renderPreloader = true;
     }
 
     public String getProgramName() {
@@ -164,6 +167,14 @@ public class UserRequestContainer {
 
     public void setMenuLocations(Map<String, String> menuLocations) {
         this.menuLocations = menuLocations;
+    }
+
+    public boolean isRenderPreloader() {
+        return renderPreloader;
+    }
+
+    public void setRenderPreloader(boolean renderPreloader) {
+        this.renderPreloader = renderPreloader;
     }
     
     public String printFullPathWithoutContext() {

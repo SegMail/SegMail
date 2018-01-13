@@ -343,6 +343,7 @@ public class CampaignExecutionService {
             trigger = new Trigger_Email_Activity();
             trigger.setTRIGGERED_TRANSACTION(email);
             trigger.setTRIGGERING_OBJECT(campaignActivity);
+            trigger.setSUBSCRIBER_ID(""+subscriber.getOBJECTID());
 
             updService.persist(trigger);
 

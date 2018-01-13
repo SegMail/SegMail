@@ -14,7 +14,6 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import segmail.component.subscription.ListService;
-import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 
@@ -73,7 +72,7 @@ public class FormImportSubscribers {
     @PostConstruct
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()) {
-            initVar();
+            //initVar();
         }
     }
     
@@ -86,8 +85,8 @@ public class FormImportSubscribers {
         List<SubscriptionList> ownedLists =  getOwnedLists();
         List<String> assignedLists = getAssignedLists();
         
-        getFieldList().clear();
-        getSelectedLists().clear();
+        setSelectedLists(new ArrayList<SubscriptionList>());
+        setFieldList(new ArrayList<SubscriptionListField>());
         for(String idString : assignedLists) {
             for(SubscriptionList list : ownedLists) {
                 long listId = Long.parseLong(idString);

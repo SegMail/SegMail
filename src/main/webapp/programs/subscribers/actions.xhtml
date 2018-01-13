@@ -10,7 +10,7 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions">
-    <form jsf:id="FormAction">
+    <h:form id="FormAction" prependId="false">
         <div class="block-head">
             <h2>
                 Actions
@@ -40,6 +40,17 @@
                         >
                 </f:ajax>
             </a>
+            <h:commandLink styleClass="btn btn-default" 
+                           >
+                <i class="fa fa-floppy-o"></i>
+                Test read checkbox
+                <f:ajax  listener="#{FormSubscriberTable.testReadCheckbox()}"
+                         event="click"
+                         execute="@form"
+                        >
+                </f:ajax>
+            </h:commandLink>
+            <h:inputHidden id="checkedIds" value="#{FormSubscriberTable.checkedIds}"></h:inputHidden>
         </div>
-    </form>
+    </h:form>
 </html>

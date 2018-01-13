@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author LeeKiatHaw
  */
-public abstract class BootstrapModule implements Filter {
+    public abstract class BootstrapModule implements Filter {
    
     @Inject protected DefaultKeys defaults;
     

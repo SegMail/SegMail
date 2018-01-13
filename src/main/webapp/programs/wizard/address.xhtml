@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<div
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -9,7 +9,6 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    
         <div class="jumbotron">
             <div class="row" style="margin-top: 20px">
                 <div class="col-md-10">
@@ -58,8 +57,9 @@
                         <div class="col-md-3">
                             <h:commandLink styleClass="btn btn-primary btn-lg pull-right"
                                            onclick="return addressForm().form();"
+                                           pass:data-page="address"
                                            >
-                                <f:ajax render="@form :FormWizardInit" execute="@form"
+                                <f:ajax render="@form" execute="@form"
                                         onevent="refresh"
                                         listener="#{FormWizardAddress.verify()}"
                                         >
@@ -75,9 +75,9 @@
     <script>
 
         var existing_addresses = [
-                <ui:repeat value="#{FormAddress.existingAddresses}" var="address">
+                <ui:repeat value="#{FormWizardAddress.existingAddresses}" var="address">
                     '#{address.VERIFIED_ADDRESS}',
                 </ui:repeat>
         ];
     </script>
-</html>
+</div>

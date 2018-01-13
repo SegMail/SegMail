@@ -7,7 +7,6 @@ package segmail.entity.subscription;
 
 import eds.entity.data.EnterpriseObject;
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 
 /**
@@ -44,6 +43,10 @@ public class SubscriberAccount extends EnterpriseObject {
 
     public void setSUBSCRIBER_STATUS(String SUBSCRIBER_STATUS) {
         this.SUBSCRIBER_STATUS = SUBSCRIBER_STATUS;
+    }
+    
+    public SUBSCRIBER_STATUS SUBSCRIBER_STATUS() {
+        return segmail.entity.subscription.SUBSCRIBER_STATUS.valueOf(this.SUBSCRIBER_STATUS);
     }
     
     @Override

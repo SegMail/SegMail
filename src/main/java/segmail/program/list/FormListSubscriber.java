@@ -5,7 +5,6 @@
  */
 package segmail.program.list;
 
-import eds.component.batch.BatchProcessingException;
 import eds.component.client.ClientFacade;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;

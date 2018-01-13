@@ -7,7 +7,6 @@ package segmail.program.mysettings;
 
 import eds.entity.client.ContactInfo;
 import eds.entity.client.VerifiedSendingAddress;
-import java.io.Serializable;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -29,6 +28,9 @@ public class MySettingsProgram extends Program {
     
     private List<VerifiedSendingAddress> addresses;
     private String deleteAddress;
+    
+    // FormReVerifyAddress
+    private String existingAddress;
     
     @PostConstruct
     public void init(){
@@ -72,19 +74,27 @@ public class MySettingsProgram extends Program {
         this.deleteAddress = deleteAddress;
     }
 
+    public String getExistingAddress() {
+        return existingAddress;
+    }
+
+    public void setExistingAddress(String existingAddress) {
+        this.existingAddress = existingAddress;
+    }
+
     @Override
     public void clearVariables() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void initRequestParams() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void initProgram() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
     
     

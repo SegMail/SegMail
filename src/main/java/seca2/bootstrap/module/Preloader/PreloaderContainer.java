@@ -29,6 +29,8 @@ public class PreloaderContainer {
     
     private int timeout;
     
+    private boolean render;
+    
     @PostConstruct
     public void init() {
         timeout = 1000; //default 2s
@@ -73,6 +75,12 @@ public class PreloaderContainer {
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
-    
-    
+
+    public boolean isRender() {
+        return render;
+    }
+
+    public void setRender(boolean render) {
+        this.render = render;
+    }
 }

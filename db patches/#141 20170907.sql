@@ -1,26 +1,18 @@
 # Update all SUBSCRIBER_ACCOUNT.SUBSCRIBER_STATUS from ACTIVE to VERIFIED
 update SUBSCRIBER_ACCOUNT set SUBSCRIBER_STATUS = 'VERIFIED' where SUBSCRIBER_STATUS = 'ACTIVE';
 
-# This is for the new dashboard changes
-# Update all Menu grouping for MENUITEM_ACCESS before deploying code changes and config changes
-ALTER TABLE `MENUITEM_ACCESS` ADD `MENU_GROUP` VARCHAR(255) NULL DEFAULT NULL AFTER `MENU_ORDER`;
-update MENUITEM_ACCESS set MENU_GROUP = 'LEFT';
-update MENUITEM_ACCESS set MENU_GROUP = 'PROFILE' where SOURCE in (select OBJECTID from MENUITEM where MENU_ITEM_URL = '/program/mysettings/');
-# Set Dashboard as the default program for Segmail Users
-update PROGRAM_ASSIGNMENT 
-set DEFAULT_ASSIGNMENT = false
-WHERE
-	TARGET in (select OBJECTID from USERTYPE where USERTYPENAME in ('Segmail User'));
+# Adding number of confirmation emails sent to an account
+ALTER TABLE `SUBSCRIPTION` ADD `NUM_CONFIRM_SENT` INT NOT NULL AFTER `UNSUBSCRIBE_KEY`;
 
-update PROGRAM_ASSIGNMENT 
-set DEFAULT_ASSIGNMENT = true
-WHERE
-	(TARGET,SOURCE,REL_SEQUENCE) in (
-        select ass.TARGET, ass.SOURCE, ass.REL_SEQUENCE
-        from (select * from PROGRAM_ASSIGNMENT) ass
-        left join PROGRAM p on ass.SOURCE = p.OBJECTID
-        left join USERTYPE t on ass.TARGET = t.OBJECTID
-        where 
-        	p.PROGRAM_NAME = 'dashboard'
-        	and t.USERTYPENAME in ('Segmail User')
-    	);
+# Adding the Subscriber ID column in TRIGGER_EMAIL_ACTIVITY for Subscriber Timeline
+ALTER TABLE `TRIGGER_EMAIL_ACTIVITY` ADD `SUBSCRIBER_ID` BIGINT NOT NULL AFTER `SUBCRIBER_EMAIL`;
+# To correct a spelling mistake
+ALTER TABLE `TRIGGER_EMAIL_ACTIVITY` CHANGE `SUBCRIBER_EMAIL` `SUBSCRIBER_EMAIL` varchar(255);
+# Migrate all Subscriber ID into TRIGGER_EMAIL_ACTIVITY
+UPDATE 
+`TRIGGER_EMAIL_ACTIVITY` t 
+LEFT JOIN ASSIGN_CAMPAIGN_ACTIVITY aca ON t.TRIGGERING_OBJECT = aca.TARGET
+LEFT JOIN ASSIGN_CAMPAIGN_CLIENT acc ON aca.SOURCE = acc.SOURCE
+LEFT JOIN SUBSCRIBER_ACCOUNT sa ON sa.EMAIL = t.SUBSCRIBER_EMAIL
+LEFT JOIN SUBSCRIBER_OWNERSHIP so ON so.SOURCE = sa.OBJECTID AND so.TARGET = acc.TARGET
+SET t.SUBSCRIBER_ID = so.SOURCE

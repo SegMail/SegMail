@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -96,11 +97,17 @@ public class FormWizardAddress {
             formWizard.nextPage();
             
         } catch (DataValidationException ex) {
-            Logger.getLogger(program.getClass().getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (EntityExistsException ex) {
-            Logger.getLogger(program.getClass().getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (EJBException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");
+        } catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
         
     }

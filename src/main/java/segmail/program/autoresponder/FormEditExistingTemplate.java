@@ -51,7 +51,6 @@ public class FormEditExistingTemplate implements FormEditEntity {
     private AutoresponderService autoresponderService;
     @EJB
     private GenericObjectService objectService;
-    //@EJB private UserService userService;
     @EJB
     private ListService listService;
     @EJB
@@ -59,13 +58,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     @EJB
     MailMergeService mmService;
 
-    @Inject
-    private ProgramAutoresponder program;
-
-    @Inject
-    private UserSessionContainer userContainer;
-    @Inject
-    private UserRequestContainer requestContainer;
+    @Inject ProgramAutoresponder program;
     @Inject AutoresponderSessionContainer autoresponderCont;
 
     @PostConstruct
@@ -170,7 +163,6 @@ public class FormEditExistingTemplate implements FormEditEntity {
         } catch (EntityExistsException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
@@ -187,7 +179,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void delete() {
         try {
             autoresponderService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template deleted.", null);
+            FacesMessenger.setFacesMessage(ProgramAutoresponder.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template deleted.", null);
             program.refresh();
 
         } catch (EntityNotFoundException ex) {
@@ -256,9 +248,9 @@ public class FormEditExistingTemplate implements FormEditEntity {
                 getMailmergeLinks().put(request.label(), url);
             }
         } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramAutoresponder.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramAutoresponder.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } 
     }
     

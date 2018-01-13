@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf">
+    <h:form id="FormReVerifyAddress" prependId="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 id="popup_title" class="modal-title">Resend your verification email</h4>
+                </div>
+                <h:inputHidden id="existingAddress" value="#{FormReVerifyAddress.existingAddress}" ></h:inputHidden>
+                <div class="modal-body refresh">
+                    
+                    <s2:messenger for="FormReVerifyAddress" showDetail="true" showSummary="true"
+                                class="form-group"></s2:messenger>
+                    <p>
+                        Re-send the confirmation from Amazon Web Services if you have not received it.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <h:commandLink  class="btn btn-warning">
+                        <f:ajax render="@form"
+                                execute="@form"
+                                onevent="deleteAddress"
+                                listener="#{FormReVerifyAddress.reverify()}"
+                                >
+                        </f:ajax>
+                        Re-send email
+                    </h:commandLink>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</html>

@@ -119,19 +119,19 @@ public class FormWizardList {
             
         } catch (IncompleteDataException ex) {
             Logger.getLogger(FormWizardList.class.getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (EnterpriseObjectNotFoundException ex) {
             Logger.getLogger(FormWizardList.class.getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
             Logger.getLogger(FormWizardList.class.getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (EntityNotFoundException ex) {
             Logger.getLogger(FormWizardList.class.getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (DataValidationException ex) {
             Logger.getLogger(FormWizardList.class.getName()).log(Level.SEVERE, null, ex);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
         
     }

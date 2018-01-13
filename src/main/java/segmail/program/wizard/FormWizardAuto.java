@@ -30,6 +30,7 @@ import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
+import segmail.program.signup.FormSignupCode;
 
 /**
  *
@@ -40,6 +41,7 @@ import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 public class FormWizardAuto {
     @Inject ProgramSetupWizard program;
     @Inject FormWizardInit formWizard;
+    @Inject FormSignupCode formSignupCode; // For a hack to re-use signup code form
     
     @EJB GenericObjectService objService;
     @EJB UpdateObjectService updService;
@@ -137,9 +139,9 @@ public class FormWizardAuto {
                 getMailmergeLinks().put(request.label(), url);
             }
         } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramSetupWizard.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
     
@@ -163,5 +165,10 @@ public class FormWizardAuto {
         setWelcomeEmail(welcome);
         
         formWizard.nextPage();
+        
+        // a hack to re-use signupcode form
+        formSignupCode.loadOwnLists();
+        formSignupCode.selectDefaultList();
+        formSignupCode.reloadList();
     }
 }

@@ -137,4 +137,7 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
                 );
     }
 
+    public FIELD_TYPE TYPE() {
+        return FIELD_TYPE.valueOf(TYPE);
+    }
 }

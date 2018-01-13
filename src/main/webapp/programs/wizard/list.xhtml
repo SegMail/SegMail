@@ -56,6 +56,7 @@
                         <div class="col-md-2">
                             <h:commandLink styleClass="btn btn-primary btn-lg pull-right"
                                            onclick="return listForm().form();"
+                                           pass:data-page="list"
                                            >
                                 <f:ajax render="@form :FormWizardInit" execute="@form :FormWizardInit"
                                         onevent="refresh"

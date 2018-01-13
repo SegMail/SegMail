@@ -5,10 +5,7 @@
  */
 package segmail.program.wizard;
 
-import eds.component.GenericObjectService;
 import eds.component.client.ClientAWSService;
-import eds.entity.client.Client;
-import eds.entity.client.VerifiedSendingAddress;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -19,7 +16,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
-import seca2.bootstrap.module.Client.ClientContainer;
 
 /**
  *
@@ -40,6 +36,7 @@ public class FormWizardInit {
     public void init() {
         if(!FacesContext.getCurrentInstance().isPostback()) {
             initPageToolbar();
+            gotoStage(0);
         }
     }
     

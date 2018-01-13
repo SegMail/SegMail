@@ -41,7 +41,7 @@ public class FormDeleteVerifiedAddress {
     public void delete() {
         try{
             clientAWSService.deleteVerifiedAddressAndSESIdentity(clientCont.getClient(), this.getDeleteAddress());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Your sending address has been removed.", "");
+            FacesMessenger.setFacesMessage(MySettingsProgram.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Your sending address has been removed.", "");
             program.refresh();
         } catch(AWSException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");

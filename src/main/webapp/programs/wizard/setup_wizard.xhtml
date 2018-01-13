@@ -9,11 +9,12 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
     xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <h:form id="ProgramSetupWizard">
-        <h:inputHidden value="#{FormWizardInit}"></h:inputHidden>
-        <h:inputHidden value="#{FormWizardAddress}"></h:inputHidden>
-        <h:inputHidden value="#{FormWizardList}"></h:inputHidden>
+    <h:form id="ProgramSetupWizard" prependId="false">
         <c:set var="stage" value="#{FormWizardInit.currentStage}"></c:set>
+        <input id="page" type="hidden" value="#{FormWizardInit.stages.get(stage)}" />
+        
         <ui:include src="#{FormWizardInit.stages.get(stage)}.xhtml" ></ui:include>
+        <s2:messenger id="ProgramSetupWizard_messenger" for="ProgramSetupWizard" showDetail="true" showSummary="true"></s2:messenger>
+        <p:messages for="ProgramSetupWizard" ></p:messages>
     </h:form>
 </html>

@@ -53,7 +53,7 @@ public class FormCancelJobRun implements FormEditEntity{
             scheduleService.cancelBatchJobRun(getEditingBatchJobRun().getRUN_KEY());
             DateTime current = program.getCurrentRunDateTime();
             scheduleService.triggerFirstBatchJobRun(current,getEditingBatchJob());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
+            FacesMessenger.setFacesMessage(ProgramBatch.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
             closeWithoutSaving();
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

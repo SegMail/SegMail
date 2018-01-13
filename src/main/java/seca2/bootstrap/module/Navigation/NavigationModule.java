@@ -61,8 +61,6 @@ public class NavigationModule extends BootstrapModule implements Serializable {
         UserType userType = sessionContainer.getUserType();
 
         //For all other programs which changes menu items assignment, just nullify menu attribute of the sessionContainer
-        String currentProgram = requestContainer.getProgramName();
-        List<MenuItemContainer> existingMenuItems = sessionContainer.getMenu();//debug
         if (sessionContainer.getMenu() == null) {
             loadMenusFromDB(sessionContainer, contextPath);
         }
@@ -151,7 +149,7 @@ public class NavigationModule extends BootstrapModule implements Serializable {
 
     @Override
     protected boolean bypassDuringWeb() {
-        return false;
+        return true;
     }
 
     public void loadMenusFromDB(UserSessionContainer sessionContainer, String contextPath) {

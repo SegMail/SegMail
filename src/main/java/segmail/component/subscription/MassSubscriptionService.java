@@ -34,7 +34,6 @@ import org.joda.time.DateTime;
 import static segmail.component.subscription.SubscriptionService.DEFAULT_EMAIL_FIELD_NAME;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
-import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
@@ -266,6 +265,7 @@ public class MassSubscriptionService {
                 //First check if it is a valid field with the List
                 if (createNew) {
                     SubscriberFieldValue newValue = new SubscriberFieldValue();
+                    
                     newValue.setFIELD_KEY(key);
                     newValue.setVALUE((String) survivor.get(key));
                     if (account == null) {
@@ -337,7 +337,7 @@ public class MassSubscriptionService {
             //Update the number of subscribers (async call)
             //Only if there are new subscriptions created
             if(createNewSubscription != null && !createNewSubscription.isEmpty())
-                subService.updateSubscriberCount(list.getOBJECTID());
+                subService.updateSubscriberCount(list,start);
             
             //Send confirmation email if double optin is turned on (must be last)
             if (doubleOptin) {
@@ -405,10 +405,10 @@ public class MassSubscriptionService {
             query.set(SubscriberFieldValue_.VALUE, fieldValue.getVALUE());
             query.where(
                     builder.and(
-                            builder.equal(fromValue.get(SubscriberFieldValue_.OWNER), fieldValue.getOWNER())),
-                    builder.equal(fromValue.get(SubscriberFieldValue_.START_DATE), fieldValue.getSTART_DATE()),
-                    builder.equal(fromValue.get(SubscriberFieldValue_.END_DATE), fieldValue.getEND_DATE()),
-                    builder.equal(fromValue.get(SubscriberFieldValue_.SNO), fieldValue.getSNO()
+                            builder.equal(fromValue.get(SubscriberFieldValue_.OWNER), fieldValue.getOWNER()),
+                            builder.equal(fromValue.get(SubscriberFieldValue_.START_DATE), fieldValue.getSTART_DATE()),
+                            builder.equal(fromValue.get(SubscriberFieldValue_.END_DATE), fieldValue.getEND_DATE()),
+                            builder.equal(fromValue.get(SubscriberFieldValue_.SNO), fieldValue.getSNO())
                     )
             );
 
@@ -542,165 +542,6 @@ public class MassSubscriptionService {
         objService.getEm().flush();
         
         return subscriptions;
-    }
-    
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void massSubscribeToMultipleLists(long clientId, List<Map<String,Object>> subs, List<Long> listIds, boolean optin) {
-        //Required existing data for validations
-        List<SubscriptionListField> fields = objService.getEnterpriseDataByIds(listIds, SubscriptionListField.class);
-        
-        //Separate the subscribers into multiple lists
-        List<SubscriberAccount> accounts = constructAccounts(clientId,subs,fields);
-        updateOrInsertAccounts(accounts);
-        
-        List<SubscriberFieldValue> fieldValues = constructFieldValues(subs,accounts,fields);
-        updateOrInsertValues(fieldValues);
-        
-        List<Subscription> subscriptions = constructSubsc(accounts,listIds);
-        updateOrInsertSubsc(subscriptions);
-    }
-
-    /**
-     * 1) Get existing accounts if they exists
-     * 2) Construct new SubscriberAccount objects for new records
-     * 
-     * Note:
-     * <ul>
-     * <li>BOUNCED subscribers will still remain as BOUNCED</li>
-     * </ul>
-     * 
-     * @param subs
-     * @return 
-     */
-    private List<SubscriberAccount> constructAccounts(
-            long clientId,
-            List<Map<String, Object>> subs,
-            List<SubscriptionListField> fields
-            ) {
-        
-        //Get email fields
-        List<SubscriptionListField> emailFields = new ArrayList<>();
-        for(SubscriptionListField field : fields) {
-            if(field.getTYPE().equals(FIELD_TYPE.EMAIL))
-                emailFields.add(field);
-        }
-        
-        //Get email values
-        List<String> emails = new ArrayList<>();
-        for(Map<String,Object> sub : subs) {
-            for(SubscriptionListField emailField : emailFields) {
-                if(sub.containsKey((String)emailField.generateKey()))
-                    emails.add((String) sub.get((String)emailField.generateKey()));
-            }
-        }
-        
-        //Retrieve those which already exists
-        List<SubscriberAccount> existAcc = subService.getSubscribersForClientByEmails(emails, clientId);
-        
-        //Construct those which does not exist and add those that exist into a new List
-        List<SubscriberAccount> allAcc = new ArrayList<>();
-        for(String email : emails) {
-            SubscriberAccount newAcc = null;
-            for(SubscriberAccount acc : existAcc) {
-                if(email.equals(acc.getEMAIL())) { //Already exist
-                    newAcc = acc;
-                    //Only if the status is INACTIVE, revert to VERIFIED
-                    //If the status is BOUNCED, leave it
-                    if(newAcc.getSUBSCRIBER_STATUS().equals(SUBSCRIBER_STATUS.INACTIVE.name))
-                        newAcc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.VERIFIED.name);
-                }
-            }
-            if(newAcc == null) { //Construct new SubscriberAccount object
-                newAcc = new SubscriberAccount();
-                newAcc.setEMAIL(email);
-                newAcc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.NEW.name);
-            }
-            allAcc.add(newAcc);
-        }
-        
-        return allAcc;
-    }
-
-    private List<Subscription> constructSubsc(List<SubscriberAccount> accounts, List<Long> listIds) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    /**
-     * 1) Retrieve existing SubscriberFieldValue
-     * 2) Construct new SubscriberFieldValue objects
-     * 
-     * @param subs
-     * @param accounts
-     * @param fields
-     * @return 
-     */
-    private List<SubscriberFieldValue> constructFieldValues(
-            List<Map<String, Object>> subs, 
-            List<SubscriberAccount> accounts,
-            List<SubscriptionListField> fields
-            ) {
-        //Retrieve all existing SubscriberFieldValue
-        List<SubscriberFieldValue> existValues = subService.getSubscriberValuesBySubscriberObjects(accounts);
-        
-        //Find new values and create SubscriberFieldValue for them
-        for(Map<String, Object> sub : subs) {
-            //Get the email first, this will be the "key" to the Subscriber
-            String email = "";
-            for(SubscriptionListField field : fields ) {
-                if(FIELD_TYPE.EMAIL.name.equals(field.getTYPE()) &&
-                        sub.containsKey((String)field.generateKey())) {
-                    email = (String) sub.get((String)field.generateKey());
-                }
-            }
-            //Get all existing SubscriberFieldValue for this email from existValues
-            //Get the SubscriberAccount first then find existing SubscriberFieldValue by using OBJECTID
-            SubscriberAccount acc = null;
-            List<SubscriberFieldValue> values = new ArrayList<>();
-            for(SubscriberAccount account : accounts) {
-                if(email.equals(account.getEMAIL())) {
-                    acc = account;
-                    break;
-                }
-            }
-            for(SubscriberFieldValue existValue : existValues) {
-                if(existValue.getOWNER().equals(acc)) {
-                    values.add(existValue);
-                }
-            }
-            //Havng values now, we can loop through all values in sub and 
-            //construct new values which have not exist yet and add them into values
-            for(String key : sub.keySet()) {
-                SubscriberFieldValue checkValue = null;
-                for(SubscriberFieldValue value : values) {
-                    if(value.getFIELD_KEY().equals(key)) {
-                        checkValue = value;
-                        break;
-                    }
-                }
-                if(checkValue == null) { //Don't exist yet
-                    SubscriberFieldValue newValue = new SubscriberFieldValue();
-                    newValue.setFIELD_KEY(key);
-                    newValue.setOWNER(acc);
-                    newValue.setVALUE((String) sub.get(key));
-                    
-                }
-            }
-        }
-        
-        return null;
-    }
-
-    private void updateOrInsertAccounts(List<SubscriberAccount> accounts) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private void updateOrInsertValues(List<SubscriberFieldValue> fieldValues) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private void updateOrInsertSubsc(List<Subscription> subscriptions) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

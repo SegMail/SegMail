@@ -42,6 +42,14 @@ var initVerify = function() {
     });
 };
 
+var initReverify = function() {
+    $('.re-verify').click(function(){
+        var email = $(this).data('email');
+        $('#existingAddress').val(email);
+    })
+}
+
 $(document).ready(function(){
     initVerify();
+    initReverify();
 });

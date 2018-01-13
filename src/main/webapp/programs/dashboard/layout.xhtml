@@ -10,43 +10,46 @@
       xmlns:jsf="http://xmlns.jcp.org/jsf">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
-        <ui:define name="toolbar-right">
-            <h:inputHidden value="#{FormSwitcherDashboard}"></h:inputHidden>
-        </ui:define>
-
         <ui:define name="main-program-panel">
             <ui:include src="dashboard.xhtml"></ui:include>
             
-            <div class="modal fade" id="">
-                <ui:include src="" ></ui:include>
+            <div class="modal fade" id="welcome">
+                <ui:include src="welcome.xhtml" ></ui:include>
             </div>
         </ui:define>
         
         <ui:define name="toolbar-right"  >
-            
+            <h:inputHidden value="#{FormSwitcherDashboard}"></h:inputHidden>
         </ui:define>
 
         <ui:define name="scripts-bottom">
-            
-            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstra-wizard/jquery.bootstrap.wizard.min.js"></script>
             
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js"></script>
             <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/excanvas.min.js'></script>    
             <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.js'></script>    
             <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.stack.js'></script>    
             <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.pie.js'></script>
-            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.resize.js'></script>  
+            <script type='text/javascript' src='#{request.contextPath}/templates/beprobootstrap/js/plugins/flot/jquery.flot.resize.js'></script> 
+            
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/sparkline/jquery.sparkline.min.js"></script> 
             
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
             
-            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-typeahead/bootstrap3-typeahead.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/d3.v3.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/rickshaw/rickshaw.min.js"></script>
             
-            <script type="text/javascript" src="#{request.contextPath}/programs/dashboard/js/setup_wizard.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/chartjs/Chart.bundle.js" />
+            
             <script type="text/javascript" src="#{request.contextPath}/programs/dashboard/js/dashboard.js" />
             
-            
+            <script type="text/javascript">
+                var CONTEXT_PATH = '#{request.contextPath}';
+                var DEFAULT_DAYS = #{ProgramDashboard.DEFAULT_DAYS};
+                var MAX_LATEST_SUBSCRIBERS = #{ProgramDashboard.MAX_LATEST_SUBSCRIBERS};
+                var SHOW_WELCOME = #{FormWizardRedirect.showWelcome};
+            </script>
         </ui:define>
 
         <ui:define name="head">

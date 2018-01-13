@@ -33,6 +33,5 @@ public class FormSwitcherDashboard {
     public void initPageToolbar() {
         reqCont.setRenderPageToolbar(false);
         reqCont.setRenderPageBreadCrumbs(false); 
-        
     }
 }

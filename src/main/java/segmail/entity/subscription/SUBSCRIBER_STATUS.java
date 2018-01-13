@@ -12,8 +12,8 @@ package segmail.entity.subscription;
 public enum SUBSCRIBER_STATUS {
     NEW("NEW"),
     VERIFIED("VERIFIED"), // Verified email
-    REMOVED("REMOVED"), // Remove themselves voluntarily
-    INACTIVE("INACTIVE"), // Removed by administrator
+    REMOVED("REMOVED"), // Removed by administrator, might be restored later
+    UNSUBSRIBE_ALL("UNSUBSRIBE_ALL"), // Remove themselves voluntarily, once they have removed themselves from all lists, then they will be in UNSUBSCRIBE_ALL status
     BOUNCED("BOUNCED"); // Any hard bounces
     
     public final String name;

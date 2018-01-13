@@ -93,10 +93,28 @@ public class FormSubscriberView {
         program.setSubscribedSince(subscribedSince);
     }
     
+    public List<SubscriptionListField> getFieldList() {
+        return program.getFieldList();
+    }
+
+    public void setFieldList(List<SubscriptionListField> fieldList) {
+        program.setFieldList(fieldList);
+    }
+    
+    public List<SubscriptionListField> getRemainFields() {
+        return program.getRemainFields();
+    }
+
+    public void setRemainFields(List<SubscriptionListField> remainFields) {
+        program.setRemainFields(remainFields);
+    }
+    
     @PostConstruct
     public void init(){
         if(!FacesContext.getCurrentInstance().isPostback()) {
             loadSubscriber();
+            calculateAge();
+            loadFieldLists();
         }
     }
     
@@ -130,15 +148,17 @@ public class FormSubscriberView {
         }
         
         // Set values/attributes
-        List<SubscriberFieldValue> values = objService.getEnterpriseData(subscriberId, SubscriberFieldValue.class);
+        program.loadSubscriberValues(subscriberId);
+        /*List<SubscriberFieldValue> values = objService.getEnterpriseData(subscriberId, SubscriberFieldValue.class);
         List<String> fieldkeys = new ArrayList<>(); // This is for later
-        setSubscriberValues(new HashMap<>());
+        Map<String,SubscriberFieldValue> subscriberValues = new HashMap<>();
         values.forEach(v -> {
             if(!fieldkeys.contains(v.getFIELD_KEY())) {
                 fieldkeys.add(v.getFIELD_KEY());
             }
-            getSubscriberValues().put(v.getFIELD_KEY(), v);
+            subscriberValues.put(v.getFIELD_KEY(), v);
         });
+        setSubscriberValues(subscriberValues);*/
         
         // Set subscriptions
         List<Subscription> subscriptions = objService.getRelationshipsForSourceObject(subscriberId, Subscription.class);
@@ -146,21 +166,34 @@ public class FormSubscriberView {
         
         // Set field-value map containing both field and value information
         List<Long> listIds = subscriptions.stream().map(s -> s.getTARGET().getOBJECTID()).collect(toList());
-        List<SubscriptionListField> fields = listService.getFieldsByKeyOrLists(fieldkeys, listIds);
-        
+        List<SubscriptionListField> fields = listService.getFieldsByKeyOrLists(
+                new ArrayList<>(getSubscriberValues().keySet()), listIds);
+        setFieldList(fields);
         
         // Set since date
         setSubscribedSince(new DateTime(subscriber.getDATE_CREATED()));
         
-        // Calculate Age
-        calculateAge();
     }
     
     public void calculateAge() {
         SubscriberAccount acc = getSubscriber();
         String ageString = subService.calculateSubscriberAge(acc, DateTime.now());
         
-        program.setSubscriberAge(ageString);
+        setSubscriberAge(ageString);
+    }
+    
+    public void loadFieldLists() {
+        
+        List<SubscriptionListField> fields = getFieldList();
+        Map<String,SubscriberFieldValue> valueMap = getSubscriberValues();
+        
+        setRemainFields(new ArrayList<>());
+        for(SubscriptionListField field : fields) {
+            if(!valueMap.containsKey(field.generateKey())) {
+                getRemainFields().add(field);
+            }
+        }
+        
     }
     
     public void resendConfirmation() {

@@ -5,6 +5,9 @@
  */
 package segmail.entity.subscription;
 
+import org.apache.commons.validator.routines.EmailValidator;
+import org.joda.time.DateTime;
+
 /**
  *
  * @author LeeKiatHaw
@@ -22,8 +25,46 @@ public enum FIELD_TYPE {
 
     @Override
     public String toString() {
-        return this.name; //To change body of generated methods, choose Tools | Templates.
+        return this.name;
     }
     
+    public void validate(Object value) throws SubscriberFieldValidationException {
+        if(value == null)
+            throw new SubscriberFieldValidationException("Field values cannot be null.");
+        
+        switch(this) {
+            case EMAIL : validateEMAIL(value.toString());
+                break;
+            case DATE : validateDATE(value);
+                break;
+            case TEXT : validateTEXT(value.toString());
+                break;
+            default : break;
+        }
+    }
     
+    void validateEMAIL(String email) throws SubscriberFieldValidationException {
+        if(!EmailValidator.getInstance().isValid(email))
+            throw new SubscriberFieldValidationException("Email "+email+" is not valid.");
+    }
+    
+    void validateDATE(Object date) throws SubscriberFieldValidationException {
+        if(!date.getClass().isAssignableFrom(java.sql.Date.class)
+                || !date.getClass().isAssignableFrom(DateTime.class)
+                || !date.getClass().isAssignableFrom(String.class))
+            throw new SubscriberFieldValidationException("Date object "+date.toString()+" is not valid.");
+        
+        if(date.getClass().isAssignableFrom(String.class)) {
+            try {
+                String dateValue = (String) date;
+                DateTime dt = DateTime.parse(dateValue);
+            } catch (Exception ex) { // Any parsing errors
+                throw new SubscriberFieldValidationException("Invalid Date object: "+ex.getMessage());
+            }
+        }
+    }
+    
+    void validateTEXT(String value) {
+        
+    }
 }

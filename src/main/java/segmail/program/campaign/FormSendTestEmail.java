@@ -68,7 +68,7 @@ public class FormSendTestEmail {
     public void sendPreview() {
         try {
             exeService.sendPreview(this.getEditingActivity(), this.getSelectedPreviewAddress(), clientCont.getClient().getOBJECTID());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Preview sent!", "");
+            FacesMessenger.setFacesMessage(ProgramCampaign.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Preview sent!", "");
             program.refresh();
         } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
