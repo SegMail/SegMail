@@ -14,9 +14,18 @@
                     >
         <ui:define name="main-program-panel">
             <div class="row">
-                
+                <div class="col-md-12">
+                    <s2:messenger for="ProgramSubscribers" showDetail="true" showSummary="true"
+                                  closable="true" ></s2:messenger>
+                </div>
             </div>
             <div class="row">
+                <h:inputHidden value="#{FormScreenSwitch}" ></h:inputHidden>
+            </div>
+            <div class="row" jsf:rendered="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[0]}" >
+                <ui:include src="setup.xhtml" ></ui:include>
+            </div>
+            <div class="row" jsf:rendered="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[1]}" >
                 <div class="col-md-8">
                     <ui:include src="subscriber_table.xhtml" ></ui:include>
                 </div>
@@ -32,6 +41,11 @@
                     </div>
                 </div>
             </div>
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}" >
+                <div>
+                    <ui:include src="subscriber_view.xhtml"></ui:include>
+                </div>
+            </c:if>
 
             <div class="modal fade" id="import_subscriber_popup">
                 <ui:include src="import_subscriber_popup.xhtml"></ui:include>
@@ -40,6 +54,56 @@
             <div class="modal fade" id="add_subscriber_popup">
                 <ui:include src="add_subscriber_popup.xhtml"></ui:include>
             </div>
+            
+            <div class="modal fade" id="select_columns_popup">
+                <ui:include src="select_columns_popup.xhtml"></ui:include>
+            </div>
+            
+            <div class="modal fade" id="add_datasource_popup">
+                <ui:include src="add_datasource.xhtml"></ui:include>
+            </div>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="add_subscriber_field_popup">
+                    <ui:include src="add_subscriber_field_popup.xhtml"></ui:include>
+                </div>
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="delete_subscriber_field_popup">
+                    <ui:include src="delete_subscriber_field_popup.xhtml"></ui:include>
+                </div>
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="resend_confirmation_popup">
+                   <ui:include src="resend_confirmation_popup.xhtml"></ui:include>
+               </div>
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="remove_subscription_popup">
+                    <ui:include src="remove_subscription_popup.xhtml"></ui:include>
+                </div>
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="restore_subscription_popup">
+                    <ui:include src="restore_subscription_popup.xhtml"></ui:include>
+                </div>
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="send_email_popup">
+                    <ui:include src="send_email_popup.xhtml" ></ui:include>
+                </div>
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <div class="modal fade" id="preview_campaign_popup">
+                    <ui:include src="preview_campaign_popup.xhtml" ></ui:include>
+                </div>
+            </c:if>
         </ui:define>
 
         <ui:define name="scripts-bottom">
@@ -54,10 +118,23 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
             <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.min.js" />
+            <script type="text/javascript" src="#{request.contextPath}/templates/common/js/mailmerge/mailmerge.js"></script>
             
-            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import_subscriber_popup.js" />
-            <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/add_subscriber_popup.js" />
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[0]}">
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/setup.js" />
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[1]}">
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import_subscriber_popup.js" />
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/add_subscriber_popup.js" />
+            </c:if>
+            
+            <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[2]}">
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_view.js" />
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_timeline.js" />
+            </c:if>
             
             <script type="text/javascript">
                 var CONTEXT_PATH = '#{request.contextPath}';

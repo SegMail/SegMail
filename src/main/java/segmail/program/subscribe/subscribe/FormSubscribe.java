@@ -7,7 +7,7 @@ package segmail.program.subscribe.subscribe;
 
 import eds.component.data.RelationshipExistsException;
 import java.io.IOException;
-import java.util.logging.Level;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.jboss.logging.Logger;
 import seca2.bootstrap.module.Webservice.REST.client.RedirectException;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.program.subscribe.subscribe.client.RestClientSubscribe;
 
 /**
@@ -52,9 +53,9 @@ public class FormSubscribe {
     public void callWS() {
         try {
             String confirmationKey = wsClient.subscribe(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterValuesMap());
-            //setListname(sub.getTARGET().getLIST_NAME());
-            this.setPageName(program.getPAGE_ALREADY_SUBSCRIBED_AND_RESEND());
-            this.setConfirmationKey(confirmationKey);
+            
+            setPageName(program.getPAGE_ALREADY_SUBSCRIBED_AND_RESEND());
+            setConfirmationKey(confirmationKey);
         } catch (RedirectException ex) {
             try {
                 FacesContext.getCurrentInstance().getExternalContext().redirect(ex.getMessage());
@@ -64,9 +65,15 @@ public class FormSubscribe {
                 setErrorMessage(ex.getMessage());
             }
         } catch (RelationshipExistsException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Logger.Level.ERROR, ex);
-            this.setPageName(program.getPAGE_ALREADY_CONFIRMED());
-            this.setConfirmationKey(ex.getMessage());
+            String message = (ex.getMessage() == null) ? "" : ex.getMessage();
+            if(message.equals(SUBSCRIPTION_STATUS.CONFIRMED.name)) {
+                setPageName(program.getPAGE_ALREADY_CONFIRMED());
+            } else if (message.equals(SUBSCRIPTION_STATUS.NEW.name)) {
+                setPageName(program.getPAGE_ALREADY_SUBSCRIBED_AND_RESEND());
+                setConfirmationKey(ex.getMessage());
+            } else {
+                setPageName(program.getPAGE_ALREADY_CONFIRMED());
+            }
         } catch (Throwable ex) {
             this.setPageName(program.getPAGE_GENERIC_ERROR());
             setErrorMessage(ex.getMessage());

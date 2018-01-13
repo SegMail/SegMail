@@ -6,7 +6,6 @@
 package seca2.jsf.custom.messenger;
 
 import javax.faces.component.FacesComponent;
-import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIMessages;
 
 /**
@@ -16,8 +15,9 @@ import javax.faces.component.UIMessages;
 @FacesComponent(MessengerComponent.COMPONENT_TYPE)
 public class MessengerComponent extends UIMessages {
 
-    public static final String COMPONENT_FAMILY = "Messenger";
-    public static final String COMPONENT_TYPE = "Messenger";
+    public static final String COMPONENT_FAMILY = "seca2.jsf.custom.messenger";
+    public static final String COMPONENT_TYPE = "seca2.jsf.custom.messenger.MessengerComponent";
+    public static final String DEFAULT_RENDERER = "seca2.jsf.custom.messenger.MessengerRenderer";
     
     //Properties
     private static final String CLOSABLE = "closable";
@@ -30,7 +30,7 @@ public class MessengerComponent extends UIMessages {
     private static final Boolean SHOW_DETAILS_DEFAULT = true;
 
     public MessengerComponent() {
-        
+        setRendererType(DEFAULT_RENDERER);
     }
 
     
@@ -51,4 +51,5 @@ public class MessengerComponent extends UIMessages {
     public String getFamily() {
         return MessengerComponent.COMPONENT_FAMILY;
     }
+    
 }

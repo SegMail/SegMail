@@ -19,6 +19,7 @@ import javax.jws.WebService;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
+import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
@@ -64,7 +65,7 @@ public class WSUnsubscribe implements WSUnsubscribeInterface {
                 return "This is a testing list";
             }
             
-            List<Subscription> subs = subService.unsubscribeSubscriber(key);
+            List<Subscription> subs = subService.updateSubscription(key,SUBSCRIPTION_STATUS.UNSUBSCRIBED);
             //Assume that there is only 1 unique key for Subscriptions
             Subscription sub = subs.get(0);
             SubscriberAccount subscriber = sub.getSOURCE();

@@ -11,7 +11,6 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
-import segmail.component.campaign.CampaignExecutionService;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.subscription.SubscriptionList;
@@ -72,8 +70,7 @@ public class FormExecuteCampaignActivity {
     public void executeAndClose() {
         try {
             campService.startSendingCampaignEmail(program.getEditingActivity());
-            //campExecService.executeCampaignActivity(program.getEditingActivity().getOBJECTID(), 10);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity "+program.getEditingActivity().getACTIVITY_NAME()+" has started.", "");
+            FacesMessenger.setFacesMessage(ProgramCampaign.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity "+program.getEditingActivity().getACTIVITY_NAME()+" has started.", "");
             program.refresh();
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

@@ -27,7 +27,7 @@
                         signup to confirm that the email address that they have provided belongs
                         to them.
                     </p>
-                    <div class="form-group">
+                    <div class="form-group" jsf:rendered="false">
                         <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
                            onclick="$('#popup_title').html('Create new confirmation email');
                                     $('#email_type').val('CONFIRMATION')">
@@ -58,7 +58,7 @@
                     <p>
                         Welcome emails are sent to your subscribers upon confirmation of their subscription.
                     </p>
-                    <div class="form-group">
+                    <div class="form-group" jsf:rendered="false">
                         <a class="btn btn-success" href="#add_new_auto_email_popup" data-toggle="modal"
                            onclick="$('#popup_title').html('Create new welcome email');
                                     $('#email_type').val('WELCOME')">

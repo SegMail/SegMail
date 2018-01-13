@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <h:form id="FormSendSingleEmail" prependId="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <c:if test="#{FormSendSingleEmail.preview}">
+                        <h4 class="modal-title">Preview your email before sending</h4>
+                    </c:if>
+                    <c:if test="#{not FormSendSingleEmail.preview}">
+                        <h4 class="modal-title">Send an email</h4>
+                    </c:if>
+                </div>
+                <div class="modal-body" jsf:rendered="#{not FormSendSingleEmail.preview}">
+
+                    <div class="form-group">
+                        <label>Sender address:</label>
+                        <h:selectOneMenu styleClass=" form-control"
+                                         value="#{FormSendSingleEmail.senderAddress}">
+                            <f:selectItems value="#{FormSendSingleEmail.verifiedAddresses}"
+                                           var="address"
+                                           itemLabel="#{address.VERIFIED_ADDRESS}"
+                                           itemValue="#{address.VERIFIED_ADDRESS}"
+                                           >
+                            </f:selectItems>
+                        </h:selectOneMenu>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject:</label>
+                        <h:inputText styleClass="form-control" value="#{FormSendSingleEmail.subject}"
+                                     >
+                        </h:inputText>
+                    </div>
+                    <div class="form-group" style="height: 400px;">
+                        <h:inputTextarea id="editor" styleClass="editor form-control"
+                                         value="#{FormSendSingleEmail.body}"
+                                         >
+                        </h:inputTextarea> 
+                    </div>
+                </div>
+                <div class="modal-body" jsf:rendered="#{FormSendSingleEmail.preview}">
+                    <p>
+                        <strong>From:</strong>
+                        <span>#{FormSendSingleEmail.senderAddress}</span>
+                        <br/>
+                        <strong>Subject:</strong>
+                        <span>#{FormSendSingleEmail.subject}</span>
+                    </p>
+                    <p>
+                        <h:outputText id="preview" value="#{FormSendSingleEmail.body}"
+                                      escape="false" styleClass="col-md-12">
+                        </h:outputText>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <h:commandButton styleClass="btn btn-success"
+                                     value="Preview"
+                                     rendered="#{not FormSendSingleEmail.preview}"
+                                     >
+                        <f:ajax render="@form" execute="@form"
+                                listener="#{FormSendSingleEmail.previewEmail()}">
+                        </f:ajax>
+                    </h:commandButton>
+
+                    <h:commandButton styleClass="btn btn-success"
+                                     value="Keep Editing"   
+                                     rendered="#{FormSendSingleEmail.preview}"
+                                     >
+                        <f:ajax render="@form" execute="@form"
+                                onevent="initSendSingleEmail"
+                                listener="#{FormSendSingleEmail.backToEdit()}">
+                        </f:ajax>
+                    </h:commandButton>
+                    <h:commandButton styleClass="btn btn-danger"
+                                     value="Send"
+                                     rendered="#{FormSendSingleEmail.preview}"
+                                     >
+                        <f:ajax render="@form" execute="@form"
+                                onevent="initSendSingleEmail"
+                                listener="#{FormSendSingleEmail.sendEmail()}">
+                        </f:ajax>
+                    </h:commandButton>
+                </div>
+            </div>
+        </div>
+        <script>
+            var mailmergeTagsSubscriber = [
+                <c:forEach items = "#{FormSendSingleEmail.subscriberValues.keySet()}" var = "key" >
+                    '#{FormSendSingleEmail.subscriberValues[key].VALUE}',
+                </c:forEach>
+            ]
+        </script>
+    </h:form>
+
+</html>

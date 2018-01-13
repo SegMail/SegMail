@@ -175,6 +175,10 @@ public class FormSignupCode {
         setFields(fieldLists);
     }
     
+    /**
+     * Deprecated
+     * @return 
+     */
     public String generateListFields() {
         long selectedListId = this.getSelectedListId();
         if(selectedListId <= 0)

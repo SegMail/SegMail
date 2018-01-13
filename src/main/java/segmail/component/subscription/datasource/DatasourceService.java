@@ -306,7 +306,7 @@ public class DatasourceService {
                     new SUBSCRIPTION_STATUS[]{ CONFIRMED });
             for(Subscription sub : subscriptions) {
                 try {
-                    subService.unsubscribeSubscriber(sub.getUNSUBSCRIBE_KEY());
+                    subService.updateSubscription(sub.getUNSUBSCRIBE_KEY(),SUBSCRIPTION_STATUS.UNSUBSCRIBED);
                 } catch (RelationshipNotFoundException ex) {
                     Logger.getLogger(DatasourceService.class.getName()).log(Level.SEVERE, null, ex);
                 }

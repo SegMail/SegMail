@@ -12,7 +12,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.persistence.EntityManager;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.tool.hbm2ddl.SchemaExport;
 import eds.utilities.EntityExplorer;
 import eds.component.data.HibernateEMServices;
 import java.util.ArrayList;
@@ -66,11 +65,11 @@ public class FormTestDB implements Serializable {
                 cfg.addAnnotatedClass(c);
             }
             //Delete all tables first
-            new SchemaExport(cfg).drop(true, true);
+            //new SchemaExport(cfg).drop(true, true);
             //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
             //.execute(true, true, true, false);
-            new SchemaExport(cfg)
-                    .execute(true, true, true, true);
+            //new SchemaExport(cfg)
+            //        .execute(true, true, true, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
@@ -91,11 +90,11 @@ public class FormTestDB implements Serializable {
             }
 
             //Delete all tables first
-            new SchemaExport(cfg).drop(true, true);
+            //new SchemaExport(cfg).drop(true, true);
             //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
             //.execute(true, true, true, false);
-            new SchemaExport(cfg)
-                    .execute(true, true, false, true);
+            //new SchemaExport(cfg)
+            //        .execute(true, true, false, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());
@@ -117,8 +116,8 @@ public class FormTestDB implements Serializable {
             //new SchemaExport(cfg).drop(true, true);
             //.setProperty("hibernate.hbm2ddl.auto", "create")) //it is currently update
             //.execute(true, true, true, false);
-            new SchemaExport(cfg)
-                    .execute(true, true, false, true);
+            //new SchemaExport(cfg)
+            //        .execute(true, true, false, true);
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_FATAL, "Success!", null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(TestGenerateDBFormName, FacesMessage.SEVERITY_ERROR, "Oops!", ex.getMessage());

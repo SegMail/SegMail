@@ -52,7 +52,9 @@ import com.amazonaws.services.sqs.model.GetQueueUrlRequest;
 import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.SetQueueAttributesRequest;
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import eds.component.data.DataValidationException;
+import eds.component.data.EntityExistsException;
 import eds.component.mail.Password;
 import eds.component.user.UserService;
 import eds.entity.client.Client;
@@ -65,6 +67,8 @@ import java.util.List;
 import java.util.Map;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -81,10 +85,7 @@ public class ClientAWSService {
     @EJB
     private GenericObjectService objService;
     @EJB
-    private UserService userService;
-
-    @Inject
-    private ClientFacade clientFacade;
+    private UpdateObjectService updService;
 
     @Inject
     @Password
@@ -311,6 +312,7 @@ public class ClientAWSService {
      *
      * @param client
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ClientAWSAccount registerAWSForClient(Client client) {
         User newOrExistingUser = retrieveOrRegisterAWSUser(client);
         AccessKey newAccessKey = registerNewAWSAccessKey(client);
@@ -411,7 +413,7 @@ public class ClientAWSService {
      * @throws DataValidationException 
      */
     public VerifiedSendingAddress verifyNewSendingAddress(Client client, String sendingAddress, boolean registerBounce) 
-            throws DataValidationException {
+            throws DataValidationException, EntityExistsException {
         
         if (!EmailValidator.getInstance().isValid(sendingAddress)) {
             throw new DataValidationException("Email address is invalid.");
@@ -424,7 +426,7 @@ public class ClientAWSService {
                 if(address.getOWNER().equals(client))
                     throw new DataValidationException("This email address was requested by you or already verified.");
             }
-            throw new DataValidationException("This email address is already taken by another account.");
+            throw new EntityExistsException("This email address is already taken by another account.");
         }
         
         List<ClientAWSAccount> accounts = objService.getEnterpriseData(client.getOBJECTID(), ClientAWSAccount.class);
@@ -438,7 +440,7 @@ public class ClientAWSService {
         VerifiedSendingAddress newVerifiedAddress = new VerifiedSendingAddress();
         newVerifiedAddress.setVERIFIED_ADDRESS(sendingAddress);
         newVerifiedAddress.setSNO(++sno);
-        objService.getEm().persist(newVerifiedAddress);
+        updService.persist(newVerifiedAddress);
         newVerifiedAddress.setOWNER(client);
         
         BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(), account.getAWS_SECRET_ACCESS_KEY());
@@ -456,6 +458,27 @@ public class ClientAWSService {
         }
         
         return newVerifiedAddress;
+    }
+    
+    public void reverifyAddress(VerifiedSendingAddress existingAddress, boolean registerBounce) {
+        List<ClientAWSAccount> accounts = objService.getEnterpriseData(existingAddress.getOWNER().getOBJECTID(), ClientAWSAccount.class);
+        if (accounts == null || accounts.isEmpty()) {
+            throw new RuntimeException("AWS account has not been setup for this account yet.");
+        }
+        
+        ClientAWSAccount account = accounts.get(0);
+        
+        BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(), account.getAWS_SECRET_ACCESS_KEY());
+        AmazonSimpleEmailServiceClient awsClient = new AmazonSimpleEmailServiceClient(clientCredentials);
+        awsClient.setEndpoint(getSESEndpoint());
+        VerifyEmailIdentityRequest verifyReq = new VerifyEmailIdentityRequest().withEmailAddress(existingAddress.getVERIFIED_ADDRESS());
+        VerifyEmailIdentityResult verifyResult = awsClient.verifyEmailIdentity(verifyReq);
+        
+        if(registerBounce) {
+            registerNotifProcessingForSender(existingAddress,NotificationType.Bounce);
+            registerNotifProcessingForSender(existingAddress,NotificationType.Complaint);
+        }
+        
     }
 
     public void deleteSESIdentity(Client client, String verifiedEmail) throws AWSException {

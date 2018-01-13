@@ -38,8 +38,10 @@ public class ApplicationConfig extends Application {
         resources.add(segmail.program.autoresponder.webservice.WSHttpAutoresponder.class);
         resources.add(segmail.program.campaign.webservice.rest.CampaignActivityFacadeREST.class);
         resources.add(segmail.program.campaign.webservice.rest.EnterpriseObjectFacadeREST.class);
+        resources.add(segmail.program.dashboard.WSRDashboard.class);
         resources.add(segmail.program.subscribe.subscribe.webservice.WSHttpSubscribe.class);
         resources.add(segmail.program.subscribers.WSRSubscriber.class);
+        resources.add(segmail.program.wizard.WSRSetupWizard.class);
     }
     
 }

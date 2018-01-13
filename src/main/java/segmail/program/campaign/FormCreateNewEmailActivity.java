@@ -76,7 +76,7 @@ public class FormCreateNewEmailActivity implements FormCreateEntity {
                     activityName, 
                     activityGoals, 
                     ACTIVITY_TYPE.EMAIL);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Activity created. You can edit your activity now.", "");
+            FacesMessenger.setFacesMessage(ProgramCampaign.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Activity created. You can edit your activity now.", "");
             program.refresh();
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

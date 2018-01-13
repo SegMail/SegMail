@@ -7,10 +7,8 @@ package segmail.program.list;
 
 import eds.component.GenericObjectService;
 import eds.component.data.DataValidationException;
-import eds.component.user.UserService;
 import eds.entity.client.VerifiedSendingAddress;
 import java.util.List;
-import segmail.component.subscription.SubscriptionService;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;

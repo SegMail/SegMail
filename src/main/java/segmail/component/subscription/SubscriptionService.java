@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toList;
+import javax.ejb.Asynchronous;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -48,9 +50,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 import javax.ws.rs.FormParam;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatterBuilder;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
@@ -58,13 +61,14 @@ import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SUBSCRIPTION_STATUS;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.NEW;
 import static segmail.entity.subscription.SUBSCRIPTION_STATUS.CONFIRMED;
-import static segmail.entity.subscription.SUBSCRIPTION_STATUS.UNSUBSCRIBED;
 import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriberCount;
+import segmail.entity.subscription.SubscriberCount_;
+import segmail.entity.subscription.SubscriberFieldValidationException;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.SubscriberFieldValue_;
 import segmail.entity.subscription.SubscriberOwnership;
 import segmail.entity.subscription.SubscriberOwnership_;
-import segmail.entity.subscription.SubscriptionList_;
 import segmail.entity.subscription.Subscription_;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
@@ -78,6 +82,7 @@ import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 public class SubscriptionService {
 
     public static final String DEFAULT_EMAIL_FIELD_NAME = "Email";
+    public static final String DEFAULT_EMAIL_PATTERN = "(?i)e[-\\S]*mail";
     public static final String DEFAULT_KEY_FOR_LIST = "LIST";
     
 
@@ -102,6 +107,11 @@ public class SubscriptionService {
     private MailMergeService mailMergeService;
     @EJB
     private MailServiceOutbound mailService;
+    
+    /**
+     * Helper services
+     */
+    @EJB SubscriptionServiceHelper helper;
 
     /**
      * [2015.07.12] Because the EJB Interceptor way failed, so this is a very
@@ -191,8 +201,8 @@ public class SubscriptionService {
         
         SUBSCRIPTION_STATUS[] status = {NEW,CONFIRMED};
         List<Subscription> existingSubscriptions = this.getSubscriptions(email, listId, status);
-        if (existingSubscriptions != null && !existingSubscriptions.isEmpty()) {//checkSubscribed(email, listId)) {
-            throw new RelationshipExistsException(existingSubscriptions.get(0).getCONFIRMATION_KEY());
+        if (existingSubscriptions != null && !existingSubscriptions.isEmpty()) {
+            throw new RelationshipExistsException(existingSubscriptions.get(0).getSTATUS());
         }
 
         List<Map<String, Object>> singleSubscriberMap = new ArrayList<>();
@@ -386,6 +396,8 @@ public class SubscriptionService {
 
         mailService.queueEmail(confirmEmail, DateTime.now());
 
+        sub.incrementConfirmEmail();
+        sub = (Subscription) updService.merge(sub);
     }
 
     /**
@@ -560,8 +572,15 @@ public class SubscriptionService {
         sendWelcomeEmail(sub);
 
         sub = updService.getEm().merge(sub);
+        
+        // Update the SubscriberAccount STATUS
+        SubscriberAccount acc = sub.getSOURCE();
+        if(SUBSCRIBER_STATUS.NEW == acc.SUBSCRIBER_STATUS()) {
+            acc.setSUBSCRIBER_STATUS(SUBSCRIBER_STATUS.VERIFIED.name);
+            acc = updService.getEm().merge(acc);
+        }
 
-        updateSubscriberCount(sub.getTARGET().getOBJECTID());
+        updateSubscriberCount(sub.getTARGET(), DateTime.now());
 
         return sub;
 
@@ -572,11 +591,12 @@ public class SubscriptionService {
      * lists counts.
      * 
      * @param unsubKey
+     * @param status
      * @return
      * @throws RelationshipNotFoundException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<Subscription> unsubscribeSubscriber(String unsubKey) throws RelationshipNotFoundException {
+    public List<Subscription> updateSubscription(String unsubKey, SUBSCRIPTION_STATUS status) throws RelationshipNotFoundException {
 
         List<Subscription> results = getSubscriptionByUnsubKey(unsubKey);
 
@@ -584,22 +604,22 @@ public class SubscriptionService {
             throw new RelationshipNotFoundException("Subscription not found for unsubscribe key.");
         }
 
-        List<Long> listIds = new ArrayList<>();
+        List<SubscriptionList> lists = new ArrayList<>();
         for (Subscription sub : results) {
-            sub.setSTATUS(UNSUBSCRIBED);
+            sub.setSTATUS(status);
             sub = (Subscription) updService.getEm().merge(sub);
-            if (!listIds.contains(sub.getTARGET().getOBJECTID())) {
-                listIds.add(sub.getTARGET().getOBJECTID());
+            if (!lists.contains(sub.getTARGET())) {
+                lists.add(sub.getTARGET());
             }
         }
 
-        for (Long listId : listIds) {
-            updateSubscriberCount(listId);
+        for (SubscriptionList list : lists) {
+            updateSubscriberCount(list, DateTime.now());
         }
 
         return results;
     }
-
+    
     /**
      * This is designed to be called from a WEB server to retrigger a
      * confirmation email.
@@ -770,28 +790,54 @@ public class SubscriptionService {
         return results;
     }
 
-    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW) //maybe a bug
-    @TransactionAttribute(TransactionAttributeType.REQUIRED) //maybe THIS is the bug
-    public void updateSubscriberCount(long listId) {
+    @Asynchronous
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void updateSubscriberCount(SubscriptionList list, DateTime dt) {
+        java.sql.Date date = new java.sql.Date(dt.getMillis());
+        
+        // Get existing count
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-        CriteriaUpdate<SubscriptionList> query = builder.createCriteriaUpdate(SubscriptionList.class);
-        Root<SubscriptionList> fromList = query.from(SubscriptionList.class);
+        CriteriaQuery<SubscriberCount> query = builder.createQuery(SubscriberCount.class);
+        Root<SubscriberCount> fromCount = query.from(SubscriberCount.class);
+        
+        query.select(fromCount);
+        query.where(builder.and(
+                builder.equal(fromCount.get(SubscriberCount_.OWNER), list.getOBJECTID()),
+                builder.lessThanOrEqualTo(fromCount.get(SubscriberCount_.START_DATE), date),
+                builder.greaterThanOrEqualTo(fromCount.get(SubscriberCount_.END_DATE), date)
+        ));
+        
+        List<SubscriberCount> results = objService.getEm().createQuery(query)
+                .getResultList();
+        
+        // If an existing count exists, delimit it
+        if(results != null && !results.isEmpty()) {
+            SubscriberCount existing = results.get(0);
+            DateTime start = new DateTime(existing.getSTART_DATE());
+            DateTime end = new DateTime(existing.getEND_DATE());
+            
+            DateTime newEnd = dt.minusDays(1); 
+            // delete the record no matter what because we can't change any pri key column
+            objService.getEm().remove(existing); 
+            if(!newEnd.isBefore(start)) {
+                // re-insert a delimited record if start <= newEnd
+                SubscriberCount replacement = new SubscriberCount();
+                replacement.setSTART_DATE(existing.getSTART_DATE());
+                replacement.setEND_DATE(new java.sql.Date(newEnd.getMillis()));
+                replacement.setOWNER(list);
+                replacement.setCOUNT(existing.getCOUNT());
+                replacement.setSNO(existing.getSNO());
+                
+                objService.getEm().persist(replacement);
+            }
+        }
+        // Count the number of subscribers and create a new record in all cases
+        SubscriberCount newCount = new SubscriberCount();
+        Map<String,Long> queriedCount = helper.getSubscriptionCounts(list.getOBJECTID());
 
-        Subquery<Long> countQuery = query.subquery(Long.class);
-        Root<Subscription> fromSubscription = countQuery.from(Subscription.class);
-        countQuery.select(builder.count(fromSubscription));
-        countQuery.where(
-                builder.and(
-                        builder.equal(fromSubscription.get(Subscription_.TARGET), listId),
-                        builder.equal(fromSubscription.get(Subscription_.STATUS), SUBSCRIPTION_STATUS.CONFIRMED.toString())
-                )
-        );
-
-        query.set(fromList.get(SubscriptionList_.SUBSCRIBER_COUNT), countQuery);
-        query.where(builder.equal(fromList.get(SubscriptionList_.OBJECTID), listId));
-
-        int result = objService.getEm().createQuery(query)
-                .executeUpdate();
+        newCount.setCOUNT(queriedCount);
+        newCount.setOWNER(list);
+        objService.getEm().persist(newCount);
 
     }
 
@@ -807,7 +853,7 @@ public class SubscriptionService {
     public void updateAllSubscriberCountForClient(long clientId) {
         List<SubscriptionList> lists = listService.getAllListForClient(clientId);
         for (SubscriptionList list : lists) {
-            updateSubscriberCount(list.getOBJECTID());
+            updateSubscriberCount(list, DateTime.now());
         }
     }
 
@@ -854,41 +900,6 @@ public class SubscriptionService {
         welcomeEmail.addRecipient(sub.getSOURCE().getEMAIL());
 
         mailService.queueEmail(welcomeEmail, DateTime.now());
-    }
-
-    /**
-     * 1) Updates SubscriberAccount.SUBSCRIBER_STATUS
-     * 
-     * [Deprecated] Use updateSubscriptionSubscriberBounce instead
-     *
-     * @param subscribers List of bounced email address.
-     * @param clientId
-     * @return
-     */
-    @Deprecated
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public int updateSubscriberBounceStatus(List<String> subscribers, long clientId) {
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
-        CriteriaUpdate<SubscriberAccount> update = builder.createCriteriaUpdate(SubscriberAccount.class);
-        Root<SubscriberAccount> updateAccount = update.from(SubscriberAccount.class);
-
-        Subquery<Long> selectQuery = update.subquery(Long.class);
-        Root<SubscriberAccount> fromSubscAcc = selectQuery.from(SubscriberAccount.class);
-        Root<SubscriberOwnership> fromOwner = selectQuery.from(SubscriberOwnership.class);
-
-        selectQuery.select(fromSubscAcc.get(SubscriberAccount_.OBJECTID));
-        selectQuery.where(builder.and(
-                builder.equal(fromOwner.get(SubscriberOwnership_.TARGET), clientId),
-                builder.equal(fromOwner.get(SubscriberOwnership_.SOURCE), fromSubscAcc.get(SubscriberAccount_.OBJECTID)),
-                fromSubscAcc.get(SubscriberAccount_.EMAIL).in(subscribers)));
-
-        update.set(updateAccount.get(SubscriberAccount_.SUBSCRIBER_STATUS), SUBSCRIBER_STATUS.BOUNCED.name);
-        update.where(updateAccount.get(SubscriberAccount_.OBJECTID).in(selectQuery));
-
-        int result = objService.getEm().createQuery(update)
-                .executeUpdate();
-
-        return result;
     }
 
     /**
@@ -969,9 +980,12 @@ public class SubscriptionService {
      * from (note: not SubscriberFieldValue records)
      * @param maxResults the max number of SubscriberAccount records to retrieve
      * from (note: not SubscriberFieldValue records)
-     * @param anyOrAll
+     * @param anyOrAll in ANY of the given listId or in ALL of the listIds
+     * @param orderBy the field name in the SubscriberAccount_ class to be sorted
+     * @param asc True for ascending order, false for descending order
      * @return
      * @throws eds.component.data.DataValidationException
+     * @throws java.lang.NoSuchFieldException if orderBy is invalid
      */
     public List<SubscriberAccount> getSubscribersForClient(
             long clientId,
@@ -982,13 +996,14 @@ public class SubscriptionService {
             String emailSearch,
             int startIndex,
             int maxResults,
-            String anyOrAll) throws DataValidationException {
+            String anyOrAll,
+            String orderBy,
+            boolean asc) throws DataValidationException, NoSuchFieldException {
         
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<SubscriberAccount> query = builder.createQuery(SubscriberAccount.class);
         Root<SubscriberAccount> fromAcc = query.from(SubscriberAccount.class);
         Root<SubscriberOwnership> fromOwn = query.from(SubscriberOwnership.class);
-        Root<Subscription> fromSubsc = query.from(Subscription.class);
         
         query.select(fromAcc);
         List<Predicate> conditions = new ArrayList<>();
@@ -1005,6 +1020,9 @@ public class SubscriptionService {
         
         // Any or All fields
         if(listIds != null && !listIds.isEmpty()) {
+            // Impt to be declared here instead of outside because it will add an unnecessary join.
+            // If the FROM table is optional, do not declare it if not required at all!
+            Root<Subscription> fromSubsc = query.from(Subscription.class); 
             conditions.add(fromSubsc.get(Subscription_.TARGET).in(listIds));
             conditions.add(builder.equal(fromSubsc.get(Subscription_.SOURCE),fromAcc.get(SubscriberAccount_.OBJECTID)));
             
@@ -1015,11 +1033,18 @@ public class SubscriptionService {
         }
         
         if(statuses != null && !statuses.isEmpty()) {
-            conditions.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statuses));
-            
-            //Another clause for if any or all
+            List<String> statusStrings = statuses.stream().map(s -> s.name).collect(toList());
+            conditions.add(fromAcc.get(SubscriberAccount_.SUBSCRIBER_STATUS).in(statusStrings));
         }
         
+        // Order by 
+        if (orderBy != null && SubscriberAccount_.class.getField(orderBy) != null) {
+            if(asc) {
+                query.orderBy(builder.asc(fromAcc.get(orderBy)));
+            } else {
+                query.orderBy(builder.desc(fromAcc.get(orderBy)));
+            }
+        }
         query.where(builder.and(conditions.toArray(new Predicate[]{})));
         List<SubscriberAccount> results = objService.getEm().createQuery(query)
                 .setFirstResult(startIndex)
@@ -1254,13 +1279,38 @@ public class SubscriptionService {
         return results.values();
     }
     
+    /**
+     * WARNING: No VALIDATIONS here!
+     * You are inserting the value of the field AS-IS.
+     * 
+     * @param subscriberId
+     * @param fieldKey
+     * @param fieldValue
+     * @param dt time of update
+     * @return 
+     * @throws eds.component.data.EntityNotFoundException 
+     * @throws segmail.entity.subscription.SubscriberFieldValidationException 
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public int updateFieldValue(long subscriberId, String fieldKey, String fieldValue) {
+    public int updateFieldValue(long subscriberId, String fieldKey, String fieldValue, DateTime dt) 
+            throws EntityNotFoundException, SubscriberFieldValidationException {
+        // Read the SubscriptionListField first to get the TYPE
+        List<String> keys = new ArrayList<>();
+        keys.add(fieldKey);
+        List<SubscriptionListField> fields = listService.getFieldsByKeyOrLists(keys, null);
+        if(fields == null || fields.isEmpty())
+            throw new EntityNotFoundException("Field key " + fieldKey + " not found.");
+        
+        SubscriptionListField field = fields.get(0);
+        field.TYPE().validate(fieldValue);
+        
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaUpdate<SubscriberFieldValue> query = builder.createCriteriaUpdate(SubscriberFieldValue.class);
         Root<SubscriberFieldValue> fromValue = query.from(SubscriberFieldValue.class);
         
         query.set(fromValue.get(SubscriberFieldValue_.VALUE), fieldValue);
+        query.set(fromValue.get(SubscriberFieldValue_.DATE_CHANGED), new java.sql.Date(dt.getMillis()));
+        
         query.where(builder.and(
                 builder.equal(fromValue.get(SubscriberFieldValue_.OWNER), subscriberId),
                 builder.equal(fromValue.get(SubscriberFieldValue_.FIELD_KEY), fieldKey)
@@ -1270,5 +1320,30 @@ public class SubscriptionService {
                 .executeUpdate();
         
         return result;
+                
     }
+    
+    public String calculateSubscriberAge(SubscriberAccount subscriber, DateTime now) {
+        Period length = (new Period(
+                new DateTime(subscriber.getDATE_CREATED().getTime()),
+                now
+        ));
+        length = length.withHours(0).withMinutes(0).withSeconds(0).withMillis(0);
+        String ageString = length.toString(
+                new PeriodFormatterBuilder()
+                        .printZeroAlways()
+                        .printZeroRarelyLast()
+                .appendYears().appendSuffix(" year"," years")
+                .appendSeparator(" ")
+                .appendMonths().appendSuffix(" month"," months")
+                .appendSeparator(" ")
+                .appendWeeks().appendSuffix(" week", " weeks")
+                .appendSeparator(" ")        
+                .appendDays().appendSuffix(" day"," days")
+                .toFormatter()
+        );
+        
+        return ageString;
+    }
+    
 }

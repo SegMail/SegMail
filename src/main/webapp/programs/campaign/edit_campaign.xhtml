@@ -24,52 +24,32 @@
     </div>
     <div class="row">
 
-        <div class="col-md-9">
+        <div class="col-md-12">
             <div class="block">
 
                 <ui:include src="campaign_activities.xhtml" />
             </div>
 
         </div>
-        <div class="col-md-3">
-            <div class="row" jsf:rendered="false">
-                <div class="col-md-12">
-                    <form jsf:id="FormAssignLists">
-                        <div class="block nb">
-                            <div class="block-head">
-                                <h2>Targeted lists</h2>
-                            </div>
-                            <ui:include src="assign_lists.xhtml" />
-                        </div>
-                    </form>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="block nb">
+                <div class="block-head">
+                    <h2>Basic Settings</h2>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="block nb">
-                        <div class="block-head">
-                            <h2>Basic Settings</h2>
-                        </div>
-                        <ui:include src="basic_settings.xhtml" />
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="block nb">
-                        <div class="block-head">
-                            <h2>
-                                Sender attributes
-                            </h2>
-                        </div>
-                        <ui:include src="campaign_sender_attribute.xhtml" />
-                    </div>
-                </div>
+                <ui:include src="basic_settings.xhtml" />
             </div>
         </div>
-
-        <div class="col-md-4">
-
+        <div class="col-md-6">
+            <div class="block nb">
+                <div class="block-head">
+                    <h2>
+                        Sender attributes
+                    </h2>
+                </div>
+                <ui:include src="campaign_sender_attribute.xhtml" />
+            </div>
         </div>
     </div>
 

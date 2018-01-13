@@ -7,6 +7,7 @@
 package eds.entity.user;
 
 import eds.entity.data.EnterpriseData;
+import java.sql.Timestamp;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -31,6 +32,9 @@ public class UserAccount extends EnterpriseData<User> {
     private String PROFILE_PIC_URL;
     
     private String API_KEY;
+    
+    private java.sql.Timestamp LAST_LOGIN;
+    private boolean FIRST_LOGIN;
 
     public String getUSERNAME() {
         return USERNAME;
@@ -95,6 +99,22 @@ public class UserAccount extends EnterpriseData<User> {
 
     public void setCONTACT_EMAIL(String CONTACT_EMAIL) {
         this.CONTACT_EMAIL = CONTACT_EMAIL;
+    }
+
+    public Timestamp getLAST_LOGIN() {
+        return LAST_LOGIN;
+    }
+
+    public void setLAST_LOGIN(Timestamp LAST_LOGIN) {
+        this.LAST_LOGIN = LAST_LOGIN;
+    }
+
+    public boolean isFIRST_LOGIN() {
+        return FIRST_LOGIN;
+    }
+
+    public void setFIRST_LOGIN(boolean FIRST_LOGIN) {
+        this.FIRST_LOGIN = FIRST_LOGIN;
     }
 
     @Override

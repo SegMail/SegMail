@@ -57,7 +57,7 @@ public class FormAddJob {
                     "",
                     "",
                     null);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job added!", "");
+            FacesMessenger.setFacesMessage(ProgramBatch.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job added!", "");
             program.refresh();
         } catch (IncompleteDataException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

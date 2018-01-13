@@ -23,13 +23,13 @@ public class SubscriptionListFieldListener {
     @PrePersist
     @PreUpdate
     public void prePersistUpdate(SubscriptionListField field){
-        updateMailmergeTage(field);
+        updateMailmergeTag(field);
         updateKeyName(field);
     }
     
-    public void updateMailmergeTage(SubscriptionListField field){
+    public void updateMailmergeTag(SubscriptionListField field){
         String fieldName = field.getFIELD_NAME();
-        fieldName = fieldName.replace(" ", "-");
+        fieldName = fieldName.replace(" ", "-").toLowerCase();
         fieldName = "{" + fieldName + "}";
         
         field.setMAILMERGE_TAG(fieldName);

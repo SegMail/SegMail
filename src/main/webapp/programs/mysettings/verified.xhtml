@@ -36,6 +36,10 @@
                                 </div>
                                 <div class="list-item-right">
                                     <div>
+                                        <a href="#re_verify_address" class="btn btn-warning re-verify" data-toggle="modal"
+                                           data-email="#{address.VERIFIED_ADDRESS}" title="re-verify this address">
+                                            <i class="fa fa-refresh"></i>
+                                        </a>
                                         <a jsf:id="DeleteVerifiedAddress#{address.SNO}" href="#delete_verified_address" class="btn btn-danger list-item-trigger"
                                            data-toggle="modal" onclick="$('#deleteAddressHidden').val('#{address.VERIFIED_ADDRESS}')">
                                             <i class="fa fa-trash"></i>

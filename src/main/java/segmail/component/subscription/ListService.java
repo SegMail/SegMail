@@ -24,6 +24,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -45,6 +46,18 @@ public class ListService {
 
     public static final String DEFAULT_FNAME_FIELD_NAME = "Firstname";
     public static final String DEFAULT_LNAME_FIELD_NAME = "Lastname";
+    public static final String[] DEFAULT_FIELD_NAMES = {
+        SubscriptionService.DEFAULT_EMAIL_FIELD_NAME,
+        DEFAULT_FNAME_FIELD_NAME,
+        DEFAULT_LNAME_FIELD_NAME
+    };
+    public static final String DEFAULT_FNAME_PATTERN = "(?i)(f|first)[ -_]*name";
+    public static final String DEFAULT_LNAME_PATTERN = "(?i)(l|last)[ -_]*name";
+    public static final String[] DEFAULT_FIELD_PATTERNS = {
+        SubscriptionService.DEFAULT_EMAIL_PATTERN,
+        DEFAULT_FNAME_PATTERN,
+        DEFAULT_LNAME_PATTERN
+    };
     /**
      * Generic services
      */
@@ -52,8 +65,6 @@ public class ListService {
     private GenericObjectService objectService;
     @EJB
     private UpdateObjectService updateService;
-    @EJB
-    private GenericConfigService configService;
     @EJB
     private AutoresponderService autoService;
 
@@ -172,7 +183,10 @@ public class ListService {
      * scheduling mechanism.
      *
      * @param listId
+     * @param clientId
      * @throws eds.component.data.EntityNotFoundException
+     * @throws java.lang.NoSuchFieldException
+     * @throws java.lang.NoSuchMethodException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteList(long listId, long clientId) throws EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
@@ -230,11 +244,13 @@ public class ListService {
      * Potentially there could be a generic operation that updates the entity.
      *
      * @param list
+     * @return 
      * @throws eds.component.data.DataValidationException if:
      * <ul>
      * <li>REDIRECT_CONFIRM or REDIRECT_WELCOME are invalid</li>
      * </ul>
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public SubscriptionList saveList(SubscriptionList list) throws DataValidationException {
 
         validateList(list);
@@ -334,5 +350,53 @@ public class ListService {
         return fields;
     }
     
+    /**
+     * Some fields do not have KEY_NAME prior to adding of KEY_NAME in the design
+     * hence we will need to select these fields by listIds.
+     * 
+     * On the other hand, while you are retrieving fields from a list of Subscriptions,
+     * some Subscription records could have been deleted but the Subscriber still
+     * has the SubscriberFieldValue. Hence, you will need both KEY_NAME and 
+     * SubscriptionList Ids to get the full list of SubscriptionListField that 
+     * you can match to a Subscriber's list of SubscriptionListField.
+     * 
+     * @param fieldKeys
+     * @param listIds
+     * @return 
+     */
+    public List<SubscriptionListField> getFieldsByKeyOrLists(List<String> fieldKeys, List<Long> listIds) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
+        
+        List<Predicate> conds = new ArrayList<>();
+        if(fieldKeys != null && !fieldKeys.isEmpty()) {
+            conds.add(fromField.get(SubscriptionListField_.KEY_NAME).in(fieldKeys));
+        }
+        if(listIds != null && !listIds.isEmpty()) {
+            conds.add(fromField.get(SubscriptionListField_.OWNER).in(listIds));
+        }
+        
+        if(conds.size() <= 0)
+            return new ArrayList<>(); // Don't query the db
+        
+        if(conds.size() > 1) {
+            query.where(builder.or(conds.toArray(new Predicate[]{})));
+        } else {
+            query.where(conds.get(0));
+        }
+        
+        query.select(fromField);
+        /*query.where(
+                builder.or(
+                        fromField.get(SubscriptionListField_.KEY_NAME).in(fieldKeys),
+                        fromField.get(SubscriptionListField_.OWNER).in(listIds)
+                ));
+        */
+        List<SubscriptionListField> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
 
 }

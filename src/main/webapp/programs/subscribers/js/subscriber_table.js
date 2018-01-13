@@ -4,38 +4,32 @@ $(document).ready(function () {
     //initSubscriberTable();
     updateAddSubsriberButtons();
     initExpandTab();
-    initFieldForms();
+    toggleMenu();
+    initCheckbox();
 });
 
 var initSubscriberTable = function () {
-    //if (!$.fn.dataTable.isDataTable('.sortable')) {
-        $('.sortable').dataTable({
-            'serverSide' : true,
-            //'destroy': false,
-            'filter': true,
-            'paging': true,
-            'searching': false,
-            'info': false
-        });
-    //}
+    $('.sortable').dataTable({
+        'serverSide' : true,
+        //'destroy': false,
+        'filter': true,
+        'paging': true,
+        'searching': false,
+        'info': false
+    });
 };
 
-var toggleCheckbox = function() {
+var toggleCheckbox = function(checkbox) {
     var checkboxes = $('input.checkbox');
-    //var trigCheckbox = $('input.trigger-check');
-    //Default action is to check all
-    //If at least 1 box is unchecked, check all
-    //Else, uncheck all (if all boxes are checked)
-    var checkAll = false;
-    checkboxes.each(function(i){
-        if(!this.checked)
-            checkAll = true;
-    });
-    if(checkAll) {
+    var checked = $(checkbox).prop('checked');
+    if(checked) {
         checkboxes.prop('checked',true);
     } else {
         checkboxes.prop('checked',false);
     }
+    checkboxes.each(function(n,item){
+        switchCheckbox($(item));
+    });
 };
 
 var refresh_select2 = function() {
@@ -76,12 +70,9 @@ function refresh(data) {
             refresh_select2();
             updateAddSubsriberButtons();
             initExpandTab();
-            initFieldForms();
             break;
     }
 };
-
-
 
 var initExpandTab = function(){
 
@@ -149,60 +140,29 @@ var initExpandTab = function(){
     
 }
 
-var updateFieldValue = function(id,key,value) {
-    $.ajax({
-        type: 'POST',
-        url: CONTEXT_PATH+'/rest/subscriber/field/update/' + id + '/' + key + '/' + value,
-        //dataType: 'json',
-        /*data: {
-            'id':id,
-            'key':key,
-            'value':value
-        }*/
-        success: function (data) {
-            //console.log(data);
-            if(data.result === 'success') {
-                noty({
-                    text: 'Field updated.',
-                    layout : 'topCenter',
-                    type : 'success',
-                    timeout : 3000
-                });
-                return;
-            }
-            noty({
-                text: 'Error: ' + data.error,
-                layout : 'topCenter',
-                type : 'error',
-                timeout : false
-            });
-        },
-        error: function(error) {
-            console.log(error);
-        }
+var toggleMenu = function () {
+    if ($(document).has('#no_subscribers').length) {
+        page_navigation();
+    }
+}
+
+var initCheckbox = function() {
+    $('#checkedIds').val('');
+    $('input.checkbox').change(function(){
+        switchCheckbox($(this));
     })
 }
 
-var initFieldForms = function() {
-    // init Save buttons
-    $('button.save').each(function(i){
-        var button = $(this);
-        var id = button.data('id');
-        var key = button.data('key');
-        button.click(function(){
-            var value = $('input[data-id="'+id+'"][data-key="'+key+'"]').val(); //Call this in click() so that it will capture the latest value, not the initial value
-            updateFieldValue(id,key,value);
-        })
-    })
-    
-    // init Reset buttons
-    $('button.reset').each(function(){
-        var button = $(this);
-        var id = button.data('id');
-        var key = button.data('key');
-        button.click(function(){
-            var defValue = $('input[data-id="'+id+'"][data-key="'+key+'"]').prop("defaultValue");
-            $('input[data-id="'+id+'"][data-key="'+key+'"]').val(defValue);
-        })
-    })
+var switchCheckbox = function(checkbox) {
+    var id = $(checkbox).data('id');
+    var checked = $(checkbox).prop('checked');
+    var checkedIdString = $('#checkedIds').val();
+    var checkedIds = (checkedIdString.length > 0) ? checkedIdString.split(',') : [];
+    var index = checkedIds.indexOf(id + "");
+    if(index >= 0 && !checked) {
+        checkedIds.splice(index,1);
+    } else if (index < 0 && checked) {
+        checkedIds.push(id);
+    }
+    $('#checkedIds').val(checkedIds.join());
 }

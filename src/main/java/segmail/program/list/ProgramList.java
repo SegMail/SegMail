@@ -34,8 +34,13 @@ public class ProgramList extends Program implements Serializable {
     private SubscriptionList listEditing;
     
     //For controlling the tabs
-    private Map<String,Boolean> showActiveTabs;
-    private String activeTab = "settings_panel"; //default
+    private String activeTab;
+    final String[] TABS = {
+        "settings", // Default is the 1st 
+        "fieldset",
+        "redirect",
+        "datasource"
+    };
     
     //For subscribers
     private Map<Long,Map<String,String>> subscriberTable;
@@ -232,14 +237,6 @@ public class ProgramList extends Program implements Serializable {
         this.subscriberTable = subscriberTable;
     }
 
-    public Map<String, Boolean> getShowActiveTabs() {
-        return showActiveTabs;
-    }
-
-    public void setShowActiveTabs(Map<String, Boolean> showActiveTabs) {
-        this.showActiveTabs = showActiveTabs;
-    }
-
     public Map<Integer, String> getListFieldMapping() {
         return listFieldMapping;
     }
@@ -272,14 +269,6 @@ public class ProgramList extends Program implements Serializable {
         this.newDatasource = newDatasource;
     }
 
-    public String getActiveTab() {
-        return activeTab;
-    }
-
-    public void setActiveTab(String activeTab) {
-        this.activeTab = activeTab;
-    }
-
     public List<ListDataMapping> getDatasourceMappings() {
         return datasourceMappings;
     }
@@ -302,11 +291,6 @@ public class ProgramList extends Program implements Serializable {
 
     public void setOldPassword(String oldPassword) {
         this.oldPassword = oldPassword;
-    }
-    
-    public void refresh(String activeTab) {
-        this.setActiveTab(activeTab);
-        this.refresh();
     }
 
     public String getConnectionString() {
@@ -395,6 +379,14 @@ public class ProgramList extends Program implements Serializable {
 
     public void setUnsubUrlParams(List<String> unsubUrlParams) {
         this.unsubUrlParams = unsubUrlParams;
+    }
+
+    public String getActiveTab() {
+        return activeTab;
+    }
+
+    public void setActiveTab(String activeTab) {
+        this.activeTab = activeTab;
     }
     
     @Override

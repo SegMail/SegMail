@@ -380,24 +380,8 @@ public class MailMergeService {
             return text;
         
         text = text.replace(SubscriberAccount.MM_DATE_OF_SUBSCRIPTION, DateFormat.getDateInstance().format(subscriber.getDATE_CREATED()));
-        Period length = (new Period(
-                new DateTime(subscriber.getDATE_CREATED().getTime()),
-                now
-        ));
-        length = length.withHours(0).withMinutes(0).withSeconds(0).withMillis(0);
-        text = text.replace(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION, length.toString(
-                new PeriodFormatterBuilder()
-                        .printZeroAlways()
-                        .printZeroRarelyLast()
-                .appendYears().appendSuffix(" year"," years")
-                .appendSeparator(" ")
-                .appendMonths().appendSuffix(" month"," months")
-                .appendSeparator(" ")
-                .appendWeeks().appendSuffix(" week", " weeks")
-                .appendSeparator(" ")        
-                .appendDays().appendSuffix(" day"," days")
-                .toFormatter()
-        ));
+        String ageString = subscriptionService.calculateSubscriberAge(subscriber, now);
+        text = text.replace(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION, ageString);
         
         return text;
     }

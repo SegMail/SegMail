@@ -31,6 +31,8 @@ public class Program extends EnterpriseObject{
     
     private Boolean IS_PUBLIC; //http://stackoverflow.com/a/10648207/5765606
     
+    private boolean RENDER_PRELOADER;
+    
     public Program() {
         super();
     }
@@ -87,6 +89,14 @@ public class Program extends EnterpriseObject{
 
     public void setIS_PUBLIC(Boolean IS_PUBLIC) {
         this.IS_PUBLIC = IS_PUBLIC;
+    }
+
+    public boolean isRENDER_PRELOADER() {
+        return RENDER_PRELOADER;
+    }
+
+    public void setRENDER_PRELOADER(boolean RENDER_PRELOADER) {
+        this.RENDER_PRELOADER = RENDER_PRELOADER;
     }
 
     @Override

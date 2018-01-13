@@ -5,8 +5,6 @@
  */
 package segmail.program.list;
 
-import eds.component.client.ClientService;
-import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;
@@ -38,21 +36,15 @@ public class FormListList {
 
     @Inject
     private ProgramList program;
-
-    @EJB
-    private ClientService clientService;
-    @EJB
-    private SubscriptionService subscriptionService;
+    
     @EJB
     private ListService listService;
-
     
     @PostConstruct
     public void init() {
         //Only if it is not a postback, reload everything
         if (!FacesContext.getCurrentInstance().isPostback()) {
             this.loadAllLists();
-            //this.resetEditingList();
         }
     }
 

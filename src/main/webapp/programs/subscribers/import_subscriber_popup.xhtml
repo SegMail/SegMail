@@ -26,7 +26,15 @@
                         <s2:messenger id="FormImportSubscribers_messenger" for="FormImportSubscribers" showDetail="true" showSummary="true"
                                       class="form-group"></s2:messenger>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" jsf:rendered="#{fn:length(FormImportSubscribers.ownedLists) le 0}">
+                        <h1>You have no lists yet</h1>
+                        <p>
+                            <a href="#{request.contextPath}/list">
+                                Click here to go create a list.
+                            </a>
+                        </p>
+                    </div>
+                    <div class="form-group" jsf:rendered="#{fn:length(FormAddSubscriber.ownedLists) gt 0}">
                         <h:selectManyListbox styleClass="select2" style="width: 100%;"
                                      value="#{FormImportSubscribers.assignedLists}" 
                                      
@@ -39,7 +47,7 @@
                             </f:selectItems>
                         </h:selectManyListbox>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" jsf:rendered="#{fn:length(FormAddSubscriber.ownedLists) gt 0}">
                         <label>
                             Upload a file
                         </label>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<div
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+        <div class="jumbotron">
+            <div class="row" style="margin-top: 20px">
+                <div class="col-md-10">
+                    <h1>
+                        Step #{FormWizardInit.currentStage}-Verify a sending address
+                    </h1>
+                </div>
+                <div class="col-md-2">
+                    <i class="fa fa-mail-reply-all" style="font-size: 63px"></i> 
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <p>
+                        Segmail uses <u>Amazon Web Services</u> as an SMTP gateway
+                        to provide you with the highest deliverability at
+                        the lowest cost. In order to send emails through
+                        AWS using a sender's email, you will need to 
+                        verify your email address with Amazon.
+                    </p>
+                    <p>
+                        After entering your address here, you will receive a confirmation email to this
+                        address from <strong>Amazon Web Services</strong>. You will need to click on the confirmation link
+                        in the email to verify this email address, after which you will be able to start
+                        setting up confirmation and welcome emails for your lists, and also start sending
+                        campaigns.
+                    </p>
+                    <p>
+                        You can add/delete sending addresses in <a href="#{request.contextPath}/mysettings">My Settings</a>.
+                    </p>
+                    <p>
+                        <strong>Enter a sending email address</strong>:
+                    </p>
+                    <div class="form-group">
+                        <s2:messenger for="ProgramSetupWizard" showDetail="true" showSummary="true"
+                                      class="form-group"></s2:messenger>
+                    </div>
+                    <div class="row-form">
+                        <div class="col-md-9">
+                        <input type="text" class="form-control input-lg" name="email" id="email" autocomplete="off"
+                               data-provide="typeahead"
+                               jsf:value="#{FormWizardAddress.address}"
+                               />
+                        </div>
+                        <div class="col-md-3">
+                            <h:commandLink styleClass="btn btn-primary btn-lg pull-right"
+                                           onclick="return addressForm().form();"
+                                           pass:data-page="address"
+                                           >
+                                <f:ajax render="@form" execute="@form"
+                                        onevent="refresh"
+                                        listener="#{FormWizardAddress.verify()}"
+                                        >
+                                </f:ajax>
+                                Send my verification email
+                            </h:commandLink>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    <script>
+
+        var existing_addresses = [
+                <ui:repeat value="#{FormWizardAddress.existingAddresses}" var="address">
+                    '#{address.VERIFIED_ADDRESS}',
+                </ui:repeat>
+        ];
+    </script>
+</div>

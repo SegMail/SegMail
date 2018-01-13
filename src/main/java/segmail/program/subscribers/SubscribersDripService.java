@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
+import segmail.entity.subscription.SubscriberAccount_;
 
 /**
  *
@@ -48,6 +49,10 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     private String emailSearch;
     
     private String anyOrAll;
+    
+    private String orderBy;
+    
+    private boolean asc;
 
     public long getClientId() {
         return clientId;
@@ -104,6 +109,22 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     public void setAnyOrAll(String anyOrAll) {
         this.anyOrAll = anyOrAll;
     }
+
+    public String getOrderBy() {
+        return orderBy;
+    }
+
+    public void setOrderBy(String orderBy) {
+        this.orderBy = orderBy;
+    }
+
+    public boolean isAsc() {
+        return asc;
+    }
+
+    public void setAsc(boolean asc) {
+        this.asc = asc;
+    }
     
     /**
      * This implementation should: 
@@ -120,8 +141,22 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
     @Override
     public List<SubscriberAccount> refill(int start, int size) {
         try {
-            return subService.getSubscribersForClient(clientId, listIds, createStart, createEnd, statuses, emailSearch, start, size, anyOrAll);
+            return subService.getSubscribersForClient(
+                    clientId, 
+                    listIds, 
+                    createStart, 
+                    createEnd, 
+                    statuses, 
+                    emailSearch, 
+                    start, 
+                    size, 
+                    anyOrAll,
+                    orderBy,
+                    asc);
         } catch (DataValidationException ex) {
+            Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        } catch (NoSuchFieldException ex) {
             Logger.getLogger(SubscribersDripService.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
         }
@@ -142,6 +177,8 @@ public class SubscribersDripService extends DripFeederService<SubscriberAccount>
         this.listIds = new ArrayList<>();
         this.statuses = new ArrayList<>();
         this.anyOrAll = "any";
+        this.orderBy = SubscriberAccount_.DATE_CREATED.getName(); // Default sorting by email
+        this.asc = false; // Latest subscribers first
     }
 
     

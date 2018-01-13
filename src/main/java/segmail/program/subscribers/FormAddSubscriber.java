@@ -11,8 +11,6 @@ import eds.component.data.RelationshipExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -38,7 +36,6 @@ public class FormAddSubscriber {
     @Inject ProgramSubscribers program;
     
     @Inject ClientContainer clientCont;
-    
     
     @EJB
     private SubscriptionService subService;
@@ -97,7 +94,7 @@ public class FormAddSubscriber {
             
             subService.subscribe(clientCont.getClient().getOBJECTID(), getSelectedLists(), getFieldValues(), true);
             
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Subscriber added! A welcome email will be sent to the subscriber soon.", null);
+            FacesMessenger.setFacesMessage(ProgramSubscribers.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Subscriber added! A welcome email will be sent to the subscriber soon.", null);
             //How to redirect to List editing panel?
             program.refresh();
         } catch (EntityNotFoundException ex) {
@@ -107,7 +104,7 @@ public class FormAddSubscriber {
         } catch (SubscriptionException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (RelationshipExistsException ex) {
-            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Subscriber is already on this list.", "");
         }  
     }
     

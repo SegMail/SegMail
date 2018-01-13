@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <h:form id="FormResendConfirmEmail" prependId="false">
+        <h:inputHidden id="resend-sub-source" value="#{FormResendConfirmEmail.sourceId}"></h:inputHidden>
+        <h:inputHidden id="resend-sub-target" value="#{FormResendConfirmEmail.targetId}"></h:inputHidden>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Resend Confirmation email?</h4>
+                </div>
+                <div class="modal-body">
+                    <s2:messenger for="FormResendConfirmEmail"></s2:messenger>
+                    <span id="resend-message">
+                    </span>
+                </div>
+                <div class="modal-footer">
+                    <h:commandButton styleClass="btn btn-success"
+                                     value="Resend"
+                        >
+                        <f:ajax render="@form" execute="@form"
+                                onevent="refresh"
+                                listener="#{FormResendConfirmEmail.resend()}">
+                                    
+                        </f:ajax>
+                    </h:commandButton>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</html>

@@ -8,7 +8,6 @@ package eds.component.user;
 import eds.entity.user.PWD_PROCESSING_STATUS;
 import eds.entity.user.PasswordResetRequest;
 import eds.component.GenericObjectService;
-import eds.entity.data.EnterpriseObject;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -27,7 +26,6 @@ import eds.component.UpdateObjectService;
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
-import eds.component.data.HibernateHelper;
 import eds.component.data.IncompleteDataException;
 import eds.component.encryption.EncryptionType;
 import eds.component.encryption.EncryptionUtility;
@@ -40,6 +38,8 @@ import eds.entity.user.Trigger_Password_User_;
 import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import eds.entity.user.UserAccount_;
+import eds.entity.user.UserSetting;
+import eds.entity.user.UserSetting_;
 import eds.entity.user.UserType;
 import eds.entity.user.UserType_;
 import eds.entity.user.User_;
@@ -375,21 +375,21 @@ public class UserService extends DBService {
 
         //If authentication passes
         if (secureHash.equals(userAccount.getPASSWORD())) {
+            // Update last login timestamp and first login flag
+            userAccount.setFIRST_LOGIN((userAccount.getLAST_LOGIN() == null));
+            userAccount.setLAST_LOGIN(new java.sql.Timestamp(DateTime.now().getMillis()));
             //Only if there were any unsuccessful login attempts, reset counter
             if (userAccount.getUNSUCCESSFUL_ATTEMPTS() > 0) {
                 userAccount.setUNSUCCESSFUL_ATTEMPTS(0);
-                objectService.getEm().persist(userAccount);
             }
+            objectService.getEm().persist(userAccount);
+            
             /**
              * Should construct and return a UserContainer instead of the
              * User or UserAccount object. User object is useless and
              * UserAccount object would contain passwords.
-             *
-             *
              */
-            EnterpriseObject owner = userAccount.getOWNER();
-
-            User user = (User) HibernateHelper.initializeAndUnproxy(owner);
+            User user = userAccount.getOWNER();
 
             return user;
 
@@ -737,5 +737,53 @@ public class UserService extends DBService {
                 .getResultList();
         
         return results;
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public UserSetting updateSetting(long userId, String name, String value) {
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<UserSetting> query = builder.createQuery(UserSetting.class);
+        Root<UserSetting> fromSettings = query.from(UserSetting.class);
+        
+        query.select(fromSettings);
+        query.where(builder.and(
+                builder.equal(fromSettings.get(UserSetting_.NAME), name),
+                builder.equal(fromSettings.get(UserSetting_.OWNER), userId)
+        ));
+        
+        List<UserSetting> results = em.createQuery(query)
+                .getResultList();
+        
+        UserSetting setting = null;
+        if(results == null || results.isEmpty()) {
+            User user = this.getUserById(userId);
+            setting = new UserSetting(name,value);
+            setting.setOWNER(user);
+            em.persist(setting);
+            
+        } else {
+            setting = results.get(0);
+            setting.setVALUE(value);
+            setting = em.merge(setting);
+        }
+        
+        return setting;
+    }
+    
+    public UserSetting getSetting(long userId, String name) {
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<UserSetting> query = builder.createQuery(UserSetting.class);
+        Root<UserSetting> fromSettings = query.from(UserSetting.class);
+        
+        query.select(fromSettings);
+        query.where(builder.and(
+                builder.equal(fromSettings.get(UserSetting_.NAME), name),
+                builder.equal(fromSettings.get(UserSetting_.OWNER), userId)
+        ));
+        
+        List<UserSetting> results = em.createQuery(query)
+                .getResultList();
+        
+        return (results == null || results.isEmpty()) ? null : results.get(0);
     }
 }

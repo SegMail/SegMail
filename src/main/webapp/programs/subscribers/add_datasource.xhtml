@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <form jsf:id="FormSetupDatasource">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Add a new datasource</h4>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        To use an external datasource, you will need to assign it to a Segmail Subscription List,
+                        and define the field mappings. The Segmail sync engine will periodically check for and adds new 
+                        subscriber accounts in your apps and remove those that do not exists in your apps anymore.
+                    </p>
+                    <p>
+                        
+                    </p>
+                    <div class="form-group" jsf:rendered="#{fn:length(FormSetupDatasource.ownedLists) le 0}">
+                        <h1>You have no lists yet</h1>
+                        <p>
+                            <a href="#{request.contextPath}/list">
+                                Click here to go create a list.
+                            </a>
+                        </p>
+                    </div>
+                    <div class="form-group" jsf:rendered="#{fn:length(FormSetupDatasource.ownedLists) gt 0}"> 
+                        <label>Select lists that you want to add to:</label>
+                        <h:selectOneListbox styleClass="select2" style="width: 100%;"
+                                            value="#{FormSetupDatasource.selectedListId}" 
+                                     >
+                            <f:selectItems value="#{FormSetupDatasource.ownedLists}" var="list" itemLabel="#{list.LIST_NAME}"
+                                           itemValue="#{list.OBJECTID}">
+                            </f:selectItems>
+                        </h:selectOneListbox>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button jsf:id="addSubscButton" class="btn btn-success"
+                            jsf:rendered="#{fn:length(FormSetupDatasource.ownedLists) gt 0}"
+                            >
+                        <f:ajax listener="#{FormSetupDatasource.setupDatasource()}"
+                                render="@form"
+                                event="click" execute="@form"
+                                >
+                        </f:ajax>
+                        Activate datasync and go to setup page
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        
+    </form>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <ui:composition template="#{UserRequestContainer.templateLocation}"
+                    >
+        <ui:define name="toolbar-right">
+            
+        </ui:define>
+
+        <ui:define name="main-program-panel">
+            <ui:include src="setup_wizard.xhtml"></ui:include>
+            
+        </ui:define>
+        
+        <ui:define name="toolbar-right"  >
+            
+        </ui:define>
+
+        <ui:define name="scripts-bottom">
+            
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstra-wizard/jquery.bootstrap.wizard.min.js"></script>
+            
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/jquery.noty.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/layouts/topCenter.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/noty/themes/default.js"></script>
+            
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/bootstrap-typeahead/bootstrap3-typeahead.js"></script>
+            
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/plugins/summernote/summernote.js"></script>
+            <script type="text/javascript" src="#{request.contextPath}/templates/beprobootstrap/js/custom/summernote_hack.js" />
+            
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/codemirror.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/addon/edit/matchbrackets.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/xml/xml.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/javascript/javascript.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/css/css.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/clike/clike.js"></script>
+            <script type='text/javascript' src="#{request.contextPath}/templates/beprobootstrap/js/plugins/codemirror/mode/php/php.js"></script>
+            
+            <script type="text/javascript" src="#{request.contextPath}/programs/wizard/js/setup_wizard.js" />
+            <h:form id="FormWizardInit">
+                <c:set var="stage" value="#{FormWizardInit.currentStage}"></c:set>
+                <script>
+                    var CONTEXT_PATH = '#{request.contextPath}';
+                </script>
+                
+            </h:form>
+            
+        </ui:define>
+
+        <ui:define name="head">
+            <link type="text/css" rel="stylesheet" href="#{request.contextPath}/templates/common/js/jasny-bootstrap/css/jasny-bootstrap.min.css" />
+        </ui:define>
+
+    </ui:composition>
+</html>
+

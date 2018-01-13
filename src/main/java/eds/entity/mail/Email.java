@@ -30,7 +30,6 @@ import org.joda.time.DateTime;
             @Index(name="MailServiceInbound",
                     columnList="AWS_SES_MESSAGE_ID"),
         })
-
 public abstract class Email extends EnterpriseTransaction {
     
     public static final String CREATED_FROM = "CREATED_FROM";

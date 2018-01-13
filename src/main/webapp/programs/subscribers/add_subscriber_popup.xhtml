@@ -7,7 +7,8 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
     <form jsf:id="FormAddSubscriber">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -19,10 +20,18 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group" jsf:rendered="#{fn:length(FormAddSubscriber.ownedLists) le 0}">
+                        <h1>You have no lists yet</h1>
+                        <p>
+                            <a href="#{request.contextPath}/list">
+                                Click here to go create a list.
+                            </a>
+                        </p>
+                    </div>
+                    <div class="form-group" jsf:rendered="#{fn:length(FormAddSubscriber.ownedLists) gt 0}"> 
+                        <label>Select lists that you want to add to:</label>
                         <h:selectManyListbox styleClass="select2" style="width: 100%;"
                                      value="#{FormAddSubscriber.assignedLists}" 
-
                                      >
                             <f:ajax render="@form" execute="@form"
                                     event="valueChange" listener="#{FormImportSubscribers.setupImport()}"
@@ -53,7 +62,8 @@
                 </div>
                 <div class="modal-footer">
                     <button jsf:id="addSubscButton" class="btn btn-success"
-                                        jsf:onclick="return FormAddSubscriber.form()">
+                            jsf:rendered="#{fn:length(FormAddSubscriber.ownedLists) gt 0}"
+                            jsf:onclick="return FormAddSubscriber.form()">
                         <f:ajax listener="#{FormAddSubscriber.addSubscriber()}"
                                 render="@form" onevent="refreshAddSubsc"
                                 event="click" execute="@form"

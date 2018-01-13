@@ -170,9 +170,9 @@ public class DatasourceQueryService {
             throw new IncompleteDataException("Table name is missing.");
         
         List<String> results = new ArrayList<>();
-        Connection conn = DatasourceConnectionFactory.getConnection(ld);
-        
+        Connection conn = null;
         try {
+            conn = DatasourceConnectionFactory.getConnection(ld);
             String queryString = "DESCRIBE "+ld.getTABLE_NAME();
             ResultSet rs = conn.prepareStatement(queryString).executeQuery();
             
@@ -183,8 +183,10 @@ public class DatasourceQueryService {
             
         } catch (SQLException ex) {
             Logger.getLogger(DatasourceQueryService.class.getName()).log(Level.SEVERE, null, ex);
+            
         } finally {
-            conn.close();
+            if (conn != null)
+                conn.close();
         }
         return results;
     }

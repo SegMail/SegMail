@@ -13,12 +13,20 @@
         <form jsf:id="FormEditListHeader">
             <!--when there is a list to be edited-->
             <div class="block-content" jsf:rendered="#{FormEditListHeader.loaded}">
-                <h2>
+                
+                <h2 class="text-default">
                     <strong>#{ProgramList.listEditing.LIST_NAME}</strong>
-                    <span class="badge badge-info" style="margin-left: 10px;" title="Confirmed subscribers: Effective number of subscribers who will receive your emails">
-                        #{ProgramList.listEditing.SUBSCRIBER_COUNT}
-                    </span>
+                    
                 </h2>
+                <p class="" style="color:#AAA;">
+                    Created since <strong class="" style="color:#333">#{ProgramList.listEditing.DATE_CREATED}</strong>, 
+                    total number of subscribers collected: <strong class="" style="color:#333">#{ProgramList.listEditing.SUBSCRIBER_COUNT}</strong>
+                    <span jsf:rendered="#{ProgramList.listEditing.SUBSCRIBER_COUNT le 0}">
+                        <a href="#{request.contextPath}/signupcode">Start collecting signups now</a>
+                    </span>
+                </p>
+                
+                
                 <!--<span>Remote list. </span>
                 <a href="#">Make local. </a>
                 <a href="#">What are remote and local lists?</a>-->

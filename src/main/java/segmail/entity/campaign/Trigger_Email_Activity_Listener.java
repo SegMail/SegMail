@@ -21,7 +21,7 @@ public class Trigger_Email_Activity_Listener {
     public void setEmail(Trigger_Email_Activity trigger) {
         if(trigger.getTRIGGERED_TRANSACTION() != null) {
             for(String email : trigger.getTRIGGERED_TRANSACTION().getRECIPIENTS()) {
-                trigger.setSUBCRIBER_EMAIL(email);
+                trigger.setSUBSCRIBER_EMAIL(email);
             }
         }
             
