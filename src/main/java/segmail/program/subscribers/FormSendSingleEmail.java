@@ -39,7 +39,6 @@ public class FormSendSingleEmail {
     @EJB GenericObjectService objService;
     @EJB MailServiceOutbound mailService;
     
-
     public boolean isPreview() {
         return program.isPreview();
     }
@@ -145,7 +144,7 @@ public class FormSendSingleEmail {
     }
     
     public void backToEdit() {
-        // No action reqiured, preview will be auto-set to false because this is a request scoped bean
+        resetPreview();
     }
     
     public void sendEmail() {

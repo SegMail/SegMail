@@ -14,7 +14,5 @@
         <input id="page" type="hidden" value="#{FormWizardInit.stages.get(stage)}" />
         
         <ui:include src="#{FormWizardInit.stages.get(stage)}.xhtml" ></ui:include>
-        <s2:messenger id="ProgramSetupWizard_messenger" for="ProgramSetupWizard" showDetail="true" showSummary="true"></s2:messenger>
-        <p:messages for="ProgramSetupWizard" ></p:messages>
     </h:form>
 </html>
