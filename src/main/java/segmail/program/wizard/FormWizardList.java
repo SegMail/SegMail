@@ -47,9 +47,7 @@ public class FormWizardList {
     
     @PostConstruct
     public void init() {
-        if(!FacesContext.getCurrentInstance().isPostback()) {
-            loadExistingLists();
-        }
+        loadExistingLists();
     }
     
     public List<SubscriptionList> getExistingLists() {

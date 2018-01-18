@@ -198,7 +198,8 @@ public class ClientAWSService {
         }
         ClientAWSAccount account = accounts.get(0);
         BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(), account.getAWS_SECRET_ACCESS_KEY());
-        sender = objService.getEm().merge(sender);
+        //sender = objService.getEm().merge(sender);
+        sender = (VerifiedSendingAddress) updService.merge(sender);
         
         AmazonSQSClient sqsClient = new AmazonSQSClient(clientCredentials);
         sqsClient.setEndpoint(getSQSEndpoint());
@@ -440,8 +441,8 @@ public class ClientAWSService {
         VerifiedSendingAddress newVerifiedAddress = new VerifiedSendingAddress();
         newVerifiedAddress.setVERIFIED_ADDRESS(sendingAddress);
         newVerifiedAddress.setSNO(++sno);
-        updService.persist(newVerifiedAddress);
         newVerifiedAddress.setOWNER(client);
+        updService.persist(newVerifiedAddress);
         
         BasicAWSCredentials clientCredentials = new BasicAWSCredentials(account.getAWS_ACCESS_KEY_ID(), account.getAWS_SECRET_ACCESS_KEY());
         AmazonSimpleEmailServiceClient awsClient = new AmazonSimpleEmailServiceClient(clientCredentials);

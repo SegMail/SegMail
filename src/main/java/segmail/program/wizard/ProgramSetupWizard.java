@@ -266,10 +266,15 @@ public class ProgramSetupWizard extends Program {
         this.existingAddresses = new ArrayList<>();
     }
     
+    public void initList() {
+        this.existingLists = new ArrayList<>();
+    }
+    
     @Override
     public void clearVariables() {
         initStages();
         initAddress();
+        initList();
     }
 
     @Override

@@ -42,9 +42,7 @@ public class FormWizardAddress {
     
     @PostConstruct
     public void init() {
-        if(!FacesContext.getCurrentInstance().isPostback()) {
-            loadExistingAddresses();
-        }
+        loadExistingAddresses();
     }
     
     public List<VerifiedSendingAddress> getExistingAddresses() {
