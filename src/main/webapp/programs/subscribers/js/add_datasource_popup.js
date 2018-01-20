@@ -12,7 +12,6 @@ function refreshDatasource(data) {
             break;
 
         case "success": // This is called when ajax response is successfully processed.
-            initAddSubsc();
             refresh_select2();
             break;
     }

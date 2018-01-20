@@ -53,6 +53,23 @@ public class SubscriberCount extends EnterpriseData<SubscriptionList>{
     public void setCOUNT(Map<String, Long> COUNT) {
         this.COUNT = COUNT;
     }
+    
+    public long count(SUBSCRIPTION_STATUS status) {
+        if(getCOUNT() == null || getCOUNT().isEmpty())
+            return 0;
+        
+        if(status == null)
+            return getCOUNT().values().stream().mapToLong(l->l.longValue()).sum();
+        
+        return getCOUNT().get(status.name);
+    }
+    
+    public long countActive() {
+        long confirmed = this.count(SUBSCRIPTION_STATUS.CONFIRMED);
+        long newly = this.count(SUBSCRIPTION_STATUS.NEW);
+        
+        return confirmed + newly;
+    }
 
     @Override
     public void randInit() {

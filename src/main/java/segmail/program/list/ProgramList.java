@@ -11,6 +11,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import seca2.program.Program;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriberCount;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import segmail.entity.subscription.datasource.ListDataMapping;
@@ -32,6 +33,7 @@ public class ProgramList extends Program implements Serializable {
     
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
+    private Map<Long,SubscriberCount> listSubscriberCounts;
     
     //For controlling the tabs
     private String activeTab;
@@ -381,6 +383,14 @@ public class ProgramList extends Program implements Serializable {
         this.unsubUrlParams = unsubUrlParams;
     }
 
+    public Map<Long,SubscriberCount> getListSubscriberCounts() {
+        return listSubscriberCounts;
+    }
+
+    public void setListSubscriberCounts(Map<Long,SubscriberCount> listSubscriberCounts) {
+        this.listSubscriberCounts = listSubscriberCounts;
+    }
+    
     public String getActiveTab() {
         return activeTab;
     }

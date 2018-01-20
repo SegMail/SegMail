@@ -7,13 +7,10 @@
       xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
       xmlns:s2="http://seca2.jsf/custom"
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
-      xmlns:jsf="http://xmlns.jcp.org/jsf">
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
     <ui:composition template="#{UserRequestContainer.templateLocation}"
                     >
-        <ui:define name="toolbar-right">
-
-        </ui:define>
-
         <ui:define name="main-program-panel">
             <div class="row"><!--Page message-->
                 <div class="col-md-12">
@@ -53,6 +50,11 @@
                             </div>
                         </c:when>
                         <c:otherwise>
+                            <div class="row" style="margin-top: 10px;">
+                                <div class="col-md-12">
+                                    <a href="#{request.contextPath}/list"><u>&lt;- Go back to lists</u></a>
+                                </div>
+                            </div>
                             <div jsf:id="list_editing_block" class="col-md-12" jsf:rendered="#{ProgramList.listEditing ne null}">
                                 <ui:include src="editing_panel_header.xhtml"></ui:include>
                                 <div class="block" >
@@ -109,8 +111,8 @@
         </ui:define>
         
         <ui:define name="toolbar-right"  >
-            <ui:include src="edit_list_controls.xhtml">
-            </ui:include>
+            <!--No longer in use-->
+            <ui:include src="edit_list_controls.xhtml"></ui:include>
         </ui:define>
 
         <ui:define name="scripts-bottom">

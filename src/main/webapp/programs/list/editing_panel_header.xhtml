@@ -16,25 +16,18 @@
                 
                 <h2 class="text-default">
                     <strong>#{ProgramList.listEditing.LIST_NAME}</strong>
-                    
                 </h2>
                 <p class="" style="color:#AAA;">
                     Created since <strong class="" style="color:#333">#{ProgramList.listEditing.DATE_CREATED}</strong>, 
-                    total number of subscribers collected: <strong class="" style="color:#333">#{ProgramList.listEditing.SUBSCRIBER_COUNT}</strong>
-                    <span jsf:rendered="#{ProgramList.listEditing.SUBSCRIBER_COUNT le 0}">
+                    total number of subscribers collected: 
+                    <c:set var="count" value="#{ProgramList.listSubscriberCounts[ProgramList.listEditing.OBJECTID].countActive()}"></c:set>
+                    <strong class="" style="color:#333">
+                        #{count}
+                    </strong>
+                    <span jsf:rendered="#{count le 0}">
                         <a href="#{request.contextPath}/signupcode">Start collecting signups now</a>
                     </span>
                 </p>
-                
-                
-                <!--<span>Remote list. </span>
-                <a href="#">Make local. </a>
-                <a href="#">What are remote and local lists?</a>-->
-            </div>
-
-            <!--when there's no list to be edited-->
-            <div class="block-content" jsf:rendered="#{!FormEditListHeader.loaded}">
-                
             </div>
         </form>
     </div>

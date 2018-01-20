@@ -5,10 +5,14 @@
  */
 package segmail.program.list;
 
+import eds.component.GenericObjectService;
 import eds.entity.client.Client;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -16,10 +20,12 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.joda.time.DateTime;
 import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.bootstrap.UserSessionContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
+import segmail.entity.subscription.SubscriberCount;
 
 /**
  *
@@ -39,12 +45,15 @@ public class FormListList {
     
     @EJB
     private ListService listService;
+    @EJB
+    private GenericObjectService objService;
     
     @PostConstruct
     public void init() {
         //Only if it is not a postback, reload everything
         if (!FacesContext.getCurrentInstance().isPostback()) {
-            this.loadAllLists();
+            loadAllLists();
+            loadSubscriberCount();
         }
     }
 
@@ -116,5 +125,23 @@ public class FormListList {
     public void setAllLists(List<SubscriptionList> allLists) {
         program.setAllLists(allLists);
     }
+    
+    public Map<Long,SubscriberCount> getListSubscriberCounts() {
+        return program.getListSubscriberCounts();
+    }
 
+    public void setListSubscriberCounts(Map<Long,SubscriberCount> listSubscriberCounts) {
+        program.setListSubscriberCounts(listSubscriberCounts);
+    }
+
+    public void loadSubscriberCount() {
+        List<Long> listIds = this.getAllLists().stream().map(l -> l.getOBJECTID()).collect(Collectors.toList());
+        DateTime now = DateTime.now();
+        List<SubscriberCount> counts = objService.getEnterpriseDataByIds(listIds, SubscriberCount.class, now, now);
+        
+        setListSubscriberCounts(new HashMap<>());
+        for(SubscriberCount count : counts) {
+            getListSubscriberCounts().put(count.getOWNER().getOBJECTID(), count);
+        }
+    }
 }

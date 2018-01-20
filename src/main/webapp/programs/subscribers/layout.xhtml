@@ -23,6 +23,7 @@
                 <h:inputHidden value="#{FormScreenSwitch}" ></h:inputHidden>
             </div>
             <div class="row" jsf:rendered="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[0]}" >
+                <h:inputHidden value="#{FormSetupSubscribers}" ></h:inputHidden>
                 <ui:include src="setup.xhtml" ></ui:include>
             </div>
             <div class="row" jsf:rendered="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[1]}" >
@@ -122,7 +123,10 @@
             <script type="text/javascript" src="#{request.contextPath}/templates/common/js/mailmerge/mailmerge.js"></script>
             
             <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[0]}">
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/subscriber_table.js" />
                 <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/setup.js" />
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/import_subscriber_popup.js" />
+                <script type="text/javascript" src="#{request.contextPath}/programs/subscribers/js/add_subscriber_popup.js" />
             </c:if>
             
             <c:if test="#{FormScreenSwitch.currentScreen eq FormScreenSwitch.SCREENS[1]}">

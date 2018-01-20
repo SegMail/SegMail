@@ -50,17 +50,17 @@
                 will be read as the header and must be present. You will be able to choose
                 which columns in your file is mapped to which fields in your list.
                 </p>
-                
-                <h:commandLink styleClass="btn btn-success" pass:href="#add_datasource_popup" 
+                <h:commandLink styleClass="btn btn-success" pass:href="#import_subscriber_popup" 
                                 pass:data-toggle="modal">
                      <i class="fa fa-gears"></i>
-                     Setup a datasource
-                     <f:ajax render=":FormImportSubscribers" event="click" 
-                             onevent="refreshImport"
-                             listener="#{FormImportSubscribers.setupImport()}"
+                     Import Subscribers
+                     <f:ajax render=":FormImportSubscribers @form" event="click" 
+                             onevent="refreshImport" execute="@form"
+                             listener="#{FormWizardCollect.initImportSubscribers()}"
                              >
                      </f:ajax>
                  </h:commandLink>
+                
             </div>
             
             <div class="col-md-4">
@@ -70,6 +70,16 @@
                     Using just your database login credentials, you can rely on our synchronization
                 engine to keep your subscriber's info up-to-date with your main apps.
                 </p>
+                <h:commandLink styleClass="btn btn-success" pass:href="#add_datasource_popup" 
+                                pass:data-toggle="modal">
+                     <i class="fa fa-gears"></i>
+                     Setup a datasource
+                     <f:ajax render=":FormSetupDatasource" event="click" 
+                             onevent="refreshDatasource" 
+                             listener="#{FormWizardCollect.initSetupDatasource()}"
+                             >
+                     </f:ajax>
+                 </h:commandLink>
             </div>
         </div>
         <div class="row">
@@ -103,13 +113,13 @@
         </div>
     </div>
     <script>
-        var listId = #{FormSignupCode.selectedListId};
-        var clientId = #{FormSignupCode.clientId};
+        var listId = #{FormWizardCollect.selectedList.OBJECTID};
+        var clientId = #{FormWizardCollect.clientId};
         
-        var serverUrl = '#{FormSignupCode.signupLink}';
+        var serverUrl = '#{FormWizardCollect.signupLink}';
         
         var fieldList = [
-        <c:forEach items="#{FormSignupCode.fields}" var="field">
+        <c:forEach items="#{FormWizardCollect.fields}" var="field">
             {
                 'name': '#{field.FIELD_NAME}',
                 'key' : '#{field.generateKey()}',
@@ -119,11 +129,9 @@
         </c:forEach>
         ];
         
-        var sendAs = '#{FormSignupCode.selectedList.SEND_AS_EMAIL}';
-        var confirmEmailCount = #{FormSignupCode.confirmEmails.size()};
+        var sendAs = '#{FormWizardCollect.selectedList.SEND_AS_EMAIL}';
+        var confirmEmailCount = #{FormWizardCollect.confirmEmails.size()};
         
     </script>
-    <div class="modal fade" id="add_datasource_popup">
-        <ui:include src="/programs/subscribers/add_datasource.xhtml" ></ui:include>
-    </div>
+    
 </html>
