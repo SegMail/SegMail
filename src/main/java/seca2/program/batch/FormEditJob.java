@@ -13,8 +13,6 @@ import eds.entity.batch.BatchJobRun;
 import eds.entity.batch.BatchJobStep;
 import eds.entity.batch.BatchJobSchedule;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -53,7 +51,6 @@ public class FormEditJob implements FormEditEntity{
             batchScheduleService.updateBatchJobRun(getEditingBatchJobRun()); 
             batchScheduleService.updateBatchJobTrigger(getFirstAndOnlyTrigger());
             batchScheduleService.updateBatchJobStep(getFirstAndOnlyStep());
-            //batchScheduleService.updateBatchJob(getEditingBatchJob()); //All the above methods are cascaded to their owners
             assignServerToBatchJob(); //Server cannot 
             
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch Job updated", "");

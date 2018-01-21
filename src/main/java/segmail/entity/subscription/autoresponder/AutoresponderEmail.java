@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * A template is actually different from the actual email sent. It has to exist
@@ -27,18 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name="AUTORESPONDER_EMAIL")
-//@DiscriminatorValue("AutoresponderEmail")
-@XmlRootElement
 public class AutoresponderEmail extends EnterpriseObject {
-    
-    /**
-    public enum EMAIL_TYPE {
-        CONFIRMATION,
-        NEWSLETTER,
-        AUTORESPONDER
-    }
-    
-    protected EMAIL_TYPE TYPE;*/
     
     protected String TYPE;
     

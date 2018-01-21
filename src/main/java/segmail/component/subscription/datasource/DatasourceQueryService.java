@@ -62,6 +62,8 @@ public class DatasourceQueryService {
             //Construct the field list
             String fieldString = "";
             for(ListDataMapping mapping : mappings) {
+                if(mapping.getFOREIGN_NAME() == null || mapping.getFOREIGN_NAME().isEmpty())
+                    continue;
                 if(fieldString.length() > 0)
                     fieldString += ",";
                 fieldString += mapping.getFOREIGN_NAME();
@@ -111,12 +113,16 @@ public class DatasourceQueryService {
                     ListDataMapping mapping = mappings.get(i);
                     String localKey = mapping.getKEY_NAME();
                     String foreignName = mapping.getFOREIGN_NAME();
+                    // If the foreignName is not selected for this mapping, skip this local field.
+                    if(foreignName == null || foreignName.isEmpty()) 
+                        continue;
+                    
                     switch(FIELD_TYPE.valueOf(mapping.getTYPE())) {
-                        case EMAIL: result.addValue(localKey, rs.getString(foreignName));
+                        case EMAIL: result.addValue(localKey, rs.getString(foreignName).trim()); //Trim because some emails have spaces before and after!
                                     //Only the 1st EMAIL field should be the identifier of this record
                                     //This is a quick and easy assumption, may not be true!
                                     if(mapping.getSNO() == 1)
-                                        result.setEmail(rs.getString(foreignName));
+                                        result.setEmail(rs.getString(foreignName).trim());
                                     break;
                         case DATE : result.addValue(localKey, rs.getDate(foreignName));
                                     break;
@@ -164,9 +170,9 @@ public class DatasourceQueryService {
             throw new IncompleteDataException("Table name is missing.");
         
         List<String> results = new ArrayList<>();
-        Connection conn = DatasourceConnectionFactory.getConnection(ld);
-        
+        Connection conn = null;
         try {
+            conn = DatasourceConnectionFactory.getConnection(ld);
             String queryString = "DESCRIBE "+ld.getTABLE_NAME();
             ResultSet rs = conn.prepareStatement(queryString).executeQuery();
             
@@ -177,8 +183,10 @@ public class DatasourceQueryService {
             
         } catch (SQLException ex) {
             Logger.getLogger(DatasourceQueryService.class.getName()).log(Level.SEVERE, null, ex);
+            
         } finally {
-            conn.close();
+            if (conn != null)
+                conn.close();
         }
         return results;
     }

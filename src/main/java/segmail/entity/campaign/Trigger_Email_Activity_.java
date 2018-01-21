@@ -15,5 +15,6 @@ import javax.persistence.metamodel.StaticMetamodel;
  */
 @StaticMetamodel(Trigger_Email_Activity.class)
 public class Trigger_Email_Activity_ extends EnterpriseTransactionTrigger_ {
-    public static volatile SingularAttribute<Trigger_Email_Activity,String> SUBCRIBER_EMAIL;
+    public static volatile SingularAttribute<Trigger_Email_Activity,String> SUBSCRIBER_EMAIL;
+    public static volatile SingularAttribute<Trigger_Email_Activity,String> SUBSCRIBER_ID;
 }

@@ -9,7 +9,7 @@
         <tag-name>messenger</tag-name>
         
         <component>
-            <component-type>Messenger</component-type>
+            <component-type>seca2.jsf.custom.messenger.MessengerComponent</component-type>
             <renderer-type>seca2.jsf.custom.messenger.MessengerRenderer</renderer-type>
         </component>
         

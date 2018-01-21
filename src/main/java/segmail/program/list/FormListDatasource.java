@@ -213,20 +213,24 @@ public class FormListDatasource {
         try {
             //Some transaction management problem here!!
             //Put this whole chunk into an EJB
-            if(program.getNewDatasource().getOWNER() == null) { //New
-                program.getNewDatasource().setOWNER(program.getListEditing());
-                updService.persist(program.getNewDatasource());
+            if(getNewDatasource().getOWNER() == null) { //New
+                getNewDatasource().setOWNER(program.getListEditing());
+                updService.persist(getNewDatasource());
             } else {
                 //If password is empty, use the old password.
-                ListDatasource updated = program.getNewDatasource();
+                ListDatasource updated = getNewDatasource();
                 if(updated.getPASSWORD() == null || updated.getPASSWORD().isEmpty()) {
                     updated.setPASSWORD(getOldPassword());
                 }
                 
                 this.dsService.update(updated);
                 //program.setNewDatasource(updated);
+            }
+            // Update all ListDataMapping
+            if(getDatasourceMappings() == null || getDatasourceMappings().isEmpty()) {
                 
             }
+            
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Saved!", "");
         } catch(EJBException ex){
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");
@@ -288,7 +292,6 @@ public class FormListDatasource {
             List<ListDataMapping> refreshed = dsService.refreshDataMappings(program.getListEditing().getOBJECTID(),getDatasourceMappings());
         
             setDatasourceMappings(refreshed);
-            
             
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Field Mapping updated!", "");
         } catch (Exception ex) {

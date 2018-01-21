@@ -28,7 +28,7 @@ public class DatasourceServiceHelper {
     @EJB MassSubscriptionService massSubService;
     @EJB UpdateObjectService updService;
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<String, List<Map<String, Object>>> subscribe(List<ListDatasourceObjectWrapper> newSubscribers, long listId, long clientId) throws EntityNotFoundException {
         List<Map<String,Object>> subscriberMaps = new ArrayList<>();
         newSubscribers.forEach(newSubscriber -> {
@@ -38,7 +38,7 @@ public class DatasourceServiceHelper {
         return massSubService.massSubscribe(clientId, subscriberMaps, listId, false);
     }
     
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public ListDatasource updateDatasource(ListDatasource datasource) {
         return (ListDatasource) updService.merge(datasource);
     }

@@ -8,6 +8,7 @@ package segmail.component.subscription.autoresponder;
 import eds.component.GenericObjectService;
 import eds.component.UpdateObjectService;
 import eds.component.client.ClientFacade;
+import eds.component.data.DataValidationException;
 import eds.component.data.EntityExistsException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
@@ -24,16 +25,20 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.Assign_Client_List_;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
+import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_Client;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_Client_;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List_;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail_;
+import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
  *
@@ -41,11 +46,26 @@ import segmail.entity.subscription.autoresponder.AutoresponderEmail_;
  */
 @Stateless
 public class AutoresponderService {
+    
+    private final String DEFAULT_CONFIRM_BODY = 
+            "<p><span>Dear {Firstname},</p>"
+            +"<p><span></span></p>"
+            + "<p><span>Please click on "+MAILMERGE_REQUEST.CONFIRM.label()+" to confirm your subscription.</span></p>";
+    
+    private final String DEFAULT_WELCOME_BODY = 
+            "<p><span>Welcome {Firstname}!</p>"
+            +"<p><span></span></p>"
+            +"<p><span>You are now subscribed to us.</span></p>";
+    
+    private final String DEFAULT_CONFIRM_SUBJECT = "Please confirm your subscription";
+    private final String DEFAULT_WELCOME_SUBJECT = "Welcome!";
 
     @EJB
     private GenericObjectService objectService;
     @EJB
     private UpdateObjectService updateService;
+    @EJB
+    private MailMergeService mmService;
 
     @Inject
     ClientFacade clientFacade;
@@ -86,16 +106,20 @@ public class AutoresponderService {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public AutoresponderEmail saveAutoEmail(AutoresponderEmail autoEmail)
-            throws IncompleteDataException, EntityExistsException, EntityNotFoundException {
-            //Check if autoEmail exists in the first place
-            if (!objectService.checkEntityExists(autoEmail)) {
-                throw new EntityNotFoundException(AutoresponderEmail.class, autoEmail.getOBJECTID());
-            }
+            throws IncompleteDataException, EntityExistsException, EntityNotFoundException, DataValidationException {
+        //Check if autoEmail exists in the first place
+        if (!objectService.checkEntityExists(autoEmail)) {
+            throw new EntityNotFoundException(AutoresponderEmail.class, autoEmail.getOBJECTID());
+        }
 
-            //Various fields for a particular client
-            checkAutoEmail(autoEmail, clientFacade.getClient().getOBJECTID());
+        //Various fields for a particular client
+        checkAutoEmail(autoEmail, clientFacade.getClient().getOBJECTID());
 
-            return updateService.getEm().merge(autoEmail);
+        // Parse test MailMerge links for preview
+        String preview = parsePreview(autoEmail);
+        autoEmail.setBODY_PROCESSED(preview);
+
+        return updateService.getEm().merge(autoEmail);
 
     }
 
@@ -285,15 +309,15 @@ public class AutoresponderService {
      * @throws RelationshipExistsException
      * @throws EntityNotFoundException
      */
-    public AutoresponderEmail createAndAssignAutoEmail(String subject, String body, AUTO_EMAIL_TYPE type)
+    public AutoresponderEmail createAndAssignAutoEmail(long clientId, String subject, String body, AUTO_EMAIL_TYPE type)
             throws IncompleteDataException, RelationshipExistsException, EntityNotFoundException {
         AutoresponderEmail newAutoEmail = this.createAutoEmailWithoutAssignment(subject, body, type);
-        Client client = clientFacade.getClient();
-        if (client == null) {
+        
+        if (clientId <= 0) {
             throw new IncompleteDataException("No client id provided.");
         }
 
-        this.assignAutoEmailToClient(newAutoEmail.getOBJECTID(), client.getOBJECTID());
+        this.assignAutoEmailToClient(newAutoEmail.getOBJECTID(), clientId);
 
         return newAutoEmail;
     }
@@ -398,5 +422,26 @@ public class AutoresponderService {
                 .getResultList();
         return results;
     }
-
+    
+    public Assign_AutoresponderEmail_List createAndAssignDefaultAutoEmail(long listId, long clientId, AUTO_EMAIL_TYPE type) 
+            throws IncompleteDataException, RelationshipExistsException, EntityNotFoundException {
+        AutoresponderEmail newTemplate = createAndAssignAutoEmail(
+                clientId,
+                (type == CONFIRMATION) ? DEFAULT_CONFIRM_SUBJECT : 
+                        (type == WELCOME) ? DEFAULT_WELCOME_SUBJECT : "",
+                (type == CONFIRMATION) ? DEFAULT_CONFIRM_BODY : 
+                        (type == WELCOME) ? DEFAULT_WELCOME_BODY : "", 
+                type);
+        Assign_AutoresponderEmail_List assign = assignAutoEmailToList(newTemplate.getOBJECTID(), listId);
+        
+        return assign;
+    }
+    
+    public String parsePreview(AutoresponderEmail email) throws DataValidationException, IncompleteDataException {
+        String preview = email.getBODY();
+        
+        preview = mmService.parseTestMailmergeLinks(preview);
+        
+        return preview;
+    }
 }

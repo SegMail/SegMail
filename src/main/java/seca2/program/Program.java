@@ -23,6 +23,8 @@ import seca2.jsf.custom.messenger.FacesMessenger;
 @SessionScoped
 public abstract class Program implements Serializable {
     
+    protected final String REFRESH_FLAG = "REFRESH_FLAG";
+    
     @Inject
     protected UserRequestContainer reqContainer;
     @Inject
@@ -53,9 +55,19 @@ public abstract class Program implements Serializable {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             //Keep all messages posted in this request
             ec.getFlash().setKeepMessages(true);
+            // Set a flash scope flag to indicate this was a refresh
+            ec.getFlash().put(REFRESH_FLAG, true);
             ec.redirect(ec.getRequestContextPath()+reqContainer.printFullPathWithoutContext());
         } catch (Exception ex){
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR,  ex.getMessage(), null);
         }
+    }
+    
+    public boolean isLastReqRefresh() {
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        if(ec.getFlash().get(REFRESH_FLAG) != null)
+            return (boolean) ec.getFlash().get(REFRESH_FLAG);
+        
+        return false;
     }
 }

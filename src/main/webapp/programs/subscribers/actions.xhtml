@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <h:form id="FormAction" prependId="false">
+        <div class="block-head">
+            <h2>
+                Actions
+            </h2>
+        </div>
+        <div class="block-content">
+            <a class="btn btn-default" href="#add_subscriber_popup"
+                           data-toggle="modal"
+                           style="margin-left: 5px"
+                           >
+                <i class="fa fa-plus"></i>
+                Add 1x Subscriber
+                <f:ajax render=":FormAddSubscriber" event="click" 
+                        onevent="refreshAddSubsc"
+                        listener="#{FormImportSubscribers.setupImport()}"
+                        >
+                </f:ajax>
+            </a>
+            <a class="btn btn-default" href="#import_subscriber_popup"
+                           data-toggle="modal"
+                           >
+                <i class="fa fa-floppy-o"></i>
+                Import from File
+                <f:ajax render=":FormImportSubscribers" event="click" 
+                        onevent="refreshImport"
+                        listener="#{FormImportSubscribers.setupImport()}"
+                        >
+                </f:ajax>
+            </a>
+            <h:commandLink styleClass="btn btn-default" 
+                           >
+                <i class="fa fa-floppy-o"></i>
+                Test read checkbox
+                <f:ajax  listener="#{FormSubscriberTable.testReadCheckbox()}"
+                         event="click"
+                         execute="@form"
+                        >
+                </f:ajax>
+            </h:commandLink>
+            <h:inputHidden id="checkedIds" value="#{FormSubscriberTable.checkedIds}"></h:inputHidden>
+        </div>
+    </h:form>
+</html>

@@ -12,7 +12,9 @@ import eds.component.data.DataValidationException;
 import eds.component.data.EnterpriseObjectNotFoundException;
 import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import eds.entity.client.Client;
+import eds.entity.client.VerifiedSendingAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,15 +24,18 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
+import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.FIELD_TYPE;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.SubscriptionListFieldComparator;
 import segmail.entity.subscription.SubscriptionListField_;
+import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 
 /**
  *
@@ -41,6 +46,18 @@ public class ListService {
 
     public static final String DEFAULT_FNAME_FIELD_NAME = "Firstname";
     public static final String DEFAULT_LNAME_FIELD_NAME = "Lastname";
+    public static final String[] DEFAULT_FIELD_NAMES = {
+        SubscriptionService.DEFAULT_EMAIL_FIELD_NAME,
+        DEFAULT_FNAME_FIELD_NAME,
+        DEFAULT_LNAME_FIELD_NAME
+    };
+    public static final String DEFAULT_FNAME_PATTERN = "(?i)(f|first)[ -_]*name";
+    public static final String DEFAULT_LNAME_PATTERN = "(?i)(l|last)[ -_]*name";
+    public static final String[] DEFAULT_FIELD_PATTERNS = {
+        SubscriptionService.DEFAULT_EMAIL_PATTERN,
+        DEFAULT_FNAME_PATTERN,
+        DEFAULT_LNAME_PATTERN
+    };
     /**
      * Generic services
      */
@@ -49,7 +66,7 @@ public class ListService {
     @EJB
     private UpdateObjectService updateService;
     @EJB
-    private GenericConfigService configService;
+    private AutoresponderService autoService;
 
     public void validateListField(SubscriptionListField field) throws DataValidationException, IncompleteDataException {
         if (field.getSNO() == 1 && !field.getTYPE().equals(FIELD_TYPE.EMAIL.name) && !field.getFIELD_NAME().equalsIgnoreCase(FIELD_TYPE.EMAIL.name)) {
@@ -166,7 +183,10 @@ public class ListService {
      * scheduling mechanism.
      *
      * @param listId
+     * @param clientId
      * @throws eds.component.data.EntityNotFoundException
+     * @throws java.lang.NoSuchFieldException
+     * @throws java.lang.NoSuchMethodException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deleteList(long listId, long clientId) throws EntityNotFoundException, NoSuchFieldException, NoSuchMethodException {
@@ -175,7 +195,7 @@ public class ListService {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException {
+    public SubscriptionList createList(String listname, boolean remote, long clientId) throws IncompleteDataException, EnterpriseObjectNotFoundException, RelationshipExistsException, EntityNotFoundException {
         if (listname == null || listname.isEmpty()) {
             throw new IncompleteDataException("List name cannot be empty.");
         }
@@ -203,6 +223,19 @@ public class ListService {
         updateService.getEm().persist(fieldFname);
         updateService.getEm().persist(fieldLname);
         
+        //Set some default fields for the convenience of the user
+        List<VerifiedSendingAddress> sendingAddreses = objectService.getEnterpriseData(clientId, VerifiedSendingAddress.class);
+        if(sendingAddreses != null && !sendingAddreses.isEmpty()) {
+            // Randomly choose the first one returned
+            newList.setSEND_AS_EMAIL(sendingAddreses.get(0).getVERIFIED_ADDRESS());
+            // Set the Send As name as the email
+            newList.setSEND_AS_NAME(newList.getSEND_AS_EMAIL());
+        }
+        
+        //Directly assign a default confirmation and welcome message
+        autoService.createAndAssignDefaultAutoEmail(newList.getOBJECTID(), clientId, AUTO_EMAIL_TYPE.CONFIRMATION);
+        autoService.createAndAssignDefaultAutoEmail(newList.getOBJECTID(), clientId, AUTO_EMAIL_TYPE.WELCOME);
+        
         return newList;
     }
 
@@ -211,17 +244,19 @@ public class ListService {
      * Potentially there could be a generic operation that updates the entity.
      *
      * @param list
+     * @return 
      * @throws eds.component.data.DataValidationException if:
      * <ul>
      * <li>REDIRECT_CONFIRM or REDIRECT_WELCOME are invalid</li>
      * </ul>
      */
-    public void saveList(SubscriptionList list) throws DataValidationException {
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public SubscriptionList saveList(SubscriptionList list) throws DataValidationException {
 
         validateList(list);
-
-        updateService.getEm().merge(list);
-
+        list = updateService.getEm().merge(list);
+        
+        return list;
     }
 
     public void validateList(SubscriptionList list) throws DataValidationException {
@@ -231,13 +266,18 @@ public class ListService {
         }
 
         if (list.getREDIRECT_CONFIRM() != null && !list.getREDIRECT_CONFIRM().isEmpty()) {
-            if (UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM())) {
+            if (!UrlValidator.getInstance().isValid(list.getREDIRECT_CONFIRM())) {
                 throw new DataValidationException("Redirect URL " + list.getREDIRECT_CONFIRM() + " is invalid.");
             }
         }
         if (list.getREDIRECT_WELCOME() != null && !list.getREDIRECT_WELCOME().isEmpty()) {
-            if (UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME())) {
+            if (!UrlValidator.getInstance().isValid(list.getREDIRECT_WELCOME())) {
                 throw new DataValidationException("Redirect URL " + list.getREDIRECT_WELCOME() + " is invalid.");
+            }
+        }
+        if (list.getREDIRECT_UNSUBSCRIBE()!= null && !list.getREDIRECT_UNSUBSCRIBE().isEmpty()) {
+            if (!UrlValidator.getInstance().isValid(list.getREDIRECT_UNSUBSCRIBE())) {
+                throw new DataValidationException("Redirect URL " + list.getREDIRECT_UNSUBSCRIBE() + " is invalid.");
             }
         }
 
@@ -310,5 +350,53 @@ public class ListService {
         return fields;
     }
     
+    /**
+     * Some fields do not have KEY_NAME prior to adding of KEY_NAME in the design
+     * hence we will need to select these fields by listIds.
+     * 
+     * On the other hand, while you are retrieving fields from a list of Subscriptions,
+     * some Subscription records could have been deleted but the Subscriber still
+     * has the SubscriberFieldValue. Hence, you will need both KEY_NAME and 
+     * SubscriptionList Ids to get the full list of SubscriptionListField that 
+     * you can match to a Subscriber's list of SubscriptionListField.
+     * 
+     * @param fieldKeys
+     * @param listIds
+     * @return 
+     */
+    public List<SubscriptionListField> getFieldsByKeyOrLists(List<String> fieldKeys, List<Long> listIds) {
+        CriteriaBuilder builder = objectService.getEm().getCriteriaBuilder();
+        CriteriaQuery<SubscriptionListField> query = builder.createQuery(SubscriptionListField.class);
+        Root<SubscriptionListField> fromField = query.from(SubscriptionListField.class);
+        
+        List<Predicate> conds = new ArrayList<>();
+        if(fieldKeys != null && !fieldKeys.isEmpty()) {
+            conds.add(fromField.get(SubscriptionListField_.KEY_NAME).in(fieldKeys));
+        }
+        if(listIds != null && !listIds.isEmpty()) {
+            conds.add(fromField.get(SubscriptionListField_.OWNER).in(listIds));
+        }
+        
+        if(conds.size() <= 0)
+            return new ArrayList<>(); // Don't query the db
+        
+        if(conds.size() > 1) {
+            query.where(builder.or(conds.toArray(new Predicate[]{})));
+        } else {
+            query.where(conds.get(0));
+        }
+        
+        query.select(fromField);
+        /*query.where(
+                builder.or(
+                        fromField.get(SubscriptionListField_.KEY_NAME).in(fieldKeys),
+                        fromField.get(SubscriptionListField_.OWNER).in(listIds)
+                ));
+        */
+        List<SubscriptionListField> results = objectService.getEm().createQuery(query)
+                .getResultList();
+        
+        return results;
+    }
 
 }

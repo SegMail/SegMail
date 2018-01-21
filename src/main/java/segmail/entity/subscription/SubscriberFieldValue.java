@@ -21,6 +21,10 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
     //private SubscriptionListField FIELD;
     private String FIELD_KEY;
     private String VALUE;
+    /*private String MAILMERGE_TAG;
+    
+    private List<SubscriberFieldValueKey> FIELD_KEYS;
+    */
 
     public String getFIELD_KEY() {
         return FIELD_KEY;
@@ -30,15 +34,6 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
         this.FIELD_KEY = FIELD_KEY;
     }
 
-    /*
-    public SubscriptionListField getFIELD() {
-        return FIELD;
-    }
-
-    public void setFIELD(SubscriptionListField FIELD) {
-        this.FIELD = FIELD;
-    }*/
-
     public String getVALUE() {
         return VALUE;
     }
@@ -46,6 +41,25 @@ public class SubscriberFieldValue extends EnterpriseData<SubscriberAccount> {
     public void setVALUE(String VALUE) {
         this.VALUE = VALUE;
     }
+
+    /*public String getMAILMERGE_TAG() {
+        return MAILMERGE_TAG;
+    }
+
+    public void setMAILMERGE_TAG(String MAILMERGE_TAG) {
+        this.MAILMERGE_TAG = MAILMERGE_TAG;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy="VALUE")
+    @OrderColumn(name = "KEY_ORDER")
+    public List<SubscriberFieldValueKey> getFIELD_KEYS() {
+        return FIELD_KEYS;
+    }
+
+    public void setFIELD_KEYS(List<SubscriberFieldValueKey> FIELD_KEYS) {
+        this.FIELD_KEYS = FIELD_KEYS;
+    }
+    */
     
     @Override
     public void randInit() {

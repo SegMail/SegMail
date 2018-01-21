@@ -14,14 +14,11 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import seca2.bootstrap.BootstrapModule;
 import seca2.bootstrap.CoreModule;
 import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
-import seca2.bootstrap.module.Path.LogicalPathParser;
 
 /**
  *

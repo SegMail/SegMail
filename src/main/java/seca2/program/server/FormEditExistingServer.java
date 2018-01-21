@@ -19,7 +19,6 @@ import seca2.component.landing.LandingService;
 import seca2.entity.landing.Assign_Server_User;
 import seca2.entity.landing.ServerInstance;
 import seca2.entity.landing.ServerResource;
-import seca2.entity.landing.ServerResourceType;
 import seca2.program.FormEditEntity;
 
 /**
@@ -70,7 +69,7 @@ public class FormEditExistingServer implements FormEditEntity {
         try {
             landingService.deleteServer(this.getServerEditing().getOBJECTID());
             
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server deleted.", "");
+            FacesMessenger.setFacesMessage(ProgramServer.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Server deleted.", "");
             closeWithoutSaving();
             
         } catch (EntityNotFoundException ex) {

@@ -20,6 +20,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.jsf.custom.messenger.FacesMessenger;
 import segmail.component.subscription.ListService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
@@ -27,6 +28,7 @@ import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE;
 import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
 import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.WELCOME;
+import segmail.entity.subscription.autoresponder.Assign_AutoresponderEmail_List;
 import segmail.entity.subscription.email.mailmerge.MAILMERGE_REQUEST;
 
 /**
@@ -44,16 +46,17 @@ public class FormAddNewAutoEmail {
     @Inject private ProgramAutoresponder program;
     @Inject private ClientFacade clientFacade;
     @Inject private UserRequestContainer reqContainer;
+    @Inject private ClientContainer clientCont;
     
     private String subject;
     
     private final String defaultConfirmBody = 
-            "<p><span>Dear ,</p>"
+            "<p><span>Dear {Firstname},</p>"
             +"<p><span></span></p>"
             + "<p><span>Please click on "+MAILMERGE_REQUEST.CONFIRM.label()+" to confirm your subscription.</span></p>";
     
     private final String defaultWelcomeBody = 
-            "<p><span>Welcome !</p>"
+            "<p><span>Welcome {Firstname}!</p>"
             +"<p><span></span></p>"
             +"<p><span>You are now subscribed to us.</span></p>";
     //private AutoEmailTypeFactory.TYPE type;
@@ -72,13 +75,7 @@ public class FormAddNewAutoEmail {
                 throw new IncompleteDataException("Please select a list.");
             // Create the new template
             // Get the client associated with the user and assign it
-            AutoresponderEmail newTemplate = autoresponderService.createAndAssignAutoEmail(
-                    subject, 
-                    (type == CONFIRMATION) ? defaultConfirmBody : 
-                            (type == WELCOME) ? defaultWelcomeBody : "", 
-                    type);
-            //Assign it to the selected list
-            autoresponderService.assignAutoEmailToList(newTemplate.getOBJECTID(), getSelectedListId());
+            Assign_AutoresponderEmail_List newAssign = autoresponderService.createAndAssignDefaultAutoEmail(getSelectedListId(), clientCont.getClient().getOBJECTID(), type);
             
             program.refresh();
             

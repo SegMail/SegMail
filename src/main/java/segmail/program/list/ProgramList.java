@@ -11,6 +11,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import seca2.program.Program;
 import segmail.entity.subscription.FIELD_TYPE;
+import segmail.entity.subscription.SubscriberCount;
 import segmail.entity.subscription.SubscriptionListField;
 import segmail.entity.subscription.autoresponder.AutoresponderEmail;
 import segmail.entity.subscription.datasource.ListDataMapping;
@@ -32,10 +33,16 @@ public class ProgramList extends Program implements Serializable {
     
     private List<SubscriptionList> allLists;
     private SubscriptionList listEditing;
+    private Map<Long,SubscriberCount> listSubscriberCounts;
     
     //For controlling the tabs
-    private Map<String,Boolean> showActiveTabs;
-    private String activeTab = "settings_panel"; //default
+    private String activeTab;
+    final String[] TABS = {
+        "settings", // Default is the 1st 
+        "fieldset",
+        "redirect",
+        "datasource"
+    };
     
     //For subscribers
     private Map<Long,Map<String,String>> subscriberTable;
@@ -51,6 +58,10 @@ public class ProgramList extends Program implements Serializable {
     private List<AutoresponderEmail> welcomeEmails;
     private AutoresponderEmail selectedWelcomeEmail;
     private long selectedWelcomeEmailId;
+    
+    private List<String> confirmUrlParams;
+    private List<String> welcomeUrlParams;
+    private List<String> unsubUrlParams;
     
     //For field list
     private List<SubscriptionListField> fieldList;
@@ -228,14 +239,6 @@ public class ProgramList extends Program implements Serializable {
         this.subscriberTable = subscriberTable;
     }
 
-    public Map<String, Boolean> getShowActiveTabs() {
-        return showActiveTabs;
-    }
-
-    public void setShowActiveTabs(Map<String, Boolean> showActiveTabs) {
-        this.showActiveTabs = showActiveTabs;
-    }
-
     public Map<Integer, String> getListFieldMapping() {
         return listFieldMapping;
     }
@@ -268,14 +271,6 @@ public class ProgramList extends Program implements Serializable {
         this.newDatasource = newDatasource;
     }
 
-    public String getActiveTab() {
-        return activeTab;
-    }
-
-    public void setActiveTab(String activeTab) {
-        this.activeTab = activeTab;
-    }
-
     public List<ListDataMapping> getDatasourceMappings() {
         return datasourceMappings;
     }
@@ -298,11 +293,6 @@ public class ProgramList extends Program implements Serializable {
 
     public void setOldPassword(String oldPassword) {
         this.oldPassword = oldPassword;
-    }
-    
-    public void refresh(String activeTab) {
-        this.setActiveTab(activeTab);
-        this.refresh();
     }
 
     public String getConnectionString() {
@@ -367,6 +357,46 @@ public class ProgramList extends Program implements Serializable {
 
     public void setOldStatusFieldValue(String oldStatusFieldValue) {
         this.oldStatusFieldValue = oldStatusFieldValue;
+    }
+
+    public List<String> getConfirmUrlParams() {
+        return confirmUrlParams;
+    }
+
+    public void setConfirmUrlParams(List<String> confirmUrlParams) {
+        this.confirmUrlParams = confirmUrlParams;
+    }
+
+    public List<String> getWelcomeUrlParams() {
+        return welcomeUrlParams;
+    }
+
+    public void setWelcomeUrlParams(List<String> welcomeUrlParams) {
+        this.welcomeUrlParams = welcomeUrlParams;
+    }
+
+    public List<String> getUnsubUrlParams() {
+        return unsubUrlParams;
+    }
+
+    public void setUnsubUrlParams(List<String> unsubUrlParams) {
+        this.unsubUrlParams = unsubUrlParams;
+    }
+
+    public Map<Long,SubscriberCount> getListSubscriberCounts() {
+        return listSubscriberCounts;
+    }
+
+    public void setListSubscriberCounts(Map<Long,SubscriberCount> listSubscriberCounts) {
+        this.listSubscriberCounts = listSubscriberCounts;
+    }
+    
+    public String getActiveTab() {
+        return activeTab;
+    }
+
+    public void setActiveTab(String activeTab) {
+        this.activeTab = activeTab;
     }
     
     @Override

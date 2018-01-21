@@ -6,8 +6,10 @@
 package eds.entity.file;
 
 import eds.entity.transaction.EnterpriseTransaction;
+import eds.entity.transaction.TransactionStatus;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import org.joda.time.DateTime;
 
 /**
  *
@@ -53,6 +55,16 @@ public class FileTransaction extends EnterpriseTransaction {
 
     public void setLOCATION(String LOCATION) {
         this.LOCATION = LOCATION;
+    }
+
+    @Override
+    public <Ts extends TransactionStatus> Ts PROCESSING_STATUS() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public FileTransaction transit(TransactionStatus newStatus, DateTime dt) {
+        return this;
     }
     
     

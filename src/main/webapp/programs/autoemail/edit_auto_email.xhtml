@@ -9,8 +9,14 @@
       xmlns:cc="http://xmlns.jcp.org/jsf/composite"
       xmlns:jsf="http://xmlns.jcp.org/jsf"
       xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
-    <form jsf:id="FormEditExistingTemplate" >
+    <form jsf:id="FormEditExistingTemplate" prependId="false">
         <div class="row">
+            <div class="col-md-12">
+                <s2:messenger id="FormEditExistingTemplate_Messenger" for="FormEditExistingTemplate" showDetail="true" showSummary="true"
+                              class="form-group"></s2:messenger>
+            </div>
+        </div>
+        <div class="row">   
             <div class="col-md-6">
                 <div id="editor-panel" class="block">
                     <div class="block-content">
@@ -37,31 +43,47 @@
                             <span id="saveResults" >
                                 
                             </span>
-                            <button id="saveButton" onclick="onSave();return false;" class="btn btn-success">Save</button>
-                            
+                            <button jsf:id="saveButton" pass:id="saveButton"
+                                    class="btn btn-success"
+                                    >
+                                <f:ajax listener="#{FormEditExistingTemplate.saveAndContinue()}"
+                                        event="click"
+                                        onevent="onSave"
+                                        render="@form"
+                                        execute="@form"
+                                        >
+                                </f:ajax>
+                                <i class="fa fa-save"></i>
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-6">
-                <div class="block">
-                    <div class="block-content">
-                        <h2>This is how your email will look like</h2>
-                        <p>
-                            It's a WYSIWYG editor on your left but you would miss out how the mail merge
-                            tags will look like.
-                        </p>
-                    </div>
-                </div>
                 <div id="preview-panel" class="block">
-                    <div id="preview" class="block-content" style="background-color: ">
-                        
+                    <div class="block-head">
+                        <h2>#{FormEditExistingTemplate.editingTemplate.SUBJECT}</h2>
+                    </div>
+                    <div class="block-content">
+                        <div class="pull-left">
+                            <strong>From: </strong>
+                            #{FormEditExistingTemplate.assignedList.SEND_AS_NAME} 
+                            &lt; #{FormEditExistingTemplate.assignedList.SEND_AS_EMAIL} &gt;
+                        </div>
+                    </div>
+                    <div class="block-content">
+                        <div class="row" style="height:100%">
+                            <h:outputText id="preview" value="#{FormEditExistingTemplate.editingTemplate.BODY_PROCESSED}"
+                                          escape="false" styleClass="col-md-12">
+                            </h:outputText>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <script type="text/javascript" >
+        <script>
             var WSAutoresponderEndpoint = '#{request.contextPath}/WSAutoresponder';
             
             var mailmergeTagsSubscriber = {
@@ -80,11 +102,6 @@
                         ],
                         </c:when>
                     </c:choose>
-                </c:forEach>
-            };
-            var randomSubscriber = {
-                <c:forEach items = "#{FormEditExistingTemplate.randomSubscriber.keySet()}" var = "field" >
-                    #{field} : '#{FormEditExistingTemplate.randomSubscriber[field]}',
                 </c:forEach>
             };
             var listTags = [

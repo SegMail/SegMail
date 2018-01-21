@@ -38,6 +38,8 @@ public class PreloaderModule extends BootstrapModule {
         if(!reqCont.getPathParser().getOrderedParams().isEmpty())
             layoutCont.setTimeout(0);
         
+        layoutCont.setRender(reqCont.isRenderPreloader());
+        
         return true;
     }
 

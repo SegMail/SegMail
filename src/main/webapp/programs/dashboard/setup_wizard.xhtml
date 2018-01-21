@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="block form-wizard" id="form-wizard">
+
+                <ul>
+                    <li><a href="#tab0" data-toggle="tab"><span>0</span> Intro</a></li>
+                    <li>
+                        <a href="#tab1" data-toggle="tab" 
+                           data-rsname="#{ProgramSetupWizard.TAB_ADDRESS}">
+                            <span>1</span> Address
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab2" data-toggle="tab" 
+                           data-rsname="#{ProgramSetupWizard.TAB_LIST}">
+                            <span>2</span> List
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab3" data-toggle="tab" 
+                           data-rsname="#{ProgramSetupWizard.TAB_AUTORESPONDERS}">
+                            <span>3</span> Autoresponders
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab4" data-toggle="tab" 
+                           data-rsname="#{ProgramSetupWizard.TAB_COLLECT}">
+                            <span>4</span> Collect
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tab5" data-toggle="tab" 
+                           data-rsname="#{ProgramSetupWizard.TAB_SEND}">
+                            <span>5</span> Send
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="block-content">
+                    <h:form id="FormSetupWizard" prependId="false">
+                        <div class="tab-content">
+                            <div class="tab-pane" id="tab0">
+                                <h2><strong>Basic List Setup Wizard</strong></h2>
+                                <p>
+                                    This wizard will help you to setup your list and start
+                                    sending your first campaign. At any point of time you 
+                                    can quit this wizard and change any of your settings 
+                                    by navigating through the links on the left. However, if 
+                                    this is your first time using Segmail, we suggest that 
+                                    you follow this wizard to the end so that you're good to go!
+                                </p>
+                                <p>Click <strong>Next</strong> to start</p>
+                            </div>
+                            <div class="tab-pane" id="tab1">
+                                <h2><strong>Set your Sending Address</strong></h2>
+                                <p>
+                                    Segmail uses <u>Amazon Web Services</u> as an SMTP gateway
+                                    to provide you with the highest deliverability at
+                                    the lowest cost. In order to send emails through
+                                    AWS using a sender's email, you will need to 
+                                    verify your email address with Amazon.
+                                </p>
+                                <p>
+                                    After entering your address here, you will receive a confirmation email to this
+                                    address from <strong>Amazon Web Services</strong>. You will need to click on the confirmation link
+                                    in the email to verify this email address, after which you will be able to start
+                                    setting up confirmation and welcome emails for your lists, and also start sending
+                                    campaigns.
+                                </p>
+                                
+                                <div class="form-group">
+                                    <s2:messenger id="FormVerifyNewAddress_messenger" for="FormVerifyNewAddress" showDetail="true" showSummary="true"
+                                                  class="form-group"></s2:messenger>
+                                </div>
+                                <div class="form-group">
+                                   <label>Sending Email Address:</label>
+                                   <input type="text" class="form-control" name="email" id="email" autocomplete="off"
+                                          data-provide="typeahead"
+                                          jsf:value="#{ProgramSetupWizard.address}"
+                                          />
+                               </div>
+                            </div>
+                            <div class="tab-pane" id="tab2">
+                                
+                                <div class="form-group">
+                                    <label>
+                                        Give your list a name:
+                                    </label>
+                                    <input type="text" class="form-control" name="list_name" id="list_name"
+                                           
+                                            />
+                                </div>
+                                <div class="form-group">
+                                    
+                                </div>
+                                <p>
+                                    Each list is given 3 fields by default: 
+                                    <c:forEach items="#{ProgramSetupWizard.defaultListFields}" var="field" varStatus="status">
+                                        #{status.first ? '' : ','} #{field}
+                                    </c:forEach>. You can edit existing fields or add new fields. An "Email" field
+                                    has already been added by default.
+                                </p>
+                                <div class="form-group">
+                                    <table id="fieldset_table" class="table" >
+                                        <tbody>
+                                            <tr><!--column headers-->
+                                                <th>
+                                                    <span class="hidden-xs">Order</span>
+                                                    <span class="hidden-sm hidden-md hidden-lg">#</span>
+                                                </th>
+                                                <th>Name</th>
+                                                <th>
+                                                    <span class="hidden-xs">Mailmerge name</span>
+                                                    <span class="hidden-sm hidden-md hidden-lg">MM</span>
+                                                </th>
+                                                <th>Type</th>
+                                                <th>
+                                                    <span class="hidden-xs">Mandatory</span>
+                                                    <span class="hidden-sm hidden-md hidden-lg">Mand</span>
+                                                </th>
+                                                <th>Description</th>
+                                                <th>
+                                                    <span class="hidden-xs">Actions</span>
+                                                </th>
+                                            </tr>
+
+                                            <!--for adding new row-->
+                                            <tr>
+                                                <td colspan="5">
+                                                    <span class="help-block">
+                                                        Fill in the form below and click "Save" above
+                                                    </span>
+
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="form-group">
+                                                        
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input type="text" style=""
+                                                               class="form-control"
+                                                               >
+                                                        </input>
+                                                    </div>
+                                                </td>
+                                                <td></td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <h:selectOneMenu styleClass="form-control" style=""
+                                                                         >
+                                                            
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <div class="checkbox" style="padding: auto">
+                                                            <input type="checkbox" class="icheck"
+                                                                   style=""
+                                                                   >
+                                                            </input>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group">
+                                                        <input class="form-control" type="text" 
+                                                               />
+                                                    </div>
+                                                </td>
+                                                <td style="width:150px;">
+                                                    <div class="form-group">
+                                                        <button jsf:id="add_button" class="btn btn-primary">
+                                                            <!--f:ajax won't append its code to the onclick attribute of the button element-->
+                                                            
+                                                            <i class="fa fa-plus"></i>
+                                                            Add
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="tab3">
+                                <p><strong>Third</strong> step of default wizard</p>
+                            </div>
+                            <div class="tab-pane" id="tab4">
+                                <p><strong>Fourth</strong> step of default wizard</p>
+                            </div>
+                            <div class="tab-pane" id="tab5">
+                                <p><strong>Fives</strong> step of default wizard</p>
+                            </div>                                            
+                            <ul class="pager wizard">                                                
+                                <li class="previous"><a href="javascript:;" class="btn btn-default">Previous</a></li>                                                
+                                <li class="next"><a href="javascript:;" class="btn btn-default">Next</a></li>
+                            </ul>
+                        </div>	
+                    </h:form>
+                </div>                                
+            </div>
+        </div>
+    </div>
+
+    <div class="row" jsf:rendered="false">
+        <div class="col-md-12">
+            <div class="block form-wizard" id="form-wizard2">
+
+                <ul>
+                    <li><a href="#valid1" data-toggle="tab"><span>1</span> User</a></li>
+                    <li><a href="#valid2" data-toggle="tab"><span>2</span> Information</a></li>
+                    <li><a href="#valid3" data-toggle="tab"><span>3</span> Finish</a></li>
+                </ul>
+
+                <div class="block-content">
+                    <h2><strong>Form Wizard</strong> Validation</h2>    
+                    
+                        <div class="tab-content">
+                            <div class="tab-pane" id="valid1">
+                                <div class="form-group">
+                                    <label>Login</label>
+                                    <input type="text" class="form-control" name="login"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="text" class="form-control" name="password" id="password"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>Re-password</label>
+                                    <input type="text" class="form-control" name="repassword"/>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="valid2">
+                                <div class="form-group">
+                                    <label>E-mail</label>
+                                    <input type="text" class="form-control" name="email"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>First name</label>
+                                    <input type="text" class="form-control" name="name"/>
+                                </div>
+                                <div class="form-group">
+                                    <label>About</label>
+                                    <textarea class="form-control" name="about"></textarea>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="valid3">
+                                <p>Finish!</p>
+                            </div>
+
+                            <ul class="pager wizard">                                                
+                                <li class="previous"><a href="#" class="btn btn-default">Previous</a></li>                                                
+                                <li class="next"><a href="#" class="btn btn-default">Next</a></li>
+                                <li class="finish" style="display: none;"><button class="btn btn-success">Submit</button></li>
+                            </ul>
+                        </div>	
+                    
+                </div>                                
+            </div>
+        </div>
+    </div>
+</html>

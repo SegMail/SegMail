@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <div class="jumbotron">
+        <div class="row" style="margin-top: 20px">
+            <div class="col-md-10">
+                <h1 >
+                    Step #{FormWizardInit.currentStage}-Collect Signups
+                </h1>
+            </div>
+            <div class="col-md-2">
+                <i class="fa fa-clipboard" style="font-size: 63px"></i> 
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <s2:messenger for="ProgramSetupWizard" showDetail="true" showSummary="true"
+                              class="form-group"></s2:messenger>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <p>
+                    Start collecting signups in the following 3 ways:
+                </p>
+            </div>
+        </div>
+        <div class="row" style="text-align: center; margin-top: 40px;">
+            <div class="col-md-4">
+                <i class="fa fa-code" style="font-size: 40px;"></i> 
+                <h2 class="text-info">Signup code</h2>
+                <p>Paste a signup code on your website:</p>
+                <textarea id="codeEditor"></textarea>
+            </div>
+            
+            <div class="col-md-4">
+                <i class="fa fa-file-excel-o" style="font-size: 40px; "></i> 
+                <h2 class="text-info">Import Excel or CSV file</h2>
+                <p>
+                    Upload a file exported from your legacy database. 1st line in the file
+                will be read as the header and must be present. You will be able to choose
+                which columns in your file is mapped to which fields in your list.
+                </p>
+                <h:commandLink styleClass="btn btn-success" pass:href="#import_subscriber_popup" 
+                                pass:data-toggle="modal">
+                     <i class="fa fa-gears"></i>
+                     Import Subscribers
+                     <f:ajax render=":FormImportSubscribers @form" event="click" 
+                             onevent="refreshImport" execute="@form"
+                             listener="#{FormWizardCollect.initImportSubscribers()}"
+                             >
+                     </f:ajax>
+                 </h:commandLink>
+                
+            </div>
+            
+            <div class="col-md-4">
+                <i class="fa fa-database" style="font-size: 40px; margin-bottom: 20px;"></i> 
+                <h2 class="text-info">Sync from your Database</h2>
+                <p>
+                    Using just your database login credentials, you can rely on our synchronization
+                engine to keep your subscriber's info up-to-date with your main apps.
+                </p>
+                <h:commandLink styleClass="btn btn-success" pass:href="#add_datasource_popup" 
+                                pass:data-toggle="modal">
+                     <i class="fa fa-gears"></i>
+                     Setup a datasource
+                     <f:ajax render=":FormSetupDatasource" event="click" 
+                             onevent="refreshDatasource" 
+                             listener="#{FormWizardCollect.initSetupDatasource()}"
+                             >
+                     </f:ajax>
+                 </h:commandLink>
+            </div>
+        </div>
+        <div class="row">
+            <br />
+        </div>
+        <div class="row">
+            <br />
+        </div>
+        <div class="row">
+            <br />
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h2 class="text-left">
+                    <h:commandLink pass:data-page="collect">
+                        <f:ajax listener="#{FormWizardInit.gotoStage(stage-1)}"
+                                render="@form :FormWizardInit" execute="@form"
+                                onevent="refresh"
+                                >
+                        </f:ajax>
+                        &lt;-- Or go back to #{FormWizardInit.stages.get(stage-1)}
+                    </h:commandLink>
+
+                </h2>
+            </div>
+            <div class="col-md-6">
+                <a href="#{request.contextPath}/" class="btn btn-primary btn-lg pull-right">
+                    Done
+                </a>
+            </div>
+        </div>
+    </div>
+    <script>
+        var listId = #{FormWizardCollect.selectedList.OBJECTID};
+        var clientId = #{FormWizardCollect.clientId};
+        
+        var serverUrl = '#{FormWizardCollect.signupLink}';
+        
+        var fieldList = [
+        <c:forEach items="#{FormWizardCollect.fields}" var="field">
+            {
+                'name': '#{field.FIELD_NAME}',
+                'key' : '#{field.generateKey()}',
+                'description' : '#{field.DESCRIPTION}',
+                'mandatory' : '#{field.MANDATORY}'
+            },
+        </c:forEach>
+        ];
+        
+        var sendAs = '#{FormWizardCollect.selectedList.SEND_AS_EMAIL}';
+        var confirmEmailCount = #{FormWizardCollect.confirmEmails.size()};
+        
+    </script>
+    
+</html>

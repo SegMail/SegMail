@@ -74,5 +74,4 @@ public class BatchJobSchedule implements Serializable {
         this.TRIGGER_STATUS = TRIGGER_STATUS;
     }
     
-    
 }

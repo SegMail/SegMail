@@ -6,6 +6,7 @@
 package segmail.program.subscribers;
 
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,12 +18,16 @@ import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.module.Client.ClientContainer;
+import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.entity.subscription.SUBSCRIBER_STATUS;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriberFieldValue;
 import segmail.entity.subscription.Subscription;
+import segmail.entity.subscription.SubscriptionList;
+import segmail.entity.subscription.SubscriptionListField;
 
 /**
  *
@@ -40,8 +45,11 @@ public class FormSubscriberTable {
     
     @EJB SubscriptionService subService;
     @EJB GenericObjectService objService;
+    @EJB ListService listService;
+    @EJB UpdateObjectService updService;
     
     @Inject ClientContainer clientCont;
+    @Inject UserRequestContainer reqCont;
     
     @PostConstruct
     public void init(){
@@ -50,6 +58,7 @@ public class FormSubscriberTable {
             dripService.init(RECORDS_PER_PAGE);
             dripService.initCriteria();
             loadPage(1);
+            updateToolbar();
         }
     }
     
@@ -105,6 +114,54 @@ public class FormSubscriberTable {
         program.setEmailSearch(emailSearch);
     }
     
+    public List<SubscriptionListField> getFieldList() {
+        return program.getFieldList();
+    }
+
+    public void setFieldList(List<SubscriptionListField> fieldList) {
+        program.setFieldList(fieldList);
+    }
+    
+    public Map<String, SubscriptionListField> getFieldMap() {
+        return program.getFieldMap();
+    }
+
+    public void setFieldMap(Map<String, SubscriptionListField> fieldMap) {
+        program.setFieldMap(fieldMap);
+    }
+    
+    public String getAnyOrAll() {
+        return program.getAnyOrAllLists();
+    }
+
+    public void setAnyOrAll(String anyOrAll) {
+        program.setAnyOrAllLists(anyOrAll);
+    }
+    
+    public Map<String, String> getStatusColor() {
+        return program.getStatusColor();
+    }
+    
+    public String getCheckedIds() {
+        return program.getCheckedIds();
+    }
+
+    public void setCheckedIds(String checkedIds) {
+        program.setCheckedIds(checkedIds);
+    }
+
+    public void setStatusColor(Map<String, String> statusColor) {
+        program.setStatusColor(statusColor);
+    }
+    
+    public int getCurrentPageRecordStart() {
+        return 1 + ((getCurrentPage() - 1) * RECORDS_PER_PAGE);
+    }
+    
+    public int getCurrentPageRecordEnd() {
+        return getCurrentPageRecordStart() + getSubscriberTable().size() - 1;
+    }
+    
     public void loadPage(int page) {
         setCurrentPage(page);
         loadFilterCriteria();
@@ -148,6 +205,13 @@ public class FormSubscriberTable {
             dirtyFlag = true;
         }
         
+        String anyOrAll = getAnyOrAll();
+        String lastAnyOrAll = dripService.getAnyOrAll();
+        if(lastAnyOrAll == null || !lastAnyOrAll.equals(anyOrAll)) {
+            dripService.setAnyOrAll(anyOrAll);
+            dirtyFlag = true;
+        }
+        
         //Just placeholders, remember to replace them once the actual UI components are up
         //dripService.setCreateStart(new DateTime(1800,1,1,0,0));
         //dripService.setCreateEnd(new DateTime(9999,12,31,23,59));
@@ -179,38 +243,59 @@ public class FormSubscriberTable {
         //Cache this part
         //Construct the subscriberTable
         //Run through values first
+        // Must clear all before loading subscriberTable
         for(SubscriberFieldValue value : values) {
+            // Do not add the first EMAIL field as it is the ID of the Subscriber and cannot be edited!
+            
             if(!program.getSubscriberTable().containsKey(value.getOWNER().getOBJECTID())) {
                 program.getSubscriberTable().put(value.getOWNER().getOBJECTID(), new HashMap<String,Object>());
-                program.getSubscriberTable().get(value.getOWNER().getOBJECTID()).put(SubscriberAccount.class.getName(), value.getOWNER());
+                program.getSubscriberTable().get(value.getOWNER().getOBJECTID()).put(SubscriberAccount.class.getSimpleName(), value.getOWNER());
             }
             
             Map<String,Object> subscriberMap = program.getSubscriberTable().get(value.getOWNER().getOBJECTID());
-            //Another map to hold fields
-            if(!subscriberMap.containsKey(SubscriberFieldValue.class.getName())) {
-                subscriberMap.put(SubscriberFieldValue.class.getName(), new HashMap<String,SubscriberFieldValue>());
+            
+            // Another map to hold fields
+            if(!subscriberMap.containsKey(SubscriberFieldValue.class.getSimpleName())) {
+                subscriberMap.put(SubscriberFieldValue.class.getSimpleName(), new HashMap<String,SubscriberFieldValue>());
+            }
+            Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getSimpleName());
+            fieldMap.put((String) value.getFIELD_KEY(), value);
+            
+            // Add a list to hold checkbox boolean values
+            if(!subscriberMap.containsKey("checked")) {
+                subscriberMap.put("checked", false); //Default to unchecked when initializing
             }
             
-            Map<String,SubscriberFieldValue> fieldMap = (Map<String,SubscriberFieldValue>) subscriberMap.get(SubscriberFieldValue.class.getName());
-            fieldMap.put(value.getFIELD_KEY(), value);
         }
         
-        //Then run through subscriptions
+        // Then run through subscriptions
+        // Collect SubscriptionLists on the way
+        List<SubscriptionList> lists = new ArrayList<>();
         for(Subscription subscription : subscriptions) {
             if(!program.getSubscriberTable().containsKey(subscription.getSOURCE().getOBJECTID())) {
                 program.getSubscriberTable().put(subscription.getSOURCE().getOBJECTID(), new HashMap<String,Object>());
-                program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID()).put(SubscriberAccount.class.getName(), subscription.getSOURCE());
+                program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID()).put(SubscriberAccount.class.getSimpleName(), subscription.getSOURCE());
             }
             
             Map<String,Object> subscriberMap = program.getSubscriberTable().get(subscription.getSOURCE().getOBJECTID());
             //Another map to hold the list of subscription
-            if(!subscriberMap.containsKey(Subscription.class.getName())) {
-                subscriberMap.put(Subscription.class.getName(), new ArrayList<Subscription>());
+            if(!subscriberMap.containsKey(Subscription.class.getSimpleName())) {
+                subscriberMap.put(Subscription.class.getSimpleName(), new ArrayList<Subscription>());
             }
             
-            List<Subscription> subscriptionList = (List<Subscription>) subscriberMap.get(Subscription.class.getName());
+            List<Subscription> subscriptionList = (List<Subscription>) subscriberMap.get(Subscription.class.getSimpleName());
             if(!subscriptionList.contains(subscription))
                 subscriptionList.add(subscription);
+            
+            // Collect SubscriptionLists on the way
+            if(!lists.contains(subscription.getTARGET()))
+                lists.add(subscription.getTARGET());
+        }
+        
+        List<SubscriptionListField> fields = listService.getFieldsForLists(lists);
+        setFieldMap(new HashMap<>());
+        for(SubscriptionListField field : fields) {
+            getFieldMap().put((String) field.generateKey(), field);//Use generateKey instead of FIELD_KEY because we still have legacy fields that contain the old key type
         }
         
         //We have to do this because of the exceptionally large data from EJBs
@@ -227,6 +312,14 @@ public class FormSubscriberTable {
 
     public void setPages(List<Integer> pages) {
         program.setPages(pages);
+    }
+    
+    public long getTotalCount() {
+        return dripService.count();
+    }
+
+    public int getRECORDS_PER_PAGE() {
+        return RECORDS_PER_PAGE;
     }
     
     /*
@@ -248,6 +341,41 @@ public class FormSubscriberTable {
         setPages(new ArrayList<Integer>());
         for(int i = startPage; i<= endPage; i++){
             getPages().add(i);
+        }
+    }
+    
+    /**
+     * Cannot use this because of some JSF issue.
+     * 
+     * @param subscriberId
+     * @param fieldKey 
+     */
+    public void saveField(long subscriberId, String fieldKey) {
+        
+        Map<String,SubscriberFieldValue> fieldMap = 
+            (Map<String,SubscriberFieldValue>) getSubscriberTable().get(subscriberId)
+                    .get(SubscriberFieldValue.class.getSimpleName());
+        
+        SubscriberFieldValue fieldValue = fieldMap.get(fieldKey);
+        //fieldValue.setVALUE(value);
+        
+        fieldValue = (SubscriberFieldValue) updService.merge(fieldValue);
+        
+        fieldMap.put((String) fieldValue.generateKey(), fieldValue);
+    }
+    
+    public void updateToolbar() {
+        if(this.getSubscriberTable() == null || getSubscriberTable().isEmpty()) {
+            reqCont.setRenderPageBreadCrumbs(false);
+            reqCont.setRenderPageToolbar(false);
+        }
+    }
+    
+    public void testReadCheckbox() {
+        String checkboxes = this.getCheckedIds();
+        for(String checkedId : checkboxes.split(",")) {
+            Long id = Long.parseLong(checkedId);
+            System.out.println("Subscriber "+id+" is checked.");
         }
     }
 }

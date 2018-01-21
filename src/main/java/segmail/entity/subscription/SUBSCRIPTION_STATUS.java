@@ -13,7 +13,8 @@ public enum SUBSCRIPTION_STATUS {
     NEW("NEW"),
     CONFIRMED("CONFIRMED"),
     BOUNCED("BOUNCED"),
-    UNSUBSCRIBED("UNSUBSCRIBED");
+    REMOVED("REMOVED"), // Removed by administrator
+    UNSUBSCRIBED("UNSUBSCRIBED"); // Removed by subscribers themselves
     
     public final String name;
     

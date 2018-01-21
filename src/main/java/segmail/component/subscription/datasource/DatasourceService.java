@@ -276,9 +276,12 @@ public class DatasourceService {
                     size,
                     new SUBSCRIPTION_STATUS[]{ NEW,CONFIRMED });
             Map<String,SubscriberAccount> accountsMap = new HashMap<>();
-            accounts.forEach(acc -> {
+            /*accounts.forEach(acc -> {
                 accountsMap.put(acc.getEMAIL(), acc);
-            });
+            });*/
+            for(SubscriberAccount acc : accounts) {
+                accountsMap.put(acc.getEMAIL(), acc);
+            }
             //Get remote subscribers
             List<String> toBeRemoved = new ArrayList<>(accountsMap.keySet());
             List<ListDatasourceObjectWrapper> objs1 = dsQueryService.getRemoteSubscriberWrappers(
@@ -303,7 +306,7 @@ public class DatasourceService {
                     new SUBSCRIPTION_STATUS[]{ CONFIRMED });
             for(Subscription sub : subscriptions) {
                 try {
-                    subService.unsubscribeSubscriber(sub.getUNSUBSCRIBE_KEY());
+                    subService.updateSubscription(sub.getUNSUBSCRIBE_KEY(),SUBSCRIPTION_STATUS.UNSUBSCRIBED);
                 } catch (RelationshipNotFoundException ex) {
                     Logger.getLogger(DatasourceService.class.getName()).log(Level.SEVERE, null, ex);
                 }

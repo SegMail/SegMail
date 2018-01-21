@@ -6,7 +6,6 @@
 package segmail.program.subscribe.unsubscribe;
 
 import eds.component.data.IncompleteDataException;
-import eds.component.data.RelationshipNotFoundException;
 import eds.component.webservice.UnwantedAccessException;
 import eds.component.webservice.WebserviceService;
 import java.net.MalformedURLException;

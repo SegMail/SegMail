@@ -2,8 +2,6 @@
 <handler-chains xmlns="http://java.sun.com/xml/ns/javaee">
   <handler-chain>
     <handler>
-      <!--<handler-name>eds.component.webservice.WebServiceService</handler-name>
-      <handler-class>eds.component.webservice.WebServiceService</handler-class>-->
       <handler-name>WebserviceAuthHandlerClient</handler-name>
       <handler-class>seca2.bootstrap.module.Webservice.SOAP.client.WebserviceAuthHandlerClient</handler-class>
     </handler>

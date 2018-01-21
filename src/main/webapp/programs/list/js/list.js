@@ -46,6 +46,9 @@ var toggleMenu = function () {
     if ($(document).has('#list_editing_block').length) {
         page_navigation();
     }
+    if ($(document).has('#listIntro').length) {
+        page_navigation();
+    }
 };
 
 $(document).ready(function () {
@@ -59,6 +62,7 @@ $(document).ready(function () {
     toggleMenu();
     
     initSettingsValidation();
+    initRedirect();
 });
 
 var FormListSettings;
@@ -76,6 +80,36 @@ var initSettingsValidation = function() {
             'FormListSettings:sendasname' : {
                 required: true,
                 minlength: 6
+            }
+        },
+        errorPlacement: function (error, element) {
+            element.parents('.form-group').addClass('has-error');
+            error.insertBefore(element);
+
+        },
+        highlight: function (element, errorClass) {
+
+        },
+        success : function (label, element) {
+            $(element).parents('.form-group').removeClass('has-error');
+            $(element).siblings('label').remove();
+        }
+    });
+};
+
+var FormListEmail;
+
+var initRedirect = function() {
+    FormListEmail = $('#FormListEmail').validate({
+        rules: {
+            'FormListEmail:confirmRedirect' : {
+                url : true
+            },
+            'FormListEmail:welcomeRedirect' : {
+                url : true
+            },
+            'FormListEmail:unsubscribeRedirect' : {
+                url : true
             }
         },
         errorPlacement: function (error, element) {
@@ -180,10 +214,27 @@ var updateSegmailIp = function() {
     });
 }
 
+var addSchemeToUrl = function() {
+    $('input.url').each(function(){
+        var address = $(this).val();
+        if(address && !address.startsWith('http')) {
+            $(this).val('http://'+address);
+        }
+    });
+}
+
+var passTabBackToJSF = function() {
+    $('#list_editing_block .nav-tabs li a').click(function(){
+        var id = $(this).data('id');
+        $('#activeTab').val(id);
+    })
+}
+
 $(document).ready(function(){
     initICheckMand();
     initToggleInfo();
     updateSegmailIp();
+    passTabBackToJSF();
 });
 
 $(window).load(function(){

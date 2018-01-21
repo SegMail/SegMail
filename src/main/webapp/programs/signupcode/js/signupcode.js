@@ -103,7 +103,9 @@ var buildSignupCode = function() {
         code += '\n'+fieldCode ;//+ '<br />';
                         
     }
-    code += '\n<button >' + $('#subscribeButtonLabel').val() + '</button>';
+    var buttonText = $('#subscribeButtonLabel').val();
+    buttonText = (!buttonText) ? 'Signup' : buttonText;
+    code += '\n<button >' + buttonText + '</button>';
     code += '\n</form>';
     var codified = $('<div>'+code+'</div>');
     

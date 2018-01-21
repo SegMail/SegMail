@@ -43,6 +43,14 @@ public class FormSubscriberStatus {
         program.setConvertedSubscriberStatus(convertedSubscriberStatus);
     }
     
+    public String getAnyOrAllStatuses() {
+        return program.getAnyOrAllStatuses();
+    }
+
+    public void setAnyOrAllStatuses(String anyOrAllStatuses) {
+        program.setAnyOrAllStatuses(anyOrAllStatuses);
+    }
+    
     public void statusUpdate() {
         setConvertedSubscriberStatus(new ArrayList<SUBSCRIBER_STATUS>());
         for(String name : getSubscriberStatus()) {

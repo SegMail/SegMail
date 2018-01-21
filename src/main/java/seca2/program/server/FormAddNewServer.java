@@ -14,8 +14,6 @@ import eds.entity.user.User;
 import eds.entity.user.UserAccount;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -54,7 +52,7 @@ public class FormAddNewServer {
     public void addServer() {
         try {
             landingService.addServerInstance(program.getName(), program.getUri(), program.getUserIdNew(), ServerNodeType.getNodeType(program.getServerNodeType()));
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
+            FacesMessenger.setFacesMessage(ProgramServer.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, "Server added!", null);
             program.refresh();
         } catch (EJBException ex) { 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Error with transaction", ex.getMessage());

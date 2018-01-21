@@ -61,7 +61,7 @@ public class FormCreateNewCampaign implements FormCreateEntity {
     public void createNew() {
         try {
             this.campaignService.createCampaign(campaignName, goals, clientCont.getClient());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign created.", "");
+            FacesMessenger.setFacesMessage(ProgramCampaign.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign created.", "");
             program.refresh();
             
         } catch (RelationshipExistsException ex) {

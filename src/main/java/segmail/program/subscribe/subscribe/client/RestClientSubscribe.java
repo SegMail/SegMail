@@ -43,7 +43,6 @@ public class RestClientSubscribe extends GenericRestClient {
                 continue;
             
             form.param(key, params[0]);
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, key, params[0]);
         }
         
         Response response = target.request(

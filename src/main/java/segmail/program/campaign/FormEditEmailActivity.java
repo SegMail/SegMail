@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static java.util.stream.Collectors.toList;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
@@ -22,6 +23,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
@@ -33,10 +35,14 @@ import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.mailmerge.MailMergeService;
 import segmail.entity.campaign.ACTIVITY_STATUS;
 import static segmail.entity.campaign.ACTIVITY_STATUS.NEW;
+import segmail.entity.campaign.Assign_CampaignActivity_List;
 import segmail.entity.campaign.Campaign;
 import segmail.entity.campaign.CampaignActivity;
 import segmail.entity.campaign.link.CampaignActivityOutboundLink;
 import segmail.entity.campaign.CampaignActivitySchedule;
+import segmail.entity.campaign.filter.CampaignActivityFilter;
+import segmail.entity.campaign.filter.FILTER_OPERATOR;
+import segmail.entity.subscription.Assign_Client_List;
 import segmail.entity.subscription.SubscriberAccount;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
@@ -52,12 +58,10 @@ import segmail.program.autoresponder.webservice.AutoresponderSessionContainer;
 public class FormEditEmailActivity implements FormEditEntity {
 
     @Inject UserRequestContainer reqCont;
-    @Inject
-    ProgramCampaign program;
-    @Inject
-    AutoresponderSessionContainer autoresponderCont;
-    @Inject
-    FormProgramModeSwitch programSwitch;
+    @Inject ClientContainer clientCont;
+    @Inject ProgramCampaign program;
+    @Inject AutoresponderSessionContainer autoresponderCont;
+    @Inject FormProgramModeSwitch programSwitch;
 
     @EJB
     CampaignService campaignService;
@@ -76,13 +80,16 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void init() {
         if (!FacesContext.getCurrentInstance().isPostback()) {
             loadSchedule();
+            loadOwnedLists();
             loadTargetLists();
             loadTargetListFields();
+            loadFilters();
             loadRandomValues();
             checkServer();
             loadOutboundLinks();
             loadCampaignTags();
             loadExtraSubscriberTags();
+            loadPreviewBody();
         }
     }
 
@@ -108,14 +115,6 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     public void setLinksDelimited(String linksDelimited) {
         this.linksDelimited = linksDelimited;
-    }
-
-    public long getEditingCampaignId() {
-        return program.getEditingCampaignId();
-    }
-
-    public void setEditingCampaignId(long editingCampaignId) {
-        program.setEditingCampaignId(editingCampaignId);
     }
 
     public MAILMERGE_REQUEST[] getMailmergeLinkTags() {
@@ -198,6 +197,42 @@ public class FormEditEmailActivity implements FormEditEntity {
         program.setExtraSubscriberTags(extraSubscriberTags);
     }
     
+    public String getPreviewBody() {
+        return program.getPreviewBody();
+    }
+
+    public void setPreviewBody(String previewBody) {
+        program.setPreviewBody(previewBody);
+    }
+    
+    public List<CampaignActivityFilter> getFilters() {
+        return program.getFilters();
+    }
+
+    public void setFilters(List<CampaignActivityFilter> filters) {
+        program.setFilters(filters);
+    }
+    
+    public List<SubscriptionList> getOwnedLists() {
+        return program.getOwnedLists();
+    }
+
+    public void setOwnedLists(List<SubscriptionList> ownedLists) {
+        program.setOwnedLists(ownedLists);
+    }
+    
+    public List<String> getSelectedTargetLists() {
+        return program.getSelectedTargetLists();
+    }
+
+    public void setSelectedTargetLists(List<String> selectedTargetLists) {
+        program.setSelectedTargetLists(selectedTargetLists);
+    }
+    
+    public FILTER_OPERATOR[] getOperators() {
+        return program.getOperators();
+    }
+    
     public boolean renderThis() {
         return reqCont.getPathParser().getOrderedParams().size() == 2;
     }
@@ -211,10 +246,25 @@ public class FormEditEmailActivity implements FormEditEntity {
             CampaignActivitySchedule schedule = campaignService.updateCampaignActivitySchedule(getEditingSchedule());
             setEditingSchedule(schedule);
             
+            // Update targeted lists
+            campaignService.assignTargetListToCampaign(
+                    getSelectedTargetLists().stream().map(l -> Long.parseLong(l)).collect(toList())
+                    ,activity.getOBJECTID()
+                    ,clientCont.getClient().getOBJECTID()
+            );
+            loadTargetLists();
+            loadTargetListFields();
+            
+            // Update Filters
+            campaignService.updateFilters(getEditingActivity().getOBJECTID(),getFilters());
+            loadFilters(); //Needed?
+            
             //Reload Campaign and CampaignActivity as they have been updated
-            programSwitch.reloadEntities();
+            //programSwitch.reloadEntities();
             //Reload all OutboundLinks for the activity
             loadOutboundLinks();
+            loadPreviewBody();
+            
 
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Email saved", "");
         } catch (IncompleteDataException ex) {
@@ -239,7 +289,7 @@ public class FormEditEmailActivity implements FormEditEntity {
     public void delete() {
         try {
             campaignService.deleteCampaignActivity(getEditingActivity().getOBJECTID());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity deleted.", "");
+            FacesMessenger.setFacesMessage(ProgramCampaign.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign activity deleted.", "");
             closeWithoutSaving();
         } catch (EntityNotFoundException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
@@ -275,7 +325,7 @@ public class FormEditEmailActivity implements FormEditEntity {
     }
 
     public void loadTargetListFields() {
-        List<SubscriptionListField> fieldList = campaignService.getTargetedListFields(program.getEditingCampaignId());
+        List<SubscriptionListField> fieldList = campaignService.getTargetedListFieldsForActivity(getEditingActivity().getOBJECTID());
 
         //Only add those fields that are common across the 2 lists
         Collections.sort(fieldList, new Comparator<SubscriptionListField>() {
@@ -295,7 +345,7 @@ public class FormEditEmailActivity implements FormEditEntity {
         });
         List<SubscriptionListField> sortedList = fieldList;//new ArrayList<>();
 
-        this.setListFields(sortedList);
+        setListFields(sortedList);
         
         //Set another Multivalued Map for fields
         setMailmergeListFields(new HashMap<String,List<String>>());
@@ -309,7 +359,7 @@ public class FormEditEmailActivity implements FormEditEntity {
 
     public void loadRandomValues() {
         //Clear it first
-        setRandomSubscriber(new HashMap<String, String>());
+        setRandomSubscriber(null);
 
         if (this.getEditingActivity() == null) {
             return;
@@ -336,23 +386,31 @@ public class FormEditEmailActivity implements FormEditEntity {
         setRandomSubscriber(randomValues);
     }
 
+    public void loadOwnedLists() {
+        long clientId = clientCont.getClient().getOBJECTID();
+        
+        List<SubscriptionList> ownedList = objService.getAllTargetObjectsFromSource(clientId, Assign_Client_List.class, SubscriptionList.class);
+        
+        setOwnedLists(ownedList);
+    }
+    
     public void loadTargetLists() {
-        long campaignId = program.getEditingCampaignId();
-        if (campaignId <= 0) {
-            return;
-        }
+        CampaignActivity editingActivity = getEditingActivity();
 
-        List<SubscriptionList> targetList = campaignService.getTargetedLists(campaignId);
+        List<SubscriptionList> targetList = objService.getAllTargetObjectsFromSource(
+                editingActivity.getOBJECTID(), 
+                Assign_CampaignActivity_List.class, 
+                SubscriptionList.class
+        );
         setTargetLists(targetList);
+        setSelectedTargetLists(
+                targetList.stream().map(l -> ""+l.getOBJECTID()).collect(toList()));
     }
 
     public void loadSchedule() {
-        long activityId = program.getEditingActivityId();
-        if (activityId <= 0) {
-            return;
-        }
+        CampaignActivity editingActivity = getEditingActivity();
 
-        CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(activityId);
+        CampaignActivitySchedule schedule = campaignService.getCampaignActivitySchedule(editingActivity.getOBJECTID());
         program.setEditingSchedule(schedule);
     }
 
@@ -398,4 +456,43 @@ public class FormEditEmailActivity implements FormEditEntity {
         
         setExtraSubscriberTags(extraSubscriberTags);
     }
+    
+    public void loadPreviewBody() {
+        if(getEditingActivity() == null) 
+            return;
+        CampaignActivity activity = getEditingActivity();
+        
+        // So far only the rendering of random subscriber
+        String body = campaignService.parseRandomSubscriber(activity.getACTIVITY_CONTENT_PROCESSED(),getRandomSubscriber(),getListFields());
+        
+        setPreviewBody(body);
+    }
+    
+    public void loadFilters() {
+        CampaignActivity activity = getEditingActivity();
+        List<CampaignActivityFilter> filters = objService.getEnterpriseData(activity.getOBJECTID(), CampaignActivityFilter.class);
+        
+        setFilters(filters.stream().sorted((a,b) -> {
+           return a.getSNO() - b.getSNO();
+        }).collect(toList()));
+    }
+    
+    public void addNewFilter() {
+        List<CampaignActivityFilter> filters = getFilters();
+        // Assuming it's already sorted
+        int lastSNO = (filters == null || filters.isEmpty()) ? 0 : filters.get(filters.size()-1).getSNO() + 1;
+        CampaignActivityFilter newFilter = new CampaignActivityFilter();
+        newFilter.setOWNER(getEditingActivity());
+        newFilter.setSNO(filters.size() + 1);
+        
+        filters.add(newFilter);
+        
+    }
+    
+    public void deleteFilter(int sno) {
+        List<CampaignActivityFilter> filters = getFilters();
+        filters.removeIf(f -> f.getSNO() == sno);
+        
+    }
+    
 }

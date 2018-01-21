@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <div id="no_subscribers" class="jumbotron" style="text-align: center;">
+        <h1 style="margin-top: 10px;">You have no Subscribers yet</h1>
+        <h2>Start building your list with these options now:</h2>
+        <br/>
+        <br/>
+
+        <div class="row">
+            <div class="col-md-3">
+                <i class="fa fa-user" style="font-size: 40px"></i> 
+                <div>
+                    <p class="text-info">Add a single subscriber by using a form</p>
+                    Manually enter your subscriber's info by using a online form. 
+                    Choose which lists to add to.
+                </div>
+                <br/>
+
+            </div>
+            <div class="col-md-3">
+                <i class="fa fa-code" style="font-size: 40px"></i> 
+                <div>
+                    <p class="text-primary">Setup a signup form to start collecting emails</p>
+                    Copy and paste html code on your own website to collect signups.
+                </div>
+                <br/>
+
+            </div>
+            <div class="col-md-3">
+                <i class="fa fa-file-excel-o" style="font-size: 40px"></i> 
+                <div>
+                    <p class="text-warning">Import multiple subscribers using an Excel or CSV file</p>
+                    Upload a file exported from your legacy database. 1st line in the file
+                    will be read as the header and must be present. You will be able to choose
+                    which columns in your file is mapped to which fields in your list.
+                </div>
+                <br/>
+
+            </div>
+            <div class="col-md-3">
+                <i class="fa fa-database" style="font-size: 40px"></i> 
+                <div>
+                    <p class="text-success">Sync from your own CRM / Blog / Ecommerce site</p>
+                    Using just your database login credentials, you can rely on our synchronization
+                    engine to keep your subscriber's info up-to-date with your main apps.
+                </div>
+                <br/>
+
+            </div>
+        </div>
+        <div class="row">
+            <h:form>
+                <div class="col-md-3">
+                    <h:commandLink styleClass="btn btn-info" pass:href="#add_subscriber_popup" pass:data-toggle="modal"
+                                   >
+                        <i class="fa fa-plus"></i>
+                        Add a Subscriber
+                        <f:ajax render=":FormAddSubscriber" event="click" 
+                                onevent="refreshAddSubsc"
+                                listener="#{FormImportSubscribers.setupImport()}"
+                                >
+                        </f:ajax>
+                    </h:commandLink>
+                </div>
+                <div class="col-md-3">
+                    <a class="btn btn-primary" href="#{request.contextPath}/signupcode" data-toggle="modal">
+                        <i class="fa fa-code"></i>
+                        Go to signup codes
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <h:commandLink styleClass="btn btn-warning" pass:href="#import_subscriber_popup" 
+                                   pass:data-toggle="modal">
+                        <i class="fa fa-floppy-o"></i>
+                        Import from a file
+                        <f:ajax render=":FormImportSubscribers" event="click" 
+                                onevent="refreshImport"
+                                listener="#{FormImportSubscribers.setupImport()}"
+                                >
+                        </f:ajax>
+                    </h:commandLink>
+                </div>
+                <div class="col-md-3">
+                    <h:commandLink styleClass="btn btn-success" pass:href="#add_datasource_popup" 
+                                   pass:data-toggle="modal">
+                        <i class="fa fa-gears"></i>
+                        Setup a datasource
+                        <f:ajax render=":FormSetupDatasource" event="click"
+                                onevent="refreshImport"
+                                listener="#{FormImportSubscribers.setupImport()}"
+
+                                >
+                        </f:ajax>
+                    </h:commandLink>
+                </div>
+            </h:form>
+        </div>
+    </div>
+</html>

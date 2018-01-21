@@ -12,6 +12,8 @@ import eds.component.data.IncompleteDataException;
 import eds.component.transaction.TransactionService;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,8 @@ import javax.ejb.TransactionAttributeType;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Tag;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
@@ -88,16 +92,12 @@ public class MailMergeService {
      *
      * @param text
      * @param confirmationKey
-     * @param email
      * @return
      * @throws eds.component.data.IncompleteDataException
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String parseConfirmationLink(
             String text, //Don't pass in the AutoConfirmEmail class because that was a huge mistake and we might want to correct it in the future
-            //String landingServerAddress, 
-            //String email,
-            //long listId
             String confirmationKey) throws IncompleteDataException {
         //!!! do this only if there is a link to generate!
         if (text == null || text.isEmpty() || !text.contains(MAILMERGE_REQUEST.CONFIRM.label())) {
@@ -188,6 +188,36 @@ public class MailMergeService {
     public Map<Long,Map<String,String>> createMMValueMap(List<Long> subscriberIds, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
         Map<Long,Map<String,String>> results = new HashMap<>();
         
+        // Sort for faster access in the triple loop later
+        Collections.sort(fields, new Comparator<SubscriptionListField>() {
+            /**
+             * Sort by field keys.
+             * 
+             * @param o1
+             * @param o2
+             * @return 
+             */
+            @Override
+            public int compare(SubscriptionListField o1, SubscriptionListField o2) {
+                return o1.generateKey().toString().compareTo(o2.generateKey().toString());
+            }
+        });
+        Collections.sort(values, new Comparator<SubscriberFieldValue>(){
+
+            /**
+             * Sort by field keys.
+             * 
+             * @param o1
+             * @param o2
+             * @return 
+             */
+            @Override
+            public int compare(SubscriberFieldValue o1, SubscriberFieldValue o2) {
+                return o1.getFIELD_KEY().compareTo(o2.getFIELD_KEY());
+            }
+            
+        });
+        
         for(SubscriptionListField field : fields) {
             String key = (String) field.generateKey();
             String tag = field.getMAILMERGE_TAG();
@@ -202,7 +232,8 @@ public class MailMergeService {
                 //Else, just insert an empty field
                 subscriberMap.put(tag, "");
                 for(SubscriberFieldValue value : values) {
-                    if(value.getFIELD_KEY() != null && value.getFIELD_KEY().equals(key)) {
+                    if(value.getFIELD_KEY() != null && value.getFIELD_KEY().equals(key)
+                            && value.getOWNER().getOBJECTID() == subscriberId) {
                         subscriberMap.put(tag, value.getVALUE());
                         break;
                     }
@@ -212,13 +243,20 @@ public class MailMergeService {
         return results;
     }
     
+    public Map<Long,Map<String,String>> createMMValueMap(long subscriberId, List<SubscriptionListField> fields, List<SubscriberFieldValue> values) {
+        List<Long> subscriberIds = new ArrayList<>();
+        subscriberIds.add(subscriberId);
+        
+        return this.createMMValueMap(subscriberIds, fields, values);
+    }
+    
     /**
      * For sending confirmation emails, where the listId is known.
      * Used by confirmation and welcome emails.
      * 
      * @param text
-     * @param subscriberId
-     * @param listId
+     * @param subscriber
+     * @param list
      * @return 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -262,6 +300,10 @@ public class MailMergeService {
             return text;
         }
         
+        if (unsubscribeKey == null || unsubscribeKey.isEmpty() ) {
+            return text;
+        }
+        
         // Check if key exists
         /*MailMergeRequest trans = transService.getTransactionByKey(unsubscribeKey, MailMergeRequest.class);
          if(trans == null) {
@@ -279,21 +321,11 @@ public class MailMergeService {
             throw new IncompleteDataException("Please contact app administrator to set a landing server.");
         }
 
-        String unsubLink = landingServer.getURI().concat("/").concat(MAILMERGE_REQUEST.UNSUBSCRIBE.program).concat("/").concat(unsubscribeKey);
+        //String unsubLink = landingServer.getURI().concat("/").concat(MAILMERGE_REQUEST.UNSUBSCRIBE.program).concat("/").concat(unsubscribeKey);
+        String unsubLink = landingServer.getURI() + "/" + MAILMERGE_REQUEST.UNSUBSCRIBE.program + "/" + unsubscribeKey;
         String unsubLinkHtml = "<a target='_blank' href='"+unsubLink+"'>"+MAILMERGE_REQUEST.UNSUBSCRIBE.defaultHtmlText()+"</a>";
         
         return text.replace(MAILMERGE_REQUEST.UNSUBSCRIBE.label(), unsubLinkHtml);
-    }
-
-    public String parseEverything(String text, Map<String, Object> params) throws IncompleteDataException {
-        String result = text;
-        //Has to be a better way to register all these parsing in a queue and process them together
-        result = this.parseConfirmationLink(result, (String) params.get(MAILMERGE_REQUEST.CONFIRM.label()));
-        this.parseUnsubscribeLink(result, (String) params.get(MAILMERGE_REQUEST.UNSUBSCRIBE.label()));
-        //result = this.parseListAttributes(result, (Long) params.get("LISTID"));
-        //result = this.parseMultipleContent(result, (Long) params.get("LISTID"));
-
-        return result;
     }
     
     /**
@@ -301,6 +333,8 @@ public class MailMergeService {
      * 
      * @param label
      * @return 
+     * @throws eds.component.data.DataValidationException if label is invalid (not a value of @Class MAILMERGE_REQUEST)
+     * @throws eds.component.data.IncompleteDataException if the WEB ServerInstance is not set up properly.
      */
     public String getSystemTestLink(String label) throws DataValidationException, IncompleteDataException{
         MAILMERGE_REQUEST request = MAILMERGE_REQUEST.getByLabel(label);
@@ -322,6 +356,9 @@ public class MailMergeService {
     }
     
     public String parseStandardListTags(String text, SubscriptionList list) {
+        if(text == null || text.isEmpty() || list == null)
+            return text;
+        
         text = text.replace(SubscriptionList.MM_SENDER_NAME, list.getSEND_AS_NAME());
         text = text.replace(SubscriptionList.MM_SUPPORT_EMAIL, list.getSUPPORT_EMAIL());
         
@@ -329,6 +366,9 @@ public class MailMergeService {
     }
     
     public String parseStandardCampaignTags(String text, Campaign campaign) {
+        if(text == null || text.isEmpty() || campaign == null)
+            return text;
+        
         text = text.replace(SubscriptionList.MM_SENDER_NAME, campaign.getOVERRIDE_SEND_AS_NAME());
         text = text.replace(SubscriptionList.MM_SUPPORT_EMAIL, campaign.getOVERRIDE_SUPPORT_EMAIL());
         
@@ -336,26 +376,44 @@ public class MailMergeService {
     }
     
     public String parseExtraSubscriberTags(String text, SubscriberAccount subscriber, DateTime now) {
+        if(text == null || text.isEmpty() || subscriber == null)
+            return text;
+        
         text = text.replace(SubscriberAccount.MM_DATE_OF_SUBSCRIPTION, DateFormat.getDateInstance().format(subscriber.getDATE_CREATED()));
-        Period length = (new Period(
-                new DateTime(subscriber.getDATE_CREATED().getTime()),
-                now
-        ));
-        length = length.withHours(0).withMinutes(0).withSeconds(0).withMillis(0);
-        text = text.replace(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION, length.toString(
-                new PeriodFormatterBuilder()
-                        .printZeroAlways()
-                        .printZeroRarelyLast()
-                .appendYears().appendSuffix(" year"," years")
-                .appendSeparator(" ")
-                .appendMonths().appendSuffix(" month"," months")
-                .appendSeparator(" ")
-                .appendWeeks().appendSuffix(" week", " weeks")
-                .appendSeparator(" ")        
-                .appendDays().appendSuffix(" day"," days")
-                .toFormatter()
-        ));
+        String ageString = subscriptionService.calculateSubscriberAge(subscriber, now);
+        text = text.replace(SubscriberAccount.MM_LENGTH_OF_SUBSCRIPTION, ageString);
         
         return text;
+    }
+    
+    /**
+     * Returns content replaced with mailmerge links.
+     * 
+     * @param content
+     * @return
+     * @throws DataValidationException if any errors are thrown when generating the test link
+     * @throws IncompleteDataException if no available server is setup yet
+     */
+    public String parseTestMailmergeLinks(String content) throws DataValidationException, IncompleteDataException {
+        if(content == null || content.isEmpty())
+            return content;
+        
+        String preview = content;
+        //Mailmerge links - generate test links
+        MAILMERGE_REQUEST[] mmReqs = MAILMERGE_REQUEST.values();
+        for(MAILMERGE_REQUEST mmReq : mmReqs) {
+            String tag = mmReq.label;
+            
+            Element a = new Element(Tag.valueOf("a"),"");
+            a.attr("href", getSystemTestLink(tag));
+            a.html(mmReq.defaultHtmlText);
+            a.attr("target", "_blank");
+            
+            String replacementElem = a.outerHtml();
+            preview = preview.replace(tag, replacementElem);
+            
+        }
+        
+        return preview;
     }
 }

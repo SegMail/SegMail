@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <h:form id="FormRemoveSubscription" prependId="false">
+        <h:inputHidden id="remove-unsubkey" value="#{FormRemoveSubscription.unsubKey}"></h:inputHidden>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">
+                        Remove subscription from  
+                        <span id="remove-list-name"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <s2:messenger for="FormRemoveSubscription"></s2:messenger>
+                    <p>
+                        Removing a subscription means that your subscriber will
+                        no longer receive any emails from you through this list. 
+                        However, you will still be able to add them back to this list. 
+                    </p>
+                    <p>
+                        Note that this is different from an <strong>unsubscribe</strong>
+                        case, which is initiated by the subscriber. You will not 
+                        be able to add the subscriber back once they have unsubscribed.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <h:commandButton styleClass="btn btn-danger"
+                                     value="Remove"
+                        >
+                        <f:ajax render="@form" execute="@form"
+                                onevent="refresh"
+                                listener="#{FormRemoveSubscription.remove()}">
+                        </f:ajax>
+                    </h:commandButton>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</html>

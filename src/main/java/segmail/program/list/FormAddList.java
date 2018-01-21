@@ -8,13 +8,17 @@ package segmail.program.list;
 import eds.component.GenericObjectService;
 import eds.component.client.ClientService;
 import eds.component.data.EnterpriseObjectNotFoundException;
+import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
+import eds.component.data.RelationshipExistsException;
 import segmail.component.subscription.SubscriptionService;
 import eds.entity.client.Client;
 import eds.entity.client.VerifiedSendingAddress;
 import segmail.entity.subscription.SubscriptionList;
 import eds.entity.user.User;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -90,6 +94,10 @@ public class FormAddList {
             if(cause != null) message = cause.getMessage();
             
             FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, message, null);
+        } catch (RelationshipExistsException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
+        } catch (EntityNotFoundException ex) {
+            FacesMessenger.setFacesMessage(formName, FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } 
     }
 

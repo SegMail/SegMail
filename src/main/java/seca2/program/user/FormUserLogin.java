@@ -23,6 +23,7 @@ import eds.entity.user.User;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.EJBException;
 import seca2.component.landing.LandingServerGenerationStrategy;
 import seca2.component.landing.LandingService;
 import seca2.component.landing.ServerNodeType;
@@ -106,12 +107,17 @@ public class FormUserLogin {
                 //this should be in the navigation module
                 
             } else {
-                ec.redirect(ec.getRequestContextPath());//go to home
+                if(ec.getRequestContextPath() == null || ec.getRequestContextPath().isEmpty())
+                    ec.redirect("/");
+                else
+                    ec.redirect(ec.getRequestContextPath());//go to home
             }
         } catch (UserLoginException esliex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, esliex.getMessage(), null);
         } catch (UserAccountLockedException ualex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, "Your account has been locked. Please contact admin.", null);
+        } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         }

@@ -13,29 +13,37 @@ import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
+import com.sun.istack.logging.Logger;
 import eds.component.GenericObjectService;
+import eds.component.UpdateObjectService;
 import eds.component.client.ClientAWSService;
+import eds.component.transaction.TransactionLockingException;
+import eds.component.transaction.TransactionService;
 import eds.entity.client.VerifiedSendingAddress;
 import eds.entity.mail.EMAIL_PROCESSING_STATUS;
 import eds.entity.mail.Email;
-import eds.entity.mail.Email_;
+import eds.entity.mail.SentEmail;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.ejb.Asynchronous;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.joda.time.DateTime;
 import segmail.component.subscription.SubscriptionService;
 
 /**
@@ -45,118 +53,169 @@ import segmail.component.subscription.SubscriptionService;
 @Stateless
 public class MailServiceInbound {
     
-    final int MAX_EMAIL_PROCESSED = 100;
+    final int MAX_SENDERS_PROCESSED = 100;
+    final int MAX_BOUNCE_PROCESSED = 100;
+    final int MAX_QUEUE_MSG_READ = 50;
     
     @Inject
     @Password
     BasicAWSCredentials awsCredentials;
     
     @EJB GenericObjectService objService;
+    @EJB UpdateObjectService updService;
     @EJB ClientAWSService clientAWSService;
     @EJB SubscriptionService subService;
+    @EJB TransactionService txService;
+    
+    @EJB MailServiceInboundHelper helper;
     
     /**
      * Try to return a List of messages in some format
      * 
      * @param sender 
      * @param type 
+     * @return  
      */
-    public List<Email> retrieveEmailFromSQSMessage(VerifiedSendingAddress sender, NotificationType type) {
-        String endpoint = clientAWSService.getSQSEndpoint();
-        String queueName = clientAWSService.getSQSNameForAddress(sender, type);
-        
-        //Get the queueURL first
-        AmazonSQSClient sqsClient = new AmazonSQSClient(awsCredentials); //or use client credentials?
-        sqsClient.setEndpoint(endpoint);
-        GetQueueUrlRequest urlReq = new GetQueueUrlRequest();
-        urlReq.setQueueName(queueName);
-        GetQueueUrlResult urlRes = sqsClient.getQueueUrl(urlReq);
-        
-        String queueURL = urlRes.getQueueUrl();
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public List<Message> retrieveFromSQSMessage(AmazonSQSClient sqsClient, String queueURL, NotificationType type) {
         
         //Get the messages using queueURL
         ReceiveMessageRequest msgReq = new ReceiveMessageRequest();
         msgReq.setQueueUrl(queueURL);
         msgReq.setMaxNumberOfMessages(10);
-        
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Started reading SQS msg at "+DateTime.now());
         ReceiveMessageResult msgRes = sqsClient.receiveMessage(msgReq);
         List<Message> messages = msgRes.getMessages();
+        Logger.getLogger(this.getClass()).log(Level.INFO, messages.size() + " msgs read at "+DateTime.now());
         
-        List<Email> emails = new ArrayList<>();
+        return messages;
+    }
+    
+    public List<SentEmail> retrieveEmailsFromDB(List<Message> messages) {
+        List<SentEmail> emails = new ArrayList<>();
         List<String> messageIds = new ArrayList<>();
-        List<String> receiptHandles = new ArrayList<>();
+        List<String> recipientEmails = new ArrayList<>();
         
         for(Message message : messages) {
             JsonReader reader = Json.createReader(new StringReader(message.getBody()));
             JsonObject body = reader.readObject();
-            String receiptHandle = message.getReceiptHandle();
-            receiptHandles.add(receiptHandle);
             
             JsonObject msgBody = Json.createReader(new StringReader(body.getJsonString("Message").getString())).readObject();
             JsonString notifType = msgBody.getJsonString("notificationType");
             
-            if(!"Bounce".equals(notifType.getString()))
+            if(!"Bounce".equalsIgnoreCase(notifType.getString()))
                 continue;
             JsonObject bounce = msgBody.getJsonObject("bounce");
             JsonString bounceType = bounce.getJsonString("bounceType");
             JsonObject mail = msgBody.getJsonObject("mail");
             JsonString messageId = mail.getJsonString("messageId");
+            // We'll think of how to use this 
+            JsonArray recipients = mail.getJsonArray("destination");
             
             if("Permanent".equalsIgnoreCase(bounceType.getString())) {
                 messageIds.add(messageId.getString());
             } else {//Haven't figure out what to do yet
-                
+                // To be safe, we update all bounce types
+                messageIds.add(messageId.getString());
             }
         }
         emails.addAll(getEmailsBySESMessageId(messageIds));
         
-        //Delete messages that have been read
-        for(String receiptHandle : receiptHandles) {
-            sqsClient.deleteMessage(queueURL, receiptHandle);
-        }
-        
         return emails;
     }
     
-    @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateBounceStatusForEmails(List<Email> emails, long clientId) {
+    public void deleteSQSMessages(AmazonSQSClient sqsClient, String queueURL, List<Message> messages) {
+        for(Message message : messages) {
+            String receiptHandle = message.getReceiptHandle();
+            sqsClient.deleteMessage(queueURL, receiptHandle);
+        }
+    }
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public void updateBounceStatusForEmails(List<SentEmail> emails, long clientId) {
         if(emails == null || emails.isEmpty())
             return;
         List<String> subscriberAddress = new ArrayList<>();
         for(Email email : emails) {
-            email.setPROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED.label);
-            Set<String> recipients = email.getRECIPIENTS();
-            subscriberAddress.addAll(recipients);
+            try {
+                //helper.updateBounceStatus(email);
+                //email.PROCESSING_STATUS(EMAIL_PROCESSING_STATUS.BOUNCED);
+                //email = (Email) updService.merge(email);
+                email = txService.transitTx(email, EMAIL_PROCESSING_STATUS.BOUNCED, DateTime.now());
+                Set<String> recipients = email.getRECIPIENTS();
+                subscriberAddress.addAll(recipients);
+            } catch (TransactionLockingException ex) {
+                // Forget about it...
+                Logger.getLogger(this.getClass()).log(Level.SEVERE, "Bounce issue: " + ex.getMessage());
+            }
             
         }
-        //Update Subscription
-        subService.updateSubscriptionBounceStatus(subscriberAddress, clientId);
-
-        //Update SubscriberAccount
-        subService.updateSubscriberBounceStatus(subscriberAddress, clientId);
-
-        //Update subscriber count for SubscriptionLists
+        // These shouldn't be here. They should be in SubscriptionService, but 
+        // for convenience's sake they are put here.
+        // Update Subscription and SubscriberAccount
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Starting the update for "
+                +" list " + subscriberAddress.stream().collect(Collectors.joining(","))
+                +" at "+DateTime.now());
+        subService.updateSubscriptionSubscriberBounce(subscriberAddress, clientId);
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Completed the update "
+                +" at "+DateTime.now());
+        // Update subscriber count for SubscriptionLists
         subService.updateAllSubscriberCountForClient(clientId);
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void processAllBounce() {
+        Logger.getLogger(this.getClass()).log(Level.INFO, "Bounced processing started at "+DateTime.now());
         List<VerifiedSendingAddress> senders = new ArrayList<>();
-        List<VerifiedSendingAddress> singleFetch = getAllVerifiedSenders(0, MAX_EMAIL_PROCESSED);
-        senders.addAll(singleFetch);
-        while (singleFetch.size() >= MAX_EMAIL_PROCESSED) {
-            singleFetch = getAllVerifiedSenders(senders.size(), MAX_EMAIL_PROCESSED);
-            senders.addAll(singleFetch);
-        }
+        int sendersIndex = 0;
+        int totalEmailCount = 0;
         
-        for(VerifiedSendingAddress sender : senders) {
-            
-            List<Email> emails = retrieveEmailFromSQSMessage(sender, NotificationType.Bounce);
-            updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
-        }
-        
+        do { // Looping through Senders
+            senders = getAllVerifiedSenders(MAX_SENDERS_PROCESSED*sendersIndex++, MAX_SENDERS_PROCESSED);
+            Logger.getLogger(this.getClass()).log(Level.INFO, senders.size() + " Senders retrieved at "+DateTime.now());
+            for(VerifiedSendingAddress sender : senders) {
+                Logger.getLogger(this.getClass()).log(Level.INFO, "Processing sender "
+                        + sender.getVERIFIED_ADDRESS() +" ARN:"
+                        + sender.getAWS_SQS_BOUNCE_QUEUE_ARN() + " at "+DateTime.now());
+                List<SentEmail> emails = new ArrayList<>();
+                List<SentEmail> incEmails = new ArrayList<>();
+                List<Message> msg = new ArrayList<>();
+                List<Message> incMsg = new ArrayList<>();
+                
+                String endpoint = clientAWSService.getSQSEndpoint();
+                String queueName = clientAWSService.getSQSNameForAddress(sender, NotificationType.Bounce);
+
+                //Get the queueURL first
+                AmazonSQSClient sqsClient = new AmazonSQSClient(awsCredentials); //or use client credentials?
+                sqsClient.setEndpoint(endpoint);
+                GetQueueUrlRequest urlReq = new GetQueueUrlRequest();
+                urlReq.setQueueName(queueName);
+                GetQueueUrlResult urlRes = sqsClient.getQueueUrl(urlReq);
+
+                String queueURL = urlRes.getQueueUrl();
+                do { // Looping through Emails from each Sender
+                    incMsg = retrieveFromSQSMessage(sqsClient,queueURL, NotificationType.Bounce);
+                    incEmails = retrieveEmailsFromDB(incMsg);
+                    
+                    Logger.getLogger(this.getClass()).log(Level.INFO, "Retrieved msg ids "+
+                            incEmails.stream().map(s -> 
+                                    "{msgId:"+s.getAWS_SES_MESSAGE_ID() 
+                                    + ",email:" + s.getRECIPIENTS().stream().collect(Collectors.joining(","))
+                                    + "}\n"
+                            ).collect(Collectors.joining("\n"))
+                            + " at "+DateTime.now());
+                    msg.addAll(incMsg);
+                    emails.addAll(incEmails);
+                } while(incEmails.size() > 0 && emails.size() < MAX_QUEUE_MSG_READ);
+                
+                updateBounceStatusForEmails(emails, sender.getOWNER().getOBJECTID());
+                deleteSQSMessages(sqsClient, queueURL, msg);
+                totalEmailCount += emails.size();
+            }
+        } while (senders.size() > 0 && totalEmailCount < MAX_BOUNCE_PROCESSED);
     }
     
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public List<VerifiedSendingAddress> getAllVerifiedSenders(int start, int max) {
         CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<VerifiedSendingAddress> countQuery = builder.createQuery(VerifiedSendingAddress.class);
@@ -172,10 +231,18 @@ public class MailServiceInbound {
         return senders;
     }
     
-    public List<Email> getEmailsBySESMessageId(List<String> messageIds) {
+    public List<SentEmail> getEmailsBySESMessageId(List<String> messageIds) {
         if(messageIds == null || messageIds.isEmpty())
             return new ArrayList<>();
-        CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
+        
+        String sql = "SELECT * FROM EMAIL_SENT WHERE AWS_SES_MESSAGE_ID IN ("
+                + messageIds.stream().map(m -> "'" + m + "'").collect(Collectors.joining(","))
+                + ")";
+        
+        Query q = objService.getEm().createNativeQuery(sql,SentEmail.class);
+        List<SentEmail> results = q.getResultList();
+        
+        /*CriteriaBuilder builder = objService.getEm().getCriteriaBuilder();
         CriteriaQuery<Email> query = builder.createQuery(Email.class);
         Root<Email> fromEmail = query.from(Email.class);
         
@@ -184,6 +251,22 @@ public class MailServiceInbound {
         
         List<Email> results = objService.getEm().createQuery(query)
                 .getResultList();
+        */
+        return results;
+    }
+    
+    public List<Email> getEmailsFromOriginalEmailTable(List<String> messageIds) {
+        if(messageIds == null || messageIds.isEmpty())
+            return new ArrayList<>();
+        
+        // Must use native SQL, cannot use JPA as it will still map back to the 
+        // concrete implementations of Email
+        String sql = "SELECT * FROM EMAIL WHERE AWS_SES_MESSAGE_ID IN ("
+                + messageIds.stream().map(m -> "'" + m + "'").collect(Collectors.joining(","))
+                + ")";
+        
+        Query q = objService.getEm().createNativeQuery(sql,Email.class);
+        List<Email> results = q.getResultList();
         
         return results;
     }

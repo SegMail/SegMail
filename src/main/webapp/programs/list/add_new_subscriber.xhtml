@@ -25,7 +25,7 @@
                             <input type="#{field.TYPE.toLowerCase()}" required="#{field.MANDATORY}"
                                        class="form-control 
                                                 validate[#{(field.MANDATORY) ? 'required,' : ''}#{(field.TYPE.equals(FormListSubscriber.emailType)) ? 'custom[email] ' : ''}]"
-                                           name="#{field.generateKey().toString()}" 
+                                           
                                            jsf:value="#{FormListSubscriber.fieldValues[field.generateKey().toString()]}"
                                            />
                         </div>

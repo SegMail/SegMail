@@ -7,8 +7,11 @@ package segmail.program.campaign;
 
 import eds.component.data.DataValidationException;
 import eds.component.data.EntityNotFoundException;
+import eds.component.data.UnauthorizedAccessException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
@@ -97,7 +100,7 @@ public class FormAssignLists implements FormEditEntity {
                 Long idLong = Long.parseLong(idString);
                 convertedIds.add(idLong);
             }
-            campService.assignTargetListToCampaign(convertedIds, program.getEditingCampaignId());
+            campService.assignTargetListToCampaign(convertedIds, program.getEditingCampaignId(), clientContainer.getClient().getOBJECTID());
             
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Target lists updated", "");
         } catch (EntityNotFoundException ex) {
@@ -105,6 +108,8 @@ public class FormAssignLists implements FormEditEntity {
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (DataValidationException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (UnauthorizedAccessException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } finally {
             programSwitch.reloadEntities();

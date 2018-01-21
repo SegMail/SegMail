@@ -7,7 +7,6 @@
 package eds.entity.user;
 
 import eds.entity.data.EnterpriseData_;
-import eds.entity.data.EnterpriseObject_;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
@@ -25,4 +24,6 @@ public class UserAccount_ extends EnterpriseData_ {
     public static volatile SingularAttribute<UserAccount,String> PROFILE_PIC_URL;
     public static volatile SingularAttribute<UserAccount,String> API_KEY;
     public static volatile SingularAttribute<UserAccount,String> CONTACT_EMAIL;
+    public static volatile SingularAttribute<UserAccount,java.sql.Timestamp> LAST_LOGIN;
+    public static volatile SingularAttribute<UserAccount,Boolean> FIRST_LOGIN;
 }

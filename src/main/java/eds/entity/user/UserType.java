@@ -7,7 +7,6 @@
 package eds.entity.user;
 
 import eds.entity.data.EnterpriseObject;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;

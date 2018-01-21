@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:pass="http://xmlns.jcp.org/jsf/passthrough">
+    <ui:composition>
+
+        <form jsf:id="user_action_menu">
+            <div class="btn-group">
+                <a class="but dropdown-toggle" data-toggle="dropdown">
+                    <i class="fa fa-cog"></i>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    <li role="presentation" class="dropdown-header">Profile Menu</li>
+                    <c:forEach items="#{UserSessionContainer.menus['PROFILE']}" var="menuitem">
+                        <li class="#{menuitem.active ? 'active' : ''}">
+                            <li>
+                                <a href="#{request.contextPath}/#{menuitem.URL}">
+                                    #{menuitem.name}
+                                </a>
+                            </li>
+                        </li>
+                    </c:forEach>
+                    <li class="divider"></li>
+                    <li>
+                        <a jsf:actionListener="#{FormUserLogout.logout()}" >
+                            <f:ajax execute="@form" render="@form"></f:ajax>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </form>
+    </ui:composition>
+</html>

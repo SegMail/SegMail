@@ -11,10 +11,10 @@ package segmail.entity.subscription.datasource;
  */
 public enum DATASOURCE_ENDPOINT_TYPE {
     
-    MYSQL("MYSQL", "MySQL", "mysql://",3306),
-    HTTP("HTTP", "Http", "http://",80),
-    HTTPS("HTTPS", "SSL/TLS", "https://",443);
-    
+    MYSQL("MYSQL", "MySQL", "mysql://",3306)
+    //,HTTP("HTTP", "Http", "http://",80)
+    //,HTTPS("HTTPS", "SSL/TLS", "https://",443)
+    ;
     public final String name;
     
     public final String label;
@@ -40,6 +40,6 @@ public enum DATASOURCE_ENDPOINT_TYPE {
     }
     
     public static DATASOURCE_ENDPOINT_TYPE defaultValue() {
-        return HTTP;
+        return MYSQL;
     }
 }

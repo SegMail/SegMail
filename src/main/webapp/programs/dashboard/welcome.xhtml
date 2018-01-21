@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+      xmlns:s2="http://seca2.jsf/custom"
+      xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+      xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+    <h:form id="FormWizardRedirect">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        X
+                    </button>
+                    <h4 class="modal-title">Welcome to Segmail!</h4>
+                </div>
+                <div class="modal-body" style="font-size: 1.4em">
+                    <p>
+                        Thank you for choosing Segmail, a pay-as-you-use email marketing tool which charges
+                        you on the number of emails <strong><em>sent</em></strong>, not <em>stored</em>.
+                    </p>
+                    <p>
+                        We have created a step-by-step wizard for you to get started. 
+                        You can start by  
+                        <a href="#{request.contextPath}/wizard">clicking here.</a>
+                    </p>
+                    <p>
+                        After setting up, go to 
+                        <a href="#{request.contextPath}/campaign">Campaigns</a> to 
+                        create awesome content, send it out, and track your clicks
+                        and conversion rates.
+                    </p>
+                    <p>
+                        For any help support or feedback, you can reach us at 
+                        <a href="#">support@segmail.io</a>
+                    </p>
+                    <div class="checkbox">
+                        <label>
+                            <h:selectBooleanCheckbox styleClass="icheck dontshow"
+                                                     value="#{FormWizardRedirect.dontShowThisAgain}"
+                                                     >
+                                <f:ajax listener="#{FormWizardRedirect.dontShowThisAgain()}"
+                                        render="@form" execute="@form"
+                                        event="valueChange"
+                                        onevent="refresh"></f:ajax>
+                            </h:selectBooleanCheckbox>
+                            <h:outputText rendered="#{not FormWizardRedirect.dontShowThisAgain}"
+                                          value="Don't show this again.">
+                            </h:outputText>
+                            <h:outputText rendered="#{FormWizardRedirect.dontShowThisAgain}"
+                                          value="You won't see this message next time!">
+                            </h:outputText>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</html>

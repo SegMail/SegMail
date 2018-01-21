@@ -26,7 +26,9 @@ public class UserRequestContainer {
     
     private String templateLocation;
     
+    @Deprecated
     private String menuLocation;
+    private Map<String,String> menuLocations;
     
     private boolean error = false; //default value
     
@@ -45,11 +47,14 @@ public class UserRequestContainer {
     private boolean renderPageToolbar;
     private boolean renderPageBreadCrumbs;
     
+    private boolean renderPreloader;
+    
     @PostConstruct
     public void init() {
         //default values
         renderPageToolbar = true;
         renderPageBreadCrumbs = true;
+        renderPreloader = true;
     }
 
     public String getProgramName() {
@@ -154,6 +159,22 @@ public class UserRequestContainer {
 
     public void setRenderPageBreadCrumbs(boolean renderPageBreadCrumbs) {
         this.renderPageBreadCrumbs = renderPageBreadCrumbs;
+    }
+
+    public Map<String, String> getMenuLocations() {
+        return menuLocations;
+    }
+
+    public void setMenuLocations(Map<String, String> menuLocations) {
+        this.menuLocations = menuLocations;
+    }
+
+    public boolean isRenderPreloader() {
+        return renderPreloader;
+    }
+
+    public void setRenderPreloader(boolean renderPreloader) {
+        this.renderPreloader = renderPreloader;
     }
     
     public String printFullPathWithoutContext() {

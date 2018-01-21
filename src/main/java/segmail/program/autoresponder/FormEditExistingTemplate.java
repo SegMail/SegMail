@@ -31,7 +31,6 @@ import segmail.component.subscription.ListService;
 import segmail.component.subscription.SubscriptionService;
 import segmail.component.subscription.autoresponder.AutoresponderService;
 import segmail.component.subscription.mailmerge.MailMergeService;
-import segmail.entity.campaign.Campaign;
 import segmail.entity.subscription.SubscriptionList;
 import segmail.entity.subscription.SubscriptionListField;
 import static segmail.entity.subscription.autoresponder.AUTO_EMAIL_TYPE.CONFIRMATION;
@@ -52,7 +51,6 @@ public class FormEditExistingTemplate implements FormEditEntity {
     private AutoresponderService autoresponderService;
     @EJB
     private GenericObjectService objectService;
-    //@EJB private UserService userService;
     @EJB
     private ListService listService;
     @EJB
@@ -60,13 +58,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     @EJB
     MailMergeService mmService;
 
-    @Inject
-    private ProgramAutoresponder program;
-
-    @Inject
-    private UserSessionContainer userContainer;
-    @Inject
-    private UserRequestContainer requestContainer;
+    @Inject ProgramAutoresponder program;
     @Inject AutoresponderSessionContainer autoresponderCont;
 
     @PostConstruct
@@ -148,6 +140,14 @@ public class FormEditExistingTemplate implements FormEditEntity {
         program.setListTags(campaignTags);
     }
 
+    public String getPreviewBody() {
+        return program.getPreviewBody();
+    }
+
+    public void setPreviewBody(String previewBody) {
+        program.setPreviewBody(previewBody);
+    }
+    
     @Override
     public void saveAndContinue() {
         try {
@@ -163,7 +163,6 @@ public class FormEditExistingTemplate implements FormEditEntity {
         } catch (EntityExistsException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (EJBException ex) { //Transaction did not go through
-            //Throwable cause = ex.getCause();
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), null);
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getClass().getSimpleName(), ex.getMessage());
@@ -180,7 +179,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void delete() {
         try {
             autoresponderService.deleteAutoEmail(program.getEditingTemplate().getOBJECTID());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template deleted.", null);
+            FacesMessenger.setFacesMessage(ProgramAutoresponder.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Template deleted.", null);
             program.refresh();
 
         } catch (EntityNotFoundException ex) {
@@ -235,7 +234,7 @@ public class FormEditExistingTemplate implements FormEditEntity {
     public void loadMMUrls() {
 
         try {
-            this.setMailmergeLinks(new HashMap<String, String>());
+            setMailmergeLinks(new HashMap<String, String>());
             for (MAILMERGE_REQUEST request : this.getMailmergeLinkTags()) {
                 //For confirm emails, don't load unsubscribe links
                 //For welcome emails, don't load confirm links
@@ -249,9 +248,9 @@ public class FormEditExistingTemplate implements FormEditEntity {
                 getMailmergeLinks().put(request.label(), url);
             }
         } catch (DataValidationException ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramAutoresponder.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } catch (IncompleteDataException ex) {
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+            FacesMessenger.setFacesMessage(ProgramAutoresponder.class.getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         } 
     }
     

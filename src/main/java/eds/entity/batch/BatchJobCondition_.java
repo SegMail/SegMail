@@ -5,7 +5,6 @@
  */
 package eds.entity.batch;
 
-import java.util.List;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

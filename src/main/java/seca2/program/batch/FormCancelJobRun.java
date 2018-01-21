@@ -9,7 +9,6 @@ import eds.component.batch.BatchProcessingException;
 import eds.component.batch.BatchSchedulingService;
 import eds.entity.batch.BatchJob;
 import eds.entity.batch.BatchJobRun;
-import java.sql.Timestamp;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
@@ -53,8 +52,8 @@ public class FormCancelJobRun implements FormEditEntity{
         try {
             scheduleService.cancelBatchJobRun(getEditingBatchJobRun().getRUN_KEY());
             DateTime current = program.getCurrentRunDateTime();
-            scheduleService.triggerNextBatchJobRun(current,getEditingBatchJob());
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
+            scheduleService.triggerFirstBatchJobRun(current,getEditingBatchJob());
+            FacesMessenger.setFacesMessage(ProgramBatch.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "Batch job run has been cancelled.", "");
             closeWithoutSaving();
         } catch (EJBException ex) {
             FacesMessenger.setFacesMessage(this.getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");

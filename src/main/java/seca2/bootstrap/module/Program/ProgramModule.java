@@ -19,7 +19,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import seca2.bootstrap.DefaultKeys;
 import seca2.bootstrap.UserRequestContainer;
 import seca2.bootstrap.UserSessionContainer;
 
@@ -119,6 +118,7 @@ public class ProgramModule extends BootstrapModule implements Serializable {
         requestContainer.setProgramName(program.getPROGRAM_NAME());//This is still needed for other modules to acces!
         sessionContainer.setCurrentProgram(program);
         requestContainer.setViewLocation(program.getVIEW_ROOT());
+        requestContainer.setRenderPreloader(program.isRENDER_PRELOADER());
         
         //Set params
         requestContainer.setProgramParamsOrdered(requestContainer.getPathParser().getOrderedParams());

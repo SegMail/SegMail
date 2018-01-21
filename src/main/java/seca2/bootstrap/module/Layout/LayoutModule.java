@@ -5,7 +5,6 @@
  */
 package seca2.bootstrap.module.Layout;
 
-import seca2.bootstrap.module.Preloader.PreloaderContainer;
 import eds.component.layout.LayoutService;
 import eds.entity.layout.Layout;
 import java.io.Serializable;
@@ -34,17 +33,12 @@ public class LayoutModule extends BootstrapModule implements Serializable {
     @Inject UserSessionContainer sessionContainer;
     @Inject UserRequestContainer requestContainer;
     
-    @Inject DefaultKeys defaults;
-    
     @EJB private LayoutService layoutService;
     
     @Override
     protected boolean execute(ServletRequest request, ServletResponse response) {
         
         //Bypass if it's a file request
-        /*if (SegURLResolver.getResolver().addExclude("index.xhtml").containsFile(((HttpServletRequest) request).getRequestURI())) {
-            return true;
-        }*/
         if(requestContainer.getPathParser().containsFileResource())
             return true;
         

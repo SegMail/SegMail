@@ -15,6 +15,7 @@ import eds.entity.user.UserType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import seca2.bootstrap.module.Navigation.MenuItemContainer;
@@ -42,6 +43,7 @@ public class UserSessionContainer implements Serializable, ActiveUser {
     private Layout currentLayout;
     
     private List<MenuItemContainer> menu;
+    private Map<String,List<MenuItemContainer>> menus;
     
     private ServerInstance defaultWebServer;
     
@@ -147,6 +149,14 @@ public class UserSessionContainer implements Serializable, ActiveUser {
 
     public void setMenu(List<MenuItemContainer> menu) {
         this.menu = menu;
+    }
+
+    public Map<String, List<MenuItemContainer>> getMenus() {
+        return menus;
+    }
+
+    public void setMenus(Map<String, List<MenuItemContainer>> menus) {
+        this.menus = menus;
     }
 
     public ServerInstance getDefaultWebServer() {

@@ -30,6 +30,12 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
      * the course of its lifecycle, a field gets deleted, recreated, and modified.
      * Instead, the EnterpriseData.generateKey() method is used to identify it.
      * It changes very often so there is no point storing it.
+     * 
+     * [2017.08.02] After months of testing, we realize that if you shift the 
+     * order of the fields, the primary key SNO gets changed too hence the generateKey()
+     * method will return a different value. So we have decided to use this 
+     * immutable key instead. It shall be generated from the initial attributes
+     * and hashed to produce a unique key.
      */
     private String KEY_NAME; 
     private String TYPE;
@@ -122,12 +128,16 @@ public class SubscriptionListField extends EnterpriseData<SubscriptionList>{
 
     @Override
     public Object generateKey() {
-        return //getOWNER().getOBJECT_NAME().replace(" ", "")
-                "listfield"
+        return (getKEY_NAME() != null && !getKEY_NAME().isEmpty())
+                ? getKEY_NAME()
+                : "listfield"
                 .concat(
                         String.format("%010d", getOWNER().getOBJECTID())
                                 .concat(String.format("%05d", getSNO()))
                 );
     }
 
+    public FIELD_TYPE TYPE() {
+        return FIELD_TYPE.valueOf(TYPE);
+    }
 }

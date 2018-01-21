@@ -134,19 +134,6 @@
                         <div class="list-item-right">
                             <div>
                                 <h:commandLink
-                                    pass:href="#cancel_this_run_panel" 
-                                    styleClass="btn btn-warning list-item-trigger" 
-                                    style="margin-right: 3px;" 
-                                    rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"
-                                    title="Cancel this run" 
-                                    pass:data-toggle="modal">
-                                    <f:ajax id="cancel_this_run_#{job.RUN_KEY}" event="click" render="FormCancelJobRun"
-                                            listener="#{FormCancelJobRun.loadBatchJobRun(job.RUN_KEY)}"
-
-                                            />
-                                    <i class="fa fa-stop-circle-o"></i>
-                                </h:commandLink>
-                                <h:commandLink
                                     pass:href="#cancel_all_future_run_panel" styleClass="btn btn-danger list-item-trigger" 
                                     style="margin-right: 3px;" 
                                     rendered="#{job.STATUS.toString() ne 'CANCELLED' and job.STATUS.toString() ne 'COMPLETED' and job.STATUS.toString() ne 'FAILED'}"

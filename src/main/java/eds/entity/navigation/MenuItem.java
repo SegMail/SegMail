@@ -28,7 +28,6 @@ public class MenuItem extends EnterpriseObject{// implements TreeBranch<MenuItem
     private TARGET_TYPE MENU_ITEM_TYPE;
     private String MENU_ITEM_NAME; //display name
     private String MENU_ITEM_URL; //request URL
-    //private String MENU_ITEM_XHTML; //actual layout.xhtml path
     private String PREPEND_TAGS;
     private int WEIGHT; // Optional for sorting
     private boolean PUBLIC;

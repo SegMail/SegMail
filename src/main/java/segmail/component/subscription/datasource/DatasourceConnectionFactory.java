@@ -43,7 +43,7 @@ public class DatasourceConnectionFactory {
         return mysqlDS.getConnection();
     }
     
-    public static Connection getConnection(ListDatasource ld) throws IncompleteDataException {
+    public static Connection getConnection(ListDatasource ld) throws IncompleteDataException, SQLException {
         DATASOURCE_ENDPOINT_TYPE type = DATASOURCE_ENDPOINT_TYPE.valueOf(ld.getENDPOINT_TYPE());
         
         switch(type) {
@@ -52,7 +52,7 @@ public class DatasourceConnectionFactory {
                     return getMySQLConnection(ld.getSERVER_NAME(),ld.getDB_NAME(),ld.getUSERNAME(),ld.getPASSWORD());
                 } catch (SQLException ex) {
                     Logger.getLogger(DatasourceConnectionFactory.class.getName()).log(Level.SEVERE, null, ex);
-                    break;
+                    throw ex;
                 }
             }
             default     : break;

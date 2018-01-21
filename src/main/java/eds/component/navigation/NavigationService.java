@@ -24,6 +24,7 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.user.UserService;
+import eds.entity.navigation.MENU_GROUP;
 import eds.entity.navigation.MenuItem;
 import eds.entity.navigation.MenuItemAccess;
 import eds.entity.navigation.MenuItemAccessComparator;
@@ -31,6 +32,8 @@ import eds.entity.navigation.MenuItemComparator;
 import eds.entity.navigation.MenuItem_;
 import eds.entity.user.UserType;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Handles the navigation of the application
@@ -106,13 +109,14 @@ public class NavigationService implements Serializable {
      * @param userTypeId
      * @param menuItemId
      * @param order
+     * @param group
      * @return Bidirectional EnterpriseRelationship
      * @throws eds.component.data.RelationshipExistsException
      * @throws eds.component.data.EntityNotFoundException
      * 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order) 
+    public List<MenuItemAccess> assignMenuItemAccess(long userTypeId, long menuItemId, int order, String group) 
             throws RelationshipExistsException, EntityNotFoundException {
         
             List<MenuItemAccess> results = this.objectService.getRelationshipsForObject(menuItemId, userTypeId, MenuItemAccess.class);
@@ -132,7 +136,7 @@ public class NavigationService implements Serializable {
             if(assignUserType == null)
                 throw new EntityNotFoundException(UserType.class,menuItemId);
             
-            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType,order);
+            MenuItemAccess assignment2 = new MenuItemAccess(assignMenuItem,assignUserType,order,group);
             
             em.persist(assignment2);
             
@@ -190,6 +194,23 @@ public class NavigationService implements Serializable {
             results.add(a.getSOURCE());
         }
 
+        return results;
+    }
+    
+    public Map<String,List<MenuItem>> getAllMenusForUsertype(long usertypeid) {
+        List<MenuItemAccess> accessList = this.objectService.getRelationshipsForTargetObject(usertypeid, MenuItemAccess.class);
+        
+        Collections.sort(accessList, new MenuItemAccessComparator());
+        
+        Map<String,List<MenuItem>> results = new HashMap<>();
+        for(MenuItemAccess access : accessList){
+            String group = access.getMENU_GROUP();
+            if(!results.containsKey(group)) {
+                results.put(group, new ArrayList<>());
+            }
+            results.get(group).add(access.getSOURCE());
+        }
+        
         return results;
     }
     

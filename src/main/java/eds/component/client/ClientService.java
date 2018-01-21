@@ -13,7 +13,6 @@ import eds.component.data.EntityNotFoundException;
 import eds.component.data.IncompleteDataException;
 import eds.component.data.RelationshipExistsException;
 import eds.component.mail.Password;
-import eds.component.user.UserService;
 import eds.entity.client.Client;
 import eds.entity.client.ClientUserAssignment;
 import eds.entity.client.ClientResource;
@@ -140,8 +139,8 @@ public class ClientService {
      * @return
      * @throws IncompleteDataException
      * @throws EntityNotFoundException
-     * @throws EntityExistsException
-     * @throws RelationshipExistsException
+     * @throws EntityExistsException if the Client identified by the Clientname already exists
+     * @throws RelationshipExistsException 
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ClientUserAssignment registerClientForUser(User user, long clienttypeid)
@@ -158,26 +157,27 @@ public class ClientService {
 
         Client existingClient = this.getClientByClientname(user.alias());
 
-        if (existingClient != null) {
+        /*if (existingClient != null) {
             throw new EntityExistsException(existingClient);
-        }
+        }*/
+        //Create the client object if there is not an existing one.
+        if(existingClient == null) {
+            Client newClient = new Client();
+            newClient.setCLIENT_NAME(user.alias());
+            newClient.setCLIENTTYPE(clientType);
+            objService.getEm().persist(newClient);
+            existingClient = newClient;
+        } 
 
         List<ClientUserAssignment> existingAssignments
-                = this.objService.getRelationshipsForTargetObject(user.getOBJECTID(), ClientUserAssignment.class);
+                = this.objService.getRelationshipsForObject(existingClient.getOBJECTID(), user.getOBJECTID(), ClientUserAssignment.class);
 
         if (existingAssignments != null && existingAssignments.size() > 0) {
-            throw new RelationshipExistsException(existingAssignments.get(0));
+            return existingAssignments.get(0);
         }
-
-        //Create the client object
-        Client newClient = new Client();
-        newClient.setCLIENT_NAME(user.alias());
-        newClient.setCLIENTTYPE(clientType);
-
-        objService.getEm().persist(newClient);
-
+        
         //Assign the client object to the enterpriseobject
-        ClientUserAssignment newAssignment = new ClientUserAssignment(newClient, user);
+        ClientUserAssignment newAssignment = new ClientUserAssignment(existingClient, user);
 
         objService.getEm().persist(newAssignment);
 

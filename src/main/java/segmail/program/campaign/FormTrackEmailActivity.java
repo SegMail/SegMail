@@ -16,6 +16,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import seca2.bootstrap.UserRequestContainer;
+import seca2.bootstrap.module.Client.ClientContainer;
 import seca2.program.FormEditEntity;
 import segmail.component.campaign.CampaignService;
 import segmail.entity.campaign.CampaignActivity;
@@ -31,6 +32,7 @@ public class FormTrackEmailActivity implements FormEditEntity  {
     @Inject UserRequestContainer reqCont;
     @Inject ProgramCampaign program;
     @Inject FormEditEmailActivity formEditEmailActivity;
+    @Inject ClientContainer cltCont;
     
     @EJB CampaignService campService;
     @EJB GenericObjectService objService;
@@ -95,14 +97,14 @@ public class FormTrackEmailActivity implements FormEditEntity  {
 
     @Override
     public void saveAndContinue() {
-        setTotalTargeted(campService.countTargetedSubscribersForActivity(program.getEditingActivityId()));
-        setTotalSent(campService.countEmailsSentForActivity(program.getEditingActivityId()));
-        setTotalClicked(campService.countTotalClicksForActivity(program.getEditingActivityId()));
+        setTotalTargeted(campService.countTargetedSubscribersForActivity(getEditingActivity().getOBJECTID(),cltCont.getClient().getOBJECTID()));
+        setTotalSent(campService.countEmailsSentForActivity(getEditingActivity().getOBJECTID()));
+        setTotalClicked(campService.countTotalClicksForActivity(getEditingActivity().getOBJECTID()));
         
-        setConversionRate(this.loadConversionRate(program.getEditingActivityId(), totalClicked));
+        setConversionRate(loadConversionRate(getEditingActivity().getOBJECTID(), totalClicked));
         
         //Load clicks for each link
-        setClicks(loadClicks(program.getEditingActivityId()));
+        setClicks(loadClicks(getEditingActivity().getOBJECTID()));
     }
 
     @Override

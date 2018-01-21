@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Can more than 1 Campaign share the same activity???
@@ -19,7 +18,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name="CAMPAIGN_ACTIVITY")
-@XmlRootElement
 public class CampaignActivity extends EnterpriseObject {
     
     private String ACTIVITY_NAME;
@@ -28,8 +26,13 @@ public class CampaignActivity extends EnterpriseObject {
     
     private String ACTIVITY_GOALS;
     
+    // Raw content for edit - what the sender sees
     private String ACTIVITY_CONTENT;
     
+    // Processed for sender-created links
+    private String ACTIVITY_CONTENT_PROCESSED;
+    
+    // Processed for test mailmerge links
     private String ACTIVITY_CONTENT_PREVIEW;
     
     private String STATUS;
@@ -40,7 +43,7 @@ public class CampaignActivity extends EnterpriseObject {
     private java.sql.Timestamp CANCEL_TIME;
     
     private int LAST_INDEX;
-
+    
     public String getACTIVITY_TYPE() {
         return ACTIVITY_TYPE;
     }
@@ -122,6 +125,15 @@ public class CampaignActivity extends EnterpriseObject {
 
     public void setACTIVITY_CONTENT_PREVIEW(String ACTIVITY_CONTENT_PREVIEW) {
         this.ACTIVITY_CONTENT_PREVIEW = ACTIVITY_CONTENT_PREVIEW;
+    }
+
+    @Column(columnDefinition="MEDIUMTEXT")
+    public String getACTIVITY_CONTENT_PROCESSED() {
+        return ACTIVITY_CONTENT_PROCESSED;
+    }
+
+    public void setACTIVITY_CONTENT_PROCESSED(String ACTIVITY_CONTENT_PROCESSED) {
+        this.ACTIVITY_CONTENT_PROCESSED = ACTIVITY_CONTENT_PROCESSED;
     }
 
     public int getLAST_INDEX() {

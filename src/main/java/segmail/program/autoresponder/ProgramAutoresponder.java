@@ -57,6 +57,8 @@ public class ProgramAutoresponder extends Program{
     private Map<String,String> mailmergeLinks = new HashMap<>();
     
     private List<String> listTags;
+    
+    private String previewBody;
 
     public List<AutoresponderEmail> getConfirmationTemplates() {
         return confirmationTemplates;
@@ -176,6 +178,14 @@ public class ProgramAutoresponder extends Program{
 
     public void setListTags(List<String> listTags) {
         this.listTags = listTags;
+    }
+
+    public String getPreviewBody() {
+        return previewBody;
+    }
+
+    public void setPreviewBody(String previewBody) {
+        this.previewBody = previewBody;
     }
 
     @Override

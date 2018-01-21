@@ -66,7 +66,9 @@ public class FormCampaignSenderAttribute implements FormEditEntity {
     @Override
     public void saveAndContinue() {
         try {
-            campaignService.updateCampaign(this.getEditingCampaign());
+            Campaign c = campaignService.updateCampaign(getEditingCampaign());
+            
+            setEditingCampaign(c);
             reloadProgramToolbar();
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "Campaign updated!", "");
         } catch (IncompleteDataException ex) {

@@ -1,9 +1,6 @@
 
 package segmail.program.subscribe.confirm.client;
 
-import eds.component.batch.BatchProcessingException;
-import eds.component.data.IncompleteDataException;
-import eds.component.webservice.ExpiredTransactionException;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;

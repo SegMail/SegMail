@@ -10,6 +10,7 @@ import eds.component.client.ClientService;
 import eds.component.data.DataValidationException;
 import eds.entity.client.VerifiedSendingAddress;
 import javax.ejb.EJB;
+import javax.ejb.EJBException;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
@@ -51,15 +52,16 @@ public class FormVerifyNewAddress {
             //Let's just register bounce for all senders first, then add a global bounce. 
             //This way, if the global bounce is not set up, there is still a sender bounce backup.
             VerifiedSendingAddress newAddress = clientAWSService.verifyNewSendingAddress(clientCont.getClient(), newEmailAddress, true);
-            FacesMessenger.setFacesMessage(program.getClass().getSimpleName(), FacesMessage.SEVERITY_FATAL, "A confirmation email from Amazon Web Services will be sent to your address shortly. Please click on the confirmation link in that email to activate your sending address.", "");
+            FacesMessenger.setFacesMessage(MySettingsProgram.class.getSimpleName(), FacesMessage.SEVERITY_FATAL, "A confirmation email from Amazon Web Services will be sent to your address shortly. Please click on the confirmation link in that email to activate your sending address.", "");
             
             program.refresh();
         } catch (DataValidationException ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
+        } catch (EJBException ex) {
+            FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");
         } catch (Exception ex) {
             FacesMessenger.setFacesMessage(getClass().getSimpleName(), FacesMessage.SEVERITY_ERROR, ex.getMessage(), "");
         }
     }
-    
     
 }

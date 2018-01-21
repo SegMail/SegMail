@@ -73,8 +73,8 @@ var onSave = function (data) {
             block_refresh(block);
             setSendInBatch('sendInBatch')
             refresh_summernote('textarea.editor');
-            $('.select2').select2();
-            initTextcomplete('.note-editable',mmTags);
+            $('select.select2').select2();
+            initTextcomplete('.note-editable',mmTags); //Still experimental and not working
             //Don't show noty when there is no errors, use our custom facesmessenger component
             break;
         case "error":
@@ -85,6 +85,31 @@ var onSave = function (data) {
             });
     }
 };
+
+var onAddNewFilter = function(data) {
+    var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
+    var block = $("#target");
+
+    switch (ajaxstatus) {
+        case "begin": // This is called right before ajax request is been sent.
+            block_refresh(block);
+            break;
+
+        case "complete": // This is called right after ajax response is received.
+            break;
+
+        case "success": // This is called when ajax response is successfully processed.
+            block_refresh(block);
+            $('select.select2').select2();
+            break;
+        case "error":
+            noty({
+                text : 'Error.',
+                layout : 'topCenter',
+                type : 'danger'
+            });
+    }
+}
 
 var renderPreview = function (timeout) {
     //Copy the html over from 
@@ -359,6 +384,12 @@ var mmTagsProcessed = function() {
         anotherArray.push(mmTags[i].slice(1,-1));
     }
     return anotherArray;
+}
+
+var initTargetList = function() {
+    $('#target .select2').select({
+        placeholder: "Select all lists"
+    })
 }
 
 $(document).ready(function () {

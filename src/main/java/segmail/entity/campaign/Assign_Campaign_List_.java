@@ -12,6 +12,7 @@ import javax.persistence.metamodel.StaticMetamodel;
  *
  * @author LeeKiatHaw
  */
+@Deprecated
 @StaticMetamodel(Assign_Campaign_List.class)
 public class Assign_Campaign_List_ extends EnterpriseRelationship_ {
     

@@ -5,6 +5,7 @@
  */
 package seca2.program.test;
 
+import eds.entity.navigation.MENU_GROUP;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.enterprise.context.RequestScoped;
@@ -108,6 +109,7 @@ public class FormTestEverything {
     private final String MENU_ASSIGN_USERTYPE_TAG = "MENU_ASSIGN_USERTYPE";
     private final String MENU_ASSIGN_MENU_TAG = "MENU_ASSIGN_MENU";
     private final String MENU_ASSIGN_ORDER_TAG = "MENU_ASSIGN_ORDER";
+    private final String MENU_ASSIGN_GROUP_TAG = "MENU_ASSIGN_GROUP";
     
     private final String PROGRAM_ASSIGN_TAG = "PROGRAM_ASSIGN";
     private final String PROGRAM_ASSIGN_PROGRAM_TAG = "PROGRAM_ASSIGN_PROGRAM";
@@ -135,7 +137,6 @@ public class FormTestEverything {
     private final String CLIENT_AWS_ACCOUNT_CLIENTNAME_TAG = "CLIENT_AWS_ACCOUNT_CLIENTNAME";
     
     public void init(){
-        System.out.println("Test everything init");
     }
     
     public void setupSegmail(){
@@ -175,9 +176,9 @@ public class FormTestEverything {
         this.formTestNavigation.createNewMenuItem();
         
         // Assign them to the respective users
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Testing page",0);
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Testing page",0);
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Testing page",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Testing page",0,MENU_GROUP.LEFT.name);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Testing page",0,MENU_GROUP.LEFT.name);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Testing page",0,MENU_GROUP.LEFT.name);
         
         //Creat chartjs page
         this.formTestProgram.setProgramName("chartjs");
@@ -192,7 +193,7 @@ public class FormTestEverything {
         this.formTestNavigation.createNewMenuItem();
         
         // Assign them to the respective users
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "ChartJS",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "ChartJS",0, MENU_GROUP.LEFT.name);
         
         //Create list page
         this.formTestProgram.setProgramName("list");
@@ -207,7 +208,7 @@ public class FormTestEverything {
         this.formTestNavigation.createNewMenuItem();
         
         // Assign them to the respective users
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Lists",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Lists",0, MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Testing page");
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Testing page");
         
@@ -224,7 +225,7 @@ public class FormTestEverything {
         this.formTestNavigation.createNewMenuItem();
         
         // Assign them to the respective users
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Signup Forms",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Signup Forms",0,MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Testing page");
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Testing page");
         
@@ -241,7 +242,7 @@ public class FormTestEverything {
         this.formTestNavigation.createNewMenuItem();
         
         // Assign them to the respective users
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Templates",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Templates",0,MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Testing page");
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Testing page");
         
@@ -258,7 +259,7 @@ public class FormTestEverything {
         this.formTestNavigation.createNewMenuItem();
         
         // Assign them to the respective users
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "My settings",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "My settings",0,MENU_GROUP.PROFILE.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Testing page");
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Testing page");
         
@@ -276,7 +277,7 @@ public class FormTestEverything {
         
         // Assign them to the respective users
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Talent Profile");
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Manage Talent Profile",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Manage Talent Profile",0, MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Manage Talent Profile");
         
         //Create Annual Peformance and Potential Review page
@@ -293,7 +294,7 @@ public class FormTestEverything {
         
         // Assign them to the respective users
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Talent Profile");
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Submit Performance Review",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Submit Performance Review",0, MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Manage Talent Profile");
         
         //Create Manage Enterprise Structure page
@@ -310,7 +311,7 @@ public class FormTestEverything {
         
         // Assign them to the respective users
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Talent Profile");
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Manage Enterprise Structure",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Manage Enterprise Structure",0,MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Manage Talent Profile");
         
         //Create Define Talent Attributes page
@@ -327,7 +328,7 @@ public class FormTestEverything {
         
         // Assign them to the respective users
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Talent Profile");
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Define Talent Attributes",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Define Talent Attributes",0, MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Manage Talent Profile");
         
         //Create Plan Succession page
@@ -344,7 +345,7 @@ public class FormTestEverything {
         
         // Assign them to the respective users
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_SEGMAIL, "Manage Talent Profile");
-        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Plan Succession",0);
+        this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_TM, "Plan Succession",0, MENU_GROUP.LEFT.name);
         //this.formTestNavigation.assignMenuItems(ADMIN_USERTYPE_CHARTJS, "Manage Talent Profile");
         
         //Create layouts
@@ -499,9 +500,11 @@ public class FormTestEverything {
                 NodeList usertypeNodes = element.getElementsByTagName(MENU_ASSIGN_USERTYPE_TAG);
                 NodeList orderLists = element.getElementsByTagName(MENU_ASSIGN_ORDER_TAG);
                 int order = (orderLists == null || orderLists.getLength() <= 0) ? 0 : Integer.parseInt(orderLists.item(0).getTextContent());
+                NodeList groupNodes = element.getElementsByTagName(MENU_ASSIGN_GROUP_TAG);
+                String group = (groupNodes == null || groupNodes.getLength() <= 0) ? "" : groupNodes.item(0).getTextContent();
                 
                 for(int i=0; i<usertypeNodes.getLength(); i++){
-                    this.formTestNavigation.assignMenuItems(usertypeNodes.item(i).getTextContent(),menu,order);
+                    this.formTestNavigation.assignMenuItems(usertypeNodes.item(i).getTextContent(),menu,order,group);
                 }
             }
             
